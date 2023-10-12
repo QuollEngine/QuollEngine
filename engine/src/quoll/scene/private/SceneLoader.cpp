@@ -1,4 +1,6 @@
 #include "quoll/core/Base.h"
+#include "quoll/scripting/Script.h"
+
 #include "SceneLoader.h"
 
 namespace quoll::detail {

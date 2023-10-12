@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LuaScope.h"
+#include "LuaHeaders.h"
 
 namespace quoll {
 
@@ -10,18 +10,18 @@ namespace quoll {
 class LuaInterpreter {
 public:
   /**
-   * @brief Create scope for Lua script
+   * @brief Create state for Lua script
    *
-   * @return Lua scope
+   * @return Lua state
    */
-  LuaScope createScope();
+  lua_State *createState();
 
   /**
-   * @brief Destroy Lua scope
+   * @brief Destroy Lua state
    *
-   * @param scope Lua scope
+   * @param state Lua state
    */
-  void destroyScope(LuaScope &scope);
+  void destroyState(lua_State *state);
 
   /**
    * @brief Evaluate Lua script
@@ -29,11 +29,11 @@ public:
    * Loads the script and stores everything in Lua scope
    *
    * @param bytes Script data
-   * @param scope Lua scope
+   * @param state Lua state
    * @retval true Script evaluated sucessfully
    * @retval false Script failed to evaluate
    */
-  bool evaluate(const std::vector<uint8_t> &bytes, LuaScope &scope);
+  bool evaluate(const std::vector<uint8_t> &bytes, lua_State *state);
 };
 
 } // namespace quoll

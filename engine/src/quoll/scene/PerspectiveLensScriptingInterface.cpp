@@ -2,536 +2,224 @@
 #include "quoll/core/Engine.h"
 
 #include "quoll/entity/EntityDatabase.h"
-
-#include "quoll/scripting/LuaScope.h"
 #include "quoll/scripting/LuaMessages.h"
-#include "quoll/scripting/ComponentLuaInterfaceCommon.h"
 
 #include "PerspectiveLensScriptingInterface.h"
 
 namespace quoll {
 
-int PerspectiveLensScriptingInterface::LuaInterface::getNear(void *state) {
-  LuaScope scope(state);
+PerspectiveLensScriptingInterface::LuaInterface::LuaInterface(
+    Entity entity, ScriptGlobals scriptGlobals)
+    : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-  if (!scope.is<LuaTable>(1)) {
+sol_maybe<float> PerspectiveLensScriptingInterface::LuaInterface::getNear() {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_near");
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
 
-    scope.set(nullptr);
-    return 1;
+    return sol::nil;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
+  const auto &lens =
+      mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity);
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-
-    scope.set(nullptr);
-    return 1;
-  }
-
-  const auto &lens = entityDatabase.get<PerspectiveLens>(entity);
-
-  scope.set(lens.near);
-
-  return 1;
+  return lens.near;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::setNear(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_near");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float>(getName(), "set_near");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  float value = scope.get<float>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
+void PerspectiveLensScriptingInterface::LuaInterface::setNear(float near) {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
-    lens.near = value;
-    entityDatabase.set(entity, lens);
+    lens.near = near;
+    mScriptGlobals.entityDatabase.set(mEntity, lens);
   } else {
-    entityDatabase.get<PerspectiveLens>(entity).near = value;
+    mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity).near = near;
   }
-
-  return 0;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::getFar(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+sol_maybe<float> PerspectiveLensScriptingInterface::LuaInterface::getFar() {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_far");
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
 
-    scope.set(nullptr);
-    return 1;
+    return sol::nil;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
+  const auto &lens =
+      mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity);
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-
-    scope.set(nullptr);
-    return 1;
-  }
-
-  const auto &lens = entityDatabase.get<PerspectiveLens>(entity);
-
-  scope.set(lens.far);
-
-  return 1;
+  return lens.far;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::setFar(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_far");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float>(getName(), "set_far");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  float value = scope.get<float>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
+void PerspectiveLensScriptingInterface::LuaInterface::setFar(float far) {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
-    lens.far = value;
-    entityDatabase.set(entity, lens);
+    lens.far = far;
+    mScriptGlobals.entityDatabase.set(mEntity, lens);
   } else {
-    entityDatabase.get<PerspectiveLens>(entity).far = value;
+    mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity).far = far;
   }
-
-  return 0;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::getSensorSize(
-    void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+std::tuple<sol_maybe<float>, sol_maybe<float>>
+PerspectiveLensScriptingInterface::LuaInterface::getSensorSize() {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_sensor_size");
-    scope.set(nullptr);
-    scope.set(nullptr);
-    return 2;
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+
+    return {sol::nil, sol::nil};
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
+  const auto &lens =
+      mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity);
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-
-    scope.set(nullptr);
-    scope.set(nullptr);
-    return 2;
-  }
-
-  const auto &lens = entityDatabase.get<PerspectiveLens>(entity);
-  scope.set(lens.sensorSize.x);
-  scope.set(lens.sensorSize.y);
-
-  return 2;
+  return {lens.sensorSize.x, lens.sensorSize.y};
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::setSensorSize(
-    void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_sensor_size");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2) || !scope.is<float>(3)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float, float>(getName(),
-                                                       "set_sensor_size");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  glm::vec2 value;
-  value.x = scope.get<float>(2);
-  value.y = scope.get<float>(3);
-  scope.pop(3);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
+void PerspectiveLensScriptingInterface::LuaInterface::setSensorSize(
+    float width, float height) {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
-    lens.sensorSize = value;
-    entityDatabase.set(entity, lens);
+    lens.sensorSize = {width, height};
+    mScriptGlobals.entityDatabase.set(mEntity, lens);
   } else {
-    entityDatabase.get<PerspectiveLens>(entity).sensorSize = value;
+    mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity).sensorSize = {
+        width, height};
   }
-
-  return 0;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::getFocalLength(
-    void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+sol_maybe<float>
+PerspectiveLensScriptingInterface::LuaInterface::getFocalLength() {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_focal_length");
-    scope.set(nullptr);
-    return 1;
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+
+    return sol::nil;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
+  const auto &lens =
+      mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity);
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-
-    scope.set(nullptr);
-    return 1;
-  }
-
-  const auto &lens = entityDatabase.get<PerspectiveLens>(entity);
-  scope.set(lens.focalLength);
-
-  return 1;
+  return lens.focalLength;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::setFocalLength(
-    void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_focal_length");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float>(getName(), "set_focal_length");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  float value = scope.get<float>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
+void PerspectiveLensScriptingInterface::LuaInterface::setFocalLength(
+    float focalLength) {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
-    lens.focalLength = value;
-    entityDatabase.set(entity, lens);
+    lens.focalLength = focalLength;
+    mScriptGlobals.entityDatabase.set(mEntity, lens);
   } else {
-    entityDatabase.get<PerspectiveLens>(entity).focalLength = value;
+    mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity).focalLength =
+        focalLength;
   }
-
-  return 0;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::getAperture(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+sol_maybe<float>
+PerspectiveLensScriptingInterface::LuaInterface::getAperture() {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_aperture");
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
 
-    scope.set(nullptr);
-    return 1;
+    return sol::nil;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
+  const auto &lens =
+      mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity);
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-
-    scope.set(nullptr);
-    return 1;
-  }
-
-  const auto &lens = entityDatabase.get<PerspectiveLens>(entity);
-  scope.set(lens.aperture);
-
-  return 1;
+  return lens.aperture;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::setAperture(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_aperture");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float>(getName(), "set_aperture");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  float value = scope.get<float>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
+void PerspectiveLensScriptingInterface::LuaInterface::setAperture(
+    float aperture) {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
-    lens.aperture = value;
-    entityDatabase.set(entity, lens);
+    lens.aperture = aperture;
+    mScriptGlobals.entityDatabase.set(mEntity, lens);
   } else {
-    entityDatabase.get<PerspectiveLens>(entity).aperture = value;
+    mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity).aperture =
+        aperture;
   }
-
-  return 0;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::getShutterSpeed(
-    void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+sol_maybe<float>
+PerspectiveLensScriptingInterface::LuaInterface::getShutterSpeed() {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_shutter_speed");
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
 
-    scope.set(nullptr);
-    return 1;
+    return sol::nil;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
+  const auto &lens =
+      mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity);
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-
-    scope.set(nullptr);
-    return 1;
-  }
-
-  const auto &lens = entityDatabase.get<PerspectiveLens>(entity);
-  scope.set(1.0f / lens.shutterSpeed);
-
-  return 1;
+  return 1.0f / lens.shutterSpeed;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::setShutterSpeed(
-    void *state) {
-  LuaScope scope(state);
+void PerspectiveLensScriptingInterface::LuaInterface::setShutterSpeed(
+    float shutterSpeed) {
+  float value = 1.0f / shutterSpeed;
 
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_shutter_speed");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float>(getName(), "set_shutter_speed");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  float value = 1.0f / scope.get<float>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
     lens.shutterSpeed = value;
-    entityDatabase.set(entity, lens);
+    mScriptGlobals.entityDatabase.set(mEntity, lens);
   } else {
-    entityDatabase.get<PerspectiveLens>(entity).shutterSpeed = value;
+    mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity).shutterSpeed =
+        value;
   }
-
-  return 0;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::getSensitivity(
-    void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+sol_maybe<uint32_t>
+PerspectiveLensScriptingInterface::LuaInterface::getSensitivity() {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_sensitivity");
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
 
-    scope.set(nullptr);
-    return 1;
+    return sol::nil;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
+  const auto &lens =
+      mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity);
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-
-    scope.set(nullptr);
-    return 1;
-  }
-
-  const auto &lens = entityDatabase.get<PerspectiveLens>(entity);
-  scope.set(lens.sensitivity);
-
-  return 1;
+  return lens.sensitivity;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::setSensitivity(
-    void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_sensitivity");
-
-    return 0;
-  }
-
-  if (!scope.is<uint32_t>(2)) {
-    Engine::getUserLogger().error() << LuaMessages::invalidArguments<uint32_t>(
-        getName(), "set_sensitivity");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  uint32_t value = scope.get<uint32_t>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<PerspectiveLens>(entity)) {
+void PerspectiveLensScriptingInterface::LuaInterface::setSensitivity(
+    uint32_t sensitivity) {
+  if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
-    lens.sensitivity = value;
-    entityDatabase.set(entity, lens);
+    lens.sensitivity = sensitivity;
+    mScriptGlobals.entityDatabase.set(mEntity, lens);
   } else {
-    entityDatabase.get<PerspectiveLens>(entity).sensitivity = value;
+    mScriptGlobals.entityDatabase.get<PerspectiveLens>(mEntity).sensitivity =
+        sensitivity;
   }
-
-  return 0;
 }
 
-int PerspectiveLensScriptingInterface::LuaInterface::deleteThis(void *state) {
-  return ComponentLuaInterfaceCommon::deleteComponent<PerspectiveLens>(
-      getName(), state);
+void PerspectiveLensScriptingInterface::LuaInterface::deleteThis() {
+  if (mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
+    mScriptGlobals.entityDatabase.remove<PerspectiveLens>(mEntity);
+  }
+}
+
+void PerspectiveLensScriptingInterface::LuaInterface ::create(
+    sol::usertype<PerspectiveLensScriptingInterface::LuaInterface> usertype) {
+  usertype["get_near"] = &LuaInterface::getNear;
+  usertype["set_near"] = &LuaInterface::setNear;
+  usertype["get_far"] = &LuaInterface::getFar;
+  usertype["set_far"] = &LuaInterface::setFar;
+  usertype["get_sensor_size"] = &LuaInterface::getSensorSize;
+  usertype["set_sensor_size"] = &LuaInterface::setSensorSize;
+  usertype["get_focal_length"] = &LuaInterface::getFocalLength;
+  usertype["set_focal_length"] = &LuaInterface::setFocalLength;
+  usertype["get_aperture"] = &LuaInterface::getAperture;
+  usertype["set_aperture"] = &LuaInterface::setAperture;
+  usertype["get_shutter_speed"] = &LuaInterface::getShutterSpeed;
+  usertype["set_shutter_speed"] = &LuaInterface::setShutterSpeed;
+  usertype["get_sensitivity"] = &LuaInterface::getSensitivity;
+  usertype["set_sensitivity"] = &LuaInterface::setSensitivity;
+  usertype["delete"] = &LuaInterface::deleteThis;
 }
 
 } // namespace quoll

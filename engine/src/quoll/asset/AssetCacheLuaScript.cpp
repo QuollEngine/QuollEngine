@@ -24,36 +24,21 @@ static std::vector<uint8_t> readFileIntoBuffer(std::ifstream &stream) {
 /**
  * @brief Inject varibale register functions
  *
- * @param scope Lua scope
+ * @param state Sol state
  * @param data Lua script asset data
  */
-static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
-  scope.setGlobal<LuaUserData>("__asset", {static_cast<void *>(&data)});
-
-  auto table = scope.createTable(1);
-
-  table.set("register", [](void *state) {
-    LuaScope scope(state);
-    if (!scope.is<String>(1) || !scope.is<uint32_t>(2)) {
-      scope.error(LuaMessages::invalidArguments<String, uint32_t>("input_vars",
-                                                                  "register"));
-      return 0;
-    }
-
-    auto name = scope.get<String>(1);
-    auto type = scope.get<uint32_t>(2);
-
+static void injectInputVarsInterface(sol::state &state, LuaScriptAsset &data) {
+  auto inputVars = state.create_named_table("input_vars");
+  auto *luaState = state.lua_state();
+  inputVars["register"] = [&data, luaState](String name, uint32_t type) {
     if (type >= static_cast<uint32_t>(LuaScriptVariableType::Invalid)) {
-      scope.error("Variable \"" + name + "\" has invalid type");
-      return 0;
+      luaL_error(luaState, "Variable \"%s\" has invalid type", name.c_str());
+      return sol::nil;
     }
-
-    auto &data = *static_cast<LuaScriptAsset *>(
-        scope.getGlobal<LuaUserData>("__asset").pointer);
 
     if (data.variables.find(name) != data.variables.end()) {
-      scope.error("Variable \"" + name + "\" already registered");
-      return 0;
+      luaL_error(luaState, "Variable \"%s\" already registered", name.c_str());
+      return sol::nil;
     }
 
     LuaScriptVariable var{};
@@ -61,19 +46,15 @@ static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
     var.type = static_cast<LuaScriptVariableType>(type);
     data.variables.insert({name, var});
 
-    return 0;
-  });
+    return sol::nil;
+  };
 
-  auto typesTable = scope.createTable(3);
-  typesTable.set("Null", static_cast<uint32_t>(LuaScriptVariableType::Invalid));
-  typesTable.set("String",
-                 static_cast<uint32_t>(LuaScriptVariableType::String));
-  typesTable.set("AssetPrefab",
-                 static_cast<uint32_t>(LuaScriptVariableType::AssetPrefab));
-  typesTable.set("AssetTexture",
-                 static_cast<uint32_t>(LuaScriptVariableType::AssetTexture));
-  table.set("types", typesTable);
-  scope.setPreviousValueAsGlobal("input_vars");
+  inputVars["types"] = state.create_table_with(
+      "Invalid", LuaScriptVariableType::Invalid,          //
+      "String", LuaScriptVariableType::String,            //
+      "AssetPrefab", LuaScriptVariableType::AssetPrefab,  //
+      "AssetTexture", LuaScriptVariableType::AssetTexture //
+  );
 }
 
 Result<Path>
@@ -128,30 +109,27 @@ Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
   stream.close();
 
   LuaInterpreter interpreter;
-  auto scope = interpreter.createScope();
 
-  injectInputVarsInterface(scope, asset.data);
-  bool success = interpreter.evaluate(asset.data.bytes, scope);
+  sol::state state;
+  injectInputVarsInterface(state, asset.data);
+
+  auto *luaState = state.lua_state();
+  bool success = interpreter.evaluate(asset.data.bytes, luaState);
 
   if (!success) {
-    auto message = scope.get<String>(-1);
-    interpreter.destroyScope(scope);
+    const auto *message = lua_tostring(luaState, -1);
     return Result<LuaScriptAssetHandle>::Error(message);
   }
 
-  if (!scope.hasFunction("start")) {
-    interpreter.destroyScope(scope);
+  if (state["start"].get_type() != sol::type::function) {
     return Result<LuaScriptAssetHandle>::Error(
         "`start` function is missing from script");
   }
 
-  if (!scope.hasFunction("update")) {
-    interpreter.destroyScope(scope);
+  if (state["update"].get_type() != sol::type::function) {
     return Result<LuaScriptAssetHandle>::Error(
         "`update` function is missing from script");
   }
-
-  interpreter.destroyScope(scope);
 
   auto handle = mRegistry.getLuaScripts().findHandleByUuid(uuid);
 

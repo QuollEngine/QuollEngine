@@ -6,15 +6,6 @@
 class RigidBodyLuaScriptingInterfaceTest
     : public LuaScriptingInterfaceTestBase {};
 
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       SetDefaultParamsDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
-  call(entity, "rigid_body_set_default_params_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
-}
-
 TEST_F(RigidBodyLuaScriptingInterfaceTest, SetDefaultParamsSetsNewRigidBody) {
   auto entity = entityDatabase.create();
 
@@ -25,19 +16,11 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest, SetDefaultParamsSetsNewRigidBody) {
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       GetMassReturnsNullIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::RigidBody>(entity, {});
-
-  call(entity, "rigid_body_get_mass_invalid");
-}
-
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
        GetMassReturnsNullIfRigidBodyDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "rigid_body_get_mass");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("mass"));
+  auto state = call(entity, "rigid_body_get_mass");
+  EXPECT_TRUE(state["mass"].is<sol::nil_t>());
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest, GetMassReturnsRigidBodyMass) {
@@ -46,17 +29,8 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest, GetMassReturnsRigidBodyMass) {
   rigidBody.dynamicDesc.mass = 2.5f;
   entityDatabase.set(entity, rigidBody);
 
-  auto &scope = call(entity, "rigid_body_get_mass");
-  EXPECT_EQ(scope.getGlobal<float>("mass"), 2.5f);
-}
-
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       SetMassDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
-  call(entity, "rigid_body_set_mass_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
+  auto state = call(entity, "rigid_body_get_mass");
+  EXPECT_EQ(state["mass"].get<float>(), 2.5f);
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
@@ -86,21 +60,13 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest,
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       GetInertiaReturnsNullIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::RigidBody>(entity, {});
-
-  call(entity, "rigid_body_get_inertia_invalid");
-}
-
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
        GetInertiaReturnsNullIfRigidBodyDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "rigid_body_get_inertia");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_x"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_y"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_z"));
+  auto state = call(entity, "rigid_body_get_inertia");
+  EXPECT_TRUE(state["inertia_x"].is<sol::nil_t>());
+  EXPECT_TRUE(state["inertia_y"].is<sol::nil_t>());
+  EXPECT_TRUE(state["inertia_z"].is<sol::nil_t>());
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest, GetInertiaReturnsRigidBodyInertia) {
@@ -109,19 +75,10 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest, GetInertiaReturnsRigidBodyInertia) {
   rigidBody.dynamicDesc.inertia = glm::vec3(2.5f);
   entityDatabase.set(entity, rigidBody);
 
-  auto &scope = call(entity, "rigid_body_get_inertia");
-  EXPECT_EQ(scope.getGlobal<float>("inertia_x"), 2.5f);
-  EXPECT_EQ(scope.getGlobal<float>("inertia_y"), 2.5f);
-  EXPECT_EQ(scope.getGlobal<float>("inertia_z"), 2.5f);
-}
-
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       SetInertiaDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
-  call(entity, "rigid_body_set_inertia_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
+  auto state = call(entity, "rigid_body_get_inertia");
+  EXPECT_EQ(state["inertia_x"].get<float>(), 2.5f);
+  EXPECT_EQ(state["inertia_y"].get<float>(), 2.5f);
+  EXPECT_EQ(state["inertia_z"].get<float>(), 2.5f);
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
@@ -153,19 +110,11 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest,
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       IsGravityAppliedReturnsNullIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::RigidBody>(entity, {});
-
-  call(entity, "rigid_body_is_gravity_applied_invalid");
-}
-
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
        IsGravityAppliedReturnsNullIfRigidBodyDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "rigid_body_is_gravity_applied");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("is_gravity_applied"));
+  auto state = call(entity, "rigid_body_is_gravity_applied");
+  EXPECT_TRUE(state["is_gravity_applied"].is<sol::nil_t>());
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
@@ -175,17 +124,8 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest,
   rigidBody.dynamicDesc.applyGravity = false;
   entityDatabase.set(entity, rigidBody);
 
-  auto &scope = call(entity, "rigid_body_is_gravity_applied");
-  EXPECT_EQ(scope.getGlobal<bool>("is_gravity_applied"), false);
-}
-
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       ApplyGravityDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
-  call(entity, "rigid_body_apply_gravity_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
+  auto state = call(entity, "rigid_body_is_gravity_applied");
+  EXPECT_EQ(state["is_gravity_applied"].get<bool>(), false);
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
@@ -219,15 +159,6 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest,
       false);
 }
 
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       ApplyForceDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Force>(entity));
-  call(entity, "rigid_body_apply_force_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Force>(entity));
-}
-
 TEST_F(RigidBodyLuaScriptingInterfaceTest, ApplyForceSetsForceComponent) {
   auto entity = entityDatabase.create();
   EXPECT_FALSE(entityDatabase.has<quoll::Force>(entity));
@@ -238,15 +169,6 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest, ApplyForceSetsForceComponent) {
   const auto &force = entityDatabase.get<quoll::Force>(entity).force;
 
   EXPECT_EQ(force, glm::vec3(10.0f, 0.2f, 5.0f));
-}
-
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       ApplyTorqueDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-  EXPECT_FALSE(entityDatabase.has<quoll::Torque>(entity));
-
-  call(entity, "rigid_body_apply_torque_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Torque>(entity));
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest, ApplyTorqueSetsTorqueComponent) {
@@ -261,30 +183,12 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest, ApplyTorqueSetsTorqueComponent) {
   EXPECT_EQ(torque, glm::vec3(2.5f, 3.5f, 1.2f));
 }
 
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       ClearDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBodyClear>(entity));
-
-  call(entity, "rigid_body_clear_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::RigidBodyClear>(entity));
-}
-
 TEST_F(RigidBodyLuaScriptingInterfaceTest, ClearSetsRigidBodyClearComponent) {
   auto entity = entityDatabase.create();
   EXPECT_FALSE(entityDatabase.has<quoll::RigidBodyClear>(entity));
 
   call(entity, "rigid_body_clear");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBodyClear>(entity));
-}
-
-TEST_F(RigidBodyLuaScriptingInterfaceTest,
-       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::RigidBody>(entity, {});
-
-  call(entity, "rigid_body_delete_invalid");
-  EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,

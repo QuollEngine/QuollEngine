@@ -2,66 +2,37 @@
 #include "quoll/core/Engine.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaScope.h"
 #include "quoll/scripting/LuaMessages.h"
-#include "quoll/scripting/ComponentLuaInterfaceCommon.h"
 
 #include "AudioScriptingInterface.h"
 
 namespace quoll {
 
-int AudioScriptingInterface::LuaInterface::play(void *state) {
-  LuaScope scope(state);
+AudioScriptingInterface::LuaInterface::LuaInterface(Entity entity,
+                                                    ScriptGlobals scriptGlobals)
+    : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "play");
-
-    return 0;
+void AudioScriptingInterface::LuaInterface::play() {
+  if (mScriptGlobals.entityDatabase.has<AudioSource>(mEntity)) {
+    mScriptGlobals.entityDatabase.set<AudioStart>(mEntity, {});
   }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<AudioSource>(entity)) {
-    return 0;
-  }
-
-  entityDatabase.set<AudioStart>(entity, {});
-  return 0;
 }
 
-int AudioScriptingInterface::LuaInterface::isPlaying(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "is_playing");
-    scope.set(false);
-    return 1;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  bool isPlaying = entityDatabase.has<AudioStatus>(entity);
-  scope.set(isPlaying);
-  return 1;
+bool AudioScriptingInterface::LuaInterface::isPlaying() {
+  return mScriptGlobals.entityDatabase.has<AudioStatus>(mEntity);
 }
 
-int AudioScriptingInterface::LuaInterface::deleteThis(void *state) {
-  return ComponentLuaInterfaceCommon::deleteComponent<AudioSource>(getName(),
-                                                                   state);
+void AudioScriptingInterface::LuaInterface::deleteThis() {
+  if (mScriptGlobals.entityDatabase.has<AudioSource>(mEntity)) {
+    mScriptGlobals.entityDatabase.remove<AudioSource>(mEntity);
+  }
+}
+
+void AudioScriptingInterface::LuaInterface::create(
+    sol::usertype<AudioScriptingInterface::LuaInterface> usertype) {
+  usertype["play"] = &LuaInterface::play;
+  usertype["is_playing"] = &LuaInterface::isPlaying;
+  usertype["delete"] = &LuaInterface::deleteThis;
 }
 
 } // namespace quoll

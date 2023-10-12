@@ -9,16 +9,10 @@ class TransformLuaScriptingInterfaceTest
 using TransformLuaScriptingInterfaceDeathTest =
     TransformLuaScriptingInterfaceTest;
 
-TEST_F(TransformLuaScriptingInterfaceDeathTest,
-       GetPositionFailsIfComponentDoesNotExist) {
+TEST_F(TransformLuaScriptingInterfaceTest,
+       GetPositionReturnsNullIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
   EXPECT_DEATH(call(entity, "local_transform_position_get"), ".*");
-}
-
-TEST_F(TransformLuaScriptingInterfaceTest,
-       GetPositionReturnsNilIfValuesAreInvalid) {
-  auto entity = entityDatabase.create();
-  call(entity, "local_transform_position_get_invalid");
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest, GetsPositionValue) {
@@ -26,11 +20,11 @@ TEST_F(TransformLuaScriptingInterfaceTest, GetsPositionValue) {
   entityDatabase.set<quoll::LocalTransform>(entity,
                                             {glm::vec3(2.5f, 0.2f, 0.5f)});
 
-  auto &scope = call(entity, "local_transform_position_get");
+  auto state = call(entity, "local_transform_position_get");
 
-  EXPECT_EQ(scope.getGlobal<float>("local_position_x"), 2.5f);
-  EXPECT_EQ(scope.getGlobal<float>("local_position_y"), 0.2f);
-  EXPECT_EQ(scope.getGlobal<float>("local_position_z"), 0.5f);
+  EXPECT_EQ(state["local_position_x"].get<float>(), 2.5f);
+  EXPECT_EQ(state["local_position_y"].get<float>(), 0.2f);
+  EXPECT_EQ(state["local_position_z"].get<float>(), 0.5f);
 }
 
 TEST_F(TransformLuaScriptingInterfaceDeathTest,
@@ -44,22 +38,10 @@ TEST_F(TransformLuaScriptingInterfaceTest, SetsPositionValue) {
   entityDatabase.set<quoll::LocalTransform>(entity,
                                             {glm::vec3(1.5f, 0.2f, 0.5f)});
 
-  auto &scope = call(entity, "local_transform_position_set");
+  auto state = call(entity, "local_transform_position_set");
 
   EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localPosition,
             glm::vec3(2.5f, 3.5f, 0.2f));
-}
-
-TEST_F(TransformLuaScriptingInterfaceTest,
-       DoesNothingIfSetPositionArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LocalTransform>(
-      entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
-
-  auto &scope = call(entity, "local_transform_position_set_invalid");
-
-  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localScale,
-            glm::vec3(1.5f, 0.2f, 0.5f));
 }
 
 TEST_F(TransformLuaScriptingInterfaceDeathTest,
@@ -68,22 +50,16 @@ TEST_F(TransformLuaScriptingInterfaceDeathTest,
   EXPECT_DEATH(call(entity, "local_transform_scale_get"), ".*");
 }
 
-TEST_F(TransformLuaScriptingInterfaceTest,
-       GetScaleReturnsNilIfValuesAreInvalid) {
-  auto entity = entityDatabase.create();
-  call(entity, "local_transform_scale_get_invalid");
-}
-
 TEST_F(TransformLuaScriptingInterfaceTest, GetsScaleValue) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::LocalTransform>(
       entity, {{}, {}, glm::vec3(2.5f, 0.2f, 0.5f)});
 
-  auto &scope = call(entity, "local_transform_scale_get");
+  auto state = call(entity, "local_transform_scale_get");
 
-  EXPECT_EQ(scope.getGlobal<float>("local_scale_x"), 2.5f);
-  EXPECT_EQ(scope.getGlobal<float>("local_scale_y"), 0.2f);
-  EXPECT_EQ(scope.getGlobal<float>("local_scale_z"), 0.5f);
+  EXPECT_EQ(state["local_scale_x"].get<float>(), 2.5f);
+  EXPECT_EQ(state["local_scale_y"].get<float>(), 0.2f);
+  EXPECT_EQ(state["local_scale_z"].get<float>(), 0.5f);
 }
 
 TEST_F(TransformLuaScriptingInterfaceDeathTest,
@@ -97,22 +73,10 @@ TEST_F(TransformLuaScriptingInterfaceTest, SetsScaleValue) {
   entityDatabase.set<quoll::LocalTransform>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
-  auto &scope = call(entity, "local_transform_scale_set");
+  auto state = call(entity, "local_transform_scale_set");
 
   EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localScale,
             glm::vec3(2.5f, 3.5f, 0.2f));
-}
-
-TEST_F(TransformLuaScriptingInterfaceTest,
-       DoesNothingIfSetScaleArgumentsAreNotNumbers) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LocalTransform>(
-      entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
-
-  auto &scope = call(entity, "local_transform_scale_set_invalid");
-
-  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localScale,
-            glm::vec3(1.5f, 0.2f, 0.5f));
 }
 
 // XYZ -> Roll-Pitch-Yaw
@@ -126,21 +90,15 @@ TEST_F(TransformLuaScriptingInterfaceDeathTest,
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
-       GetRotationReturnsNilIfValuesAreInvalid) {
-  auto entity = entityDatabase.create();
-  call(entity, "local_transform_rotation_get_invalid");
-}
-
-TEST_F(TransformLuaScriptingInterfaceTest,
        GetRotationReturnsRotationInDegrees) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::LocalTransform>(entity, {{}, TestQuat, {}});
 
-  auto &scope = call(entity, "local_transform_rotation_get");
+  auto state = call(entity, "local_transform_rotation_get");
 
-  auto actual = glm::vec3{scope.getGlobal<float>("local_rotation_x"),
-                          scope.getGlobal<float>("local_rotation_y"),
-                          scope.getGlobal<float>("local_rotation_z")};
+  auto actual = glm::vec3{state["local_rotation_x"].get<float>(),
+                          state["local_rotation_y"].get<float>(),
+                          state["local_rotation_z"].get<float>()};
   auto expected = TestEulerDegrees;
 
   EXPECT_NEAR(actual.x, expected.x, 0.0001f);
@@ -159,7 +117,7 @@ TEST_F(TransformLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::LocalTransform>(entity, {{}, {}, {}});
 
-  auto &scope = call(entity, "local_transform_rotation_set");
+  auto state = call(entity, "local_transform_rotation_set");
 
   auto actual = entityDatabase.get<quoll::LocalTransform>(entity).localRotation;
   auto expected = TestQuat;
@@ -168,27 +126,6 @@ TEST_F(TransformLuaScriptingInterfaceTest,
   EXPECT_NEAR(actual.y, expected.y, 0.0001f);
   EXPECT_NEAR(actual.z, expected.z, 0.0001f);
   EXPECT_NEAR(actual.w, expected.w, 0.0001f);
-}
-
-TEST_F(TransformLuaScriptingInterfaceTest,
-       DoesNothingIfSetRotationArgumentsAreNotNumbers) {
-  constexpr glm::quat RandomQuat{0.2f, 0.4f, 0.1f, 0.5f};
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LocalTransform>(entity, {{}, RandomQuat, {}});
-
-  auto &scope = call(entity, "local_transform_rotation_set_invalid");
-
-  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localRotation,
-            RandomQuat);
-}
-
-TEST_F(TransformLuaScriptingInterfaceTest,
-       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LocalTransform>(entity, {});
-
-  call(entity, "local_transform_delete_invalid");
-  EXPECT_TRUE(entityDatabase.has<quoll::LocalTransform>(entity));
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,

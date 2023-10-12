@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/scripting/ComponentLuaInterface.h"
+#include "quoll/scripting/EntityTable.h"
 
 namespace quoll {
 
@@ -15,32 +16,29 @@ public:
 /**
  * @brief Lua scripting interface for entity query
  */
-class EntityQueryScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<
-          EntityQueryScriptingInterface::LuaInterface> {
+class EntityQueryScriptingInterface::LuaInterface {
 public:
+  /**
+   * @brief Create entity query
+   *
+   * @param scriptGlobals Script globals
+   */
+  LuaInterface(ScriptGlobals &scriptGlobals);
+
   /**
    * @brief Get first entity by name
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param name Entity name
+   * @return Found entity
    */
-  static int getFirstEntityByName(void *state);
+  sol_maybe<EntityTable> getFirstEntityByName(String name);
 
   /**
    * @brief Delete entity
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param entity Entity table
    */
-  static int deleteEntity(void *state);
-
-  /**
-   * @brief Interface fields
-   */
-  static constexpr std::array<InterfaceField, 2> Fields{
-      InterfaceField{"get_first_entity_by_name", getFirstEntityByName},
-      InterfaceField{"delete_entity", deleteEntity}};
+  void deleteEntity(EntityTable entity);
 
   /**
    * @brief Get component name in scripts
@@ -48,6 +46,16 @@ public:
    * @return Component name
    */
   static const String getName() { return "entity_query"; }
+
+  /**
+   * @brief Create user type
+   *
+   * @param state Sol state
+   */
+  static void create(sol::state_view state);
+
+private:
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

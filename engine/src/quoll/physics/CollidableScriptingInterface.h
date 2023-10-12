@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/scripting/ComponentLuaInterface.h"
+#include "CollisionHit.h"
 
 namespace quoll {
 
@@ -15,130 +16,116 @@ public:
 /**
  * @brief Lua scripting interface for collidable
  */
-class CollidableScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<CollidableScriptingInterface::LuaInterface> {
+class CollidableScriptingInterface::LuaInterface {
 public:
   /**
-   * @brief Set default material
+   * @brief Create collidable table
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param entity Entity
+   * @param scriptGlobals Script globals
    */
-  static int setDefaultMaterial(void *state);
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
+
+  /**
+   * @brief Set default material
+   */
+  void setDefaultMaterial();
 
   /**
    * @brief Get static friction
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Static friction
    */
-  static int getStaticFriction(void *state);
+  sol_maybe<float> getStaticFriction();
 
   /**
    * @brief Set static friction
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param staticFriction Static friction
    */
-  static int setStaticFriction(void *state);
+  void setStaticFriction(float staticFriction);
 
   /**
    * @brief Get dynamic friction
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Dynamic friction
    */
-  static int getDynamicFriction(void *state);
+  sol_maybe<float> getDynamicFriction();
 
   /**
    * @brief Set dynamic friction
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param dynamicFriction Dynamic friction
    */
-  static int setDynamicFriction(void *state);
+  void setDynamicFriction(float dynamicFriction);
 
   /**
    * @brief Get restitution
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Restitution
    */
-  static int getRestitution(void *state);
+  sol_maybe<float> getRestitution();
 
   /**
    * @brief Set restitution
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param restitution Restitution
    */
-  static int setRestitution(void *state);
+  void setRestitution(float restitution);
 
   /**
    * @brief Set box geometry
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param hx Half extent in x axis
+   * @param hy Half extent in y axis
+   * @param hz Half extent in z axis
    */
-  static int setBoxGeometry(void *state);
+  void setBoxGeometry(float hx, float hy, float hz);
 
   /**
    * @brief Set sphere geometry
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param radius Sphere radius
    */
-  static int setSphereGeometry(void *state);
+  void setSphereGeometry(float radius);
 
   /**
    * @brief Set capsule geometry
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param radius Capsule radius
+   * @param halfHeight Capsule half height
    */
-  static int setCapsuleGeometry(void *state);
+  void setCapsuleGeometry(float radius, float halfHeight);
 
   /**
    * @brief Set plane geometry
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int setPlaneGeometry(void *state);
+  void setPlaneGeometry();
 
   /**
-   * @brief Sweep tset
+   * @brief Sweep test
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param dx Sweep direction in x axis
+   * @param dy Sweep direction in y axis
+   * @param dz Sweep direction in z axis
+   * @param distance Sweep distance
+   * @return Collision hit
    */
-  static int sweep(void *state);
+  std::tuple<bool, sol_maybe<CollisionHit>> sweep(float dx, float dy, float dz,
+                                                  float distance);
 
   /**
    * @brief Delete component
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int deleteThis(void *state);
+  void deleteThis();
 
   /**
-   * @brief Interface fields
+   * @brief Create user type
+   *
+   * @param usertype User type
    */
-  static constexpr std::array<InterfaceField, 13> Fields{
-      InterfaceField{"set_default_material", setDefaultMaterial},
-      InterfaceField{"get_static_friction", getStaticFriction},
-      InterfaceField{"set_static_friction", setStaticFriction},
-      InterfaceField{"get_dynamic_friction", getDynamicFriction},
-      InterfaceField{"set_dynamic_friction", setDynamicFriction},
-      InterfaceField{"get_restitution", getRestitution},
-      InterfaceField{"set_restitution", setRestitution},
-      InterfaceField{"set_box_geometry", setBoxGeometry},
-      InterfaceField{"set_sphere_geometry", setSphereGeometry},
-      InterfaceField{"set_capsule_geometry", setCapsuleGeometry},
-      InterfaceField{"set_plane_geometry", setPlaneGeometry},
-      InterfaceField{"sweep", sweep},
-      InterfaceField{"delete", deleteThis}};
+  static void
+  create(sol::usertype<CollidableScriptingInterface::LuaInterface> usertype);
 
   /**
    * @brief Get component name in scripts
@@ -146,6 +133,10 @@ public:
    * @return Component name
    */
   static const String getName() { return "collidable"; }
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

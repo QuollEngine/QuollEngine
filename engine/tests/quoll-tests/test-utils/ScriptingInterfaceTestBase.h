@@ -24,10 +24,9 @@ public:
    *
    * @param entity Entity
    * @param functionName Function name
-   * @return Lua scope
+   * @return Sol state
    */
-  quoll::LuaScope &call(quoll::Entity entity,
-                        const quoll::String &functionName);
+  sol::state_view call(quoll::Entity entity, const quoll::String &functionName);
 
   /**
    * @brief Set up test

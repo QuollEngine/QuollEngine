@@ -14,57 +14,48 @@ struct TextScriptingInterface {
 /**
  * @brief Lua interface for text component
  */
-class TextScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<TextScriptingInterface::LuaInterface> {
+class TextScriptingInterface::LuaInterface {
 public:
+  /**
+   * @brief Create text table
+   *
+   * @param entity Entity
+   * @param scriptGlobals Script globals
+   */
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
+
   /**
    * @brief Get text contents
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Text contents
    */
-  static int getText(void *state);
+  sol_maybe<String> getText();
 
   /**
    * @brief Set text contents
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param text Text contents
    */
-  static int setText(void *state);
+  void setText(String text);
 
   /**
    * @brief Get line height
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Line height
    */
-  static int getLineHeight(void *state);
+  sol_maybe<float> getLineHeight();
 
   /**
    * @brief Set line height
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param lineHeight Line height
    */
-  static int setLineHeight(void *state);
+  void setLineHeight(float lineHeight);
 
   /**
    * @brief Delete component
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int deleteThis(void *state);
-
-  /**
-   * @brief Interface fields
-   */
-  static constexpr std::array<InterfaceField, 5> Fields{
-      InterfaceField{"get_text", getText}, InterfaceField{"set_text", setText},
-      InterfaceField{"get_line_height", getLineHeight},
-      InterfaceField{"set_line_height", setLineHeight},
-      InterfaceField{"delete", deleteThis}};
+  void deleteThis();
 
   /**
    * @brief Get component name in scripts
@@ -72,6 +63,18 @@ public:
    * @return Component name
    */
   static const String getName() { return "text"; }
+
+  /**
+   * @brief Create user type
+   *
+   * @param usertype User type
+   */
+  static void
+  create(sol::usertype<TextScriptingInterface::LuaInterface> usertype);
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

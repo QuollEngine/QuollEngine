@@ -5,38 +5,27 @@
 
 class NameLuaScriptingInterfaceTest : public LuaScriptingInterfaceTestBase {};
 
+using NameLuaScriptingInterfaceDeathTest = NameLuaScriptingInterfaceTest;
+
 TEST_F(NameLuaScriptingInterfaceTest,
        ReturnsEmptyStringIfNameComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "name_get");
+  auto state = call(entity, "name_get");
 
   EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
-  auto name = scope.getGlobal<quoll::String>("name");
+  auto name = state["name"].get<quoll::String>();
   EXPECT_EQ(name, "");
 }
 
-TEST_F(NameLuaScriptingInterfaceTest, ReturnsEmptyStringIfNoSelf) {
-  auto entity = entityDatabase.create();
-  call(entity, "name_get_invalid");
-}
-
-TEST_F(NameLuaScriptingInterfaceTest, ReturnsNameComponentDataIfExists) {
+TEST_F(NameLuaScriptingInterfaceTest, ReturnsNameIfComponentExists) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Name>(entity, {"Test name"});
 
-  auto &scope = call(entity, "name_get");
+  auto state = call(entity, "name_get");
 
-  auto name = scope.getGlobal<quoll::String>("name");
+  auto name = state["name"].get<quoll::String>();
   EXPECT_EQ(name, "Test name");
-}
-
-TEST_F(NameLuaScriptingInterfaceTest, DoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
-  call(entity, "name_set_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
 }
 
 TEST_F(NameLuaScriptingInterfaceTest, CreatesNameComponentOnSet) {
@@ -56,15 +45,6 @@ TEST_F(NameLuaScriptingInterfaceTest, UpdatesExistingNameComponentOnSet) {
   call(entity, "name_set");
 
   EXPECT_EQ(entityDatabase.get<quoll::Name>(entity).name, "Hello World");
-}
-
-TEST_F(NameLuaScriptingInterfaceTest,
-       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity, {});
-
-  call(entity, "name_delete_invalid");
-  EXPECT_TRUE(entityDatabase.has<quoll::Name>(entity));
 }
 
 TEST_F(NameLuaScriptingInterfaceTest,

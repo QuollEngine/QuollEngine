@@ -15,112 +15,101 @@ public:
 /**
  * @brief Lua scripting interface for rigid body
  */
-class RigidBodyScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<RigidBodyScriptingInterface::LuaInterface> {
+class RigidBodyScriptingInterface::LuaInterface {
 public:
   /**
-   * @brief Set default params
+   * @brief Create rigid body table
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param entity Entity
+   * @param scriptGlobals Script globals
    */
-  static int setDefaultParams(void *state);
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
+
+  /**
+   * @brief Set default params
+   */
+  void setDefaultParams();
 
   /**
    * @brief Get mass
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Mass
    */
-  static int getMass(void *state);
+  sol_maybe<float> getMass();
 
   /**
    * @brief Set mass
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param mass Mass
    */
-  static int setMass(void *state);
+  void setMass(float mass);
 
   /**
    * @brief Get inertia
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Inertia
    */
-  static int getInertia(void *state);
+  std::tuple<sol_maybe<float>, sol_maybe<float>, sol_maybe<float>> getInertia();
 
   /**
    * @brief Set inertia
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param x Inertia in x axis
+   * @param y Inertia in y axis
+   * @param z Inertia in z axis
    */
-  static int setInertia(void *state);
+  void setInertia(float x, float y, float z);
 
   /**
    * @brief Check if gravity is applied
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @retval true Gravity is applied
+   * @retval false Gravity is not applied
    */
-  static int isGravityApplied(void *state);
+  sol_maybe<bool> isGravityApplied();
 
   /**
    * @brief Apply gravity
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param apply Should apply gravity
    */
-  static int applyGravity(void *state);
+  void applyGravity(bool apply);
 
   /**
    * @brief Apply force
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param x Force in x axis
+   * @param y Force in y axis
+   * @param z Force in z axis
    */
-  static int applyForce(void *state);
+  void applyForce(float x, float y, float z);
 
   /**
    * @brief Apply torque
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param x Torque in x axis
+   * @param y Torque in y axis
+   * @param z Torque in z axis
    */
-  static int applyTorque(void *state);
+  void applyTorque(float x, float y, float z);
 
   /**
    * @brief Clear force and torque
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int clear(void *state);
+  void clear();
 
   /**
    * @brief Delete component
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int deleteThis(void *state);
+  void deleteThis();
 
   /**
-   * @brief Interface fields
+   * @brief Create user type
+   *
+   * @param usertype User type
    */
-  static constexpr std::array<InterfaceField, 11> Fields{
-      InterfaceField{"set_default_params", setDefaultParams},
-      InterfaceField{"get_mass", getMass},
-      InterfaceField{"set_mass", setMass},
-      InterfaceField{"get_inertia", getInertia},
-      InterfaceField{"set_inertia", setInertia},
-      InterfaceField{"is_gravity_applied", isGravityApplied},
-      InterfaceField{"apply_gravity", applyGravity},
-      InterfaceField{"apply_force", applyForce},
-      InterfaceField{"apply_torque", applyTorque},
-      InterfaceField{"clear", clear},
-      InterfaceField{"delete", deleteThis}};
+  static void
+  create(sol::usertype<RigidBodyScriptingInterface::LuaInterface> usertype);
 
   /**
    * @brief Get component name in scripts
@@ -128,6 +117,10 @@ public:
    * @return Component name
    */
   static const String getName() { return "rigid_body"; }
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

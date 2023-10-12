@@ -15,14 +15,6 @@ TEST_F(AudioLuaScriptingInterfaceTest,
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(entity));
 }
 
-TEST_F(AudioLuaScriptingInterfaceTest, PlayDoesNothingIfInvalidArguments) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {});
-  call(entity, "audio_play_invalid");
-
-  EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(entity));
-}
-
 TEST_F(AudioLuaScriptingInterfaceTest,
        PlayAddsAudioStartComponentIfAudioSourceExists) {
   auto entity = entityDatabase.create();
@@ -35,34 +27,18 @@ TEST_F(AudioLuaScriptingInterfaceTest,
 TEST_F(AudioLuaScriptingInterfaceTest,
        IsPlayingReturnsFalseIfAudioStatusComponentDoesNotExist) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "audio_is_playing");
+  auto state = call(entity, "audio_is_playing");
 
-  EXPECT_FALSE(scope.getGlobal<bool>("audio_is_playing_flag"));
-}
-
-TEST_F(AudioLuaScriptingInterfaceTest,
-       IsPlayingReturnsFalseIfInvalidArguments) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioStatus>(entity, {});
-  call(entity, "audio_is_playing_invalid");
+  EXPECT_FALSE(state["audio_is_playing_flag"].get<bool>());
 }
 
 TEST_F(AudioLuaScriptingInterfaceTest,
        IsPlayingReturnsTrueIfAudioStatusComponentExists) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::AudioStatus>(entity, {});
-  auto &scope = call(entity, "audio_is_playing");
+  auto state = call(entity, "audio_is_playing");
 
-  EXPECT_TRUE(scope.getGlobal<bool>("audio_is_playing_flag"));
-}
-
-TEST_F(AudioLuaScriptingInterfaceTest,
-       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {});
-
-  call(entity, "audio_delete_invalid");
-  EXPECT_TRUE(entityDatabase.has<quoll::AudioSource>(entity));
+  EXPECT_TRUE(state["audio_is_playing_flag"].get<bool>());
 }
 
 TEST_F(AudioLuaScriptingInterfaceTest,

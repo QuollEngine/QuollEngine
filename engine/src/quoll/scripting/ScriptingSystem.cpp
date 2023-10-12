@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "ScriptingSystem.h"
-#include "LuaTable.h"
 #include "ScriptDecorator.h"
 
 #include "quoll/core/Engine.h"
@@ -13,6 +12,7 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 
 void ScriptingSystem::start(EntityDatabase &entityDatabase,
                             PhysicsSystem &physicsSystem) {
+  ScriptGlobals scriptGlobals{entityDatabase, physicsSystem, mAssetRegistry};
   QUOLL_PROFILE_EVENT("ScriptingSystem::start");
   ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
@@ -39,23 +39,26 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase,
 
     component.started = true;
 
-    if (component.scope.getLuaState()) {
-      mLuaInterpreter.destroyScope(component.scope);
+    if (component.state) {
+      mLuaInterpreter.destroyState(component.state);
     }
-    component.scope = mLuaInterpreter.createScope();
-    scriptDecorator.attachToScope(component.scope, entity, entityDatabase,
-                                  physicsSystem, mAssetRegistry);
-    scriptDecorator.attachVariableInjectors(component.scope,
-                                            component.variables);
+    component.state = mLuaInterpreter.createState();
+    auto state = sol::state_view(component.state);
 
-    bool success = mLuaInterpreter.evaluate(script.data.bytes, component.scope);
+    scriptDecorator.attachToScope(state, entity, scriptGlobals);
+    scriptDecorator.attachVariableInjectors(state, component.variables);
+
+    bool success = mLuaInterpreter.evaluate(script.data.bytes, component.state);
     QuollAssert(success, "Cannot evaluate script");
 
-    scriptDecorator.removeVariableInjectors(component.scope);
+    scriptDecorator.removeVariableInjectors(state);
 
     createScriptingData(component, entity);
-    component.scope.luaGetGlobal("start");
-    component.scope.call(0);
+    auto res = state["start"]();
+    if (!res.valid()) {
+      sol::error error = res;
+      Engine::getUserLogger().error() << error.what();
+    }
   }
 
   for (auto entity : deleteList) {
@@ -72,9 +75,12 @@ void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
   mScriptRemoveObserver.clear();
 
   for (auto [entity, component] : entityDatabase.view<Script>()) {
-    component.scope.luaGetGlobal("update");
-    component.scope.set(dt);
-    component.scope.call(1);
+    auto state = sol::state_view(component.state);
+    auto res = state["update"](dt);
+    if (!res.valid()) {
+      sol::error error = res;
+      Engine::getUserLogger().error() << error.what();
+    }
   }
 }
 
@@ -91,65 +97,61 @@ void ScriptingSystem::observeChanges(EntityDatabase &entityDatabase) {
 }
 
 void ScriptingSystem::createScriptingData(Script &component, Entity entity) {
-  if (component.scope.hasFunction("on_collision_start")) {
+  auto state = sol::state_view(component.state);
+
+  if (state["on_collision_start"].get_type() == sol::type::function) {
     component.onCollisionStart = mEventSystem.observe(
         CollisionEvent::CollisionStarted,
         [this, &component, entity](const CollisionObject &data) {
           if (data.a == entity || data.b == entity) {
-            component.scope.luaGetGlobal("on_collision_start");
+            auto state = sol::state_view(component.state);
             Entity target = data.a == entity ? data.b : data.a;
-            auto table = component.scope.createTable(1);
-            table.set("target", target);
-
-            component.scope.call(1);
+            auto table = state.create_table_with("target", target);
+            state["on_collision_start"](table);
           }
         });
   }
 
-  if (component.scope.hasFunction("on_collision_end")) {
+  if (state["on_collision_end"].get_type() == sol::type::function) {
     component.onCollisionEnd = mEventSystem.observe(
         CollisionEvent::CollisionEnded,
         [this, &component, entity](const CollisionObject &data) {
-          if (data.a == entity || data.b == entity) {
-            component.scope.luaGetGlobal("on_collision_end");
-            Entity target = data.a == entity ? data.b : data.a;
-            auto table = component.scope.createTable(1);
-            table.set("target", target);
+          auto state = sol::state_view(component.state);
 
-            component.scope.call(1);
+          if (data.a == entity || data.b == entity) {
+            Entity target = data.a == entity ? data.b : data.a;
+            auto table = state.create_table_with("target", target);
+            state["on_collision_end"](table);
           }
         });
   }
 
-  if (component.scope.hasFunction("on_key_press")) {
+  if (state["on_key_press"].get_type() == sol::type::function) {
     component.onKeyPress = mEventSystem.observe(
         KeyboardEvent::Pressed, [this, &component](const auto &data) {
-          component.scope.luaGetGlobal("on_key_press");
+          auto state = sol::state_view(component.state);
 
-          auto table = component.scope.createTable(2);
-          table.set("key", data.key);
-          table.set("mods", data.mods);
-
-          component.scope.call(1);
+          auto table =
+              state.create_table_with("key", data.key, "mods", data.mods);
+          state["on_key_press"](table);
         });
   }
 
-  if (component.scope.hasFunction("on_key_release")) {
+  if (state["on_key_release"].get_type() == sol::type::function) {
     component.onKeyRelease = mEventSystem.observe(
         KeyboardEvent::Released, [this, &component](const auto &data) {
-          component.scope.luaGetGlobal("on_key_release");
-          auto table = component.scope.createTable(2);
-          table.set("key", data.key);
-          table.set("mods", data.mods);
+          auto state = sol::state_view(component.state);
 
-          component.scope.call(1);
+          auto table =
+              state.create_table_with("key", data.key, "mods", data.mods);
+          state["on_key_release"](table);
         });
   }
 }
 
 void ScriptingSystem::destroyScriptingData(Script &component) {
-  if (component.scope) {
-    mLuaInterpreter.destroyScope(component.scope);
+  if (component.state) {
+    mLuaInterpreter.destroyState(component.state);
   }
 
   if (component.onCollisionStart != EventObserverMax) {

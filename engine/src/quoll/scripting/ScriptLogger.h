@@ -5,8 +5,8 @@ namespace quoll {
 /**
  * @brief Create script logger
  *
- * @param scope Lua scope
+ * @param state Sol state
  */
-void createScriptLogger(LuaScope &scope);
+void createScriptLogger(sol::state_view state);
 
 } // namespace quoll

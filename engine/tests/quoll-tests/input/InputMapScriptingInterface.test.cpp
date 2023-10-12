@@ -41,17 +41,17 @@ public:
 // get_command
 TEST_F(InputMapLuaScriptingInterfaceTest, GetCommandReturnsCommandIndex) {
   auto entity = createEntityWithInputMap();
-  auto &scope = call(entity, "input_get_command");
+  auto state = call(entity, "input_get_command");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command"));
-  EXPECT_EQ(scope.getGlobal<uint32_t>("input_command"), 1);
+  EXPECT_FALSE(state["input_command"].is<sol::nil_t>());
+  EXPECT_EQ(state["input_command"].get<uint32_t>(), 1);
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandReturnsNilIfEntityHasNoInputMap) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "input_get_command");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
+  auto state = call(entity, "input_get_command");
+  EXPECT_TRUE(state["input_command"].is<sol::nil_t>());
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
@@ -64,221 +64,107 @@ TEST_F(InputMapLuaScriptingInterfaceTest,
   map.commandNameMap["SomethingElse"] = 0;
   entityDatabase.set(entity, map);
 
-  auto &scope = call(entity, "input_get_command");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
-}
-
-TEST_F(InputMapLuaScriptingInterfaceTest,
-       GetCommandReturnsNilIfProvidedArgumentIsInvalid) {
-  auto entity = createEntityWithInputMap();
-  auto &scope = call(entity, "input_get_command_invalid");
+  auto state = call(entity, "input_get_command");
+  EXPECT_TRUE(state["input_command"].is<sol::nil_t>());
 }
 
 // get_value_boolean
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueBooleanReturnsBooleanValue) {
   auto entity = createEntityWithInputMap(true);
-  auto &scope = call(entity, "input_get_value_boolean");
+  auto state = call(entity, "input_get_value_boolean");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-  EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), true);
+  EXPECT_FALSE(state["input_command_value"].is<sol::nil_t>());
+  EXPECT_EQ(state["input_command_value"].get<bool>(), true);
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueBooleanReturnsFalseIfCommandValueIsZeroAxis2d) {
   auto entity = createEntityWithInputMap(glm::vec2{0.0f, 0.0f});
-  auto &scope = call(entity, "input_get_value_boolean");
+  auto state = call(entity, "input_get_value_boolean");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-  EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
+  EXPECT_FALSE(state["input_command_value"].is<sol::nil_t>());
+  EXPECT_EQ(state["input_command_value"].get<bool>(), false);
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueBooleanReturnsTrueIfCommandValueIsNotZeroAxis2d) {
   auto entity = createEntityWithInputMap(glm::vec2{0.1f, 0.0f});
-  auto &scope = call(entity, "input_get_value_boolean");
+  auto state = call(entity, "input_get_value_boolean");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-  EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), true);
+  EXPECT_FALSE(state["input_command_value"].is<sol::nil_t>());
+  EXPECT_EQ(state["input_command_value"].get<bool>(), true);
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
-       GetCommandValueBooleanReturnsFalseIfInputMapNotFound) {
+       GetCommandValueBooleanReturnsNilIfInputMapNotFound) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "input_get_value_boolean_non_existent_command");
+  auto state = call(entity, "input_get_value_boolean_non_existent_command");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-  EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
+  EXPECT_TRUE(state["input_command_value"].is<sol::nil_t>());
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueBooleanReturnsFalseIfCommandNotFound) {
   auto entity = createEntityWithInputMap();
-  auto &scope = call(entity, "input_get_value_boolean_non_existent_command");
+  auto state = call(entity, "input_get_value_boolean_non_existent_command");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-  EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
-}
-
-TEST_F(InputMapLuaScriptingInterfaceTest,
-       GetCommandValueBooleanReturnsFalseIfProvidedArgumentIsInvalid) {
-  auto entity = createEntityWithInputMap();
-
-  {
-    auto &scope = call(entity, "input_get_value_boolean_no_member");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-    EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_boolean_no_param");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-    EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_boolean_nil");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-    EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_boolean_string");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-    EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_boolean_function");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-    EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_boolean_table");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value"));
-    EXPECT_EQ(scope.getGlobal<bool>("input_command_value"), false);
-  }
+  EXPECT_TRUE(state["input_command_value"].is<sol::nil_t>());
 }
 
 // get_value_axis_2d
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueAxis2dReturnsVec2Value) {
   auto entity = createEntityWithInputMap(glm::vec2{0.2f, -0.3f});
-  auto &scope = call(entity, "input_get_value_axis_2d");
+  auto state = call(entity, "input_get_value_axis_2d");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
+  EXPECT_FALSE(state["input_command_value_x"].is<sol::nil_t>());
+  EXPECT_FALSE(state["input_command_value_y"].is<sol::nil_t>());
 
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.2f);
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), -0.3f);
+  EXPECT_EQ(state["input_command_value_x"].get<float>(), 0.2f);
+  EXPECT_EQ(state["input_command_value_y"].get<float>(), -0.3f);
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueAxis2dReturnsZeroVec2IfCommandValueIsFalse) {
   auto entity = createEntityWithInputMap(false);
-  auto &scope = call(entity, "input_get_value_axis_2d");
+  auto state = call(entity, "input_get_value_axis_2d");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
+  EXPECT_FALSE(state["input_command_value_x"].is<sol::nil_t>());
+  EXPECT_FALSE(state["input_command_value_y"].is<sol::nil_t>());
 
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
+  EXPECT_EQ(state["input_command_value_x"].get<float>(), 0.0f);
+  EXPECT_EQ(state["input_command_value_y"].get<float>(), 0.0f);
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueAxis2dReturnsOneVec2IfCommandValueIsTrue) {
   auto entity = createEntityWithInputMap(true);
-  auto &scope = call(entity, "input_get_value_axis_2d");
+  auto state = call(entity, "input_get_value_axis_2d");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
+  EXPECT_FALSE(state["input_command_value_x"].is<sol::nil_t>());
+  EXPECT_FALSE(state["input_command_value_y"].is<sol::nil_t>());
 
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 1.0f);
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 1.0f);
+  EXPECT_EQ(state["input_command_value_x"].get<float>(), 1.0f);
+  EXPECT_EQ(state["input_command_value_y"].get<float>(), 1.0f);
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueAxis2dReturnsZeroVec2IfInputMapNotFound) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "input_get_value_axis_2d_non_existent_command");
+  auto state = call(entity, "input_get_value_axis_2d_non_existent_command");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
-
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
+  EXPECT_TRUE(state["input_command_value_x"].is<sol::nil_t>());
+  EXPECT_TRUE(state["input_command_value_y"].is<sol::nil_t>());
 }
 
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandValueAxis2dReturnsZeroVec2IfCommandNotFound) {
   auto entity = createEntityWithInputMap();
-  auto &scope = call(entity, "input_get_value_axis_2d_non_existent_command");
+  auto state = call(entity, "input_get_value_axis_2d_non_existent_command");
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
-
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-  EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
-}
-
-TEST_F(InputMapLuaScriptingInterfaceTest,
-       GetCommandValueAxis2dReturnsZeroVec2IfProvidedArgumentIsInvalid) {
-  auto entity = createEntityWithInputMap();
-
-  {
-    auto &scope = call(entity, "input_get_value_axis_2d_no_member");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
-
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_axis_2d_no_param");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
-
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_axis_2d_nil");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
-
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_axis_2d_string");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
-
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_axis_2d_function");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
-
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
-  }
-
-  {
-    auto &scope = call(entity, "input_get_value_axis_2d_table");
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_x"));
-    EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("input_command_value_y"));
-
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
-    EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
-  }
+  EXPECT_TRUE(state["input_command_value_x"].is<sol::nil_t>());
+  EXPECT_TRUE(state["input_command_value_y"].is<sol::nil_t>());
 }
 
 // set_scheme
@@ -306,12 +192,4 @@ TEST_F(InputMapLuaScriptingInterfaceTest,
 
   call(entity, "input_set_scheme");
   EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 0);
-}
-
-TEST_F(InputMapLuaScriptingInterfaceTest,
-       SetSchemeDoesNothingIfInvalidValueProvided) {
-  auto entity = createEntityWithInputMap(false, 1);
-
-  call(entity, "input_set_scheme_invalid");
-  EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 1);
 }

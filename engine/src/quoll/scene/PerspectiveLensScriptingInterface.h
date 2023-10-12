@@ -15,149 +15,127 @@ public:
 /**
  * @brief Lua interface for perspective lens
  */
-class PerspectiveLensScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<
-          PerspectiveLensScriptingInterface::LuaInterface> {
+class PerspectiveLensScriptingInterface::LuaInterface {
 public:
   /**
-   * @brief Get near
+   * @brief Create perspective lens table
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param entity Entity
+   * @param scriptGlobals Script globals
    */
-  static int getNear(void *state);
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
 
   /**
-   * @brief Set near
+   * @brief Get near plane value
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Near plane value
    */
-  static int setNear(void *state);
+  sol_maybe<float> getNear();
 
   /**
-   * @brief Get far
+   * @brief Set near plane value
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param near Near plane value
    */
-  static int getFar(void *state);
+  void setNear(float near);
 
   /**
-   * @brief Set far
+   * @brief Get far plane value
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Far plane value
    */
-  static int setFar(void *state);
+  sol_maybe<float> getFar();
+
+  /**
+   * @brief Set far plane value
+   *
+   * @param far Far plane vavoid *statelue
+   */
+  void setFar(float far);
 
   /**
    * @brief Get sensor size
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Sensor width and height
    */
-  static int getSensorSize(void *state);
+  std::tuple<sol_maybe<float>, sol_maybe<float>> getSensorSize();
 
   /**
    * @brief Set sensor size
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param width Sensor width
+   * @param height Sensor height
    */
-  static int setSensorSize(void *state);
+  void setSensorSize(float width, float height);
 
   /**
-   * @brief Get focal length
+   * @brief Get near plane value
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Focal length
    */
-  static int getFocalLength(void *state);
+  sol_maybe<float> getFocalLength();
 
   /**
    * @brief Set focal length
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param focalLength Focal length
    */
-  static int setFocalLength(void *state);
+  void setFocalLength(float focalLength);
 
   /**
    * @brief Get aperture
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Aperture
    */
-  static int getAperture(void *state);
+  sol_maybe<float> getAperture();
 
   /**
    * @brief Set aperture
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param aperture Aperture
    */
-  static int setAperture(void *state);
+  void setAperture(float aperture);
 
   /**
    * @brief Get shutter speed
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Shutter speed
    */
-  static int getShutterSpeed(void *state);
+  sol_maybe<float> getShutterSpeed();
 
   /**
    * @brief Set shutter speed
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param shutterSpeed Shutter speed
    */
-  static int setShutterSpeed(void *state);
+  void setShutterSpeed(float shutterSpeed);
 
   /**
    * @brief Get sensitivity
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Sensitivity
    */
-  static int getSensitivity(void *state);
+  sol_maybe<uint32_t> getSensitivity();
 
   /**
    * @brief Set sensitivity
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param sensitivity Sensitivity
    */
-  static int setSensitivity(void *state);
+  void setSensitivity(uint32_t sensitivity);
 
   /**
    * @brief Delete component
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int deleteThis(void *state);
+  void deleteThis();
 
   /**
-   * @brief Interface fields
+   * @brief Create user type
+   *
+   * @param usertype User type
    */
-  static constexpr std::array<InterfaceField, 15> Fields{
-      InterfaceField{"get_near", getNear},
-      InterfaceField{"set_near", setNear},
-      InterfaceField{"get_far", getFar},
-      InterfaceField{"set_far", setFar},
-      InterfaceField{"get_sensor_size", getSensorSize},
-      InterfaceField{"set_sensor_size", setSensorSize},
-      InterfaceField{"get_focal_length", getFocalLength},
-      InterfaceField{"set_focal_length", setFocalLength},
-      InterfaceField{"get_aperture", getAperture},
-      InterfaceField{"set_aperture", setAperture},
-      InterfaceField{"get_shutter_speed", getShutterSpeed},
-      InterfaceField{"set_shutter_speed", setShutterSpeed},
-      InterfaceField{"get_sensitivity", getSensitivity},
-      InterfaceField{"set_sensitivity", setSensitivity},
-      InterfaceField{"delete", deleteThis}};
+  static void create(
+      sol::usertype<PerspectiveLensScriptingInterface::LuaInterface> usertype);
 
   /**
    * @brief Get component name in scripts
@@ -165,6 +143,10 @@ public:
    * @return Component name
    */
   static const String getName() { return "perspective_lens"; }
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

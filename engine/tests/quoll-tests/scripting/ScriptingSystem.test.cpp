@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/asset/AssetCache.h"
 #include "quoll/scripting/ScriptingSystem.h"
+#include "quoll/scripting/EntityTable.h"
 
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
@@ -36,14 +37,16 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   entityDatabase.set<quoll::Script>(entity, {handle});
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
-  EXPECT_EQ(component.scope.getLuaState(), nullptr);
+  EXPECT_EQ(component.state, nullptr);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
-  EXPECT_NE(component.scope.getLuaState(), nullptr);
+  EXPECT_NE(component.state, nullptr);
 
   scriptingSystem.update(TimeDelta, entityDatabase);
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), 0);
-  EXPECT_EQ(component.scope.getGlobal<float>("global_dt"), TimeDelta);
+
+  sol::state_view state(component.state);
+  EXPECT_EQ(state["value"].get<int32_t>(), 0);
+  EXPECT_EQ(state["global_dt"].get<float>(), TimeDelta);
 }
 
 TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
@@ -93,16 +96,17 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   entityDatabase.set<quoll::Script>(entity, {handle});
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
-  EXPECT_EQ(component.scope.getLuaState(), nullptr);
+  EXPECT_EQ(component.state, nullptr);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
-  EXPECT_NE(component.scope.getLuaState(), nullptr);
+  EXPECT_NE(component.state, nullptr);
 
   for (size_t i = 0; i < 10; ++i) {
     scriptingSystem.update(TimeDelta, entityDatabase);
   }
 
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), 9);
+  sol::state_view state(component.state);
+  EXPECT_EQ(state["value"].get<int32_t>(), 9);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
@@ -112,13 +116,13 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
   entityDatabase.set<quoll::Script>(entity, {handle});
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
-  EXPECT_EQ(component.scope.getLuaState(), nullptr);
+  EXPECT_EQ(component.state, nullptr);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
-  EXPECT_NE(component.scope.getLuaState(), nullptr);
+  EXPECT_NE(component.state, nullptr);
 
-  auto *luaScope = component.scope.getLuaState();
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), -1);
+  sol::state_view state(component.state);
+  EXPECT_EQ(state["value"].get<int32_t>(), -1);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
@@ -128,15 +132,16 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
   entityDatabase.set<quoll::Script>(entity, {handle});
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
-  EXPECT_EQ(component.scope.getLuaState(), nullptr);
+  EXPECT_EQ(component.state, nullptr);
 
   // Call 10 times
   for (size_t i = 0; i < 10; ++i) {
     scriptingSystem.start(entityDatabase, physicsSystem);
   }
-  EXPECT_NE(component.scope.getLuaState(), nullptr);
+  EXPECT_NE(component.state, nullptr);
 
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), -1);
+  auto state = sol::state_view(component.state);
+  EXPECT_EQ(state["value"].get<int32_t>(), -1);
 }
 
 TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarsAreNotSet) {
@@ -188,10 +193,11 @@ TEST_F(ScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
   scriptingSystem.start(entityDatabase, physicsSystem);
   ASSERT_TRUE(entityDatabase.has<quoll::Script>(entity));
 
-  EXPECT_EQ(component.scope.getGlobal<quoll::String>("var_string"),
-            "Hello world");
-  EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_prefab"), 15);
-  EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_texture"), 25);
+  auto state = sol::state_view(component.state);
+
+  EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
+  EXPECT_EQ(state["var_prefab"].get<uint32_t>(), 15);
+  EXPECT_EQ(state["var_texture"].get<uint32_t>(), 25);
 }
 
 TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
@@ -210,20 +216,19 @@ TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
+  auto state = sol::state_view(component.state);
 
-  EXPECT_EQ(component.scope.getGlobal<quoll::String>("var_string"),
-            "Hello world");
-  EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_prefab"), 15);
-  EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_texture"), 25);
+  EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
+  EXPECT_EQ(state["var_prefab"].get<uint32_t>(), 15);
+  EXPECT_EQ(state["var_texture"].get<uint32_t>(), 25);
 
-  EXPECT_TRUE(component.scope.isGlobal<quoll::LuaTable>("global_vars"));
-  EXPECT_TRUE(component.scope.isGlobal<quoll::LuaTable>("entity"));
+  EXPECT_TRUE(state["global_vars"].get_type() == sol::type::table);
+  EXPECT_TRUE(state["entity"].is<quoll::EntityTable>());
 
-  component.scope.luaGetGlobal("update");
-  component.scope.call(0);
+  state["update"]();
 
-  EXPECT_TRUE(component.scope.isGlobal<std::nullptr_t>("global_vars"));
-  EXPECT_TRUE(component.scope.isGlobal<quoll::LuaTable>("entity"));
+  EXPECT_TRUE(state["global_vars"].is<sol::nil_t>());
+  EXPECT_TRUE(state["entity"].is<quoll::EntityTable>());
 }
 
 TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
@@ -252,12 +257,13 @@ TEST_F(ScriptingSystemTest,
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
+  auto state = sol::state_view(component.state);
 
   eventSystem.dispatch(quoll::CollisionEvent::CollisionStarted,
                        {quoll::Entity{5}, quoll::Entity{6}});
   eventSystem.poll();
 
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 0);
+  EXPECT_EQ(state["event"].get<int32_t>(), 0);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
@@ -269,14 +275,14 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
+  auto state = sol::state_view(component.state);
 
   eventSystem.dispatch(quoll::CollisionEvent::CollisionStarted,
                        {entity, quoll::Entity{6}});
   eventSystem.poll();
 
-  auto *luaScope = component.scope.getLuaState();
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 1);
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("target"), 6);
+  EXPECT_EQ(state["event"].get<int32_t>(), 1);
+  EXPECT_EQ(state["target"].get<int32_t>(), 6);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
@@ -288,13 +294,14 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
+  auto state = sol::state_view(component.state);
 
   eventSystem.dispatch(quoll::CollisionEvent::CollisionEnded,
                        {quoll::Entity{5}, entity});
   eventSystem.poll();
 
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 2);
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("target"), 5);
+  EXPECT_EQ(state["event"].get<int32_t>(), 2);
+  EXPECT_EQ(state["target"].get<int32_t>(), 5);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
@@ -306,14 +313,14 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
+  auto state = sol::state_view(component.state);
 
   eventSystem.dispatch(quoll::KeyboardEvent::Pressed, {15, -1, 3});
   eventSystem.poll();
 
-  auto *luaScope = component.scope.getLuaState();
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 3);
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("key_value"), 15);
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("key_mods"), 3);
+  EXPECT_EQ(state["event"].get<int32_t>(), 3);
+  EXPECT_EQ(state["key_value"].get<int32_t>(), 15);
+  EXPECT_EQ(state["key_mods"].get<int32_t>(), 3);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
@@ -325,11 +332,12 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase, physicsSystem);
+  auto state = sol::state_view(component.state);
 
   eventSystem.dispatch(quoll::KeyboardEvent::Released, {35, -1, 3});
   eventSystem.poll();
 
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 4);
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("key_value"), 35);
-  EXPECT_EQ(component.scope.getGlobal<int32_t>("key_mods"), 3);
+  EXPECT_EQ(state["event"].get<int32_t>(), 4);
+  EXPECT_EQ(state["key_value"].get<int32_t>(), 35);
+  EXPECT_EQ(state["key_mods"].get<int32_t>(), 3);
 }

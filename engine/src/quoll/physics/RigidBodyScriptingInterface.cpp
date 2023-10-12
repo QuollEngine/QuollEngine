@@ -2,358 +2,126 @@
 #include "quoll/core/Engine.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaScope.h"
 #include "quoll/scripting/LuaMessages.h"
-#include "quoll/scripting/ComponentLuaInterfaceCommon.h"
 
 #include "RigidBodyScriptingInterface.h"
 
 namespace quoll {
 
-int RigidBodyScriptingInterface::LuaInterface::setDefaultParams(void *state) {
-  LuaScope scope(state);
+RigidBodyScriptingInterface::LuaInterface::LuaInterface(
+    Entity entity, ScriptGlobals scriptGlobals)
+    : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_default_params");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  entityDatabase.set<RigidBody>(entity, {});
-
-  return 0;
+void RigidBodyScriptingInterface::LuaInterface::setDefaultParams() {
+  mScriptGlobals.entityDatabase.set<RigidBody>(mEntity, {});
 }
 
-int RigidBodyScriptingInterface::LuaInterface::getMass(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+sol_maybe<float> RigidBodyScriptingInterface::LuaInterface::getMass() {
+  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_mass");
-    scope.set(nullptr);
-    return 1;
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+    return sol::nil;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<RigidBody>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-    scope.set(nullptr);
-    return 1;
-  }
-
-  float mass = entityDatabase.get<RigidBody>(entity).dynamicDesc.mass;
-  scope.set(mass);
-
-  return 1;
+  return mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.mass;
 }
 
-int RigidBodyScriptingInterface::LuaInterface::setMass(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_mass");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float>(getName(), "set_mass");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  float mass = scope.get<float>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<RigidBody>(entity)) {
+void RigidBodyScriptingInterface::LuaInterface::setMass(float mass) {
+  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.mass = mass;
-    entityDatabase.set(entity, rigidBody);
+    mScriptGlobals.entityDatabase.set(mEntity, rigidBody);
   } else {
-    entityDatabase.get<RigidBody>(entity).dynamicDesc.mass = mass;
+    mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.mass =
+        mass;
   }
-
-  return 0;
 }
 
-int RigidBodyScriptingInterface::LuaInterface::getInertia(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+std::tuple<sol_maybe<float>, sol_maybe<float>, sol_maybe<float>>
+RigidBodyScriptingInterface::LuaInterface::getInertia() {
+  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_inertia");
-    scope.set(nullptr);
-    scope.set(nullptr);
-    scope.set(nullptr);
-    return 3;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<RigidBody>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-    scope.set(nullptr);
-    scope.set(nullptr);
-    scope.set(nullptr);
-    return 3;
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+    return {sol::nil, sol::nil, sol::nil};
   }
 
   const auto &inertia =
-      entityDatabase.get<RigidBody>(entity).dynamicDesc.inertia;
+      mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.inertia;
 
-  scope.set(inertia.x);
-  scope.set(inertia.y);
-  scope.set(inertia.z);
-
-  return 3;
+  return {inertia.x, inertia.y, inertia.z};
 }
 
-int RigidBodyScriptingInterface::LuaInterface::setInertia(void *state) {
-  LuaScope scope(state);
+void RigidBodyScriptingInterface::LuaInterface::setInertia(float x, float y,
+                                                           float z) {
+  glm::vec3 inertia{x, y, z};
 
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_inertia");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float, float, float>(getName(),
-                                                              "set_inertia");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  glm::vec3 inertia;
-  inertia.x = scope.get<float>(2);
-  inertia.y = scope.get<float>(3);
-  inertia.z = scope.get<float>(4);
-  scope.pop(4);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<RigidBody>(entity)) {
+  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.inertia = inertia;
-    entityDatabase.set(entity, rigidBody);
+    mScriptGlobals.entityDatabase.set(mEntity, rigidBody);
   } else {
-    entityDatabase.get<RigidBody>(entity).dynamicDesc.inertia = inertia;
+    mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.inertia =
+        inertia;
   }
-
-  return 0;
 }
 
-int RigidBodyScriptingInterface::LuaInterface::isGravityApplied(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
+sol_maybe<bool> RigidBodyScriptingInterface::LuaInterface::isGravityApplied() {
+  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "is_gravity_applied");
-    scope.set(nullptr);
-    return 1;
+        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+    return sol::nil;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<RigidBody>(entity)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), entity);
-    scope.set(nullptr);
-    return 1;
-  }
-
-  bool applyGravity =
-      entityDatabase.get<RigidBody>(entity).dynamicDesc.applyGravity;
-  scope.set(applyGravity);
-
-  return 1;
+  return mScriptGlobals.entityDatabase.get<RigidBody>(mEntity)
+      .dynamicDesc.applyGravity;
 }
 
-int RigidBodyScriptingInterface::LuaInterface::applyGravity(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "apply_gravity");
-
-    return 0;
-  }
-
-  if (!scope.is<bool>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<bool>(getName(), "apply_gravity");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  bool apply = scope.get<bool>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (!entityDatabase.has<RigidBody>(entity)) {
+void RigidBodyScriptingInterface::LuaInterface::applyGravity(bool apply) {
+  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.applyGravity = apply;
-    entityDatabase.set(entity, rigidBody);
+    mScriptGlobals.entityDatabase.set(mEntity, rigidBody);
   } else {
-    entityDatabase.get<RigidBody>(entity).dynamicDesc.applyGravity = apply;
+    mScriptGlobals.entityDatabase.get<RigidBody>(mEntity)
+        .dynamicDesc.applyGravity = apply;
   }
-
-  return 0;
 }
 
-int RigidBodyScriptingInterface::LuaInterface::applyForce(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "apply_force");
-
-    return 0;
-  }
-
-  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float, float, float>(getName(),
-                                                              "apply_force");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  glm::vec3 force;
-  force.x = scope.get<float>(2);
-  force.y = scope.get<float>(3);
-  force.z = scope.get<float>(4);
-  scope.pop(4);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  entityDatabase.set<Force>(entity, {force});
-
-  return 0;
+void RigidBodyScriptingInterface::LuaInterface::applyForce(float x, float y,
+                                                           float z) {
+  glm::vec3 force{x, y, z};
+  mScriptGlobals.entityDatabase.set<Force>(mEntity, {force});
 }
 
-int RigidBodyScriptingInterface::LuaInterface::applyTorque(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "apply_torque");
-    return 0;
-  }
-
-  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float, float, float>(getName(),
-                                                              "apply_torque");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  glm::vec3 torque;
-  torque.x = scope.get<float>(2);
-  torque.y = scope.get<float>(3);
-  torque.z = scope.get<float>(4);
-  scope.pop(4);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  entityDatabase.set<Torque>(entity, {torque});
-
-  return 0;
+void RigidBodyScriptingInterface::LuaInterface::applyTorque(float x, float y,
+                                                            float z) {
+  glm::vec3 torque{x, y, z};
+  mScriptGlobals.entityDatabase.set<Torque>(mEntity, {torque});
 }
 
-int RigidBodyScriptingInterface::LuaInterface::clear(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "clear");
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  entityDatabase.set<RigidBodyClear>(entity, {});
-
-  return 0;
+void RigidBodyScriptingInterface::LuaInterface::clear() {
+  mScriptGlobals.entityDatabase.set<RigidBodyClear>(mEntity, {});
 }
 
-int RigidBodyScriptingInterface::LuaInterface::deleteThis(void *state) {
-  return ComponentLuaInterfaceCommon::deleteComponent<RigidBody>(getName(),
-                                                                 state);
+void RigidBodyScriptingInterface::LuaInterface::deleteThis() {
+  if (mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+    mScriptGlobals.entityDatabase.remove<RigidBody>(mEntity);
+  }
+}
+
+void RigidBodyScriptingInterface::LuaInterface::create(
+    sol::usertype<RigidBodyScriptingInterface::LuaInterface> usertype) {
+  usertype["set_default_params"] = &LuaInterface::setDefaultParams;
+  usertype["get_mass"] = &LuaInterface::getMass;
+  usertype["set_mass"] = &LuaInterface::setMass;
+  usertype["get_inertia"] = &LuaInterface::getInertia;
+  usertype["set_inertia"] = &LuaInterface::setInertia;
+  usertype["is_gravity_applied"] = &LuaInterface::isGravityApplied;
+  usertype["apply_gravity"] = &LuaInterface::applyGravity;
+  usertype["apply_force"] = &LuaInterface::applyForce;
+  usertype["apply_torque"] = &LuaInterface::applyTorque;
+  usertype["clear"] = &LuaInterface::clear;
+  usertype["delete"] = &LuaInterface::deleteThis;
 }
 
 } // namespace quoll
