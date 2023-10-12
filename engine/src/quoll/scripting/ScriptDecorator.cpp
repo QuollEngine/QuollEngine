@@ -1,17 +1,17 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 
-#include "quoll/entity/EntityQueryScriptingInterface.h"
-#include "quoll/entity/EntitySpawnerScriptingInterface.h"
-#include "quoll/core/NameScriptingInterface.h"
-#include "quoll/physics/RigidBodyScriptingInterface.h"
-#include "quoll/physics/CollidableScriptingInterface.h"
-#include "quoll/audio/AudioScriptingInterface.h"
-#include "quoll/scene/TransformScriptingInterface.h"
-#include "quoll/scene/PerspectiveLensScriptingInterface.h"
-#include "quoll/text/TextScriptingInterface.h"
-#include "quoll/animation/AnimatorScriptingInterface.h"
-#include "quoll/input/InputMapScriptingInterface.h"
+#include "quoll/entity/EntityQueryLuaTable.h"
+#include "quoll/entity/EntitySpawnerLuaTable.h"
+#include "quoll/core/NameLuaTable.h"
+#include "quoll/physics/RigidBodyLuaTable.h"
+#include "quoll/physics/CollidableLuaTable.h"
+#include "quoll/audio/AudioLuaTable.h"
+#include "quoll/scene/TransformLuaTable.h"
+#include "quoll/scene/PerspectiveLensLuaTable.h"
+#include "quoll/text/TextLuaTable.h"
+#include "quoll/animation/AnimatorLuaTable.h"
+#include "quoll/input/InputMapLuaTable.h"
 #include "quoll/physics/CollisionHitLuaTable.h"
 #include "lua/Math.h"
 
@@ -29,14 +29,12 @@ void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
   LuaMath::create(state);
   CollisionHitLuaTable::create(state);
   EntityTable::create(state);
-  EntitySpawnerScriptingInterface::LuaInterface::create(state);
-  EntityQueryScriptingInterface::LuaInterface::create(state);
+  EntitySpawnerLuaTable::create(state);
+  EntityQueryLuaTable::create(state);
 
   state["entity"] = EntityTable(entity, scriptGlobals);
-  state["entity_spawner"] =
-      EntitySpawnerScriptingInterface::LuaInterface(scriptGlobals);
-  state["entity_query"] =
-      EntityQueryScriptingInterface::LuaInterface(scriptGlobals);
+  state["entity_spawner"] = EntitySpawnerLuaTable(scriptGlobals);
+  state["entity_query"] = EntityQueryLuaTable(scriptGlobals);
 
   createScriptLogger(state);
 }
