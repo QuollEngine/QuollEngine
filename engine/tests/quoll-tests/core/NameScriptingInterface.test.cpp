@@ -3,12 +3,11 @@
 
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 
-class NameLuaScriptingInterfaceTest : public LuaScriptingInterfaceTestBase {};
+class NameLuaTableTest : public LuaScriptingInterfaceTestBase {};
 
-using NameLuaScriptingInterfaceDeathTest = NameLuaScriptingInterfaceTest;
+using NameLuaTableDeathTest = NameLuaTableTest;
 
-TEST_F(NameLuaScriptingInterfaceTest,
-       ReturnsEmptyStringIfNameComponentDoesNotExist) {
+TEST_F(NameLuaTableTest, ReturnsEmptyStringIfNameComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
   auto state = call(entity, "name_get");
@@ -18,7 +17,7 @@ TEST_F(NameLuaScriptingInterfaceTest,
   EXPECT_EQ(name, "");
 }
 
-TEST_F(NameLuaScriptingInterfaceTest, ReturnsNameIfComponentExists) {
+TEST_F(NameLuaTableTest, ReturnsNameIfComponentExists) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Name>(entity, {"Test name"});
 
@@ -28,7 +27,7 @@ TEST_F(NameLuaScriptingInterfaceTest, ReturnsNameIfComponentExists) {
   EXPECT_EQ(name, "Test name");
 }
 
-TEST_F(NameLuaScriptingInterfaceTest, CreatesNameComponentOnSet) {
+TEST_F(NameLuaTableTest, CreatesNameComponentOnSet) {
   auto entity = entityDatabase.create();
 
   EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
@@ -38,7 +37,7 @@ TEST_F(NameLuaScriptingInterfaceTest, CreatesNameComponentOnSet) {
   EXPECT_EQ(entityDatabase.get<quoll::Name>(entity).name, "Hello World");
 }
 
-TEST_F(NameLuaScriptingInterfaceTest, UpdatesExistingNameComponentOnSet) {
+TEST_F(NameLuaTableTest, UpdatesExistingNameComponentOnSet) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Name>(entity, {"Test name"});
 
@@ -47,15 +46,14 @@ TEST_F(NameLuaScriptingInterfaceTest, UpdatesExistingNameComponentOnSet) {
   EXPECT_EQ(entityDatabase.get<quoll::Name>(entity).name, "Hello World");
 }
 
-TEST_F(NameLuaScriptingInterfaceTest,
-       DeleteDoesNothingIfComponentDoesNotExist) {
+TEST_F(NameLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
   call(entity, "name_delete");
   EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
 }
 
-TEST_F(NameLuaScriptingInterfaceTest, DeleteRemovesNameComponentFromEntity) {
+TEST_F(NameLuaTableTest, DeleteRemovesNameComponentFromEntity) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Name>(entity, {});
 

@@ -2,15 +2,15 @@
 
 #include "quoll/entity/Entity.h"
 
-#include "quoll/core/NameScriptingInterface.h"
-#include "quoll/physics/RigidBodyScriptingInterface.h"
-#include "quoll/physics/CollidableScriptingInterface.h"
-#include "quoll/audio/AudioScriptingInterface.h"
-#include "quoll/scene/TransformScriptingInterface.h"
-#include "quoll/scene/PerspectiveLensScriptingInterface.h"
-#include "quoll/text/TextScriptingInterface.h"
-#include "quoll/animation/AnimatorScriptingInterface.h"
-#include "quoll/input/InputMapScriptingInterface.h"
+#include "quoll/core/NameLuaTable.h"
+#include "quoll/physics/RigidBodyLuaTable.h"
+#include "quoll/physics/CollidableLuaTable.h"
+#include "quoll/audio/AudioLuaTable.h"
+#include "quoll/scene/TransformLuaTable.h"
+#include "quoll/scene/PerspectiveLensLuaTable.h"
+#include "quoll/text/TextLuaTable.h"
+#include "quoll/animation/AnimatorLuaTable.h"
+#include "quoll/input/InputMapLuaTable.h"
 
 #include "ScriptGlobals.h"
 #include "LuaHeaders.h"
@@ -47,15 +47,15 @@ public:
 private:
   Entity mEntity;
 
-  NameScriptingInterface::LuaInterface mName;
-  TransformScriptingInterface::LuaInterface mTransform;
-  PerspectiveLensScriptingInterface::LuaInterface mPerspectiveLens;
-  RigidBodyScriptingInterface::LuaInterface mRigidBody;
-  CollidableScriptingInterface::LuaInterface mCollidable;
-  AudioScriptingInterface::LuaInterface mAudio;
-  TextScriptingInterface::LuaInterface mText;
-  AnimatorScriptingInterface::LuaInterface mAnimator;
-  InputMapScriptingInterface::LuaInterface mInputMap;
+  NameLuaTable mName;
+  TransformLuaTable mTransform;
+  PerspectiveLensLuaTable mPerspectiveLens;
+  RigidBodyLuaTable mRigidBody;
+  CollidableLuaTable mCollidable;
+  AudioLuaTable mAudio;
+  TextLuaTable mText;
+  AnimatorLuaTable mAnimator;
+  InputMapLuaTable mInputMap;
 };
 
 } // namespace quoll
