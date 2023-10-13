@@ -38,6 +38,7 @@
 #include "quoll/editor/asset/AssetManager.h"
 
 #include "quoll/editor/workspace/Workspace.h"
+#include "quoll/ui/UICanvasUpdater.h"
 
 #include "ImGuizmo.h"
 
@@ -126,6 +127,7 @@ void EditorScreen::start(const Project &rawProject) {
                           std::filesystem::current_path() / "assets" / "icons");
 
   EditorRenderer editorRenderer(renderStorage, mDevice);
+  UICanvasUpdater uiCanvasUpdater;
 
   renderer.setGraphBuilder([&](auto &graph, const auto &options) {
     auto scenePassGroup = sceneRenderer.attach(graph, options);
@@ -204,6 +206,10 @@ void EditorScreen::start(const Project &rawProject) {
       return;
     }
 
+    auto &scene = state.mode == WorkspaceMode::Simulation
+                      ? state.simulationScene
+                      : state.scene;
+
     renderer.rebuildIfSettingsChanged();
 
     // TODO: Why is -2.0f needed here
@@ -223,9 +229,12 @@ void EditorScreen::start(const Project &rawProject) {
 
     logViewer.render(userLogStorage);
 
-    bool mouseClicked =
-        ui.renderSceneView(context, renderer.getSceneTexture(), editorCamera,
-                           simulator.getCameraAspectRatioUpdater());
+    bool mouseClicked = ui.renderSceneView(
+        context, renderer.getSceneTexture(), editorCamera,
+        simulator.getCameraAspectRatioUpdater(), uiCanvasUpdater);
+
+    uiCanvasUpdater.render(scene.entityDatabase,
+                           context.assetManager.getAssetRegistry());
 
     StatusBar::render(editorCamera);
 
@@ -234,10 +243,6 @@ void EditorScreen::start(const Project &rawProject) {
     imguiRenderer.endRendering();
 
     const auto &renderFrame = mDevice->beginFrame();
-
-    auto &scene = state.mode == WorkspaceMode::Simulation
-                      ? state.simulationScene
-                      : state.scene;
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imguiRenderer.updateFrameData(renderFrame.frameIndex);

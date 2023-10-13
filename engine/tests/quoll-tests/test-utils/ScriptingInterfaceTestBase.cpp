@@ -19,7 +19,10 @@ LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
                                     const quoll::String &functionName) {
   auto uuid = quoll::Uuid::generate();
   assetCache.createLuaScriptFromSource(FixturesPath / mScriptName, uuid);
-  auto handle = assetCache.loadLuaScript(uuid).getData();
+
+  auto res = assetCache.loadLuaScript(uuid);
+  QuollAssert(res.hasData(), "Error loading script");
+  auto handle = res.getData();
 
   entityDatabase.set<quoll::Script>(entity, {handle});
 
@@ -30,7 +33,11 @@ LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
 
   state["assert_native"] = [](bool value) { return value; };
 
-  state[functionName]();
+  auto fnRes = state[functionName]();
+  if (!fnRes.valid()) {
+    sol::error error = fnRes;
+    QuollAssert(false, error.what());
+  }
 
   return state;
 }

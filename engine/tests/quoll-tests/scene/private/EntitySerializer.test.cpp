@@ -2,6 +2,7 @@
 #include "quoll-tests/Testing.h"
 
 #include "quoll/scripting/Script.h"
+#include "quoll/ui/UICanvas.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/private/EntitySerializer.h"
 
@@ -639,11 +640,18 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   script.data.variables.insert_or_assign(
       "test_prefab",
       quoll::LuaScriptVariable{quoll::LuaScriptVariableType::AssetPrefab});
+  script.data.variables.insert_or_assign(
+      "test_texture",
+      quoll::LuaScriptVariable{quoll::LuaScriptVariableType::AssetTexture});
   auto handle = assetRegistry.getLuaScripts().addAsset(script);
 
   quoll::AssetData<quoll::PrefabAsset> prefab{};
   prefab.uuid = quoll::Uuid("test.prefab");
   auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefab);
+
+  quoll::AssetData<quoll::TextureAsset> texture{};
+  texture.uuid = quoll::Uuid("test.ktx2");
+  auto textureHandle = assetRegistry.getTextures().addAsset(texture);
 
   auto entity = entityDatabase.create();
 
@@ -653,6 +661,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   component.variables.insert_or_assign("test_str_invalid",
                                        quoll::String("hello world"));
   component.variables.insert_or_assign("test_prefab", prefabHandle);
+  component.variables.insert_or_assign("test_texture", textureHandle);
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -667,13 +676,21 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   EXPECT_EQ(
       node["script"]["variables"]["test_str"]["value"].as<quoll::String>(""),
       "hello world");
+
   EXPECT_EQ(
       node["script"]["variables"]["test_prefab"]["type"].as<quoll::String>(""),
       "prefab");
-
   EXPECT_EQ(
       node["script"]["variables"]["test_prefab"]["value"].as<quoll::String>(""),
       "test.prefab");
+
+  EXPECT_EQ(
+      node["script"]["variables"]["test_texture"]["type"].as<quoll::String>(""),
+      "texture");
+  EXPECT_EQ(
+      node["script"]["variables"]["test_texture"]["value"].as<quoll::String>(
+          ""),
+      "test.ktx2");
 }
 
 // Text
@@ -1061,4 +1078,20 @@ TEST_F(EntitySerializerTest,
   EXPECT_TRUE(node["inputMap"]);
   EXPECT_EQ(node["inputMap"]["asset"].as<quoll::String>(""), "inputMap.asset");
   EXPECT_EQ(node["inputMap"]["defaultScheme"].as<uint32_t>(999), 0);
+}
+
+// UI Canvas
+TEST_F(EntitySerializerTest, DoesNotCreateUiCanvasFieldIfNoUICanvasComponent) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["uiCanvas"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesEmptyUICanvasMapIfUICanvasComponentExists) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::UICanvas>(entity, {});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["uiCanvas"]);
+  EXPECT_TRUE(node["uiCanvas"].IsMap());
 }

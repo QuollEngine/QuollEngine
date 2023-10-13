@@ -4,6 +4,7 @@
 #include "quoll/physics/PhysicsSystem.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/scene/CameraAspectRatioUpdater.h"
+#include "quoll/ui/UICanvasUpdater.h"
 
 #include "Toolbar.h"
 #include "SceneHierarchyPanel.h"
@@ -52,13 +53,16 @@ public:
    * @param sceneTexture Scene texture
    * @param editorCamera Editor camera
    * @param aspectRatioUpdater Aspect ratio updater
+   * @param uiCanvasUpdater UI Canvas updater
+   *
    * @retval true Entity is clicked
    * @retval false Entity is not clicked
    */
   bool renderSceneView(WorkspaceContext &context,
                        rhi::TextureHandle sceneTexture,
                        EditorCamera &editorCamera,
-                       CameraAspectRatioUpdater &aspectRatioUpdater);
+                       CameraAspectRatioUpdater &aspectRatioUpdater,
+                       UICanvasUpdater &uiCanvasUpdater);
 
   /**
    * @brief Get asset browser panel

@@ -18,6 +18,8 @@
 #include "quoll/editor/actions/EntitySpriteActions.h"
 #include "quoll/editor/actions/SceneActions.h"
 
+#include "quoll/ui/UICanvas.h"
+
 #include "EntityPanel.h"
 
 #include "Widgets.h"
@@ -141,6 +143,7 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderAudio(scene, assetRegistry, actionExecutor);
     renderScripting(scene, assetRegistry, actionExecutor);
     renderInput(scene, assetRegistry, actionExecutor);
+    renderUICanvas(scene, actionExecutor);
     renderSkybox(scene, assetRegistry, actionExecutor);
     renderEnvironmentLighting(scene, assetRegistry, actionExecutor);
     renderAddComponent(scene, assetRegistry, actionExecutor);
@@ -609,6 +612,23 @@ void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
     if (shouldDelete("Texture")) {
       actionExecutor.execute<EntityDeleteSprite>(mSelectedEntity);
     }
+  }
+}
+
+void EntityPanel::renderUICanvas(Scene &scene, ActionExecutor &actionExecutor) {
+  static const String SectionName = String(fa::Table) + "  UI Canvas";
+
+  if (!scene.entityDatabase.has<UICanvas>(mSelectedEntity)) {
+    return;
+  }
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
+    ImGui::Text("This component is controlled by script");
+  }
+
+  if (shouldDelete("UICanvas")) {
+    actionExecutor.execute<EntityDefaultDeleteAction<UICanvas>>(
+        mSelectedEntity);
   }
 }
 
@@ -1737,6 +1757,12 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
       actionExecutor.execute<
           EntityDefaultCreateComponent<EnvironmentLightingSkyboxSource>>(
           mSelectedEntity, EnvironmentLightingSkyboxSource{});
+    }
+
+    if (!scene.entityDatabase.has<UICanvas>(mSelectedEntity) &&
+        ImGui::Selectable("UI Canvas")) {
+      actionExecutor.execute<EntityDefaultCreateComponent<UICanvas>>(
+          mSelectedEntity, UICanvas{});
     }
 
     ImGui::EndPopup();

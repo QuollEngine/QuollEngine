@@ -56,13 +56,16 @@ void UIRoot::render(WorkspaceContext &context) {
 bool UIRoot::renderSceneView(WorkspaceContext &context,
                              rhi::TextureHandle sceneTexture,
                              EditorCamera &editorCamera,
-                             CameraAspectRatioUpdater &aspectRatioUpdater) {
+                             CameraAspectRatioUpdater &aspectRatioUpdater,
+                             UICanvasUpdater &uiCanvasUpdater) {
   if (auto _ = SceneView(sceneTexture)) {
     const auto &pos = ImGui::GetItemRectMin();
     const auto &size = ImGui::GetItemRectSize();
 
     editorCamera.setViewport(pos.x, pos.y, size.x, size.y,
                              ImGui::IsItemHovered());
+    uiCanvasUpdater.setViewport(pos.x, pos.y, size.x, size.y);
+
     aspectRatioUpdater.setViewportSize(
         {static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)});
 

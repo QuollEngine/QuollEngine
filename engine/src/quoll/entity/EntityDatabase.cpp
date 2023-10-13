@@ -1,6 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/physx/PhysxInstance.h"
 #include "quoll/scripting/Script.h"
+#include "quoll/ui/UICanvas.h"
+#include "quoll/ui/UICanvasRenderRequest.h"
 
 #include "EntityDatabase.h"
 
@@ -45,6 +47,8 @@ EntityDatabase::EntityDatabase() {
   reg<SkinnedMeshRenderer>();
   reg<InputMapAssetRef>();
   reg<InputMap>();
+  reg<UICanvas>();
+  reg<UICanvasRenderRequest>();
 }
 
 } // namespace quoll
