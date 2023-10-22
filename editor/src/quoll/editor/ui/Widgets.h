@@ -208,7 +208,7 @@ public:
    * @param id Table ID
    * @param numColumns Number of columns
    */
-  Table(const char *id, uint32_t numColumns);
+  Table(const char *id, u32 numColumns);
 
   /**
    * @brief End table
@@ -261,7 +261,7 @@ public:
    *
    * @param value Scalar value
    */
-  void column(float value);
+  void column(f32 value);
 
   /**
    * @brief Render string column
@@ -275,14 +275,14 @@ public:
    *
    * @param value Integer value
    */
-  void column(int32_t value);
+  void column(i32 value);
 
   /**
    * @brief Render unsigned integer column
    *
    * @param value Unsigned integer value
    */
-  void column(uint32_t value);
+  void column(u32 value);
 
   /**
    * @brief Render image column
@@ -339,7 +339,7 @@ public:
    * @param value Input value
    * @param autoChange Auto change
    */
-  Input(String label, float &value, bool autoChange = true);
+  Input(String label, f32 &value, bool autoChange = true);
 
   /**
    * @brief Render uint scalar input
@@ -348,7 +348,7 @@ public:
    * @param value Input value
    * @param autoChange Auto change
    */
-  Input(String label, uint32_t &value, bool autoChange = true);
+  Input(String label, u32 &value, bool autoChange = true);
 
   /**
    * @brief Render text input
@@ -376,7 +376,7 @@ private:
    * @param size Number of data items
    * @param dataType Input data type
    */
-  void renderScalarInput(String label, void *data, size_t size,
+  void renderScalarInput(String label, void *data, usize size,
                          ImGuiDataType dataType);
 
   /**

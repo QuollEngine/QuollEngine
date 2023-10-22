@@ -43,7 +43,7 @@ public:
   }
 
 private:
-  std::vector<uint8_t> mData;
+  std::vector<u8> mData;
   TextureDescription mDescription;
   TextureViewDescription mViewDescription;
 };

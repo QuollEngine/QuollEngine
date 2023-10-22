@@ -43,7 +43,7 @@ public:
    * @param size Size of write
    */
   template <class TPrimitive>
-  inline void write(const TPrimitive *value, std::size_t size) {
+  inline void write(const TPrimitive *value, usize size) {
     mStream.write(reinterpret_cast<const char *>(value),
                   static_cast<std::streamsize>(size));
   }
@@ -79,8 +79,8 @@ private:
  * @param value String value
  */
 template <> inline void OutputBinaryStream::write(const String &value) {
-  uint32_t length = static_cast<uint32_t>(value.length());
-  write(&length, sizeof(uint32_t));
+  u32 length = static_cast<u32>(value.length());
+  write(&length, sizeof(u32));
   write(value.c_str(), length);
 }
 

@@ -180,24 +180,24 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
       return Result<InputMapAssetHandle>::Error("Binding item must be a map");
     }
 
-    auto scheme = binding["scheme"].as<int32_t>(-1);
+    auto scheme = binding["scheme"].as<i32>(-1);
     if (scheme == -1) {
       return Result<InputMapAssetHandle>::Error(
           "Binding item scheme is invalid");
     }
 
-    auto command = binding["command"].as<int32_t>(-1);
+    auto command = binding["command"].as<i32>(-1);
     if (command == -1) {
       return Result<InputMapAssetHandle>::Error(
           "Binding item command is invalid");
     }
 
-    if (scheme >= static_cast<int32_t>(root["schemes"].size())) {
+    if (scheme >= static_cast<i32>(root["schemes"].size())) {
       return Result<InputMapAssetHandle>::Error(
           "Binding item scheme does not point to scheme item");
     }
 
-    if (command >= static_cast<int32_t>(root["commands"].size())) {
+    if (command >= static_cast<i32>(root["commands"].size())) {
       return Result<InputMapAssetHandle>::Error(
           "Binding item command does not point to command item");
     }
@@ -205,8 +205,7 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
     auto value = binding["binding"];
 
     auto commandType =
-        root["commands"][binding["command"].as<size_t>()]["type"].as<String>(
-            "");
+        root["commands"][binding["command"].as<usize>()]["type"].as<String>("");
 
     if (commandType == "boolean") {
       auto p = value.as<String>("");
@@ -265,8 +264,8 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
 
   for (auto node : root["bindings"]) {
     InputMapBinding binding{};
-    binding.command = node["command"].as<size_t>(0);
-    binding.scheme = node["scheme"].as<size_t>(0);
+    binding.command = node["command"].as<usize>(0);
+    binding.scheme = node["scheme"].as<usize>(0);
 
     auto &command = asset.data.commands.at(binding.command);
 

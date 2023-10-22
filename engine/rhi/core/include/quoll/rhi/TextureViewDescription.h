@@ -16,22 +16,22 @@ struct TextureViewDescription {
   /**
    * Base mip level
    */
-  uint32_t baseMipLevel = 0;
+  u32 baseMipLevel = 0;
 
   /**
    * Number of levels
    */
-  uint32_t mipLevelCount = 1;
+  u32 mipLevelCount = 1;
 
   /**
    * Base layer
    */
-  uint32_t baseLayer = 0;
+  u32 baseLayer = 0;
 
   /**
    * Layer count
    */
-  uint32_t layerCount = 1;
+  u32 layerCount = 1;
 
   /**
    * Debug name

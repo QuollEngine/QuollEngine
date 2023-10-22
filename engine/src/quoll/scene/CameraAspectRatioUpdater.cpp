@@ -11,8 +11,7 @@ void CameraAspectRatioUpdater::update(EntityDatabase &entityDatabase) {
 
   for (auto [_, lens, _1] :
        entityDatabase.view<PerspectiveLens, AutoAspectRatio>()) {
-    lens.aspectRatio =
-        static_cast<float>(mSize.x) / static_cast<float>(mSize.y);
+    lens.aspectRatio = static_cast<f32>(mSize.x) / static_cast<f32>(mSize.y);
   }
 }
 

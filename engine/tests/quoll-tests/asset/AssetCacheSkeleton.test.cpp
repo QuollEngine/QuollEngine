@@ -21,11 +21,11 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
   {
     std::random_device device;
     std::mt19937 mt(device());
-    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
-    std::uniform_int_distribution<uint32_t> udist(0, 20);
+    std::uniform_real_distribution<f32> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<u32> udist(0, 20);
 
-    size_t countJoints = 20;
-    for (size_t i = 0; i < countJoints; ++i) {
+    usize countJoints = 20;
+    for (usize i = 0; i < countJoints; ++i) {
       asset.data.jointLocalPositions.push_back(
           glm::vec3(dist(mt), dist(mt), dist(mt)));
       asset.data.jointLocalRotations.push_back(
@@ -72,7 +72,7 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
   EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, quoll::AssetType::Skeleton);
 
-  uint32_t numJoints = 0;
+  u32 numJoints = 0;
   file.read(numJoints);
   EXPECT_EQ(numJoints, 20);
 
@@ -89,7 +89,7 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
   file.read(actualInverseBindMatrices);
   file.read(actualNames);
 
-  for (uint32_t i = 0; i < numJoints; ++i) {
+  for (u32 i = 0; i < numJoints; ++i) {
     EXPECT_EQ(actualPositions.at(i), asset.data.jointLocalPositions.at(i));
     EXPECT_EQ(actualRotations.at(i), asset.data.jointLocalRotations.at(i));
     EXPECT_EQ(actualScales.at(i), asset.data.jointLocalScales.at(i));
@@ -111,11 +111,11 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   {
     std::random_device device;
     std::mt19937 mt(device());
-    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
-    std::uniform_int_distribution<uint32_t> udist(0, 20);
+    std::uniform_real_distribution<f32> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<u32> udist(0, 20);
 
-    size_t countJoints = 20;
-    for (size_t i = 0; i < countJoints; ++i) {
+    usize countJoints = 20;
+    for (usize i = 0; i < countJoints; ++i) {
       asset.data.jointLocalPositions.push_back(
           glm::vec3(dist(mt), dist(mt), dist(mt)));
       asset.data.jointLocalRotations.push_back(
@@ -161,7 +161,7 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
 
   EXPECT_EQ(actual.name, asset.name);
 
-  for (size_t i = 0; i < actual.data.jointLocalPositions.size(); ++i) {
+  for (usize i = 0; i < actual.data.jointLocalPositions.size(); ++i) {
     EXPECT_EQ(actual.data.jointLocalPositions.at(i),
               asset.data.jointLocalPositions.at(i));
     EXPECT_EQ(actual.data.jointLocalRotations.at(i),

@@ -24,10 +24,8 @@ void PhysxSimulationEventCallback::onContact(
   auto *actor1 = pairHeader.actors[0];
   auto *actor2 = pairHeader.actors[1];
 
-  Entity e1 =
-      static_cast<Entity>(reinterpret_cast<uintptr_t>(actor1->userData));
-  Entity e2 =
-      static_cast<Entity>(reinterpret_cast<uintptr_t>(actor2->userData));
+  Entity e1 = static_cast<Entity>(reinterpret_cast<uptr>(actor1->userData));
+  Entity e2 = static_cast<Entity>(reinterpret_cast<uptr>(actor2->userData));
 
   for (PxU32 i = 0; i < nbPairs; ++i) {
     const PxContactPair &cp = pairs[i];

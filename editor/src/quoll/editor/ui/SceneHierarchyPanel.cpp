@@ -62,7 +62,7 @@ static String getNodeName(const String &name, Entity entity,
 void SceneHierarchyPanel::render(WorkspaceState &state,
                                  ActionExecutor &actionExecutor) {
 
-  float paddingY = ImGui::GetStyle().WindowPadding.y;
+  f32 paddingY = ImGui::GetStyle().WindowPadding.y;
   StyleStack stack;
   stack.pushStyle(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
@@ -74,7 +74,7 @@ void SceneHierarchyPanel::render(WorkspaceState &state,
 void SceneHierarchyPanel::renderRoot(WorkspaceState &state,
                                      ActionExecutor &actionExecutor) {
   static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
-  static constexpr float TreeNodeIndentSpacing = 10.0f;
+  static constexpr f32 TreeNodeIndentSpacing = 10.0f;
 
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
@@ -105,7 +105,7 @@ void SceneHierarchyPanel::renderRoot(WorkspaceState &state,
   }
 
   if (open) {
-    uint32_t index = 0;
+    u32 index = 0;
     for (auto [entity, transform] :
          scene.entityDatabase.view<LocalTransform>()) {
       if (scene.entityDatabase.has<Parent>(entity)) {
@@ -120,17 +120,16 @@ void SceneHierarchyPanel::renderRoot(WorkspaceState &state,
   }
 }
 
-uint32_t SceneHierarchyPanel::renderEntity(Entity entity, uint32_t index,
-                                           int flags, WorkspaceState &state,
-                                           ActionExecutor &actionExecutor) {
-  uint32_t innerIndex = index;
+u32 SceneHierarchyPanel::renderEntity(Entity entity, u32 index, int flags,
+                                      WorkspaceState &state,
+                                      ActionExecutor &actionExecutor) {
+  u32 innerIndex = index;
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  String name =
-      scene.entityDatabase.has<Name>(entity)
-          ? scene.entityDatabase.get<Name>(entity).name
-          : "Entity #" + std::to_string(static_cast<uint32_t>(entity));
+  String name = scene.entityDatabase.has<Name>(entity)
+                    ? scene.entityDatabase.get<Name>(entity).name
+                    : "Entity #" + std::to_string(static_cast<u32>(entity));
 
   bool isLeaf = !scene.entityDatabase.has<Children>(entity);
 
@@ -162,7 +161,7 @@ uint32_t SceneHierarchyPanel::renderEntity(Entity entity, uint32_t index,
                            Theme::getColor(ThemeColor::Neutral200));
     }
 
-    ImGui::PushID(static_cast<int32_t>(entity));
+    ImGui::PushID(static_cast<i32>(entity));
     if (ImGui::TreeNodeEx(nodeName.c_str(), treeNodeFlags)) {
       open = !isLeaf;
     }

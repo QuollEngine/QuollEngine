@@ -6,7 +6,7 @@ namespace quoll {
 AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
     : mAssetRegistry(assetRegistry) {}
 
-void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
+void AnimationSystem::update(f32 dt, EntityDatabase &entityDatabase) {
   QUOLL_PROFILE_EVENT("AnimationSystem::update");
   const auto &animMap = mAssetRegistry.getAnimations();
 

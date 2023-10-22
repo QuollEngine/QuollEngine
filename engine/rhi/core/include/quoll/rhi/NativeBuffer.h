@@ -35,7 +35,7 @@ public:
    *
    * @param size New size
    */
-  virtual void resize(size_t size) = 0;
+  virtual void resize(usize size) = 0;
 
   /**
    * @brief Get buffer device address

@@ -26,7 +26,7 @@ public:
    * @param width Width
    * @param height Height
    */
-  void setViewport(float x, float y, float width, float height);
+  void setViewport(f32 x, f32 y, f32 width, f32 height);
 
 private:
   glm::vec2 mPosition;

@@ -66,8 +66,7 @@ FileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
     filters.push_back(filter);
   }
 
-  pFileOpen->SetFileTypes(static_cast<uint32_t>(filters.size()),
-                          filters.data());
+  pFileOpen->SetFileTypes(static_cast<u32>(filters.size()), filters.data());
 
   if (!SUCCEEDED(pFileOpen->Show(NULL))) {
     return "";
@@ -140,8 +139,7 @@ quoll::Path FileDialog::getFilePathFromCreateDialog(
     filters.push_back(filter);
   }
 
-  pFileOpen->SetFileTypes(static_cast<uint32_t>(filters.size()),
-                          filters.data());
+  pFileOpen->SetFileTypes(static_cast<u32>(filters.size()), filters.data());
 
   if (!SUCCEEDED(pFileOpen->Show(NULL))) {
     return "";

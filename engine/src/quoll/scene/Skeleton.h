@@ -16,7 +16,7 @@ struct Skeleton {
   /**
    * Number of joints
    */
-  uint32_t numJoints = 0;
+  u32 numJoints = 0;
 
   /**
    * List of joint parents

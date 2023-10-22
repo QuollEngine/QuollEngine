@@ -28,7 +28,7 @@ static void assertFeature(VkBool32 featureFlag, String name) {
 VulkanDeviceObject::VulkanDeviceObject(
     const VulkanPhysicalDevice &physicalDevice)
     : mPhysicalDevice(physicalDevice) {
-  float queuePriority = 1.0f;
+  f32 queuePriority = 1.0f;
   VkDeviceQueueCreateInfo createGraphicsQueueInfo{};
   createGraphicsQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
   createGraphicsQueueInfo.flags = 0;
@@ -133,13 +133,11 @@ VulkanDeviceObject::VulkanDeviceObject(
   createDeviceInfo.pNext = &deviceFeatures;
   createDeviceInfo.flags = 0;
   createDeviceInfo.pQueueCreateInfos = queueInfos.data();
-  createDeviceInfo.queueCreateInfoCount =
-      static_cast<uint32_t>(queueInfos.size());
+  createDeviceInfo.queueCreateInfoCount = static_cast<u32>(queueInfos.size());
   createDeviceInfo.pEnabledFeatures = nullptr;
   createDeviceInfo.enabledLayerCount = 0;
   createDeviceInfo.ppEnabledLayerNames = nullptr;
-  createDeviceInfo.enabledExtensionCount =
-      static_cast<uint32_t>(extensions.size());
+  createDeviceInfo.enabledExtensionCount = static_cast<u32>(extensions.size());
   createDeviceInfo.ppEnabledExtensionNames = extensions.data();
 
   checkForVulkanError(
@@ -204,7 +202,7 @@ void VulkanDeviceObject::setObjectName(const String &name, VkObjectType type,
   nameInfo.pNext = nullptr;
   nameInfo.pObjectName = objectName.c_str();
   nameInfo.objectType = type;
-  nameInfo.objectHandle = reinterpret_cast<uint64_t &>(handle);
+  nameInfo.objectHandle = reinterpret_cast<u64 &>(handle);
 
   vkSetDebugUtilsObjectNameEXT(mDevice, &nameInfo);
 }

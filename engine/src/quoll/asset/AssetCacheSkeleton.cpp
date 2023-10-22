@@ -31,7 +31,7 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   header.name = asset.name;
   file.write(header);
 
-  auto numJoints = static_cast<uint32_t>(asset.data.jointLocalPositions.size());
+  auto numJoints = static_cast<u32>(asset.data.jointLocalPositions.size());
   file.write(numJoints);
 
   file.write(asset.data.jointLocalPositions);
@@ -54,7 +54,7 @@ AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
   skeleton.uuid = Uuid(filePath.stem().string());
   skeleton.name = header.name;
 
-  uint32_t numJoints = 0;
+  u32 numJoints = 0;
   stream.read(numJoints);
 
   skeleton.data.jointLocalPositions.resize(numJoints);

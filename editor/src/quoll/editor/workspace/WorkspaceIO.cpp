@@ -65,11 +65,11 @@ void WorkspaceIO::loadWorkspaceState(WorkspaceState &state,
     auto up = EditorCamera::DefaultUp;
 
     if (camera["near"] && camera["near"].IsScalar()) {
-      near = camera["near"].as<float>(near);
+      near = camera["near"].as<f32>(near);
     }
 
     if (camera["far"] && camera["far"].IsScalar()) {
-      far = camera["far"].as<float>(far);
+      far = camera["far"].as<f32>(far);
     }
 
     if (camera["sensorSize"] && camera["sensorSize"].IsSequence()) {
@@ -77,7 +77,7 @@ void WorkspaceIO::loadWorkspaceState(WorkspaceState &state,
     }
 
     if (camera["focalLength"] && camera["focalLength"].IsScalar()) {
-      focalLength = camera["sensorSize"].as<float>(focalLength);
+      focalLength = camera["sensorSize"].as<f32>(focalLength);
     }
 
     if (camera["eye"] && camera["eye"].IsSequence()) {
@@ -120,8 +120,8 @@ void WorkspaceIO::loadWorkspaceState(WorkspaceState &state,
       gridLinesShown = grid["gridLines"].as<bool>();
     }
 
-    state.grid.x = static_cast<uint32_t>(gridLinesShown);
-    state.grid.y = static_cast<uint32_t>(axisLinesShown);
+    state.grid.x = static_cast<u32>(gridLinesShown);
+    state.grid.y = static_cast<u32>(axisLinesShown);
   }
 }
 

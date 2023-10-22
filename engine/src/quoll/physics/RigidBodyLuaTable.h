@@ -27,21 +27,21 @@ public:
    *
    * @return Mass
    */
-  sol_maybe<float> getMass();
+  sol_maybe<f32> getMass();
 
   /**
    * @brief Set mass
    *
    * @param mass Mass
    */
-  void setMass(float mass);
+  void setMass(f32 mass);
 
   /**
    * @brief Get inertia
    *
    * @return Inertia
    */
-  std::tuple<sol_maybe<float>, sol_maybe<float>, sol_maybe<float>> getInertia();
+  std::tuple<sol_maybe<f32>, sol_maybe<f32>, sol_maybe<f32>> getInertia();
 
   /**
    * @brief Set inertia
@@ -50,7 +50,7 @@ public:
    * @param y Inertia in y axis
    * @param z Inertia in z axis
    */
-  void setInertia(float x, float y, float z);
+  void setInertia(f32 x, f32 y, f32 z);
 
   /**
    * @brief Check if gravity is applied
@@ -74,7 +74,7 @@ public:
    * @param y Force in y axis
    * @param z Force in z axis
    */
-  void applyForce(float x, float y, float z);
+  void applyForce(f32 x, f32 y, f32 z);
 
   /**
    * @brief Apply torque
@@ -83,7 +83,7 @@ public:
    * @param y Torque in y axis
    * @param z Torque in z axis
    */
-  void applyTorque(float x, float y, float z);
+  void applyTorque(f32 x, f32 y, f32 z);
 
   /**
    * @brief Clear force and torque

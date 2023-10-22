@@ -10,7 +10,7 @@ Material::Material(const String &name,
                    RenderStorage &renderStorage)
     : mTextures(textures) {
 
-  for (size_t i = 0; i < properties.size(); ++i) {
+  for (usize i = 0; i < properties.size(); ++i) {
     auto &prop = properties[i];
     mProperties.push_back(prop.second);
     mPropertyMap.insert({prop.first, i});
@@ -33,7 +33,7 @@ void Material::updateProperty(StringView name, const Property &value) {
     return;
   }
 
-  size_t index = (*it).second;
+  usize index = (*it).second;
 
   if (mProperties.at(index).getType() != value.getType()) {
     Engine::getLogger().warning()
@@ -47,15 +47,15 @@ void Material::updateProperty(StringView name, const Property &value) {
   mBuffer.update(mData, size);
 }
 
-size_t Material::updateBufferData() {
+usize Material::updateBufferData() {
   if (mData) {
     delete mData;
   }
 
-  size_t size = 0;
-  size_t idx = 0;
+  usize size = 0;
+  usize idx = 0;
 
-  size_t maxValue = 0;
+  usize maxValue = 0;
   for (auto &value : mProperties) {
     maxValue = maxValue > value.getSize() ? maxValue : value.getSize();
   }
@@ -66,13 +66,13 @@ size_t Material::updateBufferData() {
 
   for (auto &value : mProperties) {
     if (value.getType() == Property::INT32) {
-      auto val = value.getValue<int32_t>();
+      auto val = value.getValue<i32>();
       memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::UINT32) {
-      auto val = value.getValue<uint32_t>();
+      auto val = value.getValue<u32>();
       memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::REAL) {
-      auto val = value.getValue<float>();
+      auto val = value.getValue<f32>();
       memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::VECTOR2) {
       auto &val = value.getValue<glm::vec2>();

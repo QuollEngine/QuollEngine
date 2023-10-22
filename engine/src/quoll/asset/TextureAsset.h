@@ -14,22 +14,22 @@ struct TextureAssetLevel {
   /**
    * Offset of mip level
    */
-  size_t offset = 0;
+  usize offset = 0;
 
   /**
    * Size of mip level
    */
-  size_t size = 0;
+  usize size = 0;
 
   /**
    * Mip level width
    */
-  uint32_t width = 0;
+  u32 width = 0;
 
   /**
    * Mip level height
    */
-  uint32_t height = 0;
+  u32 height = 0;
 };
 
 /**
@@ -39,17 +39,17 @@ struct TextureAsset {
   /**
    * Width
    */
-  uint32_t width = 0;
+  u32 width = 0;
 
   /**
    * Height
    */
-  uint32_t height = 0;
+  u32 height = 0;
 
   /**
    * Layers
    */
-  uint32_t layers = 0;
+  u32 layers = 0;
 
   /**
    * Texture type
@@ -64,7 +64,7 @@ struct TextureAsset {
   /**
    * Raw texture data
    */
-  std::vector<uint8_t> data;
+  std::vector<u8> data;
 
   /**
    * Mip levels

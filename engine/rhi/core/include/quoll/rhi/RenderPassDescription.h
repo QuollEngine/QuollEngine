@@ -17,12 +17,12 @@ struct DepthStencilClear {
   /**
    * Depth clear value
    */
-  float clearDepth = 0.0f;
+  f32 clearDepth = 0.0f;
 
   /**
    * Stencil clear value
    */
-  uint32_t clearStencil = 0;
+  u32 clearStencil = 0;
 };
 
 using AttachmentClearValue = std::variant<glm::vec4, DepthStencilClear>;

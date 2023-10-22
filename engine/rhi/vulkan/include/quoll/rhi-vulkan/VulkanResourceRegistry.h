@@ -43,7 +43,7 @@ class VulkanResourceRegistry {
      *
      * Used for auto generation
      */
-    uint32_t lastHandle = 1;
+    u32 lastHandle = 1;
   };
 
   using ShaderMap = ResourceMap<ShaderHandle, VulkanShader>;

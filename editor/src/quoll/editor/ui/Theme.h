@@ -48,7 +48,7 @@ struct ThemeStyles {
   /**
    * Child rounding
    */
-  float childRounding = 0.0f;
+  f32 childRounding = 0.0f;
 };
 
 /**

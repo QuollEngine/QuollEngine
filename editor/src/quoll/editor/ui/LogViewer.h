@@ -26,10 +26,10 @@ private:
    * @param width Container width
    */
   void renderLogContainer(const String &name, LogMemoryStorage &logStorage,
-                          size_t &logSize, float width);
+                          usize &logSize, f32 width);
 
 private:
-  size_t mUserLogSize = 0;
+  usize mUserLogSize = 0;
 };
 
 } // namespace quoll::editor

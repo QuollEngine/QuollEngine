@@ -28,42 +28,42 @@ public:
    *
    * @return Static friction
    */
-  sol_maybe<float> getStaticFriction();
+  sol_maybe<f32> getStaticFriction();
 
   /**
    * @brief Set static friction
    *
    * @param staticFriction Static friction
    */
-  void setStaticFriction(float staticFriction);
+  void setStaticFriction(f32 staticFriction);
 
   /**
    * @brief Get dynamic friction
    *
    * @return Dynamic friction
    */
-  sol_maybe<float> getDynamicFriction();
+  sol_maybe<f32> getDynamicFriction();
 
   /**
    * @brief Set dynamic friction
    *
    * @param dynamicFriction Dynamic friction
    */
-  void setDynamicFriction(float dynamicFriction);
+  void setDynamicFriction(f32 dynamicFriction);
 
   /**
    * @brief Get restitution
    *
    * @return Restitution
    */
-  sol_maybe<float> getRestitution();
+  sol_maybe<f32> getRestitution();
 
   /**
    * @brief Set restitution
    *
    * @param restitution Restitution
    */
-  void setRestitution(float restitution);
+  void setRestitution(f32 restitution);
 
   /**
    * @brief Set box geometry
@@ -72,14 +72,14 @@ public:
    * @param hy Half extent in y axis
    * @param hz Half extent in z axis
    */
-  void setBoxGeometry(float hx, float hy, float hz);
+  void setBoxGeometry(f32 hx, f32 hy, f32 hz);
 
   /**
    * @brief Set sphere geometry
    *
    * @param radius Sphere radius
    */
-  void setSphereGeometry(float radius);
+  void setSphereGeometry(f32 radius);
 
   /**
    * @brief Set capsule geometry
@@ -87,7 +87,7 @@ public:
    * @param radius Capsule radius
    * @param halfHeight Capsule half height
    */
-  void setCapsuleGeometry(float radius, float halfHeight);
+  void setCapsuleGeometry(f32 radius, f32 halfHeight);
 
   /**
    * @brief Set plane geometry
@@ -103,8 +103,8 @@ public:
    * @param distance Sweep distance
    * @return Collision hit
    */
-  std::tuple<bool, sol_maybe<CollisionHit>> sweep(float dx, float dy, float dz,
-                                                  float distance);
+  std::tuple<bool, sol_maybe<CollisionHit>> sweep(f32 dx, f32 dy, f32 dz,
+                                                  f32 distance);
 
   /**
    * @brief Delete component

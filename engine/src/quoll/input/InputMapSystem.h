@@ -31,7 +31,7 @@ public:
   void update(EntityDatabase &entityDatabase);
 
 private:
-  InputMap createInputMap(InputMapAsset &asset, size_t defaultScheme);
+  InputMap createInputMap(InputMapAsset &asset, usize defaultScheme);
 
 private:
   InputDeviceManager &mDeviceManager;

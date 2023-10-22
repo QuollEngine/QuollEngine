@@ -14,12 +14,12 @@ struct XBounds {
   /**
    * Start bound
    */
-  float start = 0.0f;
+  f32 start = 0.0f;
 
   /**
    * End bound
    */
-  float end = 0.0f;
+  f32 end = 0.0f;
 };
 
 /**
@@ -28,9 +28,9 @@ struct XBounds {
  * @param padding Horizontal padding
  * @return Horizontal bounds
  */
-static XBounds calculateSectionBoundsX(float padding) {
+static XBounds calculateSectionBoundsX(f32 padding) {
   auto *window = ImGui::GetCurrentWindow();
-  float windowStart = ImGui::GetWindowPos().x;
+  f32 windowStart = ImGui::GetWindowPos().x;
 
   return {windowStart + window->WindowPadding.x + padding,
           windowStart + ImGui::GetWindowWidth() - window->WindowPadding.x -
@@ -44,11 +44,11 @@ Section::Section(const char *title) {
   mPadding = ImGui::GetStyle().WindowPadding;
 
   auto *window = ImGui::GetCurrentWindow();
-  float windowWidth = ImGui::GetWindowWidth();
+  f32 windowWidth = ImGui::GetWindowWidth();
 
   auto boundsX = calculateSectionBoundsX(mPadding.x);
 
-  const float midPoint = boundsX.start + (boundsX.end - boundsX.start) / 1.2f;
+  const f32 midPoint = boundsX.start + (boundsX.end - boundsX.start) / 1.2f;
 
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + mPadding.y);
   ImGui::BeginGroup();
@@ -133,7 +133,7 @@ ContextMenu::~ContextMenu() {
   }
 }
 
-Table::Table(const char *id, uint32_t numColumns) {
+Table::Table(const char *id, u32 numColumns) {
   mExpanded = ImGui::BeginTable(id, static_cast<int>(numColumns),
                                 ImGuiTableFlags_Borders |
                                     ImGuiTableFlags_SizingStretchSame |
@@ -165,7 +165,7 @@ void Table::column(const glm::quat &value) {
   ImGui::Text("%.2f %.2f %.2f %.2f", value.x, value.y, value.z, value.w);
 }
 
-void Table::column(float value) {
+void Table::column(f32 value) {
   ImGui::TableNextColumn();
   ImGui::Text("%.2f", value);
 }
@@ -175,12 +175,12 @@ void Table::column(const String &value) {
   ImGui::Text("%s", value.c_str());
 }
 
-void Table::column(int32_t value) {
+void Table::column(i32 value) {
   ImGui::TableNextColumn();
   ImGui::Text("%d", value);
 }
 
-void Table::column(uint32_t value) {
+void Table::column(u32 value) {
   ImGui::TableNextColumn();
   ImGui::Text("%d", value);
 }
@@ -224,7 +224,7 @@ Input::Input(String label, glm::vec2 &value, bool autoChange) {
   }
 }
 
-Input::Input(String label, float &value, bool autoChange) {
+Input::Input(String label, f32 &value, bool autoChange) {
   if (autoChange) {
     auto temp = value;
 
@@ -239,9 +239,9 @@ Input::Input(String label, float &value, bool autoChange) {
   }
 }
 
-Input::Input(String label, uint32_t &value, bool autoChange) {
+Input::Input(String label, u32 &value, bool autoChange) {
   if (autoChange) {
-    uint32_t temp = value;
+    u32 temp = value;
 
     renderScalarInput(label, &temp, 1, ImGuiDataType_U32);
 
@@ -266,7 +266,7 @@ Input::Input(String label, String &value, bool autoChange) {
   }
 }
 
-void Input::renderScalarInput(String label, void *data, size_t size,
+void Input::renderScalarInput(String label, void *data, usize size,
                               ImGuiDataType dataType) {
   if (!label.empty()) {
     ImGui::Text("%s", label.c_str());

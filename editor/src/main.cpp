@@ -6,8 +6,8 @@
 #include "quoll/editor/screens/ProjectSelectorScreen.h"
 
 int main() {
-  static constexpr uint32_t InitialWidth = 1024;
-  static constexpr uint32_t InitialHeight = 768;
+  static constexpr u32 InitialWidth = 1024;
+  static constexpr u32 InitialHeight = 768;
 
   quoll::Engine::setPath(std::filesystem::current_path() / "engine");
 

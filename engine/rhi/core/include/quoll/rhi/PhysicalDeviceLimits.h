@@ -9,219 +9,219 @@ struct PhysicalDeviceLimits {
   /**
    * Maximum 1D image dimensions
    */
-  uint32_t maxImageDimension1D;
+  u32 maxImageDimension1D;
 
   /**
    * Maximum 2D image dimensions
    */
-  uint32_t maxImageDimension2D;
+  u32 maxImageDimension2D;
 
   /**
    * Maximum 3D image dimensions
    */
-  uint32_t maxImageDimension3D;
+  u32 maxImageDimension3D;
 
   /**
    * Maximum cube image dimensions
    */
-  uint32_t maxImageDimensionCube;
+  u32 maxImageDimensionCube;
 
   /**
    * Maximum image array layers
    */
-  uint32_t maxImageArrayLayers;
+  u32 maxImageArrayLayers;
 
   /**
    * Maximum texel buffer elements
    */
-  uint32_t maxTexelBufferElements;
+  u32 maxTexelBufferElements;
 
   /**
    * Maximum uniform buffer range
    */
-  uint32_t maxUniformBufferRange;
+  u32 maxUniformBufferRange;
 
   /**
    * Maximum storage buffer range
    */
 
-  uint32_t maxStorageBufferRange;
+  u32 maxStorageBufferRange;
 
   /**
    * Maximum push constants size
    */
 
-  uint32_t maxPushConstantsSize;
+  u32 maxPushConstantsSize;
 
   /**
    * Maximum memory allocation count
    */
-  uint32_t maxMemoryAllocationCount;
+  u32 maxMemoryAllocationCount;
 
   /**
    * Maximum sampler allocation count
    */
-  uint32_t maxSamplerAllocationCount;
+  u32 maxSamplerAllocationCount;
 
   /**
    * Buffer image granularity
    */
-  uint64_t bufferImageGranularity;
+  u64 bufferImageGranularity;
 
   /**
    * Sparse address space size
    */
-  uint64_t sparseAddressSpaceSize;
+  u64 sparseAddressSpaceSize;
 
   /**
    * Maximum bound descriptor sets
    */
-  uint32_t maxBoundDescriptorSets;
+  u32 maxBoundDescriptorSets;
 
   /**
    * Maximum number of samplers that are
    * accessible in a single shader stage
    */
-  uint32_t maxPerStageDescriptorSamplers;
+  u32 maxPerStageDescriptorSamplers;
 
   /**
    * Maximum number of uniform buffers that are
    * accessible in a single shader stage
    */
-  uint32_t maxPerStageDescriptorUniformBuffers;
+  u32 maxPerStageDescriptorUniformBuffers;
 
   /**
    * Maximum number of storage buffers that are
    * accessible in a single shader stage
    */
-  uint32_t maxPerStageDescriptorStorageBuffers;
+  u32 maxPerStageDescriptorStorageBuffers;
 
   /**
    * Maximum number of sampler images that are
    * accessible in a single shader stage
    */
-  uint32_t maxPerStageDescriptorSampledImages;
+  u32 maxPerStageDescriptorSampledImages;
 
   /**
    * Maximum number of storage images that are
    * accessible in a single shader stage
    */
-  uint32_t maxPerStageDescriptorStorageImages;
+  u32 maxPerStageDescriptorStorageImages;
 
   /**
    * Maximum number of input attachments that are
    * accessible in a single shader stage
    */
-  uint32_t maxPerStageDescriptorInputAttachments;
+  u32 maxPerStageDescriptorInputAttachments;
 
   /**
    * Maximum number of resources that are
    * accessible in a single shader stage
    */
-  uint32_t maxPerStageResources;
+  u32 maxPerStageResources;
 
   /**
    * Maximum number of available
    * sampler descriptor sets
    */
-  uint32_t maxDescriptorSetSamplers;
+  u32 maxDescriptorSetSamplers;
 
   /**
    * Maximum number of available
    * uniform buffer descriptor sets
    */
-  uint32_t maxDescriptorSetUniformBuffers;
+  u32 maxDescriptorSetUniformBuffers;
 
   /**
    * Maximum number of available dynamic
    * uniform buffer descriptor sets
    */
-  uint32_t maxDescriptorSetUniformBuffersDynamic;
+  u32 maxDescriptorSetUniformBuffersDynamic;
 
   /**
    * Maximum number of available
    * storage buffer descriptor sets
    */
-  uint32_t maxDescriptorSetStorageBuffers;
+  u32 maxDescriptorSetStorageBuffers;
 
   /**
    * Maximum number of available dynamic
    * storage buffer descriptor sets
    */
-  uint32_t maxDescriptorSetStorageBuffersDynamic;
+  u32 maxDescriptorSetStorageBuffersDynamic;
 
   /**
    * Maximum number of available
    * sampled image descriptor sets
    */
-  uint32_t maxDescriptorSetSampledImages;
+  u32 maxDescriptorSetSampledImages;
 
   /**
    * Maximum number of available
    * storage image descriptor sets
    */
-  uint32_t maxDescriptorSetStorageImages;
+  u32 maxDescriptorSetStorageImages;
 
   /**
    * Maximum number of available
    * input attachment descriptor sets
    */
-  uint32_t maxDescriptorSetInputAttachments;
+  u32 maxDescriptorSetInputAttachments;
 
   /**
    * Maximum number of vertex
    * input attributes
    */
-  uint32_t maxVertexInputAttributes;
+  u32 maxVertexInputAttributes;
 
   /**
    * Maximum number of vertex
    * input bindings
    */
-  uint32_t maxVertexInputBindings;
+  u32 maxVertexInputBindings;
 
   /**
    * Maximum vertex input attribute offset
    */
-  uint32_t maxVertexInputAttributeOffset;
+  u32 maxVertexInputAttributeOffset;
 
   /**
    * Maximum vertex input binding stride
    */
-  uint32_t maxVertexInputBindingStride;
+  u32 maxVertexInputBindingStride;
 
   /**
    * Maximum number of vertex output components
    */
-  uint32_t maxVertexOutputComponents;
+  u32 maxVertexOutputComponents;
 
   /**
    * Maximum number of fragment input components
    */
-  uint32_t maxFragmentInputComponents;
+  u32 maxFragmentInputComponents;
 
   /**
    * Maximum number of fragment output attachments
    */
-  uint32_t maxFragmentOutputAttachments;
+  u32 maxFragmentOutputAttachments;
 
   /**
    * Maximum number of fragment dual source
    * attachments
    */
-  uint32_t maxFragmentDualSrcAttachments;
+  u32 maxFragmentDualSrcAttachments;
 
   /**
    * Maximum number of output resources
    * can be used in fragment shader stage
    */
-  uint32_t maxFragmentCombinedOutputResources;
+  u32 maxFragmentCombinedOutputResources;
 
   /**
    * Maximum shared memory size available
    * in compute shader stages
    */
-  uint32_t maxComputeSharedMemorySize;
+  u32 maxComputeSharedMemorySize;
 
   /**
    * Maximum workgroup count allowed
@@ -232,7 +232,7 @@ struct PhysicalDeviceLimits {
   /**
    * Maximum number of workgroup invocations
    */
-  uint32_t maxComputeWorkGroupInvocations;
+  u32 maxComputeWorkGroupInvocations;
 
   /**
    * Maximum workgroup size allowed
@@ -243,42 +243,42 @@ struct PhysicalDeviceLimits {
   /**
    * Subpixel precision bits
    */
-  uint32_t subPixelPrecisionBits;
+  u32 subPixelPrecisionBits;
 
   /**
    * Subtexel precision bits
    */
-  uint32_t subTexelPrecisionBits;
+  u32 subTexelPrecisionBits;
 
   /**
    * Mip map precision bits
    */
-  uint32_t mipmapPrecisionBits;
+  u32 mipmapPrecisionBits;
 
   /**
    * Maximum draw indexed index value
    */
-  uint32_t maxDrawIndexedIndexValue;
+  u32 maxDrawIndexedIndexValue;
 
   /**
    * Maximum draw indirect count
    */
-  uint32_t maxDrawIndirectCount;
+  u32 maxDrawIndirectCount;
 
   /**
    * Maximum sampler LOD bias
    */
-  float maxSamplerLodBias;
+  f32 maxSamplerLodBias;
 
   /**
    * Maximum sampler anisotropy
    */
-  float maxSamplerAnisotropy;
+  f32 maxSamplerAnisotropy;
 
   /**
    * Maximum number of viewpoer
    */
-  uint32_t maxViewports;
+  u32 maxViewports;
 
   /**
    * Maximum viewport dimension
@@ -293,127 +293,127 @@ struct PhysicalDeviceLimits {
   /**
    * Viewport subpixel bits
    */
-  uint32_t viewportSubPixelBits;
+  u32 viewportSubPixelBits;
 
   /**
    * Minimum memory map alignment
    */
-  size_t minMemoryMapAlignment;
+  usize minMemoryMapAlignment;
 
   /**
    * Minimum texel buffer offset alignment
    */
-  uint64_t minTexelBufferOffsetAlignment;
+  u64 minTexelBufferOffsetAlignment;
 
   /**
    * Minimum uniform buffer offset alignment
    */
-  uint64_t minUniformBufferOffsetAlignment;
+  u64 minUniformBufferOffsetAlignment;
 
   /**
    * Minimum storage buffer offset alignment
    */
-  uint64_t minStorageBufferOffsetAlignment;
+  u64 minStorageBufferOffsetAlignment;
 
   /**
    * Minimum texel offset
    */
-  int32_t minTexelOffset;
+  i32 minTexelOffset;
 
   /**
    * Maximum texel offset
    */
-  uint32_t maxTexelOffset;
+  u32 maxTexelOffset;
 
   /**
    * Minimum texel gather offset
    */
-  int32_t minTexelGatherOffset;
+  i32 minTexelGatherOffset;
 
   /**
    * Maximum texel gather offset
    */
-  uint32_t maxTexelGatherOffset;
+  u32 maxTexelGatherOffset;
 
   /**
    * Minimum interpolation offset
    */
-  float minInterpolationOffset;
+  f32 minInterpolationOffset;
 
   /**
    * Maximum interpolation offset
    */
-  float maxInterpolationOffset;
+  f32 maxInterpolationOffset;
 
   /**
    * Subpixel interpolation offset bits
    */
-  uint32_t subPixelInterpolationOffsetBits;
+  u32 subPixelInterpolationOffsetBits;
 
   /**
    * Maximum framebuffer width
    */
-  uint32_t maxFramebufferWidth;
+  u32 maxFramebufferWidth;
 
   /**
    * Maximum framebuffer height
    */
-  uint32_t maxFramebufferHeight;
+  u32 maxFramebufferHeight;
 
   /**
    * Maximum framebuffer layers
    */
-  uint32_t maxFramebufferLayers;
+  u32 maxFramebufferLayers;
 
   /**
    * Framebuffer color sample counts
    */
-  uint32_t framebufferColorSampleCounts;
+  u32 framebufferColorSampleCounts;
 
   /**
    * Framebuffer depth sample counts
    */
-  uint32_t framebufferDepthSampleCounts;
+  u32 framebufferDepthSampleCounts;
 
   /**
    * Framebuffer stencil sample counts
    */
-  uint32_t framebufferStencilSampleCounts;
+  u32 framebufferStencilSampleCounts;
 
   /**
    * Maximum color attachments
    */
-  uint32_t maxColorAttachments;
+  u32 maxColorAttachments;
 
   /**
    * Sampled image color sample counts
    */
-  uint32_t sampledImageColorSampleCounts;
+  u32 sampledImageColorSampleCounts;
 
   /**
    * Sampled image integer sample counts
    */
-  uint32_t sampledImageIntegerSampleCounts;
+  u32 sampledImageIntegerSampleCounts;
 
   /**
    * Sampled image depth sample counts
    */
-  uint32_t sampledImageDepthSampleCounts;
+  u32 sampledImageDepthSampleCounts;
 
   /**
    * Sampled image stencil sample counts
    */
-  uint32_t sampledImageStencilSampleCounts;
+  u32 sampledImageStencilSampleCounts;
 
   /**
    * Storage image sample counts
    */
-  uint32_t storageImageSampleCounts;
+  u32 storageImageSampleCounts;
 
   /**
    * Max sample mask words
    */
-  uint32_t maxSampleMaskWords;
+  u32 maxSampleMaskWords;
 
   /**
    * Timestamp compute and graphics
@@ -424,31 +424,31 @@ struct PhysicalDeviceLimits {
    * Number of nanoseconds required for a
    * timestamp query to be incremented
    */
-  float timestampPeriod;
+  f32 timestampPeriod;
 
   /**
    * Maximum clip distances that can be used
    * in shader stages
    */
-  uint32_t maxClipDistances;
+  u32 maxClipDistances;
 
   /**
    * Maximum cull distances that can be used
    * in shader stages
    */
-  uint32_t maxCullDistances;
+  u32 maxCullDistances;
 
   /**
    * Maximum clip and cull distances that can
    * be used in shader stages
    */
-  uint32_t maxCombinedClipAndCullDistances;
+  u32 maxCombinedClipAndCullDistances;
 
   /**
    * Discrete queue priorities that can be
    * assigned for each queue family
    */
-  uint32_t discreteQueuePriorities;
+  u32 discreteQueuePriorities;
 
   /**
    * Point size range
@@ -463,37 +463,37 @@ struct PhysicalDeviceLimits {
   /**
    * Point size granularity
    */
-  float pointSizeGranularity;
+  f32 pointSizeGranularity;
 
   /**
    * Line width granularity
    */
-  float lineWidthGranularity;
+  f32 lineWidthGranularity;
 
   /**
    * Strict lines supported
    */
-  uint32_t strictLines;
+  u32 strictLines;
 
   /**
    * Standard sample location
    */
-  uint32_t standardSampleLocations;
+  u32 standardSampleLocations;
 
   /**
    * Optimal buffer copy offset alignment
    */
-  uint64_t optimalBufferCopyOffsetAlignment;
+  u64 optimalBufferCopyOffsetAlignment;
 
   /**
    * Optimal buffer copy row pitch alignment
    */
-  uint64_t optimalBufferCopyRowPitchAlignment;
+  u64 optimalBufferCopyRowPitchAlignment;
 
   /**
    * Non coherent atom size
    */
-  uint64_t nonCoherentAtomSize;
+  u64 nonCoherentAtomSize;
 };
 
 } // namespace quoll::rhi

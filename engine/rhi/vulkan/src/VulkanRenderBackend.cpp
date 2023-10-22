@@ -87,7 +87,7 @@ void VulkanRenderBackend::createInstance(StringView applicationName,
   }
 
   createInstanceInfo.enabledExtensionCount =
-      static_cast<uint32_t>(extensions.size());
+      static_cast<u32>(extensions.size());
   createInstanceInfo.ppEnabledExtensionNames = extensions.data();
 
   checkForVulkanError(

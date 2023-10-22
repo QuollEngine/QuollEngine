@@ -35,7 +35,7 @@ public:
    * @param type Input device type
    * @param index Input device index
    */
-  void removeDevice(InputDeviceType type, uint32_t index);
+  void removeDevice(InputDeviceType type, u32 index);
 
   /**
    * @brief Get input devices

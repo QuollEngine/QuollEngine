@@ -23,7 +23,7 @@ EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state,
   auto numBones = skeleton.numJoints * 2;
   skeletonDebug.bones.reserve(numBones);
 
-  for (uint32_t joint = 0; joint < skeleton.numJoints; ++joint) {
+  for (u32 joint = 0; joint < skeleton.numJoints; ++joint) {
     skeletonDebug.bones.push_back(skeleton.jointParents.at(joint));
     skeletonDebug.bones.push_back(joint);
   }

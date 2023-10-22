@@ -249,7 +249,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
   YAML::Node node;
   node["version"] = "0.1";
   node["type"] = "animator";
-  for (size_t i = 0; i < invalidStateNames.size(); ++i) {
+  for (usize i = 0; i < invalidStateNames.size(); ++i) {
     node["states"][invalidStateNames[i]] = invalidNodes[i];
   }
   node["states"]["valid"] = YAML::Node(YAML::NodeType::Map);
@@ -292,7 +292,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
   node["version"] = "0.1";
   node["type"] = "animator";
   node["initial"] = "invalid1";
-  for (size_t i = 0; i < invalidStateNames.size(); ++i) {
+  for (usize i = 0; i < invalidStateNames.size(); ++i) {
     node["states"][invalidStateNames[i]] = invalidNodes[i];
   }
 

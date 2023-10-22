@@ -31,7 +31,7 @@ void VulkanCommandBuffer::beginRenderPass(rhi::RenderPassHandle renderPass,
   beginInfo.renderArea.offset = {renderAreaOffset.x, renderAreaOffset.y};
   beginInfo.renderArea.extent = {renderAreaSize.x, renderAreaSize.y};
   beginInfo.clearValueCount =
-      static_cast<uint32_t>(vulkanRenderPass->getClearValues().size());
+      static_cast<u32>(vulkanRenderPass->getClearValues().size());
   beginInfo.pClearValues = vulkanRenderPass->getClearValues().data();
 
   vkCmdBeginRenderPass(mCommandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -51,10 +51,9 @@ void VulkanCommandBuffer::bindPipeline(PipelineHandle pipeline) {
   mStats.addCommandCall();
 }
 
-void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
-                                         uint32_t firstSet,
+void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline, u32 firstSet,
                                          const Descriptor &descriptor,
-                                         std::span<uint32_t> dynamicOffsets) {
+                                         std::span<u32> dynamicOffsets) {
   const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
   VkDescriptorSet descriptorSet =
       mDescriptorPool.getDescriptorSet(descriptor.getHandle());
@@ -69,13 +68,13 @@ void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
   vkCmdBindDescriptorSets(
       mCommandBuffer, vulkanPipeline->getBindPoint(),
       vulkanPipeline->getPipelineLayout(), firstSet, 1, &descriptorSet,
-      static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
+      static_cast<u32>(dynamicOffsets.size()), dynamicOffsets.data());
   mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::bindVertexBuffers(
     const std::span<const BufferHandle> buffers,
-    const std::span<const uint64_t> offsets) {
+    const std::span<const u64> offsets) {
   QuollAssert(buffers.size() == offsets.size(),
               "Buffers and offsets must match");
 
@@ -84,8 +83,7 @@ void VulkanCommandBuffer::bindVertexBuffers(
     vkBuffers.push_back(mRegistry.getBuffers().at(handle)->getBuffer());
   }
 
-  vkCmdBindVertexBuffers(mCommandBuffer, 0,
-                         static_cast<uint32_t>(vkBuffers.size()),
+  vkCmdBindVertexBuffers(mCommandBuffer, 0, static_cast<u32>(vkBuffers.size()),
                          vkBuffers.data(), offsets.data());
   mStats.addCommandCall();
 }
@@ -100,9 +98,8 @@ void VulkanCommandBuffer::bindIndexBuffer(BufferHandle buffer,
 }
 
 void VulkanCommandBuffer::pushConstants(PipelineHandle pipeline,
-                                        ShaderStage shaderStage,
-                                        uint32_t offset, uint32_t size,
-                                        void *data) {
+                                        ShaderStage shaderStage, u32 offset,
+                                        u32 size, void *data) {
   const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
 
   vkCmdPushConstants(mCommandBuffer, vulkanPipeline->getPipelineLayout(),
@@ -111,24 +108,23 @@ void VulkanCommandBuffer::pushConstants(PipelineHandle pipeline,
   mStats.addCommandCall();
 }
 
-void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex,
-                               uint32_t instanceCount, uint32_t firstInstance) {
+void VulkanCommandBuffer::draw(u32 vertexCount, u32 firstVertex,
+                               u32 instanceCount, u32 firstInstance) {
   vkCmdDraw(mCommandBuffer, vertexCount, instanceCount, firstVertex,
             firstInstance);
   mStats.addDrawCall((vertexCount / 3) * instanceCount);
 }
 
-void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
-                                      int32_t vertexOffset,
-                                      uint32_t instanceCount,
-                                      uint32_t firstInstance) {
+void VulkanCommandBuffer::drawIndexed(u32 indexCount, u32 firstIndex,
+                                      i32 vertexOffset, u32 instanceCount,
+                                      u32 firstInstance) {
   vkCmdDrawIndexed(mCommandBuffer, indexCount, instanceCount, firstIndex,
                    vertexOffset, firstInstance);
   mStats.addDrawCall((indexCount / 3) * instanceCount);
 }
 
-void VulkanCommandBuffer::dispatch(uint32_t groupCountX, uint32_t groupCountY,
-                                   uint32_t groupCountZ) {
+void VulkanCommandBuffer::dispatch(u32 groupCountX, u32 groupCountY,
+                                   u32 groupCountZ) {
   vkCmdDispatch(mCommandBuffer, groupCountX, groupCountY, groupCountZ);
   mStats.addCommandCall();
 }
@@ -158,7 +154,7 @@ void VulkanCommandBuffer::pipelineBarrier(
     std::span<BufferBarrier> bufferBarriers) {
 
   std::vector<VkMemoryBarrier2> vkMemoryBarriers(memoryBarriers.size());
-  for (size_t i = 0; i < memoryBarriers.size(); ++i) {
+  for (usize i = 0; i < memoryBarriers.size(); ++i) {
     auto &barrier = memoryBarriers[i];
     auto &vkBarrier = vkMemoryBarriers.at(i);
     vkBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
@@ -173,7 +169,7 @@ void VulkanCommandBuffer::pipelineBarrier(
 
   std::vector<VkImageMemoryBarrier2> vkImageMemoryBarriers(
       imageBarriers.size());
-  for (size_t i = 0; i < imageBarriers.size(); ++i) {
+  for (usize i = 0; i < imageBarriers.size(); ++i) {
     auto &barrier = imageBarriers[i];
     const auto &texture = mRegistry.getTextures().at(barrier.texture);
     auto &vkBarrier = vkImageMemoryBarriers.at(i);
@@ -198,7 +194,7 @@ void VulkanCommandBuffer::pipelineBarrier(
 
   std::vector<VkBufferMemoryBarrier2> vkBufferMemoryBarriers(
       bufferBarriers.size());
-  for (size_t i = 0; i < bufferBarriers.size(); ++i) {
+  for (usize i = 0; i < bufferBarriers.size(); ++i) {
     auto &barrier = bufferBarriers[i];
     auto &vkBarrier = vkBufferMemoryBarriers.at(i);
     vkBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
@@ -219,12 +215,11 @@ void VulkanCommandBuffer::pipelineBarrier(
   info.pNext = nullptr;
   info.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
   info.bufferMemoryBarrierCount =
-      static_cast<uint32_t>(vkBufferMemoryBarriers.size());
+      static_cast<u32>(vkBufferMemoryBarriers.size());
   info.pBufferMemoryBarriers = vkBufferMemoryBarriers.data();
-  info.imageMemoryBarrierCount =
-      static_cast<uint32_t>(vkImageMemoryBarriers.size());
+  info.imageMemoryBarrierCount = static_cast<u32>(vkImageMemoryBarriers.size());
   info.pImageMemoryBarriers = vkImageMemoryBarriers.data();
-  info.memoryBarrierCount = static_cast<uint32_t>(vkMemoryBarriers.size());
+  info.memoryBarrierCount = static_cast<u32>(vkMemoryBarriers.size());
   info.pMemoryBarriers = vkMemoryBarriers.data();
 
   vkCmdPipelineBarrier2KHR(mCommandBuffer, &info);
@@ -237,7 +232,7 @@ void VulkanCommandBuffer::copyTextureToBuffer(
   const auto &vulkanBuffer = mRegistry.getBuffers().at(dstBuffer);
 
   std::vector<VkBufferImageCopy> copies(copyRegions.size());
-  for (size_t i = 0; i < copies.size(); ++i) {
+  for (usize i = 0; i < copies.size(); ++i) {
     auto &copy = copies.at(i);
     auto &copyRegion = copyRegions[i];
     copy.bufferOffset = copyRegion.bufferOffset;
@@ -258,7 +253,7 @@ void VulkanCommandBuffer::copyTextureToBuffer(
   vkCmdCopyImageToBuffer(mCommandBuffer, vulkanTexture->getImage(),
                          VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                          vulkanBuffer->getBuffer(),
-                         static_cast<uint32_t>(copies.size()), copies.data());
+                         static_cast<u32>(copies.size()), copies.data());
 }
 
 void VulkanCommandBuffer::copyBufferToTexture(
@@ -268,7 +263,7 @@ void VulkanCommandBuffer::copyBufferToTexture(
   const auto &vulkanTexture = mRegistry.getTextures().at(dstTexture);
 
   std::vector<VkBufferImageCopy> copies(copyRegions.size());
-  for (size_t i = 0; i < copies.size(); ++i) {
+  for (usize i = 0; i < copies.size(); ++i) {
     auto &copy = copies.at(i);
     auto &copyRegion = copyRegions[i];
     copy.bufferOffset = copyRegion.bufferOffset;
@@ -289,7 +284,7 @@ void VulkanCommandBuffer::copyBufferToTexture(
   vkCmdCopyBufferToImage(mCommandBuffer, vulkanBuffer->getBuffer(),
                          vulkanTexture->getImage(),
                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                         static_cast<uint32_t>(copies.size()), copies.data());
+                         static_cast<u32>(copies.size()), copies.data());
 }
 
 void VulkanCommandBuffer::blitTexture(TextureHandle source,
@@ -299,9 +294,9 @@ void VulkanCommandBuffer::blitTexture(TextureHandle source,
   VkImage srcImage = mRegistry.getTextures().at(source)->getImage();
   VkImage dstImage = mRegistry.getTextures().at(destination)->getImage();
 
-  static constexpr size_t OffsetSize = 2;
+  static constexpr usize OffsetSize = 2;
   std::vector<VkImageBlit> vkRegions(regions.size());
-  for (size_t i = 0; i < regions.size(); ++i) {
+  for (usize i = 0; i < regions.size(); ++i) {
     auto &region = regions[i];
     auto &vkRegion = vkRegions.at(i);
 
@@ -310,7 +305,7 @@ void VulkanCommandBuffer::blitTexture(TextureHandle source,
     vkRegion.srcSubresource.baseArrayLayer = region.srcBaseArrayLayer;
     vkRegion.srcSubresource.layerCount = region.srcLayerCount;
 
-    for (size_t i = 0; i < OffsetSize; ++i) {
+    for (usize i = 0; i < OffsetSize; ++i) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
       vkRegion.srcOffsets[i] = {region.srcOffsets.at(i).x,
                                 region.srcOffsets.at(i).y,
@@ -321,7 +316,7 @@ void VulkanCommandBuffer::blitTexture(TextureHandle source,
     vkRegion.dstSubresource.mipLevel = region.dstMipLevel;
     vkRegion.dstSubresource.baseArrayLayer = region.dstBaseArrayLayer;
     vkRegion.dstSubresource.layerCount = region.dstLayerCount;
-    for (size_t i = 0; i < OffsetSize; ++i) {
+    for (usize i = 0; i < OffsetSize; ++i) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
       vkRegion.dstOffsets[i] = {region.dstOffsets.at(i).x,
                                 region.dstOffsets.at(i).y,
@@ -331,7 +326,7 @@ void VulkanCommandBuffer::blitTexture(TextureHandle source,
 
   vkCmdBlitImage(mCommandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                  dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                 static_cast<uint32_t>(regions.size()), vkRegions.data(),
+                 static_cast<u32>(regions.size()), vkRegions.data(),
                  VulkanMapping::getFilter(filter));
 }
 

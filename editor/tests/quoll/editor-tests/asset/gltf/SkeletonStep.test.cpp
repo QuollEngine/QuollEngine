@@ -8,13 +8,13 @@
 
 class GLTFImporterSkeletonTest : public GLTFImporterTestBase {
 public:
-  void createNodes(GLTFTestScene &scene, size_t nodeIndex, int currentLevel,
+  void createNodes(GLTFTestScene &scene, usize nodeIndex, int currentLevel,
                    int maxLevel) {
     if (currentLevel >= maxLevel)
       return;
 
     auto scale = glm::vec3{2.0f};
-    auto position = glm::vec3(static_cast<float>(currentLevel));
+    auto position = glm::vec3(static_cast<f32>(currentLevel));
 
     scene.nodes.push_back(GLTFTestNode{position, scale});
     scene.nodes.at(nodeIndex).children.push_back(
@@ -30,13 +30,13 @@ public:
 
   GLTFTestSkin &createSimpleSkin(GLTFTestScene &scene) {
     scene.nodes.push_back({glm::vec3{0.0f}, glm::vec3{1.0f}});
-    size_t startIndex = scene.nodes.size() - 1;
+    usize startIndex = scene.nodes.size() - 1;
 
     createNodes(scene, scene.nodes.size() - 1, 0, 2);
 
     GLTFTestSkin skin;
     skin.inverseBindMatrices.data.resize(7);
-    for (size_t i = startIndex; i < startIndex + 7; ++i) {
+    for (usize i = startIndex; i < startIndex + 7; ++i) {
       skin.joints.push_back(static_cast<int>(i));
     }
     scene.skins.push_back(skin);
@@ -178,7 +178,7 @@ TEST_F(GLTFImporterSkeletonTest, CreatesSkeletonWithJoints) {
   auto &skeleton = assetCache.getRegistry().getSkeletons().getAsset(
       quoll::SkeletonAssetHandle{1});
 
-  for (size_t i = 0; i < skeleton.data.jointLocalPositions.size(); ++i) {
+  for (usize i = 0; i < skeleton.data.jointLocalPositions.size(); ++i) {
     auto &node = scene.nodes.at(skin.joints.at(i));
 
     auto &position = skeleton.data.jointLocalPositions.at(i);

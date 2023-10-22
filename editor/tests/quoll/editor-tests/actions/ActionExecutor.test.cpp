@@ -166,7 +166,7 @@ TEST_F(ActionExecutorTest,
 
     EXPECT_EQ(node["entities"].size(), 1);
     auto id = state.scene.entityDatabase.get<quoll::Id>(entity).id;
-    EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), id);
+    EXPECT_EQ(node["entities"][0]["id"].as<u64>(0), id);
   }
 }
 
@@ -275,7 +275,7 @@ TEST_F(ActionExecutorTest,
   auto startingCamera = node["zones"][0]["startingCamera"];
   EXPECT_TRUE(startingCamera);
   EXPECT_TRUE(startingCamera.IsScalar());
-  EXPECT_EQ(startingCamera.as<uint32_t>(0), 15);
+  EXPECT_EQ(startingCamera.as<u32>(0), 15);
 }
 
 TEST_F(ActionExecutorTest,

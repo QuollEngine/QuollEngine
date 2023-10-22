@@ -121,7 +121,7 @@ void MockRenderDevice::destroyTexture(TextureHandle handle) {
   mTextures.erase(handle);
 }
 
-uint32_t MockRenderDevice::getTextureUpdates(TextureHandle handle) {
+u32 MockRenderDevice::getTextureUpdates(TextureHandle handle) {
   return mTextures.getEmplaced(handle);
 }
 

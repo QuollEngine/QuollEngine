@@ -10,11 +10,11 @@
 namespace quoll {
 
 Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
-  static constexpr double MaxCornerAngle = 3.0;
-  static constexpr double MinimumScale = 32.0;
-  static constexpr double PixelRange = 2.0;
-  static constexpr uint32_t NumChannels = 4;
-  static constexpr double FontScale = 1.0;
+  static constexpr f64 MaxCornerAngle = 3.0;
+  static constexpr f64 MinimumScale = 32.0;
+  static constexpr f64 PixelRange = 2.0;
+  static constexpr u32 NumChannels = 4;
+  static constexpr f64 FontScale = 1.0;
 
   using namespace msdf_atlas;
 
@@ -53,7 +53,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   int width = 0, height = 0;
   packer.getDimensions(width, height);
 
-  ImmediateAtlasGenerator<float, NumChannels, mtsdfGenerator,
+  ImmediateAtlasGenerator<f32, NumChannels, mtsdfGenerator,
                           BitmapAtlasStorage<byte, NumChannels>>
       generator(width, height);
 
@@ -64,10 +64,10 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   generator.setThreadCount(1);
   generator.generate(msdfGlyphs.data(), static_cast<int>(msdfGlyphs.size()));
 
-  std::unordered_map<uint32_t, FontGlyph> glyphs;
+  std::unordered_map<u32, FontGlyph> glyphs;
 
-  auto fWidth = static_cast<float>(width);
-  auto fHeight = static_cast<float>(height);
+  auto fWidth = static_cast<f32>(width);
+  auto fHeight = static_cast<f32>(height);
 
   for (auto &msdfGlyph : msdfGlyphs) {
     FontGlyph glyph{};
@@ -75,26 +75,25 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
     const auto &rect = msdfGlyph.getBoxRect();
 
     {
-      double top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
+      f64 top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
       msdfGlyph.getQuadAtlasBounds(left, bottom, right, top);
 
-      glyph.bounds = glm::vec4(static_cast<float>(left),
-                               static_cast<float>(fHeight - bottom),
-                               static_cast<float>(right),
-                               static_cast<float>(fHeight - top)) /
-                     fWidth;
+      glyph.bounds =
+          glm::vec4(static_cast<f32>(left), static_cast<f32>(fHeight - bottom),
+                    static_cast<f32>(right), static_cast<f32>(fHeight - top)) /
+          fWidth;
     }
 
     {
-      double top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
+      f64 top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
       msdfGlyph.getQuadPlaneBounds(left, top, right, bottom);
 
       glyph.planeBounds =
-          glm::vec4(static_cast<float>(left), static_cast<float>(top),
-                    static_cast<float>(right), static_cast<float>(bottom));
+          glm::vec4(static_cast<f32>(left), static_cast<f32>(top),
+                    static_cast<f32>(right), static_cast<f32>(bottom));
     }
 
-    glyph.advanceX = static_cast<float>(msdfGlyph.getAdvance());
+    glyph.advanceX = static_cast<f32>(msdfGlyph.getAdvance());
 
     glyphs.insert_or_assign(msdfGlyph.getCodepoint(), glyph);
   }
@@ -103,13 +102,13 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
 
   msdfgen::BitmapConstRef<byte, NumChannels> bitmap = storage;
 
-  std::vector<std::byte> pixels(static_cast<size_t>(bitmap.width) *
+  std::vector<std::byte> pixels(static_cast<usize>(bitmap.width) *
                                 bitmap.height * NumChannels);
 
   for (int y = 0; y < bitmap.height; ++y) {
-    memcpy(&pixels[NumChannels * static_cast<size_t>(bitmap.width) * y],
+    memcpy(&pixels[NumChannels * static_cast<usize>(bitmap.width) * y],
            bitmap(0, bitmap.height - y - 1),
-           NumChannels * static_cast<size_t>(bitmap.width));
+           NumChannels * static_cast<usize>(bitmap.width));
   }
 
   AssetData<FontAsset> fontAsset{};
@@ -120,7 +119,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   fontAsset.data.glyphs = glyphs;
   fontAsset.data.atlas = pixels;
   fontAsset.data.atlasDimensions = glm::uvec2{bitmap.width, bitmap.height};
-  fontAsset.data.fontScale = static_cast<float>(FontScale);
+  fontAsset.data.fontScale = static_cast<f32>(FontScale);
 
   msdfgen::destroyFont(font);
   msdfgen::deinitializeFreetype(ft);

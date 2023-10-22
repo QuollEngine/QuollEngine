@@ -225,7 +225,7 @@ TEST_F(SceneUpdaterTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
   auto &lens = entityDatabase.get<quoll::PerspectiveLens>(entity);
   auto &camera = entityDatabase.get<quoll::Camera>(entity);
 
-  float fovY = 2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
+  f32 fovY = 2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
 
   auto expectedPerspective =
       glm::perspective(fovY, lens.aspectRatio, lens.near, lens.far);

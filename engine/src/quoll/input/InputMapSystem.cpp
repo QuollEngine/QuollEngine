@@ -30,7 +30,7 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
   }
 
   for (auto [_, inputMap] : entityDatabase.view<InputMap>()) {
-    for (size_t i = 0; i < inputMap.commandValues.size(); ++i) {
+    for (usize i = 0; i < inputMap.commandValues.size(); ++i) {
       auto type = inputMap.commandDataTypes.at(i);
       if (type == InputDataType::Boolean) {
         inputMap.commandValues.at(i) = false;
@@ -54,7 +54,7 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
 
           if (auto *inputValue = std::get_if<bool>(&variant)) {
             commandValue |= *inputValue;
-          } else if (auto *inputValue = std::get_if<float>(&variant)) {
+          } else if (auto *inputValue = std::get_if<f32>(&variant)) {
             commandValue |= (*inputValue != 0.0f);
           } else if (auto *inputValue = std::get_if<glm::vec2>(&variant)) {
             commandValue |= (inputValue->x != 0.0f || inputValue->y != 0.0f);
@@ -76,7 +76,7 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
               commandValue.y += 1.0f;
             }
 
-          } else if (auto *inputValue = std::get_if<float>(&variant)) {
+          } else if (auto *inputValue = std::get_if<f32>(&variant)) {
             auto field = scheme.inputKeyFields.at(key);
             if (field == InputDataTypeField::X) {
               commandValue.x += *inputValue;
@@ -109,7 +109,7 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
 }
 
 InputMap InputMapSystem::createInputMap(InputMapAsset &asset,
-                                        size_t defaultScheme) {
+                                        usize defaultScheme) {
   InputMap inputMap{};
 
   inputMap.activeScheme = std::min(defaultScheme, asset.schemes.size() - 1);
@@ -118,12 +118,12 @@ InputMap InputMapSystem::createInputMap(InputMapAsset &asset,
   inputMap.commandValues.resize(asset.commands.size());
   inputMap.schemes.resize(asset.schemes.size());
 
-  size_t schemeIndex = 0;
+  usize schemeIndex = 0;
   for (const auto &scheme : asset.schemes) {
     inputMap.schemeNameMap.insert_or_assign(scheme.name, schemeIndex++);
   }
 
-  size_t commandIndex = 0;
+  usize commandIndex = 0;
   for (const auto &command : asset.commands) {
     inputMap.commandNameMap.insert_or_assign(command.name, commandIndex++);
     inputMap.commandDataTypes.push_back(command.type);

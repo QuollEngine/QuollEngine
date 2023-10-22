@@ -32,9 +32,8 @@ rhi::TextureHandle ImageTextureLoader::loadFromFile(const Path &path) {
   TextureUtils::copyDataToTexture(
       mRenderStorage.getDevice(), data, texture,
       rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
-      {TextureAssetLevel{0, static_cast<size_t>(width) * height * channels,
-                         static_cast<uint32_t>(width),
-                         static_cast<uint32_t>(height)}});
+      {TextureAssetLevel{0, static_cast<usize>(width) * height * channels,
+                         static_cast<u32>(width), static_cast<u32>(height)}});
 
   return texture;
 }

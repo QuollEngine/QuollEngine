@@ -23,12 +23,12 @@ public:
   /**
    * @brief Maximum number of debug bones
    */
-  static constexpr size_t MaxNumBones = 64;
+  static constexpr usize MaxNumBones = 64;
 
   /**
    * @brief Default reserved space for buffers
    */
-  static constexpr size_t DefaultReservedSpace = 2000;
+  static constexpr usize DefaultReservedSpace = 2000;
 
   /**
    * @brief Collidable entity data for buffers
@@ -70,7 +70,7 @@ public:
     /**
      * Vertex buffer binding offsets
      */
-    std::vector<uint64_t> vertexBufferOffsets;
+    std::vector<u64> vertexBufferOffsets;
 
     /**
      * Index buffer
@@ -79,15 +79,15 @@ public:
     /**
      * Index buffer
      */
-    std::vector<uint32_t> indexCounts;
+    std::vector<u32> indexCounts;
     /**
      * Index offsets
      */
-    std::vector<uint32_t> indexOffsets;
+    std::vector<u32> indexOffsets;
     /**
      * Vertex offsets
      */
-    std::vector<uint32_t> vertexOffsets;
+    std::vector<u32> vertexOffsets;
   };
 
 public:
@@ -98,7 +98,7 @@ public:
    * @param reservedSpace Reserved space for buffer data
    */
   EditorRendererFrameData(RenderStorage &renderStorage,
-                          size_t reservedSpace = DefaultReservedSpace);
+                          usize reservedSpace = DefaultReservedSpace);
 
   /**
    * @brief Add skeleton
@@ -132,9 +132,7 @@ public:
    *
    * @return Number of bones
    */
-  inline const std::vector<uint32_t> &getBoneCounts() const {
-    return mNumBones;
-  }
+  inline const std::vector<u32> &getBoneCounts() const { return mNumBones; }
 
   /**
    * @brief Set active camera
@@ -238,28 +236,28 @@ public:
    *
    * @return Last sprite index
    */
-  inline size_t getOutlineSpriteEnd() const { return mOutlineSpriteEnd; }
+  inline usize getOutlineSpriteEnd() const { return mOutlineSpriteEnd; }
 
   /**
    * @brief Get last text index in outline data
    *
    * @return Last text index
    */
-  inline size_t getOutlineTextEnd() const { return mOutlineTextEnd; }
+  inline usize getOutlineTextEnd() const { return mOutlineTextEnd; }
 
   /**
    * @brief Get last mesh index in outline data
    *
    * @return Last mesh index
    */
-  inline size_t getOutlineMeshEnd() const { return mOutlineMeshEnd; }
+  inline usize getOutlineMeshEnd() const { return mOutlineMeshEnd; }
 
   /**
    * @brief Get last skinned mesh index in outline data
    *
    * @return Last skinned mesh index
    */
-  inline size_t getOutlineSkinnedMeshEnd() const {
+  inline usize getOutlineSkinnedMeshEnd() const {
     return mOutlineSkinnedMeshEnd;
   }
 
@@ -277,7 +275,7 @@ public:
    *
    * @return Gizmo counts per icon
    */
-  inline const std::unordered_map<rhi::TextureHandle, uint32_t> &
+  inline const std::unordered_map<rhi::TextureHandle, u32> &
   getGizmoCounts() const {
     return mGizmoCounts;
   }
@@ -343,26 +341,26 @@ public:
   void createBindlessParamsRange();
 
 private:
-  size_t mReservedSpace = 0;
+  usize mReservedSpace = 0;
 
   // Outlines
   std::vector<glm::mat4> mOutlineTransforms;
   rhi::Buffer mOutlineTransformsBuffer;
 
-  size_t mOutlineSpriteEnd = 0;
+  usize mOutlineSpriteEnd = 0;
 
-  size_t mOutlineTextEnd = 0;
+  usize mOutlineTextEnd = 0;
   std::vector<SceneRendererFrameData::TextItem> mTextOutlines;
   std::vector<SceneRendererFrameData::GlyphData> mTextGlyphOutlines;
   rhi::Buffer mOutlineTextGlyphsBuffer;
 
-  size_t mOutlineMeshEnd = 0;
+  usize mOutlineMeshEnd = 0;
   std::vector<MeshOutline> mMeshOutlines;
 
-  size_t mOutlineSkinnedMeshEnd = 0;
+  usize mOutlineSkinnedMeshEnd = 0;
   std::unique_ptr<glm::mat4> mOutlineSkeletons;
-  size_t mLastOutlineSkeleton = 0;
-  size_t mOutlineSkeletonCapacity = 0;
+  usize mLastOutlineSkeleton = 0;
+  usize mOutlineSkeletonCapacity = 0;
   rhi::Buffer mOutlineSkeletonsBuffer;
 
   // Camera
@@ -374,16 +372,16 @@ private:
   rhi::Buffer mEditorGridBuffer;
 
   // Skeleton bones
-  size_t mLastSkeleton = 0;
+  usize mLastSkeleton = 0;
   std::vector<glm::mat4> mSkeletonTransforms;
   std::unique_ptr<glm::mat4> mSkeletonVector;
-  std::vector<uint32_t> mNumBones;
+  std::vector<u32> mNumBones;
   rhi::Buffer mSkeletonTransformsBuffer;
   rhi::Buffer mSkeletonBoneTransformsBuffer;
 
   // Gizmos
   std::vector<glm::mat4> mGizmoTransforms;
-  std::unordered_map<rhi::TextureHandle, uint32_t> mGizmoCounts;
+  std::unordered_map<rhi::TextureHandle, u32> mGizmoCounts;
   rhi::Buffer mGizmoTransformsBuffer;
 
   // Collidable shape

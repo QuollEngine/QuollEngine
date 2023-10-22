@@ -14,12 +14,12 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
                                    const VulkanResourceRegistry &registry)
     : mDevice(device) {
 
-  size_t numDepthAttachments = description.depthAttachment.has_value() ? 1 : 0;
-  size_t numResolveAttachments =
+  usize numDepthAttachments = description.depthAttachment.has_value() ? 1 : 0;
+  usize numResolveAttachments =
       description.resolveAttachment.has_value() ? 1 : 0;
 
-  size_t numAttachments = description.colorAttachments.size() +
-                          numDepthAttachments + numResolveAttachments;
+  usize numAttachments = description.colorAttachments.size() +
+                         numDepthAttachments + numResolveAttachments;
 
   std::vector<VkAttachmentDescription> attachments;
   attachments.reserve(numAttachments);
@@ -29,7 +29,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
   std::optional<VkAttachmentReference> depthReference;
   std::optional<VkAttachmentReference> resolveReference;
 
-  for (size_t i = 0; i < description.colorAttachments.size(); ++i) {
+  for (usize i = 0; i < description.colorAttachments.size(); ++i) {
     auto &desc = description.colorAttachments.at(i);
     const auto &texture = registry.getTextures().at(desc.texture);
 
@@ -45,7 +45,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
     attachments.push_back(attachment);
 
     VkAttachmentReference ref;
-    ref.attachment = static_cast<uint32_t>(attachments.size() - 1);
+    ref.attachment = static_cast<u32>(attachments.size() - 1);
     ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     colorReferences.push_back(ref);
 
@@ -73,7 +73,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
     attachments.push_back(attachment);
 
     VkAttachmentReference ref;
-    ref.attachment = static_cast<uint32_t>(attachments.size() - 1);
+    ref.attachment = static_cast<u32>(attachments.size() - 1);
     ref.layout = attachment.finalLayout;
     depthReference.emplace(ref);
 
@@ -98,7 +98,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
     attachments.push_back(attachment);
 
     VkAttachmentReference ref;
-    ref.attachment = static_cast<uint32_t>(attachments.size() - 1);
+    ref.attachment = static_cast<u32>(attachments.size() - 1);
     ref.layout = attachment.finalLayout;
     resolveReference.emplace(ref);
 
@@ -112,7 +112,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
 
   VkSubpassDescription subpass{};
   subpass.flags = 0;
-  subpass.colorAttachmentCount = static_cast<uint32_t>(colorReferences.size());
+  subpass.colorAttachmentCount = static_cast<u32>(colorReferences.size());
   subpass.pColorAttachments = colorReferences.data();
   subpass.pDepthStencilAttachment =
       depthReference.has_value() ? &depthReference.value() : nullptr;
@@ -129,7 +129,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
   createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   createInfo.flags = 0;
   createInfo.pNext = nullptr;
-  createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+  createInfo.attachmentCount = static_cast<u32>(attachments.size());
   createInfo.pAttachments = attachments.data();
   createInfo.subpassCount = 1;
   createInfo.pSubpasses = &subpass;

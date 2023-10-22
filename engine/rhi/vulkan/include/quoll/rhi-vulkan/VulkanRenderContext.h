@@ -41,7 +41,7 @@ public:
    * @return Present queue submit result
    */
   VkResult present(VulkanFrameManager &frameManager,
-                   const VulkanSwapchain &swapchain, uint32_t imageIdx);
+                   const VulkanSwapchain &swapchain, u32 imageIdx);
 
   /**
    * @brief Begin Rendering

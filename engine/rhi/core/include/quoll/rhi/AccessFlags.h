@@ -2,7 +2,7 @@
 
 namespace quoll::rhi {
 
-enum class Access : uint64_t {
+enum class Access : u64 {
   None = 0,
   IndirectCommandRead = 0x00000001ULL,
   IndexRead = 0x00000002ULL,

@@ -56,7 +56,7 @@ public:
    * @param imageAvailableSemaphore Semaphore to signal
    * @return Next acquired image index
    */
-  uint32_t acquireNextImage(VkSemaphore imageAvailableSemaphore);
+  u32 acquireNextImage(VkSemaphore imageAvailableSemaphore);
 
   /**
    * @brief Gets surface format

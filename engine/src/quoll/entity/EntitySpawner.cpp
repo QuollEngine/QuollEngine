@@ -22,11 +22,10 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
   const auto &assetName = mAssetRegistry.getPrefabs().getAsset(handle).name;
   const auto &asset = mAssetRegistry.getPrefabs().getAsset(handle).data;
 
-  std::unordered_map<uint32_t, size_t> entityMap;
+  std::unordered_map<u32, usize> entityMap;
   std::vector<Entity> entities;
 
-  auto getOrCreateEntity = [&entityMap, &entities,
-                            this](uint32_t localId) mutable {
+  auto getOrCreateEntity = [&entityMap, &entities, this](u32 localId) mutable {
     if (entityMap.find(localId) == entityMap.end()) {
       auto entity = mEntityDatabase.create();
       mEntityDatabase.set<LocalTransform>(entity, {});
@@ -99,11 +98,11 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
     const auto &asset =
         mAssetRegistry.getSkeletons().getAsset(pSkeleton.value).data;
 
-    size_t numJoints = asset.jointLocalPositions.size();
+    usize numJoints = asset.jointLocalPositions.size();
 
     Skeleton skeleton{};
     skeleton.assetHandle = pSkeleton.value;
-    skeleton.numJoints = static_cast<uint32_t>(numJoints);
+    skeleton.numJoints = static_cast<u32>(numJoints);
     skeleton.jointNames.resize(numJoints);
     skeleton.jointParents.resize(numJoints);
     skeleton.jointLocalPositions.resize(numJoints);
@@ -113,7 +112,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
     skeleton.jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
     skeleton.jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
 
-    for (size_t i = 0; i < numJoints; ++i) {
+    for (usize i = 0; i < numJoints; ++i) {
       skeleton.jointNames.at(i) = asset.jointNames.at(i);
       skeleton.jointParents.at(i) = asset.jointParents.at(i);
       skeleton.jointLocalPositions.at(i) = asset.jointLocalPositions.at(i);

@@ -16,17 +16,17 @@ struct FramebufferDescription {
   /**
    * Width
    */
-  uint32_t width = 0;
+  u32 width = 0;
 
   /**
    * Height
    */
-  uint32_t height = 0;
+  u32 height = 0;
 
   /**
    * Number of layers
    */
-  uint32_t layers = 0;
+  u32 layers = 0;
 
   /**
    * Texture attachments

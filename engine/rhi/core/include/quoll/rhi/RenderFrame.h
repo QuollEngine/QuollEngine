@@ -11,12 +11,12 @@ struct RenderFrame {
   /**
    * Frame index
    */
-  uint32_t frameIndex = std::numeric_limits<uint32_t>::max();
+  u32 frameIndex = std::numeric_limits<u32>::max();
 
   /**
    * Swapchain image index
    */
-  uint32_t swapchainImageIndex = std::numeric_limits<uint32_t>::max();
+  u32 swapchainImageIndex = std::numeric_limits<u32>::max();
 
   /**
    * Command list

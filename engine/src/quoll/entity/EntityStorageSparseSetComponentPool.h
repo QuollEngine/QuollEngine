@@ -9,7 +9,7 @@ struct EntityStorageSparseSetComponentPool {
   /**
    * List of entity indices
    */
-  std::vector<size_t> entityIndices;
+  std::vector<usize> entityIndices;
 
   /**
    * List of Entities

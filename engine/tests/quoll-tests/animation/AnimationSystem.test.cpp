@@ -50,7 +50,7 @@ public:
   }
 
   quoll::AnimationAssetHandle
-  createAnimation(quoll::KeyframeSequenceAssetTarget target, float time) {
+  createAnimation(quoll::KeyframeSequenceAssetTarget target, f32 time) {
     quoll::AssetData<quoll::AnimationAsset> animation;
     animation.data.time = time;
 
@@ -68,8 +68,7 @@ public:
   }
 
   quoll::AnimationAssetHandle
-  createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget target,
-                          float time) {
+  createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget target, f32 time) {
     quoll::AssetData<quoll::AnimationAsset> animation;
     animation.data.time = time;
 

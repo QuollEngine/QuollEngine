@@ -24,7 +24,7 @@ public:
    * @param dt Time delta
    * @param entityDatabase Entity database
    */
-  void update(float dt, EntityDatabase &entityDatabase);
+  void update(f32 dt, EntityDatabase &entityDatabase);
 
 private:
   AssetRegistry &mAssetRegistry;

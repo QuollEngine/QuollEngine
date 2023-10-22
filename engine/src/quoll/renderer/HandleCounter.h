@@ -8,7 +8,7 @@ namespace quoll {
  * @tparam THandle Handle type
  * @tparam TStart Starting index
  */
-template <class THandle, uint32_t TStart = 1> class HandleCounter {
+template <class THandle, u32 TStart = 1> class HandleCounter {
 public:
   /**
    * @brief Create handle
@@ -16,12 +16,12 @@ public:
    * @return New handle
    */
   THandle create() {
-    uint32_t handle = mLastHandle++;
+    u32 handle = mLastHandle++;
     return static_cast<THandle>(handle);
   }
 
 private:
-  uint32_t mLastHandle = TStart;
+  u32 mLastHandle = TStart;
 };
 
 } // namespace quoll

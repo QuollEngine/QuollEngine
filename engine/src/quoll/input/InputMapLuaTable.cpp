@@ -11,7 +11,7 @@ namespace quoll {
 InputMapLuaTable::InputMapLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-sol_maybe<size_t> InputMapLuaTable::getCommand(String name) {
+sol_maybe<usize> InputMapLuaTable::getCommand(String name) {
   if (!mScriptGlobals.entityDatabase.has<InputMap>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -28,7 +28,7 @@ sol_maybe<size_t> InputMapLuaTable::getCommand(String name) {
   return inputMap.commandNameMap.at(name);
 }
 
-sol_maybe<bool> InputMapLuaTable::getCommandValueBoolean(size_t command) {
+sol_maybe<bool> InputMapLuaTable::getCommandValueBoolean(usize command) {
   if (!mScriptGlobals.entityDatabase.has<InputMap>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -53,8 +53,8 @@ sol_maybe<bool> InputMapLuaTable::getCommandValueBoolean(size_t command) {
   return sol::nil;
 }
 
-std::tuple<sol_maybe<float>, sol_maybe<float>>
-InputMapLuaTable::getCommandValueAxis2d(size_t command) {
+std::tuple<sol_maybe<f32>, sol_maybe<f32>>
+InputMapLuaTable::getCommandValueAxis2d(usize command) {
   if (!mScriptGlobals.entityDatabase.has<InputMap>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);

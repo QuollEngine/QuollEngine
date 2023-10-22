@@ -37,7 +37,7 @@ struct SamplerDescription {
   /**
    * Clamp Lod to minimum value
    */
-  float minLod = 0.0f;
+  f32 minLod = 0.0f;
 
   /**
    * Maximum clamped Lod value
@@ -45,7 +45,7 @@ struct SamplerDescription {
    * If value is 0.0, maximum value
    * clamping is disabled
    */
-  float maxLod = 0.0f;
+  f32 maxLod = 0.0f;
 
   /**
    * Debug name

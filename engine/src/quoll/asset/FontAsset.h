@@ -20,7 +20,7 @@ struct FontGlyph {
   /**
    * Glyph advance
    */
-  float advanceX = 0.0;
+  f32 advanceX = 0.0;
 };
 
 /**
@@ -40,12 +40,12 @@ struct FontAsset {
   /**
    * Glyph data
    */
-  std::unordered_map<uint32_t, FontGlyph> glyphs;
+  std::unordered_map<u32, FontGlyph> glyphs;
 
   /**
    * Font scale
    */
-  float fontScale = 1.0f;
+  f32 fontScale = 1.0f;
 
   /**
    * Device handle

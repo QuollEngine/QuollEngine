@@ -20,7 +20,7 @@ VulkanRenderContext::VulkanRenderContext(VulkanDeviceObject &device,
 
 VkResult VulkanRenderContext::present(VulkanFrameManager &frameManager,
                                       const VulkanSwapchain &swapchain,
-                                      uint32_t imageIdx) {
+                                      u32 imageIdx) {
   QUOLL_PROFILE_EVENT("VulkanRenderContext::present");
   std::array<VkSemaphore, 1> waitSemaphores{
       frameManager.getRenderFinishedSemaphore()};
@@ -28,9 +28,9 @@ VkResult VulkanRenderContext::present(VulkanFrameManager &frameManager,
   VkPresentInfoKHR presentInfo{};
 
   presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-  presentInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size());
+  presentInfo.waitSemaphoreCount = static_cast<u32>(waitSemaphores.size());
   presentInfo.pWaitSemaphores = waitSemaphores.data();
-  presentInfo.swapchainCount = static_cast<uint32_t>(swapchains.size());
+  presentInfo.swapchainCount = static_cast<u32>(swapchains.size());
   presentInfo.pSwapchains = swapchains.data();
   presentInfo.pImageIndices = &imageIdx;
   presentInfo.pResults = nullptr;

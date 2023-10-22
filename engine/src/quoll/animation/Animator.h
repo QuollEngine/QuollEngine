@@ -16,14 +16,14 @@ struct Animator {
   /**
    * Current animator state
    */
-  size_t currentState = std::numeric_limits<size_t>::max();
+  usize currentState = std::numeric_limits<usize>::max();
 
   /**
    * Normalized time
    *
    * Range: [0.0, 1.0];
    */
-  float normalizedTime = 0.0f;
+  f32 normalizedTime = 0.0f;
 
   /**
    * Animation is playing

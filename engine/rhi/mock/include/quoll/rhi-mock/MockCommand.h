@@ -96,7 +96,7 @@ struct MockCommandBindDescriptor
   /**
    * First descriptor set
    */
-  uint32_t firstSet;
+  u32 firstSet;
 
   /**
    * Descriptor
@@ -106,7 +106,7 @@ struct MockCommandBindDescriptor
   /**
    * Dynamic offsets
    */
-  std::vector<uint32_t> dynamicOffsets;
+  std::vector<u32> dynamicOffsets;
 };
 
 /**
@@ -122,7 +122,7 @@ struct MockCommandBindVertexBuffer
   /**
    * Vertex buffer binding offsets
    */
-  std::vector<uint64_t> offsets;
+  std::vector<u64> offsets;
 };
 
 /**
@@ -159,12 +159,12 @@ struct MockCommandPushConstants
   /**
    * Offset
    */
-  uint32_t offset;
+  u32 offset;
 
   /**
    * Size
    */
-  uint32_t size;
+  u32 size;
 
   /**
    * Data
@@ -179,22 +179,22 @@ struct MockCommandDraw : public MockCommandTyped<MockCommandType::Draw> {
   /**
    * Vertex count
    */
-  uint32_t vertexCount;
+  u32 vertexCount;
 
   /**
    * First vertex
    */
-  uint32_t firstVertex;
+  u32 firstVertex;
 
   /**
    * Instance count
    */
-  uint32_t instanceCount;
+  u32 instanceCount;
 
   /**
    * First instance
    */
-  uint32_t firstInstance;
+  u32 firstInstance;
 };
 
 /**
@@ -205,27 +205,27 @@ struct MockCommandDrawIndexed
   /**
    * Index count
    */
-  uint32_t indexCount;
+  u32 indexCount;
 
   /**
    * First index
    */
-  uint32_t firstIndex;
+  u32 firstIndex;
 
   /**
    * Vertex offset
    */
-  int32_t vertexOffset;
+  i32 vertexOffset;
 
   /**
    * Instance count
    */
-  uint32_t instanceCount;
+  u32 instanceCount;
 
   /**
    * First instance
    */
-  uint32_t firstInstance;
+  u32 firstInstance;
 };
 
 /**
@@ -236,17 +236,17 @@ struct MockCommandDispatch
   /**
    * Group count X
    */
-  uint32_t groupCountX;
+  u32 groupCountX;
 
   /**
    * Group count Y
    */
-  uint32_t groupCountY;
+  u32 groupCountY;
 
   /**
    * Group count Z
    */
-  uint32_t groupCountZ;
+  u32 groupCountZ;
 };
 
 /**

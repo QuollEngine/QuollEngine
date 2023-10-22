@@ -39,7 +39,7 @@ public:
    * @param frameIndex Frame index
    */
   void execute(rhi::RenderCommandList &commandList, const glm::vec2 &mousePos,
-               uint32_t frameIndex);
+               u32 frameIndex);
 
   /**
    * @brief Get selected entity
@@ -65,7 +65,7 @@ public:
    * @retval true Selection is performed in current frame
    * @retval false Selection is not performed in current frame
    */
-  inline bool isSelectionPerformedInFrame(uint32_t frameIndex) const {
+  inline bool isSelectionPerformedInFrame(u32 frameIndex) const {
     return frameIndex == mFrameIndex;
   }
 
@@ -99,7 +99,7 @@ private:
   glm::uvec2 mFramebufferSize{};
   bool mResized = true;
 
-  uint32_t mFrameIndex = std::numeric_limits<uint32_t>::max();
+  u32 mFrameIndex = std::numeric_limits<u32>::max();
 };
 
 } // namespace quoll::editor

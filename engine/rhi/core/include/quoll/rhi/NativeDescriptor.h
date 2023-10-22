@@ -12,12 +12,12 @@ struct DescriptorBufferInfo {
   /**
    * Buffer offset
    */
-  uint32_t offset = 0;
+  u32 offset = 0;
 
   /**
    * Buffer range
    */
-  uint32_t range = 0;
+  u32 range = 0;
 
   /**
    * Buffer
@@ -38,8 +38,8 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  virtual void write(uint32_t binding, std::span<TextureHandle> textures,
-                     DescriptorType type, uint32_t start) = 0;
+  virtual void write(u32 binding, std::span<TextureHandle> textures,
+                     DescriptorType type, u32 start) = 0;
 
   /**
    * @brief Bind sampler descriptors
@@ -48,8 +48,8 @@ public:
    * @param samplers Samplers
    * @param start Starting index
    */
-  virtual void write(uint32_t binding, std::span<SamplerHandle> samplers,
-                     uint32_t start) = 0;
+  virtual void write(u32 binding, std::span<SamplerHandle> samplers,
+                     u32 start) = 0;
 
   /**
    * @brief Bind buffer descriptors
@@ -59,8 +59,8 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  virtual void write(uint32_t binding, std::span<BufferHandle> buffers,
-                     DescriptorType type, uint32_t start) = 0;
+  virtual void write(u32 binding, std::span<BufferHandle> buffers,
+                     DescriptorType type, u32 start) = 0;
 
   /**
    * @brief Bind buffer descriptors
@@ -70,9 +70,8 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  virtual void write(uint32_t binding,
-                     std::span<DescriptorBufferInfo> bufferInfos,
-                     DescriptorType type, uint32_t start) = 0;
+  virtual void write(u32 binding, std::span<DescriptorBufferInfo> bufferInfos,
+                     DescriptorType type, u32 start) = 0;
 };
 
 } // namespace quoll::rhi

@@ -14,7 +14,7 @@ VulkanFramebuffer::VulkanFramebuffer(const FramebufferDescription &description,
   std::vector<VkImageView> attachments(description.attachments.size(),
                                        VK_NULL_HANDLE);
 
-  for (size_t i = 0; i < attachments.size(); ++i) {
+  for (usize i = 0; i < attachments.size(); ++i) {
     attachments.at(i) = registry.getTextures()
                             .at(description.attachments.at(i))
                             ->getImageView();
@@ -25,7 +25,7 @@ VulkanFramebuffer::VulkanFramebuffer(const FramebufferDescription &description,
   createInfo.flags = 0;
   createInfo.pNext = nullptr;
   createInfo.pAttachments = attachments.data();
-  createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+  createInfo.attachmentCount = static_cast<u32>(attachments.size());
   createInfo.renderPass =
       registry.getRenderPasses().at(description.renderPass)->getRenderPass();
   createInfo.width = description.width;

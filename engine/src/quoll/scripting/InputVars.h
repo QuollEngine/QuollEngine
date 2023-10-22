@@ -24,8 +24,8 @@ public:
    * @param type Variable type
    * @return Variable value
    */
-  std::variant<String, uint32_t> registerVar(String name,
-                                             LuaScriptVariableType type);
+  std::variant<String, u32> registerVar(String name,
+                                        LuaScriptVariableType type);
 
   /**
    * @brief Create interface

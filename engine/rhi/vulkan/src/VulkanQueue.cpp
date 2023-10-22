@@ -5,7 +5,7 @@
 
 namespace quoll::rhi {
 
-VulkanQueue::VulkanQueue(VulkanDeviceObject &device, uint32_t queueIndex)
+VulkanQueue::VulkanQueue(VulkanDeviceObject &device, u32 queueIndex)
     : mQueueIndex(queueIndex) {
   vkGetDeviceQueue(device, mQueueIndex, 0, &mQueue);
 }
@@ -20,13 +20,13 @@ void VulkanQueue::submit(
   submitInfo.pNext = nullptr;
   submitInfo.flags = 0;
   submitInfo.commandBufferInfoCount =
-      static_cast<uint32_t>(commandBufferInfos.size());
+      static_cast<u32>(commandBufferInfos.size());
   submitInfo.pCommandBufferInfos = commandBufferInfos.data();
   submitInfo.waitSemaphoreInfoCount =
-      static_cast<uint32_t>(waitSemaphoreInfos.size());
+      static_cast<u32>(waitSemaphoreInfos.size());
   submitInfo.pWaitSemaphoreInfos = waitSemaphoreInfos.data();
   submitInfo.signalSemaphoreInfoCount =
-      static_cast<uint32_t>(signalSemaphoreInfos.size());
+      static_cast<u32>(signalSemaphoreInfos.size());
   submitInfo.pSignalSemaphoreInfos = signalSemaphoreInfos.data();
 
   checkForVulkanError(vkQueueSubmit2KHR(mQueue, 1, &submitInfo, fence),

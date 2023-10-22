@@ -19,9 +19,9 @@ TEST_F(TransformLuaTableTest, GetsPositionValue) {
 
   auto state = call(entity, "local_transform_position_get");
 
-  EXPECT_EQ(state["local_position_x"].get<float>(), 2.5f);
-  EXPECT_EQ(state["local_position_y"].get<float>(), 0.2f);
-  EXPECT_EQ(state["local_position_z"].get<float>(), 0.5f);
+  EXPECT_EQ(state["local_position_x"].get<f32>(), 2.5f);
+  EXPECT_EQ(state["local_position_y"].get<f32>(), 0.2f);
+  EXPECT_EQ(state["local_position_z"].get<f32>(), 0.5f);
 }
 
 TEST_F(TransformLuaTableDeathTest, SetPositionFailsIfComponentDoesNotExist) {
@@ -52,9 +52,9 @@ TEST_F(TransformLuaTableTest, GetsScaleValue) {
 
   auto state = call(entity, "local_transform_scale_get");
 
-  EXPECT_EQ(state["local_scale_x"].get<float>(), 2.5f);
-  EXPECT_EQ(state["local_scale_y"].get<float>(), 0.2f);
-  EXPECT_EQ(state["local_scale_z"].get<float>(), 0.5f);
+  EXPECT_EQ(state["local_scale_x"].get<f32>(), 2.5f);
+  EXPECT_EQ(state["local_scale_y"].get<f32>(), 0.2f);
+  EXPECT_EQ(state["local_scale_z"].get<f32>(), 0.5f);
 }
 
 TEST_F(TransformLuaTableDeathTest, SetScaleFailsIfComponentDoesNotExist) {
@@ -88,9 +88,9 @@ TEST_F(TransformLuaTableTest, GetRotationReturnsRotationInDegrees) {
 
   auto state = call(entity, "local_transform_rotation_get");
 
-  auto actual = glm::vec3{state["local_rotation_x"].get<float>(),
-                          state["local_rotation_y"].get<float>(),
-                          state["local_rotation_z"].get<float>()};
+  auto actual = glm::vec3{state["local_rotation_x"].get<f32>(),
+                          state["local_rotation_y"].get<f32>(),
+                          state["local_rotation_z"].get<f32>()};
   auto expected = TestEulerDegrees;
 
   EXPECT_NEAR(actual.x, expected.x, 0.0001f);

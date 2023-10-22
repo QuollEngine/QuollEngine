@@ -31,8 +31,8 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  void write(uint32_t binding, std::span<TextureHandle> textures,
-             DescriptorType type, uint32_t start) override;
+  void write(u32 binding, std::span<TextureHandle> textures,
+             DescriptorType type, u32 start) override;
 
   /**
    * @brief Bind sampler descriptors
@@ -41,8 +41,8 @@ public:
    * @param samplers Samplers
    * @param start Starting index
    */
-  void write(uint32_t binding, std::span<SamplerHandle> samplers,
-             uint32_t start) override;
+  void write(u32 binding, std::span<SamplerHandle> samplers,
+             u32 start) override;
 
   /**
    * @brief Write buffers
@@ -52,8 +52,8 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  void write(uint32_t binding, std::span<BufferHandle> buffers,
-             DescriptorType type, uint32_t start) override;
+  void write(u32 binding, std::span<BufferHandle> buffers, DescriptorType type,
+             u32 start) override;
 
   /**
    * @brief Bind buffer descriptors
@@ -63,8 +63,8 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  void write(uint32_t binding, std::span<DescriptorBufferInfo> bufferInfos,
-             DescriptorType type, uint32_t start) override;
+  void write(u32 binding, std::span<DescriptorBufferInfo> bufferInfos,
+             DescriptorType type, u32 start) override;
 
 private:
   /**
@@ -77,7 +77,7 @@ private:
    * @param imageInfos Image infos
    * @param bufferInfos Buffer infos
    */
-  void write(uint32_t binding, uint32_t start, size_t descriptorCount,
+  void write(u32 binding, u32 start, usize descriptorCount,
              VkDescriptorType type, const VkDescriptorImageInfo *imageInfos,
              VkDescriptorBufferInfo *bufferInfos);
 

@@ -28,7 +28,7 @@ public:
   /**
    * @brief Toolbar height
    */
-  static constexpr float Height = 60.0f;
+  static constexpr f32 Height = 60.0f;
 
 public:
   /**

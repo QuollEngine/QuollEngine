@@ -151,14 +151,14 @@ Result<AnimatorAssetHandle> AssetCache::loadAnimator(const Uuid &uuid) {
     asset.data.states.push_back(state);
   }
 
-  for (size_t i = 0; i < transitionNodes.size(); ++i) {
+  for (usize i = 0; i < transitionNodes.size(); ++i) {
     auto &state = asset.data.states.at(i);
     auto &stateOn = transitionNodes.at(i);
     if (!stateOn || !stateOn.IsSequence()) {
       continue;
     }
 
-    for (size_t j = 0; j < stateOn.size(); ++j) {
+    for (usize j = 0; j < stateOn.size(); ++j) {
       auto transitionIndex =
           "Transition at index " + std::to_string(j) + " of " + state.name;
 
@@ -201,7 +201,7 @@ Result<AnimatorAssetHandle> AssetCache::loadAnimator(const Uuid &uuid) {
       }
 
       auto target = transitionNode["target"].as<String>("");
-      size_t i = 0;
+      usize i = 0;
       for (; i < asset.data.states.size() &&
              asset.data.states.at(i).name != target;
            ++i) {
@@ -229,7 +229,7 @@ Result<AnimatorAssetHandle> AssetCache::loadAnimator(const Uuid &uuid) {
 
   if (root["initial"]) {
     auto initial = root["initial"].as<String>("");
-    size_t i = 0;
+    usize i = 0;
     for (; i < asset.data.states.size() &&
            asset.data.states.at(i).name != initial;
          ++i) {

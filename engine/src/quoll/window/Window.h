@@ -24,7 +24,7 @@ public:
    * @param deviceManager Device manager
    * @param eventSystem Event system
    */
-  Window(StringView title, uint32_t width, uint32_t height,
+  Window(StringView title, u32 width, u32 height,
          InputDeviceManager &deviceManager, EventSystem &eventSystem);
 
   /**
@@ -89,15 +89,14 @@ public:
    * @param handler Framebuffer resize handler
    * @return Framebuffer resize handler ID
    */
-  uint32_t addFramebufferResizeHandler(
-      const std::function<void(uint32_t, uint32_t)> &handler);
+  u32 addFramebufferResizeHandler(const std::function<void(u32, u32)> &handler);
 
   /**
    * @brief Remove resize handler
    *
    * @param handle Handle
    */
-  void removeResizeHandler(uint32_t handle);
+  void removeResizeHandler(u32 handle);
 
   /**
    * @brief Add focus handler
@@ -105,14 +104,14 @@ public:
    * @param handler Focus handler
    * @return Focus handler ID
    */
-  uint32_t addFocusHandler(const std::function<void(bool)> &handler);
+  u32 addFocusHandler(const std::function<void(bool)> &handler);
 
   /**
    * @brief Remove focus handler
    *
    * @param handle Handle
    */
-  void removeFocusHandler(uint32_t handle);
+  void removeFocusHandler(u32 handle);
 
   /**
    * @brief Get current mouse position
@@ -157,9 +156,9 @@ private:
   ::GLFWwindow *mWindowInstance;
 
   template <class TFunctionType>
-  using HandlerMap = std::map<uint32_t, std::function<TFunctionType>>;
+  using HandlerMap = std::map<u32, std::function<TFunctionType>>;
 
-  HandlerMap<void(uint32_t, uint32_t)> mResizeHandlers;
+  HandlerMap<void(u32, u32)> mResizeHandlers;
   HandlerMap<void(bool)> mFocusHandlers;
 };
 

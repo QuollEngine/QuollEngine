@@ -9,7 +9,7 @@ struct CascadedShadowMap {
   /**
    * @brief Maximum number of shadow cascades
    */
-  static constexpr uint32_t MaxCascades = 6;
+  static constexpr u32 MaxCascades = 6;
 
   /**
    * Split lambda for calculating splits
@@ -21,7 +21,7 @@ struct CascadedShadowMap {
    * uniform_i = near + (far - near) * (1 / size)
    * distance_i = lambda * log_i + (1 - lambda) * uniform_i
    */
-  float splitLambda = 0.8f;
+  f32 splitLambda = 0.8f;
 
   /**
    * Use soft shadows
@@ -31,7 +31,7 @@ struct CascadedShadowMap {
   /**
    * Number of cascades
    */
-  uint32_t numCascades = 4;
+  u32 numCascades = 4;
 };
 
 } // namespace quoll

@@ -16,8 +16,7 @@ enum class GraphDirty { None, PassChanges, SizeUpdate };
  */
 class RenderGraph {
   using RGTexture = RenderGraphResource<rhi::TextureHandle>;
-  using RGTextureCreator =
-      std::function<rhi::TextureDescription(uint32_t, uint32_t)>;
+  using RGTextureCreator = std::function<rhi::TextureDescription(u32, u32)>;
   template <class THandle>
   using RGBuildCallback = std::function<void(THandle, RenderStorage &)>;
 
@@ -67,9 +66,9 @@ public:
    * @param layerCount Layer count
    * @return Render graph texture
    */
-  RGTexture createView(RGTexture texture, uint32_t baseMipLevel = 0,
-                       uint32_t mipLevelCount = 1, uint32_t baseLayer = 0,
-                       uint32_t layerCount = 1);
+  RGTexture createView(RGTexture texture, u32 baseMipLevel = 0,
+                       u32 mipLevelCount = 1, u32 baseLayer = 0,
+                       u32 layerCount = 1);
 
   /**
    * @brief Import existing texture to render graph
@@ -85,7 +84,7 @@ public:
    * @param commandList Command list
    * @param frameIndex Frame index
    */
-  void execute(rhi::RenderCommandList &commandList, uint32_t frameIndex);
+  void execute(rhi::RenderCommandList &commandList, u32 frameIndex);
 
   /**
    * @brief Build render graph

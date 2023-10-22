@@ -4,7 +4,7 @@
 
 namespace quoll::editor {
 
-static constexpr uint32_t TriangleVertices = 3;
+static constexpr u32 TriangleVertices = 3;
 
 /**
  * @brief Mikktspace adapter
@@ -14,7 +14,7 @@ class MikktspaceAdapter {
     const std::vector<glm::vec3> &positions;
     const std::vector<glm::vec3> &normals;
     const std::vector<glm::vec2> &texCoords;
-    const std::vector<uint32_t> &indices;
+    const std::vector<u32> &indices;
     std::vector<glm::vec4> &tangents;
   };
 
@@ -36,7 +36,7 @@ public:
   void generate(const std::vector<glm::vec3> &positions,
                 const std::vector<glm::vec3> &normals,
                 const std::vector<glm::vec2> &texCoords,
-                const std::vector<uint32_t> &indices,
+                const std::vector<u32> &indices,
                 std::vector<glm::vec4> &tangents);
 
 private:
@@ -70,9 +70,8 @@ private:
    * @param faceIndex Face index
    * @param vertexIndex Relative vertex index
    */
-  static void getPosition(const SMikkTSpaceContext *context,
-                          float outAttribute[], const int faceIndex,
-                          const int vertexIndex);
+  static void getPosition(const SMikkTSpaceContext *context, f32 outAttribute[],
+                          const int faceIndex, const int vertexIndex);
 
   /**
    * @brief Get normal
@@ -82,7 +81,7 @@ private:
    * @param faceIndex Face index
    * @param vertexIndex Relative vertex index
    */
-  static void getNormal(const SMikkTSpaceContext *context, float outAttribute[],
+  static void getNormal(const SMikkTSpaceContext *context, f32 outAttribute[],
                         const int faceIndex, const int vertexIndex);
 
   /**
@@ -93,9 +92,8 @@ private:
    * @param faceIndex Face index
    * @param vertexIndex Relative vertex index
    */
-  static void getTexCoord(const SMikkTSpaceContext *context,
-                          float outAttribute[], const int faceIndex,
-                          const int vertexIndex);
+  static void getTexCoord(const SMikkTSpaceContext *context, f32 outAttribute[],
+                          const int faceIndex, const int vertexIndex);
 
   /**
    * @brief Set tangent space
@@ -107,7 +105,7 @@ private:
    * @param vertexIndex Relative vertex index
    */
   static void setTSpaceBasic(const SMikkTSpaceContext *context,
-                             const float tangents[], const float sign,
+                             const f32 tangents[], const f32 sign,
                              const int faceIndex, const int vertexIndex);
 
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays)
@@ -130,8 +128,8 @@ private:
    * @param vertexIndex Vertex index relative to face
    * @return Vertex index
    */
-  static size_t getVertexIndex(const SMikkTSpaceContext *context, int faceIndex,
-                               int vertexIndex);
+  static usize getVertexIndex(const SMikkTSpaceContext *context, int faceIndex,
+                              int vertexIndex);
 
 private:
   SMikkTSpaceInterface mInterface{};

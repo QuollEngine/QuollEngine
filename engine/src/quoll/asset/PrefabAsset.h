@@ -19,7 +19,7 @@ template <class T> struct PrefabComponent {
    *
    * This value is local to prefab asset file
    */
-  uint32_t entity = 0;
+  u32 entity = 0;
 
   /**
    * Value
@@ -51,7 +51,7 @@ struct PrefabTransformData {
    *
    * This value is local to prefab asset file
    */
-  int32_t parent = -1;
+  i32 parent = -1;
 };
 
 /**

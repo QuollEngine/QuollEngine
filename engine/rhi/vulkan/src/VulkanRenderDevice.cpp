@@ -40,7 +40,7 @@ VulkanRenderDevice::VulkanRenderDevice(
   VkDevice device = mDevice.getVulkanHandle();
   VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
   VkQueue graphicsQueue = mGraphicsQueue.getVulkanHandle();
-  uint32_t queueIndex = mGraphicsQueue.getQueueIndex();
+  u32 queueIndex = mGraphicsQueue.getQueueIndex();
 
   QUOLL_PROFILE_GPU_INIT_VULKAN(&device, &physicalDeviceHandle, &graphicsQueue,
                                 &queueIndex, 1, nullptr);
@@ -85,7 +85,7 @@ void VulkanRenderDevice::submitImmediate(RenderCommandList &commandList) {
 }
 
 RenderFrame VulkanRenderDevice::beginFrame() {
-  static constexpr auto SkipFrame = std::numeric_limits<uint32_t>::max();
+  static constexpr auto SkipFrame = std::numeric_limits<u32>::max();
   static RenderCommandList emptyCommandList;
 
   QUOLL_PROFILE_EVENT("VulkanRenderDevice::beginFrame");
@@ -93,10 +93,10 @@ RenderFrame VulkanRenderDevice::beginFrame() {
   mStats.resetCalls();
   mFrameManager.waitForFrame();
 
-  uint32_t imageIndex =
+  u32 imageIndex =
       mSwapchain.acquireNextImage(mFrameManager.getImageAvailableSemaphore());
 
-  if (imageIndex == std::numeric_limits<uint32_t>::max()) {
+  if (imageIndex == std::numeric_limits<u32>::max()) {
     recreateSwapchain();
     return {SkipFrame, SkipFrame, emptyCommandList};
   }

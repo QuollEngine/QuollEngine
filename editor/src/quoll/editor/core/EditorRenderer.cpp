@@ -126,7 +126,7 @@ void EditorRenderer::attach(RenderGraph &graph,
          {},
          "object icons"});
 
-    static const float WireframeLineHeight = 3.0f;
+    static const f32 WireframeLineHeight = 3.0f;
 
     auto collidableShapePipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("collidable-shape.vert"),
@@ -152,10 +152,10 @@ void EditorRenderer::attach(RenderGraph &graph,
     editorDebugPass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
                                  objectIconsPipeline, collidableShapePipeline,
                                  this](rhi::RenderCommandList &commandList,
-                                       uint32_t frameIndex) {
+                                       u32 frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
 
-      std::array<uint32_t, 1> offsets{0};
+      std::array<u32, 1> offsets{0};
       // Collidable shapes
       if (frameData.isCollidableEntitySelected() &&
           frameData.getCollidableShapeType() != PhysicsGeometryType::Plane) {
@@ -168,7 +168,7 @@ void EditorRenderer::attach(RenderGraph &graph,
 
         auto type = frameData.getCollidableShapeType();
 
-        std::array<uint64_t, 1> offsets{0};
+        std::array<u64, 1> offsets{0};
 
         if (type == PhysicsGeometryType::Box) {
           commandList.bindVertexBuffers(
@@ -194,7 +194,7 @@ void EditorRenderer::attach(RenderGraph &graph,
             editorGridPipeline, 0,
             frameData.getBindlessParams().getDescriptor(), offsets);
 
-        static constexpr uint32_t GridPlaneNumVertices = 6;
+        static constexpr u32 GridPlaneNumVertices = 6;
         commandList.draw(GridPlaneNumVertices, 0);
       }
 
@@ -209,8 +209,8 @@ void EditorRenderer::attach(RenderGraph &graph,
 
         const auto &numBones = frameData.getBoneCounts();
 
-        for (size_t i = 0; i < numBones.size(); ++i) {
-          commandList.draw(numBones.at(i), 0, 1, static_cast<uint32_t>(i));
+        for (usize i = 0; i < numBones.size(); ++i) {
+          commandList.draw(numBones.at(i), 0, 1, static_cast<u32>(i));
         }
       }
 
@@ -226,14 +226,14 @@ void EditorRenderer::attach(RenderGraph &graph,
             objectIconsPipeline, 1,
             frameData.getBindlessParams().getDescriptor(), offsets);
 
-        uint32_t previousInstance = 0;
+        u32 previousInstance = 0;
         for (auto &[icon, count] : frameData.getGizmoCounts()) {
           glm::uvec4 uIcon{
               rhi::castHandleToUint(icon),
               rhi::castHandleToUint(mRenderStorage.getDefaultSampler()), 0, 0};
           commandList.pushConstants(objectIconsPipeline,
-                                    rhi::ShaderStage::Fragment, 0,
-                                    sizeof(uint32_t), glm::value_ptr(uIcon));
+                                    rhi::ShaderStage::Fragment, 0, sizeof(u32),
+                                    glm::value_ptr(uIcon));
 
           commandList.draw(4, 0, count, previousInstance);
 
@@ -265,7 +265,7 @@ void EditorRenderer::attach(RenderGraph &graph,
     outlinePass.write(scenePassData.sceneColorResolved, AttachmentType::Resolve,
                       glm::vec4(0.0));
 
-    static constexpr uint32_t MaskAll = 0xFF;
+    static constexpr u32 MaskAll = 0xFF;
     rhi::PipelineDepthStencil outlineWritePipelineStencil{
         .depthTest = true,
         .depthWrite = true,
@@ -438,19 +438,18 @@ void EditorRenderer::attach(RenderGraph &graph,
          outlineGeometryStencilWritePipeline, outlineGeometryPipeline,
          outlineSkinnedGeometryStencilWritePipeline,
          outlineSkinnedGeometryPipeline,
-         this](rhi::RenderCommandList &commandList, uint32_t frameIndex) {
+         this](rhi::RenderCommandList &commandList, u32 frameIndex) {
           static constexpr glm::vec4 OutlineColor{1.0f, 0.26f, 0.0f, 1.0f};
-          static constexpr float OutlineScale = 1.02f;
-          static constexpr float OutlineScale2D = 1.06f;
+          static constexpr f32 OutlineScale = 1.02f;
+          static constexpr f32 OutlineScale2D = 1.06f;
 
           auto &frameData = mFrameData.at(frameIndex);
 
-          auto spriteEnd =
-              static_cast<uint32_t>(frameData.getOutlineSpriteEnd());
-          auto textEnd = static_cast<uint32_t>(frameData.getOutlineTextEnd());
-          auto meshEnd = static_cast<uint32_t>(frameData.getOutlineMeshEnd());
+          auto spriteEnd = static_cast<u32>(frameData.getOutlineSpriteEnd());
+          auto textEnd = static_cast<u32>(frameData.getOutlineTextEnd());
+          auto meshEnd = static_cast<u32>(frameData.getOutlineMeshEnd());
           auto skinnedMeshEnd =
-              static_cast<uint32_t>(frameData.getOutlineSkinnedMeshEnd());
+              static_cast<u32>(frameData.getOutlineSkinnedMeshEnd());
 
           renderSpriteOutlines(commandList, frameData,
                                outlineSpriteStencilWritePipeline, 0, spriteEnd,
@@ -485,7 +484,7 @@ void EditorRenderer::attach(RenderGraph &graph,
 void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                      Entity camera, WorkspaceState &state,
                                      AssetRegistry &assetRegistry,
-                                     uint32_t frameIndex) {
+                                     u32 frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
   QUOLL_PROFILE_EVENT("EditorRenderer::update");
@@ -524,9 +523,9 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 
       std::vector<SceneRendererFrameData::GlyphData> glyphs(text.text.length());
-      float advanceX = 0;
-      float advanceY = 0;
-      for (size_t i = 0; i < text.text.length(); ++i) {
+      f32 advanceX = 0;
+      f32 advanceY = 0;
+      for (usize i = 0; i < text.text.length(); ++i) {
         char c = text.text.at(i);
 
         if (c == '\n') {
@@ -582,7 +581,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   for (auto [entity, world, camera] :
        entityDatabase.view<WorldTransform, PerspectiveLens>()) {
-    static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;
+    static constexpr f32 NinetyDegreesInRadians = glm::pi<f32>() / 2.0f;
 
     frameData.addGizmo(IconRegistry::getIcon(EditorIcon::Camera),
                        glm::rotate(world.worldTransform, NinetyDegreesInRadians,
@@ -595,10 +594,9 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 void EditorRenderer::renderSpriteOutlines(rhi::RenderCommandList &commandList,
                                           EditorRendererFrameData &frameData,
                                           rhi::PipelineHandle pipeline,
-                                          uint32_t instanceStart,
-                                          uint32_t instanceEnd, glm::vec4 color,
-                                          float scale) {
-  std::array<uint32_t, 1> offsets{0};
+                                          u32 instanceStart, u32 instanceEnd,
+                                          glm::vec4 color, f32 scale) {
+  std::array<u32, 1> offsets{0};
 
   commandList.bindPipeline(pipeline);
   commandList.bindDescriptor(
@@ -625,10 +623,9 @@ void EditorRenderer::renderSpriteOutlines(rhi::RenderCommandList &commandList,
 void EditorRenderer::renderTextOutlines(rhi::RenderCommandList &commandList,
                                         EditorRendererFrameData &frameData,
                                         rhi::PipelineHandle pipeline,
-                                        uint32_t instanceStart,
-                                        uint32_t instanceEnd, glm::vec4 color,
-                                        float scale) {
-  std::array<uint32_t, 1> offsets{0};
+                                        u32 instanceStart, u32 instanceEnd,
+                                        glm::vec4 color, f32 scale) {
+  std::array<u32, 1> offsets{0};
 
   commandList.bindPipeline(pipeline);
   commandList.bindDescriptor(
@@ -642,8 +639,8 @@ void EditorRenderer::renderTextOutlines(rhi::RenderCommandList &commandList,
     glm::uvec4 index;
   };
 
-  static constexpr uint32_t QuadNumVertices = 6;
-  for (size_t i = 0; i < frameData.getTextOutlines().size(); ++i) {
+  static constexpr u32 QuadNumVertices = 6;
+  for (usize i = 0; i < frameData.getTextOutlines().size(); ++i) {
     const auto &text = frameData.getTextOutlines().at(i);
 
     PushConstants pc{};
@@ -658,18 +655,17 @@ void EditorRenderer::renderTextOutlines(rhi::RenderCommandList &commandList,
         pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
         sizeof(PushConstants), &pc);
 
-    commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0, 1,
-                     static_cast<uint32_t>(i));
+    commandList.draw(QuadNumVertices * static_cast<u32>(text.length), 0, 1,
+                     static_cast<u32>(i));
   }
 }
 
 void EditorRenderer::renderMeshOutlines(rhi::RenderCommandList &commandList,
                                         EditorRendererFrameData &frameData,
                                         rhi::PipelineHandle pipeline,
-                                        uint32_t instanceStart,
-                                        uint32_t instanceEnd, glm::vec4 color,
-                                        float scale) {
-  std::array<uint32_t, 1> offsets{0};
+                                        u32 instanceStart, u32 instanceEnd,
+                                        glm::vec4 color, f32 scale) {
+  std::array<u32, 1> offsets{0};
 
   commandList.bindPipeline(pipeline);
   commandList.bindDescriptor(
@@ -690,7 +686,7 @@ void EditorRenderer::renderMeshOutlines(rhi::RenderCommandList &commandList,
       pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
       sizeof(PushConstants), &pc);
 
-  for (uint32_t instanceIndex = instanceStart; instanceIndex < instanceEnd;
+  for (u32 instanceIndex = instanceStart; instanceIndex < instanceEnd;
        ++instanceIndex) {
     const auto &outline = frameData.getMeshOutlines().at(instanceIndex);
 
@@ -698,17 +694,17 @@ void EditorRenderer::renderMeshOutlines(rhi::RenderCommandList &commandList,
                                   outline.vertexBufferOffsets);
     commandList.bindIndexBuffer(outline.indexBuffer, rhi::IndexType::Uint32);
 
-    for (size_t i = 0; i < outline.indexCounts.size(); ++i) {
+    for (usize i = 0; i < outline.indexCounts.size(); ++i) {
       commandList.drawIndexed(
           outline.indexCounts.at(i), outline.indexOffsets.at(i),
-          static_cast<int32_t>(outline.vertexOffsets.at(i)), 1, instanceIndex);
+          static_cast<i32>(outline.vertexOffsets.at(i)), 1, instanceIndex);
     }
   }
 }
 
 void EditorRenderer::createCollidableShapes() {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-  static constexpr float Pi = glm::pi<float>();
+  static constexpr f32 Pi = glm::pi<f32>();
 
   using V = glm::vec3;
 
@@ -742,37 +738,37 @@ void EditorRenderer::createCollidableShapes() {
          CollidableBoxVertices.size() * sizeof(glm::vec3),
          static_cast<const void *>(CollidableBoxVertices.data())});
     mCollidableCube.vertexCount =
-        static_cast<uint32_t>(CollidableBoxVertices.size());
+        static_cast<u32>(CollidableBoxVertices.size());
   }
 
-  using CalculationFn = std::function<float(float)>;
+  using CalculationFn = std::function<f32(f32)>;
 
-  static constexpr float Radius = 1.0f;
+  static constexpr f32 Radius = 1.0f;
 
-  auto cSinCenter = [](float center) {
-    return [center](float angle) { return Radius * sin(angle) + center; };
+  auto cSinCenter = [](f32 center) {
+    return [center](f32 angle) { return Radius * sin(angle) + center; };
   };
-  auto cCosCenter = [](float center) {
-    return [center](float angle) { return Radius * cos(angle) + center; };
+  auto cCosCenter = [](f32 center) {
+    return [center](f32 angle) { return Radius * cos(angle) + center; };
   };
 
   auto cSin = cSinCenter(0.0f);
   auto cCos = cCosCenter(0.0f);
-  auto cZero = [](float angle) { return 0.0f; };
+  auto cZero = [](f32 angle) { return 0.0f; };
 
   // Sphere shape
   {
-    auto drawUnitCircle = [](std::vector<glm::vec3> &vertices,
-                             uint32_t numSegments, CalculationFn cX,
-                             CalculationFn cY, CalculationFn cZ) {
-      const float SegmentDelta = 2.0f * Pi / static_cast<float>(numSegments);
-      float segmentAngle = SegmentDelta;
+    auto drawUnitCircle = [](std::vector<glm::vec3> &vertices, u32 numSegments,
+                             CalculationFn cX, CalculationFn cY,
+                             CalculationFn cZ) {
+      const f32 SegmentDelta = 2.0f * Pi / static_cast<f32>(numSegments);
+      f32 segmentAngle = SegmentDelta;
 
       V start{cX(0.0f), cY(0.0f), cZ(0.0f)};
 
       vertices.push_back(start);
 
-      for (uint32_t i = 0; i < numSegments; ++i) {
+      for (u32 i = 0; i < numSegments; ++i) {
         V vertex{cX(segmentAngle), cY(segmentAngle), cZ(segmentAngle)};
 
         vertices.push_back(vertex);
@@ -784,7 +780,7 @@ void EditorRenderer::createCollidableShapes() {
       vertices.push_back(start);
     };
 
-    static constexpr uint32_t NumSegments = 12;
+    static constexpr u32 NumSegments = 12;
     std::vector<glm::vec3> CollidableSphereVertices;
 
     drawUnitCircle(CollidableSphereVertices, NumSegments, cZero, cSin, cCos);
@@ -795,35 +791,34 @@ void EditorRenderer::createCollidableShapes() {
          CollidableSphereVertices.size() * sizeof(glm::vec3),
          static_cast<const void *>(CollidableSphereVertices.data())});
     mCollidableSphere.vertexCount =
-        static_cast<uint32_t>(CollidableSphereVertices.size());
+        static_cast<u32>(CollidableSphereVertices.size());
   }
 
   // Capsule shape
   {
-    auto drawUnitHalfCircle = [](std::vector<glm::vec3> &vertices,
-                                 uint32_t numSegments, CalculationFn cX,
-                                 CalculationFn cY, CalculationFn cZ,
-                                 float circleAngle) {
-      const float SegmentDelta = circleAngle / static_cast<float>(numSegments);
-      float segmentAngle = SegmentDelta;
+    auto drawUnitHalfCircle =
+        [](std::vector<glm::vec3> &vertices, u32 numSegments, CalculationFn cX,
+           CalculationFn cY, CalculationFn cZ, f32 circleAngle) {
+          const f32 SegmentDelta = circleAngle / static_cast<f32>(numSegments);
+          f32 segmentAngle = SegmentDelta;
 
-      V start{cX(0.0f), cY(0.0f), cZ(0.0f)};
+          V start{cX(0.0f), cY(0.0f), cZ(0.0f)};
 
-      vertices.push_back(start);
+          vertices.push_back(start);
 
-      for (uint32_t i = 0; i < numSegments; ++i) {
-        V v{cX(segmentAngle), cY(segmentAngle), cZ(segmentAngle)};
+          for (u32 i = 0; i < numSegments; ++i) {
+            V v{cX(segmentAngle), cY(segmentAngle), cZ(segmentAngle)};
 
-        vertices.push_back(v);
-        vertices.push_back(v);
+            vertices.push_back(v);
+            vertices.push_back(v);
 
-        segmentAngle += SegmentDelta;
-      }
+            segmentAngle += SegmentDelta;
+          }
 
-      vertices.push_back(vertices.at(vertices.size() - 1));
-    };
+          vertices.push_back(vertices.at(vertices.size() - 1));
+        };
 
-    static constexpr uint32_t NumSegments = 12;
+    static constexpr u32 NumSegments = 12;
     std::vector<glm::vec3> CollidableCapsuleVertices;
 
     drawUnitHalfCircle(CollidableCapsuleVertices, NumSegments, cCos,
@@ -853,7 +848,7 @@ void EditorRenderer::createCollidableShapes() {
          CollidableCapsuleVertices.size() * sizeof(glm::vec3),
          static_cast<const void *>(CollidableCapsuleVertices.data())});
     mCollidableCapsule.vertexCount =
-        static_cast<uint32_t>(CollidableCapsuleVertices.size());
+        static_cast<u32>(CollidableCapsuleVertices.size());
   }
 
   // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

@@ -15,7 +15,7 @@ ActionExecutorResult SetGridLines::onExecute(WorkspaceState &state,
 
 bool SetGridLines::predicate(WorkspaceState &state,
                              AssetRegistry &assetRegistry) {
-  return state.grid.x != static_cast<uint32_t>(mShow);
+  return state.grid.x != static_cast<u32>(mShow);
 }
 
 bool SetGridAxisLines::isShown(WorkspaceState &state) {
@@ -32,7 +32,7 @@ ActionExecutorResult SetGridAxisLines::onExecute(WorkspaceState &state,
 
 bool SetGridAxisLines::predicate(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) {
-  return state.grid.y != static_cast<uint32_t>(mShow);
+  return state.grid.y != static_cast<u32>(mShow);
 }
 
 } // namespace quoll::editor

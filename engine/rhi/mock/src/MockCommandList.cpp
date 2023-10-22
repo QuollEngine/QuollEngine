@@ -43,9 +43,9 @@ void MockCommandList::bindPipeline(PipelineHandle pipeline) {
   mBindings.pipeline = pipeline;
 }
 
-void MockCommandList::bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
+void MockCommandList::bindDescriptor(PipelineHandle pipeline, u32 firstSet,
                                      const Descriptor &descriptor,
-                                     std::span<uint32_t> dynamicOffsets) {
+                                     std::span<u32> dynamicOffsets) {
   auto *command = new MockCommandBindDescriptor;
   command->pipeline = pipeline;
   command->firstSet = firstSet;
@@ -59,7 +59,7 @@ void MockCommandList::bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
 
 void MockCommandList::bindVertexBuffers(
     const std::span<const BufferHandle> buffers,
-    const std::span<const uint64_t> offsets) {
+    const std::span<const u64> offsets) {
   auto *command = new MockCommandBindVertexBuffer;
   command->buffers = std::vector(buffers.begin(), buffers.end());
   command->offsets = std::vector(offsets.begin(), offsets.end());
@@ -80,8 +80,8 @@ void MockCommandList::bindIndexBuffer(BufferHandle buffer,
 }
 
 void MockCommandList::pushConstants(PipelineHandle pipeline,
-                                    ShaderStage shaderStage, uint32_t offset,
-                                    uint32_t size, void *data) {
+                                    ShaderStage shaderStage, u32 offset,
+                                    u32 size, void *data) {
   auto *command = new MockCommandPushConstants;
   command->pipeline = pipeline;
   command->shaderStage = shaderStage;
@@ -91,8 +91,8 @@ void MockCommandList::pushConstants(PipelineHandle pipeline,
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 }
 
-void MockCommandList::draw(uint32_t vertexCount, uint32_t firstVertex,
-                           uint32_t instanceCount, uint32_t firstInstance) {
+void MockCommandList::draw(u32 vertexCount, u32 firstVertex, u32 instanceCount,
+                           u32 firstInstance) {
   auto *command = new MockCommandDraw;
   command->vertexCount = vertexCount;
   command->firstVertex = firstVertex;
@@ -107,9 +107,9 @@ void MockCommandList::draw(uint32_t vertexCount, uint32_t firstVertex,
   mDrawCalls.push_back(call);
 }
 
-void MockCommandList::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
-                                  int32_t vertexOffset, uint32_t instanceCount,
-                                  uint32_t firstInstance) {
+void MockCommandList::drawIndexed(u32 indexCount, u32 firstIndex,
+                                  i32 vertexOffset, u32 instanceCount,
+                                  u32 firstInstance) {
   auto *command = new MockCommandDrawIndexed;
   command->indexCount = indexCount;
   command->firstIndex = firstIndex;
@@ -125,8 +125,8 @@ void MockCommandList::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
   mDrawCalls.push_back(call);
 }
 
-void MockCommandList::dispatch(uint32_t groupCountX, uint32_t groupCountY,
-                               uint32_t groupCountZ) {
+void MockCommandList::dispatch(u32 groupCountX, u32 groupCountY,
+                               u32 groupCountZ) {
   auto *command = new MockCommandDispatch;
   command->groupCountX = groupCountX;
   command->groupCountY = groupCountY;

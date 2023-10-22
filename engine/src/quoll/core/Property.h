@@ -27,28 +27,28 @@ public:
    *
    * @param value 32bit integer value
    */
-  Property(int32_t value);
+  Property(i32 value);
 
   /**
    * @brief Create 32bit unsigned  integer property
    *
    * @param value 32bit unsigned integer value
    */
-  Property(uint32_t value);
+  Property(u32 value);
 
   /**
    * @brief Create 64bit unsigned integer property
    *
    * @param value 64bit unsigned integer value
    */
-  Property(uint64_t value);
+  Property(u64 value);
 
   /**
    * @brief Create real property
    *
    * @param value Real value
    */
-  Property(float value);
+  Property(f32 value);
 
   /**
    * @brief Create vector2 property
@@ -90,7 +90,7 @@ public:
    *
    * @return Property size
    */
-  size_t getSize() const;
+  usize getSize() const;
 
   /**
    * @brief Get value in string
@@ -122,10 +122,10 @@ private:
  *
  * @return int32 value
  */
-template <> inline const int32_t Property::getValue() const {
+template <> inline const i32 Property::getValue() const {
   QuollAssert(mType == INT32, "Property type is not int32");
 
-  return std::any_cast<int32_t>(mValue);
+  return std::any_cast<i32>(mValue);
 }
 
 /**
@@ -133,10 +133,10 @@ template <> inline const int32_t Property::getValue() const {
  *
  * @return uint32 value
  */
-template <> inline const uint32_t Property::getValue() const {
+template <> inline const u32 Property::getValue() const {
   QuollAssert(mType == UINT32, "Property type is not uint32");
 
-  return std::any_cast<uint32_t>(mValue);
+  return std::any_cast<u32>(mValue);
 }
 
 /**
@@ -144,10 +144,10 @@ template <> inline const uint32_t Property::getValue() const {
  *
  * @return uint64 value
  */
-template <> inline const uint64_t Property::getValue() const {
+template <> inline const u64 Property::getValue() const {
   QuollAssert(mType == UINT64, "Property type is not uint64");
 
-  return std::any_cast<uint64_t>(mValue);
+  return std::any_cast<u64>(mValue);
 }
 
 /**
@@ -155,10 +155,10 @@ template <> inline const uint64_t Property::getValue() const {
  *
  * @return Real value
  */
-template <> inline const float Property::getValue() const {
+template <> inline const f32 Property::getValue() const {
   QuollAssert(mType == REAL, "Property type is not a real number");
 
-  return std::any_cast<float>(mValue);
+  return std::any_cast<f32>(mValue);
 }
 
 /**

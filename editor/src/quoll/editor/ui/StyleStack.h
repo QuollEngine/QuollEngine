@@ -33,7 +33,7 @@ public:
    * @param colorIndex Color index
    * @param color Color value
    */
-  void pushColor(uint32_t colorIndex, const glm::vec4 &color);
+  void pushColor(u32 colorIndex, const glm::vec4 &color);
 
   /**
    * @brief Push color to the stack
@@ -41,7 +41,7 @@ public:
    * @param colorIndex Color index
    * @param color Color value
    */
-  void pushColor(uint32_t colorIndex, const ImVec4 &color);
+  void pushColor(u32 colorIndex, const ImVec4 &color);
 
   /**
    * @brief Push style to the stack
@@ -49,7 +49,7 @@ public:
    * @param styleIndex Style index
    * @param value Style value
    */
-  void pushStyle(uint32_t styleIndex, float value);
+  void pushStyle(u32 styleIndex, f32 value);
 
   /**
    * @brief Push style to the stack
@@ -57,7 +57,7 @@ public:
    * @param styleIndex Style index
    * @param value Style value
    */
-  void pushStyle(uint32_t styleIndex, const glm::vec2 &value);
+  void pushStyle(u32 styleIndex, const glm::vec2 &value);
 
   /**
    * @brief Push style to the stack
@@ -65,7 +65,7 @@ public:
    * @param styleIndex Style index
    * @param value Style value
    */
-  void pushStyle(uint32_t styleIndex, const ImVec2 &value);
+  void pushStyle(u32 styleIndex, const ImVec2 &value);
 
   /**
    * @brief Push style to the stack
@@ -75,9 +75,9 @@ public:
   void pushFont(ImFont *font);
 
 private:
-  uint32_t mPushedColors = 0;
-  uint32_t mPushedStyles = 0;
-  uint32_t mPushedFonts = 0;
+  u32 mPushedColors = 0;
+  u32 mPushedStyles = 0;
+  u32 mPushedFonts = 0;
 };
 
 } // namespace quoll::editor

@@ -36,7 +36,7 @@ public:
   quoll::detail::SceneLoader sceneLoader;
 
 private:
-  uint32_t lastId = 1;
+  u32 lastId = 1;
 };
 
 using SceneLoaderNameTest = SceneLoaderTest;
@@ -539,10 +539,10 @@ TEST_F(SceneLoaderSkeletonTest,
        CreatesSkeletonComponentWithFileDataIfValidField) {
   quoll::AssetData<quoll::SkeletonAsset> data{};
 
-  static constexpr uint32_t NumJoints = 5;
+  static constexpr u32 NumJoints = 5;
 
-  for (uint32_t i = 0; i < NumJoints; ++i) {
-    float fi = static_cast<float>(i);
+  for (u32 i = 0; i < NumJoints; ++i) {
+    f32 fi = static_cast<f32>(i);
 
     data.data.jointLocalPositions.push_back(glm::vec3(fi));
     data.data.jointLocalRotations.push_back(glm::quat(fi, fi, fi, fi));
@@ -565,8 +565,8 @@ TEST_F(SceneLoaderSkeletonTest,
   EXPECT_EQ(skeleton.assetHandle, handle);
 
   EXPECT_EQ(skeleton.numJoints, NumJoints);
-  for (uint32_t i = 0; i < NumJoints; ++i) {
-    float fi = static_cast<float>(i);
+  for (u32 i = 0; i < NumJoints; ++i) {
+    f32 fi = static_cast<f32>(i);
 
     EXPECT_EQ(skeleton.jointLocalPositions.at(i),
               data.data.jointLocalPositions.at(i));
@@ -629,7 +629,7 @@ TEST_F(SceneLoaderJointAttachmentTest,
 TEST_F(SceneLoaderJointAttachmentTest,
        DoesNotCreateJointAttachmentIfJointFieldIsLargerThanMaximumJointSize) {
   auto [node, entity] = createNode();
-  node["jointAttachment"]["joint"] = std::numeric_limits<uint8_t>::max();
+  node["jointAttachment"]["joint"] = std::numeric_limits<u8>::max();
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   EXPECT_FALSE(entityDatabase.has<quoll::JointAttachment>(entity));
@@ -699,7 +699,7 @@ TEST_F(SceneLoaderAnimatorTest, CreatesAnimatorComponentIfAllFieldsAreValid) {
 
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.asset, handle);
-  EXPECT_EQ(animator.currentState, std::numeric_limits<size_t>::max());
+  EXPECT_EQ(animator.currentState, std::numeric_limits<usize>::max());
   EXPECT_EQ(animator.normalizedTime, 0.0f);
 }
 
@@ -744,12 +744,12 @@ TEST_F(SceneLoaderLightTest,
 
 TEST_F(SceneLoaderLightTest,
        DoesNotCreateAnyLightComponentIfLightTypeIsUndefined) {
-  static constexpr uint32_t InvalidStart = 1;
+  static constexpr u32 InvalidStart = 1;
 
   // Check for 10 items
-  static constexpr uint32_t Size = 10;
+  static constexpr u32 Size = 10;
 
-  for (uint32_t i = InvalidStart; i < InvalidStart + Size; ++i) {
+  for (u32 i = InvalidStart; i < InvalidStart + Size; ++i) {
     auto [node, entity] = createNode();
     node["light"]["type"] = i;
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
@@ -776,7 +776,7 @@ TEST_F(SceneLoaderLightTest,
   quoll::DirectionalLight defaults{};
 
   glm::vec4 validColor{0.5f};
-  float validIntensity = 3.5f;
+  f32 validIntensity = 3.5f;
 
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
@@ -1050,8 +1050,8 @@ TEST_F(
   quoll::PointLight defaults{};
 
   glm::vec4 validColor{0.5f};
-  float validIntensity = 3.5f;
-  float validRange = 25.0f;
+  f32 validIntensity = 3.5f;
+  f32 validRange = 25.0f;
 
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
@@ -1166,14 +1166,14 @@ TEST_F(SceneLoaderCameraTest,
 
   quoll::PerspectiveLens defaults{};
 
-  float validNear = 0.5f;
-  float validFar = 1000.0f;
-  float validAspectRatio = 2.0f;
+  f32 validNear = 0.5f;
+  f32 validFar = 1000.0f;
+  f32 validAspectRatio = 2.0f;
   glm::vec2 validSensorSize{50.0f, 45.0f};
-  float validFocalLength = 100.0f;
-  float validAperture = 2.5f;
-  float validShutterSpeed = 0.125f;
-  uint32_t validSensitivity = 2500;
+  f32 validFocalLength = 100.0f;
+  f32 validAperture = 2.5f;
+  f32 validShutterSpeed = 0.125f;
+  u32 validSensitivity = 2500;
 
   // Near
   for (const auto &invalidNode : invalidNodes) {
@@ -1467,14 +1467,14 @@ TEST_F(SceneLoaderCameraTest,
 }
 
 TEST_F(SceneLoaderCameraTest, CreatesCameraComponentWithFileDataIfValidField) {
-  float validNear = 0.5f;
-  float validFar = 1000.0f;
-  float validAspectRatio = 2.0f;
+  f32 validNear = 0.5f;
+  f32 validFar = 1000.0f;
+  f32 validAspectRatio = 2.0f;
   glm::vec2 validSensorSize{50.0f, 45.0f};
-  float validFocalLength = 100.0f;
-  float validAperture = 2.5f;
-  float validShutterSpeed = 0.125f;
-  uint32_t validSensitivity = 2500;
+  f32 validFocalLength = 100.0f;
+  f32 validAperture = 2.5f;
+  f32 validShutterSpeed = 0.125f;
+  u32 validSensitivity = 2500;
 
   auto [node, entity] = createNode();
   node["camera"]["near"] = validNear;
@@ -2318,7 +2318,7 @@ TEST_F(SceneLoaderParentTest,
 
 TEST_F(SceneLoaderParentTest,
        DoesNotCreateParentComponentIfParentDoesNotExist) {
-  static constexpr uint64_t NonExistentId = 255;
+  static constexpr u64 NonExistentId = 255;
   auto [parentNode, parentEntity] = createNode();
 
   auto [node, entity] = createNode();
@@ -2331,7 +2331,7 @@ TEST_F(SceneLoaderParentTest,
 
 TEST_F(SceneLoaderParentTest,
        DoesNotCreateParentComponentIfParentIsNotCreatedWithSceneLoader) {
-  static constexpr uint64_t ParentId = 255;
+  static constexpr u64 ParentId = 255;
 
   auto parentEntity = entityDatabase.create();
   entityDatabase.set<quoll::Id>(parentEntity, {ParentId});

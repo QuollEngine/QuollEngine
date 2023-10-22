@@ -6,7 +6,7 @@
 
 struct Component1 {
   int intValue;
-  float realValue;
+  f32 realValue;
 };
 
 struct Component2 {
@@ -19,7 +19,7 @@ struct IntComponent {
 };
 
 struct FloatComponent {
-  float value;
+  f32 value;
 };
 
 struct StringComponent {
@@ -512,7 +512,7 @@ TEST(EntityStorageSparseSetTest,
       Pair{e1, 10, "e1"}, {e3, 30, "e3"}, {e2, 20, "e2"}, {e4, 40, "e4"}};
 
   {
-    size_t index = 0;
+    usize index = 0;
     EXPECT_EQ(observer1.size(), 4);
     for (auto [entity, component] : observer1) {
       EXPECT_EQ(entity, orderedExpectation.at(index).entity);
@@ -523,7 +523,7 @@ TEST(EntityStorageSparseSetTest,
   }
 
   {
-    size_t index = 0;
+    usize index = 0;
     EXPECT_EQ(observer2.size(), 1);
     for (auto [entity, component] : observer2) {
       EXPECT_EQ(entity, orderedExpectation.at(index).entity);
@@ -535,7 +535,7 @@ TEST(EntityStorageSparseSetTest,
   }
 
   {
-    size_t index = 2;
+    usize index = 2;
     EXPECT_EQ(observer3.size(), 2);
     for (auto [entity, component] : observer3) {
       EXPECT_EQ(entity, orderedExpectation.at(index).entity);
@@ -590,7 +590,7 @@ TEST(EntityStorageSparseSetTest, DeletingEntitiesTriggersRemoveObservers) {
   storage.deleteEntity(e3);
 
   {
-    size_t index = 0;
+    usize index = 0;
     EXPECT_EQ(observer1.size(), 4);
     for (auto [entity, component] : observer1) {
       EXPECT_EQ(entity, orderedExpectation.at(index).entity);
@@ -602,7 +602,7 @@ TEST(EntityStorageSparseSetTest, DeletingEntitiesTriggersRemoveObservers) {
   }
 
   {
-    size_t index = 0;
+    usize index = 0;
     EXPECT_EQ(observer2.size(), 4);
     for (auto [entity, component] : observer2) {
       EXPECT_EQ(entity, orderedExpectation.at(index).entity);
@@ -614,7 +614,7 @@ TEST(EntityStorageSparseSetTest, DeletingEntitiesTriggersRemoveObservers) {
   }
 
   {
-    size_t index = 2;
+    usize index = 2;
     EXPECT_EQ(observer3.size(), 2);
     for (auto [entity, component] : observer3) {
       EXPECT_EQ(entity, orderedExpectation.at(index).entity);
@@ -655,7 +655,7 @@ TEST(EntityStorageSparseSetTest, ClearingObserverClearsAllExistingData) {
 
   {
     EXPECT_EQ(observer1.size(), 2);
-    size_t index = 0;
+    usize index = 0;
     for (auto [entity, component] : observer1) {
       EXPECT_EQ(entity, orderedExpectation.at(index).entity);
       EXPECT_EQ(component.value, orderedExpectation.at(index).value);
@@ -672,7 +672,7 @@ TEST(EntityStorageSparseSetTest, ClearingObserverClearsAllExistingData) {
 
   {
     EXPECT_EQ(observer1.size(), 2);
-    size_t index = 2;
+    usize index = 2;
     for (auto [entity, component] : observer1) {
       EXPECT_EQ(entity, orderedExpectation.at(index).entity);
       EXPECT_EQ(component.value, orderedExpectation.at(index).value);

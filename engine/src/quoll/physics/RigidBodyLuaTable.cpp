@@ -15,7 +15,7 @@ void RigidBodyLuaTable::setDefaultParams() {
   mScriptGlobals.entityDatabase.set<RigidBody>(mEntity, {});
 }
 
-sol_maybe<float> RigidBodyLuaTable::getMass() {
+sol_maybe<f32> RigidBodyLuaTable::getMass() {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -25,7 +25,7 @@ sol_maybe<float> RigidBodyLuaTable::getMass() {
   return mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.mass;
 }
 
-void RigidBodyLuaTable::setMass(float mass) {
+void RigidBodyLuaTable::setMass(f32 mass) {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.mass = mass;
@@ -36,7 +36,7 @@ void RigidBodyLuaTable::setMass(float mass) {
   }
 }
 
-std::tuple<sol_maybe<float>, sol_maybe<float>, sol_maybe<float>>
+std::tuple<sol_maybe<f32>, sol_maybe<f32>, sol_maybe<f32>>
 RigidBodyLuaTable::getInertia() {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
@@ -50,7 +50,7 @@ RigidBodyLuaTable::getInertia() {
   return {inertia.x, inertia.y, inertia.z};
 }
 
-void RigidBodyLuaTable::setInertia(float x, float y, float z) {
+void RigidBodyLuaTable::setInertia(f32 x, f32 y, f32 z) {
   glm::vec3 inertia{x, y, z};
 
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
@@ -85,12 +85,12 @@ void RigidBodyLuaTable::applyGravity(bool apply) {
   }
 }
 
-void RigidBodyLuaTable::applyForce(float x, float y, float z) {
+void RigidBodyLuaTable::applyForce(f32 x, f32 y, f32 z) {
   glm::vec3 force{x, y, z};
   mScriptGlobals.entityDatabase.set<Force>(mEntity, {force});
 }
 
-void RigidBodyLuaTable::applyTorque(float x, float y, float z) {
+void RigidBodyLuaTable::applyTorque(f32 x, f32 y, f32 z) {
   glm::vec3 torque{x, y, z};
   mScriptGlobals.entityDatabase.set<Torque>(mEntity, {torque});
 }

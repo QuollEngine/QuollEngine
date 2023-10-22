@@ -54,7 +54,7 @@ public:
    *
    * @param size New size
    */
-  void resize(size_t size) override;
+  void resize(usize size) override;
 
   /**
    * @brief Get device address
@@ -89,7 +89,7 @@ public:
    *
    * @return Buffer size
    */
-  inline size_t getSize() const { return mSize; }
+  inline usize getSize() const { return mSize; }
 
 private:
   /**
@@ -108,7 +108,7 @@ private:
   rhi::BufferUsage mUsage;
   rhi::BufferAllocationUsage mAllocationUsage;
   bool mMapped = false;
-  size_t mSize = 0;
+  usize mSize = 0;
   void *mMappedData = nullptr;
 
   String mDebugName;

@@ -31,7 +31,7 @@ template <> glm::quat convertVec4(const glm::vec4 &value) {
  * @param k Interpolation constant
  * @return Interpolated value
  */
-template <class T> T interpolateLinear(const T &a, const T &b, float k) {
+template <class T> T interpolateLinear(const T &a, const T &b, f32 k) {
   return a + k * (b - a);
 }
 
@@ -46,7 +46,7 @@ template <class T> T interpolateLinear(const T &a, const T &b, float k) {
  * @return Interpolated value
  */
 template <>
-glm::quat interpolateLinear(const glm::quat &a, const glm::quat &b, float k) {
+glm::quat interpolateLinear(const glm::quat &a, const glm::quat &b, f32 k) {
   return glm::normalize(glm::slerp(a, b, k));
 }
 
@@ -59,10 +59,10 @@ glm::quat interpolateLinear(const glm::quat &a, const glm::quat &b, float k) {
  * @return Step interpolated value
  */
 template <class T>
-T getStepValue(const KeyframeSequenceAsset &sequence, float time) {
-  size_t found = 0;
+T getStepValue(const KeyframeSequenceAsset &sequence, f32 time) {
+  usize found = 0;
 
-  for (size_t i = 0; i < sequence.keyframeTimes.size(); ++i) {
+  for (usize i = 0; i < sequence.keyframeTimes.size(); ++i) {
     if (time < sequence.keyframeTimes.at(i)) {
       break;
     }
@@ -82,10 +82,10 @@ T getStepValue(const KeyframeSequenceAsset &sequence, float time) {
  * @return Linear interpolated value
  */
 template <class T>
-const T getLinearValue(const KeyframeSequenceAsset &sequence, float time) {
-  size_t found = 0;
+const T getLinearValue(const KeyframeSequenceAsset &sequence, f32 time) {
+  usize found = 0;
 
-  for (size_t i = 0; i < sequence.keyframeTimes.size(); ++i) {
+  for (usize i = 0; i < sequence.keyframeTimes.size(); ++i) {
     if (time < sequence.keyframeTimes.at(i)) {
       break;
     }
@@ -103,7 +103,7 @@ const T getLinearValue(const KeyframeSequenceAsset &sequence, float time) {
   const auto &currentTime = sequence.keyframeTimes.at(found);
   const auto &nextTime = sequence.keyframeTimes.at(found + 1);
 
-  float k = (time - currentTime) / (nextTime - currentTime);
+  f32 k = (time - currentTime) / (nextTime - currentTime);
 
   return interpolateLinear(currentVal, nextVal, k);
 }
@@ -117,7 +117,7 @@ const T getLinearValue(const KeyframeSequenceAsset &sequence, float time) {
  * @return Interpolated value
  */
 template <class T>
-T interpolate(const KeyframeSequenceAsset &sequence, float time) {
+T interpolate(const KeyframeSequenceAsset &sequence, f32 time) {
   if (sequence.interpolation == KeyframeSequenceAssetInterpolation::Step) {
     return getStepValue<T>(sequence, time);
   }
@@ -127,13 +127,13 @@ T interpolate(const KeyframeSequenceAsset &sequence, float time) {
 
 glm::vec3
 KeyframeInterpolator::interpolateVec3(const KeyframeSequenceAsset &sequence,
-                                      float time) {
+                                      f32 time) {
   return interpolate<glm::vec3>(sequence, time);
 }
 
 glm::quat
 KeyframeInterpolator::interpolateQuat(const KeyframeSequenceAsset &sequence,
-                                      float time) {
+                                      f32 time) {
   return interpolate<glm::quat>(sequence, time);
 }
 

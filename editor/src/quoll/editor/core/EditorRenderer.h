@@ -29,7 +29,7 @@ class EditorRenderer {
      *
      * Used when recording draw command
      */
-    uint32_t vertexCount = 0;
+    u32 vertexCount = 0;
   };
 
 public:
@@ -62,24 +62,23 @@ public:
    */
   void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
                        WorkspaceState &state, AssetRegistry &assetRegistry,
-                       uint32_t frameIndex);
+                       u32 frameIndex);
 
 private:
   void renderSpriteOutlines(rhi::RenderCommandList &commandList,
                             EditorRendererFrameData &frameData,
-                            rhi::PipelineHandle pipeline,
-                            uint32_t instanceStart, uint32_t instanceEnd,
-                            glm::vec4 color, float scale);
+                            rhi::PipelineHandle pipeline, u32 instanceStart,
+                            u32 instanceEnd, glm::vec4 color, f32 scale);
 
   void renderTextOutlines(rhi::RenderCommandList &commandList,
                           EditorRendererFrameData &frameData,
-                          rhi::PipelineHandle pipeline, uint32_t instanceStart,
-                          uint32_t instanceEnd, glm::vec4 color, float scale);
+                          rhi::PipelineHandle pipeline, u32 instanceStart,
+                          u32 instanceEnd, glm::vec4 color, f32 scale);
 
   void renderMeshOutlines(rhi::RenderCommandList &commandList,
                           EditorRendererFrameData &frameData,
-                          rhi::PipelineHandle pipeline, uint32_t instanceStart,
-                          uint32_t instanceEnd, glm::vec4 color, float scale);
+                          rhi::PipelineHandle pipeline, u32 instanceStart,
+                          u32 instanceEnd, glm::vec4 color, f32 scale);
 
   /**
    * @brief Create buffers for collidable shapes

@@ -33,7 +33,7 @@ public:
    * @param dt Time delta
    * @param entityDatabase Entity database
    */
-  virtual void update(float dt, EntityDatabase &entityDatabase) = 0;
+  virtual void update(f32 dt, EntityDatabase &entityDatabase) = 0;
 
   /**
    * @brief Cleanup physics data
@@ -61,7 +61,7 @@ public:
    * @retval false Entity not collided
    */
   virtual bool sweep(EntityDatabase &entityDatabase, Entity entity,
-                     const glm::vec3 &direction, float distance,
+                     const glm::vec3 &direction, f32 distance,
                      CollisionHit &hit) = 0;
 };
 

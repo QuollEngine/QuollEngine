@@ -32,7 +32,7 @@ public:
   /**
    * Zoom speed when scrolling
    */
-  static constexpr float ZoomSpeed = 0.03f;
+  static constexpr f32 ZoomSpeed = 0.03f;
 
   /**
    * Default sensor size
@@ -42,17 +42,17 @@ public:
   /**
    * Default focal length
    */
-  static constexpr float DefaultFocalLength = 16.0f;
+  static constexpr f32 DefaultFocalLength = 16.0f;
 
   /**
    * Default near perspective plane
    */
-  static constexpr float DefaultNear = 0.1f;
+  static constexpr f32 DefaultNear = 0.1f;
 
   /**
    * Default far perspective plane
    */
-  static constexpr float DefaultFar = 1000.0f;
+  static constexpr f32 DefaultFar = 1000.0f;
 
   /**
    * Default camera position
@@ -115,8 +115,7 @@ public:
    * @param height Viewport height
    * @param captureMouse Capture mouse for camera controls
    */
-  void setViewport(float x, float y, float width, float height,
-                   bool captureMouse);
+  void setViewport(f32 x, f32 y, f32 width, f32 height, bool captureMouse);
 
   /**
    * @brief Check if position is within viewport
@@ -175,11 +174,11 @@ private:
   void zoomWheel(CameraLookAt &lookAt);
 
 private:
-  float mX = 0.0f;
-  float mY = 0.0f;
-  float mWidth = 1.0f;
-  float mHeight = 1.0f;
-  float mWheelOffset = 0.0f;
+  f32 mX = 0.0f;
+  f32 mY = 0.0f;
+  f32 mWidth = 1.0f;
+  f32 mHeight = 1.0f;
+  f32 mWheelOffset = 0.0f;
   bool mCaptureMouse = false;
 
   InputState mInputState = InputState::None;

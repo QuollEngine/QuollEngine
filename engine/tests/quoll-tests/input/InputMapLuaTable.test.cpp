@@ -6,7 +6,7 @@
 class InputMapLuaTableTest : public LuaScriptingInterfaceTestBase {
 public:
   quoll::Entity createEntityWithInputMap(bool value = false,
-                                         size_t defaultScheme = 0) {
+                                         usize defaultScheme = 0) {
     auto entity = entityDatabase.create();
 
     quoll::InputMap map{};
@@ -44,7 +44,7 @@ TEST_F(InputMapLuaTableTest, GetCommandReturnsCommandIndex) {
   auto state = call(entity, "input_get_command");
 
   EXPECT_FALSE(state["input_command"].is<sol::nil_t>());
-  EXPECT_EQ(state["input_command"].get<uint32_t>(), 1);
+  EXPECT_EQ(state["input_command"].get<u32>(), 1);
 }
 
 TEST_F(InputMapLuaTableTest, GetCommandReturnsNilIfEntityHasNoInputMap) {
@@ -117,8 +117,8 @@ TEST_F(InputMapLuaTableTest, GetCommandValueAxis2dReturnsVec2Value) {
   EXPECT_FALSE(state["input_command_value_x"].is<sol::nil_t>());
   EXPECT_FALSE(state["input_command_value_y"].is<sol::nil_t>());
 
-  EXPECT_EQ(state["input_command_value_x"].get<float>(), 0.2f);
-  EXPECT_EQ(state["input_command_value_y"].get<float>(), -0.3f);
+  EXPECT_EQ(state["input_command_value_x"].get<f32>(), 0.2f);
+  EXPECT_EQ(state["input_command_value_y"].get<f32>(), -0.3f);
 }
 
 TEST_F(InputMapLuaTableTest,
@@ -129,8 +129,8 @@ TEST_F(InputMapLuaTableTest,
   EXPECT_FALSE(state["input_command_value_x"].is<sol::nil_t>());
   EXPECT_FALSE(state["input_command_value_y"].is<sol::nil_t>());
 
-  EXPECT_EQ(state["input_command_value_x"].get<float>(), 0.0f);
-  EXPECT_EQ(state["input_command_value_y"].get<float>(), 0.0f);
+  EXPECT_EQ(state["input_command_value_x"].get<f32>(), 0.0f);
+  EXPECT_EQ(state["input_command_value_y"].get<f32>(), 0.0f);
 }
 
 TEST_F(InputMapLuaTableTest,
@@ -141,8 +141,8 @@ TEST_F(InputMapLuaTableTest,
   EXPECT_FALSE(state["input_command_value_x"].is<sol::nil_t>());
   EXPECT_FALSE(state["input_command_value_y"].is<sol::nil_t>());
 
-  EXPECT_EQ(state["input_command_value_x"].get<float>(), 1.0f);
-  EXPECT_EQ(state["input_command_value_y"].get<float>(), 1.0f);
+  EXPECT_EQ(state["input_command_value_x"].get<f32>(), 1.0f);
+  EXPECT_EQ(state["input_command_value_y"].get<f32>(), 1.0f);
 }
 
 TEST_F(InputMapLuaTableTest,

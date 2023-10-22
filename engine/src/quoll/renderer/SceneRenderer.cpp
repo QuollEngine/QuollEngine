@@ -24,8 +24,8 @@ SceneRenderer::SceneRenderer(AssetRegistry &assetRegistry,
 
   mMaxSampleCounts = std::max(1u, mMaxSampleCounts);
 
-  static constexpr uint32_t MaxSamples = 8;
-  for (uint32_t i = MaxSamples; i > 1; i = i / 2) {
+  static constexpr u32 MaxSamples = 8;
+  for (u32 i = MaxSamples; i > 1; i = i / 2) {
     if ((mMaxSampleCounts & i) == i) {
       mMaxSampleCounts = i;
       break;
@@ -98,7 +98,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     frameData.getBindlessParams().destroy(mRenderStorage.getDevice());
   }
 
-  static constexpr uint32_t ShadowMapDimensions = 4096;
+  static constexpr u32 ShadowMapDimensions = 4096;
 
   rhi::TextureDescription shadowMapDesc{};
   shadowMapDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
@@ -168,7 +168,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       rhi::DeviceAddress shadows;
     };
 
-    size_t shadowDrawOffset = 0;
+    usize shadowDrawOffset = 0;
     for (auto &frameData : mFrameData) {
       shadowDrawOffset =
           frameData.getBindlessParams().addRange(ShadowDrawParams{
@@ -212,10 +212,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
     pass.setExecutor([pipeline, skinnedPipeline, shadowmap, shadowDrawOffset,
                       this](rhi::RenderCommandList &commandList,
-                            uint32_t frameIndex) {
+                            u32 frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
 
-      std::array<uint32_t, 1> offsets{static_cast<uint32_t>(shadowDrawOffset)};
+      std::array<u32, 1> offsets{static_cast<u32>(shadowDrawOffset)};
       {
         QUOLL_PROFILE_EVENT("shadowPass::meshes");
         commandList.bindPipeline(pipeline);
@@ -224,11 +224,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
             pipeline, 0, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
-        for (int32_t index = 0;
-             index < static_cast<int32_t>(frameData.getNumShadowMaps());
-             ++index) {
+        for (i32 index = 0;
+             index < static_cast<i32>(frameData.getNumShadowMaps()); ++index) {
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
-                                    sizeof(uint32_t), &index);
+                                    sizeof(u32), &index);
 
           renderShadowsMesh(commandList, pipeline, frameIndex);
         }
@@ -241,12 +240,11 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
             pipeline, 0, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
-        for (int32_t index = 0;
-             index < static_cast<int32_t>(frameData.getNumShadowMaps());
-             ++index) {
+        for (i32 index = 0;
+             index < static_cast<i32>(frameData.getNumShadowMaps()); ++index) {
 
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
-                                    sizeof(uint32_t), &index);
+                                    sizeof(u32), &index);
 
           renderShadowsSkinnedMesh(commandList, skinnedPipeline, frameIndex);
         }
@@ -270,7 +268,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       rhi::SamplerHandle sampler;
     };
 
-    size_t pbrOffset = 0;
+    usize pbrOffset = 0;
     for (auto &frameData : mFrameData) {
       pbrOffset = frameData.getBindlessParams().addRange(MeshDrawParams{
           frameData.getFlattenedMaterialsBuffer(),
@@ -319,14 +317,13 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     pass.addPipeline(pipeline);
     pass.addPipeline(skinnedPipeline);
 
-    pass.setExecutor([this, pipeline, skinnedPipeline, pbrOffset,
-                      shadowmap](rhi::RenderCommandList &commandList,
-                                 uint32_t frameIndex) {
+    pass.setExecutor([this, pipeline, skinnedPipeline, pbrOffset, shadowmap](
+                         rhi::RenderCommandList &commandList, u32 frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
 
       commandList.bindPipeline(pipeline);
 
-      std::array<uint32_t, 1> offsets{static_cast<uint32_t>(pbrOffset)};
+      std::array<u32, 1> offsets{static_cast<u32>(pbrOffset)};
       {
         QUOLL_PROFILE_EVENT("meshPass::meshes");
 
@@ -383,7 +380,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
     pass.addPipeline(pipeline);
 
-    size_t spriteOffset = 0;
+    usize spriteOffset = 0;
     for (auto &frameData : mFrameData) {
       spriteOffset = frameData.getBindlessParams().addRange(SpriteDrawParams{
           frameData.getCameraBuffer(), frameData.getSpriteTransformsBuffer(),
@@ -391,12 +388,11 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           mRenderStorage.getDefaultSampler()});
     }
 
-    pass.setExecutor([pipeline, spriteOffset,
-                      this](rhi::RenderCommandList &commandList,
-                            uint32_t frameIndex) {
+    pass.setExecutor([pipeline, spriteOffset, this](
+                         rhi::RenderCommandList &commandList, u32 frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
 
-      std::array<uint32_t, 1> offsets{static_cast<uint32_t>(spriteOffset)};
+      std::array<u32, 1> offsets{static_cast<u32>(spriteOffset)};
 
       commandList.bindPipeline(pipeline);
       commandList.bindDescriptor(pipeline, 0,
@@ -405,7 +401,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           pipeline, 1, frameData.getBindlessParams().getDescriptor(), offsets);
 
       commandList.draw(
-          4, 0, static_cast<uint32_t>(frameData.getSpriteEntities().size()), 0);
+          4, 0, static_cast<u32>(frameData.getSpriteEntities().size()), 0);
     });
   } // sprite pass
 
@@ -416,7 +412,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       rhi::SamplerHandle defaultSampler;
     };
 
-    size_t skyboxOffset = 0;
+    usize skyboxOffset = 0;
     for (auto &frameData : mFrameData) {
       skyboxOffset = frameData.getBindlessParams().addRange(SkyboxDrawParams{
           frameData.getCameraBuffer(), frameData.getSkyboxBuffer(),
@@ -443,10 +439,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
     pass.addPipeline(pipeline);
 
-    pass.setExecutor([pipeline, skyboxOffset,
-                      this](rhi::RenderCommandList &commandList,
-                            uint32_t frameIndex) {
-      std::array<uint32_t, 1> offsets{static_cast<uint32_t>(skyboxOffset)};
+    pass.setExecutor([pipeline, skyboxOffset, this](
+                         rhi::RenderCommandList &commandList, u32 frameIndex) {
+      std::array<u32, 1> offsets{static_cast<u32>(skyboxOffset)};
 
       auto &frameData = mFrameData.at(frameIndex);
 
@@ -461,17 +456,17 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
                              .data;
 
-      std::array<uint64_t, 1> vbOffsets{0};
+      std::array<u64, 1> vbOffsets{0};
       commandList.bindVertexBuffers(std::array{cube.vertexBuffers.at(0)},
                                     vbOffsets);
       commandList.bindIndexBuffer(cube.indexBuffer, rhi::IndexType::Uint32);
 
       commandList.drawIndexed(
-          static_cast<uint32_t>(cube.geometries.at(0).indices.size()), 0, 0);
+          static_cast<u32>(cube.geometries.at(0).indices.size()), 0, 0);
     });
   } // skybox pass
 
-  static constexpr uint32_t BloomMipChainSize = 7;
+  static constexpr u32 BloomMipChainSize = 7;
 
   rhi::TextureDescription description{};
   description.debugName = "Bloom";
@@ -500,7 +495,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     std::vector<BloomMip> bloomChain;
     bloomChain.push_back({bloomTexture, options.size});
     bloomChain.reserve(BloomMipChainSize);
-    for (uint32_t i = 1; i < BloomMipChainSize; ++i) {
+    for (u32 i = 1; i < BloomMipChainSize; ++i) {
       auto view = graph.createView(bloomTexture, i)
                       .onReady([](auto handle, auto &storage) {
                         storage.addToDescriptor(handle);
@@ -527,23 +522,21 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
             "bloom upsample"});
     pass.addPipeline(upsamplePipeline);
 
-    static constexpr uint32_t WorkGroupSize = 32;
+    static constexpr u32 WorkGroupSize = 32;
 
     pass.setExecutor([extractBrightColorsPipeline, downsamplePipeline,
                       upsamplePipeline, bloomTexture, sceneColorResolved,
-                      &options, bloomChain,
-                      this](rhi::RenderCommandList &commandList,
-                            uint32_t frameIndex) {
+                      &options, bloomChain, this](
+                         rhi::RenderCommandList &commandList, u32 frameIndex) {
       // Extract bright colors
       {
         commandList.bindDescriptor(
             extractBrightColorsPipeline, 0,
             mRenderStorage.getGlobalTexturesDescriptor());
 
-        glm::uvec4 texture{
-            static_cast<uint32_t>(sceneColorResolved.getHandle()),
-            static_cast<uint32_t>(bloomTexture.getHandle()),
-            static_cast<uint32_t>(mBloomSampler), 0};
+        glm::uvec4 texture{static_cast<u32>(sceneColorResolved.getHandle()),
+                           static_cast<u32>(bloomTexture.getHandle()),
+                           static_cast<u32>(mBloomSampler), 0};
         commandList.pushConstants(extractBrightColorsPipeline,
                                   rhi::ShaderStage::Compute, 0,
                                   sizeof(glm::uvec4), glm::value_ptr(texture));
@@ -560,8 +553,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
             mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindPipeline(downsamplePipeline);
 
-        for (uint32_t level = 1;
-             level < static_cast<uint32_t>(bloomChain.size()); ++level) {
+        for (u32 level = 1; level < static_cast<u32>(bloomChain.size());
+             ++level) {
 
           const auto &source = bloomChain.at(level - 1);
           const auto &target = bloomChain.at(level);
@@ -581,9 +574,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
           commandList.pipelineBarrier({}, imageBarriers, {});
 
-          glm::uvec4 texture{static_cast<uint32_t>(source.texture.getHandle()),
-                             static_cast<uint32_t>(target.texture.getHandle()),
-                             static_cast<uint32_t>(mBloomSampler), level - 1};
+          glm::uvec4 texture{static_cast<u32>(source.texture.getHandle()),
+                             static_cast<u32>(target.texture.getHandle()),
+                             static_cast<u32>(mBloomSampler), level - 1};
           commandList.pushConstants(
               downsamplePipeline, rhi::ShaderStage::Compute, 0,
               sizeof(glm::uvec4), glm::value_ptr(texture));
@@ -597,8 +590,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
         commandList.bindDescriptor(
             upsamplePipeline, 0, mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindPipeline(upsamplePipeline);
-        for (uint32_t level = static_cast<uint32_t>(bloomChain.size() - 1);
-             level > 0; --level) {
+        for (u32 level = static_cast<u32>(bloomChain.size() - 1); level > 0;
+             --level) {
 
           rhi::ImageBarrier imageBarrierSrc{};
           imageBarrierSrc.baseLevel = level;
@@ -630,9 +623,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           const auto &source = bloomChain.at(level);
           const auto &target = bloomChain.at(level - 1);
 
-          glm::uvec4 texture{static_cast<uint32_t>(source.texture.getHandle()),
-                             static_cast<uint32_t>(target.texture.getHandle()),
-                             static_cast<uint32_t>(mBloomSampler), 0};
+          glm::uvec4 texture{static_cast<u32>(source.texture.getHandle()),
+                             static_cast<u32>(target.texture.getHandle()),
+                             static_cast<u32>(mBloomSampler), 0};
           commandList.pushConstants(upsamplePipeline, rhi::ShaderStage::Compute,
                                     0, sizeof(glm::uvec4),
                                     glm::value_ptr(texture));
@@ -664,9 +657,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     auto pipeline = mRenderStorage.addPipeline(pipelineDescription);
     pass.addPipeline(pipeline);
 
-    pass.setExecutor([pipeline, sceneColorResolved, bloomTexture,
-                      this](rhi::RenderCommandList &commandList,
-                            uint32_t frameIndex) {
+    pass.setExecutor([pipeline, sceneColorResolved, bloomTexture, this](
+                         rhi::RenderCommandList &commandList, u32 frameIndex) {
       commandList.bindPipeline(pipeline);
       commandList.bindDescriptor(pipeline, 0,
                                  mRenderStorage.getGlobalTexturesDescriptor());
@@ -714,7 +706,7 @@ void SceneRenderer::attachText(RenderGraph &graph,
     rhi::DeviceAddress pad0;
   };
 
-  size_t textOffset = 0;
+  usize textOffset = 0;
   for (auto &frameData : mFrameData) {
     textOffset = frameData.getBindlessParams().addRange(TextDrawParams{
         frameData.getTextTransformsBuffer(), frameData.getCameraBuffer(),
@@ -747,11 +739,10 @@ void SceneRenderer::attachText(RenderGraph &graph,
   pass.addPipeline(textPipeline);
 
   pass.setExecutor([textPipeline, textOffset,
-                    this](rhi::RenderCommandList &commandList,
-                          uint32_t frameIndex) {
+                    this](rhi::RenderCommandList &commandList, u32 frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
 
-    std::array<uint32_t, 1> offsets{static_cast<uint32_t>(textOffset)};
+    std::array<u32, 1> offsets{static_cast<u32>(textOffset)};
     commandList.bindPipeline(textPipeline);
     commandList.bindDescriptor(textPipeline, 1,
                                frameData.getBindlessParams().getDescriptor(),
@@ -765,7 +756,7 @@ void SceneRenderer::attachText(RenderGraph &graph,
 }
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
-                                    Entity camera, uint32_t frameIndex) {
+                                    Entity camera, u32 frameIndex) {
   QuollAssert(entityDatabase.has<Camera>(camera),
               "Entity does not have a camera");
 
@@ -827,9 +818,9 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
     const auto &font = mAssetRegistry.getFonts().getAsset(text.font).data;
 
     std::vector<SceneRendererFrameData::GlyphData> glyphs(text.text.length());
-    float advanceX = 0;
-    float advanceY = 0;
-    for (size_t i = 0; i < text.text.length(); ++i) {
+    f32 advanceX = 0;
+    f32 advanceY = 0;
+    for (usize i = 0; i < text.text.length(); ++i) {
       char c = text.text.at(i);
 
       if (c == '\n') {
@@ -901,13 +892,13 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 }
 
 void SceneRenderer::render(rhi::RenderCommandList &commandList,
-                           rhi::PipelineHandle pipeline, uint32_t frameIndex) {
+                           rhi::PipelineHandle pipeline, u32 frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
-  uint32_t instanceStart = 0;
+  u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
-    uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+    u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
     commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
@@ -918,14 +909,14 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 
 void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
                                   rhi::PipelineHandle pipeline,
-                                  uint32_t frameIndex) {
+                                  u32 frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
-  uint32_t instanceStart = 0;
+  u32 instanceStart = 0;
 
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
-    uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+    u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
     commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
@@ -937,23 +928,20 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
 
 void SceneRenderer::renderGeometries(rhi::RenderCommandList &commandList,
                                      rhi::PipelineHandle pipeline,
-                                     const MeshAsset &mesh,
-                                     uint32_t instanceStart,
-                                     uint32_t numInstances) {
-  int32_t vertexOffset = 0;
-  uint32_t indexOffset = 0;
-  for (size_t g = 0; g < mesh.geometries.size(); ++g) {
+                                     const MeshAsset &mesh, u32 instanceStart,
+                                     u32 numInstances) {
+  i32 vertexOffset = 0;
+  u32 indexOffset = 0;
+  for (usize g = 0; g < mesh.geometries.size(); ++g) {
     auto &geometry = mesh.geometries.at(g);
 
-    auto index = static_cast<uint32_t>(g);
+    auto index = static_cast<u32>(g);
 
     commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
-                              sizeof(uint32_t), &index);
+                              sizeof(u32), &index);
 
-    uint32_t indexCount =
-        static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-    int32_t vertexCount =
-        static_cast<int32_t>(mesh.geometries.at(g).positions.size());
+    u32 indexCount = static_cast<u32>(mesh.geometries.at(g).indices.size());
+    i32 vertexCount = static_cast<i32>(mesh.geometries.at(g).positions.size());
 
     commandList.drawIndexed(indexCount, indexOffset, vertexOffset, numInstances,
                             instanceStart);
@@ -964,13 +952,13 @@ void SceneRenderer::renderGeometries(rhi::RenderCommandList &commandList,
 
 void SceneRenderer::renderShadowsMesh(rhi::RenderCommandList &commandList,
                                       rhi::PipelineHandle pipeline,
-                                      uint32_t frameIndex) {
+                                      u32 frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
-  uint32_t instanceStart = 0;
+  u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
-    uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+    u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(
         MeshRenderUtils::getGeometryBuffers(mesh),
@@ -984,13 +972,13 @@ void SceneRenderer::renderShadowsMesh(rhi::RenderCommandList &commandList,
 
 void SceneRenderer::renderShadowsSkinnedMesh(
     rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
-    uint32_t frameIndex) {
+    u32 frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
-  uint32_t instanceStart = 0;
+  u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
-    uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+    u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(
         MeshRenderUtils::getSkinnedGeometryBuffers(mesh),
@@ -1005,17 +993,15 @@ void SceneRenderer::renderShadowsSkinnedMesh(
 void SceneRenderer::renderShadowsGeometries(rhi::RenderCommandList &commandList,
                                             rhi::PipelineHandle pipeline,
                                             const MeshAsset &mesh,
-                                            uint32_t instanceStart,
-                                            uint32_t numInstances) {
-  int32_t vertexOffset = 0;
-  uint32_t indexOffset = 0;
-  for (size_t g = 0; g < mesh.geometries.size(); ++g) {
+                                            u32 instanceStart,
+                                            u32 numInstances) {
+  i32 vertexOffset = 0;
+  u32 indexOffset = 0;
+  for (usize g = 0; g < mesh.geometries.size(); ++g) {
     auto &geometry = mesh.geometries.at(g);
 
-    uint32_t indexCount =
-        static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-    int32_t vertexCount =
-        static_cast<int32_t>(mesh.geometries.at(g).positions.size());
+    u32 indexCount = static_cast<u32>(mesh.geometries.at(g).indices.size());
+    i32 vertexCount = static_cast<i32>(mesh.geometries.at(g).positions.size());
 
     commandList.drawIndexed(indexCount, indexOffset, vertexOffset, numInstances,
                             instanceStart);
@@ -1025,11 +1011,10 @@ void SceneRenderer::renderShadowsGeometries(rhi::RenderCommandList &commandList,
 }
 
 void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
-                               rhi::PipelineHandle pipeline,
-                               uint32_t frameIndex) {
+                               rhi::PipelineHandle pipeline, u32 frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
-  static constexpr uint32_t QuadNumVertices = 6;
-  for (size_t i = 0; i < frameData.getTexts().size(); ++i) {
+  static constexpr u32 QuadNumVertices = 6;
+  for (usize i = 0; i < frameData.getTexts().size(); ++i) {
     const auto &text = frameData.getTexts().at(i);
 
     commandList.bindDescriptor(pipeline, 0,
@@ -1044,16 +1029,16 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
         pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
         sizeof(glm::uvec4), glm::value_ptr(textConstants));
 
-    commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0, 1,
-                     static_cast<uint32_t>(i));
+    commandList.draw(QuadNumVertices * static_cast<u32>(text.length), 0, 1,
+                     static_cast<u32>(i));
   }
 }
 
 void SceneRenderer::generateBrdfLut() {
   auto *device = mRenderStorage.getDevice();
 
-  static constexpr uint32_t GroupSize = 16;
-  static constexpr uint32_t TextureSize = 512;
+  static constexpr u32 GroupSize = 16;
+  static constexpr u32 TextureSize = 512;
 
   rhi::DescriptorLayoutBindingDescription binding0{};
   binding0.type = rhi::DescriptorLayoutBindingType::Static;

@@ -4,7 +4,7 @@
 #include "quoll-tests/Testing.h"
 
 struct Data {
-  uint32_t value = 25;
+  u32 value = 25;
 };
 
 enum class Error { None = 0, InvalidNumber = 1, MaximumReached = 2 };

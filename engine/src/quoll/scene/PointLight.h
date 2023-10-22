@@ -14,12 +14,12 @@ struct PointLight {
   /**
    * Light intensity
    */
-  float intensity = 1.0f;
+  f32 intensity = 1.0f;
 
   /**
    * Light range cutoff
    */
-  float range = 10.0f;
+  f32 range = 10.0f;
 };
 
 } // namespace quoll

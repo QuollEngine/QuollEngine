@@ -9,8 +9,8 @@ namespace quoll {
  */
 class BindlessDrawParameters {
   struct Range {
-    size_t offset = 0;
-    size_t size = 0;
+    usize offset = 0;
+    usize size = 0;
     void *data = nullptr;
   };
 
@@ -20,7 +20,7 @@ public:
    *
    * @param minBufferAlignment Minimum buffer alignment
    */
-  BindlessDrawParameters(size_t minBufferAlignment)
+  BindlessDrawParameters(usize minBufferAlignment)
       : mMinBufferAlignment(minBufferAlignment) {}
 
   /**
@@ -30,12 +30,12 @@ public:
    * @param data Data
    * @return Range offset
    */
-  template <class TData> size_t addRange(TData &&data) {
-    size_t structSize = sizeof(TData);
+  template <class TData> usize addRange(TData &&data) {
+    usize structSize = sizeof(TData);
     auto *bytes = new TData;
     *bytes = data;
 
-    size_t currentOffset = mLastOffset;
+    usize currentOffset = mLastOffset;
     mRanges.push_back({currentOffset, structSize, bytes});
 
     mLastOffset += padSizeToMinimumUniformAlignment(structSize);
@@ -70,12 +70,12 @@ private:
    * @param originalSize Original size
    * @return Padded size
    */
-  size_t padSizeToMinimumUniformAlignment(size_t originalSize);
+  usize padSizeToMinimumUniformAlignment(usize originalSize);
 
 private:
   std::vector<Range> mRanges;
-  size_t mLastOffset = 0;
-  size_t mMinBufferAlignment = 0;
+  usize mLastOffset = 0;
+  usize mMinBufferAlignment = 0;
 
   rhi::Buffer mBuffer;
   rhi::DescriptorLayoutHandle mDescriptorLayout =

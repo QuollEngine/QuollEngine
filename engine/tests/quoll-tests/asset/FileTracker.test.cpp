@@ -15,8 +15,8 @@ class FileTrackerTest : public ::testing::Test {
 public:
   FileTrackerTest() : fileTracker(fileTrackerPath) {}
 
-  void createFixtures(size_t count) {
-    for (size_t i = 0; i < count; ++i) {
+  void createFixtures(usize count) {
+    for (usize i = 0; i < count; ++i) {
       {
         fs::path path(fileTrackerPath / ("file-" + std::to_string(i)));
         std::ofstream stream(path);

@@ -9,7 +9,7 @@ struct SkeletonUpdaterTest : public ::testing::Test {
   quoll::SkeletonUpdater skeletonUpdater;
 
   std::tuple<quoll::Skeleton &, quoll::SkeletonDebug &, quoll::Entity>
-  createSkeleton(uint32_t numJoints) {
+  createSkeleton(u32 numJoints) {
     auto entity = entityDatabase.create();
 
     quoll::Skeleton skeleton;
@@ -18,8 +18,8 @@ struct SkeletonUpdaterTest : public ::testing::Test {
     skeleton.jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
     skeleton.numJoints = numJoints;
 
-    for (uint32_t i = 0; i < numJoints; ++i) {
-      float value = static_cast<float>(i) + 1.2f;
+    for (u32 i = 0; i < numJoints; ++i) {
+      f32 value = static_cast<f32>(i) + 1.2f;
       skeleton.jointLocalPositions.push_back(glm::vec3(value));
       skeleton.jointLocalRotations.push_back(
           glm::quat(value, value, value, value));
@@ -35,7 +35,7 @@ struct SkeletonUpdaterTest : public ::testing::Test {
     auto numBones = skeleton.numJoints * 2;
     skeletonDebug.bones.reserve(numBones);
 
-    for (uint32_t joint = 0; joint < skeleton.numJoints; ++joint) {
+    for (u32 joint = 0; joint < skeleton.numJoints; ++joint) {
       skeletonDebug.bones.push_back(skeleton.jointParents.at(joint));
       skeletonDebug.bones.push_back(joint);
     }
@@ -55,14 +55,14 @@ struct SkeletonUpdaterTest : public ::testing::Test {
     return entityDatabase.get<quoll::SkeletonDebug>(entity);
   }
 
-  glm::mat4 getLocalTransform(quoll::Skeleton &skeleton, uint32_t i) {
+  glm::mat4 getLocalTransform(quoll::Skeleton &skeleton, u32 i) {
     glm::mat4 identity{1.0f};
     return glm::translate(identity, skeleton.jointLocalPositions.at(i)) *
            glm::toMat4(skeleton.jointLocalRotations.at(i)) *
            glm::scale(identity, skeleton.jointLocalScales.at(i));
   };
 
-  template <class T> std::vector<T> createItems(uint32_t numJoints) {
+  template <class T> std::vector<T> createItems(u32 numJoints) {
     return std::vector<T>(numJoints);
   }
 };
@@ -117,7 +117,7 @@ TEST_F(SkeletonUpdaterTest, UpdatesDebugBonesOnUpdate) {
 
   skeletonUpdater.update(entityDatabase);
 
-  for (size_t i = 0; i < skeletonDebug.bones.size(); ++i) {
+  for (usize i = 0; i < skeletonDebug.bones.size(); ++i) {
     EXPECT_EQ(skeletonDebug.boneTransforms.at(i),
               skeleton.jointWorldTransforms.at(skeletonDebug.bones.at(i)));
   }

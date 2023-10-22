@@ -33,7 +33,7 @@ public:
    * @retval true Script evaluated sucessfully
    * @retval false Script failed to evaluate
    */
-  bool evaluate(const std::vector<uint8_t> &bytes, lua_State *state);
+  bool evaluate(const std::vector<u8> &bytes, lua_State *state);
 };
 
 } // namespace quoll

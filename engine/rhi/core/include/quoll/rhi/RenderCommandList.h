@@ -101,9 +101,9 @@ public:
    * @param descriptor Descriptor
    * @param dynamicOffsets Dynamic offsets
    */
-  inline void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
+  inline void bindDescriptor(PipelineHandle pipeline, u32 firstSet,
                              const Descriptor &descriptor,
-                             std::span<uint32_t> dynamicOffsets = {}) {
+                             std::span<u32> dynamicOffsets = {}) {
     mNativeRenderCommandList->bindDescriptor(pipeline, firstSet, descriptor,
                                              dynamicOffsets);
   }
@@ -115,7 +115,7 @@ public:
    * @param offsets Vertex buffer binding offsets
    */
   inline void bindVertexBuffers(const std::span<const BufferHandle> buffers,
-                                const std::span<const uint64_t> offsets) {
+                                const std::span<const u64> offsets) {
     mNativeRenderCommandList->bindVertexBuffers(buffers, offsets);
   }
 
@@ -139,7 +139,7 @@ public:
    * @param data Data
    */
   inline void pushConstants(PipelineHandle pipeline, ShaderStage shaderStage,
-                            uint32_t offset, uint32_t size, void *data) {
+                            u32 offset, u32 size, void *data) {
     mNativeRenderCommandList->pushConstants(pipeline, shaderStage, offset, size,
                                             data);
   }
@@ -152,8 +152,8 @@ public:
    * @param instanceCount Instance count
    * @param firstInstance First instance
    */
-  inline void draw(uint32_t vertexCount, uint32_t firstVertex,
-                   uint32_t instanceCount = 1, uint32_t firstInstance = 0) {
+  inline void draw(u32 vertexCount, u32 firstVertex, u32 instanceCount = 1,
+                   u32 firstInstance = 0) {
     mNativeRenderCommandList->draw(vertexCount, firstVertex, instanceCount,
                                    firstInstance);
   }
@@ -167,9 +167,8 @@ public:
    * @param instanceCount Instance count
    * @param firstInstance First instance
    */
-  inline void drawIndexed(uint32_t indexCount, uint32_t firstIndex,
-                          int32_t vertexOffset, uint32_t instanceCount = 1,
-                          uint32_t firstInstance = 0) {
+  inline void drawIndexed(u32 indexCount, u32 firstIndex, i32 vertexOffset,
+                          u32 instanceCount = 1, u32 firstInstance = 0) {
     mNativeRenderCommandList->drawIndexed(indexCount, firstIndex, vertexOffset,
                                           instanceCount, firstInstance);
   }
@@ -181,8 +180,7 @@ public:
    * @param groupCountY Number of groups to dispatch in Y direction
    * @param groupCountZ Number of groups to dispatch in Z direction
    */
-  inline void dispatch(uint32_t groupCountX, uint32_t groupCountY,
-                       uint32_t groupCountZ) {
+  inline void dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) {
     mNativeRenderCommandList->dispatch(groupCountX, groupCountY, groupCountZ);
   }
 

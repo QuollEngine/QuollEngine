@@ -6,7 +6,7 @@
 
 #include <imgui_impl_glfw.h>
 
-static constexpr uint64_t BufferMemoryAlignment = 256;
+static constexpr u64 BufferMemoryAlignment = 256;
 
 /**
  * @brief Aligns given size based on specified alignment
@@ -14,7 +14,7 @@ static constexpr uint64_t BufferMemoryAlignment = 256;
  * @param size Size to align
  * @return Aligned size
  */
-static inline uint64_t getAlignedBufferSize(uint64_t size) {
+static inline u64 getAlignedBufferSize(u64 size) {
   return ((size - 1) / BufferMemoryAlignment + 1) * BufferMemoryAlignment;
 }
 
@@ -112,10 +112,10 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph,
 
   pass.addPipeline(pipeline);
 
-  pass.setExecutor([this, pipeline](rhi::RenderCommandList &commandList,
-                                    uint32_t frameIndex) {
-    draw(commandList, pipeline, frameIndex);
-  });
+  pass.setExecutor(
+      [this, pipeline](rhi::RenderCommandList &commandList, u32 frameIndex) {
+        draw(commandList, pipeline, frameIndex);
+      });
 
   return {pass, imgui};
 }
@@ -127,7 +127,7 @@ void ImguiRenderer::beginRendering() {
 
 void ImguiRenderer::endRendering() { ImGui::Render(); }
 
-void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
+void ImguiRenderer::updateFrameData(u32 frameIndex) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -144,9 +144,9 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
     return;
   }
 
-  size_t vertexSize =
+  usize vertexSize =
       getAlignedBufferSize(data->TotalVtxCount * sizeof(ImDrawVert));
-  size_t indexSize =
+  usize indexSize =
       getAlignedBufferSize(data->TotalIdxCount * sizeof(ImDrawIdx));
 
   if (frameObj.vertexBufferSize < vertexSize) {
@@ -177,7 +177,7 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
 }
 
 void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
-                         rhi::PipelineHandle pipeline, uint32_t frameIndex) {
+                         rhi::PipelineHandle pipeline, u32 frameIndex) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -187,8 +187,8 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
   int fbWidth = (int)(data->DisplaySize.x * data->FramebufferScale.x);
   int fbHeight = (int)(data->DisplaySize.y * data->FramebufferScale.y);
 
-  float realFbWidth = static_cast<float>(fbWidth);
-  float realFbHeight = static_cast<float>(fbHeight);
+  f32 realFbWidth = static_cast<f32>(fbWidth);
+  f32 realFbHeight = static_cast<f32>(fbHeight);
 
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
@@ -198,8 +198,8 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
 
   setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline, frameIndex);
 
-  uint32_t indexOffset = 0;
-  uint32_t vertexOffset = 0;
+  u32 indexOffset = 0;
+  u32 vertexOffset = 0;
   for (int cmdListIdx = 0; cmdListIdx < data->CmdListsCount; ++cmdListIdx) {
     const ImDrawList *cmdList = data->CmdLists[cmdListIdx];
     for (int cmdIdx = 0; cmdIdx < cmdList->CmdBuffer.Size; ++cmdIdx) {
@@ -246,7 +246,7 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
         commandList.bindPipeline(pipeline);
 
         glm::uvec4 textureData{
-            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(cmd->TextureId)),
+            static_cast<u32>(reinterpret_cast<uptr>(cmd->TextureId)),
             rhi::castHandleToUint(mRenderStorage.getDefaultSampler()), 0, 0};
 
         commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment,
@@ -255,7 +255,7 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
 
         commandList.drawIndexed(
             cmd->ElemCount, cmd->IdxOffset + indexOffset,
-            static_cast<int32_t>(cmd->VtxOffset + vertexOffset));
+            static_cast<i32>(cmd->VtxOffset + vertexOffset));
       }
     }
     indexOffset += cmdList->IdxBuffer.Size;
@@ -267,9 +267,9 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
                                       rhi::RenderCommandList &commandList,
                                       int fbWidth, int fbHeight,
                                       rhi::PipelineHandle pipeline,
-                                      uint32_t frameIndex) {
+                                      u32 frameIndex) {
   if (data->TotalVtxCount > 0) {
-    std::array<uint64_t, 1> offsets{0};
+    std::array<u64, 1> offsets{0};
     commandList.bindVertexBuffers(
         std::array{mFrameData.at(frameIndex).vertexBuffer.getHandle()},
         offsets);
@@ -281,35 +281,35 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
 
   commandList.setViewport({0, 0}, {fbWidth, fbHeight}, {0.0f, 1.0f});
 
-  float L = data->DisplayPos.x;
-  float R = data->DisplayPos.x + data->DisplaySize.x;
-  float T = data->DisplayPos.y;
-  float B = data->DisplayPos.y + data->DisplaySize.y;
+  f32 L = data->DisplayPos.x;
+  f32 R = data->DisplayPos.x + data->DisplaySize.x;
+  f32 T = data->DisplayPos.y;
+  f32 B = data->DisplayPos.y + data->DisplaySize.y;
 
-  static constexpr size_t MatrixSize = 16;
-  const float SCALE_FACTOR = 2.0f;
-  std::array<float, MatrixSize> mvp{SCALE_FACTOR / (R - L),
-                                    0.0f,
-                                    0.0f,
-                                    0.0f,
-                                    0.0f,
-                                    SCALE_FACTOR / (T - B),
-                                    0.0f,
-                                    0.0f,
-                                    0.0f,
-                                    0.0f,
-                                    1.0f / SCALE_FACTOR,
-                                    0.0f,
-                                    (R + L) / (L - R),
-                                    (T + B) / (B - T),
-                                    1.0f / SCALE_FACTOR,
-                                    1.0f
+  static constexpr usize MatrixSize = 16;
+  const f32 SCALE_FACTOR = 2.0f;
+  std::array<f32, MatrixSize> mvp{SCALE_FACTOR / (R - L),
+                                  0.0f,
+                                  0.0f,
+                                  0.0f,
+                                  0.0f,
+                                  SCALE_FACTOR / (T - B),
+                                  0.0f,
+                                  0.0f,
+                                  0.0f,
+                                  0.0f,
+                                  1.0f / SCALE_FACTOR,
+                                  0.0f,
+                                  (R + L) / (L - R),
+                                  (T + B) / (B - T),
+                                  1.0f / SCALE_FACTOR,
+                                  1.0f
 
   };
 
   commandList.pushConstants(
       pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-      static_cast<uint32_t>(sizeof(float) * mvp.size()), mvp.data());
+      static_cast<u32>(sizeof(f32) * mvp.size()), mvp.data());
 }
 
 void ImguiRenderer::setClearColor(const glm::vec4 &clearColor) {
@@ -337,13 +337,11 @@ void ImguiRenderer::buildFonts() {
     TextureUtils::copyDataToTexture(
         mRenderStorage.getDevice(), pixels, mFontTexture,
         rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
-        {TextureAssetLevel{0, static_cast<size_t>(width) * height * 4,
-                           static_cast<uint32_t>(width),
-                           static_cast<uint32_t>(height)}});
+        {TextureAssetLevel{0, static_cast<usize>(width) * height * 4,
+                           static_cast<u32>(width), static_cast<u32>(height)}});
   }
 
-  io.Fonts->SetTexID(
-      reinterpret_cast<void *>(static_cast<uintptr_t>(mFontTexture)));
+  io.Fonts->SetTexID(reinterpret_cast<void *>(static_cast<uptr>(mFontTexture)));
 
   {
     auto &&stream = Engine::getLogger().info();

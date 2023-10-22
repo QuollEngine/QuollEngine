@@ -35,7 +35,7 @@ public:
    * @param imageIndex Swapchain image index
    */
   void present(rhi::RenderCommandList &commandList, rhi::TextureHandle handle,
-               uint32_t imageIndex);
+               u32 imageIndex);
 
   /**
    * @brief Set flag to update framebuffers

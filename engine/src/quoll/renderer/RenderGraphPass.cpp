@@ -47,7 +47,7 @@ void RenderGraphPass::addPipeline(rhi::PipelineHandle handle) {
 }
 
 void RenderGraphPass::execute(rhi::RenderCommandList &commandList,
-                              uint32_t frameIndex) {
+                              u32 frameIndex) {
   mExecutor(commandList, frameIndex);
 }
 

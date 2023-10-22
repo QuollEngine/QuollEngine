@@ -43,13 +43,13 @@ calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
   const auto &parentWorld =
       entityDatabase.get<WorldTransform>(parent).worldTransform;
 
-  int16_t jointId = -1;
+  i16 jointId = -1;
   if (entityDatabase.has<JointAttachment>(entity) &&
       entityDatabase.has<Skeleton>(parent)) {
     jointId = entityDatabase.get<JointAttachment>(entity).joint;
   }
 
-  if (jointId >= 0 && jointId < std::numeric_limits<uint8_t>::max()) {
+  if (jointId >= 0 && jointId < std::numeric_limits<u8>::max()) {
     const auto &jointTransform =
         entityDatabase.get<Skeleton>(parent).jointWorldTransforms.at(jointId);
 

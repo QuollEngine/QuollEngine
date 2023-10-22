@@ -44,7 +44,7 @@ public:
    * @param format Texture format
    * @return Uuid of newly created texture
    */
-  Result<Uuid> loadFromMemory(void *data, uint32_t width, uint32_t height,
+  Result<Uuid> loadFromMemory(void *data, u32 width, u32 height,
                               const Uuid &uuid, const String &name,
                               bool generateMipMaps, rhi::Format format);
 
@@ -57,7 +57,7 @@ private:
    * @param format Texture format
    * @return Texture data with mip maps
    */
-  std::vector<uint8_t>
+  std::vector<u8>
   generateMipMapsFromTextureData(void *data,
                                  const std::vector<TextureAssetLevel> &levels,
                                  rhi::Format format);

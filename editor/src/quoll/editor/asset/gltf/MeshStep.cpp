@@ -16,7 +16,7 @@ namespace quoll::editor {
  * @param[out] normals Normals
  */
 void generateNormals(const std::vector<glm::vec3> &positions,
-                     const std::vector<uint32_t> &indices,
+                     const std::vector<u32> &indices,
                      std::vector<glm::vec3> &normals) {
   for (auto &n : normals) {
     n.x = 0.0f;
@@ -24,7 +24,7 @@ void generateNormals(const std::vector<glm::vec3> &positions,
     n.z = 0.0f;
   }
 
-  for (size_t i = 0; i < indices.size(); i += 3) {
+  for (usize i = 0; i < indices.size(); i += 3) {
     auto i0 = indices.at(i);
     auto i1 = indices.at(i + 1);
     auto i2 = indices.at(i + 2);
@@ -72,7 +72,7 @@ void generateNormals(const std::vector<glm::vec3> &positions,
 void generateTangents(const std::vector<glm::vec3> &vertices,
                       const std::vector<glm::vec3> &normals,
                       const std::vector<glm::vec2> &texCoords,
-                      const std::vector<uint32_t> &indices,
+                      const std::vector<u32> &indices,
                       std::vector<glm::vec4> &tangents) {
   MikktspaceAdapter adapter;
 
@@ -86,9 +86,9 @@ void generateTangents(const std::vector<glm::vec3> &vertices,
  * @param indices Indices
  */
 void optimizeMeshes(BaseGeometryAsset &g) {
-  static constexpr float OverdrawThreshold = 1.05f;
+  static constexpr f32 OverdrawThreshold = 1.05f;
 
-  size_t vertexSize = g.positions.size();
+  usize vertexSize = g.positions.size();
 
   meshopt_optimizeVertexCache(g.indices.data(), g.indices.data(),
                               g.indices.size(), vertexSize);
@@ -96,7 +96,7 @@ void optimizeMeshes(BaseGeometryAsset &g) {
                            &g.positions.at(0).x, vertexSize, sizeof(glm::vec3),
                            OverdrawThreshold);
 
-  std::vector<uint32_t> remap(g.positions.size());
+  std::vector<u32> remap(g.positions.size());
   meshopt_optimizeVertexFetchRemap(remap.data(), g.indices.data(),
                                    g.indices.size(), g.positions.size());
 
@@ -148,9 +148,9 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
 
   auto &&positionMeta =
       getBufferMetaForAccessor(model, primitive.attributes.at("POSITION"));
-  size_t vertexSize = positionMeta.accessor.count;
+  usize vertexSize = positionMeta.accessor.count;
 
-  // According to spec, position attribute can only be vec3<float>
+  // According to spec, position attribute can only be vec3<f32>
   if (positionMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
       positionMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
     geometry.positions.resize(vertexSize);
@@ -160,7 +160,7 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
     geometry.texCoords1.resize(vertexSize);
 
     auto *data = reinterpret_cast<const glm::vec3 *>(positionMeta.rawData);
-    for (size_t i = 0; i < vertexSize; ++i) {
+    for (usize i = 0; i < vertexSize; ++i) {
       geometry.positions.at(i) = data[i];
     }
   } else {
@@ -174,22 +174,22 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
     if (indexMeta.accessor.componentType ==
             TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT &&
         indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-      const auto *data = reinterpret_cast<const uint32_t *>(indexMeta.rawData);
-      for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+      const auto *data = reinterpret_cast<const u32 *>(indexMeta.rawData);
+      for (usize i = 0; i < indexMeta.accessor.count; ++i) {
         indices[i] = data[i];
       }
     } else if (indexMeta.accessor.componentType ==
                    TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT &&
                indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-      const auto *data = reinterpret_cast<const uint16_t *>(indexMeta.rawData);
-      for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+      const auto *data = reinterpret_cast<const u16 *>(indexMeta.rawData);
+      for (usize i = 0; i < indexMeta.accessor.count; ++i) {
         indices[i] = data[i];
       }
     } else if (indexMeta.accessor.componentType ==
                    TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
                indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-      const auto *data = reinterpret_cast<const uint8_t *>(indexMeta.rawData);
-      for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+      const auto *data = reinterpret_cast<const u8 *>(indexMeta.rawData);
+      for (usize i = 0; i < indexMeta.accessor.count; ++i) {
         indices[i] = data[i];
       }
     } else {
@@ -198,12 +198,12 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
     }
   } else {
     indices.resize(geometry.positions.size());
-    for (size_t i = 0; i < geometry.positions.size(); ++i) {
-      indices.at(i) = static_cast<uint32_t>(i);
+    for (usize i = 0; i < geometry.positions.size(); ++i) {
+      indices.at(i) = static_cast<u32>(i);
     }
   }
 
-  // According to spec, normal attribute can only be vec3<float> and
+  // According to spec, normal attribute can only be vec3<f32> and
   // all attributes of a primitive must have the same number of items
   bool validNormals =
       primitive.attributes.find("NORMAL") != primitive.attributes.end();
@@ -219,7 +219,7 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
 
     if (validNormals) {
       auto *data = reinterpret_cast<const glm::vec3 *>(normalMeta.rawData);
-      for (size_t i = 0; i < vertexSize; ++i) {
+      for (usize i = 0; i < vertexSize; ++i) {
         geometry.normals.at(i) = data[i];
       }
     }
@@ -239,17 +239,17 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
     // the same number of items
     if (uvMeta.accessor.type == TINYGLTF_TYPE_VEC2 &&
         uvMeta.accessor.count == vertexSize) {
-      // UV coordinates can be float, ubyte, and ushort
+      // UV coordinates can be f32, ubyte, and ushort
       if (uvMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
         auto *data = reinterpret_cast<const glm::vec2 *>(uvMeta.rawData);
-        for (size_t i = 0; i < vertexSize; ++i) {
+        for (usize i = 0; i < vertexSize; ++i) {
           geometry.texCoords0.at(i) = data[i];
         }
       } else if (uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ||
                  uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-        // TODO: Convert integer coordinates to float
+        // TODO: Convert integer coordinates to f32
         warnings.push_back("Integer based texture coordinates are not "
                            "supported for TEXCOORD0");
       }
@@ -265,24 +265,24 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
     // the same number of items
     if (uvMeta.accessor.type == TINYGLTF_TYPE_VEC2 &&
         uvMeta.accessor.count == vertexSize) {
-      // UV coordinates can be float, ubyte, and ushort
+      // UV coordinates can be f32, ubyte, and ushort
       if (uvMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
         auto *data = reinterpret_cast<const glm::vec2 *>(uvMeta.rawData);
-        for (size_t i = 0; i < vertexSize; ++i) {
+        for (usize i = 0; i < vertexSize; ++i) {
           geometry.texCoords1.at(i) = data[i];
         }
       } else if (uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ||
                  uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-        // TODO: Convert integer coordinates to float
+        // TODO: Convert integer coordinates to f32
         warnings.push_back("Integer based texture coordinates are not "
                            "supported for TEXCOORD1");
       }
     }
   }
 
-  // According to spec, tangent attribute can only be vec4<float> and
+  // According to spec, tangent attribute can only be vec4<f32> and
   // all attributes of a primitive must have the same number of items
   bool validTangents =
       primitive.attributes.find("TANGENT") != primitive.attributes.end();
@@ -298,7 +298,7 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
 
     if (validTangents) {
       auto *data = reinterpret_cast<const glm::vec4 *>(tangentMeta.rawData);
-      for (size_t i = 0; i < vertexSize; ++i) {
+      for (usize i = 0; i < vertexSize; ++i) {
         geometry.tangents.at(i) = data[i];
       }
     }
@@ -336,14 +336,14 @@ Result<bool> loadSkinnedMeshAttributes(const String &primitiveName,
         const auto *data =
             reinterpret_cast<const glm::u8vec4 *>(jointMeta.rawData);
 
-        for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
+        for (usize i = 0; i < jointMeta.accessor.count; ++i) {
           geometry.joints.at(i) = data[i];
         }
       } else if (jointMeta.accessor.componentType ==
                  TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
         const auto *data =
             reinterpret_cast<const glm::u16vec4 *>(jointMeta.rawData);
-        for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
+        for (usize i = 0; i < jointMeta.accessor.count; ++i) {
           geometry.joints.at(i) = data[i];
         }
       } else {
@@ -370,7 +370,7 @@ Result<bool> loadSkinnedMeshAttributes(const String &primitiveName,
       const auto *data =
           reinterpret_cast<const glm::vec4 *>(weightsMeta.rawData);
 
-      for (size_t i = 0; i < weightsMeta.accessor.count; ++i) {
+      for (usize i = 0; i < weightsMeta.accessor.count; ++i) {
         geometry.weights.at(i) = data[i];
       }
     }
@@ -417,7 +417,7 @@ void loadMeshes(GLTFImportData &importData) {
     std::vector<MaterialAssetHandle> materials;
     AssetData<MeshAsset> mesh;
 
-    for (size_t p = 0; p < gltfMesh.primitives.size(); ++p) {
+    for (usize p = 0; p < gltfMesh.primitives.size(); ++p) {
       auto primitiveName = assetName + ", primitive #" + std::to_string(p);
 
       const auto &primitive = gltfMesh.primitives.at(p);

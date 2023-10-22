@@ -26,7 +26,7 @@ struct LuaScriptAsset {
   /**
    * Bytes that represent the script
    */
-  std::vector<uint8_t> bytes;
+  std::vector<u8> bytes;
 
   /**
    * Variables

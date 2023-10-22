@@ -14,7 +14,7 @@ struct DirectionalLight {
   /**
    * Light intensity
    */
-  float intensity = 1.0f;
+  f32 intensity = 1.0f;
 
   /**
    * Light direction

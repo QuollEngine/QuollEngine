@@ -59,7 +59,7 @@ TEST_F(SwappableVectorTest, RangeForLoopWorks) {
   buffer.push_back({7});
   buffer.push_back({8});
 
-  size_t i = 0;
+  usize i = 0;
   for (auto &x : buffer) {
     EXPECT_EQ(x.val, buffer.at(i).val);
     i++;

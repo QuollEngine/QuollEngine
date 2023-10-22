@@ -14,7 +14,7 @@ struct MockBindings {
   /**
    * Descriptors
    */
-  std::unordered_map<uint32_t, Descriptor> descriptors{};
+  std::unordered_map<u32, Descriptor> descriptors{};
 
   /**
    * Render pass
@@ -79,17 +79,17 @@ struct MockDispatchCall {
   /**
    * Group count x
    */
-  uint32_t groupCountX = 0;
+  u32 groupCountX = 0;
 
   /**
    * Group count y
    */
-  uint32_t groupCountY = 0;
+  u32 groupCountY = 0;
 
   /**
    * Group count z
    */
-  uint32_t groupCountZ = 0;
+  u32 groupCountZ = 0;
 };
 
 } // namespace quoll::rhi

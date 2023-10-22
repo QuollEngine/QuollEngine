@@ -12,7 +12,7 @@ PerspectiveLensLuaTable::PerspectiveLensLuaTable(Entity entity,
                                                  ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-sol_maybe<float> PerspectiveLensLuaTable::getNear() {
+sol_maybe<f32> PerspectiveLensLuaTable::getNear() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -26,7 +26,7 @@ sol_maybe<float> PerspectiveLensLuaTable::getNear() {
   return lens.near;
 }
 
-void PerspectiveLensLuaTable::setNear(float near) {
+void PerspectiveLensLuaTable::setNear(f32 near) {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
     lens.near = near;
@@ -36,7 +36,7 @@ void PerspectiveLensLuaTable::setNear(float near) {
   }
 }
 
-sol_maybe<float> PerspectiveLensLuaTable::getFar() {
+sol_maybe<f32> PerspectiveLensLuaTable::getFar() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -50,7 +50,7 @@ sol_maybe<float> PerspectiveLensLuaTable::getFar() {
   return lens.far;
 }
 
-void PerspectiveLensLuaTable::setFar(float far) {
+void PerspectiveLensLuaTable::setFar(f32 far) {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
     lens.far = far;
@@ -60,7 +60,7 @@ void PerspectiveLensLuaTable::setFar(float far) {
   }
 }
 
-std::tuple<sol_maybe<float>, sol_maybe<float>>
+std::tuple<sol_maybe<f32>, sol_maybe<f32>>
 PerspectiveLensLuaTable::getSensorSize() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
@@ -75,7 +75,7 @@ PerspectiveLensLuaTable::getSensorSize() {
   return {lens.sensorSize.x, lens.sensorSize.y};
 }
 
-void PerspectiveLensLuaTable::setSensorSize(float width, float height) {
+void PerspectiveLensLuaTable::setSensorSize(f32 width, f32 height) {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
     lens.sensorSize = {width, height};
@@ -86,7 +86,7 @@ void PerspectiveLensLuaTable::setSensorSize(float width, float height) {
   }
 }
 
-sol_maybe<float> PerspectiveLensLuaTable::getFocalLength() {
+sol_maybe<f32> PerspectiveLensLuaTable::getFocalLength() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -100,7 +100,7 @@ sol_maybe<float> PerspectiveLensLuaTable::getFocalLength() {
   return lens.focalLength;
 }
 
-void PerspectiveLensLuaTable::setFocalLength(float focalLength) {
+void PerspectiveLensLuaTable::setFocalLength(f32 focalLength) {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
     lens.focalLength = focalLength;
@@ -111,7 +111,7 @@ void PerspectiveLensLuaTable::setFocalLength(float focalLength) {
   }
 }
 
-sol_maybe<float> PerspectiveLensLuaTable::getAperture() {
+sol_maybe<f32> PerspectiveLensLuaTable::getAperture() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -125,7 +125,7 @@ sol_maybe<float> PerspectiveLensLuaTable::getAperture() {
   return lens.aperture;
 }
 
-void PerspectiveLensLuaTable::setAperture(float aperture) {
+void PerspectiveLensLuaTable::setAperture(f32 aperture) {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
     lens.aperture = aperture;
@@ -136,7 +136,7 @@ void PerspectiveLensLuaTable::setAperture(float aperture) {
   }
 }
 
-sol_maybe<float> PerspectiveLensLuaTable::getShutterSpeed() {
+sol_maybe<f32> PerspectiveLensLuaTable::getShutterSpeed() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -150,8 +150,8 @@ sol_maybe<float> PerspectiveLensLuaTable::getShutterSpeed() {
   return 1.0f / lens.shutterSpeed;
 }
 
-void PerspectiveLensLuaTable::setShutterSpeed(float shutterSpeed) {
-  float value = 1.0f / shutterSpeed;
+void PerspectiveLensLuaTable::setShutterSpeed(f32 shutterSpeed) {
+  f32 value = 1.0f / shutterSpeed;
 
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
@@ -163,7 +163,7 @@ void PerspectiveLensLuaTable::setShutterSpeed(float shutterSpeed) {
   }
 }
 
-sol_maybe<uint32_t> PerspectiveLensLuaTable::getSensitivity() {
+sol_maybe<u32> PerspectiveLensLuaTable::getSensitivity() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
         << LuaMessages::componentDoesNotExist(getName(), mEntity);
@@ -177,7 +177,7 @@ sol_maybe<uint32_t> PerspectiveLensLuaTable::getSensitivity() {
   return lens.sensitivity;
 }
 
-void PerspectiveLensLuaTable::setSensitivity(uint32_t sensitivity) {
+void PerspectiveLensLuaTable::setSensitivity(u32 sensitivity) {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};
     lens.sensitivity = sensitivity;

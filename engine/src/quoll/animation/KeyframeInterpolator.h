@@ -17,7 +17,7 @@ public:
    * @return Vec3 value
    */
   static glm::vec3 interpolateVec3(const KeyframeSequenceAsset &sequence,
-                                   float time);
+                                   f32 time);
 
   /**
    * @brief Get quat interpolated value based on keyframe sequence
@@ -27,7 +27,7 @@ public:
    * @return Quat value
    */
   static glm::quat interpolateQuat(const KeyframeSequenceAsset &sequence,
-                                   float time);
+                                   f32 time);
 };
 
 } // namespace quoll

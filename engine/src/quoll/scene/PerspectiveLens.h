@@ -16,41 +16,41 @@ struct PerspectiveLens {
   /**
    * Default focal length
    */
-  static constexpr float DefaultFocalLength = 23.0f;
+  static constexpr f32 DefaultFocalLength = 23.0f;
 
   /**
    * Default aperture
    */
-  static constexpr float DefaultAperture = 16.0f;
+  static constexpr f32 DefaultAperture = 16.0f;
 
   /**
    * Default shutter speed
    */
-  static constexpr float DefaultShutterSpeed = 1.0f / 250.0f;
+  static constexpr f32 DefaultShutterSpeed = 1.0f / 250.0f;
 
   /**
    * Default sensitivity
    */
-  static constexpr uint32_t DefaultSensitivity = 200;
+  static constexpr u32 DefaultSensitivity = 200;
 
   /**
    * Near plane
    *
    * Measured in meters
    */
-  float near = 0.1f;
+  f32 near = 0.1f;
 
   /**
    * Far plane
    *
    * Measured in meters
    */
-  float far = 1000.0f;
+  f32 far = 1000.0f;
 
   /**
    * Aspect ratio
    */
-  float aspectRatio = 1.0f;
+  f32 aspectRatio = 1.0f;
 
   /**
    * Sensor size
@@ -64,7 +64,7 @@ struct PerspectiveLens {
    *
    * Measured in millimeters
    */
-  float focalLength = DefaultFocalLength;
+  f32 focalLength = DefaultFocalLength;
 
   /**
    * Lens aperture
@@ -73,7 +73,7 @@ struct PerspectiveLens {
    *
    * Example: f3.5, f1.6, f22
    */
-  float aperture = DefaultAperture;
+  f32 aperture = DefaultAperture;
 
   /**
    * Camera shutter speed
@@ -86,7 +86,7 @@ struct PerspectiveLens {
    *
    * Example: 1/125s, 1/1000s, 1s
    */
-  float shutterSpeed = DefaultShutterSpeed;
+  f32 shutterSpeed = DefaultShutterSpeed;
 
   /**
    * Camera sensitivity to light
@@ -96,7 +96,7 @@ struct PerspectiveLens {
    *
    * Example: ISO 100, ISO 400, ISO 1600
    */
-  uint32_t sensitivity = DefaultSensitivity;
+  u32 sensitivity = DefaultSensitivity;
 };
 
 } // namespace quoll

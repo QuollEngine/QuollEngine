@@ -5,9 +5,9 @@
 
 class SparseSetTest : public ::testing::Test {
 public:
-  quoll::SparseSet<uint32_t> sparseSet;
+  quoll::SparseSet<u32> sparseSet;
 
-  static constexpr size_t NumItems = 20;
+  static constexpr usize NumItems = 20;
 };
 
 using SparseSetDeathTest = SparseSetTest;
@@ -15,19 +15,19 @@ using SparseSetDeathTest = SparseSetTest;
 using SparseSetIteratorTest = SparseSetTest;
 
 TEST_F(SparseSetTest, PushesItemToTheEndOfTheListIfNoHoles) {
-  for (size_t i = 0; i < NumItems; ++i) {
-    size_t index = sparseSet.insert(static_cast<uint32_t>(i) * 2);
+  for (usize i = 0; i < NumItems; ++i) {
+    usize index = sparseSet.insert(static_cast<u32>(i) * 2);
     EXPECT_EQ(index, (sparseSet.size() - 1));
   }
 
-  for (size_t i = 0; i < NumItems; ++i) {
-    EXPECT_EQ(sparseSet.at(i), static_cast<uint32_t>(i) * 2);
+  for (usize i = 0; i < NumItems; ++i) {
+    EXPECT_EQ(sparseSet.at(i), static_cast<u32>(i) * 2);
   }
 }
 
 TEST_F(SparseSetTest, ErasesItemAtIndex) {
-  for (uint32_t i = 0; i < NumItems; ++i) {
-    size_t index = sparseSet.insert(i * 2);
+  for (u32 i = 0; i < NumItems; ++i) {
+    usize index = sparseSet.insert(i * 2);
     EXPECT_EQ(index, sparseSet.size() - 1);
   }
 
@@ -35,51 +35,51 @@ TEST_F(SparseSetTest, ErasesItemAtIndex) {
   sparseSet.erase(9);
   sparseSet.erase(17);
 
-  for (size_t i = 0; i < 5; ++i) {
+  for (usize i = 0; i < 5; ++i) {
     EXPECT_TRUE(sparseSet.contains(i));
     EXPECT_EQ(sparseSet.at(i), i * 2);
   }
 
   EXPECT_FALSE(sparseSet.contains(5));
 
-  for (size_t i = 6; i < 9; ++i) {
+  for (usize i = 6; i < 9; ++i) {
     EXPECT_TRUE(sparseSet.contains(i));
     EXPECT_EQ(sparseSet.at(i), i * 2);
   }
 
   EXPECT_FALSE(sparseSet.contains(9));
 
-  for (size_t i = 10; i < 17; ++i) {
+  for (usize i = 10; i < 17; ++i) {
     EXPECT_TRUE(sparseSet.contains(i));
     EXPECT_EQ(sparseSet.at(i), i * 2);
   }
 
   EXPECT_FALSE(sparseSet.contains(17));
 
-  for (size_t i = 18; i < NumItems; ++i) {
+  for (usize i = 18; i < NumItems; ++i) {
     EXPECT_TRUE(sparseSet.contains(i));
     EXPECT_EQ(sparseSet.at(i), i * 2);
   }
 }
 
 TEST_F(SparseSetTest, OutOfOrderAddAndEraseDoesNotCauseInvalidState) {
-  for (uint32_t i = 0; i < NumItems; ++i) {
-    size_t index0 = sparseSet.insert(i);
-    size_t index1 = sparseSet.insert(NumItems + i);
+  for (u32 i = 0; i < NumItems; ++i) {
+    usize index0 = sparseSet.insert(i);
+    usize index1 = sparseSet.insert(NumItems + i);
 
     sparseSet.erase(index0);
     sparseSet.erase(index1);
   }
 
-  for (uint32_t i = 0; i < NumItems; ++i) {
+  for (u32 i = 0; i < NumItems; ++i) {
     EXPECT_FALSE(sparseSet.contains(i));
     EXPECT_FALSE(sparseSet.contains(NumItems + i));
   }
 }
 
 TEST_F(SparseSetTest, FillsEmptyHolesOnInsertIfThereAreAny) {
-  for (size_t i = 0; i < NumItems; ++i) {
-    size_t index = sparseSet.insert(static_cast<uint32_t>(i) * 2);
+  for (usize i = 0; i < NumItems; ++i) {
+    usize index = sparseSet.insert(static_cast<u32>(i) * 2);
     EXPECT_EQ(index, sparseSet.size() - 1);
   }
 
@@ -102,8 +102,8 @@ TEST_F(SparseSetTest, FillsEmptyHolesOnInsertIfThereAreAny) {
 }
 
 TEST_F(SparseSetTest, GetsSize) {
-  for (uint32_t i = 0; i < NumItems; ++i) {
-    size_t index = sparseSet.insert(i * 2);
+  for (u32 i = 0; i < NumItems; ++i) {
+    usize index = sparseSet.insert(i * 2);
     EXPECT_EQ(index, sparseSet.size() - 1);
   }
 
@@ -115,11 +115,11 @@ TEST_F(SparseSetTest, GetsSize) {
 }
 
 TEST_F(SparseSetTest, EmptyReturnsTrueIfSetIsEmpty) {
-  for (uint32_t i = 0; i < NumItems; ++i) {
+  for (u32 i = 0; i < NumItems; ++i) {
     sparseSet.insert(i * 2);
   }
 
-  for (uint32_t i = 0; i < NumItems; ++i) {
+  for (u32 i = 0; i < NumItems; ++i) {
     sparseSet.erase(i);
   }
 
@@ -127,8 +127,8 @@ TEST_F(SparseSetTest, EmptyReturnsTrueIfSetIsEmpty) {
 }
 
 TEST_F(SparseSetTest, EmptyReturnsFalseIfSetIsNotEmpty) {
-  for (uint32_t i = 0; i < NumItems; ++i) {
-    size_t index = sparseSet.insert(i * 2);
+  for (u32 i = 0; i < NumItems; ++i) {
+    usize index = sparseSet.insert(i * 2);
   }
 
   EXPECT_FALSE(sparseSet.empty());
@@ -139,7 +139,7 @@ TEST_F(SparseSetDeathTest, FailsGettingItemIfIndexOutOfBounds) {
 }
 
 TEST_F(SparseSetDeathTest, FailsGettingItemIfNoItemAtIndex) {
-  for (uint32_t i = 0; i < NumItems; ++i) {
+  for (u32 i = 0; i < NumItems; ++i) {
     sparseSet.insert(i * 2);
   }
 
@@ -149,11 +149,11 @@ TEST_F(SparseSetDeathTest, FailsGettingItemIfNoItemAtIndex) {
 }
 
 TEST_F(SparseSetTest, FailsGettingItemIfNoItemAtIndex) {
-  for (uint32_t i = 0; i < NumItems; ++i) {
+  for (u32 i = 0; i < NumItems; ++i) {
     sparseSet.insert(i * 2);
   }
 
-  size_t i = 0;
+  usize i = 0;
   for (auto value : sparseSet) {
     EXPECT_EQ(value, i * 2);
     i++;

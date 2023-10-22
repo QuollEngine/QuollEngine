@@ -23,7 +23,7 @@ public:
    * @param name Command name
    * @return Command id
    */
-  sol_maybe<size_t> getCommand(String name);
+  sol_maybe<usize> getCommand(String name);
 
   /**
    * @brief Check if command is pressed
@@ -31,7 +31,7 @@ public:
    * @param command Command id
    * @return Command boolean value
    */
-  sol_maybe<bool> getCommandValueBoolean(size_t command);
+  sol_maybe<bool> getCommandValueBoolean(usize command);
 
   /**
    * @brief Get axis 2d command value
@@ -39,8 +39,8 @@ public:
    * @param command Command id
    * @return Command 2d axis value
    */
-  std::tuple<sol_maybe<float>, sol_maybe<float>>
-  getCommandValueAxis2d(size_t command);
+  std::tuple<sol_maybe<f32>, sol_maybe<f32>>
+  getCommandValueAxis2d(usize command);
 
   /**
    * @brief Set scheme

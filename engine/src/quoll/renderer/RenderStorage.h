@@ -183,7 +183,7 @@ public:
   inline rhi::GraphicsPipelineDescription &
   getGraphicsPipelineDescription(rhi::PipelineHandle handle) {
     return std::get<rhi::GraphicsPipelineDescription>(
-        mPipelineDescriptions.at(static_cast<size_t>(handle) - 1));
+        mPipelineDescriptions.at(static_cast<usize>(handle) - 1));
   }
 
   /**
@@ -195,7 +195,7 @@ public:
   inline rhi::ComputePipelineDescription &
   getComputePipelineDescription(rhi::PipelineHandle handle) {
     return std::get<rhi::ComputePipelineDescription>(
-        mPipelineDescriptions.at(static_cast<size_t>(handle) - 1));
+        mPipelineDescriptions.at(static_cast<usize>(handle) - 1));
   }
 
 private:
@@ -206,10 +206,10 @@ private:
   std::vector<std::variant<rhi::GraphicsPipelineDescription,
                            rhi::ComputePipelineDescription>>
       mPipelineDescriptions;
-  std::vector<size_t> mGraphicsPipelineIndices;
-  std::vector<size_t> mComputePipelineIndices;
+  std::vector<usize> mGraphicsPipelineIndices;
+  std::vector<usize> mComputePipelineIndices;
 
-  static constexpr uint32_t TextureStart = 10;
+  static constexpr u32 TextureStart = 10;
   HandleCounter<rhi::ShaderHandle> mShaderCounter;
   HandleCounter<rhi::TextureHandle, TextureStart> mTextureCounter;
   HandleCounter<rhi::RenderPassHandle> mRenderPassCounter;

@@ -7,8 +7,8 @@ TEST(PropertyTest, SetsInt32Value) {
   quoll::Property property(-232);
 
   EXPECT_EQ(property.getType(), quoll::Property::INT32);
-  EXPECT_EQ(property.getSize(), sizeof(int32_t));
-  EXPECT_EQ(property.getValue<int32_t>(), -232);
+  EXPECT_EQ(property.getSize(), sizeof(i32));
+  EXPECT_EQ(property.getValue<i32>(), -232);
   EXPECT_EQ(property.toString(), "-232");
 }
 
@@ -16,18 +16,18 @@ TEST(PropertyTest, SetsUint32Value) {
   quoll::Property property(232u);
 
   EXPECT_EQ(property.getType(), quoll::Property::UINT32);
-  EXPECT_EQ(property.getSize(), sizeof(uint32_t));
-  EXPECT_EQ(property.getValue<uint32_t>(), 232);
+  EXPECT_EQ(property.getSize(), sizeof(u32));
+  EXPECT_EQ(property.getValue<u32>(), 232);
   EXPECT_EQ(property.toString(), "232");
 }
 
 TEST(PropertyTest, SetsUint64Value) {
-  uint64_t value = 232;
+  u64 value = 232;
   quoll::Property property(value);
 
   EXPECT_EQ(property.getType(), quoll::Property::UINT64);
-  EXPECT_EQ(property.getSize(), sizeof(uint64_t));
-  EXPECT_EQ(property.getValue<uint64_t>(), 232);
+  EXPECT_EQ(property.getSize(), sizeof(u64));
+  EXPECT_EQ(property.getValue<u64>(), 232);
   EXPECT_EQ(property.toString(), "232");
 }
 
@@ -35,8 +35,8 @@ TEST(PropertyTest, SetsRealValue) {
   quoll::Property property(12.0f);
 
   EXPECT_EQ(property.getType(), quoll::Property::REAL);
-  EXPECT_EQ(property.getSize(), sizeof(float));
-  EXPECT_EQ(property.getValue<float>(), 12.0f);
+  EXPECT_EQ(property.getSize(), sizeof(f32));
+  EXPECT_EQ(property.getValue<f32>(), 12.0f);
   EXPECT_EQ(property.toString(), "12.00");
 }
 
@@ -94,14 +94,14 @@ TEST(PropertyDeathTest, UndefinedTypeThrowsError) {
 TEST(PropertyDeathTest, CastingToWrongTypeThrowsError) {
   quoll::Property p1(12.0f);
 
-  EXPECT_DEATH(p1.getValue<int32_t>(), ".*");
-  EXPECT_DEATH(p1.getValue<uint32_t>(), ".*");
-  EXPECT_DEATH(p1.getValue<uint64_t>(), ".*");
+  EXPECT_DEATH(p1.getValue<i32>(), ".*");
+  EXPECT_DEATH(p1.getValue<u32>(), ".*");
+  EXPECT_DEATH(p1.getValue<u64>(), ".*");
   EXPECT_DEATH(p1.getValue<glm::vec2>(), ".*");
   EXPECT_DEATH(p1.getValue<glm::vec3>(), ".*");
   EXPECT_DEATH(p1.getValue<glm::vec4>(), ".*");
   EXPECT_DEATH(p1.getValue<glm::mat4>(), ".*");
 
   quoll::Property p2(glm::vec2{1.0f, 1.0f});
-  EXPECT_DEATH(p2.getValue<float>(), ".*");
+  EXPECT_DEATH(p2.getValue<f32>(), ".*");
 }

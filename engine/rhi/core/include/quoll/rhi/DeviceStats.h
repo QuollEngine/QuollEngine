@@ -24,7 +24,7 @@ public:
    *
    * @param primitiveCount Number of primitives
    */
-  void addDrawCall(size_t primitiveCount);
+  void addDrawCall(usize primitiveCount);
 
   /**
    * @brief Resets calls
@@ -41,23 +41,21 @@ public:
    *
    * @return Number of draw calls
    */
-  inline uint32_t getDrawCallsCount() const { return mDrawCallsCount; }
+  inline u32 getDrawCallsCount() const { return mDrawCallsCount; }
 
   /**
    * @brief Get number of drawn primitives
    *
    * @return Number of drawn primitives
    */
-  inline size_t getDrawnPrimitivesCount() const {
-    return mDrawnPrimitivesCount;
-  }
+  inline usize getDrawnPrimitivesCount() const { return mDrawnPrimitivesCount; }
 
   /**
    * @brief Get command calls count
    *
    * @return Number of command calls
    */
-  inline uint32_t getCommandCallsCount() const { return mCommandCallsCount; }
+  inline u32 getCommandCallsCount() const { return mCommandCallsCount; }
 
   /**
    * @brief Get resource metrics
@@ -69,9 +67,9 @@ public:
   }
 
 private:
-  uint32_t mDrawCallsCount = 0;
-  size_t mDrawnPrimitivesCount = 0;
-  uint32_t mCommandCallsCount = 0;
+  u32 mDrawCallsCount = 0;
+  usize mDrawnPrimitivesCount = 0;
+  u32 mCommandCallsCount = 0;
 
   NativeResourceMetrics *mResourceMetrics;
 };

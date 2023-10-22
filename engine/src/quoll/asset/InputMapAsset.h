@@ -57,12 +57,12 @@ struct InputMapBinding {
   /**
    * Scheme index
    */
-  size_t scheme = 0;
+  usize scheme = 0;
 
   /**
    * Command index
    */
-  size_t command = 0;
+  usize command = 0;
 
   /**
    * Binding value

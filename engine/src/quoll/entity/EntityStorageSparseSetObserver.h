@@ -22,7 +22,7 @@ public:
      * @param index Index
      * @param pool Picked pools
      */
-    Iterator(size_t index, EntityStorageSparseSetComponentPool *pool)
+    Iterator(usize index, EntityStorageSparseSetComponentPool *pool)
         : mIndex(index), mPool(pool) {}
 
     /**
@@ -64,7 +64,7 @@ public:
     }
 
   private:
-    size_t mIndex = 0;
+    usize mIndex = 0;
     EntityStorageSparseSetComponentPool *mPool;
   };
 
@@ -105,7 +105,7 @@ public:
    *
    * @return Number of observed components
    */
-  inline size_t size() { return mPool->entities.size(); }
+  inline usize size() { return mPool->entities.size(); }
 
   /**
    * @brief Clear observed items

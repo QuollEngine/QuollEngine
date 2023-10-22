@@ -34,7 +34,7 @@ public:
    *
    * @param size Resized buffer
    */
-  void resize(size_t size) override;
+  void resize(usize size) override;
 
   /**
    * @brief Get buffer device address
@@ -53,7 +53,7 @@ public:
   }
 
 private:
-  std::vector<uint8_t> mData;
+  std::vector<u8> mData;
   BufferDescription mDescription;
 };
 

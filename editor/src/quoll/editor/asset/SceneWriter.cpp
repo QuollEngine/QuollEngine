@@ -66,9 +66,9 @@ void SceneWriter::updateSceneYaml(
     if (mEntityIdCache.find(id) == mEntityIdCache.end()) {
       node["entities"].push_back(updatedNode.getData());
     } else {
-      size_t i = 0;
+      usize i = 0;
       for (; i < node["entities"].size() &&
-             node["entities"][i]["id"].as<uint64_t>(0) != id;
+             node["entities"][i]["id"].as<u64>(0) != id;
            ++i) {
       }
 
@@ -117,19 +117,19 @@ void SceneWriter::removeEntityFromSceneYaml(
 
   auto id = mScene.entityDatabase.get<Id>(entity).id;
 
-  size_t i = 0;
+  usize i = 0;
   for (; i < node["entities"].size() &&
-         node["entities"][i]["id"].as<uint64_t>(0) != id;
+         node["entities"][i]["id"].as<u64>(0) != id;
        ++i) {
   }
 
   node["entities"].remove(i);
 
-  if (mRoot["zones"][0]["startingCamera"].as<uint64_t>(0) == id) {
+  if (mRoot["zones"][0]["startingCamera"].as<u64>(0) == id) {
     mRoot["zones"][0]["startingCamera"] = YAML::Node(YAML::NodeType::Null);
   }
 
-  if (mRoot["zones"][0]["environment"].as<uint64_t>(0) == id) {
+  if (mRoot["zones"][0]["environment"].as<u64>(0) == id) {
     mRoot["zones"][0]["environment"] = YAML::Node(YAML::NodeType::Null);
   }
 
@@ -168,6 +168,6 @@ void SceneWriter::save() {
   mStream.close();
 }
 
-uint64_t SceneWriter::generateId() { return mLastId++; }
+u64 SceneWriter::generateId() { return mLastId++; }
 
 } // namespace quoll::editor

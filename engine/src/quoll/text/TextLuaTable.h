@@ -36,14 +36,14 @@ public:
    *
    * @return Line height
    */
-  sol_maybe<float> getLineHeight();
+  sol_maybe<f32> getLineHeight();
 
   /**
    * @brief Set line height
    *
    * @param lineHeight Line height
    */
-  void setLineHeight(float lineHeight);
+  void setLineHeight(f32 lineHeight);
 
   /**
    * @brief Delete component

@@ -43,7 +43,7 @@ void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
         stack.pushColor(ImGuiCol_HeaderHovered, SelectionColor);
         stack.pushColor(ImGuiCol_HeaderActive, SelectionColor);
 
-        for (size_t i = 0; i < mTabs.size(); ++i) {
+        for (usize i = 0; i < mTabs.size(); ++i) {
           const auto &tab = mTabs.at(i);
           bool selected = mSelectedIndex == i;
 

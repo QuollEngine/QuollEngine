@@ -67,7 +67,7 @@ static Path getUniquePath(Path path) {
 
   auto tmpPath = path;
 
-  uint32_t index = 1;
+  u32 index = 1;
   while (std::filesystem::exists(tmpPath)) {
     String uniqueSuffix = "-" + std::to_string(index++);
     tmpPath = path;
@@ -348,9 +348,9 @@ Result<UUIDMap> AssetManager::loadSourceIfChanged(const Path &sourceAssetPath) {
 
 Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
                                                 const UUIDMap &uuids) {
-  int32_t width = 0;
-  int32_t height = 0;
-  int32_t channels = 0;
+  i32 width = 0;
+  i32 height = 0;
+  i32 channels = 0;
 
   if (sourceAssetPath.extension() == ".ktx2") {
     auto uuid = getOrCreateUuidFromMap(uuids, "root");
@@ -562,7 +562,7 @@ Result<Path> AssetManager::createMetaFile(const Path &sourceAssetPath,
     node["uuid"][pair.first] = pair.second;
   }
 
-  node["revision"] = static_cast<uint32_t>(revision);
+  node["revision"] = static_cast<u32>(revision);
 
   std::ofstream stream(metaFilePath);
   stream << node;
@@ -591,7 +591,7 @@ bool AssetManager::isAssetChanged(const Path &assetFilePath) const {
   stream.close();
 
   auto sourceAssetHash = node["sourceHash"].as<String>("");
-  auto revision = AssetRevision{node["revision"].as<uint32_t>(0)};
+  auto revision = AssetRevision{node["revision"].as<u32>(0)};
 
   if (!node["uuid"] || !node["uuid"].IsMap()) {
     return {};

@@ -141,11 +141,11 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdAlreadyExists) {
 }
 
 TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
-  static constexpr uint64_t NumEntities = 9;
+  static constexpr u64 NumEntities = 9;
 
   std::vector<YAML::Node> nodes(NumEntities);
 
-  for (uint64_t i = 1; i < NumEntities + 1; ++i) {
+  for (u64 i = 1; i < NumEntities + 1; ++i) {
     YAML::Node node;
     node["id"] = i;
     nodes.push_back(node);
@@ -162,11 +162,11 @@ TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
 }
 
 TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
-  static constexpr uint64_t NumEntities = 9;
+  static constexpr u64 NumEntities = 9;
 
   std::vector<YAML::Node> nodes(NumEntities);
 
-  for (uint64_t i = 1; i < NumEntities + 1; ++i) {
+  for (u64 i = 1; i < NumEntities + 1; ++i) {
     // set parent to next entity
     // to make sure that parent entities
     // are loaded after child ones

@@ -31,11 +31,11 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   header.name = asset.name;
   file.write(header);
 
-  auto numGeometries = static_cast<uint32_t>(asset.data.geometries.size());
+  auto numGeometries = static_cast<u32>(asset.data.geometries.size());
   file.write(numGeometries);
 
   for (auto &geometry : asset.data.geometries) {
-    auto numVertices = static_cast<uint32_t>(geometry.positions.size());
+    auto numVertices = static_cast<u32>(geometry.positions.size());
     file.write(numVertices);
     file.write(geometry.positions);
     file.write(geometry.normals);
@@ -48,7 +48,7 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
       file.write(geometry.weights);
     }
 
-    auto numIndices = static_cast<uint32_t>(geometry.indices.size());
+    auto numIndices = static_cast<u32>(geometry.indices.size());
     file.write(numIndices);
     file.write(geometry.indices);
   }
@@ -68,13 +68,13 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
   mesh.type = header.type;
   mesh.uuid = Uuid(filePath.stem().string());
 
-  uint32_t numGeometries = 0;
+  u32 numGeometries = 0;
   stream.read(numGeometries);
 
   mesh.data.geometries.resize(numGeometries);
 
-  for (uint32_t i = 0; i < numGeometries; ++i) {
-    uint32_t numVertices = 0;
+  for (u32 i = 0; i < numGeometries; ++i) {
+    u32 numVertices = 0;
     stream.read(numVertices);
 
     if (numVertices == 0) {
@@ -102,7 +102,7 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
       stream.read(g.weights);
     }
 
-    uint32_t numIndices = 0;
+    u32 numIndices = 0;
     stream.read(numIndices);
 
     if (numIndices == 0) {

@@ -30,11 +30,11 @@ void ImguiDebugLayer::render() {
 }
 
 void ImguiDebugLayer::renderPerformanceMetrics() {
-  const uint32_t ONE_SECOND_IN_MS = 1000;
+  const u32 ONE_SECOND_IN_MS = 1000;
   if (!mPerformanceMetricsVisible)
     return;
 
-  uint32_t fps = mFpsCounter.getFPS();
+  u32 fps = mFpsCounter.getFPS();
 
   if (ImGui::Begin("Performance Metrics", &mPerformanceMetricsVisible,
                    ImGuiWindowFlags_NoDocking)) {
@@ -61,15 +61,15 @@ void ImguiDebugLayer::renderUsageMetrics() {
                    ImGuiWindowFlags_NoDocking)) {
 
     static const std::array<String, 3> Units{"bytes", "Kb", "Mb"};
-    static constexpr float Kilo = 1024.0f;
+    static constexpr f32 Kilo = 1024.0f;
 
-    auto getSizeString = [](size_t size) {
-      if (size < static_cast<size_t>(Kilo)) {
+    auto getSizeString = [](usize size) {
+      if (size < static_cast<usize>(Kilo)) {
         return std::to_string(size) + " " + Units.at(0);
       }
-      float humanReadableSize = static_cast<float>(size);
+      f32 humanReadableSize = static_cast<f32>(size);
 
-      size_t i = 1;
+      usize i = 1;
       for (; i < Units.size() && humanReadableSize >= Kilo; ++i) {
         humanReadableSize /= Kilo;
       }

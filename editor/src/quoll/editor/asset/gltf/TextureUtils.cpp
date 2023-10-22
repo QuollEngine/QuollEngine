@@ -4,7 +4,7 @@
 
 namespace quoll::editor {
 
-TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
+TextureAssetHandle loadTexture(GLTFImportData &importData, usize index,
                                GLTFTextureColorSpace colorSpace,
                                bool generateMipMaps) {
   if (importData.textures.map.find(index) != importData.textures.map.end()) {

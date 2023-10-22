@@ -15,7 +15,7 @@ enum class GLTFTextureColorSpace { Linear, Srgb };
  * @param generateMipMaps Generate mip maps
  * @return Texture asset handle
  */
-TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
+TextureAssetHandle loadTexture(GLTFImportData &importData, usize index,
                                GLTFTextureColorSpace colorSpace,
                                bool generateMipMaps);
 

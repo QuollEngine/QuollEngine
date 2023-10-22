@@ -9,17 +9,17 @@ struct PhysicsMaterialDesc {
   /**
    * Static friction
    */
-  float staticFriction = 0.0f;
+  f32 staticFriction = 0.0f;
 
   /**
    * Dynamic friction
    */
-  float dynamicFriction = 0.0f;
+  f32 dynamicFriction = 0.0f;
 
   /**
    * Restitution
    */
-  float restitution = 1.0f;
+  f32 restitution = 1.0f;
 };
 
 /**
@@ -55,7 +55,7 @@ struct PhysicsGeometrySphere {
   /**
    * Sphere radius
    */
-  float radius = 1.0f;
+  f32 radius = 1.0f;
 };
 
 /**
@@ -73,12 +73,12 @@ struct PhysicsGeometryCapsule {
   /**
    * Capsule radius
    */
-  float radius = 1.0f;
+  f32 radius = 1.0f;
 
   /**
    * Capsule half height
    */
-  float halfHeight = 0.5f;
+  f32 halfHeight = 0.5f;
 };
 
 /**
@@ -122,7 +122,7 @@ struct PhysicsDynamicRigidBodyDesc {
   /**
    * Mass
    */
-  float mass = 1.0f;
+  f32 mass = 1.0f;
 
   /**
    * Inertia

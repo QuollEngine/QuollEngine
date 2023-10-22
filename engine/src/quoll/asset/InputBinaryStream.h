@@ -43,7 +43,7 @@ public:
    * @param value Address to value
    * @param size Size to read
    */
-  template <class TPrimitive> void read(TPrimitive *value, size_t size) {
+  template <class TPrimitive> void read(TPrimitive *value, usize size) {
     mStream.read(reinterpret_cast<char *>(value),
                  static_cast<std::streamsize>(size));
   }
@@ -78,8 +78,8 @@ private:
  * @param value String value
  */
 template <> inline void InputBinaryStream::read(String &value) {
-  uint32_t length = 0;
-  read(&length, sizeof(uint32_t));
+  u32 length = 0;
+  read(&length, sizeof(u32));
 
   value.resize(length);
   read(value.data(), length);
@@ -138,7 +138,7 @@ template <> inline void InputBinaryStream::read(glm::quat &value) {
  * @param value String vector
  */
 template <> inline void InputBinaryStream::read(std::vector<String> &value) {
-  for (size_t i = 0; i < value.size(); ++i) {
+  for (usize i = 0; i < value.size(); ++i) {
     read<String>(value.at(i));
   }
 }
@@ -149,7 +149,7 @@ template <> inline void InputBinaryStream::read(std::vector<String> &value) {
  * @param value String vector
  */
 template <> inline void InputBinaryStream::read(std::vector<Uuid> &value) {
-  for (size_t i = 0; i < value.size(); ++i) {
+  for (usize i = 0; i < value.size(); ++i) {
     read<Uuid>(value.at(i));
   }
 }

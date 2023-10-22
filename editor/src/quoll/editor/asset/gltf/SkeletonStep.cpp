@@ -10,15 +10,15 @@ void loadSkeletons(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
   const auto &model = importData.model;
 
-  for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
+  for (u32 si = 0; si < static_cast<u32>(model.skins.size()); ++si) {
     const auto &skin = model.skins.at(si);
 
     auto skeletonName =
         skin.name.empty() ? "skeleton" + std::to_string(si) : skin.name;
     skeletonName += ".skel";
 
-    std::unordered_map<uint32_t, int> jointParents;
-    std::unordered_map<uint32_t, uint32_t> normalizedJointMap;
+    std::unordered_map<u32, int> jointParents;
+    std::unordered_map<u32, u32> normalizedJointMap;
 
     auto &&ibMeta = getBufferMetaForAccessor(model, skin.inverseBindMatrices);
 
@@ -50,14 +50,14 @@ void loadSkeletons(GLTFImportData &importData) {
 
     {
       const auto *data = reinterpret_cast<const glm::mat4 *>(ibMeta.rawData);
-      for (size_t i = 0; i < ibMeta.accessor.count; ++i) {
+      for (usize i = 0; i < ibMeta.accessor.count; ++i) {
         inverseBindMatrices.at(i) = data[i];
       }
     }
 
     bool skeletonValid = true;
-    for (uint32_t i = 0;
-         i < static_cast<uint32_t>(skin.joints.size()) && skeletonValid; ++i) {
+    for (u32 i = 0; i < static_cast<u32>(skin.joints.size()) && skeletonValid;
+         ++i) {
       const auto &joint = skin.joints.at(i);
 
       skeletonValid =
@@ -79,12 +79,12 @@ void loadSkeletons(GLTFImportData &importData) {
     if (!skeletonValid)
       continue;
 
-    for (uint32_t j = 0; j < static_cast<uint32_t>(model.nodes.size()); ++j) {
+    for (u32 j = 0; j < static_cast<u32>(model.nodes.size()); ++j) {
       if (normalizedJointMap.find(j) == normalizedJointMap.end()) {
         continue;
       }
 
-      uint32_t nJ = normalizedJointMap.at(j);
+      u32 nJ = normalizedJointMap.at(j);
 
       const auto &node = model.nodes.at(j);
       for (auto &child : node.children) {
@@ -92,12 +92,12 @@ void loadSkeletons(GLTFImportData &importData) {
           continue;
         }
 
-        uint32_t nChild = normalizedJointMap.at(child);
+        u32 nChild = normalizedJointMap.at(child);
         jointParents.at(nChild) = static_cast<int>(nJ);
       }
     }
 
-    uint32_t numJoints = static_cast<uint32_t>(skin.joints.size());
+    u32 numJoints = static_cast<u32>(skin.joints.size());
 
     auto assetName =
         skin.name.empty() ? "skeleton" + std::to_string(si) : skin.name;
@@ -110,7 +110,7 @@ void loadSkeletons(GLTFImportData &importData) {
     asset.uuid = getOrCreateGLTFUuid(importData, skeletonName);
 
     for (auto &joint : skin.joints) {
-      uint32_t nJoint = normalizedJointMap.at(joint);
+      u32 nJoint = normalizedJointMap.at(joint);
       int parent = jointParents.at(nJoint);
       const auto &node = model.nodes.at(joint);
       const auto &data = loadTransformData(node);
@@ -128,7 +128,7 @@ void loadSkeletons(GLTFImportData &importData) {
     auto handle = assetCache.loadSkeleton(asset.uuid);
 
     importData.skeletons.skeletonMap.map.insert_or_assign(
-        static_cast<size_t>(si), handle.getData());
+        static_cast<usize>(si), handle.getData());
 
     importData.outputUuids.insert_or_assign(assetName,
                                             assetCache.getRegistry()

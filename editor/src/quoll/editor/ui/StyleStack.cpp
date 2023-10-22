@@ -16,30 +16,30 @@ StyleStack::~StyleStack() {
     mPushedStyles = 0;
   }
 
-  for (uint32_t i = 0; i < mPushedFonts; ++i) {
+  for (u32 i = 0; i < mPushedFonts; ++i) {
     ImGui::PopFont();
   }
 }
 
-void StyleStack::pushColor(uint32_t colorIndex, const glm::vec4 &color) {
+void StyleStack::pushColor(u32 colorIndex, const glm::vec4 &color) {
   pushColor(colorIndex, ImVec4(color.x, color.y, color.z, color.w));
 }
 
-void StyleStack::pushColor(uint32_t colorIndex, const ImVec4 &color) {
+void StyleStack::pushColor(u32 colorIndex, const ImVec4 &color) {
   ImGui::PushStyleColor(static_cast<ImGuiCol>(colorIndex), color);
   mPushedColors++;
 }
 
-void StyleStack::pushStyle(uint32_t styleIndex, float value) {
+void StyleStack::pushStyle(u32 styleIndex, f32 value) {
   ImGui::PushStyleVar(static_cast<ImGuiStyleVar>(styleIndex), value);
   mPushedStyles++;
 }
 
-void StyleStack::pushStyle(uint32_t styleIndex, const glm::vec2 &value) {
+void StyleStack::pushStyle(u32 styleIndex, const glm::vec2 &value) {
   pushStyle(styleIndex, ImVec2(value.x, value.y));
 }
 
-void StyleStack::pushStyle(uint32_t styleIndex, const ImVec2 &value) {
+void StyleStack::pushStyle(u32 styleIndex, const ImVec2 &value) {
   ImGui::PushStyleVar(static_cast<ImGuiStyleVar>(styleIndex), value);
   mPushedStyles++;
 }

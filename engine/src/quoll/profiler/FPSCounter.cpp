@@ -3,6 +3,6 @@
 
 namespace quoll {
 
-void FPSCounter::collectFPS(uint32_t fps) { mFps = fps; }
+void FPSCounter::collectFPS(u32 fps) { mFps = fps; }
 
 } // namespace quoll

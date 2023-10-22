@@ -20,7 +20,7 @@ void decomposeMatrix(const glm::mat4 &matrix, glm::vec3 &position,
 TransformData loadTransformData(const tinygltf::Node &node) {
   TransformData data{};
 
-  static constexpr size_t TransformMatrixSize = 6;
+  static constexpr usize TransformMatrixSize = 6;
 
   glm::mat4 finalTransform = glm::mat4{1.0f};
   if (node.matrix.size() == TransformMatrixSize) {

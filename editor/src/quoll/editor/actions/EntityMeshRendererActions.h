@@ -19,7 +19,7 @@ public:
    * @param slot Material slot
    * @param handle New material
    */
-  EntitySetMeshRendererMaterial(Entity entity, size_t slot,
+  EntitySetMeshRendererMaterial(Entity entity, usize slot,
                                 MaterialAssetHandle handle);
 
   /**
@@ -54,7 +54,7 @@ public:
 
 private:
   Entity mEntity;
-  size_t mSlot;
+  usize mSlot;
   MaterialAssetHandle mOldMaterial = MaterialAssetHandle::Null;
   MaterialAssetHandle mNewMaterial;
 };

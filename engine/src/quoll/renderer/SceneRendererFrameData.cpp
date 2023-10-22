@@ -6,7 +6,7 @@
 namespace quoll {
 
 SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
-                                               size_t reservedSpace)
+                                               usize reservedSpace)
     : mReservedSpace(reservedSpace),
       mBindlessParams(renderStorage.getDevice()
                           ->getDeviceInformation()
@@ -152,7 +152,7 @@ void SceneRendererFrameData::updateBuffers() {
                               mFlatMaterials.size() *
                                   sizeof(rhi::DeviceAddress));
   {
-    size_t offset = 0;
+    usize offset = 0;
     auto *bufferData = static_cast<glm::mat4 *>(mMeshTransformsBuffer.map());
     for (auto &[_, data] : mMeshGroups) {
       memcpy(bufferData + offset, data.transforms.data(),
@@ -162,7 +162,7 @@ void SceneRendererFrameData::updateBuffers() {
   }
 
   {
-    size_t offset = 0;
+    usize offset = 0;
     auto *bufferData = static_cast<MaterialRange *>(mMeshMaterialsBuffer.map());
     for (auto &[_, data] : mMeshGroups) {
       memcpy(bufferData + offset, data.materialRanges.data(),
@@ -172,11 +172,11 @@ void SceneRendererFrameData::updateBuffers() {
   }
 
   {
-    size_t transformsOffset = 0;
+    usize transformsOffset = 0;
     auto *transformsBuffer =
         static_cast<glm::mat4 *>(mSkinnedMeshTransformsBuffer.map());
 
-    size_t skeletonsOffset = 0;
+    usize skeletonsOffset = 0;
     auto *skeletonsBuffer = static_cast<glm::mat4 *>(mSkeletonsBuffer.map());
     for (auto &[_, data] : mSkinnedMeshGroups) {
       memcpy(transformsBuffer + transformsOffset, data.transforms.data(),
@@ -190,7 +190,7 @@ void SceneRendererFrameData::updateBuffers() {
   }
 
   {
-    size_t offset = 0;
+    usize offset = 0;
     auto *bufferData =
         static_cast<MaterialRange *>(mSkinnedMeshMaterialsBuffer.map());
     for (auto &[_, data] : mSkinnedMeshGroups) {
@@ -216,7 +216,7 @@ void SceneRendererFrameData::updateBuffers() {
   mSkyboxBuffer.update(&mSkyboxData, sizeof(SkyboxData));
 
   mSpriteTexturesBuffer.update(mSpriteTextures.data(),
-                               mSpriteTextures.size() * sizeof(uint32_t));
+                               mSpriteTextures.size() * sizeof(u32));
   mSpriteTransformsBuffer.update(mSpriteTransforms.data(),
                                  mSpriteTransforms.size() * sizeof(glm::mat4));
 }
@@ -228,12 +228,12 @@ void SceneRendererFrameData::setDefaultMaterial(rhi::DeviceAddress material) {
 void SceneRendererFrameData::addMesh(
     MeshAssetHandle handle, quoll::Entity entity, const glm::mat4 &transform,
     const std::vector<rhi::DeviceAddress> &materials) {
-  uint32_t start = static_cast<uint32_t>(mFlatMaterials.size());
+  u32 start = static_cast<u32>(mFlatMaterials.size());
   for (const auto &material : materials) {
     mFlatMaterials.push_back(material);
   }
-  auto newMaterialSize = static_cast<uint32_t>(mFlatMaterials.size());
-  uint32_t end = newMaterialSize == start ? 0 : newMaterialSize - 1;
+  auto newMaterialSize = static_cast<u32>(mFlatMaterials.size());
+  u32 end = newMaterialSize == start ? 0 : newMaterialSize - 1;
 
   if (mMeshGroups.find(handle) == mMeshGroups.end()) {
     MeshData data{};
@@ -249,12 +249,12 @@ void SceneRendererFrameData::addSkinnedMesh(
     MeshAssetHandle handle, Entity entity, const glm::mat4 &transform,
     const std::vector<glm::mat4> &skeleton,
     const std::vector<rhi::DeviceAddress> &materials) {
-  uint32_t start = static_cast<uint32_t>(mFlatMaterials.size());
+  u32 start = static_cast<u32>(mFlatMaterials.size());
   for (const auto &material : materials) {
     mFlatMaterials.push_back(material);
   }
-  auto newMaterialSize = static_cast<uint32_t>(mFlatMaterials.size());
-  uint32_t end = newMaterialSize == start ? 0 : newMaterialSize - 1;
+  auto newMaterialSize = static_cast<u32>(mFlatMaterials.size());
+  u32 end = newMaterialSize == start ? 0 : newMaterialSize - 1;
 
   if (mSkinnedMeshGroups.find(handle) == mSkinnedMeshGroups.end()) {
     mSkinnedMeshGroups.insert({handle, SkinnedMeshData{}});
@@ -266,8 +266,8 @@ void SceneRendererFrameData::addSkinnedMesh(
   group.transforms.push_back(transform);
   group.materialRanges.push_back({start, end});
 
-  size_t currentOffset = group.lastSkeleton * MaxNumJoints;
-  size_t newSize = currentOffset + MaxNumJoints;
+  usize currentOffset = group.lastSkeleton * MaxNumJoints;
+  usize newSize = currentOffset + MaxNumJoints;
 
   // Resize skeletons if new skeleton does not fit
   if (group.skeletonCapacity < newSize) {
@@ -279,18 +279,18 @@ void SceneRendererFrameData::addSkinnedMesh(
   }
 
   auto *currentSkeleton = group.skeletons.get() + currentOffset;
-  size_t dataSize = std::min(skeleton.size(), MaxNumJoints);
+  usize dataSize = std::min(skeleton.size(), MaxNumJoints);
   memcpy(currentSkeleton, skeleton.data(), dataSize * sizeof(glm::mat4));
   group.lastSkeleton++;
 }
 
 void SceneRendererFrameData::setBrdfLookupTable(rhi::TextureHandle brdfLut) {
-  mSceneData.textures.z = static_cast<uint32_t>(brdfLut);
+  mSceneData.textures.z = static_cast<u32>(brdfLut);
 }
 
 void SceneRendererFrameData::addCascadedShadowMaps(
     const DirectionalLight &light, const CascadedShadowMap &shadowMap) {
-  uint32_t numCascades = static_cast<uint32_t>(shadowMap.numCascades);
+  u32 numCascades = static_cast<u32>(shadowMap.numCascades);
 
   // Calculate split distances by combining
   // logarithmic and uniform splitting
@@ -298,25 +298,24 @@ void SceneRendererFrameData::addCascadedShadowMaps(
   // log_i = near * (far/near)^(i / size)
   // uniform_i = near + (far - near) * (1 / size)
   // distance_i = lambda * log_i + (1 - lambda) * uniform_i
-  std::array<float, CascadedShadowMap::MaxCascades + 1> splitDistances{};
+  std::array<f32, CascadedShadowMap::MaxCascades + 1> splitDistances{};
 
-  float splitLambda = shadowMap.splitLambda;
+  f32 splitLambda = shadowMap.splitLambda;
 
-  float far = mCameraLens.far;
-  float near = mCameraLens.near;
+  f32 far = mCameraLens.far;
+  f32 near = mCameraLens.near;
 
-  float range = far - near;
-  float ratio = far / near;
+  f32 range = far - near;
+  f32 ratio = far / near;
 
-  const float fovY =
+  const f32 fovY =
       2.0f * atanf(mCameraLens.sensorSize.y / (2.0f * mCameraLens.focalLength));
 
-  for (size_t i = 0; i < static_cast<size_t>(numCascades + 1); ++i) {
-    float p =
-        static_cast<float>(i + 1) / static_cast<float>(splitDistances.size());
-    float log = near * std::pow(ratio, p);
-    float uniform = near + range * p;
-    float d = splitLambda * log + (1.0f - splitLambda) * uniform;
+  for (usize i = 0; i < static_cast<usize>(numCascades + 1); ++i) {
+    f32 p = static_cast<f32>(i + 1) / static_cast<f32>(splitDistances.size());
+    f32 log = near * std::pow(ratio, p);
+    f32 uniform = near + range * p;
+    f32 d = splitLambda * log + (1.0f - splitLambda) * uniform;
 
     splitDistances.at(i) = mCameraLens.far * ((d - near) / range);
   }
@@ -329,9 +328,9 @@ void SceneRendererFrameData::addCascadedShadowMaps(
       glm::vec3(1.0f, -1.0f, 1.0f),  glm::vec3(-1.0f, -1.0f, 1.0f),
   };
 
-  float prevSplitDistance = mCameraLens.near;
-  for (size_t i = 0; i < numCascades; ++i) {
-    float splitDistance = splitDistances.at(i);
+  f32 prevSplitDistance = mCameraLens.near;
+  for (usize i = 0; i < numCascades; ++i) {
+    f32 splitDistance = splitDistances.at(i);
 
     auto splitProjectionMatrix = glm::perspective(
         fovY, mCameraLens.aspectRatio, prevSplitDistance, splitDistance);
@@ -341,7 +340,7 @@ void SceneRendererFrameData::addCascadedShadowMaps(
 
     std::array<glm::vec4, FrustumCornersNDC.size()> frustumCorners{};
 
-    for (size_t i = 0; i < frustumCorners.size(); ++i) {
+    for (usize i = 0; i < frustumCorners.size(); ++i) {
       auto pt = invProjView * glm::vec4(FrustumCornersNDC.at(i), 1.0f);
       frustumCorners.at(i) = pt / pt.w;
     }
@@ -353,20 +352,20 @@ void SceneRendererFrameData::addCascadedShadowMaps(
     for (const auto &v : frustumCorners) {
       frustumCenter += glm::vec3(v);
     }
-    frustumCenter /= static_cast<float>(frustumCorners.size());
+    frustumCenter /= static_cast<f32>(frustumCorners.size());
 
-    float radius = 0.0f;
+    f32 radius = 0.0f;
     for (const auto &corner : frustumCorners) {
-      float distance = glm::length(glm::vec3(corner) - frustumCenter);
+      f32 distance = glm::length(glm::vec3(corner) - frustumCenter);
       radius = glm::max(radius, distance);
     }
 
-    static constexpr float Sixteen = 16.0f;
+    static constexpr f32 Sixteen = 16.0f;
     radius = std::ceil(radius * Sixteen) / Sixteen;
     glm::vec3 maxBounds = glm::vec3(radius);
     glm::vec3 minBounds = -maxBounds;
 
-    float cascadeZ = maxBounds.z - minBounds.z;
+    f32 cascadeZ = maxBounds.z - minBounds.z;
     auto lightViewMatrix =
         glm::lookAt(frustumCenter - light.direction * radius, frustumCenter,
                     glm::vec3(0.0f, 1.0f, 0.0f));
@@ -386,11 +385,11 @@ void SceneRendererFrameData::addCascadedShadowMaps(
 
 void SceneRendererFrameData::addLight(const DirectionalLight &light,
                                       const CascadedShadowMap &shadowMap) {
-  uint32_t shadowIndex = static_cast<uint32_t>(mShadowMaps.size());
-  uint32_t numCascades = static_cast<uint32_t>(shadowMap.numCascades);
+  u32 shadowIndex = static_cast<u32>(mShadowMaps.size());
+  u32 numCascades = static_cast<u32>(shadowMap.numCascades);
 
   bool canCastShadows =
-      (shadowIndex + numCascades) <= static_cast<uint32_t>(MaxShadowMaps);
+      (shadowIndex + numCascades) <= static_cast<u32>(MaxShadowMaps);
 
   if (canCastShadows) {
     addCascadedShadowMaps(light, shadowMap);
@@ -400,7 +399,7 @@ void SceneRendererFrameData::addLight(const DirectionalLight &light,
       glm::vec4(light.direction, light.intensity), light.color,
       glm::uvec4(canCastShadows ? 1 : 0, shadowIndex, numCascades, 0)};
   mDirectionalLights.push_back(data);
-  mSceneData.data.x = static_cast<int32_t>(mDirectionalLights.size());
+  mSceneData.data.x = static_cast<i32>(mDirectionalLights.size());
 }
 
 void SceneRendererFrameData::addLight(const DirectionalLight &light) {
@@ -408,7 +407,7 @@ void SceneRendererFrameData::addLight(const DirectionalLight &light) {
                             light.color};
   mDirectionalLights.push_back(data);
 
-  mSceneData.data.x = static_cast<int32_t>(mDirectionalLights.size());
+  mSceneData.data.x = static_cast<i32>(mDirectionalLights.size());
 }
 
 void SceneRendererFrameData::addLight(const PointLight &light,
@@ -424,7 +423,7 @@ void SceneRendererFrameData::addLight(const PointLight &light,
   PointLightData data{glm::vec4(position, light.intensity),
                       glm::vec4(light.range), glm::vec4(light.color)};
   mPointLights.push_back(data);
-  mSceneData.data.y = static_cast<int32_t>(mPointLights.size());
+  mSceneData.data.y = static_cast<i32>(mPointLights.size());
 }
 
 void SceneRendererFrameData::addSprite(Entity entity,
@@ -444,8 +443,8 @@ void SceneRendererFrameData::addText(Entity entity,
 
   TextItem textData{};
   textData.fontTexture = fontTexture;
-  textData.glyphStart = static_cast<uint32_t>(mTextGlyphs.size());
-  textData.length = static_cast<uint32_t>(glyphs.size());
+  textData.glyphStart = static_cast<u32>(mTextGlyphs.size());
+  textData.length = static_cast<u32>(glyphs.size());
 
   for (auto &glyph : glyphs) {
     mTextGlyphs.push_back(glyph);
@@ -455,7 +454,7 @@ void SceneRendererFrameData::addText(Entity entity,
 }
 
 void SceneRendererFrameData::setSkyboxTexture(rhi::TextureHandle texture) {
-  mSkyboxData.data.x = static_cast<uint32_t>(texture);
+  mSkyboxData.data.x = static_cast<u32>(texture);
 }
 
 void SceneRendererFrameData::setSkyboxColor(const glm::vec4 &color) {

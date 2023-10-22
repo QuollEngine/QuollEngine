@@ -21,7 +21,7 @@ Entity EntityStorageSparseSet::create() {
   }
 
   auto eid = mLastEntity;
-  mLastEntity = Entity{static_cast<uint32_t>(mLastEntity) + 1};
+  mLastEntity = Entity{static_cast<u32>(mLastEntity) + 1};
   return eid;
 }
 
@@ -51,13 +51,13 @@ void EntityStorageSparseSet::destroy() {
 
 void EntityStorageSparseSet::deleteAllEntityComponents(Entity entity) {
   for (auto &[index, pool] : mComponentPools) {
-    size_t sEntity = static_cast<size_t>(entity);
+    usize sEntity = static_cast<usize>(entity);
 
     if (sEntity < pool.entityIndices.size() &&
         pool.entityIndices[sEntity] < DeadIndex) {
 
-      size_t movedEntity = static_cast<size_t>(pool.entities.back());
-      size_t entityIndexToDelete = pool.entityIndices[sEntity];
+      usize movedEntity = static_cast<usize>(pool.entities.back());
+      usize entityIndexToDelete = pool.entityIndices[sEntity];
 
       auto &observers = mRemoveObserverPools.at(index);
       for (auto &observer : observers) {

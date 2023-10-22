@@ -38,7 +38,7 @@ public:
   /**
    * Default pool size
    */
-  static constexpr size_t DEFAULT_SIZE = 500;
+  static constexpr usize DEFAULT_SIZE = 500;
 
 public:
   /**

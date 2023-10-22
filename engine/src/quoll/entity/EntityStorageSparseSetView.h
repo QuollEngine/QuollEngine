@@ -13,7 +13,7 @@ template <class... TComponentTypes> class EntityStorageSparseSetView {
   using PickedPools = std::array<EntityStorageSparseSetComponentPool *,
                                  sizeof...(TComponentTypes)>;
 
-  static constexpr size_t DeadIndex = std::numeric_limits<size_t>::max();
+  static constexpr usize DeadIndex = std::numeric_limits<usize>::max();
 
 public:
   /**
@@ -28,7 +28,7 @@ public:
      * @param pools Picked pools
      * @param smallestPool Smallest pool
      */
-    Iterator(size_t index, PickedPools &pools,
+    Iterator(usize index, PickedPools &pools,
              EntityStorageSparseSetComponentPool *smallestPool)
         : mIndex(index), mPools(pools), mSmallestPool(smallestPool) {}
 
@@ -83,14 +83,14 @@ public:
      * @param sequence Index sequence
      * @return Tuple with first item as entity and rest as components
      */
-    template <size_t... TComponentIndices>
+    template <usize... TComponentIndices>
     std::tuple<Entity, TComponentTypes &...>
     get(std::index_sequence<TComponentIndices...> sequence) {
       auto entity = mSmallestPool->entities.at(mIndex);
 
       const auto &indices =
           std::array{std::get<TComponentIndices>(mPools)
-                         ->entityIndices[static_cast<size_t>(entity)]...};
+                         ->entityIndices[static_cast<usize>(entity)]...};
 
       return {mSmallestPool->entities.at(mIndex),
               std::any_cast<TComponentTypes &>(
@@ -99,7 +99,7 @@ public:
     }
 
   private:
-    size_t mIndex = 0;
+    usize mIndex = 0;
     PickedPools &mPools;
     EntityStorageSparseSetComponentPool *mSmallestPool = nullptr;
   };
@@ -128,7 +128,7 @@ public:
       }
     }
 
-    size_t index = 0;
+    usize index = 0;
     while (index < mSmallestPool->entities.size() &&
            !isValidIndex(index, mPools, mSmallestPool)) {
       index++;
@@ -160,11 +160,11 @@ private:
    * @retval true Index is valid
    * @retval false Index is not valid
    */
-  static bool isValidIndex(size_t index, PickedPools &pools,
+  static bool isValidIndex(usize index, PickedPools &pools,
                            EntityStorageSparseSetComponentPool *smallestPool) {
     bool isValid = true;
-    auto entity = static_cast<size_t>(smallestPool->entities.at(index));
-    for (size_t i = 0; i < pools.size() && isValid; ++i) {
+    auto entity = static_cast<usize>(smallestPool->entities.at(index));
+    for (usize i = 0; i < pools.size() && isValid; ++i) {
       auto *pool = pools.at(i);
       isValid = entity < pool->entityIndices.size() &&
                 pool->entityIndices[entity] != DeadIndex;

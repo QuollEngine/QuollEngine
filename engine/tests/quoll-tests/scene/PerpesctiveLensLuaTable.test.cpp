@@ -34,15 +34,15 @@ TEST_F(PerspectiveLensLuaTableTest, GetReturnsComponentValues) {
 
   auto state = call(entity, "perspective_lens_get");
 
-  EXPECT_EQ(state["pr_near"].get<float>(), lens.near);
-  EXPECT_EQ(state["pr_far"].get<float>(), lens.far);
-  EXPECT_EQ(state["pr_sensor_width"].get<float>(), lens.sensorSize.x);
-  EXPECT_EQ(state["pr_sensor_height"].get<float>(), lens.sensorSize.y);
-  EXPECT_EQ(state["pr_focal_length"].get<float>(), lens.focalLength);
-  EXPECT_EQ(state["pr_aperture"].get<float>(), lens.aperture);
-  EXPECT_FLOAT_EQ(state["pr_shutter_speed"].get<float>(),
+  EXPECT_EQ(state["pr_near"].get<f32>(), lens.near);
+  EXPECT_EQ(state["pr_far"].get<f32>(), lens.far);
+  EXPECT_EQ(state["pr_sensor_width"].get<f32>(), lens.sensorSize.x);
+  EXPECT_EQ(state["pr_sensor_height"].get<f32>(), lens.sensorSize.y);
+  EXPECT_EQ(state["pr_focal_length"].get<f32>(), lens.focalLength);
+  EXPECT_EQ(state["pr_aperture"].get<f32>(), lens.aperture);
+  EXPECT_FLOAT_EQ(state["pr_shutter_speed"].get<f32>(),
                   1.0f / lens.shutterSpeed);
-  EXPECT_EQ(state["pr_sensitivity"].get<float>(), lens.sensitivity);
+  EXPECT_EQ(state["pr_sensitivity"].get<f32>(), lens.sensitivity);
 }
 
 TEST_F(PerspectiveLensLuaTableTest, SetCreatesComponentIfItDoesNotExist) {

@@ -24,7 +24,7 @@ public:
     /**
      * @brief Descriptor layouts
      */
-    std::map<uint32_t, DescriptorLayoutDescription> descriptorLayouts;
+    std::map<u32, DescriptorLayoutDescription> descriptorLayouts;
   };
 
 public:

@@ -3,12 +3,12 @@
 
 namespace quoll::rhi {
 
-size_t MockResourceMetrics::getTotalBufferSize() const { return 0; }
+usize MockResourceMetrics::getTotalBufferSize() const { return 0; }
 
-size_t MockResourceMetrics::getBuffersCount() const { return 0; }
+usize MockResourceMetrics::getBuffersCount() const { return 0; }
 
-size_t MockResourceMetrics::getTexturesCount() const { return 0; }
+usize MockResourceMetrics::getTexturesCount() const { return 0; }
 
-size_t MockResourceMetrics::getDescriptorsCount() const { return 0; }
+usize MockResourceMetrics::getDescriptorsCount() const { return 0; }
 
 } // namespace quoll::rhi

@@ -24,8 +24,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
     if (texture.data.deviceHandle == rhi::TextureHandle::Null) {
       rhi::TextureDescription description{};
       description.width = texture.data.width;
-      description.mipLevelCount =
-          static_cast<uint32_t>(texture.data.levels.size());
+      description.mipLevelCount = static_cast<u32>(texture.data.levels.size());
       description.layerCount = texture.data.layers;
       description.height = texture.data.height;
       description.usage = rhi::TextureUsage::Color |
@@ -118,17 +117,17 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       continue;
     }
 
-    size_t ibSize = 0;
+    usize ibSize = 0;
     for (auto &g : mesh.data.geometries) {
-      ibSize += g.indices.size() * sizeof(uint32_t);
+      ibSize += g.indices.size() * sizeof(u32);
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CreateBuffer(FieldName, Type)                                          \
   {                                                                            \
-    size_t vbSize = 0;                                                         \
+    usize vbSize = 0;                                                          \
     for (auto &g : mesh.data.geometries) {                                     \
-      size_t vertexSize = g.FieldName.size();                                  \
+      usize vertexSize = g.FieldName.size();                                   \
       vbSize += vertexSize * sizeof(Type);                                     \
     }                                                                          \
     rhi::BufferDescription description;                                        \
@@ -140,7 +139,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
                                                                                \
     auto *data = static_cast<Type *>(buffer.map());                            \
     mesh.data.vertexBufferOffsets.push_back(0);                                \
-    size_t offset = 0;                                                         \
+    usize offset = 0;                                                          \
     for (auto &g : mesh.data.geometries) {                                     \
       memcpy(data + offset, g.FieldName.data(),                                \
              g.FieldName.size() * sizeof(Type));                               \
@@ -170,11 +169,10 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
       auto buffer = renderStorage.createBuffer(description);
 
-      auto *data = static_cast<uint32_t *>(buffer.map());
-      size_t offset = 0;
+      auto *data = static_cast<u32 *>(buffer.map());
+      usize offset = 0;
       for (auto &g : mesh.data.geometries) {
-        memcpy(data + offset, g.indices.data(),
-               g.indices.size() * sizeof(uint32_t));
+        memcpy(data + offset, g.indices.data(), g.indices.size() * sizeof(u32));
         offset += g.indices.size();
       }
 
@@ -185,83 +183,83 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
   }
 }
 
-std::pair<AssetType, uint32_t> AssetRegistry::getAssetByUuid(const Uuid &uuid) {
+std::pair<AssetType, u32> AssetRegistry::getAssetByUuid(const Uuid &uuid) {
   QUOLL_PROFILE_EVENT("AssetRegistry::getAssetByUUID");
   for (auto &[handle, asset] : mTextures.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Texture, static_cast<uint32_t>(handle)};
+      return {AssetType::Texture, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mFonts.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Font, static_cast<uint32_t>(handle)};
+      return {AssetType::Font, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mMaterials.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Material, static_cast<uint32_t>(handle)};
+      return {AssetType::Material, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mMeshes.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Mesh, static_cast<uint32_t>(handle)};
+      return {AssetType::Mesh, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mSkeletons.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Skeleton, static_cast<uint32_t>(handle)};
+      return {AssetType::Skeleton, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mAnimations.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Animation, static_cast<uint32_t>(handle)};
+      return {AssetType::Animation, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mAnimators.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Animator, static_cast<uint32_t>(handle)};
+      return {AssetType::Animator, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mAudios.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Audio, static_cast<uint32_t>(handle)};
+      return {AssetType::Audio, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mPrefabs.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Prefab, static_cast<uint32_t>(handle)};
+      return {AssetType::Prefab, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mLuaScripts.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::LuaScript, static_cast<uint32_t>(handle)};
+      return {AssetType::LuaScript, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mEnvironments.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Environment, static_cast<uint32_t>(handle)};
+      return {AssetType::Environment, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mScenes.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Scene, static_cast<uint32_t>(handle)};
+      return {AssetType::Scene, static_cast<u32>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mInputMaps.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::InputMap, static_cast<uint32_t>(handle)};
+      return {AssetType::InputMap, static_cast<u32>(handle)};
     }
   }
 
