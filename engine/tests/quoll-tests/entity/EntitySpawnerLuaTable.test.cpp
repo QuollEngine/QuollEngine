@@ -1,5 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/scripting/EntityTable.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/WorldTransform.h"
+#include "quoll/scene/Sprite.h"
 
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"

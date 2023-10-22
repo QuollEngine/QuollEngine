@@ -3,6 +3,8 @@
 #include "quoll/editor/actions/Action.h"
 #include "quoll/editor/actions/EntityDefaultDeleteAction.h"
 
+#include "quoll/physics/Collidable.h"
+
 namespace quoll::editor {
 
 /**
@@ -53,11 +55,5 @@ private:
   PhysicsGeometryType mType;
   Collidable mOldCollidable;
 };
-
-using EntitySetCollidable = EntityDefaultUpdateComponent<Collidable>;
-
-using EntityCreateCollidable = EntityDefaultCreateComponent<Collidable>;
-
-using EntityDeleteCollidable = EntityDefaultDeleteAction<Collidable>;
 
 } // namespace quoll::editor

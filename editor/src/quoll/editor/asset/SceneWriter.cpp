@@ -1,4 +1,9 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Id.h"
+#include "quoll/scene/Parent.h"
+#include "quoll/scene/Children.h"
+#include "quoll/scene/PerspectiveLens.h"
+
 #include "quoll/yaml/Yaml.h"
 #include "quoll/scene/private/EntitySerializer.h"
 

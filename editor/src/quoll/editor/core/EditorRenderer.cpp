@@ -1,5 +1,10 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/scene/Skeleton.h"
+#include "quoll/scene/Mesh.h"
+#include "quoll/scene/Sprite.h"
+#include "quoll/scene/SkinnedMesh.h"
+#include "quoll/text/Text.h"
 #include "quoll/renderer/MeshVertexLayout.h"
 
 #include "quoll/editor/ui/IconRegistry.h"

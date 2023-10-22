@@ -1,4 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Delete.h"
+#include "quoll/scene/Parent.h"
+
 #include "DeleteEntityAction.h"
 
 namespace quoll::editor {

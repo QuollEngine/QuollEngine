@@ -4,6 +4,10 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scripting/LuaMessages.h"
 
+#include "RigidBody.h"
+#include "RigidBodyClear.h"
+#include "Force.h"
+#include "Torque.h"
 #include "RigidBodyLuaTable.h"
 
 namespace quoll {

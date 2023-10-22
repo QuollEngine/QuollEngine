@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
-#include "quoll-tests/Testing.h"
+#include "quoll/text/Text.h"
 
+#include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 
 class TextLuaTableTest : public LuaScriptingInterfaceTestBase {};

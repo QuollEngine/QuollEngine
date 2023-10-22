@@ -1,4 +1,6 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Name.h"
+#include "quoll/core/Delete.h"
 #include "quoll/scripting/EntityTable.h"
 
 #include "quoll-tests/Testing.h"

@@ -102,6 +102,4 @@ private:
   TextureAssetHandle mHandle;
 };
 
-using EntityDeleteSprite = EntityDefaultDeleteAction<Sprite>;
-
 } // namespace quoll::editor

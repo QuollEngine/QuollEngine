@@ -3,7 +3,10 @@
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
 
-#include "quoll/audio/DefaultAudioBackend.h"
+#include "DefaultAudioBackend.h"
+#include "AudioStatus.h"
+#include "AudioSource.h"
+#include "AudioStart.h"
 
 namespace quoll {
 

@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/yaml/Yaml.h"
 #include "quoll/platform/tools/FileDialog.h"
+#include "quoll/scene/PerspectiveLens.h"
 
 #include "quoll/editor/core/CameraLookAt.h"
 #include "quoll/editor/editor-scene/EditorCamera.h"

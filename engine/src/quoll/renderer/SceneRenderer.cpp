@@ -1,5 +1,12 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/scene/EnvironmentSkybox.h"
+#include "quoll/scene/Mesh.h"
+#include "quoll/scene/SkinnedMesh.h"
+#include "quoll/scene/EnvironmentLighting.h"
+#include "quoll/scene/Sprite.h"
+#include "quoll/text/Text.h"
+#include "quoll/scene/Skeleton.h"
 
 #include "SceneRenderer.h"
 #include "StandardPushConstants.h"

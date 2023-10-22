@@ -1,4 +1,6 @@
 #include "quoll/core/Base.h"
+#include "quoll/physics/Collidable.h"
+
 #include "EntityCollidableActions.h"
 
 namespace quoll::editor {

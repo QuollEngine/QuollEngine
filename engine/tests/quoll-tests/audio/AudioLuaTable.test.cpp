@@ -1,4 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/audio/AudioSource.h"
+#include "quoll/audio/AudioStatus.h"
+#include "quoll/audio/AudioStart.h"
 
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Action.h"
+
 namespace quoll::editor {
 
 /**

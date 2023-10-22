@@ -1,4 +1,6 @@
 #include "quoll/core/Base.h"
+#include "quoll/scene/Sprite.h"
+
 #include "quoll/editor/actions/EntitySpriteActions.h"
 
 #include "quoll/editor-tests/Testing.h"
@@ -103,8 +105,3 @@ TEST_P(EntitySetSpriteActionTest, PredicateReturnsTrueIfSpriteExists) {
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetSpriteActionTest);
-
-using EntityDeleteSpriteActionTest = ActionTestBase;
-InitDefaultDeleteComponentTests(EntityDeleteSpriteActionTest,
-                                EntityDeleteSprite, Sprite);
-InitActionsTestSuite(EntityActionsTest, EntityDeleteSpriteActionTest);

@@ -1,10 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/ImguiUtils.h"
 
-#include "quoll/editor/actions/EntityNameActions.h"
 #include "quoll/editor/actions/EntityTransformActions.h"
-#include "quoll/editor/actions/EntityTextActions.h"
-#include "quoll/editor/actions/EntityRigidBodyActions.h"
 #include "quoll/editor/actions/EntityLightActions.h"
 #include "quoll/editor/actions/EntityCameraActions.h"
 #include "quoll/editor/actions/EntityCollidableActions.h"
@@ -18,7 +15,44 @@
 #include "quoll/editor/actions/EntitySpriteActions.h"
 #include "quoll/editor/actions/SceneActions.h"
 
+#include "quoll/core/Name.h"
+#include "quoll/core/Id.h"
+#include "quoll/core/Delete.h"
+#include "quoll/scene/Mesh.h"
+#include "quoll/scene/SkinnedMesh.h"
+#include "quoll/scene/DirectionalLight.h"
+#include "quoll/scene/PointLight.h"
+#include "quoll/scene/CascadedShadowMap.h"
+#include "quoll/scene/PerspectiveLens.h"
+#include "quoll/scene/AutoAspectRatio.h"
+#include "quoll/scene/Skeleton.h"
+#include "quoll/scene/JointAttachment.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/Parent.h"
+#include "quoll/scene/Children.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/WorldTransform.h"
+#include "quoll/scene/EnvironmentSkybox.h"
+#include "quoll/scene/EnvironmentLighting.h"
+#include "quoll/scene/Sprite.h"
+#include "quoll/animation/Animator.h"
+#include "quoll/animation/AnimatorEvent.h"
+#include "quoll/audio/AudioSource.h"
+#include "quoll/audio/AudioStart.h"
+#include "quoll/audio/AudioStatus.h"
+#include "quoll/physics/RigidBody.h"
+#include "quoll/physics/Collidable.h"
+#include "quoll/physics/Force.h"
+#include "quoll/physics/Torque.h"
+#include "quoll/physics/RigidBodyClear.h"
+#include "quoll/text/Text.h"
+#include "quoll/renderer/MeshRenderer.h"
+#include "quoll/renderer/SkinnedMeshRenderer.h"
+#include "quoll/input/InputMap.h"
+#include "quoll/physx/PhysxInstance.h"
+#include "quoll/scripting/Script.h"
 #include "quoll/ui/UICanvas.h"
+#include "quoll/ui/UICanvasRenderRequest.h"
 
 #include "EntityPanel.h"
 
@@ -167,7 +201,8 @@ void EntityPanel::renderName(Scene &scene, ActionExecutor &actionExecutor) {
     if (widgets::Input("", tmpName)) {
       if (!tmpName.empty()) {
         if (!mNameAction) {
-          mNameAction = std::make_unique<EntitySetName>(mSelectedEntity, name);
+          mNameAction = std::make_unique<EntityDefaultUpdateComponent<Name>>(
+              mSelectedEntity, name);
         }
 
         name.name = tmpName;
@@ -201,8 +236,9 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
     glm::vec4 color = component.color;
     if (widgets::InputColor("Color", color)) {
       if (!mDirectionalLightAction) {
-        mDirectionalLightAction = std::make_unique<EntitySetDirectionalLight>(
-            mSelectedEntity, component);
+        mDirectionalLightAction =
+            std::make_unique<EntityDefaultUpdateComponent<DirectionalLight>>(
+                mSelectedEntity, component);
       }
 
       component.color = color;
@@ -213,8 +249,9 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
     f32 intensity = component.intensity;
     if (widgets::Input("Intensity", intensity, false)) {
       if (!mDirectionalLightAction) {
-        mDirectionalLightAction = std::make_unique<EntitySetDirectionalLight>(
-            mSelectedEntity, component);
+        mDirectionalLightAction =
+            std::make_unique<EntityDefaultUpdateComponent<DirectionalLight>>(
+                mSelectedEntity, component);
       }
 
       component.intensity = intensity;
@@ -230,9 +267,11 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
         scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
     if (ImGui::Checkbox("Cast shadows", &castShadows)) {
       if (castShadows) {
-        actionExecutor.execute<EntityEnableCascadedShadowMap>(mSelectedEntity);
+        actionExecutor.execute<EntityDefaultCreateComponent<CascadedShadowMap>>(
+            mSelectedEntity);
       } else {
-        actionExecutor.execute<EntityDisableCascadedShadowMap>(mSelectedEntity);
+        actionExecutor.execute<EntityDefaultDeleteAction<CascadedShadowMap>>(
+            mSelectedEntity);
       }
     }
 
@@ -247,8 +286,8 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
       if (ImGui::Checkbox("Soft shadows", &softShadows)) {
         if (!mCascadedShadowMapAction) {
           mCascadedShadowMapAction =
-              std::make_unique<EntitySetCascadedShadowMap>(mSelectedEntity,
-                                                           component);
+              std::make_unique<EntityDefaultUpdateComponent<CascadedShadowMap>>(
+                  mSelectedEntity, component);
         }
 
         component.softShadows = softShadows;
@@ -259,8 +298,9 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
       if (widgets::Input("Split lambda", splitLambda, false)) {
         splitLambda = glm::clamp(splitLambda, 0.0f, 1.0f);
 
-        mCascadedShadowMapAction = std::make_unique<EntitySetCascadedShadowMap>(
-            mSelectedEntity, component);
+        mCascadedShadowMapAction =
+            std::make_unique<EntityDefaultUpdateComponent<CascadedShadowMap>>(
+                mSelectedEntity, component);
 
         component.splitLambda = splitLambda;
         sendAction = true;
@@ -270,8 +310,9 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
       ImGui::Text("Number of cascades");
       if (ImGui::DragInt("###NumberOfCascades", &numCascades, 0.5f, 1,
                          static_cast<i32>(component.MaxCascades))) {
-        mCascadedShadowMapAction = std::make_unique<EntitySetCascadedShadowMap>(
-            mSelectedEntity, component);
+        mCascadedShadowMapAction =
+            std::make_unique<EntityDefaultUpdateComponent<CascadedShadowMap>>(
+                mSelectedEntity, component);
 
         component.numCascades = static_cast<u32>(numCascades);
       }
@@ -308,7 +349,8 @@ void EntityPanel::renderPointLight(Scene &scene,
     if (widgets::InputColor("Color", color)) {
       if (!mPointLightAction) {
         mPointLightAction =
-            std::make_unique<EntitySetPointLight>(mSelectedEntity, component);
+            std::make_unique<EntityDefaultUpdateComponent<PointLight>>(
+                mSelectedEntity, component);
       }
 
       component.color = color;
@@ -319,7 +361,8 @@ void EntityPanel::renderPointLight(Scene &scene,
     f32 intensity = component.intensity;
     if (widgets::Input("Intensity (in candelas)", intensity, false)) {
       mPointLightAction =
-          std::make_unique<EntitySetPointLight>(mSelectedEntity, component);
+          std::make_unique<EntityDefaultUpdateComponent<PointLight>>(
+              mSelectedEntity, component);
 
       component.intensity = intensity;
 
@@ -330,7 +373,8 @@ void EntityPanel::renderPointLight(Scene &scene,
     if (widgets::Input("Range", range, false)) {
       if (!mPointLightAction) {
         mPointLightAction =
-            std::make_unique<EntitySetPointLight>(mSelectedEntity, component);
+            std::make_unique<EntityDefaultUpdateComponent<PointLight>>(
+                mSelectedEntity, component);
       }
       component.range = range;
 
@@ -344,7 +388,8 @@ void EntityPanel::renderPointLight(Scene &scene,
   }
 
   if (shouldDelete("Point light")) {
-    actionExecutor.execute<EntityDeletePointLight>(mSelectedEntity);
+    actionExecutor.execute<EntityDefaultDeleteAction<PointLight>>(
+        mSelectedEntity);
   }
 }
 
@@ -369,8 +414,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       }
 
       if (!mPerspectiveLensAction) {
-        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component);
+        mPerspectiveLensAction =
+            std::make_unique<EntityDefaultUpdateComponent<PerspectiveLens>>(
+                mSelectedEntity, component);
       }
 
       component.near = near;
@@ -385,8 +431,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       }
 
       if (!mPerspectiveLensAction) {
-        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component);
+        mPerspectiveLensAction =
+            std::make_unique<EntityDefaultUpdateComponent<PerspectiveLens>>(
+                mSelectedEntity, component);
       }
       component.far = far;
 
@@ -398,8 +445,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       sensorSize = glm::max(sensorSize, glm::vec2(0.0f));
 
       if (!mPerspectiveLensAction) {
-        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component);
+        mPerspectiveLensAction =
+            std::make_unique<EntityDefaultUpdateComponent<PerspectiveLens>>(
+                mSelectedEntity, component);
       }
       component.sensorSize = sensorSize;
 
@@ -411,8 +459,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       focalLength = std::max(focalLength, 0.0f);
 
       if (!mPerspectiveLensAction) {
-        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component);
+        mPerspectiveLensAction =
+            std::make_unique<EntityDefaultUpdateComponent<PerspectiveLens>>(
+                mSelectedEntity, component);
       }
       component.focalLength = focalLength;
 
@@ -426,8 +475,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       }
 
       if (!mPerspectiveLensAction) {
-        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component);
+        mPerspectiveLensAction =
+            std::make_unique<EntityDefaultUpdateComponent<PerspectiveLens>>(
+                mSelectedEntity, component);
       }
       component.aperture = aperture;
 
@@ -441,8 +491,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       }
 
       if (!mPerspectiveLensAction) {
-        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component);
+        mPerspectiveLensAction =
+            std::make_unique<EntityDefaultUpdateComponent<PerspectiveLens>>(
+                mSelectedEntity, component);
       }
       component.shutterSpeed = 1.0f / shutterSpeed;
 
@@ -452,8 +503,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     u32 sensitivity = component.sensitivity;
     if (widgets::Input("Sensitivity (ISO)", sensitivity, false)) {
       if (!mPerspectiveLensAction) {
-        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component);
+        mPerspectiveLensAction =
+            std::make_unique<EntityDefaultUpdateComponent<PerspectiveLens>>(
+                mSelectedEntity, component);
       }
       component.sensitivity = sensitivity;
 
@@ -477,11 +529,12 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
                           0)) {
 
       if (ImGui::Selectable("Viewport ratio")) {
-        actionExecutor.execute<EntitySetCameraAutoAspectRatio>(mSelectedEntity);
+        actionExecutor.execute<EntityDefaultCreateComponent<AutoAspectRatio>>(
+            mSelectedEntity);
       }
 
       if (ImGui::Selectable("Custom")) {
-        actionExecutor.execute<EntitySetCameraCustomAspectRatio>(
+        actionExecutor.execute<EntityDefaultDeleteAction<AutoAspectRatio>>(
             mSelectedEntity);
       }
 
@@ -496,8 +549,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
                            MaxCustomAspectRatio, "%.2f")) {
 
         if (!mPerspectiveLensAction) {
-          mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-              mSelectedEntity, component);
+          mPerspectiveLensAction =
+              std::make_unique<EntityDefaultUpdateComponent<PerspectiveLens>>(
+                  mSelectedEntity, component);
         }
 
         component.aspectRatio = aspectRatio;
@@ -610,7 +664,8 @@ void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
     }
 
     if (shouldDelete("Texture")) {
-      actionExecutor.execute<EntityDeleteSprite>(mSelectedEntity);
+      actionExecutor.execute<EntityDefaultDeleteAction<Sprite>>(
+          mSelectedEntity);
     }
   }
 }
@@ -1019,7 +1074,8 @@ void EntityPanel::renderCollidable(Scene &scene,
     if (widgets::Input("Center", center, false)) {
       if (!mCollidableAction) {
         mCollidableAction =
-            std::make_unique<EntitySetCollidable>(mSelectedEntity, collidable);
+            std::make_unique<EntityDefaultUpdateComponent<Collidable>>(
+                mSelectedEntity, collidable);
       }
 
       collidable.geometryDesc.center = center;
@@ -1031,8 +1087,9 @@ void EntityPanel::renderCollidable(Scene &scene,
 
       if (widgets::Input("Half extents", halfExtents, false)) {
         if (!mCollidableAction) {
-          mCollidableAction = std::make_unique<EntitySetCollidable>(
-              mSelectedEntity, collidable);
+          mCollidableAction =
+              std::make_unique<EntityDefaultUpdateComponent<Collidable>>(
+                  mSelectedEntity, collidable);
         }
 
         box.halfExtents = halfExtents;
@@ -1044,8 +1101,9 @@ void EntityPanel::renderCollidable(Scene &scene,
 
       if (widgets::Input("Radius", radius, false)) {
         if (!mCollidableAction) {
-          mCollidableAction = std::make_unique<EntitySetCollidable>(
-              mSelectedEntity, collidable);
+          mCollidableAction =
+              std::make_unique<EntityDefaultUpdateComponent<Collidable>>(
+                  mSelectedEntity, collidable);
         }
 
         sphere.radius = radius;
@@ -1058,8 +1116,9 @@ void EntityPanel::renderCollidable(Scene &scene,
 
       if (widgets::Input("Radius", radius, false)) {
         if (!mCollidableAction) {
-          mCollidableAction = std::make_unique<EntitySetCollidable>(
-              mSelectedEntity, collidable);
+          mCollidableAction =
+              std::make_unique<EntityDefaultUpdateComponent<Collidable>>(
+                  mSelectedEntity, collidable);
         }
 
         capsule.radius = radius;
@@ -1067,8 +1126,9 @@ void EntityPanel::renderCollidable(Scene &scene,
 
       if (widgets::Input("Half height", halfHeight, false)) {
         if (!mCollidableAction) {
-          mCollidableAction = std::make_unique<EntitySetCollidable>(
-              mSelectedEntity, collidable);
+          mCollidableAction =
+              std::make_unique<EntityDefaultUpdateComponent<Collidable>>(
+                  mSelectedEntity, collidable);
         }
 
         capsule.halfHeight = halfHeight;
@@ -1102,8 +1162,9 @@ void EntityPanel::renderCollidable(Scene &scene,
 
       if (widgets::Input("Dynamic friction", dynamicFriction, false)) {
         if (!mCollidableAction) {
-          mCollidableAction = std::make_unique<EntitySetCollidable>(
-              mSelectedEntity, collidable);
+          mCollidableAction =
+              std::make_unique<EntityDefaultUpdateComponent<Collidable>>(
+                  mSelectedEntity, collidable);
         }
 
         material.dynamicFriction = dynamicFriction;
@@ -1116,8 +1177,9 @@ void EntityPanel::renderCollidable(Scene &scene,
         }
 
         if (!mCollidableAction) {
-          mCollidableAction = std::make_unique<EntitySetCollidable>(
-              mSelectedEntity, collidable);
+          mCollidableAction =
+              std::make_unique<EntityDefaultUpdateComponent<Collidable>>(
+                  mSelectedEntity, collidable);
         }
 
         material.restitution = restitution;
@@ -1126,8 +1188,9 @@ void EntityPanel::renderCollidable(Scene &scene,
       f32 staticFriction = material.staticFriction;
       if (widgets::Input("Static friction", staticFriction, false)) {
         if (!mCollidableAction) {
-          mCollidableAction = std::make_unique<EntitySetCollidable>(
-              mSelectedEntity, collidable);
+          mCollidableAction =
+              std::make_unique<EntityDefaultUpdateComponent<Collidable>>(
+                  mSelectedEntity, collidable);
         }
 
         material.staticFriction = staticFriction;
@@ -1142,7 +1205,8 @@ void EntityPanel::renderCollidable(Scene &scene,
   }
 
   if (shouldDelete("Collidable")) {
-    actionExecutor.execute<EntityDeleteCollidable>(mSelectedEntity);
+    actionExecutor.execute<EntityDefaultDeleteAction<Collidable>>(
+        mSelectedEntity);
   }
 }
 
@@ -1162,7 +1226,8 @@ void EntityPanel::renderRigidBody(Scene &scene,
     if (widgets::Input("Mass", mass, false)) {
       if (!mRigidBodyAction) {
         mRigidBodyAction =
-            std::make_unique<EntitySetRigidBody>(mSelectedEntity, rigidBody);
+            std::make_unique<EntityDefaultUpdateComponent<RigidBody>>(
+                mSelectedEntity, rigidBody);
       }
 
       rigidBody.dynamicDesc.mass = mass;
@@ -1172,7 +1237,8 @@ void EntityPanel::renderRigidBody(Scene &scene,
     if (widgets::Input("Inertia", inertia, false)) {
       if (!mRigidBodyAction) {
         mRigidBodyAction =
-            std::make_unique<EntitySetRigidBody>(mSelectedEntity, rigidBody);
+            std::make_unique<EntityDefaultUpdateComponent<RigidBody>>(
+                mSelectedEntity, rigidBody);
       }
 
       rigidBody.dynamicDesc.inertia = inertia;
@@ -1183,7 +1249,8 @@ void EntityPanel::renderRigidBody(Scene &scene,
     if (ImGui::Checkbox("Apply gravity###ApplyGravity", &applyGravity)) {
       if (!mRigidBodyAction) {
         mRigidBodyAction =
-            std::make_unique<EntitySetRigidBody>(mSelectedEntity, rigidBody);
+            std::make_unique<EntityDefaultUpdateComponent<RigidBody>>(
+                mSelectedEntity, rigidBody);
       }
 
       rigidBody.dynamicDesc.applyGravity = applyGravity;
@@ -1196,7 +1263,8 @@ void EntityPanel::renderRigidBody(Scene &scene,
   }
 
   if (shouldDelete("RigidBody")) {
-    actionExecutor.execute<EntityDeleteRigidBody>(mSelectedEntity);
+    actionExecutor.execute<EntityDefaultDeleteAction<RigidBody>>(
+        mSelectedEntity);
   }
 }
 
@@ -1222,7 +1290,8 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
             "###InputContent", tmpText,
             ImVec2(ImGui::GetWindowWidth(), ContentInputHeight), 0)) {
       if (!mTextAction) {
-        mTextAction = std::make_unique<EntitySetText>(mSelectedEntity, text);
+        mTextAction = std::make_unique<EntityDefaultUpdateComponent<Text>>(
+            mSelectedEntity, text);
       }
 
       text.text = tmpText;
@@ -1235,7 +1304,8 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
     f32 lineHeight = text.lineHeight;
     if (widgets::Input("Line height", lineHeight, false)) {
       if (!mTextAction) {
-        mTextAction = std::make_unique<EntitySetText>(mSelectedEntity, text);
+        mTextAction = std::make_unique<EntityDefaultUpdateComponent<Text>>(
+            mSelectedEntity, text);
       }
 
       text.lineHeight = lineHeight;
@@ -1251,8 +1321,8 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
 
         if (ImGui::Selectable(fontName.c_str(), &selectable)) {
           if (!mTextAction) {
-            mTextAction =
-                std::make_unique<EntitySetText>(mSelectedEntity, text);
+            mTextAction = std::make_unique<EntityDefaultUpdateComponent<Text>>(
+                mSelectedEntity, text);
           }
 
           text.font = handle;
@@ -1269,7 +1339,7 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
   }
 
   if (shouldDelete("Text")) {
-    actionExecutor.execute<EntityDeleteText>(mSelectedEntity);
+    actionExecutor.execute<EntityDefaultDeleteAction<Text>>(mSelectedEntity);
   }
 }
 
@@ -1289,7 +1359,8 @@ void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
   }
 
   if (shouldDelete("Audio")) {
-    actionExecutor.execute<EntityDeleteAudio>(mSelectedEntity);
+    actionExecutor.execute<EntityDefaultDeleteAction<AudioSource>>(
+        mSelectedEntity);
   }
 }
 
@@ -1690,12 +1761,14 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
 
     if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
         ImGui::Selectable("Rigid body")) {
-      actionExecutor.execute<EntityCreateRigidBody>(mSelectedEntity);
+      actionExecutor.execute<EntityDefaultCreateComponent<RigidBody>>(
+          mSelectedEntity);
     }
 
     if (!scene.entityDatabase.has<Collidable>(mSelectedEntity) &&
         ImGui::Selectable("Collidable")) {
-      actionExecutor.execute<EntityCreateCollidable>(mSelectedEntity);
+      actionExecutor.execute<EntityDefaultCreateComponent<Collidable>>(
+          mSelectedEntity);
     }
 
     if (!scene.entityDatabase.has<MeshRenderer>(mSelectedEntity) &&
@@ -1711,11 +1784,13 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
     if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
         !scene.entityDatabase.has<PointLight>(mSelectedEntity)) {
       if (ImGui::Selectable("Directional light")) {
-        actionExecutor.execute<EntityCreateDirectionalLight>(mSelectedEntity);
+        actionExecutor.execute<EntityDefaultCreateComponent<DirectionalLight>>(
+            mSelectedEntity);
       }
 
       if (ImGui::Selectable("Point light")) {
-        actionExecutor.execute<EntityCreatePointLight>(mSelectedEntity);
+        actionExecutor.execute<EntityDefaultCreateComponent<PointLight>>(
+            mSelectedEntity);
       }
     }
 
@@ -1728,7 +1803,8 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
         ImGui::Selectable("Text")) {
       Text text{"Hello world"};
       text.font = assetRegistry.getDefaultObjects().defaultFont;
-      actionExecutor.execute<EntityCreateText>(mSelectedEntity, text);
+      actionExecutor.execute<EntityDefaultCreateComponent<Text>>(
+          mSelectedEntity, text);
     }
 
     if (!scene.entityDatabase.has<JointAttachment>(mSelectedEntity) &&

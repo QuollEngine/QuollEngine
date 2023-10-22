@@ -1,11 +1,15 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Delete.h"
+#include "quoll/core/Name.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/Parent.h"
 #include "quoll/entity/EntitySpawner.h"
 
 #include "EntityMeshActions.h"
 #include "EntitySkeletonActions.h"
 #include "EntityTransformActions.h"
 #include "EntityLightActions.h"
-#include "EntityNameActions.h"
 
 #include "SpawnEntityActions.h"
 
@@ -64,7 +68,7 @@ SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
   mSpawnedEntity =
       EntitySpawner(scene.entityDatabase, assetRegistry).spawnEmpty(transform);
 
-  EntitySetName(mSpawnedEntity, {}, Name{"New entity"})
+  EntityDefaultUpdateComponent<Name>(mSpawnedEntity, {}, Name{"New entity"})
       .onExecute(state, assetRegistry);
 
   ActionExecutorResult res{};

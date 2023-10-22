@@ -1,5 +1,7 @@
 #pragma once
 
+#include "quoll/entity/Entity.h"
+
 namespace quoll {
 
 /**

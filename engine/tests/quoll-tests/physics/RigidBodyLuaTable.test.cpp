@@ -1,6 +1,10 @@
 #include "quoll/core/Base.h"
-#include "quoll-tests/Testing.h"
+#include "quoll/physics/RigidBody.h"
+#include "quoll/physics/RigidBodyClear.h"
+#include "quoll/physics/Force.h"
+#include "quoll/physics/Torque.h"
 
+#include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 
 class RigidBodyLuaTableTest : public LuaScriptingInterfaceTestBase {};

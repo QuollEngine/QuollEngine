@@ -1,4 +1,8 @@
 #include "quoll/core/Base.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/AutoAspectRatio.h"
+#include "quoll/scene/PerspectiveLens.h"
+
 #include "quoll/editor/actions/EntityCameraActions.h"
 
 #include "quoll/editor-tests/Testing.h"
@@ -51,26 +55,6 @@ TEST_P(EntityCreatePerspectiveLensActionTest,
 }
 
 InitActionsTestSuite(EntityActionsTest, EntityCreatePerspectiveLensActionTest);
-
-using EntitySetPerspectiveLensActionTest = ActionTestBase;
-
-InitDefaultUpdateComponentTests(EntitySetPerspectiveLensActionTest,
-                                EntitySetPerspectiveLens, PerspectiveLens,
-                                focalLength, 45.0f);
-
-InitActionsTestSuite(EntityActionsTest, EntitySetPerspectiveLensActionTest);
-
-using EntitySetCameraAutoAspectRatioTest = ActionTestBase;
-InitDefaultCreateComponentTests(EntitySetCameraAutoAspectRatioTest,
-                                EntitySetCameraAutoAspectRatio,
-                                AutoAspectRatio);
-InitActionsTestSuite(EntityActionsTest, EntitySetCameraAutoAspectRatioTest);
-
-using SetEntityCameraCustomAspectRatioTest = ActionTestBase;
-InitDefaultDeleteComponentTests(SetEntityCameraCustomAspectRatioTest,
-                                EntitySetCameraCustomAspectRatio,
-                                AutoAspectRatio);
-InitActionsTestSuite(EntityActionsTest, SetEntityCameraCustomAspectRatioTest);
 
 using EntityDeletePerspectiveLensActionTest = ActionTestBase;
 

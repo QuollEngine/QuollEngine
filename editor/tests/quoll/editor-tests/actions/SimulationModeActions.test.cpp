@@ -1,4 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/Parent.h"
+
 #include "quoll/editor/actions/SimulationModeActions.h"
 
 #include "quoll/editor-tests/Testing.h"

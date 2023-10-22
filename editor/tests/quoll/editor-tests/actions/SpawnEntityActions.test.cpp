@@ -1,4 +1,12 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Name.h"
+#include "quoll/core/Delete.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/WorldTransform.h"
+#include "quoll/scene/Parent.h"
+#include "quoll/scene/Sprite.h"
+
 #include "quoll/editor/actions/SpawnEntityActions.h"
 
 #include "quoll/editor-tests/Testing.h"

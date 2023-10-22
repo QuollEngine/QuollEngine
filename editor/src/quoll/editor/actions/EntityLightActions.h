@@ -1,24 +1,12 @@
 #pragma once
 
 #include "quoll/editor/actions/Action.h"
+#include "quoll/scene/DirectionalLight.h"
+#include "quoll/scene/CascadedShadowMap.h"
+
 #include "EntityDefaultDeleteAction.h"
 
 namespace quoll::editor {
-
-using EntityCreateDirectionalLight =
-    EntityDefaultCreateComponent<DirectionalLight>;
-
-using EntitySetDirectionalLight =
-    EntityDefaultUpdateComponent<DirectionalLight>;
-
-using EntityEnableCascadedShadowMap =
-    EntityDefaultCreateComponent<CascadedShadowMap>;
-
-using EntityDisableCascadedShadowMap =
-    EntityDefaultDeleteAction<CascadedShadowMap>;
-
-using EntitySetCascadedShadowMap =
-    EntityDefaultUpdateComponent<CascadedShadowMap>;
 
 /**
  * @brief Delete directional light from entity action
@@ -67,11 +55,5 @@ private:
   DirectionalLight mOldDirectionalLight;
   std::optional<CascadedShadowMap> mOldCascadedShadowMap;
 };
-
-using EntityCreatePointLight = EntityDefaultCreateComponent<PointLight>;
-
-using EntitySetPointLight = EntityDefaultUpdateComponent<PointLight>;
-
-using EntityDeletePointLight = EntityDefaultDeleteAction<PointLight>;
 
 } // namespace quoll::editor

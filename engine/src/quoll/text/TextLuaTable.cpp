@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/text/Text.h"
 
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scripting/LuaMessages.h"
