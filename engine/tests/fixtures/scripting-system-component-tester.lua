@@ -333,3 +333,69 @@ end
 function input_set_scheme()
     entity.input:set_scheme("Test scheme")
 end
+
+function my_component()
+  return ui.view{
+    children={ui.image(10), ui.image(10), ui.image(10)}
+  }
+end
+
+-- UI canvas
+function ui_element_image()
+  image = ui.image{texture=10}
+  expect_eq(image.texture, 10)
+end
+
+function ui_element_text()
+  text = ui.text{content="Hello"}
+  expect_eq(text.content, "Hello")
+end
+
+function table_length(T)
+    local count = 0
+    for _ in pairs(T) do count = count + 1 end
+    return count
+  end
+
+function ui_element_view()
+  view = ui.view{children={
+    ui.image{texture=10},
+    ui.text{content="Hello"},
+    ui.image{texture=20},
+    ui.text{content="Test"},
+    ui.view{
+        children={
+            ui.text{content="Child"},
+            ui.image{texture=30}
+        }
+    },
+    ui.view{}
+  }}
+
+  expect_eq(table_length(view.children), 6)
+  expect_eq(view.children[1].texture, 10)
+  expect_eq(view.children[2].content, "Hello")
+  expect_eq(view.children[3].texture, 20)
+  expect_eq(view.children[4].content, "Test")
+  expect_eq(table_length(view.children[5].children), 2)
+  expect_eq(view.children[5].children[1].content, "Child")
+  expect_eq(view.children[5].children[2].texture, 30)
+  expect_eq(table_length(view.children[6].children), 0)
+end
+
+function ui_canvas_render()
+    view = ui.view{children={
+        ui.image{texture=10},
+        ui.text{content="Hello"},
+        ui.image{texture=20},
+        ui.text{content="Test"},
+        ui.view{
+            children={
+                ui.text{content="Child"},
+                ui.image{texture=30}
+            }
+        },
+        ui.view{}
+    }}
+    entity.ui_canvas:render(view)
+end

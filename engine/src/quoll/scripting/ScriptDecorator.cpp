@@ -13,6 +13,8 @@
 #include "quoll/animation/AnimatorLuaTable.h"
 #include "quoll/input/InputMapLuaTable.h"
 #include "quoll/physics/CollisionHitLuaTable.h"
+#include "quoll/ui/UILuaTable.h"
+
 #include "lua/Math.h"
 
 #include "LuaMessages.h"
@@ -31,6 +33,7 @@ void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
   EntityTable::create(state);
   EntitySpawnerLuaTable::create(state);
   EntityQueryLuaTable::create(state);
+  UILuaTable::create(state);
 
   state["entity"] = EntityTable(entity, scriptGlobals);
   state["entity_spawner"] = EntitySpawnerLuaTable(scriptGlobals);

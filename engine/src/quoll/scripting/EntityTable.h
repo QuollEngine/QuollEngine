@@ -11,6 +11,7 @@
 #include "quoll/text/TextLuaTable.h"
 #include "quoll/animation/AnimatorLuaTable.h"
 #include "quoll/input/InputMapLuaTable.h"
+#include "quoll/ui/UICanvasLuaTable.h"
 
 #include "ScriptGlobals.h"
 #include "LuaHeaders.h"
@@ -56,6 +57,7 @@ private:
   TextLuaTable mText;
   AnimatorLuaTable mAnimator;
   InputMapLuaTable mInputMap;
+  UICanvasLuaTable mUICanvas;
 };
 
 } // namespace quoll

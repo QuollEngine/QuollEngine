@@ -93,6 +93,14 @@ private:
                     ActionExecutor &actionExecutor);
 
   /**
+   * @brief Render ui canvas
+   *
+   * @param scene Scene
+   * @param actionExecutor Action executor
+   */
+  void renderUICanvas(Scene &scene, ActionExecutor &actionExecutor);
+
+  /**
    * @brief Render mesh
    *
    * @param scene Scene

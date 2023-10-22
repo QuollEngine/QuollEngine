@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/scripting/Script.h"
+#include "quoll/ui/UICanvas.h"
 
 #include "EntitySerializer.h"
 
@@ -258,6 +259,14 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
             components["script"]["variables"][name]["type"] = "prefab";
             components["script"]["variables"][name]["value"] = uuid;
           }
+        } else if (value.isType(LuaScriptVariableType::AssetTexture)) {
+          auto handle = value.get<TextureAssetHandle>();
+          if (mAssetRegistry.getTextures().hasAsset(handle)) {
+            auto uuid = mAssetRegistry.getTextures().getAsset(handle).uuid;
+
+            components["script"]["variables"][name]["type"] = "texture";
+            components["script"]["variables"][name]["value"] = uuid;
+          }
         }
       }
     }
@@ -299,6 +308,10 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
           mAssetRegistry.getInputMaps().getAsset(component.handle).uuid;
       components["inputMap"]["defaultScheme"] = component.defaultScheme;
     }
+  }
+
+  if (mEntityDatabase.has<UICanvas>(entity)) {
+    components["uiCanvas"] = YAML::Node(YAML::NodeType::Map);
   }
 
   return components;

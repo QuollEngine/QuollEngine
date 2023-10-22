@@ -93,6 +93,10 @@
     {
       "name": "sol2",
       "default-features": false
+    },
+    {
+      "name": "yoga",
+      "default-features": false
     }
   ]
 }

@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/scripting/Script.h"
+#include "quoll/ui/UICanvas.h"
 
 #include "SceneLoader.h"
 
@@ -371,6 +372,12 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
             if (handle != PrefabAssetHandle::Null) {
               script.variables.insert_or_assign(name, handle);
             }
+          } else if (type == "texture") {
+            auto handle =
+                mAssetRegistry.getTextures().findHandleByUuid(Uuid(value));
+            if (handle != TextureAssetHandle::Null) {
+              script.variables.insert_or_assign(name, handle);
+            }
           }
         }
       }
@@ -439,6 +446,10 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
       mEntityDatabase.set<InputMapAssetRef>(entity, {handle, defaultScheme});
     }
+  }
+
+  if (node["uiCanvas"] && node["uiCanvas"].IsMap()) {
+    mEntityDatabase.set<UICanvas>(entity, {});
   }
 
   return Result<bool>::Ok(true);

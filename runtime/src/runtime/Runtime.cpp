@@ -18,7 +18,10 @@
 #include "quoll/core/EntityDeleter.h"
 #include "quoll/scene/SceneIO.h"
 #include "quoll/renderer/SceneRenderer.h"
+#include "quoll/imgui/ImguiRenderer.h"
+#include "quoll/imgui/ImguiUtils.h"
 #include "quoll/input/InputMapSystem.h"
+#include "quoll/ui/UICanvasUpdater.h"
 
 // Render hardware interfaces
 #include "quoll/rhi/RenderDevice.h"
@@ -35,49 +38,63 @@ void Runtime::start() {
   static constexpr uint32_t Width = 800;
   static constexpr uint32_t Height = 600;
 
-  quoll::Scene scene;
-  quoll::EventSystem eventSystem;
-  quoll::InputDeviceManager deviceManager;
-  quoll::Window window(mConfig.name, Width, Height, deviceManager, eventSystem);
-  quoll::AssetCache assetCache(std::filesystem::current_path() / "assets",
-                               true);
+  Scene scene;
+  EventSystem eventSystem;
+  InputDeviceManager deviceManager;
+  Window window(mConfig.name, Width, Height, deviceManager, eventSystem);
+  AssetCache assetCache(std::filesystem::current_path() / "assets", true);
 
-  quoll::rhi::VulkanRenderBackend backend(window);
+  rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
-  quoll::RenderStorage renderStorage(device);
+  RenderStorage renderStorage(device);
 
-  quoll::RendererOptions initialOptions{};
+  RendererOptions initialOptions{};
   initialOptions.size = {Width, Height};
-  quoll::Renderer renderer(renderStorage, initialOptions);
+  Renderer renderer(renderStorage, initialOptions);
+  ImguiRenderer imguiRenderer(window, renderStorage);
+
+  {
+    static constexpr float FontSize = 18.0f;
+    auto &io = ImGui::GetIO();
+
+    Path defaultFontPath = Engine::getFontsPath() / "Roboto-Regular.ttf";
+    io.Fonts->AddFontFromFileTTF(defaultFontPath.string().c_str(), FontSize);
+    imguiRenderer.buildFonts();
+  }
 
   SceneRenderer sceneRenderer(assetCache.getRegistry(), renderStorage);
 
   auto res = assetCache.preloadAssets(renderStorage);
 
-  quoll::FPSCounter fpsCounter;
-  quoll::MainLoop mainLoop(window, fpsCounter);
+  FPSCounter fpsCounter;
+  MainLoop mainLoop(window, fpsCounter);
 
-  quoll::Presenter presenter(renderStorage);
+  Presenter presenter(renderStorage);
 
   renderer.setGraphBuilder([&](auto &graph, const auto &options) {
     auto passData = sceneRenderer.attach(graph, options);
     sceneRenderer.attachText(graph, passData);
+    auto imguiData = imguiRenderer.attach(graph, options);
+    imguiData.pass.read(passData.finalColor);
 
-    return RendererTextures{passData.finalColor, passData.finalColor};
+    return RendererTextures{imguiData.imguiColor, passData.finalColor};
   });
 
-  quoll::ScriptingSystem scriptingSystem(eventSystem, assetCache.getRegistry());
-  quoll::SceneUpdater sceneUpdater;
-  quoll::PhysicsSystem physicsSystem =
-      quoll::PhysicsSystem::createPhysxBackend(eventSystem);
-  quoll::CameraAspectRatioUpdater cameraAspectRatioUpdater;
-  quoll::AnimationSystem animationSystem(assetCache.getRegistry());
-  quoll::SkeletonUpdater skeletonUpdater;
-  quoll::AudioSystem audioSystem(assetCache.getRegistry());
-  quoll::EntityDeleter entityDeleter;
-  quoll::InputMapSystem inputMapSystem(deviceManager, assetCache.getRegistry());
+  ScriptingSystem scriptingSystem(eventSystem, assetCache.getRegistry());
+  SceneUpdater sceneUpdater;
+  PhysicsSystem physicsSystem = PhysicsSystem::createPhysxBackend(eventSystem);
+  CameraAspectRatioUpdater cameraAspectRatioUpdater;
+  AnimationSystem animationSystem(assetCache.getRegistry());
+  SkeletonUpdater skeletonUpdater;
+  AudioSystem audioSystem(assetCache.getRegistry());
+  EntityDeleter entityDeleter;
+  InputMapSystem inputMapSystem(deviceManager, assetCache.getRegistry());
+  UICanvasUpdater uiCanvasUpdater;
 
   cameraAspectRatioUpdater.setViewportSize(window.getFramebufferSize());
+  uiCanvasUpdater.setViewport(
+      0.0f, 0.0f, static_cast<float>(window.getFramebufferSize().x),
+      static_cast<float>(window.getFramebufferSize().y));
 
   audioSystem.observeChanges(scene.entityDatabase);
   scriptingSystem.observeChanges(scene.entityDatabase);
@@ -87,6 +104,8 @@ void Runtime::start() {
     renderer.setFramebufferSize({width, height});
     presenter.enqueueFramebufferUpdate();
     cameraAspectRatioUpdater.setViewportSize({width, height});
+    uiCanvasUpdater.setViewport(0.0f, 0.0f, static_cast<float>(width),
+                                static_cast<float>(height));
   });
 
   auto handle = assetCache.getRegistry().getScenes().findHandleByUuid(
@@ -97,7 +116,7 @@ void Runtime::start() {
     return;
   }
 
-  quoll::SceneIO sceneIO(assetCache.getRegistry(), scene);
+  SceneIO sceneIO(assetCache.getRegistry(), scene);
   sceneIO.loadScene(handle);
 
   presenter.updateFramebuffers(device->getSwapchain());
@@ -130,11 +149,39 @@ void Runtime::start() {
 
     renderer.rebuildIfSettingsChanged();
 
+    imguiRenderer.beginRendering();
+
+    ImGuiWindowFlags WindowFlags =
+        ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoInputs |
+        ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoScrollWithMouse |
+        ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+    auto size = window.getFramebufferSize();
+    ImGui::SetNextWindowPos({0.0f, 0.0f});
+    ImGui::SetNextWindowSize(
+        {static_cast<float>(size.x), static_cast<float>(size.y)});
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+    if (ImGui::Begin("SceneView", nullptr, WindowFlags)) {
+      imgui::image(renderer.getSceneTexture(), ImGui::GetContentRegionAvail());
+      ImGui::End();
+    }
+
+    ImGui::PopStyleVar();
+
+    uiCanvasUpdater.render(scene.entityDatabase, assetCache.getRegistry());
+
+    imguiRenderer.endRendering();
+
     const auto &renderFrame = device->beginFrame();
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       sceneRenderer.updateFrameData(scene.entityDatabase, scene.activeCamera,
                                     renderFrame.frameIndex);
+      imguiRenderer.updateFrameData(renderFrame.frameIndex);
 
       renderer.execute(renderFrame.commandList, renderFrame.frameIndex);
 

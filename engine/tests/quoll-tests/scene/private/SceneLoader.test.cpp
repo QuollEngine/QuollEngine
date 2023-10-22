@@ -2,6 +2,8 @@
 #include "quoll-tests/Testing.h"
 
 #include "quoll/scripting/Script.h"
+#include "quoll/ui/UICanvas.h"
+
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/private/SceneLoader.h"
 
@@ -1626,15 +1628,24 @@ TEST_F(SceneLoaderScriptTest,
   prefabData.uuid = quoll::Uuid("my-prefab");
   auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefabData);
 
+  quoll::AssetData<quoll::TextureAsset> textureData{};
+  textureData.uuid = quoll::Uuid("my-texture");
+  auto textureHandle = assetRegistry.getTextures().addAsset(textureData);
+
   auto [node, entity] = createNode();
   node["script"]["asset"] = data.uuid;
   node["script"]["variables"]["test_str"]["type"] = "string";
   node["script"]["variables"]["test_str"]["value"] = "Test string";
+
   node["script"]["variables"]["test_valid_prefab"]["type"] = "prefab";
   node["script"]["variables"]["test_valid_prefab"]["value"] = prefabData.uuid;
   node["script"]["variables"]["test_invalid_prefab"]["type"] = "prefab";
   node["script"]["variables"]["test_invalid_prefab"]["value"] =
       "unknown-prefab-file.prefab";
+
+  node["script"]["variables"]["test_valid_texture"]["type"] = "texture";
+  node["script"]["variables"]["test_valid_texture"]["value"] = textureData.uuid;
+
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   ASSERT_TRUE(entityDatabase.has<quoll::Script>(entity));
@@ -1642,13 +1653,19 @@ TEST_F(SceneLoaderScriptTest,
 
   EXPECT_EQ(script.handle, handle);
 
-  // Invalid prefab is ignored
+  // Invalid prefab and texture are ignored
   EXPECT_FALSE(script.variables.contains("test_invalid_prefab"));
+  EXPECT_FALSE(script.variables.contains("test_invalid_texture"));
+
   EXPECT_EQ(script.variables.at("test_str").get<quoll::String>(),
             "Test string");
   EXPECT_EQ(
       script.variables.at("test_valid_prefab").get<quoll::PrefabAssetHandle>(),
       prefabHandle);
+
+  EXPECT_EQ(script.variables.at("test_valid_texture")
+                .get<quoll::TextureAssetHandle>(),
+            textureHandle);
 }
 
 using SceneLoaderTextTest = SceneLoaderTest;
@@ -2711,7 +2728,6 @@ TEST_F(SceneLoaderInputMapTest, SetsInputMapDefaultSchemeToZeroIfInvalidField) {
       YAML::Node(YAML::NodeType::Scalar)};
 
   for (auto invalidNode : invalidNodes) {
-
     auto [node, entity] = createNode();
     node["inputMap"]["asset"] = data.uuid;
     node["inputMap"]["defaultScheme"] = invalidNode;
@@ -2721,4 +2737,35 @@ TEST_F(SceneLoaderInputMapTest, SetsInputMapDefaultSchemeToZeroIfInvalidField) {
     EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).defaultScheme,
               0);
   }
+}
+
+using SceneLoaderUICanvasTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderUICanvasTest, DoesNotAddUICanvasComponentIfNoUICanvasField) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  EXPECT_FALSE(entityDatabase.has<quoll::UICanvas>(entity));
+}
+
+TEST_F(SceneLoaderUICanvasTest,
+       DoesNotAddUICanvasComponentIfUICanvasFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  for (auto invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["uiCanvas"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_FALSE(entityDatabase.has<quoll::UICanvas>(entity));
+  }
+}
+
+TEST_F(SceneLoaderUICanvasTest,
+       CreatesUICanvasComponentIfUICanvasFieldExistsAndIsAnObject) {
+  auto [node, entity] = createNode();
+  node["uiCanvas"] = YAML::Node(YAML::NodeType::Map);
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  EXPECT_TRUE(entityDatabase.has<quoll::UICanvas>(entity));
 }

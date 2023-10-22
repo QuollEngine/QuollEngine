@@ -32,6 +32,7 @@ function linkDependenciesWith(...)
         "cryptopp",
         "ktx",
         "zstd",
+        "yogacore",
         "PhysX_static_64",
         "PhysXPvdSDK_static_64",
         "PhysXExtensions_static_64",
