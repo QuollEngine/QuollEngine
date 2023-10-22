@@ -10,7 +10,7 @@
 namespace quoll::rhi {
 
 VulkanCommandPool::VulkanCommandPool(VulkanDeviceObject &device,
-                                     uint32_t queueFamilyIndex,
+                                     u32 queueFamilyIndex,
                                      const VulkanResourceRegistry &registry,
                                      const VulkanDescriptorPool &descriptorPool,
                                      DeviceStats &stats)
@@ -37,7 +37,7 @@ VulkanCommandPool::~VulkanCommandPool() {
 }
 
 std::vector<RenderCommandList>
-VulkanCommandPool::createCommandLists(uint32_t count) {
+VulkanCommandPool::createCommandLists(u32 count) {
   std::vector<VkCommandBuffer> commandBuffers(count);
   std::vector<RenderCommandList> renderCommandLists(count);
 
@@ -51,7 +51,7 @@ VulkanCommandPool::createCommandLists(uint32_t count) {
       vkAllocateCommandBuffers(mDevice, &allocInfo, commandBuffers.data()),
       "Failed to allocate command buffers");
 
-  for (size_t i = 0; i < count; ++i) {
+  for (usize i = 0; i < count; ++i) {
     renderCommandLists.at(i) =
         std::move(RenderCommandList(new VulkanCommandBuffer(
             commandBuffers.at(i), mRegistry, mDescriptorPool, mStats)));

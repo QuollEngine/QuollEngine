@@ -18,24 +18,24 @@ public:
 
     std::random_device device;
     std::mt19937 mt(device());
-    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
-    std::uniform_int_distribution<int32_t> idist(-1, 2);
-    std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
-    std::uniform_real_distribution<float> distPositive(0.0f, 10.0f);
+    std::uniform_real_distribution<f32> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<i32> idist(-1, 2);
+    std::uniform_real_distribution<f32> distColor(0.0f, 1.0f);
+    std::uniform_real_distribution<f32> distPositive(0.0f, 10.0f);
 
-    uint32_t numMaterials = 5;
-    uint32_t numTransforms = 5;
-    uint32_t numMeshes = 5;
-    uint32_t numMeshRenderers = 4;
-    uint32_t numSkeletons = 3;
-    uint32_t numSkinnedMeshRenderers = 2;
-    uint32_t numAnimators = 4;
-    uint32_t numAnimations = 3;
-    uint32_t numDirectionalLights = 2;
-    uint32_t numPointLights = 4;
-    uint32_t numNames = 3;
+    u32 numMaterials = 5;
+    u32 numTransforms = 5;
+    u32 numMeshes = 5;
+    u32 numMeshRenderers = 4;
+    u32 numSkeletons = 3;
+    u32 numSkinnedMeshRenderers = 2;
+    u32 numAnimators = 4;
+    u32 numAnimations = 3;
+    u32 numDirectionalLights = 2;
+    u32 numPointLights = 4;
+    u32 numNames = 3;
 
-    for (uint32_t i = 0; i < numTransforms; ++i) {
+    for (u32 i = 0; i < numTransforms; ++i) {
       quoll::PrefabTransformData transform{};
       transform.position = {dist(mt), dist(mt), dist(mt)};
       transform.rotation = {dist(mt), dist(mt), dist(mt), dist(mt)};
@@ -45,13 +45,13 @@ public:
       asset.data.transforms.push_back({i, transform});
     }
 
-    for (uint32_t i = 0; i < numNames; ++i) {
+    for (u32 i = 0; i < numNames; ++i) {
       quoll::String name = "Test name " + std::to_string(i);
 
       asset.data.names.push_back({i, name});
     }
 
-    for (uint32_t i = 0; i < numDirectionalLights; ++i) {
+    for (u32 i = 0; i < numDirectionalLights; ++i) {
       quoll::DirectionalLight light{};
       light.color = {distColor(mt), distColor(mt), distColor(mt),
                      distColor(mt)};
@@ -60,7 +60,7 @@ public:
       asset.data.directionalLights.push_back({i, light});
     }
 
-    for (uint32_t i = 0; i < numPointLights; ++i) {
+    for (u32 i = 0; i < numPointLights; ++i) {
       quoll::PointLight light{};
       light.color = {distColor(mt), distColor(mt), distColor(mt),
                      distColor(mt)};
@@ -71,20 +71,20 @@ public:
     }
 
     std::vector<quoll::MaterialAssetHandle> materials(numMaterials);
-    for (uint32_t i = 0; i < numMaterials; ++i) {
+    for (u32 i = 0; i < numMaterials; ++i) {
       quoll::AssetData<quoll::MaterialAsset> material;
       material.uuid = quoll::Uuid("material-" + std::to_string(i));
       materials.at(i) = cache.getRegistry().getMaterials().addAsset(material);
     }
 
-    for (uint32_t i = 0; i < numMeshes; ++i) {
+    for (u32 i = 0; i < numMeshes; ++i) {
       quoll::AssetData<quoll::MeshAsset> mesh;
       mesh.uuid = quoll::Uuid("mesh-" + std::to_string(i));
       auto handle = cache.getRegistry().getMeshes().addAsset(mesh);
       asset.data.meshes.push_back({i, handle});
     }
 
-    for (uint32_t i = 0; i < numMeshRenderers; ++i) {
+    for (u32 i = 0; i < numMeshRenderers; ++i) {
       quoll::MeshRenderer renderer{};
       renderer.materials.push_back(materials.at(i % 3));
       renderer.materials.push_back(materials.at(1 + (i % 3)));
@@ -95,12 +95,12 @@ public:
     // Add two more entities that point to the same
     // meshes to test that existing meshes are always
     // referenced instead of added again
-    for (uint32_t i = 0; i < 2; ++i) {
-      auto handle = asset.data.meshes.at(static_cast<size_t>(i)).value;
+    for (u32 i = 0; i < 2; ++i) {
+      auto handle = asset.data.meshes.at(static_cast<usize>(i)).value;
       asset.data.meshes.push_back({numMeshes + i, handle});
     }
 
-    for (uint32_t i = 0; i < numSkinnedMeshRenderers; ++i) {
+    for (u32 i = 0; i < numSkinnedMeshRenderers; ++i) {
       quoll::SkinnedMeshRenderer renderer{};
       renderer.materials.push_back(materials.at((i % 2)));
       renderer.materials.push_back(materials.at(1 + (i % 2)));
@@ -109,7 +109,7 @@ public:
       asset.data.skinnedMeshRenderers.push_back({i, renderer});
     }
 
-    for (uint32_t i = 0; i < numSkeletons; ++i) {
+    for (u32 i = 0; i < numSkeletons; ++i) {
       quoll::AssetData<quoll::SkeletonAsset> skeleton;
       skeleton.uuid = quoll::Uuid("skel-" + std::to_string(i));
       auto handle = cache.getRegistry().getSkeletons().addAsset(skeleton);
@@ -119,12 +119,12 @@ public:
     // Add two more entities that point to the same
     // skeletons to test that existing skeletons are always
     // referenced instead of added again
-    for (uint32_t i = 0; i < 2; ++i) {
-      auto handle = asset.data.skeletons.at(static_cast<size_t>(i)).value;
+    for (u32 i = 0; i < 2; ++i) {
+      auto handle = asset.data.skeletons.at(static_cast<usize>(i)).value;
       asset.data.skeletons.push_back({numSkeletons + i, handle});
     }
 
-    for (uint32_t i = 0; i < numAnimations; ++i) {
+    for (u32 i = 0; i < numAnimations; ++i) {
       quoll::AssetData<quoll::AnimationAsset> animation;
       animation.uuid = quoll::Uuid("animation-" + std::to_string(i));
 
@@ -132,7 +132,7 @@ public:
       asset.data.animations.push_back(handle);
     }
 
-    for (uint32_t i = 0; i < numAnimators; ++i) {
+    for (u32 i = 0; i < numAnimators; ++i) {
       quoll::AssetData<quoll::AnimatorAsset> animator;
       animator.uuid = quoll::Uuid("animator-" + std::to_string(i));
       auto handle = cache.getRegistry().getAnimators().addAsset(animator);
@@ -142,7 +142,7 @@ public:
     // Add two more entities that point to same animations
     // to test that existing animations are always
     // referenced instead of added again
-    for (uint32_t i = 0; i < 2; ++i) {
+    for (u32 i = 0; i < 2; ++i) {
       auto handle = asset.data.animators.at(i).value;
       asset.data.animators.push_back({numAnimators + i, handle});
     }
@@ -177,13 +177,13 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   {
     auto &map = cache.getRegistry().getMaterials();
     auto &actual = actualMaterials;
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     file.read(numAssets);
     EXPECT_EQ(numAssets, 4);
     actualMaterials.resize(4);
     file.read(actual);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto handle = map.findHandleByUuid(actual.at(i));
       EXPECT_NE(handle, quoll::MaterialAssetHandle::Null);
     }
@@ -193,13 +193,13 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   {
     auto &expected = asset.data.meshes;
     auto &map = cache.getRegistry().getMeshes();
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     file.read(numAssets);
-    EXPECT_EQ(numAssets, static_cast<uint32_t>(expected.size() - 2));
+    EXPECT_EQ(numAssets, static_cast<u32>(expected.size() - 2));
     actualMeshes.resize(numAssets);
     file.read(actualMeshes);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto expectedString = map.getAsset(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualMeshes.at(i));
     }
@@ -209,13 +209,13 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   {
     auto &expected = asset.data.skeletons;
     auto &map = cache.getRegistry().getSkeletons();
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     file.read(numAssets);
     EXPECT_EQ(numAssets, 3);
     actualSkeletons.resize(numAssets);
     file.read(actualSkeletons);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto expectedString = map.getAsset(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualSkeletons.at(i));
     }
@@ -226,13 +226,13 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     auto &expected = asset.data.animations;
     auto &map = cache.getRegistry().getAnimations();
     auto &actual = actualAnimations;
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     file.read(numAssets);
     EXPECT_EQ(numAssets, 3);
     actualAnimations.resize(numAssets);
     file.read(actual);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto expectedString = map.getAsset(expected.at(i)).uuid;
       EXPECT_EQ(expectedString, actual.at(i));
     }
@@ -243,31 +243,31 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     auto &expected = asset.data.animators;
     auto &map = cache.getRegistry().getAnimators();
     auto &actual = actualAnimators;
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     file.read(numAssets);
     EXPECT_EQ(numAssets, 4);
     actualAnimators.resize(numAssets);
     file.read(actual);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto expectedString = map.getAsset(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actual.at(i));
     }
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 5);
     std::vector<quoll::PrefabTransformData> transforms(numComponents);
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       file.read(entity);
 
       glm::vec3 position;
       glm::quat rotation;
       glm::vec3 scale;
-      int32_t parent = -1;
+      i32 parent = -1;
       file.read(position);
       file.read(rotation);
       file.read(scale);
@@ -282,12 +282,12 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 3);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
@@ -299,16 +299,16 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 7);
     auto &map = cache.getRegistry().getMeshes();
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
-      uint32_t meshIndex = 999;
+      u32 meshIndex = 999;
       file.read(meshIndex);
       EXPECT_EQ(meshIndex, i % 5);
 
@@ -319,26 +319,26 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 999;
+    u32 numComponents = 999;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 4);
     auto &map = cache.getRegistry().getMaterials();
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
-      uint32_t numMaterials = 999;
+      u32 numMaterials = 999;
       file.read(numMaterials);
       EXPECT_EQ(numMaterials, 2);
 
-      std::vector<uint32_t> materialIndices(numMaterials);
+      std::vector<u32> materialIndices(numMaterials);
       file.read(materialIndices);
 
       auto &expected = asset.data.meshRenderers.at(i).value;
       EXPECT_EQ(materialIndices.size(), expected.materials.size());
 
-      for (size_t mi = 0; mi < materialIndices.size(); ++mi) {
+      for (usize mi = 0; mi < materialIndices.size(); ++mi) {
         auto materialIndex = materialIndices.at(mi);
         auto handle = expected.materials.at(mi);
 
@@ -349,26 +349,26 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 999;
+    u32 numComponents = 999;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 2);
     auto &map = cache.getRegistry().getMaterials();
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
-      uint32_t numMaterials = 999;
+      u32 numMaterials = 999;
       file.read(numMaterials);
       EXPECT_EQ(numMaterials, 3);
 
-      std::vector<uint32_t> materialIndices(numMaterials);
+      std::vector<u32> materialIndices(numMaterials);
       file.read(materialIndices);
 
       auto &expected = asset.data.skinnedMeshRenderers.at(i).value;
       EXPECT_EQ(materialIndices.size(), expected.materials.size());
 
-      for (size_t mi = 0; mi < materialIndices.size(); ++mi) {
+      for (usize mi = 0; mi < materialIndices.size(); ++mi) {
         auto materialIndex = materialIndices.at(mi);
         auto handle = expected.materials.at(mi);
 
@@ -379,16 +379,16 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 5);
     auto &map = cache.getRegistry().getSkeletons();
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
-      uint32_t skeletonIndex = 999;
+      u32 skeletonIndex = 999;
       file.read(skeletonIndex);
       EXPECT_EQ(skeletonIndex, i % 3);
 
@@ -399,13 +399,13 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 3);
     auto &map = cache.getRegistry().getAnimations();
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t animatorIndex = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 animatorIndex = 999;
       file.read(animatorIndex);
 
       auto &expected = map.getAsset(asset.data.animations.at(i));
@@ -415,17 +415,17 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 6);
     auto &map = cache.getRegistry().getAnimators();
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
-      uint32_t animatorIndex = 999;
+      u32 animatorIndex = 999;
       file.read(animatorIndex);
 
       auto &expected = map.getAsset(asset.data.animators.at(i).value);
@@ -435,17 +435,17 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 2);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
       glm::vec4 color{999.0f};
-      float intensity = 0.0f;
+      f32 intensity = 0.0f;
       file.read(color);
       file.read(intensity);
 
@@ -455,18 +455,18 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 4);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
       glm::vec4 color{999.0f};
-      float intensity = 0.0f;
-      float range = 99.0f;
+      f32 intensity = 0.0f;
+      f32 range = 99.0f;
       file.read(color);
       file.read(intensity);
       file.read(range);
@@ -504,7 +504,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   EXPECT_EQ(prefab.name, asset.name);
 
   EXPECT_EQ(asset.data.transforms.size(), prefab.data.transforms.size());
-  for (size_t i = 0; i < prefab.data.transforms.size(); ++i) {
+  for (usize i = 0; i < prefab.data.transforms.size(); ++i) {
     auto &expected = asset.data.transforms.at(i);
     auto &actual = prefab.data.transforms.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
@@ -515,7 +515,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   }
 
   EXPECT_EQ(asset.data.names.size(), prefab.data.names.size());
-  for (size_t i = 0; i < prefab.data.names.size(); ++i) {
+  for (usize i = 0; i < prefab.data.names.size(); ++i) {
     auto &expected = asset.data.names.at(i);
     auto &actual = prefab.data.names.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
@@ -523,7 +523,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   }
 
   EXPECT_EQ(asset.data.meshes.size(), prefab.data.meshes.size());
-  for (size_t i = 0; i < prefab.data.meshes.size(); ++i) {
+  for (usize i = 0; i < prefab.data.meshes.size(); ++i) {
     auto &expected = asset.data.meshes.at(i);
     auto &actual = prefab.data.meshes.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
@@ -531,30 +531,30 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   }
 
   EXPECT_EQ(asset.data.meshRenderers.size(), prefab.data.meshRenderers.size());
-  for (size_t i = 0; i < prefab.data.meshRenderers.size(); ++i) {
+  for (usize i = 0; i < prefab.data.meshRenderers.size(); ++i) {
     auto &expected = asset.data.meshRenderers.at(i);
     auto &actual = prefab.data.meshRenderers.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.materials.size(), actual.value.materials.size());
-    for (size_t mi = 0; mi < expected.value.materials.size(); ++mi) {
+    for (usize mi = 0; mi < expected.value.materials.size(); ++mi) {
       EXPECT_EQ(expected.value.materials.at(mi), actual.value.materials.at(mi));
     }
   }
 
   EXPECT_EQ(asset.data.skinnedMeshRenderers.size(),
             prefab.data.skinnedMeshRenderers.size());
-  for (size_t i = 0; i < prefab.data.skinnedMeshRenderers.size(); ++i) {
+  for (usize i = 0; i < prefab.data.skinnedMeshRenderers.size(); ++i) {
     auto &expected = asset.data.skinnedMeshRenderers.at(i);
     auto &actual = prefab.data.skinnedMeshRenderers.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.materials.size(), actual.value.materials.size());
-    for (size_t mi = 0; mi < expected.value.materials.size(); ++mi) {
+    for (usize mi = 0; mi < expected.value.materials.size(); ++mi) {
       EXPECT_EQ(expected.value.materials.at(mi), actual.value.materials.at(mi));
     }
   }
 
   EXPECT_EQ(asset.data.skeletons.size(), prefab.data.skeletons.size());
-  for (size_t i = 0; i < prefab.data.skeletons.size(); ++i) {
+  for (usize i = 0; i < prefab.data.skeletons.size(); ++i) {
     auto &expected = asset.data.skeletons.at(i);
     auto &actual = prefab.data.skeletons.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
@@ -562,7 +562,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   }
 
   EXPECT_EQ(asset.data.animations.size(), prefab.data.animations.size());
-  for (size_t i = 0; i < prefab.data.animations.size(); ++i) {
+  for (usize i = 0; i < prefab.data.animations.size(); ++i) {
     auto &expected = asset.data.animations.at(i);
     auto &actual = prefab.data.animations.at(i);
 
@@ -570,7 +570,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   }
 
   EXPECT_EQ(asset.data.animators.size(), prefab.data.animators.size());
-  for (size_t i = 0; i < prefab.data.animators.size(); ++i) {
+  for (usize i = 0; i < prefab.data.animators.size(); ++i) {
     auto &expected = asset.data.animators.at(i);
     auto &actual = prefab.data.animators.at(i);
 
@@ -580,7 +580,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
 
   EXPECT_EQ(asset.data.directionalLights.size(),
             prefab.data.directionalLights.size());
-  for (size_t i = 0; i < prefab.data.directionalLights.size(); ++i) {
+  for (usize i = 0; i < prefab.data.directionalLights.size(); ++i) {
     auto &expected = asset.data.directionalLights.at(i);
     auto &actual = prefab.data.directionalLights.at(i);
 
@@ -592,7 +592,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   }
 
   EXPECT_EQ(asset.data.pointLights.size(), prefab.data.pointLights.size());
-  for (size_t i = 0; i < prefab.data.pointLights.size(); ++i) {
+  for (usize i = 0; i < prefab.data.pointLights.size(); ++i) {
     auto &expected = asset.data.pointLights.at(i);
     auto &actual = prefab.data.pointLights.at(i);
 

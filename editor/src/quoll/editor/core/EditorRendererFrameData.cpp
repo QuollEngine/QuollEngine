@@ -5,10 +5,10 @@
 
 namespace quoll::editor {
 
-static constexpr size_t MaxNumJoints = 32;
+static constexpr usize MaxNumJoints = 32;
 
 EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
-                                                 size_t reservedSpace)
+                                                 usize reservedSpace)
     : mReservedSpace(reservedSpace),
       mBindlessParams(renderStorage.getDevice()
                           ->getDeviceInformation()
@@ -89,10 +89,10 @@ void EditorRendererFrameData::addSkeleton(
     const glm::mat4 &worldTransform,
     const std::vector<glm::mat4> &boneTransforms) {
   mSkeletonTransforms.push_back(worldTransform);
-  mNumBones.push_back(static_cast<uint32_t>(boneTransforms.size()));
+  mNumBones.push_back(static_cast<u32>(boneTransforms.size()));
 
   auto *currentSkeleton = mSkeletonVector.get() + (mLastSkeleton * MaxNumBones);
-  size_t dataSize = std::min(boneTransforms.size(), MaxNumBones);
+  usize dataSize = std::min(boneTransforms.size(), MaxNumBones);
   memcpy(currentSkeleton, boneTransforms.data(), dataSize * sizeof(glm::mat4));
 
   mLastSkeleton++;
@@ -123,8 +123,8 @@ void EditorRendererFrameData::addTextOutline(
 
   SceneRendererFrameData::TextItem textData{};
   textData.fontTexture = fontTexture;
-  textData.glyphStart = static_cast<uint32_t>(mTextGlyphOutlines.size());
-  textData.length = static_cast<uint32_t>(glyphs.size());
+  textData.glyphStart = static_cast<u32>(mTextGlyphOutlines.size());
+  textData.length = static_cast<u32>(glyphs.size());
 
   for (auto &glyph : glyphs) {
     mTextGlyphOutlines.push_back(glyph);
@@ -153,16 +153,16 @@ void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
 
   mOutlineTransforms.push_back(worldTransform);
 
-  uint32_t lastIndexOffset = 0;
-  uint32_t lastVertexOffset = 0;
-  for (size_t i = 0; i < outline.indexCounts.size(); ++i) {
+  u32 lastIndexOffset = 0;
+  u32 lastVertexOffset = 0;
+  for (usize i = 0; i < outline.indexCounts.size(); ++i) {
     outline.indexCounts.at(i) =
-        static_cast<uint32_t>(mesh.geometries.at(i).indices.size());
-    outline.indexOffsets.at(i) = static_cast<uint32_t>(lastIndexOffset);
+        static_cast<u32>(mesh.geometries.at(i).indices.size());
+    outline.indexOffsets.at(i) = static_cast<u32>(lastIndexOffset);
     outline.vertexOffsets.at(i) = lastVertexOffset;
     lastIndexOffset += outline.indexCounts.at(i);
     lastVertexOffset +=
-        static_cast<uint32_t>(mesh.geometries.at(i).positions.size());
+        static_cast<u32>(mesh.geometries.at(i).positions.size());
   }
 
   mMeshOutlines.push_back(outline);
@@ -189,22 +189,22 @@ void EditorRendererFrameData::addSkinnedMeshOutline(
 
   mOutlineTransforms.push_back(worldTransform);
 
-  uint32_t lastIndexOffset = 0;
-  uint32_t lastVertexOffset = 0;
-  for (size_t i = 0; i < outline.indexCounts.size(); ++i) {
+  u32 lastIndexOffset = 0;
+  u32 lastVertexOffset = 0;
+  for (usize i = 0; i < outline.indexCounts.size(); ++i) {
     outline.indexCounts.at(i) =
-        static_cast<uint32_t>(mesh.geometries.at(i).indices.size());
-    outline.indexOffsets.at(i) = static_cast<uint32_t>(lastIndexOffset);
+        static_cast<u32>(mesh.geometries.at(i).indices.size());
+    outline.indexOffsets.at(i) = static_cast<u32>(lastIndexOffset);
     outline.vertexOffsets.at(i) = lastVertexOffset;
     lastIndexOffset += outline.indexCounts.at(i);
     lastVertexOffset +=
-        static_cast<uint32_t>(mesh.geometries.at(i).positions.size());
+        static_cast<u32>(mesh.geometries.at(i).positions.size());
   }
 
   mMeshOutlines.push_back(outline);
 
-  size_t currentOffset = mLastOutlineSkeleton * MaxNumJoints;
-  size_t newSize = currentOffset + MaxNumJoints;
+  usize currentOffset = mLastOutlineSkeleton * MaxNumJoints;
+  usize newSize = currentOffset + MaxNumJoints;
 
   // Resize skeletons if new skeleton does not fit
   if (mOutlineSkeletonCapacity < newSize) {
@@ -217,7 +217,7 @@ void EditorRendererFrameData::addSkinnedMeshOutline(
   }
 
   auto *currentSkeleton = mOutlineSkeletons.get() + currentOffset;
-  size_t dataSize = std::min(skeleton.size(), MaxNumJoints);
+  usize dataSize = std::min(skeleton.size(), MaxNumJoints);
   memcpy(currentSkeleton, skeleton.data(), dataSize * sizeof(glm::mat4));
   mLastOutlineSkeleton++;
 
@@ -291,7 +291,7 @@ void EditorRendererFrameData::setCollidable(
   mCollidableEntityParams.center =
       glm::vec4(collidable.geometryDesc.center, 0.0f);
   mCollidableEntityParams.type.x =
-      static_cast<uint32_t>(collidable.geometryDesc.type);
+      static_cast<u32>(collidable.geometryDesc.type);
 
   if (collidable.geometryDesc.type == PhysicsGeometryType::Box) {
     const auto &params =

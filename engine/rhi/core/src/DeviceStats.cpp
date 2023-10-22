@@ -6,7 +6,7 @@ namespace quoll::rhi {
 DeviceStats::DeviceStats(NativeResourceMetrics *resourceMetrics)
     : mResourceMetrics(resourceMetrics) {}
 
-void DeviceStats::addDrawCall(size_t primitiveCount) {
+void DeviceStats::addDrawCall(usize primitiveCount) {
   mDrawCallsCount++;
   mDrawnPrimitivesCount += primitiveCount;
   mCommandCallsCount++;

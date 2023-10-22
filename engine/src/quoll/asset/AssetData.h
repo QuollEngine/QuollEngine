@@ -19,7 +19,7 @@ template <class TData> struct AssetData {
   /**
    * Asset size
    */
-  size_t size = 0;
+  usize size = 0;
 
   /**
    * Asset data

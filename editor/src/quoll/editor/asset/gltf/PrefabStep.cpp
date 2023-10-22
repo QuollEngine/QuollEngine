@@ -61,21 +61,21 @@ void loadPrefabs(GLTFImportData &importData) {
         auto index = data.Get("light").GetNumberAsInt();
         hasValidLight =
             index >= 0 &&
-            (importData.directionalLights.map.find(static_cast<size_t>(
-                 index)) != importData.directionalLights.map.end() ||
-             importData.pointLights.map.find(static_cast<size_t>(index)) !=
+            (importData.directionalLights.map.find(static_cast<usize>(index)) !=
+                 importData.directionalLights.map.end() ||
+             importData.pointLights.map.find(static_cast<usize>(index)) !=
                  importData.pointLights.map.end());
       }
     }
 
-    auto localEntityId = static_cast<uint32_t>(nodeIndex);
+    auto localEntityId = static_cast<u32>(nodeIndex);
 
     PrefabTransformData transform{};
     auto data = loadTransformData(node);
     transform.position = data.localPosition;
     transform.rotation = data.localRotation;
     transform.scale = data.localScale;
-    transform.parent = static_cast<int32_t>(parentIndex);
+    transform.parent = static_cast<i32>(parentIndex);
 
     prefab.data.transforms.push_back({localEntityId, transform});
 
@@ -117,8 +117,8 @@ void loadPrefabs(GLTFImportData &importData) {
 
     if (hasValidLight) {
       const auto &light = itExtLight->second;
-      size_t lightIndex =
-          static_cast<size_t>(light.Get("light").GetNumberAsInt());
+      usize lightIndex =
+          static_cast<usize>(light.Get("light").GetNumberAsInt());
 
       if (importData.directionalLights.map.find(lightIndex) !=
           importData.directionalLights.map.end()) {

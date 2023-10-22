@@ -35,8 +35,8 @@ namespace quoll::runtime {
 Runtime::Runtime(const LaunchConfig &config) : mConfig(config) {}
 
 void Runtime::start() {
-  static constexpr uint32_t Width = 800;
-  static constexpr uint32_t Height = 600;
+  static constexpr u32 Width = 800;
+  static constexpr u32 Height = 600;
 
   Scene scene;
   EventSystem eventSystem;
@@ -54,7 +54,7 @@ void Runtime::start() {
   ImguiRenderer imguiRenderer(window, renderStorage);
 
   {
-    static constexpr float FontSize = 18.0f;
+    static constexpr f32 FontSize = 18.0f;
     auto &io = ImGui::GetIO();
 
     Path defaultFontPath = Engine::getFontsPath() / "Roboto-Regular.ttf";
@@ -92,9 +92,9 @@ void Runtime::start() {
   UICanvasUpdater uiCanvasUpdater;
 
   cameraAspectRatioUpdater.setViewportSize(window.getFramebufferSize());
-  uiCanvasUpdater.setViewport(
-      0.0f, 0.0f, static_cast<float>(window.getFramebufferSize().x),
-      static_cast<float>(window.getFramebufferSize().y));
+  uiCanvasUpdater.setViewport(0.0f, 0.0f,
+                              static_cast<f32>(window.getFramebufferSize().x),
+                              static_cast<f32>(window.getFramebufferSize().y));
 
   audioSystem.observeChanges(scene.entityDatabase);
   scriptingSystem.observeChanges(scene.entityDatabase);
@@ -104,8 +104,8 @@ void Runtime::start() {
     renderer.setFramebufferSize({width, height});
     presenter.enqueueFramebufferUpdate();
     cameraAspectRatioUpdater.setViewportSize({width, height});
-    uiCanvasUpdater.setViewport(0.0f, 0.0f, static_cast<float>(width),
-                                static_cast<float>(height));
+    uiCanvasUpdater.setViewport(0.0f, 0.0f, static_cast<f32>(width),
+                                static_cast<f32>(height));
   });
 
   auto handle = assetCache.getRegistry().getScenes().findHandleByUuid(
@@ -121,7 +121,7 @@ void Runtime::start() {
 
   presenter.updateFramebuffers(device->getSwapchain());
 
-  mainLoop.setUpdateFn([&](float dt) mutable {
+  mainLoop.setUpdateFn([&](f32 dt) mutable {
     auto &entityDatabase = scene.entityDatabase;
     entityDeleter.update(scene);
 
@@ -161,7 +161,7 @@ void Runtime::start() {
     auto size = window.getFramebufferSize();
     ImGui::SetNextWindowPos({0.0f, 0.0f});
     ImGui::SetNextWindowSize(
-        {static_cast<float>(size.x), static_cast<float>(size.y)});
+        {static_cast<f32>(size.x), static_cast<f32>(size.y)});
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
@@ -178,7 +178,7 @@ void Runtime::start() {
 
     const auto &renderFrame = device->beginFrame();
 
-    if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
+    if (renderFrame.frameIndex < std::numeric_limits<u32>::max()) {
       sceneRenderer.updateFrameData(scene.entityDatabase, scene.activeCamera,
                                     renderFrame.frameIndex);
       imguiRenderer.updateFrameData(renderFrame.frameIndex);

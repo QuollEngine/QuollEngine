@@ -36,7 +36,7 @@ void VulkanBuffer::unmap() {
   vmaUnmapMemory(mAllocator, mAllocation);
 }
 
-void VulkanBuffer::resize(size_t size) {
+void VulkanBuffer::resize(usize size) {
   mSize = size;
   createBuffer({mUsage, mSize, nullptr, mAllocationUsage, mMapped, mDebugName});
 }

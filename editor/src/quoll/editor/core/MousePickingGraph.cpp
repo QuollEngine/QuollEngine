@@ -71,8 +71,7 @@ MousePickingGraph::MousePickingGraph(
 }
 
 void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
-                                const glm::vec2 &mousePos,
-                                uint32_t frameIndex) {
+                                const glm::vec2 &mousePos, u32 frameIndex) {
   mFrameIndex = frameIndex;
   const auto &frameData = mFrameData.at(frameIndex);
 
@@ -82,11 +81,11 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
 
   for (const auto &text : frameData.getTexts()) {
     glm::vec4 bounds(
-        std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
-        std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+        std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max(),
+        std::numeric_limits<f32>::min(), std::numeric_limits<f32>::min());
 
     for (auto i = text.glyphStart; i < text.glyphStart + text.length; ++i) {
-      const auto &glyph = frameData.getTextGlyphs().at(static_cast<size_t>(i));
+      const auto &glyph = frameData.getTextGlyphs().at(static_cast<usize>(i));
 
       bounds.x = std::min(glyph.planeBounds.x, bounds.x);
       bounds.y = std::min(glyph.planeBounds.y, bounds.y);
@@ -105,7 +104,7 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
                                  sizeof(Entity));
 
   {
-    size_t offset = 0;
+    usize offset = 0;
     auto *bufferData = static_cast<Entity *>(mMeshEntitiesBuffer.map());
     for (auto &[_, meshData] : frameData.getMeshGroups()) {
       memcpy(bufferData + offset, meshData.entities.data(),
@@ -116,7 +115,7 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
   }
 
   {
-    size_t offset = 0;
+    usize offset = 0;
     auto *bufferData = static_cast<Entity *>(mSkinnedMeshEntitiesBuffer.map());
     for (auto &[_, meshData] : frameData.getSkinnedMeshGroups()) {
       memcpy(bufferData + offset, meshData.entities.data(),
@@ -152,7 +151,7 @@ Entity MousePickingGraph::getSelectedEntity() {
   Entity nullEntity = Entity::Null;
   mSelectedEntityBuffer.update(&nullEntity, sizeof(Entity));
 
-  mFrameIndex = std::numeric_limits<uint32_t>::max();
+  mFrameIndex = std::numeric_limits<u32>::max();
 
   return selectedEntity;
 }
@@ -262,8 +261,8 @@ void MousePickingGraph::createRenderGraph() {
     rhi::DeviceAddress glyphs;
   };
 
-  size_t offset = 0;
-  for (size_t i = 0; i < mBindlessParams.size(); ++i) {
+  usize offset = 0;
+  for (usize i = 0; i < mBindlessParams.size(); ++i) {
     auto &frameData = mFrameData.at(i);
     offset = mBindlessParams.at(i).addRange(MousePickingDrawParams{
         mSelectedEntityBuffer.getAddress(), frameData.getCameraBuffer(),
@@ -282,12 +281,12 @@ void MousePickingGraph::createRenderGraph() {
 
   pass.setExecutor([this, spritePipeline, meshPipeline, skinnedMeshPipeline,
                     textPipeline, offset](rhi::RenderCommandList &commandList,
-                                          uint32_t frameIndex) {
+                                          u32 frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
 
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
 
-    std::array<uint32_t, 1> offsets{static_cast<uint32_t>(offset)};
+    std::array<u32, 1> offsets{static_cast<u32>(offset)};
 
     // Sprite
     {
@@ -297,7 +296,7 @@ void MousePickingGraph::createRenderGraph() {
                                  offsets);
 
       commandList.draw(
-          4, 0, static_cast<uint32_t>(frameData.getSpriteEntities().size()), 0);
+          4, 0, static_cast<u32>(frameData.getSpriteEntities().size()), 0);
     }
 
     // Mesh
@@ -308,23 +307,22 @@ void MousePickingGraph::createRenderGraph() {
                                  mBindlessParams.at(frameIndex).getDescriptor(),
                                  offsets);
 
-      uint32_t instanceStart = 0;
+      u32 instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getMeshGroups()) {
         const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
 
-        uint32_t numInstances =
-            static_cast<uint32_t>(meshData.transforms.size());
+        u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
         commandList.bindVertexBuffers(
             MeshRenderUtils::getGeometryBuffers(mesh),
             MeshRenderUtils::getGeometryBufferOffsets(mesh));
         commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
 
-        int32_t vertexOffset = 0;
-        uint32_t indexOffset = 0;
+        i32 vertexOffset = 0;
+        u32 indexOffset = 0;
         for (auto &geometry : mesh.geometries) {
-          uint32_t indexCount = static_cast<uint32_t>(geometry.indices.size());
-          int32_t vertexCount = static_cast<int32_t>(geometry.positions.size());
+          u32 indexCount = static_cast<u32>(geometry.indices.size());
+          i32 vertexCount = static_cast<i32>(geometry.positions.size());
 
           commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
                                   numInstances, instanceStart);
@@ -343,23 +341,22 @@ void MousePickingGraph::createRenderGraph() {
                                  mBindlessParams.at(frameIndex).getDescriptor(),
                                  offsets);
 
-      uint32_t instanceStart = 0;
+      u32 instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
         const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
 
-        uint32_t numInstances =
-            static_cast<uint32_t>(meshData.transforms.size());
+        u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
         commandList.bindVertexBuffers(
             MeshRenderUtils::getSkinnedGeometryBuffers(mesh),
             MeshRenderUtils::getSkinnedGeometryBufferOffsets(mesh));
         commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
 
-        int32_t vertexOffset = 0;
-        uint32_t indexOffset = 0;
+        i32 vertexOffset = 0;
+        u32 indexOffset = 0;
         for (auto &geometry : mesh.geometries) {
-          uint32_t indexCount = static_cast<uint32_t>(geometry.indices.size());
-          int32_t vertexCount = static_cast<int32_t>(geometry.positions.size());
+          u32 indexCount = static_cast<u32>(geometry.indices.size());
+          i32 vertexCount = static_cast<i32>(geometry.positions.size());
 
           commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
                                   numInstances, instanceStart);
@@ -377,14 +374,14 @@ void MousePickingGraph::createRenderGraph() {
                                  mBindlessParams.at(frameIndex).getDescriptor(),
                                  offsets);
 
-      static constexpr uint32_t NumVertices = 4;
-      for (size_t i = 0; i < frameData.getTextEntities().size(); ++i) {
+      static constexpr u32 NumVertices = 4;
+      for (usize i = 0; i < frameData.getTextEntities().size(); ++i) {
         commandList.pushConstants(
             textPipeline, rhi::ShaderStage::Vertex, 0, sizeof(glm::uvec4),
             glm::value_ptr(
                 mMousePickingFrameData.at(frameIndex).textBounds.at(i)));
 
-        commandList.draw(NumVertices, 0, 1, static_cast<uint32_t>(i));
+        commandList.draw(NumVertices, 0, 1, static_cast<u32>(i));
       }
     }
   });

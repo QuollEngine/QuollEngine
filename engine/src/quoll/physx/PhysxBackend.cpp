@@ -98,8 +98,8 @@ static PxFilterFlags phyxFilterAllCollisionShader(
 
 PhysxBackend::PhysxBackend(EventSystem &eventSystem)
     : mSimulationEventCallback(eventSystem) {
-  static constexpr uint32_t PvdPort = 5425;
-  static constexpr uint32_t PvdTimeoutInMs = 2000;
+  static constexpr u32 PvdPort = 5425;
+  static constexpr u32 PvdTimeoutInMs = 2000;
   static constexpr glm::vec3 Gravity(0.0f, -9.8f, 0.0f);
 
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, mDefaultAllocator,
@@ -145,7 +145,7 @@ PhysxBackend::~PhysxBackend() {
   mFoundation->release();
 }
 
-void PhysxBackend::update(float dt, EntityDatabase &entityDatabase) {
+void PhysxBackend::update(f32 dt, EntityDatabase &entityDatabase) {
   QUOLL_PROFILE_EVENT("PhysicsSystem::update");
 
   synchronizeComponents(entityDatabase);
@@ -184,7 +184,7 @@ void PhysxBackend::observeChanges(EntityDatabase &entityDatabase) {
 }
 
 bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
-                         const glm::vec3 &direction, float distance,
+                         const glm::vec3 &direction, f32 distance,
                          CollisionHit &hit) {
   QuollAssert(entityDatabase.has<PhysxInstance>(entity),
               "Physx instance not found");
@@ -302,7 +302,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
             PhysxMapping::getPhysxTransform(world.worldTransform));
         physx.rigidStatic->attachShape(*physx.shape);
         physx.rigidStatic->userData =
-            reinterpret_cast<void *>(static_cast<uintptr_t>(entity));
+            reinterpret_cast<void *>(static_cast<uptr>(entity));
 
         mScene->addActor(*physx.rigidStatic);
       } else if (physx.rigidStatic) {
@@ -327,7 +327,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
         physx.rigidDynamic = mPhysics->createRigidDynamic(
             PhysxMapping::getPhysxTransform(world.worldTransform));
         physx.rigidDynamic->userData =
-            reinterpret_cast<void *>(static_cast<uintptr_t>(entity));
+            reinterpret_cast<void *>(static_cast<uptr>(entity));
 
         mScene->addActor(*physx.rigidDynamic);
 
@@ -393,7 +393,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
 
 void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
   QUOLL_PROFILE_EVENT("PhysicsSystem::synchronizeTransforms");
-  uint32_t count = 0;
+  u32 count = 0;
   auto **actors = mScene->getActiveActors(count);
 
   {
@@ -401,7 +401,7 @@ void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
     // calculate world transforms first so that local
     // transforms are calculated from the most recent
     // values
-    for (uint32_t i = 0; i < count; ++i) {
+    for (u32 i = 0; i < count; ++i) {
       if (actors[i]->getType() != PxActorType::eRIGID_DYNAMIC) {
         continue;
       }
@@ -409,7 +409,7 @@ void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
       const auto &globalTransform = actor->getGlobalPose();
 
       Entity entity =
-          static_cast<Entity>(reinterpret_cast<uintptr_t>(actor->userData));
+          static_cast<Entity>(reinterpret_cast<uptr>(actor->userData));
 
       glm::vec3 position(globalTransform.p.x, globalTransform.p.y,
                          globalTransform.p.z);
@@ -437,7 +437,7 @@ void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
   {
     QUOLL_PROFILE_EVENT("Synchronize local transforms");
     // Calculate local transforms from parent world transforms
-    for (uint32_t i = 0; i < count; ++i) {
+    for (u32 i = 0; i < count; ++i) {
       if (actors[i]->getType() != PxActorType::eRIGID_DYNAMIC) {
         continue;
       }
@@ -445,7 +445,7 @@ void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
       const auto &globalTransform = actor->getGlobalPose();
 
       Entity entity =
-          static_cast<Entity>(reinterpret_cast<uintptr_t>(actor->userData));
+          static_cast<Entity>(reinterpret_cast<uptr>(actor->userData));
 
       glm::vec3 position(globalTransform.p.x, globalTransform.p.y,
                          globalTransform.p.z);

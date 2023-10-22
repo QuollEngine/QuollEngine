@@ -67,7 +67,7 @@ bool UIRoot::renderSceneView(WorkspaceContext &context,
     uiCanvasUpdater.setViewport(pos.x, pos.y, size.x, size.y);
 
     aspectRatioUpdater.setViewportSize(
-        {static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)});
+        {static_cast<u32>(size.x), static_cast<u32>(size.y)});
 
     bool isItemClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
 

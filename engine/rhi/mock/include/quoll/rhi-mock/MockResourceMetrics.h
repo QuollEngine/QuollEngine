@@ -14,28 +14,28 @@ public:
    *
    * @return Total buffer size
    */
-  size_t getTotalBufferSize() const override;
+  usize getTotalBufferSize() const override;
 
   /**
    * @brief Get number of buffers
    *
    * @return Number of buffers
    */
-  size_t getBuffersCount() const override;
+  usize getBuffersCount() const override;
 
   /**
    * @brief Get number of textures
    *
    * @return Number of textures
    */
-  size_t getTexturesCount() const override;
+  usize getTexturesCount() const override;
 
   /**
    * @brief Get number of descriptors
    *
    * @return Number of descriptors
    */
-  size_t getDescriptorsCount() const override;
+  usize getDescriptorsCount() const override;
 };
 
 } // namespace quoll::rhi

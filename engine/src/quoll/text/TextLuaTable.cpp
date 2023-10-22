@@ -28,7 +28,7 @@ void TextLuaTable::setText(String text) {
   mScriptGlobals.entityDatabase.get<Text>(mEntity).text = text;
 }
 
-sol_maybe<float> TextLuaTable::getLineHeight() {
+sol_maybe<f32> TextLuaTable::getLineHeight() {
   if (mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
     return mScriptGlobals.entityDatabase.get<Text>(mEntity).lineHeight;
   }
@@ -36,7 +36,7 @@ sol_maybe<float> TextLuaTable::getLineHeight() {
   return sol::nil;
 }
 
-void TextLuaTable::setLineHeight(float lineHeight) {
+void TextLuaTable::setLineHeight(f32 lineHeight) {
   // Text needs to exist in order to change it
   if (!mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
     return;

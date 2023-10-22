@@ -69,52 +69,52 @@ TEST_F(MaterialPBRTest, GetsProperties) {
   EXPECT_EQ(properties.getProperties()[idx].first, key);                       \
   EXPECT_TRUE(properties.getProperties()[idx].second.getValue<type>() == value);
 
-  EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 0);
+  EXPECT_PROP_EQ(0, "baseColorTexture", u32, 0);
   EXPECT_PROP_EQ(1, "baseColorTextureCoord", int, 0);
   EXPECT_PROP_EQ(2, "baseColorFactor", glm::vec4,
                  glm::vec4(1.0, 0.2, 0.3, 0.4));
 
-  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", uint32_t, 0);
+  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", u32, 0);
   EXPECT_PROP_EQ(4, "metallicRoughnessTextureCoord", int, 0);
-  EXPECT_PROP_EQ(5, "metallicFactor", float, 0.2f);
-  EXPECT_PROP_EQ(6, "roughnessFactor", float, 0.6f);
+  EXPECT_PROP_EQ(5, "metallicFactor", f32, 0.2f);
+  EXPECT_PROP_EQ(6, "roughnessFactor", f32, 0.6f);
 
-  EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 0);
+  EXPECT_PROP_EQ(7, "normalTexture", u32, 0);
   EXPECT_PROP_EQ(8, "normalTextureCoord", int, 1);
-  EXPECT_PROP_EQ(9, "normalScale", float, 0.7f);
+  EXPECT_PROP_EQ(9, "normalScale", f32, 0.7f);
 
-  EXPECT_PROP_EQ(10, "occlusionTexture", uint32_t, 0);
+  EXPECT_PROP_EQ(10, "occlusionTexture", u32, 0);
   EXPECT_PROP_EQ(11, "occlusionTextureCoord", int, 0);
-  EXPECT_PROP_EQ(12, "occlusionStrength", float, 0.3f);
+  EXPECT_PROP_EQ(12, "occlusionStrength", f32, 0.3f);
 
-  EXPECT_PROP_EQ(13, "emissiveTexture", uint32_t, 0);
+  EXPECT_PROP_EQ(13, "emissiveTexture", u32, 0);
   EXPECT_PROP_EQ(14, "emissiveTextureCoord", int, 0);
   EXPECT_PROP_EQ(15, "emissiveFactor", glm::vec3, glm::vec3(1.0, 0.2, 0.4));
 
   properties.baseColorTexture = quoll::rhi::TextureHandle(1);
-  EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
+  EXPECT_PROP_EQ(0, "baseColorTexture", u32, 1);
 
   properties.normalTexture = quoll::rhi::TextureHandle(2);
-  EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
-  EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 2);
+  EXPECT_PROP_EQ(0, "baseColorTexture", u32, 1);
+  EXPECT_PROP_EQ(7, "normalTexture", u32, 2);
 
   properties.occlusionTexture = quoll::rhi::TextureHandle(3);
-  EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
-  EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 2);
-  EXPECT_PROP_EQ(10, "occlusionTexture", uint32_t, 3);
+  EXPECT_PROP_EQ(0, "baseColorTexture", u32, 1);
+  EXPECT_PROP_EQ(7, "normalTexture", u32, 2);
+  EXPECT_PROP_EQ(10, "occlusionTexture", u32, 3);
 
   properties.metallicRoughnessTexture = quoll::rhi::TextureHandle(4);
-  EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
-  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", uint32_t, 4);
-  EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 2);
-  EXPECT_PROP_EQ(10, "occlusionTexture", uint32_t, 3);
+  EXPECT_PROP_EQ(0, "baseColorTexture", u32, 1);
+  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", u32, 4);
+  EXPECT_PROP_EQ(7, "normalTexture", u32, 2);
+  EXPECT_PROP_EQ(10, "occlusionTexture", u32, 3);
 
   properties.emissiveTexture = quoll::rhi::TextureHandle(5);
-  EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
-  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", uint32_t, 4);
-  EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 2);
-  EXPECT_PROP_EQ(10, "occlusionTexture", uint32_t, 3);
-  EXPECT_PROP_EQ(13, "emissiveTexture", uint32_t, 5);
+  EXPECT_PROP_EQ(0, "baseColorTexture", u32, 1);
+  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", u32, 4);
+  EXPECT_PROP_EQ(7, "normalTexture", u32, 2);
+  EXPECT_PROP_EQ(10, "occlusionTexture", u32, 3);
+  EXPECT_PROP_EQ(13, "emissiveTexture", u32, 5);
 
 #undef EXPECT_PROP_EQ
 }

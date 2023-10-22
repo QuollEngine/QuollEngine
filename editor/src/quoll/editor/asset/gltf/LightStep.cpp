@@ -19,20 +19,20 @@ void loadLights(GLTFImportData &importData) {
       DirectionalLight component{};
       for (auto i = 0;
            i < static_cast<glm::vec4::length_type>(light.color.size()); ++i) {
-        component.color[i] = static_cast<float>(light.color.at(i));
+        component.color[i] = static_cast<f32>(light.color.at(i));
       }
 
-      component.intensity = static_cast<float>(light.intensity);
+      component.intensity = static_cast<f32>(light.intensity);
 
       importData.directionalLights.map.insert_or_assign(i, component);
     } else if (light.type == "point") {
       PointLight component{};
       for (auto i = 0; i < glm::vec4::length_type(light.color.size()); ++i) {
-        component.color[i] = static_cast<float>(light.color.at(i));
+        component.color[i] = static_cast<f32>(light.color.at(i));
       }
 
-      component.intensity = static_cast<float>(light.intensity);
-      component.range = static_cast<float>(light.range);
+      component.intensity = static_cast<f32>(light.intensity);
+      component.range = static_cast<f32>(light.range);
 
       importData.pointLights.map.insert_or_assign(i, component);
     }

@@ -50,7 +50,7 @@ private:
   Scene &mScene;
   AssetRegistry &mAssetRegistry;
 
-  std::unordered_map<uint64_t, Entity> mEntityIdCache;
+  std::unordered_map<u64, Entity> mEntityIdCache;
 };
 
 } // namespace quoll

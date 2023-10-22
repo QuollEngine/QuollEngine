@@ -19,7 +19,7 @@ struct AttributeTestFns {
 
   TestFn<glm::vec2> testTexCoord1 = [](auto t1, auto t2) { EXPECT_EQ(t1, t2); };
 
-  TestFn<uint32_t> testIndex = [](auto t1, auto t2) { EXPECT_EQ(t1, t2); };
+  TestFn<u32> testIndex = [](auto t1, auto t2) { EXPECT_EQ(t1, t2); };
 };
 
 class MeshAttributeTestBase : public GLTFImporterTestBase {
@@ -38,7 +38,7 @@ public:
 
     for (auto type : AllTypes) {
       bool found = false;
-      for (size_t i = 0; i < validTypes.size() && !found; ++i) {
+      for (usize i = 0; i < validTypes.size() && !found; ++i) {
         found = validTypes.at(i) == type;
       }
 
@@ -79,7 +79,7 @@ public:
 
     for (auto type : AllComponentTypes) {
       bool found = false;
-      for (size_t i = 0; i < validTypes.size() && !found; ++i) {
+      for (usize i = 0; i < validTypes.size() && !found; ++i) {
         found = validTypes.at(i) == type;
       }
 
@@ -130,7 +130,7 @@ public:
         quoll::MeshAssetHandle{1});
 
     EXPECT_EQ(meshAsset.data.geometries.size(), gltfMesh.primitives.size());
-    for (size_t gi = 0; gi < meshAsset.data.geometries.size(); ++gi) {
+    for (usize gi = 0; gi < meshAsset.data.geometries.size(); ++gi) {
       const auto &g = meshAsset.data.geometries.at(gi);
       auto &p = gltfMesh.primitives.at(gi);
 
@@ -159,7 +159,7 @@ public:
         p.indices.data.resize(g.indices.size());
       }
 
-      for (size_t i = 0; i < g.positions.size(); ++i) {
+      for (usize i = 0; i < g.positions.size(); ++i) {
         fns.testPosition(g.positions.at(i), p.positions.data.at(i));
         fns.testNormal(g.normals.at(i), p.normals.data.at(i));
         fns.testTangent(g.tangents.at(i), p.tangents.data.at(i));
@@ -168,7 +168,7 @@ public:
       }
 
       EXPECT_EQ(g.indices.size(), p.indices.data.size());
-      for (size_t i = 0; i < g.indices.size(); ++i) {
+      for (usize i = 0; i < g.indices.size(); ++i) {
         fns.testIndex(g.indices.at(i), p.indices.data.at(i));
       }
     }
@@ -258,7 +258,7 @@ TEST_F(MeshNormalAttributeTest,
 
 class MeshTexCoordAttributeTest : public MeshAttributeTestBase {
 public:
-  AttributeTestFns getInvalidTest(uint32_t index) {
+  AttributeTestFns getInvalidTest(u32 index) {
     AttributeTestFns fns{};
 
     if (index == 0) {
@@ -390,7 +390,7 @@ TEST_F(MeshTangentAttributeTest,
 class MeshIndexAttributeTest : public MeshAttributeTestBase {
 public:
   AttributeTestFns getInvalidTest() {
-    static constexpr uint32_t NumVertices = 24u;
+    static constexpr u32 NumVertices = 24u;
 
     AttributeTestFns fns{};
     fns.testIndex = [](auto n1, auto n2) { EXPECT_LT(n1, NumVertices); };

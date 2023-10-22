@@ -113,9 +113,7 @@ public:
    * @param handle Resource handle
    * @return Number of times the handle is emplaced
    */
-  uint32_t getEmplaced(THandle handle) const {
-    return mEmplacements.at(handle);
-  }
+  u32 getEmplaced(THandle handle) const { return mEmplacements.at(handle); }
 
 private:
   void incrementEmplacement(THandle handle) {
@@ -128,9 +126,9 @@ private:
   }
 
 private:
-  uint32_t mIncrement = 1;
+  u32 mIncrement = 1;
   std::unordered_map<THandle, TResource> mResources;
-  std::unordered_map<THandle, uint32_t> mEmplacements;
+  std::unordered_map<THandle, u32> mEmplacements;
 };
 
 } // namespace quoll::rhi

@@ -91,7 +91,7 @@ private:
    *
    * @return Generated ID
    */
-  uint64_t generateId();
+  u64 generateId();
 
 private:
   Scene &mScene;
@@ -101,9 +101,9 @@ private:
   std::fstream mStream;
   YAML::Node mRoot;
 
-  std::unordered_map<uint64_t, Entity> mEntityIdCache;
+  std::unordered_map<u64, Entity> mEntityIdCache;
 
-  uint64_t mLastId = 1;
+  u64 mLastId = 1;
 };
 
 } // namespace quoll::editor

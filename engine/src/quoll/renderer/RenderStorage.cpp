@@ -3,11 +3,11 @@
 
 namespace quoll {
 
-static constexpr uint32_t Hundred = 100;
+static constexpr u32 Hundred = 100;
 
 RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
-  static constexpr uint32_t NumSamplers = 1000;
-  static constexpr uint32_t MaxBuffers = 1000;
+  static constexpr u32 NumSamplers = 1000;
+  static constexpr u32 MaxBuffers = 1000;
 
   {
     rhi::DescriptorLayoutBindingDescription binding0{};

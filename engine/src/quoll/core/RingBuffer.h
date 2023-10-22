@@ -20,7 +20,7 @@ public:
    *
    * @param maxSize Maximum size
    */
-  RingBuffer(size_t maxSize) : mBuffer(maxSize) {}
+  RingBuffer(usize maxSize) : mBuffer(maxSize) {}
 
   /**
    * @brief Push item to the end of buffer
@@ -68,7 +68,7 @@ public:
    *
    * @return Buffer size
    */
-  inline size_t size() const { return mSize; }
+  inline usize size() const { return mSize; }
 
   /**
    * @brief Check if ring buffer is empty
@@ -79,9 +79,9 @@ public:
   inline bool empty() const { return mSize == 0; }
 
 private:
-  size_t mStart = 0;
-  size_t mEnd = 0;
-  size_t mSize = 0;
+  usize mStart = 0;
+  usize mEnd = 0;
+  usize mSize = 0;
   std::vector<TItem> mBuffer;
 };
 

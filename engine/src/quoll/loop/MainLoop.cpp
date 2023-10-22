@@ -9,7 +9,7 @@ namespace quoll {
 MainLoop::MainLoop(Window &window, FPSCounter &fpsCounter)
     : mWindow(window), mFpsCounter(fpsCounter) {}
 
-void MainLoop::setUpdateFn(const std::function<bool(float)> &updateFn) {
+void MainLoop::setUpdateFn(const std::function<bool(f32)> &updateFn) {
   mUpdateFn = updateFn;
 }
 
@@ -20,12 +20,12 @@ void MainLoop::setRenderFn(const std::function<void()> &renderFn) {
 void MainLoop::run() {
   bool running = true;
 
-  static constexpr uint32_t OneSecondInMs = 1000;
-  static constexpr double MaxUpdateTime = 0.25;
-  static constexpr double TimeDelta = 0.01;
+  static constexpr u32 OneSecondInMs = 1000;
+  static constexpr f64 MaxUpdateTime = 0.25;
+  static constexpr f64 TimeDelta = 0.01;
 
-  uint32_t frames = 0;
-  double accumulator = 0.0;
+  u32 frames = 0;
+  f64 accumulator = 0.0;
 
   auto prevGameTime = std::chrono::high_resolution_clock::now();
   auto prevFrameTime = prevGameTime;
@@ -39,15 +39,15 @@ void MainLoop::run() {
 
     mWindow.pollEvents();
 
-    double frameTime = std::clamp(
-        std::chrono::duration<double>(currentTime - prevGameTime).count(), 0.0,
+    f64 frameTime = std::clamp(
+        std::chrono::duration<f64>(currentTime - prevGameTime).count(), 0.0,
         MaxUpdateTime);
 
     prevGameTime = currentTime;
     accumulator += frameTime;
 
     while (accumulator >= TimeDelta) {
-      running = mUpdateFn(static_cast<float>(TimeDelta));
+      running = mUpdateFn(static_cast<f32>(TimeDelta));
       accumulator -= TimeDelta;
     }
 

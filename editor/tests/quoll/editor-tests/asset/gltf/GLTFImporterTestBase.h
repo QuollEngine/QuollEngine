@@ -29,9 +29,9 @@ template <class T> struct GLTFTestBufferData {
   int type;
   std::vector<T> data;
 
-  void fillWithZeros(size_t size) {
+  void fillWithZeros(usize size) {
     data.resize(size);
-    for (size_t i = 0; i < size; ++i) {
+    for (usize i = 0; i < size; ++i) {
       data.at(i) = T{0};
     }
   }
@@ -78,8 +78,8 @@ struct GLTFTestPrimitive {
                                            TINYGLTF_TYPE_VEC2};
   GLTFTestBufferData<glm::vec2> texCoords1{TINYGLTF_COMPONENT_TYPE_FLOAT,
                                            TINYGLTF_TYPE_VEC2};
-  GLTFTestBufferData<uint32_t> indices{TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,
-                                       TINYGLTF_TYPE_SCALAR};
+  GLTFTestBufferData<u32> indices{TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,
+                                  TINYGLTF_TYPE_SCALAR};
 };
 
 struct GLTFTestMesh {
@@ -109,7 +109,7 @@ struct GLTFTestScene {
 template <class T>
 int createBufferFromVector(tinygltf::Model &model,
                            GLTFTestBufferData<T> &bufferData) {
-  size_t size = sizeof(T) * bufferData.data.size();
+  usize size = sizeof(T) * bufferData.data.size();
 
   tinygltf::Buffer buffer;
   buffer.data.resize(size);
@@ -180,7 +180,7 @@ static tinygltf::Skin createSkin(tinygltf::Model &model, GLTFTestSkin &inSkin) {
 
 static tinygltf::Primitive createPrimitive(tinygltf::Model &model,
                                            GLTFTestPrimitive &inPrimitive) {
-  constexpr size_t FloatSize = sizeof(float);
+  constexpr usize FloatSize = sizeof(f32);
 
   tinygltf::Primitive primitive;
   primitive.mode = TINYGLTF_MODE_TRIANGLES;
@@ -213,23 +213,21 @@ static tinygltf::Primitive createPrimitive(tinygltf::Model &model,
   if (!inPrimitive.indices.data.empty()) {
     if (inPrimitive.indices.componentType ==
         TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-      GLTFTestBufferData<uint16_t> indices{
-          TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT, TINYGLTF_TYPE_SCALAR};
+      GLTFTestBufferData<u16> indices{TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT,
+                                      TINYGLTF_TYPE_SCALAR};
       indices.data.resize(inPrimitive.indices.data.size());
-      for (size_t i = 0; i < indices.data.size(); ++i) {
-        indices.data.at(i) =
-            static_cast<uint16_t>(inPrimitive.indices.data.at(i));
+      for (usize i = 0; i < indices.data.size(); ++i) {
+        indices.data.at(i) = static_cast<u16>(inPrimitive.indices.data.at(i));
       }
 
       primitive.indices = createBufferFromVector(model, indices);
     } else if (inPrimitive.indices.componentType ==
                TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
-      GLTFTestBufferData<uint8_t> indices{TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE,
-                                          TINYGLTF_TYPE_SCALAR};
+      GLTFTestBufferData<u8> indices{TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE,
+                                     TINYGLTF_TYPE_SCALAR};
       indices.data.resize(inPrimitive.indices.data.size());
-      for (size_t i = 0; i < indices.data.size(); ++i) {
-        indices.data.at(i) =
-            static_cast<uint8_t>(inPrimitive.indices.data.at(i));
+      for (usize i = 0; i < indices.data.size(); ++i) {
+        indices.data.at(i) = static_cast<u8>(inPrimitive.indices.data.at(i));
       }
 
       primitive.indices = createBufferFromVector(model, indices);
@@ -262,7 +260,7 @@ static GLTFTestPrimitive createCubePrimitive() {
   primitive.texCoords1.data.resize(g.positions.size());
   primitive.indices.data.resize(g.indices.size());
 
-  for (size_t i = 0; i < g.positions.size(); ++i) {
+  for (usize i = 0; i < g.positions.size(); ++i) {
     primitive.positions.data.at(i) = g.positions.at(i);
     primitive.normals.data.at(i) = g.normals.at(i);
     primitive.tangents.data.at(i) = g.tangents.at(i);
@@ -270,7 +268,7 @@ static GLTFTestPrimitive createCubePrimitive() {
     primitive.texCoords1.data.at(i) = g.texCoords1.at(i);
   }
 
-  for (size_t i = 0; i < g.indices.size(); ++i) {
+  for (usize i = 0; i < g.indices.size(); ++i) {
     primitive.indices.data.at(i) = g.indices.at(i);
   }
 
@@ -278,7 +276,7 @@ static GLTFTestPrimitive createCubePrimitive() {
 }
 
 static tinygltf::Mesh createMesh(tinygltf::Model &model, GLTFTestMesh &inMesh) {
-  constexpr size_t FloatSize = sizeof(float);
+  constexpr usize FloatSize = sizeof(f32);
 
   tinygltf::Mesh mesh;
 

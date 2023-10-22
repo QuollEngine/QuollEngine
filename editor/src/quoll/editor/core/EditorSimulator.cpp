@@ -13,7 +13,7 @@ EditorSimulator::EditorSimulator(InputDeviceManager &deviceManager,
       mPhysicsSystem(PhysicsSystem::createPhysxBackend(eventSystem)),
       mEditorCamera(editorCamera), mAudioSystem(assetRegistry) {}
 
-void EditorSimulator::update(float dt, WorkspaceState &state) {
+void EditorSimulator::update(f32 dt, WorkspaceState &state) {
   if (state.mode != mMode) {
     // Reobserve changes when switching from
     // edit to simulation mode
@@ -49,7 +49,7 @@ void EditorSimulator::observeChanges(EntityDatabase &simulationDatabase) {
   mAudioSystem.observeChanges(simulationDatabase);
 }
 
-void EditorSimulator::updateEditor(float dt, WorkspaceState &state) {
+void EditorSimulator::updateEditor(f32 dt, WorkspaceState &state) {
   auto &entityDatabase = state.scene.entityDatabase;
   mEntityDeleter.update(state.scene);
 
@@ -60,7 +60,7 @@ void EditorSimulator::updateEditor(float dt, WorkspaceState &state) {
   mSceneUpdater.update(entityDatabase);
 }
 
-void EditorSimulator::updateSimulation(float dt, WorkspaceState &state) {
+void EditorSimulator::updateSimulation(f32 dt, WorkspaceState &state) {
   auto &entityDatabase = state.simulationScene.entityDatabase;
   mEntityDeleter.update(state.simulationScene);
 

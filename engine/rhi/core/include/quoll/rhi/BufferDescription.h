@@ -15,7 +15,7 @@ enum class BufferUsage {
 
 EnableBitwiseEnum(BufferUsage);
 
-enum class BufferAllocationUsage : uint8_t {
+enum class BufferAllocationUsage : u8 {
   None = 0,
   HostWrite = 1 << 0,
   HostRead = 1 << 1
@@ -35,7 +35,7 @@ struct BufferDescription {
   /**
    * Buffer size
    */
-  size_t size = 0;
+  usize size = 0;
 
   /**
    * Buffer data

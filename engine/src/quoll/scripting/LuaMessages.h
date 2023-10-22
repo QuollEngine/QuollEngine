@@ -93,7 +93,7 @@ private:
   template <class T> static inline String getTypename() { return "[unknown]"; }
 };
 
-template <> inline String LuaMessages::getTypename<float>() { return "number"; }
+template <> inline String LuaMessages::getTypename<f32>() { return "number"; }
 
 template <> inline String LuaMessages::getTypename<String>() {
   return "string";

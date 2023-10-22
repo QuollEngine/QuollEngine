@@ -22,12 +22,12 @@ class AssetBrowser {
     Uuid uuid;
     String name;
     String truncatedName;
-    float textWidth = 0.0f;
+    f32 textWidth = 0.0f;
     bool isDirectory = false;
     EditorIcon icon = EditorIcon::Unknown;
     rhi::TextureHandle preview = rhi::TextureHandle::Null;
     AssetType assetType = AssetType::None;
-    uint32_t asset = 0;
+    u32 asset = 0;
     bool isEditable = false;
   };
 
@@ -72,7 +72,7 @@ private:
   std::vector<Entry> mEntries;
   Path mCurrentDirectory;
   Path mPrefabDirectory;
-  size_t mSelected = std::numeric_limits<size_t>::max();
+  usize mSelected = std::numeric_limits<usize>::max();
 
   AssetLoadStatusDialog mStatusDialog{"AssetLoadStatus"};
   MaterialViewer mMaterialViewer;

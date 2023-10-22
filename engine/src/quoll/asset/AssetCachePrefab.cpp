@@ -31,7 +31,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   header.name = asset.name;
   file.write(header);
 
-  std::map<MaterialAssetHandle, uint32_t> localMaterialMap;
+  std::map<MaterialAssetHandle, u32> localMaterialMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.meshes.size());
@@ -41,7 +41,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
         if (localMaterialMap.find(material) == localMaterialMap.end()) {
           auto uuid = mRegistry.getMaterials().getAsset(material).uuid;
           localMaterialMap.insert_or_assign(
-              material, static_cast<uint32_t>(assetPaths.size()));
+              material, static_cast<u32>(assetPaths.size()));
           assetPaths.push_back(uuid);
         }
       }
@@ -52,17 +52,17 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
         if (localMaterialMap.find(material) == localMaterialMap.end()) {
           auto uuid = mRegistry.getMaterials().getAsset(material).uuid;
           localMaterialMap.insert_or_assign(
-              material, static_cast<uint32_t>(assetPaths.size()));
+              material, static_cast<u32>(assetPaths.size()));
           assetPaths.push_back(uuid);
         }
       }
     }
 
-    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(static_cast<u32>(assetPaths.size()));
     file.write(assetPaths);
   }
 
-  std::map<MeshAssetHandle, uint32_t> localMeshMap;
+  std::map<MeshAssetHandle, u32> localMeshMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.meshes.size());
@@ -71,16 +71,16 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
       if (localMeshMap.find(component.value) == localMeshMap.end()) {
         auto uuid = mRegistry.getMeshes().getAsset(component.value).uuid;
         localMeshMap.insert_or_assign(component.value,
-                                      static_cast<uint32_t>(assetPaths.size()));
+                                      static_cast<u32>(assetPaths.size()));
         assetPaths.push_back(uuid);
       }
     }
 
-    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(static_cast<u32>(assetPaths.size()));
     file.write(assetPaths);
   }
 
-  std::map<SkeletonAssetHandle, uint32_t> localSkeletonMap;
+  std::map<SkeletonAssetHandle, u32> localSkeletonMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.skeletons.size());
@@ -89,17 +89,17 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
       auto uuid = mRegistry.getSkeletons().getAsset(component.value).uuid;
 
       if (localSkeletonMap.find(component.value) == localSkeletonMap.end()) {
-        localSkeletonMap.insert_or_assign(
-            component.value, static_cast<uint32_t>(assetPaths.size()));
+        localSkeletonMap.insert_or_assign(component.value,
+                                          static_cast<u32>(assetPaths.size()));
         assetPaths.push_back(uuid);
       }
     }
 
-    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(static_cast<u32>(assetPaths.size()));
     file.write(assetPaths);
   }
 
-  std::map<AnimationAssetHandle, uint32_t> localAnimationMap;
+  std::map<AnimationAssetHandle, u32> localAnimationMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.animations.size());
@@ -108,17 +108,17 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
       auto uuid = mRegistry.getAnimations().getAsset(handle).uuid;
 
       if (localAnimationMap.find(handle) == localAnimationMap.end()) {
-        localAnimationMap.insert_or_assign(
-            handle, static_cast<uint32_t>(assetPaths.size()));
+        localAnimationMap.insert_or_assign(handle,
+                                           static_cast<u32>(assetPaths.size()));
         assetPaths.push_back(uuid);
       }
     }
 
-    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(static_cast<u32>(assetPaths.size()));
     file.write(assetPaths);
   }
 
-  std::map<AnimatorAssetHandle, uint32_t> localAnimatorMap;
+  std::map<AnimatorAssetHandle, u32> localAnimatorMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.animators.size());
@@ -127,22 +127,22 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
       auto uuid = mRegistry.getAnimators().getAsset(component.value).uuid;
 
       if (localAnimatorMap.find(component.value) == localAnimatorMap.end()) {
-        localAnimatorMap.insert_or_assign(
-            component.value, static_cast<uint32_t>(assetPaths.size()));
+        localAnimatorMap.insert_or_assign(component.value,
+                                          static_cast<u32>(assetPaths.size()));
         assetPaths.push_back(uuid);
       }
     }
 
-    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(static_cast<u32>(assetPaths.size()));
     file.write(assetPaths);
   }
 
   // Load component data
   {
-    auto numComponents = static_cast<uint32_t>(asset.data.transforms.size());
+    auto numComponents = static_cast<u32>(asset.data.transforms.size());
 
     file.write(numComponents);
-    for (uint32_t i = 0; i < numComponents; ++i) {
+    for (u32 i = 0; i < numComponents; ++i) {
       const auto &transform = asset.data.transforms.at(i).value;
       file.write(asset.data.transforms.at(i).entity);
 
@@ -154,7 +154,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<uint32_t>(asset.data.names.size());
+    auto numComponents = static_cast<u32>(asset.data.names.size());
     file.write(numComponents);
 
     for (auto &name : asset.data.names) {
@@ -164,7 +164,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<uint32_t>(asset.data.meshes.size());
+    auto numComponents = static_cast<u32>(asset.data.meshes.size());
     file.write(numComponents);
     for (auto &component : asset.data.meshes) {
       file.write(component.entity);
@@ -173,12 +173,12 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<uint32_t>(asset.data.meshRenderers.size());
+    auto numComponents = static_cast<u32>(asset.data.meshRenderers.size());
     file.write(numComponents);
     for (auto &component : asset.data.meshRenderers) {
       file.write(component.entity);
 
-      file.write(static_cast<uint32_t>(component.value.materials.size()));
+      file.write(static_cast<u32>(component.value.materials.size()));
       for (auto handle : component.value.materials) {
         file.write(localMaterialMap.at(handle));
       }
@@ -187,12 +187,12 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
 
   {
     auto numComponents =
-        static_cast<uint32_t>(asset.data.skinnedMeshRenderers.size());
+        static_cast<u32>(asset.data.skinnedMeshRenderers.size());
     file.write(numComponents);
     for (auto &component : asset.data.skinnedMeshRenderers) {
       file.write(component.entity);
 
-      file.write(static_cast<uint32_t>(component.value.materials.size()));
+      file.write(static_cast<u32>(component.value.materials.size()));
       for (auto handle : component.value.materials) {
         file.write(localMaterialMap.at(handle));
       }
@@ -200,7 +200,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<uint32_t>(asset.data.skeletons.size());
+    auto numComponents = static_cast<u32>(asset.data.skeletons.size());
     file.write(numComponents);
     for (auto &component : asset.data.skeletons) {
       file.write(component.entity);
@@ -209,7 +209,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<uint32_t>(asset.data.animations.size());
+    auto numComponents = static_cast<u32>(asset.data.animations.size());
     file.write(numComponents);
 
     for (auto &component : asset.data.animations) {
@@ -218,7 +218,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<uint32_t>(asset.data.animators.size());
+    auto numComponents = static_cast<u32>(asset.data.animators.size());
     file.write(numComponents);
 
     for (auto &component : asset.data.animators) {
@@ -228,8 +228,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents =
-        static_cast<uint32_t>(asset.data.directionalLights.size());
+    auto numComponents = static_cast<u32>(asset.data.directionalLights.size());
     file.write(numComponents);
 
     for (auto &light : asset.data.directionalLights) {
@@ -240,7 +239,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<uint32_t>(asset.data.pointLights.size());
+    auto numComponents = static_cast<u32>(asset.data.pointLights.size());
     file.write(numComponents);
 
     for (auto &light : asset.data.pointLights) {
@@ -269,13 +268,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
   std::vector<MaterialAssetHandle> localMaterialMap;
   {
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localMaterialMap.resize(numAssets, MaterialAssetHandle::Null);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       const auto &res = getOrLoadMaterial(assetUuid);
       if (res.hasData()) {
@@ -290,13 +289,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
   std::vector<MeshAssetHandle> localMeshMap;
   {
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localMeshMap.resize(numAssets, MeshAssetHandle::Null);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       const auto &res = getOrLoadMesh(assetUuid);
       if (res.hasData()) {
@@ -311,13 +310,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
   std::vector<SkeletonAssetHandle> localSkeletonMap;
   {
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localSkeletonMap.resize(numAssets, SkeletonAssetHandle::Null);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       const auto &res = getOrLoadSkeleton(assetUuid);
       if (res.hasData()) {
@@ -334,13 +333,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     auto &map = mRegistry.getAnimations();
 
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localAnimationMap.resize(numAssets, AnimationAssetHandle::Null);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       const auto &res = getOrLoadAnimation(assetUuid);
       if (res.hasData()) {
@@ -358,13 +357,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     auto &map = mRegistry.getAnimators();
 
-    uint32_t numAssets = 0;
+    u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localAnimatorMap.resize(numAssets, AnimatorAssetHandle::Null);
 
-    for (uint32_t i = 0; i < numAssets; ++i) {
+    for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       const auto &res = getOrLoadAnimator(assetUuid);
       if (res.hasData()) {
@@ -379,17 +378,17 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
     prefab.data.transforms.resize(numComponents);
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
       glm::vec3 position;
       glm::quat rotation;
       glm::vec3 scale;
-      int32_t parent = -1;
+      i32 parent = -1;
       stream.read(position);
       stream.read(rotation);
       stream.read(scale);
@@ -401,11 +400,11 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
     prefab.data.names.resize(numComponents);
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
       String name;
@@ -417,16 +416,16 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
 
     prefab.data.meshes.resize(numComponents);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
-      uint32_t meshIndex = 0;
+      u32 meshIndex = 0;
       stream.read(meshIndex);
 
       prefab.data.meshes.at(i).entity = entity;
@@ -435,19 +434,19 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
 
     prefab.data.meshRenderers.resize(numComponents);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
-      uint32_t numMaterials = 0;
+      u32 numMaterials = 0;
       stream.read(numMaterials);
 
-      std::vector<uint32_t> materialIndices(numMaterials);
+      std::vector<u32> materialIndices(numMaterials);
       stream.read(materialIndices);
 
       prefab.data.meshRenderers.at(i).entity = entity;
@@ -460,19 +459,19 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
 
     prefab.data.skinnedMeshRenderers.resize(numComponents);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
-      uint32_t numMaterials = 0;
+      u32 numMaterials = 0;
       stream.read(numMaterials);
 
-      std::vector<uint32_t> materialIndices(numMaterials);
+      std::vector<u32> materialIndices(numMaterials);
       stream.read(materialIndices);
 
       prefab.data.skinnedMeshRenderers.at(i).entity = entity;
@@ -485,16 +484,16 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
 
     prefab.data.skeletons.resize(numComponents);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
-      uint32_t meshIndex = 0;
+      u32 meshIndex = 0;
       stream.read(meshIndex);
 
       prefab.data.skeletons.at(i).entity = entity;
@@ -503,13 +502,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
 
     prefab.data.animations.resize(numComponents);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t animationIndex = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 animationIndex = 0;
       stream.read(animationIndex);
 
       prefab.data.animations.at(i) = localAnimationMap.at(animationIndex);
@@ -517,16 +516,16 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
 
     prefab.data.animators.resize(numComponents);
 
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
-      uint32_t animatorIndex = 0;
+      u32 animatorIndex = 0;
       stream.read(animatorIndex);
 
       prefab.data.animators.at(i).entity = entity;
@@ -535,15 +534,15 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
     prefab.data.directionalLights.resize(numComponents);
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
       glm::vec4 color;
-      float intensity = 0.0f;
+      f32 intensity = 0.0f;
       stream.read(color);
       stream.read(intensity);
 
@@ -553,16 +552,16 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   }
 
   {
-    uint32_t numComponents = 0;
+    u32 numComponents = 0;
     stream.read(numComponents);
     prefab.data.pointLights.resize(numComponents);
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
+    for (u32 i = 0; i < numComponents; ++i) {
+      u32 entity = 0;
       stream.read(entity);
 
       glm::vec4 color;
-      float intensity = 0.0f;
-      float range = 0.0f;
+      f32 intensity = 0.0f;
+      f32 range = 0.0f;
       stream.read(color);
       stream.read(intensity);
       stream.read(range);

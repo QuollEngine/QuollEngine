@@ -22,35 +22,35 @@ public:
    *
    * @return Near plane value
    */
-  sol_maybe<float> getNear();
+  sol_maybe<f32> getNear();
 
   /**
    * @brief Set near plane value
    *
    * @param near Near plane value
    */
-  void setNear(float near);
+  void setNear(f32 near);
 
   /**
    * @brief Get far plane value
    *
    * @return Far plane value
    */
-  sol_maybe<float> getFar();
+  sol_maybe<f32> getFar();
 
   /**
    * @brief Set far plane value
    *
    * @param far Far plane vavoid *statelue
    */
-  void setFar(float far);
+  void setFar(f32 far);
 
   /**
    * @brief Get sensor size
    *
    * @return Sensor width and height
    */
-  std::tuple<sol_maybe<float>, sol_maybe<float>> getSensorSize();
+  std::tuple<sol_maybe<f32>, sol_maybe<f32>> getSensorSize();
 
   /**
    * @brief Set sensor size
@@ -58,63 +58,63 @@ public:
    * @param width Sensor width
    * @param height Sensor height
    */
-  void setSensorSize(float width, float height);
+  void setSensorSize(f32 width, f32 height);
 
   /**
    * @brief Get near plane value
    *
    * @return Focal length
    */
-  sol_maybe<float> getFocalLength();
+  sol_maybe<f32> getFocalLength();
 
   /**
    * @brief Set focal length
    *
    * @param focalLength Focal length
    */
-  void setFocalLength(float focalLength);
+  void setFocalLength(f32 focalLength);
 
   /**
    * @brief Get aperture
    *
    * @return Aperture
    */
-  sol_maybe<float> getAperture();
+  sol_maybe<f32> getAperture();
 
   /**
    * @brief Set aperture
    *
    * @param aperture Aperture
    */
-  void setAperture(float aperture);
+  void setAperture(f32 aperture);
 
   /**
    * @brief Get shutter speed
    *
    * @return Shutter speed
    */
-  sol_maybe<float> getShutterSpeed();
+  sol_maybe<f32> getShutterSpeed();
 
   /**
    * @brief Set shutter speed
    *
    * @param shutterSpeed Shutter speed
    */
-  void setShutterSpeed(float shutterSpeed);
+  void setShutterSpeed(f32 shutterSpeed);
 
   /**
    * @brief Get sensitivity
    *
    * @return Sensitivity
    */
-  sol_maybe<uint32_t> getSensitivity();
+  sol_maybe<u32> getSensitivity();
 
   /**
    * @brief Set sensitivity
    *
    * @param sensitivity Sensitivity
    */
-  void setSensitivity(uint32_t sensitivity);
+  void setSensitivity(u32 sensitivity);
 
   /**
    * @brief Delete component

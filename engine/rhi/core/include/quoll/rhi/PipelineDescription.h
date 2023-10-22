@@ -57,7 +57,7 @@ struct PipelineRasterizer {
   /**
    * @brief Line width
    */
-  float lineWidth = 1.0f;
+  f32 lineWidth = 1.0f;
 };
 
 enum class BlendFactor {
@@ -111,12 +111,12 @@ struct PipelineVertexInputBinding {
   /**
    * Vertex input binding
    */
-  uint32_t binding = 0;
+  u32 binding = 0;
 
   /**
    * Vertex input stride
    */
-  uint32_t stride = 0;
+  u32 stride = 0;
 
   /**
    * Vertex input rate
@@ -131,12 +131,12 @@ struct PipelineVertexInputAttribute {
   /**
    * Attribute slot
    */
-  uint32_t slot = 0;
+  u32 slot = 0;
 
   /**
    * Attribute binding
    */
-  uint32_t binding = 0;
+  u32 binding = 0;
 
   /**
    * Attribute format
@@ -146,7 +146,7 @@ struct PipelineVertexInputAttribute {
   /**
    * Attribute offset
    */
-  uint32_t offset = 0;
+  u32 offset = 0;
 };
 
 /**
@@ -241,17 +241,17 @@ struct PipelineStencil {
   /**
    * Compare mask
    */
-  uint32_t compareMask = 0;
+  u32 compareMask = 0;
 
   /**
    * Write mask
    */
-  uint32_t writeMask = 0;
+  u32 writeMask = 0;
 
   /**
    * Reference value
    */
-  uint32_t reference = 0;
+  u32 reference = 0;
 };
 
 /**
@@ -291,7 +291,7 @@ struct PipelineMultisample {
   /**
    * Sample count
    */
-  uint32_t sampleCount = 1;
+  u32 sampleCount = 1;
 };
 
 /**

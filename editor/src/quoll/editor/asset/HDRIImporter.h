@@ -65,8 +65,7 @@ private:
    * @param height Equirectangular image height
    * @return Cubemap
    */
-  CubemapData convertEquirectangularToCubemap(float *data, uint32_t width,
-                                              uint32_t height);
+  CubemapData convertEquirectangularToCubemap(f32 *data, u32 width, u32 height);
 
   /**
    * @brief Generate irradiance map

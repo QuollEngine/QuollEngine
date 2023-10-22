@@ -61,7 +61,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
         presenter.enqueueFramebufferUpdate();
       });
 
-  mainLoop.setUpdateFn([&project, this](float dt) {
+  mainLoop.setUpdateFn([&project, this](f32 dt) {
     mEventSystem.poll();
     return !project.has_value();
   });
@@ -88,9 +88,9 @@ std::optional<Project> ProjectSelectorScreen::start() {
     debugLayer.render();
 
     static constexpr ImVec2 CenterWindowPivot(0.5f, 0.5f);
-    static constexpr float ActionButtonWidth = 240.0f;
-    static constexpr float ActionButtonHeight = 40.0f;
-    static constexpr float WindowPadding = 20.0f;
+    static constexpr f32 ActionButtonWidth = 240.0f;
+    static constexpr f32 ActionButtonHeight = 40.0f;
+    static constexpr f32 WindowPadding = 20.0f;
     static constexpr ImVec2 ActionButtonSize{ActionButtonWidth,
                                              ActionButtonHeight};
 
@@ -130,7 +130,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     const auto &renderFrame = mDevice->beginFrame();
 
-    if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
+    if (renderFrame.frameIndex < std::numeric_limits<u32>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
       renderer.execute(renderFrame.commandList, renderFrame.frameIndex);
 

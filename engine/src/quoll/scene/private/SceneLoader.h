@@ -7,7 +7,7 @@
 
 namespace quoll::detail {
 
-using EntityIdCache = std::unordered_map<uint64_t, Entity>;
+using EntityIdCache = std::unordered_map<u64, Entity>;
 
 /**
  * @brief Load scene data to entity

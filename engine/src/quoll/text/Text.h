@@ -16,7 +16,7 @@ struct Text {
   /**
    * Line height
    */
-  float lineHeight = 1.0f;
+  f32 lineHeight = 1.0f;
 
   /**
    * Font used for rendering

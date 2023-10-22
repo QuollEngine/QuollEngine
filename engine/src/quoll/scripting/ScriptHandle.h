@@ -2,6 +2,6 @@
 
 namespace quoll {
 
-enum class ScriptHandle : uint32_t {};
+enum class ScriptHandle : u32 {};
 
 } // namespace quoll

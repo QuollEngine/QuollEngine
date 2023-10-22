@@ -4,7 +4,7 @@
 namespace quoll {
 
 void BindlessDrawParameters::build(rhi::RenderDevice *device) {
-  size_t maxSize = 0;
+  usize maxSize = 0;
   for (auto &range : mRanges) {
     maxSize = std::max(range.size, maxSize);
   }
@@ -21,7 +21,7 @@ void BindlessDrawParameters::build(rhi::RenderDevice *device) {
 
     mBuffer = device->createBuffer(description);
 
-    uint8_t *data = static_cast<uint8_t *>(mBuffer.map());
+    u8 *data = static_cast<u8 *>(mBuffer.map());
     for (const auto &range : mRanges) {
       memcpy(data + range.offset, range.data, range.size);
     }
@@ -48,7 +48,7 @@ void BindlessDrawParameters::build(rhi::RenderDevice *device) {
 
     rhi::DescriptorBufferInfo info{};
     info.offset = 0;
-    info.range = static_cast<uint32_t>(maxSize);
+    info.range = static_cast<u32>(maxSize);
     info.buffer = mBuffer.getHandle();
 
     std::array<rhi::DescriptorBufferInfo, 1> bufferInfos{info};
@@ -66,8 +66,8 @@ void BindlessDrawParameters::destroy(rhi::RenderDevice *device) {
   }
 }
 
-size_t
-BindlessDrawParameters::padSizeToMinimumUniformAlignment(size_t originalSize) {
+usize BindlessDrawParameters::padSizeToMinimumUniformAlignment(
+    usize originalSize) {
   if (mMinBufferAlignment > 0) {
     return (originalSize + mMinBufferAlignment - 1) &
            ~(mMinBufferAlignment - 1);

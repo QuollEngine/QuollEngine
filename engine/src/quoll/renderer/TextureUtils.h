@@ -23,10 +23,11 @@ public:
    * @param destinationLayers Destination texture layers
    * @param destinationLevels Destination texture levels
    */
-  static void copyDataToTexture(
-      rhi::RenderDevice *device, void *source, rhi::TextureHandle destination,
-      rhi::ImageLayout destinationLayout, uint32_t destinationLayers,
-      const std::vector<TextureAssetLevel> &destinationLevels);
+  static void
+  copyDataToTexture(rhi::RenderDevice *device, void *source,
+                    rhi::TextureHandle destination,
+                    rhi::ImageLayout destinationLayout, u32 destinationLayers,
+                    const std::vector<TextureAssetLevel> &destinationLevels);
 
   /**
    * @brief Copy texture to data
@@ -40,7 +41,7 @@ public:
    */
   static void
   copyTextureToData(rhi::RenderDevice *device, rhi::TextureHandle source,
-                    rhi::ImageLayout sourceLayout, uint32_t sourceLayers,
+                    rhi::ImageLayout sourceLayout, u32 sourceLayers,
                     const std::vector<TextureAssetLevel> &sourceLevels,
                     void *destination);
 
@@ -60,9 +61,8 @@ public:
    */
   static void generateMipMapsForTexture(rhi::RenderDevice *device,
                                         rhi::TextureHandle texture,
-                                        rhi::ImageLayout layout,
-                                        uint32_t layers, uint32_t levels,
-                                        uint32_t width, uint32_t height);
+                                        rhi::ImageLayout layout, u32 layers,
+                                        u32 levels, u32 width, u32 height);
 
   /**
    * @brief Get buffer size from texture level data
@@ -70,7 +70,7 @@ public:
    * @param levels Levels
    * @return Buffer size
    */
-  static size_t
+  static usize
   getBufferSizeFromLevels(const std::vector<TextureAssetLevel> &levels);
 };
 

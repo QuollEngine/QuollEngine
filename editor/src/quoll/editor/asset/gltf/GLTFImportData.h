@@ -18,7 +18,7 @@ template <class THandle> struct GLTFToAsset {
   /**
    * GLTF index to asset handle map
    */
-  std::map<size_t, THandle> map;
+  std::map<usize, THandle> map;
 };
 
 /**
@@ -31,12 +31,12 @@ struct SkeletonData {
   /**
    * GLTF joint to engine specific joint I
    */
-  std::unordered_map<uint32_t, uint32_t> gltfToNormalizedJointMap;
+  std::unordered_map<u32, u32> gltfToNormalizedJointMap;
 
   /**
    * Joints that are associated with skins
    */
-  std::unordered_map<uint32_t, uint32_t> jointSkinMap;
+  std::unordered_map<u32, u32> jointSkinMap;
 
   /**
    * Skin map
@@ -54,12 +54,12 @@ struct AnimationData {
   /**
    * Node to animator map
    */
-  std::map<uint32_t, AnimatorAssetHandle> nodeAnimatorMap;
+  std::map<u32, AnimatorAssetHandle> nodeAnimatorMap;
 
   /**
    * Skin to animator map
    */
-  std::map<uint32_t, AnimatorAssetHandle> skinAnimatorMap;
+  std::map<u32, AnimatorAssetHandle> skinAnimatorMap;
 };
 
 /**

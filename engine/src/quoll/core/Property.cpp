@@ -3,25 +3,25 @@
 
 namespace quoll {
 
-Property::Property(int32_t value) : mType(INT32), mValue(value) {}
-Property::Property(uint32_t value) : mType(UINT32), mValue(value) {}
-Property::Property(uint64_t value) : mType(UINT64), mValue(value) {}
-Property::Property(float value) : mType(REAL), mValue(value) {}
+Property::Property(i32 value) : mType(INT32), mValue(value) {}
+Property::Property(u32 value) : mType(UINT32), mValue(value) {}
+Property::Property(u64 value) : mType(UINT64), mValue(value) {}
+Property::Property(f32 value) : mType(REAL), mValue(value) {}
 Property::Property(const glm::vec2 &value) : mType(VECTOR2), mValue(value) {}
 Property::Property(const glm::vec3 &value) : mType(VECTOR3), mValue(value) {}
 Property::Property(const glm::vec4 &value) : mType(VECTOR4), mValue(value) {}
 Property::Property(const glm::mat4 &value) : mType(MATRIX4), mValue(value) {}
 
-size_t Property::getSize() const {
+usize Property::getSize() const {
   switch (mType) {
   case INT32:
-    return sizeof(int32_t);
+    return sizeof(i32);
   case UINT32:
-    return sizeof(uint32_t);
+    return sizeof(u32);
   case UINT64:
-    return sizeof(uint64_t);
+    return sizeof(u64);
   case REAL:
-    return sizeof(float);
+    return sizeof(f32);
   case VECTOR2:
     return sizeof(glm::vec2);
   case VECTOR3:
@@ -38,16 +38,16 @@ size_t Property::getSize() const {
 const String Property::toString() const {
   switch (mType) {
   case INT32:
-    return std::to_string(getValue<int32_t>());
+    return std::to_string(getValue<i32>());
   case UINT32:
-    return std::to_string(getValue<uint32_t>());
+    return std::to_string(getValue<u32>());
   case UINT64:
-    return std::to_string(getValue<uint64_t>());
+    return std::to_string(getValue<u64>());
   case REAL: {
     std::stringstream ss;
     ss.setf(std::ios::fixed);
     ss.precision(2);
-    ss << getValue<float>();
+    ss << getValue<f32>();
     return ss.str();
   }
   case VECTOR2: {

@@ -42,8 +42,8 @@ private:
    * @param actionExecutor Action executor
    * @return Calculated index
    */
-  uint32_t renderEntity(Entity entity, uint32_t index, int flags,
-                        WorkspaceState &state, ActionExecutor &actionExecutor);
+  u32 renderEntity(Entity entity, u32 index, int flags, WorkspaceState &state,
+                   ActionExecutor &actionExecutor);
 
 private:
   Entity mRightClickedEntity = Entity::Null;

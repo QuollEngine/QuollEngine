@@ -36,13 +36,13 @@ void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
                                glm::toMat4(local.localRotation) *
                                glm::scale(identity, local.localScale);
 
-    int16_t jointId = -1;
+    i16 jointId = -1;
     if (entityDatabase.has<JointAttachment>(entity) &&
         entityDatabase.has<Skeleton>(parent.parent)) {
       jointId = entityDatabase.get<JointAttachment>(entity).joint;
     }
 
-    if (jointId >= 0 && static_cast<size_t>(jointId) <
+    if (jointId >= 0 && static_cast<usize>(jointId) <
                             entityDatabase.get<Skeleton>(parent.parent)
                                 .jointWorldTransforms.size()) {
       const auto &jointTransform = entityDatabase.get<Skeleton>(parent.parent)
@@ -61,7 +61,7 @@ void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
   for (auto [entity, lens, world, camera] :
        entityDatabase.view<PerspectiveLens, WorldTransform, Camera>()) {
 
-    const float fovY =
+    const f32 fovY =
         2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
 
     camera.projectionMatrix =
@@ -70,9 +70,8 @@ void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
     camera.viewMatrix = glm::inverse(world.worldTransform);
     camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
 
-    const float ev100 =
-        std::log2f(powf(lens.aperture, 2.0f) * lens.shutterSpeed * 100.0f /
-                   static_cast<float>(lens.sensitivity));
+    const f32 ev100 = std::log2f(powf(lens.aperture, 2.0f) * lens.shutterSpeed *
+                                 100.0f / static_cast<f32>(lens.sensitivity));
     camera.exposure.x = ev100;
   }
 }

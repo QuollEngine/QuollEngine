@@ -19,7 +19,7 @@ MikktspaceAdapter::MikktspaceAdapter() {
 void MikktspaceAdapter::generate(const std::vector<glm::vec3> &positions,
                                  const std::vector<glm::vec3> &normals,
                                  const std::vector<glm::vec2> &texCoords,
-                                 const std::vector<uint32_t> &indices,
+                                 const std::vector<u32> &indices,
                                  std::vector<glm::vec4> &tangents) {
   MeshData data{positions, normals, texCoords, indices, tangents};
 
@@ -38,7 +38,7 @@ int MikktspaceAdapter::getNumFaces(const SMikkTSpaceContext *pContext) {
 }
 
 void MikktspaceAdapter::getPosition(const SMikkTSpaceContext *context,
-                                    float outAttribute[], const int faceIndex,
+                                    f32 outAttribute[], const int faceIndex,
                                     const int vertexIndex) {
   auto index = getVertexIndex(context, faceIndex, vertexIndex);
   const auto &p = getMeshData(context).positions.at(index);
@@ -49,7 +49,7 @@ void MikktspaceAdapter::getPosition(const SMikkTSpaceContext *context,
 }
 
 void MikktspaceAdapter::getNormal(const SMikkTSpaceContext *context,
-                                  float outAttribute[], const int faceIndex,
+                                  f32 outAttribute[], const int faceIndex,
                                   const int vertexIndex) {
   auto index = getVertexIndex(context, faceIndex, vertexIndex);
   const auto &n = getMeshData(context).normals.at(index);
@@ -60,7 +60,7 @@ void MikktspaceAdapter::getNormal(const SMikkTSpaceContext *context,
 }
 
 void MikktspaceAdapter::getTexCoord(const SMikkTSpaceContext *context,
-                                    float outAttribute[], const int faceIndex,
+                                    f32 outAttribute[], const int faceIndex,
                                     const int vertexIndex) {
   auto index = getVertexIndex(context, faceIndex, vertexIndex);
   const auto &tc = getMeshData(context).texCoords.at(index);
@@ -70,7 +70,7 @@ void MikktspaceAdapter::getTexCoord(const SMikkTSpaceContext *context,
 }
 
 void MikktspaceAdapter::setTSpaceBasic(const SMikkTSpaceContext *context,
-                                       const float tangents[], const float sign,
+                                       const f32 tangents[], const f32 sign,
                                        const int faceIndex,
                                        const int vertexIndex) {
   auto index = getVertexIndex(context, faceIndex, vertexIndex);
@@ -83,10 +83,10 @@ void MikktspaceAdapter::setTSpaceBasic(const SMikkTSpaceContext *context,
 }
 // NOLINTEND(cppcoreguidelines-avoid-c-arrays)
 
-size_t MikktspaceAdapter::getVertexIndex(const SMikkTSpaceContext *context,
-                                         int faceIndex, int vertexIndex) {
+usize MikktspaceAdapter::getVertexIndex(const SMikkTSpaceContext *context,
+                                        int faceIndex, int vertexIndex) {
   auto &meshData = getMeshData(context);
-  size_t index = static_cast<size_t>(faceIndex * 3 + vertexIndex);
+  usize index = static_cast<usize>(faceIndex * 3 + vertexIndex);
 
   return meshData.indices.at(index);
 }

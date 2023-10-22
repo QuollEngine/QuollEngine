@@ -22,7 +22,7 @@ public:
    *
    * @return Local scale
    */
-  std::tuple<float, float, float> getScale();
+  std::tuple<f32, f32, f32> getScale();
 
   /**
    * @brief Set local scale
@@ -31,14 +31,14 @@ public:
    * @param y Local scale in y axis
    * @param z Local scale in z axis
    */
-  void setScale(float x, float y, float z);
+  void setScale(f32 x, f32 y, f32 z);
 
   /**
    * @brief Get local position
    *
    * @return Local position
    */
-  std::tuple<float, float, float> getPosition();
+  std::tuple<f32, f32, f32> getPosition();
 
   /**
    * @brief Set local position
@@ -47,14 +47,14 @@ public:
    * @param y Local position in y axis
    * @param z Local position in z axis
    */
-  void setPosition(float x, float y, float z);
+  void setPosition(f32 x, f32 y, f32 z);
 
   /**
    * @brief Get rotation
    *
    * @return Local rotation in euler angles
    */
-  std::tuple<float, float, float> getRotation();
+  std::tuple<f32, f32, f32> getRotation();
 
   /**
    * @brief Set local rotation
@@ -63,7 +63,7 @@ public:
    * @param y Local rotation as euler angles in y axis
    * @param z Local rotation as euler angles in z axis
    */
-  void setRotation(float x, float y, float z);
+  void setRotation(f32 x, f32 y, f32 z);
 
   /**
    * @brief Delete component

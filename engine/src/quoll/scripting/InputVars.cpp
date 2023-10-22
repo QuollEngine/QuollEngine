@@ -7,10 +7,10 @@ InputVars::InputVars(
     std::unordered_map<String, LuaScriptInputVariable> &variables)
     : mVariables(variables) {}
 
-std::variant<String, uint32_t>
-InputVars::registerVar(String name, LuaScriptVariableType type) {
-  if (static_cast<uint32_t>(type) >=
-      static_cast<uint32_t>(LuaScriptVariableType::Invalid)) {
+std::variant<String, u32> InputVars::registerVar(String name,
+                                                 LuaScriptVariableType type) {
+  if (static_cast<u32>(type) >=
+      static_cast<u32>(LuaScriptVariableType::Invalid)) {
     // scope.error("Variable \"" + name + "\" has invalid type");
     return 0u;
   }
@@ -21,11 +21,11 @@ InputVars::registerVar(String name, LuaScriptVariableType type) {
   }
 
   if (value.isType(LuaScriptVariableType::AssetPrefab)) {
-    return static_cast<uint32_t>(value.get<PrefabAssetHandle>());
+    return static_cast<u32>(value.get<PrefabAssetHandle>());
   }
 
   if (value.isType(LuaScriptVariableType::AssetTexture)) {
-    return static_cast<uint32_t>(value.get<TextureAssetHandle>());
+    return static_cast<u32>(value.get<TextureAssetHandle>());
   }
 
   return 0u;

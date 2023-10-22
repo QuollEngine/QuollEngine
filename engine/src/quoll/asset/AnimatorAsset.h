@@ -14,7 +14,7 @@ struct AnimationStateTransition {
   /**
    * Index to animation state
    */
-  size_t target;
+  usize target;
 };
 
 /**
@@ -53,7 +53,7 @@ struct AnimatorAsset {
   /**
    * Initial state
    */
-  size_t initialState = 0;
+  usize initialState = 0;
 
   /**
    * Animation states

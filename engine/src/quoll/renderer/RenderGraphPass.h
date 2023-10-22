@@ -102,7 +102,7 @@ enum class RenderGraphPassType { Graphics, Compute };
  * @brief Render graph pass
  */
 class RenderGraphPass {
-  using ExecutorFn = std::function<void(rhi::RenderCommandList &, uint32_t)>;
+  using ExecutorFn = std::function<void(rhi::RenderCommandList &, u32)>;
   friend RenderGraph;
 
 public:
@@ -155,7 +155,7 @@ public:
    * @param commandList Command list
    * @param frameIndex Frame index
    */
-  void execute(rhi::RenderCommandList &commandList, uint32_t frameIndex);
+  void execute(rhi::RenderCommandList &commandList, u32 frameIndex);
 
   /**
    * @brief Set output texture

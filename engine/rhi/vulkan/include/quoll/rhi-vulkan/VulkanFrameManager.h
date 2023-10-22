@@ -61,7 +61,7 @@ public:
    *
    * @return Current frame index
    */
-  inline uint32_t getCurrentFrameIndex() const { return mFrameIndex; }
+  inline u32 getCurrentFrameIndex() const { return mFrameIndex; }
 
   /**
    * @brief Go to next frame
@@ -91,7 +91,7 @@ private:
   std::array<VkSemaphore, RenderDevice::NumFrames> mImageAvailableSemaphores{};
   std::array<VkSemaphore, RenderDevice::NumFrames> mRenderFinishedSemaphores{};
 
-  uint32_t mFrameIndex = 0;
+  u32 mFrameIndex = 0;
 };
 
 } // namespace quoll::rhi

@@ -190,13 +190,12 @@ void EditorScreen::start(const Project &rawProject) {
 
   mWindow.maximize();
 
-  mainLoop.setUpdateFn(
-      [&state, &workspace, &simulator, this](float dt) mutable {
-        workspace.update();
-        mEventSystem.poll();
-        simulator.update(dt, state);
-        return true;
-      });
+  mainLoop.setUpdateFn([&state, &workspace, &simulator, this](f32 dt) mutable {
+    workspace.update();
+    mEventSystem.poll();
+    simulator.update(dt, state);
+    return true;
+  });
 
   LogViewer logViewer;
   mainLoop.setRenderFn([&]() {
@@ -213,7 +212,7 @@ void EditorScreen::start(const Project &rawProject) {
     renderer.rebuildIfSettingsChanged();
 
     // TODO: Why is -2.0f needed here
-    static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
+    static const f32 IconSize = ImGui::GetFrameHeight() - 2.0f;
 
     imguiRenderer.beginRendering();
     ImGuizmo::BeginFrame();
@@ -244,7 +243,7 @@ void EditorScreen::start(const Project &rawProject) {
 
     const auto &renderFrame = mDevice->beginFrame();
 
-    if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
+    if (renderFrame.frameIndex < std::numeric_limits<u32>::max()) {
       imguiRenderer.updateFrameData(renderFrame.frameIndex);
       sceneRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,
                                     renderFrame.frameIndex);

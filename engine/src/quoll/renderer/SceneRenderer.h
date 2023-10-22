@@ -35,7 +35,7 @@ struct SceneRenderPassData {
   /**
    * Sample count
    */
-  uint32_t sampleCount = 0;
+  u32 sampleCount = 0;
 };
 
 /**
@@ -86,7 +86,7 @@ public:
    * @param frameIndex Frame index
    */
   void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
-                       uint32_t frameIndex);
+                       u32 frameIndex);
 
   /**
    * @brief Get frame data
@@ -106,7 +106,7 @@ private:
    * @param frameIndex Frame index
    */
   void render(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
-              uint32_t frameIndex);
+              u32 frameIndex);
 
   /**
    * @brief Render skinned meshes
@@ -116,7 +116,7 @@ private:
    * @param frameIndex Frame index
    */
   void renderSkinned(rhi::RenderCommandList &commandList,
-                     rhi::PipelineHandle pipeline, uint32_t frameIndex);
+                     rhi::PipelineHandle pipeline, u32 frameIndex);
 
   /**
    * @brief Render geometries
@@ -129,7 +129,7 @@ private:
    */
   void renderGeometries(rhi::RenderCommandList &commandList,
                         rhi::PipelineHandle pipeline, const MeshAsset &mesh,
-                        uint32_t instanceStart, uint32_t numInstances);
+                        u32 instanceStart, u32 numInstances);
 
   /**
    * @brief Render meshes for shadows
@@ -139,7 +139,7 @@ private:
    * @param frameIndex Frame index
    */
   void renderShadowsMesh(rhi::RenderCommandList &commandList,
-                         rhi::PipelineHandle pipeline, uint32_t frameIndex);
+                         rhi::PipelineHandle pipeline, u32 frameIndex);
 
   /**
    * @brief Render skinned meshes for shadows
@@ -149,8 +149,7 @@ private:
    * @param frameIndex Frame index
    */
   void renderShadowsSkinnedMesh(rhi::RenderCommandList &commandList,
-                                rhi::PipelineHandle pipeline,
-                                uint32_t frameIndex);
+                                rhi::PipelineHandle pipeline, u32 frameIndex);
 
   /**
    * @brief Render geometries for shadows
@@ -163,8 +162,8 @@ private:
    */
   void renderShadowsGeometries(rhi::RenderCommandList &commandList,
                                rhi::PipelineHandle pipeline,
-                               const MeshAsset &mesh, uint32_t instanceStart,
-                               uint32_t numInstances);
+                               const MeshAsset &mesh, u32 instanceStart,
+                               u32 numInstances);
 
   /**
    * @brief Render texts
@@ -174,7 +173,7 @@ private:
    * @param frameIndex Frame index
    */
   void renderText(rhi::RenderCommandList &commandList,
-                  rhi::PipelineHandle pipeline, uint32_t frameIndex);
+                  rhi::PipelineHandle pipeline, u32 frameIndex);
 
   /**
    * @brief Generate BRDF lookup table
@@ -186,7 +185,7 @@ private:
    *
    * @return Framebuffer samples
    */
-  inline uint32_t getFramebufferSamples() const { return mMaxSampleCounts; }
+  inline u32 getFramebufferSamples() const { return mMaxSampleCounts; }
 
 private:
   glm::vec4 mClearColor{DefaultClearColor};
@@ -196,7 +195,7 @@ private:
 
   rhi::SamplerHandle mBloomSampler;
 
-  uint32_t mMaxSampleCounts = 1;
+  u32 mMaxSampleCounts = 1;
 };
 
 } // namespace quoll

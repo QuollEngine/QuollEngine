@@ -102,7 +102,7 @@ public:
    * @param commandList Render command list
    * @param frameIndex Frame index
    */
-  void execute(rhi::RenderCommandList &commandList, uint32_t frameIndex);
+  void execute(rhi::RenderCommandList &commandList, u32 frameIndex);
 
   /**
    * @brief Get final texture

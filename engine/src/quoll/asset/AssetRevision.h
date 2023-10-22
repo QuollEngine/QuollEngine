@@ -4,7 +4,7 @@
 
 namespace quoll {
 
-enum class AssetRevision : uint32_t {
+enum class AssetRevision : u32 {
   Material = 230901,
   Texture = 230901,
   Mesh = 230901,

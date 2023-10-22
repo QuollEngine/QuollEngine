@@ -17,7 +17,7 @@ public:
    * @param registry Render graph registry
    * @param index Resource index
    */
-  RenderGraphResource(RenderGraphRegistry &registry, size_t index)
+  RenderGraphResource(RenderGraphRegistry &registry, usize index)
       : mRegistry(registry), mIndex(index) {}
 
   /**
@@ -32,7 +32,7 @@ public:
    *
    * @return Render graph index
    */
-  inline size_t getIndex() const { return mIndex; }
+  inline usize getIndex() const { return mIndex; }
 
   /**
    * @brief Get real resource handle
@@ -56,7 +56,7 @@ public:
 
 private:
   RenderGraphRegistry &mRegistry;
-  size_t mIndex;
+  usize mIndex;
 };
 
 } // namespace quoll

@@ -21,8 +21,7 @@ lua_State *LuaInterpreter::createState() {
 
 void LuaInterpreter::destroyState(lua_State *state) { lua_close(state); }
 
-bool LuaInterpreter::evaluate(const std::vector<uint8_t> &bytes,
-                              lua_State *state) {
+bool LuaInterpreter::evaluate(const std::vector<u8> &bytes, lua_State *state) {
 
   auto ret =
       luaL_loadstring(state, quoll::String{bytes.begin(), bytes.end()}.c_str());

@@ -23,7 +23,7 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
   };
 
   std::array<VkPipelineShaderStageCreateInfo, 2> stages{};
-  for (size_t i = 0; i < 2; ++i) {
+  for (usize i = 0; i < 2; ++i) {
     stages.at(i).sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     stages.at(i).pName = "main";
     stages.at(i).module = shaders.at(i)->getShaderModule();
@@ -40,7 +40,7 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
   dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
   dynamicState.flags = 0;
   dynamicState.pNext = nullptr;
-  dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+  dynamicState.dynamicStateCount = static_cast<u32>(dynamicStates.size());
   dynamicState.pDynamicStates = dynamicStates.data();
 
   // Viewport
@@ -134,7 +134,7 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
       description.colorBlend.attachments.size(),
       VkPipelineColorBlendAttachmentState{});
 
-  for (size_t i = 0; i < description.colorBlend.attachments.size(); ++i) {
+  for (usize i = 0; i < description.colorBlend.attachments.size(); ++i) {
     const auto &src = description.colorBlend.attachments.at(i);
     auto &dst = colorBlendAttachments.at(i);
 
@@ -155,7 +155,7 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
   colorBlending.pNext = nullptr;
   colorBlending.flags = 0;
   colorBlending.attachmentCount =
-      static_cast<uint32_t>(colorBlendAttachments.size());
+      static_cast<u32>(colorBlendAttachments.size());
   colorBlending.pAttachments = colorBlendAttachments.data();
   colorBlending.logicOpEnable = false;
   colorBlending.logicOp = VK_LOGIC_OP_COPY;
@@ -172,10 +172,10 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
 
   // Vertex Input Bindings
   vertexInput.vertexBindingDescriptionCount =
-      static_cast<uint32_t>(description.inputLayout.bindings.size());
+      static_cast<u32>(description.inputLayout.bindings.size());
   std::vector<VkVertexInputBindingDescription> vertexInputBindings(
       description.inputLayout.bindings.size());
-  for (size_t i = 0; i < description.inputLayout.bindings.size(); ++i) {
+  for (usize i = 0; i < description.inputLayout.bindings.size(); ++i) {
     vertexInputBindings.at(i) = VkVertexInputBindingDescription{
         description.inputLayout.bindings.at(i).binding,
         description.inputLayout.bindings.at(i).stride,
@@ -185,11 +185,11 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
   vertexInput.pVertexBindingDescriptions = vertexInputBindings.data();
 
   vertexInput.vertexAttributeDescriptionCount =
-      static_cast<uint32_t>(description.inputLayout.attributes.size());
+      static_cast<u32>(description.inputLayout.attributes.size());
   std::vector<VkVertexInputAttributeDescription> vertexInputDescriptions(
       description.inputLayout.attributes.size());
 
-  for (size_t i = 0; i < description.inputLayout.attributes.size(); ++i) {
+  for (usize i = 0; i < description.inputLayout.attributes.size(); ++i) {
     vertexInputDescriptions.at(i) = VkVertexInputAttributeDescription{
         description.inputLayout.attributes.at(i).slot,
         description.inputLayout.attributes.at(i).binding,
@@ -212,7 +212,7 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
   pipelineInfo.renderPass = pass->getRenderPass();
   pipelineInfo.subpass = 0;
   pipelineInfo.layout = mPipelineLayout;
-  pipelineInfo.stageCount = static_cast<uint32_t>(stages.size());
+  pipelineInfo.stageCount = static_cast<u32>(stages.size());
   pipelineInfo.pStages = stages.data();
   pipelineInfo.pVertexInputState = &vertexInput;
   pipelineInfo.pInputAssemblyState = &inputAssembly;
@@ -291,7 +291,7 @@ void VulkanPipeline::createLayout(
     VulkanPipelineLayoutCache &pipelineLayoutCache) {
 
   // Pipeline Layout
-  std::map<uint32_t, VkDescriptorSetLayout> descriptorLayoutsMap;
+  std::map<u32, VkDescriptorSetLayout> descriptorLayoutsMap;
   std::vector<VkDescriptorSetLayout> descriptorLayoutsRaw;
   std::vector<VkPushConstantRange> pushConstantRanges;
 
@@ -322,10 +322,10 @@ void VulkanPipeline::createLayout(
   pipelineLayoutCreateInfo.flags = 0;
   pipelineLayoutCreateInfo.pNext = nullptr;
   pipelineLayoutCreateInfo.setLayoutCount =
-      static_cast<uint32_t>(mDescriptorLayouts.size());
+      static_cast<u32>(mDescriptorLayouts.size());
   pipelineLayoutCreateInfo.pSetLayouts = descriptorLayoutsRaw.data();
   pipelineLayoutCreateInfo.pushConstantRangeCount =
-      static_cast<uint32_t>(pushConstantRanges.size());
+      static_cast<u32>(pushConstantRanges.size());
   pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRanges.data();
 
   checkForVulkanError(vkCreatePipelineLayout(mDevice, &pipelineLayoutCreateInfo,

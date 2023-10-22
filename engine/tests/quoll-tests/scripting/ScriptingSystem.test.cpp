@@ -28,7 +28,7 @@ public:
 
 using ScriptingSystemDeathTest = ScriptingSystemTest;
 
-static constexpr float TimeDelta = 0.2f;
+static constexpr f32 TimeDelta = 0.2f;
 
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   auto handle = loadLuaScript();
@@ -45,17 +45,17 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   scriptingSystem.update(TimeDelta, entityDatabase);
 
   sol::state_view state(component.state);
-  EXPECT_EQ(state["value"].get<int32_t>(), 0);
-  EXPECT_EQ(state["global_dt"].get<float>(), TimeDelta);
+  EXPECT_EQ(state["value"].get<i32>(), 0);
+  EXPECT_EQ(state["global_dt"].get<f32>(), TimeDelta);
 }
 
 TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
   auto handle = loadLuaScript();
 
-  static constexpr size_t NumEntities = 20;
+  static constexpr usize NumEntities = 20;
 
   std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entityDatabase.create();
     entities.at(i) = entity;
 
@@ -65,7 +65,7 @@ TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
   scriptingSystem.start(entityDatabase, physicsSystem);
 
   std::vector<quoll::Script> scripts(entities.size());
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
     scripts.at(i) = entityDatabase.get<quoll::Script>(entity);
     ASSERT_TRUE(eventSystem.hasObserver(quoll::CollisionEvent::CollisionEnded,
@@ -77,7 +77,7 @@ TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
   }
 
   scriptingSystem.update(TimeDelta, entityDatabase);
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
     bool deleted = (i % 2) == 0;
     EXPECT_NE(entityDatabase.has<quoll::Script>(entity), deleted);
@@ -101,12 +101,12 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   scriptingSystem.start(entityDatabase, physicsSystem);
   EXPECT_NE(component.state, nullptr);
 
-  for (size_t i = 0; i < 10; ++i) {
+  for (usize i = 0; i < 10; ++i) {
     scriptingSystem.update(TimeDelta, entityDatabase);
   }
 
   sol::state_view state(component.state);
-  EXPECT_EQ(state["value"].get<int32_t>(), 9);
+  EXPECT_EQ(state["value"].get<i32>(), 9);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
@@ -122,7 +122,7 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
   EXPECT_NE(component.state, nullptr);
 
   sol::state_view state(component.state);
-  EXPECT_EQ(state["value"].get<int32_t>(), -1);
+  EXPECT_EQ(state["value"].get<i32>(), -1);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
@@ -135,13 +135,13 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
   EXPECT_EQ(component.state, nullptr);
 
   // Call 10 times
-  for (size_t i = 0; i < 10; ++i) {
+  for (usize i = 0; i < 10; ++i) {
     scriptingSystem.start(entityDatabase, physicsSystem);
   }
   EXPECT_NE(component.state, nullptr);
 
   auto state = sol::state_view(component.state);
-  EXPECT_EQ(state["value"].get<int32_t>(), -1);
+  EXPECT_EQ(state["value"].get<i32>(), -1);
 }
 
 TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarsAreNotSet) {
@@ -196,8 +196,8 @@ TEST_F(ScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
   auto state = sol::state_view(component.state);
 
   EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
-  EXPECT_EQ(state["var_prefab"].get<uint32_t>(), 15);
-  EXPECT_EQ(state["var_texture"].get<uint32_t>(), 25);
+  EXPECT_EQ(state["var_prefab"].get<u32>(), 15);
+  EXPECT_EQ(state["var_texture"].get<u32>(), 25);
 }
 
 TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
@@ -219,8 +219,8 @@ TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
   auto state = sol::state_view(component.state);
 
   EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
-  EXPECT_EQ(state["var_prefab"].get<uint32_t>(), 15);
-  EXPECT_EQ(state["var_texture"].get<uint32_t>(), 25);
+  EXPECT_EQ(state["var_prefab"].get<u32>(), 15);
+  EXPECT_EQ(state["var_texture"].get<u32>(), 25);
 
   EXPECT_TRUE(state["global_vars"].get_type() == sol::type::table);
   EXPECT_TRUE(state["entity"].is<quoll::EntityTable>());
@@ -263,7 +263,7 @@ TEST_F(ScriptingSystemTest,
                        {quoll::Entity{5}, quoll::Entity{6}});
   eventSystem.poll();
 
-  EXPECT_EQ(state["event"].get<int32_t>(), 0);
+  EXPECT_EQ(state["event"].get<i32>(), 0);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
@@ -281,8 +281,8 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
                        {entity, quoll::Entity{6}});
   eventSystem.poll();
 
-  EXPECT_EQ(state["event"].get<int32_t>(), 1);
-  EXPECT_EQ(state["target"].get<int32_t>(), 6);
+  EXPECT_EQ(state["event"].get<i32>(), 1);
+  EXPECT_EQ(state["target"].get<i32>(), 6);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
@@ -300,8 +300,8 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
                        {quoll::Entity{5}, entity});
   eventSystem.poll();
 
-  EXPECT_EQ(state["event"].get<int32_t>(), 2);
-  EXPECT_EQ(state["target"].get<int32_t>(), 5);
+  EXPECT_EQ(state["event"].get<i32>(), 2);
+  EXPECT_EQ(state["target"].get<i32>(), 5);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
@@ -318,9 +318,9 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
   eventSystem.dispatch(quoll::KeyboardEvent::Pressed, {15, -1, 3});
   eventSystem.poll();
 
-  EXPECT_EQ(state["event"].get<int32_t>(), 3);
-  EXPECT_EQ(state["key_value"].get<int32_t>(), 15);
-  EXPECT_EQ(state["key_mods"].get<int32_t>(), 3);
+  EXPECT_EQ(state["event"].get<i32>(), 3);
+  EXPECT_EQ(state["key_value"].get<i32>(), 15);
+  EXPECT_EQ(state["key_mods"].get<i32>(), 3);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
@@ -337,7 +337,7 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
   eventSystem.dispatch(quoll::KeyboardEvent::Released, {35, -1, 3});
   eventSystem.poll();
 
-  EXPECT_EQ(state["event"].get<int32_t>(), 4);
-  EXPECT_EQ(state["key_value"].get<int32_t>(), 35);
-  EXPECT_EQ(state["key_mods"].get<int32_t>(), 3);
+  EXPECT_EQ(state["event"].get<i32>(), 4);
+  EXPECT_EQ(state["key_value"].get<i32>(), 35);
+  EXPECT_EQ(state["key_mods"].get<i32>(), 3);
 }

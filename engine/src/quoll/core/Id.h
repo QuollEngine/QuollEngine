@@ -9,7 +9,7 @@ struct Id {
   /**
    * ID
    */
-  uint64_t id = 0;
+  u64 id = 0;
 };
 
 } // namespace quoll

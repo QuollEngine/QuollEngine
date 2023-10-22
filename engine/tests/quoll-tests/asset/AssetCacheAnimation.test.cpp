@@ -20,16 +20,16 @@ quoll::AssetData<quoll::AnimationAsset> createRandomizedAnimation() {
   {
     std::random_device device;
     std::mt19937 mt(device());
-    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
-    std::uniform_int_distribution<uint32_t> udist(0, 20);
-    std::uniform_int_distribution<uint32_t> targetDist(0, 2);
-    std::uniform_int_distribution<uint32_t> interpolationDist(0, 1);
+    std::uniform_real_distribution<f32> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<u32> udist(0, 20);
+    std::uniform_int_distribution<u32> targetDist(0, 2);
+    std::uniform_int_distribution<u32> interpolationDist(0, 1);
 
-    size_t countKeyframes = 5;
-    size_t countKeyframeValues = 10;
-    asset.data.time = static_cast<float>(countKeyframeValues) * 0.5f;
+    usize countKeyframes = 5;
+    usize countKeyframeValues = 10;
+    asset.data.time = static_cast<f32>(countKeyframeValues) * 0.5f;
 
-    for (size_t i = 0; i < countKeyframes; ++i) {
+    for (usize i = 0; i < countKeyframes; ++i) {
       quoll::KeyframeSequenceAsset keyframe;
       keyframe.interpolation =
           static_cast<quoll::KeyframeSequenceAssetInterpolation>(
@@ -41,8 +41,8 @@ quoll::AssetData<quoll::AnimationAsset> createRandomizedAnimation() {
       keyframe.keyframeTimes.resize(countKeyframeValues);
       keyframe.keyframeValues.resize(countKeyframeValues);
 
-      for (size_t j = 0; j < countKeyframeValues; ++j) {
-        keyframe.keyframeTimes.at(j) = 0.5f * static_cast<float>(j);
+      for (usize j = 0; j < countKeyframeValues; ++j) {
+        keyframe.keyframeTimes.at(j) = 0.5f * static_cast<f32>(j);
         keyframe.keyframeValues.at(j) =
             glm::vec4(dist(mt), dist(mt), dist(mt), dist(mt));
       }
@@ -66,8 +66,8 @@ TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   EXPECT_EQ(header.type, quoll::AssetType::Animation);
   EXPECT_EQ(header.name, asset.name);
 
-  float time = 0.0f;
-  uint32_t numKeyframes = 0;
+  f32 time = 0.0f;
+  u32 numKeyframes = 0;
 
   file.read(time);
   file.read(numKeyframes);
@@ -75,14 +75,14 @@ TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   EXPECT_EQ(time, 5.0f);
   EXPECT_EQ(numKeyframes, 5);
 
-  for (uint32_t i = 0; i < numKeyframes; ++i) {
+  for (u32 i = 0; i < numKeyframes; ++i) {
     auto &keyframe = asset.data.keyframes.at(i);
 
     quoll::KeyframeSequenceAssetTarget target{0};
     quoll::KeyframeSequenceAssetInterpolation interpolation{0};
     bool jointTarget = false;
     quoll::JointId joint = 0;
-    uint32_t numValues = 0;
+    u32 numValues = 0;
 
     file.read(target);
     file.read(interpolation);
@@ -94,14 +94,14 @@ TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
     EXPECT_EQ(interpolation, keyframe.interpolation);
     EXPECT_EQ(jointTarget, keyframe.jointTarget);
     EXPECT_EQ(joint, keyframe.joint);
-    EXPECT_EQ(numValues, static_cast<uint32_t>(keyframe.keyframeValues.size()));
+    EXPECT_EQ(numValues, static_cast<u32>(keyframe.keyframeValues.size()));
 
-    std::vector<float> times(numValues);
+    std::vector<f32> times(numValues);
     std::vector<glm::vec4> values(numValues);
 
     file.read(times);
     file.read(values);
-    for (uint32_t i = 0; i < numValues; ++i) {
+    for (u32 i = 0; i < numValues; ++i) {
       EXPECT_EQ(times.at(i), keyframe.keyframeTimes.at(i));
       EXPECT_EQ(values.at(i), keyframe.keyframeValues.at(i));
     }
@@ -125,7 +125,7 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
 
   EXPECT_EQ(actual.data.time, asset.data.time);
   EXPECT_EQ(actual.data.keyframes.size(), asset.data.keyframes.size());
-  for (size_t i = 0; i < asset.data.keyframes.size(); ++i) {
+  for (usize i = 0; i < asset.data.keyframes.size(); ++i) {
     auto &expectedKf = asset.data.keyframes.at(i);
     auto &actualKf = actual.data.keyframes.at(i);
 
@@ -136,7 +136,7 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
     EXPECT_EQ(expectedKf.keyframeTimes.size(), actualKf.keyframeTimes.size());
     EXPECT_EQ(expectedKf.keyframeValues.size(), actualKf.keyframeValues.size());
 
-    for (size_t j = 0; j < expectedKf.keyframeTimes.size(); ++j) {
+    for (usize j = 0; j < expectedKf.keyframeTimes.size(); ++j) {
       EXPECT_EQ(expectedKf.keyframeTimes.at(j), actualKf.keyframeTimes.at(j));
       EXPECT_EQ(expectedKf.keyframeValues.at(j), actualKf.keyframeValues.at(j));
     }

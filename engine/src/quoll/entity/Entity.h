@@ -2,6 +2,6 @@
 
 namespace quoll {
 
-enum class Entity : uint32_t { Null = 0 };
+enum class Entity : u32 { Null = 0 };
 
 } // namespace quoll

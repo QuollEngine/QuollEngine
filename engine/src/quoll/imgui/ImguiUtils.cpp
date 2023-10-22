@@ -18,14 +18,14 @@ constexpr ImVec2 &operator+=(ImVec2 &a, const ImVec2 &b) {
 namespace quoll::imgui {
 
 inline ImTextureID getImguiTexture(quoll::rhi::TextureHandle handle) {
-  return reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(handle));
+  return reinterpret_cast<ImTextureID>(static_cast<uptr>(handle));
 }
 
 void image(quoll::rhi::TextureHandle handle, const ImVec2 &size,
            const ImVec2 &uv0, const ImVec2 &uv1, ImGuiID id,
            const ImVec4 &tint_col, const ImVec4 &border_col) {
 
-  static constexpr float BorderWidth = 2.0f;
+  static constexpr f32 BorderWidth = 2.0f;
 
   ImGuiWindow *window = ImGui::GetCurrentWindow();
   if (window->SkipItems)

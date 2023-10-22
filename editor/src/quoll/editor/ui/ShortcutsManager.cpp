@@ -10,7 +10,7 @@ void ShortcutsManager::add(Shortcut shortcut, ActionCreator *actionCreator) {
 
 void ShortcutsManager::process(int key, int mods,
                                ActionExecutor &actionExecutor) {
-  for (size_t i = 0; i < mShortcuts.size(); ++i) {
+  for (usize i = 0; i < mShortcuts.size(); ++i) {
     const auto &shortcut = mShortcuts.at(i);
 
     if (shortcut == Shortcut(key, mods)) {

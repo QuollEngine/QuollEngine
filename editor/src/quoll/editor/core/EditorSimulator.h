@@ -48,7 +48,7 @@ public:
    * @param dt Time delta
    * @param state Workspace state
    */
-  void update(float dt, WorkspaceState &state);
+  void update(f32 dt, WorkspaceState &state);
 
   /**
    * @brief Get physics system
@@ -87,7 +87,7 @@ private:
    * @param dt Time delta
    * @param state Workspace state
    */
-  void updateEditor(float dt, WorkspaceState &scene);
+  void updateEditor(f32 dt, WorkspaceState &scene);
 
   /**
    * @brief Simulation updater
@@ -95,10 +95,10 @@ private:
    * @param dt Time delta
    * @param state Workspace state
    */
-  void updateSimulation(float dt, WorkspaceState &scene);
+  void updateSimulation(f32 dt, WorkspaceState &scene);
 
 private:
-  std::function<void(float, WorkspaceState &)> mUpdater;
+  std::function<void(f32, WorkspaceState &)> mUpdater;
 
   EditorCamera &mEditorCamera;
   CameraAspectRatioUpdater mCameraAspectRatioUpdater;

@@ -7,7 +7,7 @@ namespace quoll::rhi {
 
 enum class TextureType { Standard, Cubemap };
 
-enum class TextureUsage : uint8_t {
+enum class TextureUsage : u8 {
   None = 0,
   Color = 1 << 0,
   Depth = 1 << 1,
@@ -42,32 +42,32 @@ struct TextureDescription {
   /**
    * Texture width
    */
-  uint32_t width = 0;
+  u32 width = 0;
 
   /**
    * Texture height
    */
-  uint32_t height = 0;
+  u32 height = 0;
 
   /**
    * Texture depth
    */
-  uint32_t depth = 1;
+  u32 depth = 1;
 
   /**
    * Number of layers in texture
    */
-  uint32_t layerCount = 1;
+  u32 layerCount = 1;
 
   /**
    * Number of mip levels
    */
-  uint32_t mipLevelCount = 1;
+  u32 mipLevelCount = 1;
 
   /**
    * Number of samples
    */
-  uint32_t samples = 1;
+  u32 samples = 1;
 
   /**
    * Debug name

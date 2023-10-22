@@ -32,7 +32,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
         node["transform"]["scale"].as<glm::vec3>(transform.localScale);
 
     if (node["transform"]["parent"]) {
-      auto parentId = node["transform"]["parent"].as<uint64_t>(0);
+      auto parentId = node["transform"]["parent"].as<u64>(0);
 
       auto it = entityIdCache.find(parentId);
       Entity parentEntity =
@@ -67,7 +67,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   if (node["rigidBody"] && node["rigidBody"].IsMap()) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.mass =
-        node["rigidBody"]["mass"].as<float>(rigidBody.dynamicDesc.mass);
+        node["rigidBody"]["mass"].as<f32>(rigidBody.dynamicDesc.mass);
     rigidBody.dynamicDesc.inertia = node["rigidBody"]["inertia"].as<glm::vec3>(
         rigidBody.dynamicDesc.inertia);
     rigidBody.dynamicDesc.applyGravity =
@@ -104,14 +104,14 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       collidable.geometryDesc.params = box;
     } else if (shape == PhysicsGeometryType::Sphere) {
       quoll::PhysicsGeometrySphere sphere{};
-      sphere.radius = node["collidable"]["radius"].as<float>(sphere.radius);
+      sphere.radius = node["collidable"]["radius"].as<f32>(sphere.radius);
 
       collidable.geometryDesc.params = sphere;
     } else if (shape == PhysicsGeometryType::Capsule) {
       quoll::PhysicsGeometryCapsule capsule{};
-      capsule.radius = node["collidable"]["radius"].as<float>(capsule.radius);
+      capsule.radius = node["collidable"]["radius"].as<f32>(capsule.radius);
       capsule.halfHeight =
-          node["collidable"]["halfHeight"].as<float>(capsule.halfHeight);
+          node["collidable"]["halfHeight"].as<f32>(capsule.halfHeight);
 
       collidable.geometryDesc.params = capsule;
     } else if (shape == PhysicsGeometryType::Plane) {
@@ -119,13 +119,13 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
 
     collidable.materialDesc.dynamicFriction =
-        node["collidable"]["dynamicFriction"].as<float>(
+        node["collidable"]["dynamicFriction"].as<f32>(
             collidable.materialDesc.dynamicFriction);
     collidable.materialDesc.restitution =
-        node["collidable"]["restitution"].as<float>(
+        node["collidable"]["restitution"].as<f32>(
             collidable.materialDesc.restitution);
     collidable.materialDesc.staticFriction =
-        node["collidable"]["staticFriction"].as<float>(
+        node["collidable"]["staticFriction"].as<f32>(
             collidable.materialDesc.staticFriction);
 
     mEntityDatabase.set(entity, collidable);
@@ -203,7 +203,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       skeletonComponent.jointNames = skeleton.jointNames;
       skeletonComponent.assetHandle = handle;
       skeletonComponent.numJoints =
-          static_cast<uint32_t>(skeleton.jointLocalPositions.size());
+          static_cast<u32>(skeleton.jointLocalPositions.size());
       skeletonComponent.jointFinalTransforms.resize(skeletonComponent.numJoints,
                                                     glm::mat4{1.0f});
       skeletonComponent.jointWorldTransforms.resize(skeletonComponent.numJoints,
@@ -214,8 +214,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["jointAttachment"] && node["jointAttachment"].IsMap()) {
-    auto joint = node["jointAttachment"]["joint"].as<int16_t>(-1);
-    if (joint >= 0 && joint < std::numeric_limits<uint8_t>::max()) {
+    auto joint = node["jointAttachment"]["joint"].as<i16>(-1);
+    if (joint >= 0 && joint < std::numeric_limits<u8>::max()) {
       JointAttachment attachment{joint};
       mEntityDatabase.set(entity, attachment);
     }
@@ -236,12 +236,11 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
   if (node["light"] && node["light"].IsMap()) {
     auto light = node["light"];
-    auto type =
-        light["type"].as<uint32_t>(std::numeric_limits<uint32_t>::max());
+    auto type = light["type"].as<u32>(std::numeric_limits<u32>::max());
 
     if (type == 0) {
       DirectionalLight component{};
-      component.intensity = light["intensity"].as<float>(component.intensity);
+      component.intensity = light["intensity"].as<f32>(component.intensity);
       component.color = light["color"].as<glm::vec4>(component.color);
 
       mEntityDatabase.set(entity, component);
@@ -250,11 +249,10 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
         CascadedShadowMap shadowComponent{};
         shadowComponent.softShadows = light["shadow"]["softShadows"].as<bool>(
             shadowComponent.softShadows);
-        shadowComponent.splitLambda = light["shadow"]["splitLambda"].as<float>(
-            shadowComponent.splitLambda);
+        shadowComponent.splitLambda =
+            light["shadow"]["splitLambda"].as<f32>(shadowComponent.splitLambda);
         shadowComponent.numCascades =
-            light["shadow"]["numCascades"].as<uint32_t>(
-                shadowComponent.numCascades);
+            light["shadow"]["numCascades"].as<u32>(shadowComponent.numCascades);
 
         shadowComponent.numCascades = glm::clamp(
             shadowComponent.numCascades, 1u, shadowComponent.MaxCascades);
@@ -266,7 +264,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       }
     } else if (type == 1) {
       PointLight component{};
-      component.intensity = light["intensity"].as<float>(component.intensity);
+      component.intensity = light["intensity"].as<f32>(component.intensity);
       component.color = light["color"].as<glm::vec4>(component.color);
       component.range = light["range"].as<glm::float32>(component.range);
 
@@ -276,12 +274,12 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
   if (node["camera"] && node["camera"].IsMap()) {
     PerspectiveLens lens{};
-    float near = node["camera"]["near"].as<float>(lens.near);
+    f32 near = node["camera"]["near"].as<f32>(lens.near);
     if (near >= 0.0f) {
       lens.near = near;
     }
 
-    float far = node["camera"]["far"].as<float>(lens.far);
+    f32 far = node["camera"]["far"].as<f32>(lens.far);
     if (far >= 0.0f) {
       lens.far = far;
     }
@@ -293,25 +291,23 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       lens.sensorSize = sensorSize;
     }
 
-    float focalLength =
-        node["camera"]["focalLength"].as<float>(lens.focalLength);
+    f32 focalLength = node["camera"]["focalLength"].as<f32>(lens.focalLength);
     if (focalLength >= 0.0f) {
       lens.focalLength = focalLength;
     }
 
-    float aperture = node["camera"]["aperture"].as<float>(lens.aperture);
+    f32 aperture = node["camera"]["aperture"].as<f32>(lens.aperture);
     if (aperture >= 0.0f) {
       lens.aperture = aperture;
     }
 
-    float shutterSpeed =
-        node["camera"]["shutterSpeed"].as<float>(lens.shutterSpeed);
+    f32 shutterSpeed =
+        node["camera"]["shutterSpeed"].as<f32>(lens.shutterSpeed);
     if (shutterSpeed >= 0.0f) {
       lens.shutterSpeed = shutterSpeed;
     }
 
-    lens.sensitivity =
-        node["camera"]["sensitivity"].as<uint32_t>(lens.sensitivity);
+    lens.sensitivity = node["camera"]["sensitivity"].as<u32>(lens.sensitivity);
 
     bool autoRatio = true;
     if (node["camera"]["aspectRatio"] &&
@@ -326,8 +322,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     if (autoRatio) {
       mEntityDatabase.set<AutoAspectRatio>(entity, {});
     } else {
-      float aspectRatio =
-          node["camera"]["aspectRatio"].as<float>(lens.aspectRatio);
+      f32 aspectRatio = node["camera"]["aspectRatio"].as<f32>(lens.aspectRatio);
       if (aspectRatio >= 0.0f) {
         lens.aspectRatio = aspectRatio;
       }
@@ -404,7 +399,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       }
 
       textComponent.lineHeight =
-          node["text"]["lineHeight"].as<float>(textComponent.lineHeight);
+          node["text"]["lineHeight"].as<f32>(textComponent.lineHeight);
 
       mEntityDatabase.set(entity, textComponent);
     }
@@ -438,7 +433,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
   if (node["inputMap"] && node["inputMap"].IsMap()) {
     auto uuid = node["inputMap"]["asset"].as<Uuid>(Uuid{});
-    auto defaultScheme = node["inputMap"]["defaultScheme"].as<size_t>(0);
+    auto defaultScheme = node["inputMap"]["defaultScheme"].as<usize>(0);
     auto handle = mAssetRegistry.getInputMaps().findHandleByUuid(uuid);
 
     if (handle != InputMapAssetHandle::Null) {
@@ -459,7 +454,7 @@ Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
                                                EntityIdCache &entityIdCache) {
   Entity entity = Entity::Null;
   if (node && node.IsScalar()) {
-    auto entityId = node.as<uint64_t>(0);
+    auto entityId = node.as<u64>(0);
 
     if (entityId > 0 && entityIdCache.find(entityId) != entityIdCache.end()) {
       auto foundEntity = entityIdCache.at(entityId);
@@ -480,7 +475,7 @@ Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
 Result<Entity> SceneLoader::loadEnvironment(const YAML::Node &node,
                                             EntityIdCache &entityIdCache) {
   if (node && node.IsScalar()) {
-    auto entityId = node.as<uint64_t>(0);
+    auto entityId = node.as<u64>(0);
 
     if (entityId > 0 && entityIdCache.contains(entityId)) {
       auto entity = entityIdCache.at(entityId);

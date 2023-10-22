@@ -44,7 +44,7 @@ public:
    *
    * @return Array of all queue families
    */
-  inline const std::array<uint32_t, 3> toArray() const {
+  inline const std::array<u32, 3> toArray() const {
     return {getGraphicsFamily(), getTransferFamily(), getPresentFamily()};
   }
 
@@ -53,26 +53,26 @@ public:
    *
    * @return Graphics queue index
    */
-  inline uint32_t getGraphicsFamily() const { return mGraphicsFamily.value(); }
+  inline u32 getGraphicsFamily() const { return mGraphicsFamily.value(); }
 
   /**
    * @brief Get present queue index
    *
    * @return Present queue index
    */
-  inline uint32_t getPresentFamily() const { return mPresentFamily.value(); }
+  inline u32 getPresentFamily() const { return mPresentFamily.value(); }
 
   /**
    * @brief Get transfer queue index
    *
    * @return Transfer queue index
    */
-  inline uint32_t getTransferFamily() const { return mTransferFamily.value(); }
+  inline u32 getTransferFamily() const { return mTransferFamily.value(); }
 
 private:
-  std::optional<uint32_t> mGraphicsFamily;
-  std::optional<uint32_t> mPresentFamily;
-  std::optional<uint32_t> mTransferFamily;
+  std::optional<u32> mGraphicsFamily;
+  std::optional<u32> mPresentFamily;
+  std::optional<u32> mTransferFamily;
 };
 
 } // namespace quoll::rhi

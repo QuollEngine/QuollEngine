@@ -50,7 +50,7 @@ TEST_F(CollidableLuaTableTest,
   entityDatabase.set(entity, collidable);
 
   auto state = call(entity, "collidable_get_static_friction");
-  EXPECT_EQ(state["static_friction"].get<float>(), 2.5f);
+  EXPECT_EQ(state["static_friction"].get<f32>(), 2.5f);
 }
 
 // Set static friction
@@ -101,7 +101,7 @@ TEST_F(CollidableLuaTableTest,
   entityDatabase.set(entity, collidable);
 
   auto state = call(entity, "collidable_get_dynamic_friction");
-  EXPECT_EQ(state["dynamic_friction"].get<float>(), 2.5f);
+  EXPECT_EQ(state["dynamic_friction"].get<f32>(), 2.5f);
 }
 
 // Set dynamic friction
@@ -151,7 +151,7 @@ TEST_F(CollidableLuaTableTest, GetRestitutionReturnsCollidableRestitution) {
   entityDatabase.set(entity, collidable);
 
   auto state = call(entity, "collidable_get_restitution");
-  EXPECT_EQ(state["restitution"].get<float>(), 2.5f);
+  EXPECT_EQ(state["restitution"].get<f32>(), 2.5f);
 }
 
 // Set restitution

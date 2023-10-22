@@ -12,27 +12,27 @@ struct RGTextureViewDescription {
   /**
    * Texture index in render graph registry
    */
-  size_t textureIndex = 0;
+  usize textureIndex = 0;
 
   /**
    * Base mip level
    */
-  uint32_t baseMipLevel = 0;
+  u32 baseMipLevel = 0;
 
   /**
    * Mip level count
    */
-  uint32_t mipLevelCount = 1;
+  u32 mipLevelCount = 1;
 
   /**
    * Base layer
    */
-  uint32_t baseLayer = 0;
+  u32 baseLayer = 0;
 
   /**
    * Layer count
    */
-  uint32_t layerCount = 1;
+  u32 layerCount = 1;
 };
 
 enum class RGResourceState { Transient, Real };
@@ -53,7 +53,7 @@ public:
    * @param description Description
    * @return Resource index
    */
-  size_t allocate(TDescription description) {
+  usize allocate(TDescription description) {
     auto index = mRealResources.size();
     mRealResources.push_back(THandle{0});
     mDescriptions.push_back(description);
@@ -69,7 +69,7 @@ public:
    * @param handle Resource handle
    * @return Resource index
    */
-  size_t allocate(THandle handle) {
+  usize allocate(THandle handle) {
     auto index = mRealResources.size();
     mRealResources.push_back(handle);
     mDescriptions.push_back({});
@@ -85,7 +85,7 @@ public:
    * @param index Resource index
    * @return Render graph resource state
    */
-  RGResourceState getResourceState(size_t index) const {
+  RGResourceState getResourceState(usize index) const {
     return mResourceStates.at(index);
   }
 
@@ -95,7 +95,7 @@ public:
    * @param index Resource indexResourceType
    * @return Resource handleindex
    */
-  THandle get(size_t index) { return mRealResources.at(index); }
+  THandle get(usize index) { return mRealResources.at(index); }
 
   /**
    * @brief Get real resources
@@ -112,7 +112,7 @@ public:
    * @param index Resource index
    * @return Resource index
    */
-  inline const TDescription &getDescription(size_t index) const {
+  inline const TDescription &getDescription(usize index) const {
     return mDescriptions.at(index);
   }
 
@@ -123,7 +123,7 @@ public:
    * @param index Resource index
    * @param handle Handle
    */
-  void set(size_t index, THandle handle) { mRealResources.at(index) = handle; }
+  void set(usize index, THandle handle) { mRealResources.at(index) = handle; }
 
   /**
    * @brief Set on resource ready function
@@ -132,7 +132,7 @@ public:
    * @param resourceReadyFn Resource ready function
    */
   template <class TFunction>
-  void setResourceReady(size_t index, TFunction &&resourceReadyFn) {
+  void setResourceReady(usize index, TFunction &&resourceReadyFn) {
     mResourceReadyFns.at(index) = resourceReadyFn;
   }
 
@@ -142,7 +142,7 @@ public:
    * @param index Resource index
    * @param storage Render storage
    */
-  void callResourceReady(size_t index, RenderStorage &storage) {
+  void callResourceReady(usize index, RenderStorage &storage) {
     mResourceReadyFns.at(index)(mRealResources.at(index), storage);
   }
 
@@ -174,7 +174,7 @@ public:
    * @param index Index
    * @return Resource handle
    */
-  template <class THandle> inline THandle get(size_t index) {
+  template <class THandle> inline THandle get(usize index) {
     return getCache<THandle>().get(index);
   }
 
@@ -185,7 +185,7 @@ public:
    * @param index Index
    * @return Resource handle
    */
-  template <class THandle> inline auto getDescription(size_t index) {
+  template <class THandle> inline auto getDescription(usize index) {
     return getCache<THandle>().getDescription(index);
   }
 
@@ -206,7 +206,7 @@ public:
    * @param handle Handle
    * @return Newly created resource index
    */
-  template <class THandle> size_t allocate(THandle handle = THandle::Null) {
+  template <class THandle> usize allocate(THandle handle = THandle::Null) {
     return getCache<THandle>().allocate(handle);
   }
 
@@ -219,7 +219,7 @@ public:
    * @return Newly created resource index
    */
   template <class THandle, class TDescription>
-  size_t allocate(TDescription description) {
+  usize allocate(TDescription description) {
     return getCache<THandle>().allocate(description);
   }
 
@@ -231,7 +231,7 @@ public:
    * @return Render graph resource type
    */
   template <class THandle>
-  inline RGResourceState getResourceState(size_t index) const {
+  inline RGResourceState getResourceState(usize index) const {
     return getCache<THandle>().getResourceState(index);
   }
 
@@ -242,7 +242,7 @@ public:
    * @param index Resource index
    * @param handle Handle
    */
-  template <class THandle> void set(size_t index, THandle handle) {
+  template <class THandle> void set(usize index, THandle handle) {
     getCache<THandle>().set(index, handle);
   }
 
@@ -253,7 +253,7 @@ public:
    * @param resourceReadyFn Resource ready function
    */
   template <class THandle, class TFunction>
-  inline void setResourceReady(size_t index, TFunction &&resourceReadyFn) {
+  inline void setResourceReady(usize index, TFunction &&resourceReadyFn) {
     getCache<THandle>().setResourceReady(index, resourceReadyFn);
   }
 
@@ -264,7 +264,7 @@ public:
    * @param storage Render storage
    */
   template <class THandle>
-  inline void callResourceReady(size_t index, RenderStorage &storage) {
+  inline void callResourceReady(usize index, RenderStorage &storage) {
     getCache<THandle>().callResourceReady(index, storage);
   }
 

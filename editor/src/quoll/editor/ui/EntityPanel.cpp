@@ -81,7 +81,7 @@ static bool ImguiMultilineInputText(const String &label, String &value,
 static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
                                 const EnvironmentSkybox &skybox,
                                 ActionExecutor &actionExecutor) {
-  static constexpr float DropBorderWidth = 3.5f;
+  static constexpr f32 DropBorderWidth = 3.5f;
   auto &g = *ImGui::GetCurrentContext();
 
   ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
@@ -210,7 +210,7 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
 
     sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
-    float intensity = component.intensity;
+    f32 intensity = component.intensity;
     if (widgets::Input("Intensity", intensity, false)) {
       if (!mDirectionalLightAction) {
         mDirectionalLightAction = std::make_unique<EntitySetDirectionalLight>(
@@ -255,7 +255,7 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
         sendAction = true;
       }
 
-      float splitLambda = component.splitLambda;
+      f32 splitLambda = component.splitLambda;
       if (widgets::Input("Split lambda", splitLambda, false)) {
         splitLambda = glm::clamp(splitLambda, 0.0f, 1.0f);
 
@@ -266,14 +266,14 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
         sendAction = true;
       }
 
-      int32_t numCascades = static_cast<int32_t>(component.numCascades);
+      i32 numCascades = static_cast<i32>(component.numCascades);
       ImGui::Text("Number of cascades");
       if (ImGui::DragInt("###NumberOfCascades", &numCascades, 0.5f, 1,
-                         static_cast<int32_t>(component.MaxCascades))) {
+                         static_cast<i32>(component.MaxCascades))) {
         mCascadedShadowMapAction = std::make_unique<EntitySetCascadedShadowMap>(
             mSelectedEntity, component);
 
-        component.numCascades = static_cast<uint32_t>(numCascades);
+        component.numCascades = static_cast<u32>(numCascades);
       }
 
       sendAction |= ImGui::IsItemDeactivatedAfterEdit();
@@ -316,7 +316,7 @@ void EntityPanel::renderPointLight(Scene &scene,
 
     sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
-    float intensity = component.intensity;
+    f32 intensity = component.intensity;
     if (widgets::Input("Intensity (in candelas)", intensity, false)) {
       mPointLightAction =
           std::make_unique<EntitySetPointLight>(mSelectedEntity, component);
@@ -326,7 +326,7 @@ void EntityPanel::renderPointLight(Scene &scene,
       sendAction = true;
     }
 
-    float range = component.range;
+    f32 range = component.range;
     if (widgets::Input("Range", range, false)) {
       if (!mPointLightAction) {
         mPointLightAction =
@@ -362,7 +362,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
 
     bool sendAction = false;
 
-    float near = component.near;
+    f32 near = component.near;
     if (widgets::Input("Near", near, false)) {
       if (near < 0.0f) {
         near = 0.0f;
@@ -378,7 +378,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       sendAction = true;
     }
 
-    float far = component.far;
+    f32 far = component.far;
     if (widgets::Input("Far", far, false)) {
       if (far < 0.0f) {
         far = 0.0f;
@@ -406,7 +406,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       sendAction = true;
     }
 
-    float focalLength = component.focalLength;
+    f32 focalLength = component.focalLength;
     if (widgets::Input("Focal length (mm)", focalLength, false)) {
       focalLength = std::max(focalLength, 0.0f);
 
@@ -419,7 +419,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       sendAction = true;
     }
 
-    float aperture = component.aperture;
+    f32 aperture = component.aperture;
     if (widgets::Input("Aperture", aperture, false)) {
       if (aperture < 0.0f) {
         aperture = 0.0f;
@@ -434,7 +434,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       sendAction = true;
     }
 
-    float shutterSpeed = 1.0f / component.shutterSpeed;
+    f32 shutterSpeed = 1.0f / component.shutterSpeed;
     if (widgets::Input("Shutter speed (1/s)", shutterSpeed, false)) {
       if (shutterSpeed < 0.0f) {
         shutterSpeed = 0.0f;
@@ -449,7 +449,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       sendAction = true;
     }
 
-    uint32_t sensitivity = component.sensitivity;
+    u32 sensitivity = component.sensitivity;
     if (widgets::Input("Sensitivity (ISO)", sensitivity, false)) {
       if (!mPerspectiveLensAction) {
         mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
@@ -466,8 +466,8 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     }
 
     ImGui::Text("Aspect Ratio");
-    static constexpr float MinCustomAspectRatio = 0.01f;
-    static constexpr float MaxCustomAspectRatio = 1000.0f;
+    static constexpr f32 MinCustomAspectRatio = 0.01f;
+    static constexpr f32 MaxCustomAspectRatio = 1000.0f;
 
     bool hasViewportAspectRatio =
         scene.entityDatabase.has<AutoAspectRatio>(mSelectedEntity);
@@ -490,7 +490,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
 
     if (!hasViewportAspectRatio) {
       ImGui::Text("Custom aspect ratio");
-      float aspectRatio = component.aspectRatio;
+      f32 aspectRatio = component.aspectRatio;
       if (ImGui::DragFloat("###CustomAspectRatio", &aspectRatio,
                            MinCustomAspectRatio, MinCustomAspectRatio,
                            MaxCustomAspectRatio, "%.2f")) {
@@ -644,8 +644,7 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
 
       if (auto table = widgets::Table("TableMesh", 2)) {
         table.row("Name", asset.name);
-        table.row("Geometries",
-                  static_cast<uint32_t>(asset.data.geometries.size()));
+        table.row("Geometries", static_cast<u32>(asset.data.geometries.size()));
       }
     }
 
@@ -663,8 +662,7 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
 
       if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
         table.row("Name", asset.name);
-        table.row("Geometries",
-                  static_cast<uint32_t>(asset.data.geometries.size()));
+        table.row("Geometries", static_cast<u32>(asset.data.geometries.size()));
       }
     }
 
@@ -687,12 +685,12 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
         scene.entityDatabase.get<MeshRenderer>(mSelectedEntity);
 
     if (auto table = widgets::Table("TableMaterials", 2)) {
-      for (size_t i = 0; i < renderer.materials.size(); ++i) {
+      for (usize i = 0; i < renderer.materials.size(); ++i) {
         const auto &asset =
             assetRegistry.getMaterials().getAsset(renderer.materials.at(i));
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        ImGui::Text("Slot %d", static_cast<uint32_t>(i));
+        ImGui::Text("Slot %d", static_cast<u32>(i));
         ImGui::TableNextColumn();
         ImGui::Button(asset.name.c_str());
         if (ImGui::BeginDragDropTarget()) {
@@ -749,12 +747,12 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
         scene.entityDatabase.get<SkinnedMeshRenderer>(mSelectedEntity);
 
     if (auto table = widgets::Table("TableMaterials", 2)) {
-      for (size_t i = 0; i < renderer.materials.size(); ++i) {
+      for (usize i = 0; i < renderer.materials.size(); ++i) {
         const auto &asset =
             assetRegistry.getMaterials().getAsset(renderer.materials.at(i));
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        ImGui::Text("Slot %d", static_cast<uint32_t>(i));
+        ImGui::Text("Slot %d", static_cast<u32>(i));
         ImGui::TableNextColumn();
         ImGui::Button(asset.name.c_str());
         if (ImGui::BeginDragDropTarget()) {
@@ -816,7 +814,7 @@ void EntityPanel::renderSkeleton(Scene &scene, AssetRegistry &assetRegistry,
     if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
       table.row("Name", asset.name);
       table.row("Number of joints",
-                static_cast<uint32_t>(skeleton.jointNames.size()));
+                static_cast<u32>(skeleton.jointNames.size()));
     }
 
     if (ImGui::Checkbox("Show bones", &showBones)) {
@@ -853,7 +851,7 @@ void EntityPanel::renderJointAttachment(Scene &scene,
 
       auto label = attachment.joint >= 0 &&
                            attachment.joint <
-                               static_cast<int16_t>(skeleton.jointNames.size())
+                               static_cast<i16>(skeleton.jointNames.size())
                        ? skeleton.jointNames.at(attachment.joint)
                        : "Select joint";
 
@@ -862,10 +860,10 @@ void EntityPanel::renderJointAttachment(Scene &scene,
       }
 
       if (ImGui::BeginPopup("SetJointAttachment")) {
-        for (size_t i = 0; i < skeleton.jointNames.size(); ++i) {
+        for (usize i = 0; i < skeleton.jointNames.size(); ++i) {
           if (ImGui::Selectable(skeleton.jointNames.at(i).c_str())) {
             auto newAttachment = attachment;
-            newAttachment.joint = static_cast<int16_t>(i);
+            newAttachment.joint = static_cast<i16>(i);
 
             actionExecutor
                 .execute<EntityDefaultUpdateComponent<JointAttachment>>(
@@ -932,7 +930,7 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
             assetRegistry.getAnimations().getAsset(currentState.animation).data;
 
         ImGui::Text("Time");
-        float animationTime = component.normalizedTime * animationAsset.time;
+        f32 animationTime = component.normalizedTime * animationAsset.time;
         if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
                                animationAsset.time)) {
           component.normalizedTime = animationTime / animationAsset.time;
@@ -1042,7 +1040,7 @@ void EntityPanel::renderCollidable(Scene &scene,
     } else if (collidable.geometryDesc.type == PhysicsGeometryType::Sphere) {
       auto &sphere =
           std::get<PhysicsGeometrySphere>(collidable.geometryDesc.params);
-      float radius = sphere.radius;
+      f32 radius = sphere.radius;
 
       if (widgets::Input("Radius", radius, false)) {
         if (!mCollidableAction) {
@@ -1055,8 +1053,8 @@ void EntityPanel::renderCollidable(Scene &scene,
     } else if (collidable.geometryDesc.type == PhysicsGeometryType::Capsule) {
       auto &capsule =
           std::get<PhysicsGeometryCapsule>(collidable.geometryDesc.params);
-      float radius = capsule.radius;
-      float halfHeight = capsule.halfHeight;
+      f32 radius = capsule.radius;
+      f32 halfHeight = capsule.halfHeight;
 
       if (widgets::Input("Radius", radius, false)) {
         if (!mCollidableAction) {
@@ -1100,7 +1098,7 @@ void EntityPanel::renderCollidable(Scene &scene,
     {
       auto &material = collidable.materialDesc;
 
-      float dynamicFriction = material.dynamicFriction;
+      f32 dynamicFriction = material.dynamicFriction;
 
       if (widgets::Input("Dynamic friction", dynamicFriction, false)) {
         if (!mCollidableAction) {
@@ -1111,7 +1109,7 @@ void EntityPanel::renderCollidable(Scene &scene,
         material.dynamicFriction = dynamicFriction;
       }
 
-      float restitution = material.restitution;
+      f32 restitution = material.restitution;
       if (widgets::Input("Restitution", restitution, false)) {
         if (restitution > 1.0f) {
           restitution = 1.0f;
@@ -1125,7 +1123,7 @@ void EntityPanel::renderCollidable(Scene &scene,
         material.restitution = restitution;
       }
 
-      float staticFriction = material.staticFriction;
+      f32 staticFriction = material.staticFriction;
       if (widgets::Input("Static friction", staticFriction, false)) {
         if (!mCollidableAction) {
           mCollidableAction = std::make_unique<EntitySetCollidable>(
@@ -1160,7 +1158,7 @@ void EntityPanel::renderRigidBody(Scene &scene,
     auto &rigidBody = scene.entityDatabase.get<RigidBody>(mSelectedEntity);
 
     bool sendAction = false;
-    float mass = rigidBody.dynamicDesc.mass;
+    f32 mass = rigidBody.dynamicDesc.mass;
     if (widgets::Input("Mass", mass, false)) {
       if (!mRigidBodyAction) {
         mRigidBodyAction =
@@ -1215,7 +1213,7 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
 
     const auto &fonts = assetRegistry.getFonts().getAssets();
 
-    static constexpr float ContentInputHeight = 100.0f;
+    static constexpr f32 ContentInputHeight = 100.0f;
     bool sendAction = false;
 
     ImGui::Text("Content");
@@ -1234,7 +1232,7 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
       sendAction = true;
     }
 
-    float lineHeight = text.lineHeight;
+    f32 lineHeight = text.lineHeight;
     if (widgets::Input("Line height", lineHeight, false)) {
       if (!mTextAction) {
         mTextAction = std::make_unique<EntitySetText>(mSelectedEntity, text);
@@ -1381,7 +1379,7 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
                     : PrefabAssetHandle::Null;
 
             const auto width = ImGui::GetWindowContentRegionWidth();
-            const float halfWidth = width * 0.5f;
+            const f32 halfWidth = width * 0.5f;
             if (value == PrefabAssetHandle::Null) {
               ImGui::Button("Drag prefab here", ImVec2(width, halfWidth));
             } else {
@@ -1407,7 +1405,7 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
                     : TextureAssetHandle::Null;
 
             const auto width = ImGui::GetWindowContentRegionWidth();
-            const float halfWidth = width * 0.5f;
+            const f32 halfWidth = width * 0.5f;
             if (value == TextureAssetHandle::Null) {
               ImGui::Button("Drag texture here", ImVec2(width, halfWidth));
             } else {
@@ -1449,8 +1447,8 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
   static const String SectionName = String(fa::Keyboard) + "  Input map";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    float width = section.getClipRect().GetWidth();
-    const float height = width * 0.2f;
+    f32 width = section.getClipRect().GetWidth();
+    const f32 height = width * 0.2f;
 
     auto &component =
         scene.entityDatabase.get<InputMapAssetRef>(mSelectedEntity);
@@ -1464,7 +1462,7 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
       ImGui::Button("Drag input map here", ImVec2(width, height));
     }
 
-    static constexpr float DropBorderWidth = 3.5f;
+    static constexpr f32 DropBorderWidth = 3.5f;
     auto &g = *ImGui::GetCurrentContext();
 
     ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
@@ -1494,7 +1492,7 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
 
       ImGui::Text("Default scheme");
       if (ImGui::BeginCombo("##DefaultScheme", schemeName)) {
-        for (size_t i = 0; i < asset.data.schemes.size(); ++i) {
+        for (usize i = 0; i < asset.data.schemes.size(); ++i) {
           const auto *name = asset.data.schemes.at(i).name.c_str();
           bool selectable = i == component.defaultScheme;
 
@@ -1554,8 +1552,8 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
   static const String SectionName = String(fa::Cloud) + "  Skybox";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    float width = section.getClipRect().GetWidth();
-    const float height = width * 0.5f;
+    f32 width = section.getClipRect().GetWidth();
+    const f32 height = width * 0.5f;
 
     auto &skybox = scene.entityDatabase.get<EnvironmentSkybox>(mSelectedEntity);
 
@@ -1772,7 +1770,7 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
 void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
                                     ActionExecutor &actionExecutor) {
   const auto width = ImGui::GetWindowContentRegionWidth();
-  const float halfWidth = width * 0.5f;
+  const f32 halfWidth = width * 0.5f;
 
   ImGui::Button("Drag asset here", ImVec2(width, halfWidth));
 

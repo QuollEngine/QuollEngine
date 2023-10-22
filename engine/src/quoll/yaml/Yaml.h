@@ -34,8 +34,8 @@ template <> struct convert<glm::vec2> {
       return false;
     }
 
-    return convert<float>::decode(node[0], value.x) &&
-           convert<float>::decode(node[1], value.y);
+    return convert<f32>::decode(node[0], value.x) &&
+           convert<f32>::decode(node[1], value.y);
   }
 };
 
@@ -70,9 +70,9 @@ template <> struct convert<glm::vec3> {
       return false;
     }
 
-    return convert<float>::decode(node[0], value.x) &&
-           convert<float>::decode(node[1], value.y) &&
-           convert<float>::decode(node[2], value.z);
+    return convert<f32>::decode(node[0], value.x) &&
+           convert<f32>::decode(node[1], value.y) &&
+           convert<f32>::decode(node[2], value.z);
   }
 };
 
@@ -108,10 +108,10 @@ template <> struct convert<glm::vec4> {
       return false;
     }
 
-    return convert<float>::decode(node[0], value.x) &&
-           convert<float>::decode(node[1], value.y) &&
-           convert<float>::decode(node[2], value.z) &&
-           convert<float>::decode(node[3], value.w);
+    return convert<f32>::decode(node[0], value.x) &&
+           convert<f32>::decode(node[1], value.y) &&
+           convert<f32>::decode(node[2], value.z) &&
+           convert<f32>::decode(node[3], value.w);
   }
 };
 
@@ -147,10 +147,10 @@ template <> struct convert<glm::quat> {
       return false;
     }
 
-    return convert<float>::decode(node[0], value.x) &&
-           convert<float>::decode(node[1], value.y) &&
-           convert<float>::decode(node[2], value.z) &&
-           convert<float>::decode(node[3], value.w);
+    return convert<f32>::decode(node[0], value.x) &&
+           convert<f32>::decode(node[1], value.y) &&
+           convert<f32>::decode(node[2], value.z) &&
+           convert<f32>::decode(node[3], value.w);
   }
 };
 

@@ -9,12 +9,12 @@ void loadAnimations(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
   const auto &model = importData.model;
 
-  std::map<uint32_t, std::vector<std::pair<AnimationAssetHandle, String>>>
+  std::map<u32, std::vector<std::pair<AnimationAssetHandle, String>>>
       nodeAnimationMap;
-  std::map<uint32_t, std::vector<std::pair<AnimationAssetHandle, String>>>
+  std::map<u32, std::vector<std::pair<AnimationAssetHandle, String>>>
       skinAnimationMap;
 
-  for (size_t i = 0; i < model.animations.size(); ++i) {
+  for (usize i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
     auto assetName = gltfAnimation.name.empty()
@@ -23,7 +23,7 @@ void loadAnimations(GLTFImportData &importData) {
     assetName += ".anim";
 
     struct SamplerInfo {
-      std::vector<float> times;
+      std::vector<f32> times;
       std::vector<glm::vec4> values;
       KeyframeSequenceAssetInterpolation interpolation =
           KeyframeSequenceAssetInterpolation::Linear;
@@ -31,10 +31,10 @@ void loadAnimations(GLTFImportData &importData) {
 
     std::vector<SamplerInfo> samplers(gltfAnimation.samplers.size());
 
-    float maxTime = 0.0f;
+    f32 maxTime = 0.0f;
     bool animationValid = true;
 
-    for (size_t i = 0; i < gltfAnimation.samplers.size() && animationValid;
+    for (usize i = 0; i < gltfAnimation.samplers.size() && animationValid;
          ++i) {
       const auto &sampler = gltfAnimation.samplers.at(i);
       const auto &input = getBufferMetaForAccessor(model, sampler.input);
@@ -68,7 +68,7 @@ void loadAnimations(GLTFImportData &importData) {
         continue;
       }
 
-      std::vector<float> &times = samplers.at(i).times;
+      std::vector<f32> &times = samplers.at(i).times;
       times.resize(input.accessor.count);
 
       std::vector<glm::vec4> &values = samplers.at(i).values;
@@ -81,11 +81,11 @@ void loadAnimations(GLTFImportData &importData) {
         samplers.at(i).interpolation = KeyframeSequenceAssetInterpolation::Step;
       }
 
-      float max = 0.0f;
+      f32 max = 0.0f;
 
       {
-        const float *inputData = reinterpret_cast<const float *>(input.rawData);
-        for (size_t i = 0; i < input.accessor.count; ++i) {
+        const f32 *inputData = reinterpret_cast<const f32 *>(input.rawData);
+        for (usize i = 0; i < input.accessor.count; ++i) {
           times.at(i) = inputData[i];
           max = std::max(max, inputData[i]);
         }
@@ -95,7 +95,7 @@ void loadAnimations(GLTFImportData &importData) {
 
       // Normalize the time
       {
-        for (size_t i = 0; i < times.size(); ++i) {
+        for (usize i = 0; i < times.size(); ++i) {
           times.at(i) = times.at(i) / max;
         }
       }
@@ -103,19 +103,18 @@ void loadAnimations(GLTFImportData &importData) {
       if (output.accessor.type == TINYGLTF_TYPE_VEC3) {
         const glm::vec3 *outputData =
             reinterpret_cast<const glm::vec3 *>(output.rawData);
-        for (size_t i = 0; i < output.accessor.count; ++i) {
+        for (usize i = 0; i < output.accessor.count; ++i) {
           values.at(i) = glm::vec4(outputData[i], 0.0f);
         }
       } else if (output.accessor.type == TINYGLTF_TYPE_VEC4) {
         const glm::vec4 *outputData =
             reinterpret_cast<const glm::vec4 *>(output.rawData);
-        for (size_t i = 0; i < output.accessor.count; ++i) {
+        for (usize i = 0; i < output.accessor.count; ++i) {
           values.at(i) = outputData[i];
         }
       } else if (output.accessor.type == TINYGLTF_TYPE_SCALAR) {
-        const float *outputData =
-            reinterpret_cast<const float *>(output.rawData);
-        for (size_t i = 0; i < output.accessor.count; ++i) {
+        const f32 *outputData = reinterpret_cast<const f32 *>(output.rawData);
+        for (usize i = 0; i < output.accessor.count; ++i) {
           values.at(i) = glm::vec4(outputData[i], 0, 0, 0);
         }
       }
@@ -126,10 +125,10 @@ void loadAnimations(GLTFImportData &importData) {
     animation.data.time = maxTime;
     animation.uuid = getOrCreateGLTFUuid(importData, assetName);
 
-    int32_t targetNode = -1;
-    int32_t targetSkin = -1;
+    i32 targetNode = -1;
+    i32 targetSkin = -1;
 
-    for (size_t ci = 0; ci < gltfAnimation.channels.size() && animationValid;
+    for (usize ci = 0; ci < gltfAnimation.channels.size() && animationValid;
          ++ci) {
       const auto &channel = gltfAnimation.channels.at(ci);
       const auto &sampler = samplers.at(channel.sampler);
@@ -148,12 +147,12 @@ void loadAnimations(GLTFImportData &importData) {
         target = KeyframeSequenceAssetTarget::Position;
       }
 
-      uint32_t targetJoint = 0;
+      u32 targetJoint = 0;
 
       auto it = importData.skeletons.jointSkinMap.find(channel.target_node);
       bool skinFound = it != importData.skeletons.jointSkinMap.end();
       if (targetSkin == -1 && skinFound) {
-        targetSkin = static_cast<int32_t>(it->second);
+        targetSkin = static_cast<i32>(it->second);
         targetJoint = importData.skeletons.gltfToNormalizedJointMap.at(
             channel.target_node);
       } else if (skinFound) {
@@ -196,7 +195,7 @@ void loadAnimations(GLTFImportData &importData) {
       }
 
       if (target == KeyframeSequenceAssetTarget::Rotation) {
-        for (size_t i = 0; i < sampler.times.size(); ++i) {
+        for (usize i = 0; i < sampler.times.size(); ++i) {
           sequence.keyframeTimes.push_back(sampler.times.at(i));
 
           auto v = sampler.values.at(i);
@@ -207,7 +206,7 @@ void loadAnimations(GLTFImportData &importData) {
           sequence.keyframeValues.push_back(v);
         }
       } else {
-        for (size_t i = 0; i < sampler.times.size(); ++i) {
+        for (usize i = 0; i < sampler.times.size(); ++i) {
           sequence.keyframeTimes.push_back(sampler.times.at(i));
           sequence.keyframeValues.push_back(sampler.values.at(i));
         }
@@ -238,12 +237,12 @@ void loadAnimations(GLTFImportData &importData) {
 
     if (targetSkin >= 0) {
       if (skinAnimationMap.find(targetSkin) == skinAnimationMap.end()) {
-        skinAnimationMap.insert({static_cast<uint32_t>(targetSkin), {}});
+        skinAnimationMap.insert({static_cast<u32>(targetSkin), {}});
       }
       skinAnimationMap.at(targetSkin).push_back({handle.getData(), assetName});
     } else {
       if (nodeAnimationMap.find(targetSkin) == nodeAnimationMap.end()) {
-        nodeAnimationMap.insert({static_cast<uint32_t>(targetNode), {}});
+        nodeAnimationMap.insert({static_cast<u32>(targetNode), {}});
       }
       nodeAnimationMap.at(targetNode).push_back({handle.getData(), assetName});
     }
@@ -264,10 +263,10 @@ void loadAnimations(GLTFImportData &importData) {
       asset.data.states.push_back(state);
     }
 
-    for (size_t i = 0; i < asset.data.states.size(); ++i) {
+    for (usize i = 0; i < asset.data.states.size(); ++i) {
       auto &state = asset.data.states.at(i);
 
-      for (size_t j = 0; j < asset.data.states.size(); ++j) {
+      for (usize j = 0; j < asset.data.states.size(); ++j) {
         if (i == j) {
           // Ignore transition to itself
           continue;
@@ -305,10 +304,10 @@ void loadAnimations(GLTFImportData &importData) {
       asset.data.states.push_back(state);
     }
 
-    for (size_t i = 0; i < asset.data.states.size(); ++i) {
+    for (usize i = 0; i < asset.data.states.size(); ++i) {
       auto &state = asset.data.states.at(i);
 
-      for (size_t j = 0; j < asset.data.states.size(); ++j) {
+      for (usize j = 0; j < asset.data.states.size(); ++j) {
         if (i == j) {
           // Ignore transition to itself
           continue;

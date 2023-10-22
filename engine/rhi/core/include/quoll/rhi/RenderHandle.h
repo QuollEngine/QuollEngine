@@ -2,23 +2,23 @@
 
 namespace quoll::rhi {
 
-enum class ShaderHandle : uint32_t { Null = 0 };
+enum class ShaderHandle : u32 { Null = 0 };
 
-enum class BufferHandle : uint32_t { Null = 0 };
+enum class BufferHandle : u32 { Null = 0 };
 
-enum class TextureHandle : uint32_t { Null = 0 };
+enum class TextureHandle : u32 { Null = 0 };
 
-enum class SamplerHandle : uint32_t { Null = 0 };
+enum class SamplerHandle : u32 { Null = 0 };
 
-enum class RenderPassHandle : uint32_t { Null = 0 };
+enum class RenderPassHandle : u32 { Null = 0 };
 
-enum class FramebufferHandle : uint32_t { Null = 0 };
+enum class FramebufferHandle : u32 { Null = 0 };
 
-enum class PipelineHandle : uint32_t { Null = 0 };
+enum class PipelineHandle : u32 { Null = 0 };
 
-enum class DescriptorLayoutHandle : uint32_t { Null = 0 };
+enum class DescriptorLayoutHandle : u32 { Null = 0 };
 
-enum class DescriptorHandle : uint32_t { Null = 0 };
+enum class DescriptorHandle : u32 { Null = 0 };
 
 /**
  * @brief Check if type equals any of the other types
@@ -53,15 +53,14 @@ template <class THandle> constexpr inline bool isHandleValid(THandle handle) {
  * @param handle Handle
  * @return Handle value in uint
  */
-template <class THandle>
-constexpr inline uint32_t castHandleToUint(THandle handle) {
+template <class THandle> constexpr inline u32 castHandleToUint(THandle handle) {
   static_assert(
       IsAnySame<THandle, ShaderHandle, BufferHandle, TextureHandle,
                 SamplerHandle, RenderPassHandle, FramebufferHandle,
                 PipelineHandle, DescriptorLayoutHandle, DescriptorHandle>,
       "Type must be a render handle");
 
-  return static_cast<uint32_t>(handle);
+  return static_cast<u32>(handle);
 }
 
 } // namespace quoll::rhi

@@ -31,10 +31,9 @@ RenderGraph::create(const rhi::TextureDescription &description) {
 }
 
 RenderGraph::RGTexture RenderGraph::createView(RGTexture texture,
-                                               uint32_t baseMipLevel,
-                                               uint32_t mipLevelCount,
-                                               uint32_t baseLayer,
-                                               uint32_t layerCount) {
+                                               u32 baseMipLevel,
+                                               u32 mipLevelCount, u32 baseLayer,
+                                               u32 layerCount) {
   RGTextureViewDescription description{};
   description.baseMipLevel = baseMipLevel;
   description.mipLevelCount = mipLevelCount;
@@ -62,12 +61,12 @@ RenderGraph::RGTexture RenderGraph::import(rhi::TextureHandle handle) {
  * @param output Output array
  */
 static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
-                            size_t index, std::vector<bool> &visited,
-                            const std::vector<std::set<size_t>> &adjacencyList,
+                            usize index, std::vector<bool> &visited,
+                            const std::vector<std::set<usize>> &adjacencyList,
                             std::vector<RenderGraphPass> &output) {
   visited.at(index) = true;
 
-  for (size_t x : adjacencyList.at(index)) {
+  for (usize x : adjacencyList.at(index)) {
     if (!visited.at(x)) {
       topologicalSort(inputs, x, visited, adjacencyList, output);
     }
@@ -79,7 +78,7 @@ static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
 void RenderGraph::buildResources(RenderStorage &storage) {
   // Create all real handles for render graph if they do not exist
   const auto &textures = mRegistry.getRealResources<rhi::TextureHandle>();
-  for (size_t i = 0; i < textures.size(); ++i) {
+  for (usize i = 0; i < textures.size(); ++i) {
     if (textures.at(i) != rhi::TextureHandle::Null) {
       continue;
     }
@@ -89,7 +88,7 @@ void RenderGraph::buildResources(RenderStorage &storage) {
 
   auto *device = storage.getDevice();
 
-  for (size_t i = 0; i < textures.size(); ++i) {
+  for (usize i = 0; i < textures.size(); ++i) {
     auto handle = mRegistry.get<rhi::TextureHandle>(i);
     const auto &desc = mRegistry.getDescription<rhi::TextureHandle>(i);
 
@@ -113,7 +112,7 @@ void RenderGraph::buildResources(RenderStorage &storage) {
 
 void RenderGraph::compile() {
   QUOLL_PROFILE_EVENT("RenderGraph::compile");
-  std::vector<size_t> passIndices;
+  std::vector<usize> passIndices;
   passIndices.reserve(mPasses.size());
 
   // Validate pass names
@@ -149,9 +148,9 @@ void RenderGraph::compile() {
 
   // Cache reads so we can easily access them
   // for creating the adjacency lsit
-  std::unordered_map<rhi::TextureHandle, std::vector<size_t>> passTextureReads;
-  std::unordered_map<rhi::BufferHandle, std::vector<size_t>> passBufferReads;
-  for (size_t i = 0; i < passIndices.size(); ++i) {
+  std::unordered_map<rhi::TextureHandle, std::vector<usize>> passTextureReads;
+  std::unordered_map<rhi::BufferHandle, std::vector<usize>> passBufferReads;
+  for (usize i = 0; i < passIndices.size(); ++i) {
     auto &pass = mPasses.at(passIndices.at(i));
     for (auto &resourceId : pass.getTextureInputs()) {
       passTextureReads[resourceId.texture].push_back(i);
@@ -164,10 +163,10 @@ void RenderGraph::compile() {
 
   // Create adjacency list from inputs and outputs
   // to determine the edges of the graph
-  std::vector<std::set<size_t>> adjacencyList;
+  std::vector<std::set<usize>> adjacencyList;
   adjacencyList.resize(passIndices.size());
 
-  for (size_t i = 0; i < passIndices.size(); ++i) {
+  for (usize i = 0; i < passIndices.size(); ++i) {
     auto &pass = mPasses.at(passIndices.at(i));
     for (auto resourceId : pass.getTextureOutputs()) {
       if (passTextureReads.find(resourceId.texture) != passTextureReads.end()) {
@@ -191,7 +190,7 @@ void RenderGraph::compile() {
   compiledPasses.reserve(passIndices.size());
   std::vector<bool> visited(passIndices.size(), false);
 
-  for (size_t i = passIndices.size(); i-- > 0;) {
+  for (usize i = passIndices.size(); i-- > 0;) {
     if (!visited.at(i)) {
       topologicalSort(mPasses, i, visited, adjacencyList, compiledPasses);
     }
@@ -215,7 +214,7 @@ void RenderGraph::buildBarriers() {
     std::vector<rhi::ImageBarrier> imageBarriers{};
     std::vector<rhi::BufferBarrier> bufferBarriers{};
 
-    for (size_t index = 0; index < pass.getTextureOutputs().size(); ++index) {
+    for (usize index = 0; index < pass.getTextureOutputs().size(); ++index) {
       auto &output = pass.getTextureOutputs().at(index);
       auto handle = output.texture.getHandle();
 
@@ -225,8 +224,8 @@ void RenderGraph::buildBarriers() {
       const auto &description = mRegistry.getDescription<rhi::TextureHandle>(
           output.texture.getIndex());
 
-      uint32_t baseMipLevel = 0;
-      uint32_t mipLevelCount = 1;
+      u32 baseMipLevel = 0;
+      u32 mipLevelCount = 1;
 
       if (const auto *textureDescription =
               std::get_if<rhi::TextureDescription>(&description)) {
@@ -262,7 +261,7 @@ void RenderGraph::buildBarriers() {
       textureDependencies.insert_or_assign(handle, newDependency);
     }
 
-    for (size_t index = 0; index < pass.getTextureInputs().size(); ++index) {
+    for (usize index = 0; index < pass.getTextureInputs().size(); ++index) {
       auto &input = pass.getTextureInputs().at(index);
       auto handle = input.texture.getHandle();
 
@@ -336,7 +335,7 @@ void RenderGraph::buildBarriers() {
     pass.mDependencies.bufferBarriers = bufferBarriers;
 
     // Attachments
-    for (size_t i = 0; i < pass.mTextureOutputs.size(); ++i) {
+    for (usize i = 0; i < pass.mTextureOutputs.size(); ++i) {
       auto &output = pass.mTextureOutputs.at(i);
       auto &attachment = pass.mAttachments.at(i);
       if (textureAttachmentLayouts.find(output.texture) ==
@@ -380,10 +379,10 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
   QUOLL_PROFILE_EVENT("RenderGraph::buildGraphicsPass");
   auto *device = storage.getDevice();
 
-  uint32_t width = 0;
-  uint32_t height = 0;
-  uint32_t layerCount = 0;
-  uint32_t sampleCount = 0;
+  u32 width = 0;
+  u32 height = 0;
+  u32 layerCount = 0;
+  u32 sampleCount = 0;
 
   std::vector<rhi::TextureHandle> framebufferAttachments;
 
@@ -391,7 +390,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
   renderPassDesc.bindPoint = rhi::PipelineBindPoint::Graphics;
   renderPassDesc.debugName = pass.getName();
 
-  for (size_t i = 0; i < pass.getTextureOutputs().size(); ++i) {
+  for (usize i = 0; i < pass.getTextureOutputs().size(); ++i) {
     auto &output = pass.mTextureOutputs.at(i);
     sampleCount = std::max(
         device->getTextureDescription(output.texture).samples, sampleCount);
@@ -482,8 +481,7 @@ void RenderGraph::buildComputePass(RenderGraphPass &pass,
   }
 }
 
-void RenderGraph::execute(rhi::RenderCommandList &commandList,
-                          uint32_t frameIndex) {
+void RenderGraph::execute(rhi::RenderCommandList &commandList, u32 frameIndex) {
   QUOLL_PROFILE_EVENT("RenderGraph::execute");
 
   for (auto &pass : mCompiledPasses) {
@@ -530,7 +528,7 @@ void RenderGraph::destroy(RenderStorage &storage) {
     }
   }
 
-  for (size_t index = 0;
+  for (usize index = 0;
        index < mRegistry.getRealResources<rhi::TextureHandle>().size();
        ++index) {
     if (mRegistry.getResourceState<rhi::TextureHandle>(index) ==

@@ -2,8 +2,8 @@
 
 namespace quoll {
 
-using EventObserverId = size_t;
+using EventObserverId = usize;
 
-static constexpr size_t EventObserverMax = std::numeric_limits<size_t>::max();
+static constexpr usize EventObserverMax = std::numeric_limits<usize>::max();
 
 } // namespace quoll

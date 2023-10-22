@@ -37,7 +37,7 @@ public:
     /**
      * Base color texture coordinate index
      */
-    int8_t baseColorTextureCoord = -1;
+    i8 baseColorTextureCoord = -1;
 
     /**
      * Base color factor
@@ -52,17 +52,17 @@ public:
     /**
      * Metallic roughness texture coordinate index
      */
-    int8_t metallicRoughnessTextureCoord = -1;
+    i8 metallicRoughnessTextureCoord = -1;
 
     /**
      * Metallic factor
      */
-    float metallicFactor = 0.0f;
+    f32 metallicFactor = 0.0f;
 
     /**
      * Roughness factor
      */
-    float roughnessFactor = 0.0f;
+    f32 roughnessFactor = 0.0f;
 
     /**
      * Normal texture
@@ -72,12 +72,12 @@ public:
     /**
      * Normal texture coordinate index
      */
-    int8_t normalTextureCoord = -1;
+    i8 normalTextureCoord = -1;
 
     /**
      * Normal scale
      */
-    float normalScale = 0.0f;
+    f32 normalScale = 0.0f;
 
     /**
      * Occlusion texture
@@ -87,12 +87,12 @@ public:
     /**
      * Occlusion texture coordinate index
      */
-    int8_t occlusionTextureCoord = -1;
+    i8 occlusionTextureCoord = -1;
 
     /**
      * Occlusion strength
      */
-    float occlusionStrength = 0.0f;
+    f32 occlusionStrength = 0.0f;
 
     /**
      * Emissive texture
@@ -102,7 +102,7 @@ public:
     /**
      * Emissive texture coordinate index
      */
-    int8_t emissiveTextureCoord = -1;
+    i8 emissiveTextureCoord = -1;
 
     /**
      * Emissive factor

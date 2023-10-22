@@ -4,9 +4,9 @@
 
 namespace quoll {
 
-enum class KeyframeSequenceAssetTarget : uint8_t { Position, Rotation, Scale };
+enum class KeyframeSequenceAssetTarget : u8 { Position, Rotation, Scale };
 
-enum class KeyframeSequenceAssetInterpolation : uint8_t { Step, Linear };
+enum class KeyframeSequenceAssetInterpolation : u8 { Step, Linear };
 
 /**
  * @brief Keyframe sequence asset
@@ -15,7 +15,7 @@ struct KeyframeSequenceAsset {
   /**
    * List of keyframe times
    */
-  std::vector<float> keyframeTimes;
+  std::vector<f32> keyframeTimes;
 
   /**
    * List of keyframe values
@@ -51,7 +51,7 @@ struct AnimationAsset {
   /**
    * Animation time
    */
-  float time = 0.0f;
+  f32 time = 0.0f;
 
   /**
    * Keyframes

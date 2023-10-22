@@ -43,7 +43,7 @@ class ImguiRenderer {
     /**
      * Vertex buffer size
      */
-    size_t vertexBufferSize = 0;
+    usize vertexBufferSize = 0;
 
     /**
      * Vertex buffer data
@@ -58,7 +58,7 @@ class ImguiRenderer {
     /**
      * Index buffer size
      */
-    size_t indexBufferSize = 0;
+    usize indexBufferSize = 0;
 
     /**
      * Index buffer data
@@ -126,7 +126,7 @@ public:
    *
    * @param frameIndex
    */
-  void updateFrameData(uint32_t frameIndex);
+  void updateFrameData(u32 frameIndex);
 
   /**
    * @brief Send imgui data to command list
@@ -136,7 +136,7 @@ public:
    * @param frameIndex Frame index
    */
   void draw(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
-            uint32_t frameIndex);
+            u32 frameIndex);
 
 private:
   /**
@@ -151,7 +151,7 @@ private:
    */
   void setupRenderStates(ImDrawData *data, rhi::RenderCommandList &commandList,
                          int fbWidth, int fbHeight,
-                         rhi::PipelineHandle pipeline, uint32_t frameIndex);
+                         rhi::PipelineHandle pipeline, u32 frameIndex);
 
 private:
   RenderStorage &mRenderStorage;

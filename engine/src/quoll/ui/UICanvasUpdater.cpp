@@ -8,13 +8,13 @@
 
 namespace quoll {
 
-static constexpr float ImageSize = 50.0f;
+static constexpr f32 ImageSize = 50.0f;
 
 void renderView(UIComponent component, YGNodeRef node,
                 AssetRegistry &assetRegistry,
                 ImVec2 offset = ImVec2{0.0f, 0.0f}) {
-  float left = YGNodeLayoutGetLeft(node) + offset.x;
-  float top = YGNodeLayoutGetTop(node) + offset.y;
+  f32 left = YGNodeLayoutGetLeft(node) + offset.x;
+  f32 top = YGNodeLayoutGetTop(node) + offset.y;
 
   ImGui::SetCursorPos({left, top});
 
@@ -26,9 +26,9 @@ void renderView(UIComponent component, YGNodeRef node,
   } else if (auto *text = std::get_if<UIText>(&component)) {
     ImGui::Text("%s", text->content.c_str());
   } else if (auto *view = std::get_if<UIView>(&component)) {
-    for (size_t i = 0; i < view->children.size(); ++i) {
+    for (usize i = 0; i < view->children.size(); ++i) {
       const auto &childView = view->children.at(i);
-      YGNodeRef childNode = YGNodeGetChild(node, static_cast<uint32_t>(i));
+      YGNodeRef childNode = YGNodeGetChild(node, static_cast<u32>(i));
       renderView(childView, childNode, assetRegistry, {left, top});
     }
   }
@@ -46,9 +46,9 @@ void updateLayout(UIComponent component, YGNodeRef node) {
   } else if (auto *view = std::get_if<UIView>(&component)) {
     YGNodeStyleSetFlexDirection(node, view->flexDirection);
 
-    for (size_t i = 0; i < view->children.size(); ++i) {
+    for (usize i = 0; i < view->children.size(); ++i) {
       YGNodeRef childNode = YGNodeNew();
-      YGNodeInsertChild(node, childNode, static_cast<uint32_t>(i));
+      YGNodeInsertChild(node, childNode, static_cast<u32>(i));
       updateLayout(view->children.at(i), childNode);
     }
   }
@@ -97,8 +97,8 @@ void UICanvasUpdater::render(EntityDatabase &entityDatabase,
         ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings |
         ImGuiWindowFlags_NoScrollWithMouse;
 
-    if (ImGui::Begin(std::to_string(static_cast<uint32_t>(entity)).c_str(),
-                     nullptr, WindowFlags)) {
+    if (ImGui::Begin(std::to_string(static_cast<u32>(entity)).c_str(), nullptr,
+                     WindowFlags)) {
       renderView(canvas.rootView, canvas.flexRoot, assetRegistry);
       ImGui::End();
     }
@@ -107,8 +107,8 @@ void UICanvasUpdater::render(EntityDatabase &entityDatabase,
   }
 }
 
-void UICanvasUpdater::setViewport(float x, float y, float width, float height) {
-  static const float Epsilon = 0.01f;
+void UICanvasUpdater::setViewport(f32 x, f32 y, f32 width, f32 height) {
+  static const f32 Epsilon = 0.01f;
 
   bool xEqual = glm::epsilonEqual(x, mPosition.x, Epsilon);
   bool yEqual = glm::epsilonEqual(y, mPosition.y, Epsilon);

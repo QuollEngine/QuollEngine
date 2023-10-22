@@ -29,7 +29,7 @@ std::vector<Entity> SceneIO::loadScene(SceneAssetHandle scene) {
     }
   }
 
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto &node = yamlNodes.at(i);
 
     sceneLoader.loadComponents(node, entities.at(i), mEntityIdCache);
@@ -75,7 +75,7 @@ void SceneIO::reset() {
 
 Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {
   if (node["id"] && node["id"].IsScalar()) {
-    auto id = node["id"].as<uint64_t>(0);
+    auto id = node["id"].as<u64>(0);
 
     if (id > 0 && mEntityIdCache.find(id) == mEntityIdCache.end()) {
       auto entity = mScene.entityDatabase.create();

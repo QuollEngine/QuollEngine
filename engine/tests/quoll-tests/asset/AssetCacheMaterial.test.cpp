@@ -99,7 +99,7 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     // Base color
     quoll::String baseTexturePath;
     file.read(baseTexturePath);
-    int8_t baseTextureCoord = -1;
+    i8 baseTextureCoord = -1;
     file.read(baseTextureCoord);
     glm::vec4 baseColorFactor;
     file.read(baseColorFactor);
@@ -107,33 +107,33 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     // Metallic roughness
     quoll::String metallicRoughnessTexturePath;
     file.read(metallicRoughnessTexturePath);
-    int8_t metallicRoughnessTextureCoord = -1;
+    i8 metallicRoughnessTextureCoord = -1;
     file.read(metallicRoughnessTextureCoord);
-    float metallicFactor = 0.0f;
+    f32 metallicFactor = 0.0f;
     file.read(metallicFactor);
-    float roughnessFactor = 0.0f;
+    f32 roughnessFactor = 0.0f;
     file.read(roughnessFactor);
 
     // Normal
     quoll::String normalTexturePath;
     file.read(normalTexturePath);
-    int8_t normalTextureCoord = -1;
+    i8 normalTextureCoord = -1;
     file.read(normalTextureCoord);
-    float normalScale = 0.0f;
+    f32 normalScale = 0.0f;
     file.read(normalScale);
 
     // Occlusion
     quoll::String occlusionTexturePath;
     file.read(occlusionTexturePath);
-    int8_t occlusionTextureCoord = -1;
+    i8 occlusionTextureCoord = -1;
     file.read(occlusionTextureCoord);
-    float occlusionStrength = 0.0f;
+    f32 occlusionStrength = 0.0f;
     file.read(occlusionStrength);
 
     // Emissive
     quoll::String emissiveTexturePath;
     file.read(emissiveTexturePath);
-    int8_t emissiveTextureCoord = -1;
+    i8 emissiveTextureCoord = -1;
     file.read(emissiveTextureCoord);
     glm::vec3 emissiveFactor;
     file.read(emissiveFactor);
@@ -176,7 +176,7 @@ TEST_F(AssetCacheMaterialTest,
     // Base color
     quoll::String baseTexturePath;
     file.read(baseTexturePath);
-    int8_t baseTextureCoord = -1;
+    i8 baseTextureCoord = -1;
     file.read(baseTextureCoord);
     glm::vec4 baseColorFactor;
     file.read(baseColorFactor);
@@ -184,33 +184,33 @@ TEST_F(AssetCacheMaterialTest,
     // Metallic roughness
     quoll::String metallicRoughnessTexturePath;
     file.read(metallicRoughnessTexturePath);
-    int8_t metallicRoughnessTextureCoord = -1;
+    i8 metallicRoughnessTextureCoord = -1;
     file.read(metallicRoughnessTextureCoord);
-    float metallicFactor = 0.0f;
+    f32 metallicFactor = 0.0f;
     file.read(metallicFactor);
-    float roughnessFactor = 0.0f;
+    f32 roughnessFactor = 0.0f;
     file.read(roughnessFactor);
 
     // Normal
     quoll::String normalTexturePath;
     file.read(normalTexturePath);
-    int8_t normalTextureCoord = -1;
+    i8 normalTextureCoord = -1;
     file.read(normalTextureCoord);
-    float normalScale = 0.0f;
+    f32 normalScale = 0.0f;
     file.read(normalScale);
 
     // Occlusion
     quoll::String occlusionTexturePath;
     file.read(occlusionTexturePath);
-    int8_t occlusionTextureCoord = -1;
+    i8 occlusionTextureCoord = -1;
     file.read(occlusionTextureCoord);
-    float occlusionStrength = 0.0f;
+    f32 occlusionStrength = 0.0f;
     file.read(occlusionStrength);
 
     // Emissive
     quoll::String emissiveTexturePath;
     file.read(emissiveTexturePath);
-    int8_t emissiveTextureCoord = -1;
+    i8 emissiveTextureCoord = -1;
     file.read(emissiveTextureCoord);
     glm::vec3 emissiveFactor;
     file.read(emissiveFactor);

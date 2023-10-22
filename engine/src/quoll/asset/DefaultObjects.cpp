@@ -19,9 +19,9 @@ AssetData<MeshAsset> createCube() {
   std::vector<glm::vec4> tangents;
   std::vector<glm::vec2> texCoords;
 
-  std::vector<uint32_t> indices{0,  1,  2,  3,  2,  1,  4,  5,  6,  7,  6,  5,
-                                8,  9,  10, 11, 10, 9,  12, 13, 14, 15, 14, 13,
-                                16, 17, 18, 19, 18, 17, 20, 21, 22, 23, 22, 21};
+  std::vector<u32> indices{0,  1,  2,  3,  2,  1,  4,  5,  6,  7,  6,  5,
+                           8,  9,  10, 11, 10, 9,  12, 13, 14, 15, 14, 13,
+                           16, 17, 18, 19, 18, 17, 20, 21, 22, 23, 22, 21};
 
   // Front face
   positions.push_back({-1.0f, -1.0f, -1.0f});

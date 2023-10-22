@@ -14,7 +14,7 @@
 
 namespace quoll {
 
-static constexpr uint32_t CubemapSides = 6;
+static constexpr u32 CubemapSides = 6;
 
 /**
  * @brief Get Vulkan format from RHI format
@@ -130,7 +130,7 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   createInfo.numFaces =
       asset.data.type == quoll::TextureAssetType::Cubemap ? CubemapSides : 1;
   createInfo.numLayers = asset.data.layers;
-  createInfo.numLevels = static_cast<uint32_t>(asset.data.levels.size());
+  createInfo.numLevels = static_cast<u32>(asset.data.levels.size());
   createInfo.isArray = KTX_FALSE;
   createInfo.generateMipmaps = KTX_FALSE;
   createInfo.vkFormat = getVulkanFormatFromFormat(asset.data.format);
@@ -152,12 +152,12 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
 
   const auto *baseData =
       static_cast<const ktx_uint8_t *>(asset.data.data.data());
-  for (size_t i = 0; i < asset.data.levels.size(); ++i) {
+  for (usize i = 0; i < asset.data.levels.size(); ++i) {
     const auto &level = asset.data.levels.at(i);
 
-    size_t faceOffset = 0;
-    size_t faceSize = level.size / createInfo.numFaces;
-    for (uint32_t face = 0; face < createInfo.numFaces; ++face) {
+    usize faceOffset = 0;
+    usize faceSize = level.size / createInfo.numFaces;
+    for (u32 face = 0; face < createInfo.numFaces; ++face) {
       ktxTexture_SetImageFromMemory(
           baseTexture, static_cast<ktx_uint32_t>(i), 0, face,
           baseData + level.offset + faceOffset, faceSize);
@@ -198,7 +198,7 @@ Result<TextureAssetHandle> AssetCache::loadTexture(const Uuid &uuid) {
   auto size = stream.tellg();
   stream.seekg(0, std::ios::beg);
 
-  std::vector<uint8_t> bytes(size);
+  std::vector<u8> bytes(size);
   stream.read(reinterpret_cast<char *>(bytes.data()), size);
   stream.close();
 
@@ -243,22 +243,22 @@ Result<TextureAssetHandle> AssetCache::loadTexture(const Uuid &uuid) {
 
   auto *srcData = ktxTexture_GetData(ktxTextureData);
 
-  size_t numFaces = ktxTextureData->isCubemap ? CubemapSides : 1;
+  usize numFaces = ktxTextureData->isCubemap ? CubemapSides : 1;
 
-  size_t levelOffset = 0;
-  uint32_t mipWidth = texture.data.width;
-  uint32_t mipHeight = texture.data.height;
+  usize levelOffset = 0;
+  u32 mipWidth = texture.data.width;
+  u32 mipHeight = texture.data.height;
 
-  for (size_t level = 0; level < texture.data.levels.size(); ++level) {
+  for (usize level = 0; level < texture.data.levels.size(); ++level) {
     // ktsTexture_GetImageSize returns size of a
     // single face or layer within a level
-    size_t blockSize =
-        ktxTexture_GetImageSize(ktxTextureData, static_cast<int32_t>(level));
+    usize blockSize =
+        ktxTexture_GetImageSize(ktxTextureData, static_cast<i32>(level));
 
-    size_t levelSize = blockSize * numFaces;
+    usize levelSize = blockSize * numFaces;
 
-    texture.data.levels.at(level).offset = static_cast<uint32_t>(levelOffset);
-    texture.data.levels.at(level).size = static_cast<uint32_t>(levelSize);
+    texture.data.levels.at(level).offset = static_cast<u32>(levelOffset);
+    texture.data.levels.at(level).size = static_cast<u32>(levelSize);
     texture.data.levels.at(level).width = mipWidth;
     texture.data.levels.at(level).height = mipHeight;
 
@@ -270,12 +270,12 @@ Result<TextureAssetHandle> AssetCache::loadTexture(const Uuid &uuid) {
       mipHeight /= 2;
     }
 
-    for (size_t face = 0; face < numFaces; ++face) {
-      size_t offset = 0;
-      ktxTexture_GetImageOffset(ktxTextureData, static_cast<int32_t>(level), 0,
-                                static_cast<uint32_t>(face), &offset);
+    for (usize face = 0; face < numFaces; ++face) {
+      usize offset = 0;
+      ktxTexture_GetImageOffset(ktxTextureData, static_cast<i32>(level), 0,
+                                static_cast<u32>(face), &offset);
 
-      memcpy(static_cast<uint8_t *>(texture.data.data.data()) + levelOffset +
+      memcpy(static_cast<u8 *>(texture.data.data.data()) + levelOffset +
                  (blockSize * face),
              srcData + offset, blockSize);
     }

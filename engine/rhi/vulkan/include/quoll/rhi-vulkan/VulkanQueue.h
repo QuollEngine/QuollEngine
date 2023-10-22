@@ -15,14 +15,14 @@ public:
    * @param device Vulkan device object
    * @param queueIndex Queue index
    */
-  VulkanQueue(VulkanDeviceObject &device, uint32_t queueIndex);
+  VulkanQueue(VulkanDeviceObject &device, u32 queueIndex);
 
   /**
    * @brief Get queue index
    *
    * @return Queue index
    */
-  inline uint32_t getQueueIndex() const { return mQueueIndex; }
+  inline u32 getQueueIndex() const { return mQueueIndex; }
 
   /**
    * @brief Get Vulkan queue handle
@@ -58,7 +58,7 @@ public:
 
 private:
   VkQueue mQueue = VK_NULL_HANDLE;
-  uint32_t mQueueIndex = 0;
+  u32 mQueueIndex = 0;
 };
 
 } // namespace quoll::rhi

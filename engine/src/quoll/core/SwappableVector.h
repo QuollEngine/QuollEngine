@@ -29,7 +29,7 @@ public:
      * @param container Swappaple vector container
      * @param index Index
      */
-    Iterator(const SwappableVector<TItem> &container, size_t index)
+    Iterator(const SwappableVector<TItem> &container, usize index)
         : mContainer(container), mIndex(index) {}
 
     /**
@@ -60,7 +60,7 @@ public:
 
   private:
     const SwappableVector<TItem> &mContainer;
-    size_t mIndex;
+    usize mIndex;
   };
 
 public:
@@ -83,9 +83,9 @@ public:
    *
    * @param index Index
    */
-  void erase(size_t index) {
+  void erase(usize index) {
     QuollAssert(index < mSize, "Index out of bounds");
-    size_t lastItem = mSize - 1;
+    usize lastItem = mSize - 1;
     mBuffer.at(index) = mBuffer.at(lastItem);
     mSize--;
   }
@@ -96,7 +96,7 @@ public:
    * @param index Index
    * @return Item
    */
-  inline TItem &at(size_t index) {
+  inline TItem &at(usize index) {
     QuollAssert(index < mSize, "Index out of bounds");
     return mBuffer.at(index);
   }
@@ -107,7 +107,7 @@ public:
    * @param index Index
    * @return Item
    */
-  inline const TItem &at(size_t index) const {
+  inline const TItem &at(usize index) const {
     QuollAssert(index < mSize, "Index out of bounds");
     return mBuffer.at(index);
   }
@@ -116,7 +116,7 @@ public:
    * @brief Get size of vector
    * @return Vector size
    */
-  inline size_t size() const { return mSize; }
+  inline usize size() const { return mSize; }
 
   /**
    * @brief Check if vector is empty
@@ -141,7 +141,7 @@ public:
   inline Iterator end() const { return Iterator(*this, mSize); }
 
 private:
-  size_t mSize = 0;
+  usize mSize = 0;
   std::vector<TItem> mBuffer;
 };
 

@@ -44,7 +44,7 @@ public:
    * @param data New data
    * @param size Size to copy
    */
-  void update(const void *data, size_t size);
+  void update(const void *data, usize size);
 
   /**
    * @brief Resize buffer
@@ -55,7 +55,7 @@ public:
    *
    * @param size New size
    */
-  void resize(size_t size);
+  void resize(usize size);
 
   /**
    * @brief Get device address

@@ -30,22 +30,22 @@ struct PhysicalDeviceProperties {
   /**
    * API version
    */
-  uint32_t apiVersion;
+  u32 apiVersion;
 
   /**
    * Driver version
    */
-  uint32_t driverVersion;
+  u32 driverVersion;
 
   /**
    * Vendor ID
    */
-  uint32_t vendorId;
+  u32 vendorId;
 
   /**
    * Device ID
    */
-  uint32_t deviceId;
+  u32 deviceId;
 };
 
 /**

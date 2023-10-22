@@ -2,33 +2,33 @@
 
 namespace quoll {
 
-enum class MaterialAssetHandle : uint32_t { Null = 0 };
+enum class MaterialAssetHandle : u32 { Null = 0 };
 
-enum class TextureAssetHandle : uint32_t { Null = 0 };
+enum class TextureAssetHandle : u32 { Null = 0 };
 
-enum class FontAssetHandle : uint32_t { Null = 0 };
+enum class FontAssetHandle : u32 { Null = 0 };
 
-enum class MeshAssetHandle : uint32_t { Null = 0 };
+enum class MeshAssetHandle : u32 { Null = 0 };
 
-enum class SkeletonAssetHandle : uint32_t { Null = 0 };
+enum class SkeletonAssetHandle : u32 { Null = 0 };
 
-enum class AnimationAssetHandle : uint32_t { Null = 0 };
+enum class AnimationAssetHandle : u32 { Null = 0 };
 
-enum class AnimatorAssetHandle : uint32_t { Null = 0 };
+enum class AnimatorAssetHandle : u32 { Null = 0 };
 
-enum class AudioAssetHandle : uint32_t { Null = 0 };
+enum class AudioAssetHandle : u32 { Null = 0 };
 
-enum class PrefabAssetHandle : uint32_t { Null = 0 };
+enum class PrefabAssetHandle : u32 { Null = 0 };
 
-enum class LuaScriptAssetHandle : uint32_t { Null = 0 };
+enum class LuaScriptAssetHandle : u32 { Null = 0 };
 
-enum class EnvironmentAssetHandle : uint32_t { Null = 0 };
+enum class EnvironmentAssetHandle : u32 { Null = 0 };
 
-enum class SceneAssetHandle : uint32_t { Null = 0 };
+enum class SceneAssetHandle : u32 { Null = 0 };
 
-enum class InputMapAssetHandle : uint32_t { Null = 0 };
+enum class InputMapAssetHandle : u32 { Null = 0 };
 
-enum class AssetType : uint8_t {
+enum class AssetType : u8 {
   None,
   Material,
   Texture,

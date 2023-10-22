@@ -59,7 +59,7 @@ public:
    */
   inline VkDescriptorSetLayout
   getVulkanDescriptorSetLayout(DescriptorLayoutHandle handle) {
-    return mDescriptorSetLayouts.at(static_cast<size_t>(handle) - 1);
+    return mDescriptorSetLayouts.at(static_cast<usize>(handle) - 1);
   }
 
   /**
@@ -70,7 +70,7 @@ public:
    */
   inline const DescriptorLayoutDescription &
   getDescriptorLayoutDescription(DescriptorLayoutHandle handle) {
-    return mDescriptorLayoutDescriptions.at(static_cast<size_t>(handle) - 1);
+    return mDescriptorLayoutDescriptions.at(static_cast<usize>(handle) - 1);
   }
 
 private:

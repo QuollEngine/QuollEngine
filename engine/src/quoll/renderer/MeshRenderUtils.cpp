@@ -3,9 +3,9 @@
 
 namespace quoll {
 
-static constexpr size_t PositionsIndex = 0;
-static constexpr size_t JointsIndex = 5;
-static constexpr size_t WeightsIndex = 6;
+static constexpr usize PositionsIndex = 0;
+static constexpr usize JointsIndex = 5;
+static constexpr usize WeightsIndex = 6;
 
 std::array<rhi::BufferHandle, 1>
 MeshRenderUtils::getGeometryBuffers(const MeshAsset &mesh) {
@@ -13,7 +13,7 @@ MeshRenderUtils::getGeometryBuffers(const MeshAsset &mesh) {
   return std::array{mesh.vertexBuffers.at(PositionsIndex)};
 }
 
-std::array<uint64_t, 1>
+std::array<u64, 1>
 MeshRenderUtils::getGeometryBufferOffsets(const MeshAsset &mesh) {
   return std::array{mesh.vertexBufferOffsets.at(PositionsIndex)};
 }
@@ -25,7 +25,7 @@ MeshRenderUtils::getSkinnedGeometryBuffers(const MeshAsset &mesh) {
                     mesh.vertexBuffers.at(WeightsIndex)};
 }
 
-std::array<uint64_t, MeshRenderUtils::SkinGeometryContributors>
+std::array<u64, MeshRenderUtils::SkinGeometryContributors>
 MeshRenderUtils::getSkinnedGeometryBufferOffsets(const MeshAsset &mesh) {
   return std::array{mesh.vertexBufferOffsets.at(PositionsIndex),
                     mesh.vertexBufferOffsets.at(JointsIndex),

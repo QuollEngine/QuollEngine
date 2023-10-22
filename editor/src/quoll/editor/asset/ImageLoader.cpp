@@ -14,9 +14,9 @@ ImageLoader::ImageLoader(AssetCache &assetCache, RenderStorage &renderStorage)
 Result<Uuid> ImageLoader::loadFromPath(const Path &sourceAssetPath,
                                        const Uuid &uuid, bool generateMipMaps,
                                        rhi::Format format) {
-  int32_t width = 0;
-  int32_t height = 0;
-  int32_t channels = 0;
+  i32 width = 0;
+  i32 height = 0;
+  i32 channels = 0;
 
   auto *data = stbi_load(sourceAssetPath.string().c_str(), &width, &height,
                          &channels, STBI_rgb_alpha);
@@ -26,33 +26,31 @@ Result<Uuid> ImageLoader::loadFromPath(const Path &sourceAssetPath,
   }
 
   auto res = loadFromMemory(
-      data, static_cast<uint32_t>(width), static_cast<uint32_t>(height), uuid,
+      data, static_cast<u32>(width), static_cast<u32>(height), uuid,
       sourceAssetPath.filename().string(), generateMipMaps, format);
 
   stbi_image_free(data);
   return res;
 }
 
-Result<Uuid> ImageLoader::loadFromMemory(void *data, uint32_t width,
-                                         uint32_t height, const Uuid &uuid,
-                                         const String &name,
+Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
+                                         const Uuid &uuid, const String &name,
                                          bool generateMipMaps,
                                          rhi::Format format) {
   std::vector<TextureAssetLevel> levels;
-  std::vector<uint8_t> assetData;
+  std::vector<u8> assetData;
   if (generateMipMaps) {
     auto numLevels =
-        static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) +
-        1;
+        static_cast<u32>(std::floor(std::log2(std::max(width, height)))) + 1;
 
     levels.resize(numLevels);
 
-    uint32_t bufferOffset = 0;
-    uint32_t mipWidth = width;
-    uint32_t mipHeight = height;
-    for (uint32_t i = 0; i < numLevels; ++i) {
+    u32 bufferOffset = 0;
+    u32 mipWidth = width;
+    u32 mipHeight = height;
+    for (u32 i = 0; i < numLevels; ++i) {
       levels.at(i).offset = bufferOffset;
-      levels.at(i).size = static_cast<size_t>(mipWidth) * mipHeight * 4;
+      levels.at(i).size = static_cast<usize>(mipWidth) * mipHeight * 4;
       levels.at(i).width = mipWidth;
       levels.at(i).height = mipHeight;
 
@@ -71,10 +69,10 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, uint32_t width,
   } else {
     levels.resize(1);
     levels.at(0).offset = 0;
-    levels.at(0).size = static_cast<size_t>(width) * height * 4;
+    levels.at(0).size = static_cast<usize>(width) * height * 4;
     levels.at(0).width = width;
     levels.at(0).height = height;
-    size_t textureSize = TextureUtils::getBufferSizeFromLevels(levels);
+    usize textureSize = TextureUtils::getBufferSizeFromLevels(levels);
     assetData.resize(textureSize);
     memcpy(assetData.data(), data, textureSize);
   }
@@ -105,11 +103,11 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, uint32_t width,
       mAssetCache.getRegistry().getTextures().getAsset(loadRes.getData()).uuid);
 }
 
-std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
+std::vector<u8> ImageLoader::generateMipMapsFromTextureData(
     void *data, const std::vector<TextureAssetLevel> &levels,
     rhi::Format format) {
   rhi::TextureDescription description{};
-  description.mipLevelCount = static_cast<uint32_t>(levels.size());
+  description.mipLevelCount = static_cast<u32>(levels.size());
   description.width = levels.at(0).width;
   description.height = levels.at(0).height;
   description.depth = 1;
@@ -119,7 +117,7 @@ std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
   description.format = format;
 
   auto texture = mRenderStorage.createTexture(description);
-  size_t size = static_cast<size_t>(description.width) * description.height * 4;
+  usize size = static_cast<usize>(description.width) * description.height * 4;
 
   TextureUtils::copyDataToTexture(
       mRenderStorage.getDevice(), data, texture,
@@ -129,11 +127,9 @@ std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
   TextureUtils::generateMipMapsForTexture(
       mRenderStorage.getDevice(), texture,
       rhi::ImageLayout::TransferSourceOptimal, description.layerCount,
-      static_cast<uint32_t>(levels.size()), description.width,
-      description.height);
+      static_cast<u32>(levels.size()), description.width, description.height);
 
-  std::vector<uint8_t> textureData(
-      TextureUtils::getBufferSizeFromLevels(levels));
+  std::vector<u8> textureData(TextureUtils::getBufferSizeFromLevels(levels));
 
   TextureUtils::copyTextureToData(mRenderStorage.getDevice(), texture,
                                   rhi::ImageLayout::TransferDestinationOptimal,

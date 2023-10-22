@@ -45,7 +45,7 @@ public:
    * @param dt Time delta
    * @param entityDatabase Entity database
    */
-  void update(float dt, EntityDatabase &entityDatabase) override;
+  void update(f32 dt, EntityDatabase &entityDatabase) override;
 
   /**
    * @brief Cleanup Physx actors and shapes
@@ -73,7 +73,7 @@ public:
    * @retval false Entity not collided
    */
   bool sweep(EntityDatabase &entityDatabase, Entity entity,
-             const glm::vec3 &direction, float distance,
+             const glm::vec3 &direction, f32 distance,
              CollisionHit &hit) override;
 
 private:

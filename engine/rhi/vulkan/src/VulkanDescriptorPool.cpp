@@ -25,15 +25,14 @@ VulkanDescriptorPool::~VulkanDescriptorPool() {
 }
 
 void VulkanDescriptorPool::createDescriptorPool() {
-  static constexpr uint32_t NumUniformBuffers = 15000;
-  static constexpr uint32_t NumUniformBuffersDynamic = 20;
-  static constexpr uint32_t NumStorageBuffers = 10;
-  static constexpr uint32_t NumSamplers = 1000;
-  static constexpr uint32_t NumDescriptors = 30000;
-  static constexpr uint32_t MaxTextureDescriptors = 8;
+  static constexpr u32 NumUniformBuffers = 15000;
+  static constexpr u32 NumUniformBuffersDynamic = 20;
+  static constexpr u32 NumStorageBuffers = 10;
+  static constexpr u32 NumSamplers = 1000;
+  static constexpr u32 NumDescriptors = 30000;
+  static constexpr u32 MaxTextureDescriptors = 8;
 
-  static constexpr uint32_t MaxImageSamplers =
-      MaxTextureDescriptors * NumSamplers;
+  static constexpr u32 MaxImageSamplers = MaxTextureDescriptors * NumSamplers;
 
   std::array<VkDescriptorPoolSize, 4> poolSizes{
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -50,7 +49,7 @@ void VulkanDescriptorPool::createDescriptorPool() {
   descriptorPoolInfo.pNext = nullptr;
   descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
   descriptorPoolInfo.maxSets = NumDescriptors;
-  descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+  descriptorPoolInfo.poolSizeCount = static_cast<u32>(poolSizes.size());
   descriptorPoolInfo.pPoolSizes = poolSizes.data();
 
   checkForVulkanError(vkCreateDescriptorPool(mDevice, &descriptorPoolInfo,

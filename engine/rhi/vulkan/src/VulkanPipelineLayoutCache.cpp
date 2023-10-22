@@ -43,14 +43,14 @@ VulkanPipelineLayoutCache::~VulkanPipelineLayoutCache() {
 
 DescriptorLayoutHandle VulkanPipelineLayoutCache::getOrCreateDescriptorLayout(
     const DescriptorLayoutDescription &description) {
-  for (size_t i = 0; i < mDescriptorLayoutDescriptions.size(); ++i) {
+  for (usize i = 0; i < mDescriptorLayoutDescriptions.size(); ++i) {
     const auto &existing = mDescriptorLayoutDescriptions.at(i);
     if (existing.bindings.size() != description.bindings.size()) {
       continue;
     }
 
     bool matches = true;
-    for (size_t li = 0; li < description.bindings.size() && matches; ++li) {
+    for (usize li = 0; li < description.bindings.size() && matches; ++li) {
       matches =
           bindingsMatch(description.bindings.at(li), existing.bindings.at(li));
     }
@@ -82,7 +82,7 @@ VkDescriptorSetLayout VulkanPipelineLayoutCache::createDescriptorLayout(
   std::vector<VkDescriptorSetLayoutBinding> vkBindings(
       description.bindings.size(), VkDescriptorSetLayoutBinding{});
 
-  for (size_t i = 0; i < description.bindings.size(); ++i) {
+  for (usize i = 0; i < description.bindings.size(); ++i) {
     auto &binding = description.bindings.at(i);
 
     if (binding.type == DescriptorLayoutBindingType::Dynamic) {
@@ -104,15 +104,14 @@ VkDescriptorSetLayout VulkanPipelineLayoutCache::createDescriptorLayout(
       VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
   bindingFlagsCreateInfo.pNext = nullptr;
   bindingFlagsCreateInfo.pBindingFlags = vkBindingFlags.data();
-  bindingFlagsCreateInfo.bindingCount =
-      static_cast<uint32_t>(vkBindingFlags.size());
+  bindingFlagsCreateInfo.bindingCount = static_cast<u32>(vkBindingFlags.size());
 
   VkDescriptorSetLayout layout = VK_NULL_HANDLE;
   VkDescriptorSetLayoutCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
   createInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
   createInfo.pNext = &bindingFlagsCreateInfo;
-  createInfo.bindingCount = static_cast<uint32_t>(vkBindings.size());
+  createInfo.bindingCount = static_cast<u32>(vkBindings.size());
   createInfo.pBindings = vkBindings.data();
 
   checkForVulkanError(

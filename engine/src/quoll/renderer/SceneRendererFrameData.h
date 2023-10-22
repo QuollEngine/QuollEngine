@@ -20,22 +20,22 @@ public:
   /**
    * Default reserved space for buffers
    */
-  static constexpr size_t DefaultReservedSpace = 10000;
+  static constexpr usize DefaultReservedSpace = 10000;
 
   /**
    * Maximum number of joints
    */
-  static constexpr size_t MaxNumJoints = 32;
+  static constexpr usize MaxNumJoints = 32;
 
   /**
    * Maximum number of lights
    */
-  static constexpr size_t MaxNumLights = 256;
+  static constexpr usize MaxNumLights = 256;
 
   /**
    * Maximum number of shadow maps
    */
-  static constexpr size_t MaxShadowMaps = 16;
+  static constexpr usize MaxShadowMaps = 16;
 
   /**
    * @brief Directional light data
@@ -169,12 +169,12 @@ public:
     /**
      * Range start
      */
-    uint32_t start = 0;
+    u32 start = 0;
 
     /**
      * Range end
      */
-    uint32_t end = 0;
+    u32 end = 0;
   };
 
   /**
@@ -210,12 +210,12 @@ public:
     /**
      * Last skeleton index
      */
-    size_t lastSkeleton = 0;
+    usize lastSkeleton = 0;
 
     /**
      * Skeleton capacity
      */
-    size_t skeletonCapacity = 0;
+    usize skeletonCapacity = 0;
   };
 
   /**
@@ -248,12 +248,12 @@ public:
     /**
      * Glyph start position in glyphs buffer
      */
-    uint32_t glyphStart = 0;
+    u32 glyphStart = 0;
 
     /**
      * Text length
      */
-    uint32_t length = 0;
+    u32 length = 0;
   };
 
 public:
@@ -264,7 +264,7 @@ public:
    * @param reservedSpace Reserved space for buffer data
    */
   SceneRendererFrameData(RenderStorage &renderStorage,
-                         size_t reservedSpace = DefaultReservedSpace);
+                         usize reservedSpace = DefaultReservedSpace);
 
   /**
    * @brief Update storage buffers
@@ -330,14 +330,14 @@ public:
    *
    * @return Number of lights
    */
-  inline uint32_t getNumLights() const { return mSceneData.data.x; }
+  inline u32 getNumLights() const { return mSceneData.data.x; }
 
   /**
    * @brief Get number shadow maps
    *
    * @return Number of shadow maps
    */
-  inline const size_t getNumShadowMaps() const { return mShadowMaps.size(); }
+  inline const usize getNumShadowMaps() const { return mShadowMaps.size(); }
 
   /**
    * @brief Set default material
@@ -480,7 +480,7 @@ public:
    *
    * @return Reserved space
    */
-  inline size_t getReservedSpace() const { return mReservedSpace; }
+  inline usize getReservedSpace() const { return mReservedSpace; }
 
   /**
    * @brief Get bindless parameters
@@ -661,7 +661,7 @@ private:
   Camera mCameraData;
   PerspectiveLens mCameraLens;
 
-  size_t mLastSkeleton = 0;
+  usize mLastSkeleton = 0;
 
   std::vector<rhi::DeviceAddress> mFlatMaterials;
   rhi::Buffer mFlatMaterialsBuffer;
@@ -695,7 +695,7 @@ private:
   rhi::Buffer mTextTransformsBuffer;
   rhi::Buffer mTextGlyphsBuffer;
 
-  size_t mReservedSpace = 0;
+  usize mReservedSpace = 0;
 
   BindlessDrawParameters mBindlessParams;
 };

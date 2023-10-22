@@ -74,12 +74,12 @@ struct ImageBarrier {
   /**
    * Base mip level
    */
-  uint32_t baseLevel = 0;
+  u32 baseLevel = 0;
 
   /**
    * Mip level count
    */
-  uint32_t levelCount = 1;
+  u32 levelCount = 1;
 };
 
 /**
@@ -114,12 +114,12 @@ struct BufferBarrier {
   /**
    * Buffer offset
    */
-  uint32_t offset = 0;
+  u32 offset = 0;
 
   /**
    * Buffer size
    */
-  uint32_t size = 0;
+  u32 size = 0;
 };
 
 } // namespace quoll::rhi

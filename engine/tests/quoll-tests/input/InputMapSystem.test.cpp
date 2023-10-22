@@ -24,7 +24,7 @@ public:
     inputStates.insert_or_assign(key, value);
   }
 
-  void setInputState(int key, float value) {
+  void setInputState(int key, f32 value) {
     inputStates.insert_or_assign(key, value);
   }
 

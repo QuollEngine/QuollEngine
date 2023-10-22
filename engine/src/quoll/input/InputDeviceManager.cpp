@@ -14,7 +14,7 @@ void InputDeviceManager::addDevice(InputDevice device) {
       << "Device \"" << device.name << "\" connected";
 }
 
-void InputDeviceManager::removeDevice(InputDeviceType type, uint32_t index) {
+void InputDeviceManager::removeDevice(InputDeviceType type, u32 index) {
   auto it =
       std::find_if(mDevices.begin(), mDevices.end(),
                    [type, index](const InputDevice &existing) {

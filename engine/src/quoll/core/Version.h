@@ -11,11 +11,10 @@ namespace quoll {
  * @param build Build number
  * @return Version uint
  */
-constexpr inline uint64_t createVersion(uint8_t major, uint8_t minor = 0,
-                                        uint8_t patch = 0, uint32_t build = 0) {
-  return (static_cast<uint64_t>(major) << 56) |
-         (static_cast<uint64_t>(minor) << 48) |
-         (static_cast<uint64_t>(patch) << 40) | (static_cast<uint64_t>(build));
+constexpr inline u64 createVersion(u8 major, u8 minor = 0, u8 patch = 0,
+                                   u32 build = 0) {
+  return (static_cast<u64>(major) << 56) | (static_cast<u64>(minor) << 48) |
+         (static_cast<u64>(patch) << 40) | (static_cast<u64>(build));
 }
 
 } // namespace quoll

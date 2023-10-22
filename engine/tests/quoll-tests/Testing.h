@@ -27,7 +27,7 @@ void PrintTo(const qua<T, Q> &value, std::ostream *out) {
 namespace quoll {
 
 static void PrintTo(Entity entity, std::ostream *out) {
-  *out << static_cast<uint32_t>(entity);
+  *out << static_cast<u32>(entity);
 }
 
 } // namespace quoll

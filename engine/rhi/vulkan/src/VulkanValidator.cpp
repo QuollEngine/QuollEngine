@@ -34,8 +34,7 @@ void VulkanValidator::attachToInstanceCreateConfig(
   createInfo.pNext =
       (VkDebugUtilsMessengerCreateInfoEXT *)&mMessengerCreateInfo;
   createInfo.ppEnabledLayerNames = mValidationLayers.data();
-  createInfo.enabledLayerCount =
-      static_cast<uint32_t>(mValidationLayers.size());
+  createInfo.enabledLayerCount = static_cast<u32>(mValidationLayers.size());
 }
 
 void VulkanValidator::attachToInstance(VkInstance instance) {
@@ -84,7 +83,7 @@ static String getValidationMessage(
   ss << newStr;
   ss << "\n\t"
      << "Message ID: " << pCallbackData->pMessageIdName;
-  for (uint32_t i = 0; i < pCallbackData->objectCount; ++i) {
+  for (u32 i = 0; i < pCallbackData->objectCount; ++i) {
     const char *name = pCallbackData->pObjects[i].pObjectName;
     ss << "\n\t"
        << "Object: " << (name ? name : "[no name]");
@@ -111,7 +110,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanValidator::debugCallback(
 }
 
 bool VulkanValidator::checkValidationSupport() {
-  uint32_t layerCount = 0;
+  u32 layerCount = 0;
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
   std::vector<VkLayerProperties> availableLayers(layerCount);

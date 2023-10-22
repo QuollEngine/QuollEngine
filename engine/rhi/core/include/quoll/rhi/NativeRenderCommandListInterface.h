@@ -68,9 +68,9 @@ public:
    * @param descriptor Descriptor
    * @param dynamicOffsets Dynamic offsets
    */
-  virtual void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
+  virtual void bindDescriptor(PipelineHandle pipeline, u32 firstSet,
                               const Descriptor &descriptor,
-                              std::span<uint32_t> dynamicOffsets) = 0;
+                              std::span<u32> dynamicOffsets) = 0;
 
   /**
    * @brief Bind vertex buffers
@@ -79,7 +79,7 @@ public:
    * @param offsets Vertex buffer binding offsets
    */
   virtual void bindVertexBuffers(const std::span<const BufferHandle> buffers,
-                                 const std::span<const uint64_t> offsets) = 0;
+                                 const std::span<const u64> offsets) = 0;
 
   /**
    * @brief Bind index buffer
@@ -99,7 +99,7 @@ public:
    * @param data Data
    */
   virtual void pushConstants(PipelineHandle pipeline, ShaderStage shaderStage,
-                             uint32_t offset, uint32_t size, void *data) = 0;
+                             u32 offset, u32 size, void *data) = 0;
 
   /**
    * @brief Draw
@@ -109,8 +109,8 @@ public:
    * @param instanceCount Instance count
    * @param firstInstance First instance
    */
-  virtual void draw(uint32_t vertexCount, uint32_t firstVertex,
-                    uint32_t instanceCount, uint32_t firstInstance) = 0;
+  virtual void draw(u32 vertexCount, u32 firstVertex, u32 instanceCount,
+                    u32 firstInstance) = 0;
 
   /**
    * @brief Draw indexed
@@ -121,9 +121,8 @@ public:
    * @param instanceCount Instance count
    * @param firstInstance First instance
    */
-  virtual void drawIndexed(uint32_t indexCount, uint32_t firstIndex,
-                           int32_t vertexOffset, uint32_t instanceCount,
-                           uint32_t firstInstance) = 0;
+  virtual void drawIndexed(u32 indexCount, u32 firstIndex, i32 vertexOffset,
+                           u32 instanceCount, u32 firstInstance) = 0;
 
   /**
    * @brief Dispatch compute work
@@ -132,8 +131,7 @@ public:
    * @param groupCountY Number of groups to dispatch in Y direction
    * @param groupCountZ Number of groups to dispatch in Z direction
    */
-  virtual void dispatch(uint32_t groupCountX, uint32_t groupCountY,
-                        uint32_t groupCountZ) = 0;
+  virtual void dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) = 0;
 
   /**
    * @brief Set viewport

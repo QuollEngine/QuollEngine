@@ -24,7 +24,7 @@ struct DescriptorLayoutBindingDescription {
   /**
    * Binding number
    */
-  uint32_t binding = 0;
+  u32 binding = 0;
 
   /**
    * Descriptor type
@@ -34,7 +34,7 @@ struct DescriptorLayoutBindingDescription {
   /**
    * Number of descriptors
    */
-  uint32_t descriptorCount = 0;
+  u32 descriptorCount = 0;
 
   /**
    * Shader stage

@@ -8,7 +8,7 @@ namespace quoll {
  * @brief Mesh render utilities
  */
 class MeshRenderUtils {
-  static constexpr size_t SkinGeometryContributors = 3;
+  static constexpr usize SkinGeometryContributors = 3;
 
 public:
   /**
@@ -29,8 +29,7 @@ public:
    * @param mesh Mesh asset data
    * @return Offsets
    */
-  static std::array<uint64_t, 1>
-  getGeometryBufferOffsets(const MeshAsset &mesh);
+  static std::array<u64, 1> getGeometryBufferOffsets(const MeshAsset &mesh);
 
   /**
    * @brief Get buffers required for skinned mesh geometry
@@ -50,7 +49,7 @@ public:
    * @param mesh Mesh asset data
    * @return Offsets
    */
-  static std::array<uint64_t, SkinGeometryContributors>
+  static std::array<u64, SkinGeometryContributors>
   getSkinnedGeometryBufferOffsets(const MeshAsset &mesh);
 };
 

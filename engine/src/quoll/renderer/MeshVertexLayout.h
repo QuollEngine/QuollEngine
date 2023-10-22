@@ -29,7 +29,7 @@ template <class TType> static rhi::Format getFormat() {
 template <typename... TTypes>
 static constexpr void
 createBindings(std::vector<rhi::PipelineVertexInputBinding> &bindings) {
-  (bindings.push_back({.binding = static_cast<uint32_t>(bindings.size()),
+  (bindings.push_back({.binding = static_cast<u32>(bindings.size()),
                        .stride = sizeof(TTypes),
                        .inputRate = rhi::VertexInputRate::Vertex}),
    ...);
@@ -38,8 +38,8 @@ createBindings(std::vector<rhi::PipelineVertexInputBinding> &bindings) {
 template <typename... TTypes>
 static constexpr void
 createAttributes(std::vector<rhi::PipelineVertexInputAttribute> &attributes) {
-  (attributes.push_back({.slot = static_cast<uint32_t>(attributes.size()),
-                         .binding = static_cast<uint32_t>(attributes.size()),
+  (attributes.push_back({.slot = static_cast<u32>(attributes.size()),
+                         .binding = static_cast<u32>(attributes.size()),
                          .format = getFormat<TTypes>(),
                          .offset = 0}),
    ...);

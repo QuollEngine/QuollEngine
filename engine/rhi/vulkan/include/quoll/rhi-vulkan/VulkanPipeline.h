@@ -73,7 +73,7 @@ public:
    * @param index Descriptor layout index
    * @return Descriptor layout
    */
-  inline const VkDescriptorSetLayout getDescriptorLayout(uint32_t index) const {
+  inline const VkDescriptorSetLayout getDescriptorLayout(u32 index) const {
     return mDescriptorLayouts.at(index);
   }
 
@@ -109,7 +109,7 @@ private:
   VkPipelineLayout mPipelineLayout = VK_NULL_HANDLE;
   VkPipelineBindPoint mBindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
 
-  std::unordered_map<uint32_t, VkDescriptorSetLayout> mDescriptorLayouts;
+  std::unordered_map<u32, VkDescriptorSetLayout> mDescriptorLayouts;
 
   String mDebugName;
 };

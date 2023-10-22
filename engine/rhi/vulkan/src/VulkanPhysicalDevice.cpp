@@ -6,7 +6,7 @@ namespace quoll::rhi {
 std::vector<VulkanPhysicalDevice>
 VulkanPhysicalDevice::getPhysicalDevices(VkInstance instance,
                                          VkSurfaceKHR surface) {
-  uint32_t deviceCount = 0;
+  u32 deviceCount = 0;
   vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
   std::vector<VkPhysicalDevice> rawDevices(deviceCount);
   vkEnumeratePhysicalDevices(instance, &deviceCount, rawDevices.data());
@@ -52,7 +52,7 @@ bool VulkanPhysicalDevice::supportsSwapchain() const {
 
 const std::vector<VkExtensionProperties>
 VulkanPhysicalDevice::getSupportedExtensions() const {
-  uint32_t extensionCount = 0;
+  u32 extensionCount = 0;
   vkEnumerateDeviceExtensionProperties(mDevice, nullptr, &extensionCount,
                                        nullptr);
 
@@ -73,7 +73,7 @@ const VkSurfaceCapabilitiesKHR VulkanPhysicalDevice::getSurfaceCapabilities(
 
 const std::vector<VkSurfaceFormatKHR>
 VulkanPhysicalDevice::getSurfaceFormats(const VkSurfaceKHR &surface) const {
-  uint32_t surfaceFormatsCount = 0;
+  u32 surfaceFormatsCount = 0;
   vkGetPhysicalDeviceSurfaceFormatsKHR(mDevice, surface, &surfaceFormatsCount,
                                        nullptr);
   std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatsCount);
@@ -85,7 +85,7 @@ VulkanPhysicalDevice::getSurfaceFormats(const VkSurfaceKHR &surface) const {
 
 const std::vector<VkPresentModeKHR>
 VulkanPhysicalDevice::getPresentModes(const VkSurfaceKHR &surface) const {
-  uint32_t presentModesCount = 0;
+  u32 presentModesCount = 0;
   vkGetPhysicalDeviceSurfacePresentModesKHR(mDevice, surface,
                                             &presentModesCount, nullptr);
   std::vector<VkPresentModeKHR> presentModes(presentModesCount);

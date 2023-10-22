@@ -10,10 +10,10 @@ public:
 };
 
 TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
-  static constexpr size_t NumEntities = 20;
+  static constexpr usize NumEntities = 20;
 
   std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto entity = scene.entityDatabase.create();
     entities.at(i) = entity;
 
@@ -28,18 +28,18 @@ TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
 
   entityDeleter.update(scene);
 
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
     EXPECT_NE(scene.entityDatabase.exists(entity), (i % 2) == 0);
   }
 }
 
 TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
-  static constexpr size_t NumEntities = 20;
+  static constexpr usize NumEntities = 20;
 
   std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
 
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto entity = scene.entityDatabase.create();
     entities.at(i) = entity;
 
@@ -58,7 +58,7 @@ TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
 
   entityDeleter.update(scene);
 
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
 
     // Even numbers are removed
@@ -71,11 +71,11 @@ TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
 }
 
 TEST_F(EntityDeleterTest, RemoveDeletedEntityFromChildrenOfAParent) {
-  static constexpr size_t NumEntities = 20;
+  static constexpr usize NumEntities = 20;
 
   std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
 
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     auto entity = scene.entityDatabase.create();
     entities.at(i) = entity;
 
@@ -98,7 +98,7 @@ TEST_F(EntityDeleterTest, RemoveDeletedEntityFromChildrenOfAParent) {
 
   entityDeleter.update(scene);
 
-  for (size_t i = 0; i < entities.size(); ++i) {
+  for (usize i = 0; i < entities.size(); ++i) {
     if (!scene.entityDatabase.has<quoll::Children>(entities.at(i))) {
       continue;
     }

@@ -12,9 +12,9 @@ namespace quoll {
  * @brief Sparse set based entity storage
  */
 class EntityStorageSparseSet {
-  static constexpr size_t DeadIndex = std::numeric_limits<size_t>::max();
+  static constexpr usize DeadIndex = std::numeric_limits<usize>::max();
 
-  static constexpr size_t MaxObserverPoolSizePerComponent = 100;
+  static constexpr usize MaxObserverPoolSizePerComponent = 100;
 
 public:
   EntityStorageSparseSet() = default;
@@ -77,7 +77,7 @@ public:
    *
    * @return Number of entities
    */
-  inline const size_t getEntityCount() const { return mNumEntities; }
+  inline const usize getEntityCount() const { return mNumEntities; }
 
   /**
    * @brief Delete entity
@@ -99,19 +99,19 @@ public:
    */
   template <class TComponentType>
   void set(Entity entity, const TComponentType &value) {
-    QuollAssert(exists(entity),
-                "Entity " + std::to_string(static_cast<uint32_t>(entity)) +
-                    " does not exist");
+    QuollAssert(exists(entity), "Entity " +
+                                    std::to_string(static_cast<u32>(entity)) +
+                                    " does not exist");
 
     auto &pool = getPoolForComponent<TComponentType>();
 
-    size_t sEntity = static_cast<size_t>(entity);
+    usize sEntity = static_cast<usize>(entity);
     if (sEntity >= pool.entityIndices.size()) {
       // TODO: Make this better
       pool.entityIndices.resize((sEntity + 1) * 2, DeadIndex);
     }
 
-    size_t index = pool.entityIndices[sEntity];
+    usize index = pool.entityIndices[sEntity];
     if (index != DeadIndex) {
       pool.components[index] = value;
       pool.entities[index] = entity;
@@ -134,11 +134,11 @@ public:
     QuollAssert(has<TComponentType>(entity),
                 "Component named " + String(typeid(TComponentType).name()) +
                     " does not exist for entity " +
-                    std::to_string(static_cast<uint32_t>(entity)));
+                    std::to_string(static_cast<u32>(entity)));
     const auto &pool = getPoolForComponent<TComponentType>();
 
     return std::any_cast<const TComponentType &>(
-        pool.components[pool.entityIndices[static_cast<size_t>(entity)]]);
+        pool.components[pool.entityIndices[static_cast<usize>(entity)]]);
   }
 
   /**
@@ -152,11 +152,11 @@ public:
     QuollAssert(has<TComponentType>(entity),
                 "Component named " + String(typeid(TComponentType).name()) +
                     " does not exist for entity " +
-                    std::to_string(static_cast<uint32_t>(entity)));
+                    std::to_string(static_cast<u32>(entity)));
     auto &pool = getPoolForComponent<TComponentType>();
 
     return std::any_cast<TComponentType &>(
-        pool.components[pool.entityIndices[static_cast<size_t>(entity)]]);
+        pool.components[pool.entityIndices[static_cast<usize>(entity)]]);
   }
 
   /**
@@ -168,7 +168,7 @@ public:
    * @retval false Entity does not have component
    */
   template <class TComponentType> bool has(Entity entity) const {
-    size_t sEntity = static_cast<size_t>(entity);
+    usize sEntity = static_cast<usize>(entity);
     const auto &pool = getPoolForComponent<TComponentType>();
     return sEntity < pool.entityIndices.size() &&
            pool.entityIndices[sEntity] != DeadIndex;
@@ -181,15 +181,15 @@ public:
    * @param entity Entity
    */
   template <class TComponentType> void remove(Entity entity) {
-    size_t sEntity = static_cast<size_t>(entity);
+    usize sEntity = static_cast<usize>(entity);
 
     auto &pool = getPoolForComponent<TComponentType>();
     QuollAssert(sEntity < pool.entityIndices.size(),
                 "Component named " + String(typeid(TComponentType).name()) +
                     " does not exist for entity " +
-                    std::to_string(static_cast<uint32_t>(entity)));
+                    std::to_string(static_cast<u32>(entity)));
 
-    size_t entityIndexToDelete = pool.entityIndices[sEntity];
+    usize entityIndexToDelete = pool.entityIndices[sEntity];
 
     auto &observers = getRemoveObserverPoolForComponent<TComponentType>();
     for (auto &observer : observers) {
@@ -203,7 +203,7 @@ public:
     pool.entities[entityIndexToDelete] = movedEntity;
 
     // Change index of moved entity to the index of deleted entity
-    pool.entityIndices[static_cast<size_t>(movedEntity)] = entityIndexToDelete;
+    pool.entityIndices[static_cast<usize>(movedEntity)] = entityIndexToDelete;
 
     // Delete last item from entities array
     pool.entities.pop_back();
@@ -223,7 +223,7 @@ public:
    * @tparam TComponentType Component type
    * @return Number of entities
    */
-  template <class TComponentType> size_t getEntityCountForComponent() const {
+  template <class TComponentType> usize getEntityCountForComponent() const {
     return getPoolForComponent<TComponentType>().entities.size();
   }
 
@@ -367,7 +367,7 @@ private:
    * @param iterFn Iterator function
    * @param sequence Index sequence of picked components
    */
-  template <class... TPickComponents, size_t... TPickComponentIndices>
+  template <class... TPickComponents, usize... TPickComponentIndices>
   void iterateEntitiesInternal(
       const std::function<void(Entity, TPickComponents &...)> &iterFn,
       std::index_sequence<TPickComponentIndices...> sequence) {
@@ -385,11 +385,11 @@ private:
 
     const auto &smallestEntities = smallestPool->entities;
 
-    for (size_t i = 0; i < smallestEntities.size(); ++i) {
+    for (usize i = 0; i < smallestEntities.size(); ++i) {
       Entity entity = smallestEntities[i];
 
       bool isDead = false;
-      for (size_t i = 0; i < pickedPools.size() && !isDead; ++i) {
+      for (usize i = 0; i < pickedPools.size() && !isDead; ++i) {
         auto *pool = pickedPools.at(i);
         isDead = entity >= pool->entityIndices.size() ||
                  pool->entityIndices[entity] == DeadIndex;
@@ -447,7 +447,7 @@ private:
 
   Entity mLastEntity{1};
   std::list<Entity> mDeleted;
-  size_t mNumEntities = 0;
+  usize mNumEntities = 0;
 };
 
 } // namespace quoll

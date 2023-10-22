@@ -19,7 +19,7 @@ namespace quoll::editor {
  * @param value Srgb value
  * @return Linear value
  */
-static constexpr float SrgbToLinear(float value) {
+static constexpr f32 SrgbToLinear(f32 value) {
   if (value <= 0.0031308f) {
     return value / 12.92f;
   }
@@ -43,9 +43,9 @@ static ImVec4 SrgbToLinear(int r, int g, int b, int a = 255) {
           color.w};
 }
 
-static constexpr float FontSize = 18.0f;
+static constexpr f32 FontSize = 18.0f;
 
-static constexpr size_t NumFonts = 2;
+static constexpr usize NumFonts = 2;
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static std::array<ImFont *, NumFonts> Fonts{};
@@ -180,7 +180,7 @@ static void addFonts() {
   Fonts.at(1) =
       io.Fonts->AddFontFromFileTTF(boldFontPath.string().c_str(), FontSize);
 
-  for (size_t i = 0; i < Fonts.size(); ++i) {
+  for (usize i = 0; i < Fonts.size(); ++i) {
     ImFontConfig config;
     config.MergeMode = true;
     config.GlyphMinAdvanceX = FontSize;

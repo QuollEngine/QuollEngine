@@ -114,7 +114,7 @@ private:
    * @tparam Index Tuple index to loop
    * @tparam Size Tuple size
    */
-  template <size_t Index, size_t Size> inline void poll() {
+  template <usize Index, usize Size> inline void poll() {
     if constexpr (Index < Size) {
       std::get<Index>(mPools).poll();
       poll<Index + 1, Size>();

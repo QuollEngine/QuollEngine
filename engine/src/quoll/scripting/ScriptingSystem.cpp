@@ -66,7 +66,7 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase,
   }
 }
 
-void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
+void ScriptingSystem::update(f32 dt, EntityDatabase &entityDatabase) {
   QUOLL_PROFILE_EVENT("ScriptingSystem::update");
 
   for (auto [entity, script] : mScriptRemoveObserver) {

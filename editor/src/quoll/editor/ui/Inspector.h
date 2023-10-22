@@ -34,7 +34,7 @@ public:
 
 private:
   EntityPanel mEntityPanel;
-  size_t mSelectedIndex = 0;
+  usize mSelectedIndex = 0;
 
   std::vector<Tab> mTabs;
 };

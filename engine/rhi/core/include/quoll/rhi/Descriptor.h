@@ -33,8 +33,8 @@ public:
    * @param start Starting index
    * @return Current object
    */
-  Descriptor &write(uint32_t binding, std::span<TextureHandle> textures,
-                    DescriptorType type, uint32_t start = 0);
+  Descriptor &write(u32 binding, std::span<TextureHandle> textures,
+                    DescriptorType type, u32 start = 0);
 
   /**
    * @brief Bind sampler descriptors
@@ -44,8 +44,8 @@ public:
    * @param start Starting index
    * @return Current object
    */
-  Descriptor &write(uint32_t binding, std::span<SamplerHandle> samplers,
-                    uint32_t start = 0);
+  Descriptor &write(u32 binding, std::span<SamplerHandle> samplers,
+                    u32 start = 0);
 
   /**
    * @brief Bind buffer descriptors
@@ -56,8 +56,8 @@ public:
    * @param start Starting index
    * @return Current object
    */
-  Descriptor &write(uint32_t binding, std::span<BufferHandle> buffers,
-                    DescriptorType type, uint32_t start = 0);
+  Descriptor &write(u32 binding, std::span<BufferHandle> buffers,
+                    DescriptorType type, u32 start = 0);
 
   /**
    * @brief Bind buffer descriptors
@@ -68,9 +68,8 @@ public:
    * @param start Starting index
    * @return Current object
    */
-  Descriptor &write(uint32_t binding,
-                    std::span<DescriptorBufferInfo> bufferInfos,
-                    DescriptorType type, uint32_t start = 0);
+  Descriptor &write(u32 binding, std::span<DescriptorBufferInfo> bufferInfos,
+                    DescriptorType type, u32 start = 0);
 
   /**
    * @brief Get descriptor handle

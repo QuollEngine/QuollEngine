@@ -12,11 +12,11 @@ namespace quoll {
  * @param stream Input stream
  * @return Vector of characters
  */
-static std::vector<uint8_t> readFileIntoBuffer(std::ifstream &stream) {
+static std::vector<u8> readFileIntoBuffer(std::ifstream &stream) {
   std::ostringstream ss;
   ss << stream.rdbuf();
   const std::string &s = ss.str();
-  std::vector<uint8_t> bytes(s.begin(), s.end());
+  std::vector<u8> bytes(s.begin(), s.end());
 
   return bytes;
 }
@@ -30,8 +30,8 @@ static std::vector<uint8_t> readFileIntoBuffer(std::ifstream &stream) {
 static void injectInputVarsInterface(sol::state &state, LuaScriptAsset &data) {
   auto inputVars = state.create_named_table("input_vars");
   auto *luaState = state.lua_state();
-  inputVars["register"] = [&data, luaState](String name, uint32_t type) {
-    if (type >= static_cast<uint32_t>(LuaScriptVariableType::Invalid)) {
+  inputVars["register"] = [&data, luaState](String name, u32 type) {
+    if (type >= static_cast<u32>(LuaScriptVariableType::Invalid)) {
       luaL_error(luaState, "Variable \"%s\" has invalid type", name.c_str());
       return sol::nil;
     }

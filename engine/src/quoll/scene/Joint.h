@@ -2,6 +2,6 @@
 
 namespace quoll {
 
-using JointId = uint8_t;
+using JointId = u8;
 
 } // namespace quoll

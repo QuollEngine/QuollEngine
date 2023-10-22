@@ -28,7 +28,7 @@ TEST_F(RigidBodyLuaTableTest, GetMassReturnsRigidBodyMass) {
   entityDatabase.set(entity, rigidBody);
 
   auto state = call(entity, "rigid_body_get_mass");
-  EXPECT_EQ(state["mass"].get<float>(), 2.5f);
+  EXPECT_EQ(state["mass"].get<f32>(), 2.5f);
 }
 
 TEST_F(RigidBodyLuaTableTest, SetMassCreatesRigidBodyIfItDoesNotExist) {
@@ -71,9 +71,9 @@ TEST_F(RigidBodyLuaTableTest, GetInertiaReturnsRigidBodyInertia) {
   entityDatabase.set(entity, rigidBody);
 
   auto state = call(entity, "rigid_body_get_inertia");
-  EXPECT_EQ(state["inertia_x"].get<float>(), 2.5f);
-  EXPECT_EQ(state["inertia_y"].get<float>(), 2.5f);
-  EXPECT_EQ(state["inertia_z"].get<float>(), 2.5f);
+  EXPECT_EQ(state["inertia_x"].get<f32>(), 2.5f);
+  EXPECT_EQ(state["inertia_y"].get<f32>(), 2.5f);
+  EXPECT_EQ(state["inertia_z"].get<f32>(), 2.5f);
 }
 
 TEST_F(RigidBodyLuaTableTest, SetInertiaCreatesRigidBodyIfItDoesNotExist) {

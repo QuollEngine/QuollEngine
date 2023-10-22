@@ -49,7 +49,7 @@ struct BaseGeometryAsset {
   /**
    * List of indices
    */
-  std::vector<uint32_t> indices;
+  std::vector<u32> indices;
 };
 
 /**
@@ -69,7 +69,7 @@ struct MeshAsset {
   /**
    * Vertex buffer binding offsets
    */
-  std::vector<uint64_t> vertexBufferOffsets;
+  std::vector<u64> vertexBufferOffsets;
 
   /**
    * @brief Index buffer for all geometries

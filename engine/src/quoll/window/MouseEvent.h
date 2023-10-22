@@ -28,12 +28,12 @@ struct MouseCursorEventObject {
   /**
    * Cursor x position
    */
-  float xpos = 0.0f;
+  f32 xpos = 0.0f;
 
   /**
    * Cursor y position
    */
-  float ypos = 0.0f;
+  f32 ypos = 0.0f;
 };
 
 enum class MouseScrollEvent { Scroll };
@@ -45,12 +45,12 @@ struct MouseScrollEventObject {
   /**
    * Scroll x offset
    */
-  float xoffset = 0.0f;
+  f32 xoffset = 0.0f;
 
   /**
    * Scroll y offset
    */
-  float yoffset = 0.0f;
+  f32 yoffset = 0.0f;
 };
 
 } // namespace quoll

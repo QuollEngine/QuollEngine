@@ -81,7 +81,7 @@ private:
    *
    * @return Size of buffer data
    */
-  size_t updateBufferData();
+  usize updateBufferData();
 
 private:
   std::vector<rhi::TextureHandle> mTextures;
@@ -90,7 +90,7 @@ private:
   char *mData = nullptr;
 
   std::vector<Property> mProperties;
-  std::map<String, size_t> mPropertyMap;
+  std::map<String, usize> mPropertyMap;
 };
 
 } // namespace quoll

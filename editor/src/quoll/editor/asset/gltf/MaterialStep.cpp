@@ -15,7 +15,7 @@ void loadMaterials(GLTFImportData &importData) {
   const auto &model = importData.model;
   const auto &textures = importData.textures;
 
-  for (size_t i = 0; i < model.materials.size(); ++i) {
+  for (usize i = 0; i < model.materials.size(); ++i) {
     auto &gltfMaterial = model.materials.at(i);
 
     auto assetName = gltfMaterial.name.empty() ? "material" + std::to_string(i)
@@ -33,7 +33,7 @@ void loadMaterials(GLTFImportData &importData) {
           importData, gltfMaterial.pbrMetallicRoughness.baseColorTexture.index,
           GLTFTextureColorSpace::Srgb, true);
     }
-    material.data.baseColorTextureCoord = static_cast<int8_t>(
+    material.data.baseColorTextureCoord = static_cast<i8>(
         gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord);
     auto &colorFactor = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
     material.data.baseColorFactor = glm::vec4{colorFactor[0], colorFactor[1],
@@ -45,12 +45,12 @@ void loadMaterials(GLTFImportData &importData) {
           gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index,
           GLTFTextureColorSpace::Linear, false);
     }
-    material.data.metallicRoughnessTextureCoord = static_cast<int8_t>(
+    material.data.metallicRoughnessTextureCoord = static_cast<i8>(
         gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord);
     material.data.metallicFactor =
-        static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor);
+        static_cast<f32>(gltfMaterial.pbrMetallicRoughness.metallicFactor);
     material.data.roughnessFactor =
-        static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor);
+        static_cast<f32>(gltfMaterial.pbrMetallicRoughness.roughnessFactor);
 
     if (gltfMaterial.normalTexture.index >= 0) {
       material.data.normalTexture =
@@ -58,9 +58,9 @@ void loadMaterials(GLTFImportData &importData) {
                       GLTFTextureColorSpace::Linear, false);
     }
     material.data.normalTextureCoord =
-        static_cast<int8_t>(gltfMaterial.normalTexture.texCoord);
+        static_cast<i8>(gltfMaterial.normalTexture.texCoord);
     material.data.normalScale =
-        static_cast<float>(gltfMaterial.normalTexture.scale);
+        static_cast<f32>(gltfMaterial.normalTexture.scale);
 
     if (gltfMaterial.occlusionTexture.index >= 0) {
       material.data.occlusionTexture =
@@ -68,9 +68,9 @@ void loadMaterials(GLTFImportData &importData) {
                       GLTFTextureColorSpace::Linear, false);
     }
     material.data.occlusionTextureCoord =
-        static_cast<int8_t>(gltfMaterial.occlusionTexture.texCoord);
+        static_cast<i8>(gltfMaterial.occlusionTexture.texCoord);
     material.data.occlusionStrength =
-        static_cast<float>(gltfMaterial.occlusionTexture.strength);
+        static_cast<f32>(gltfMaterial.occlusionTexture.strength);
 
     if (gltfMaterial.emissiveTexture.index >= 0) {
       material.data.emissiveTexture =
@@ -78,7 +78,7 @@ void loadMaterials(GLTFImportData &importData) {
                       GLTFTextureColorSpace::Srgb, false);
     }
     material.data.emissiveTextureCoord =
-        static_cast<int8_t>(gltfMaterial.emissiveTexture.texCoord);
+        static_cast<i8>(gltfMaterial.emissiveTexture.texCoord);
     auto &emissiveFactor = gltfMaterial.emissiveFactor;
     material.data.emissiveFactor =
         glm::vec3{emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]};
@@ -91,7 +91,7 @@ void loadMaterials(GLTFImportData &importData) {
       auto strength = emissiveStrengthExt->second.Get("emissiveStrength");
       if (strength.IsReal()) {
         material.data.emissiveFactor *=
-            static_cast<float>(strength.GetNumberAsDouble());
+            static_cast<f32>(strength.GetNumberAsDouble());
       }
     }
 

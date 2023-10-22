@@ -394,7 +394,7 @@ TEST_F(EntitySerializerTest, CreatesJointAttachmentFieldWithJointId) {
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["jointAttachment"]);
-  EXPECT_EQ(node["jointAttachment"]["joint"].as<uint32_t>(0), 10);
+  EXPECT_EQ(node["jointAttachment"]["joint"].as<u32>(0), 10);
 }
 
 // Animator
@@ -449,8 +449,8 @@ TEST_F(EntitySerializerTest,
 
   EXPECT_TRUE(node["light"]);
   EXPECT_TRUE(node["light"].IsMap());
-  EXPECT_EQ(node["light"]["type"].as<uint32_t>(1000), 0);
-  EXPECT_EQ(node["light"]["intensity"].as<float>(-1.0f), light.intensity);
+  EXPECT_EQ(node["light"]["type"].as<u32>(1000), 0);
+  EXPECT_EQ(node["light"]["intensity"].as<f32>(-1.0f), light.intensity);
   EXPECT_EQ(node["light"]["color"].as<glm::vec4>(glm::vec4{-1.0f}),
             light.color);
   EXPECT_FALSE(node["light"]["direction"]);
@@ -495,9 +495,9 @@ TEST_F(
   EXPECT_TRUE(node["light"]["shadow"].IsMap());
   EXPECT_EQ(node["light"]["shadow"]["softShadows"].as<bool>(true),
             shadow.softShadows);
-  EXPECT_EQ(node["light"]["shadow"]["splitLambda"].as<float>(1.0f),
+  EXPECT_EQ(node["light"]["shadow"]["splitLambda"].as<f32>(1.0f),
             shadow.splitLambda);
-  EXPECT_EQ(node["light"]["shadow"]["numCascades"].as<uint32_t>(0),
+  EXPECT_EQ(node["light"]["shadow"]["numCascades"].as<u32>(0),
             shadow.numCascades);
 }
 
@@ -521,11 +521,11 @@ TEST_F(EntitySerializerTest, CreatesLightFieldIfPointLightComponentExists) {
 
   EXPECT_TRUE(node["light"]);
   EXPECT_TRUE(node["light"].IsMap());
-  EXPECT_EQ(node["light"]["type"].as<uint32_t>(1000), 1);
-  EXPECT_EQ(node["light"]["intensity"].as<float>(-1.0f), light.intensity);
+  EXPECT_EQ(node["light"]["type"].as<u32>(1000), 1);
+  EXPECT_EQ(node["light"]["intensity"].as<f32>(-1.0f), light.intensity);
   EXPECT_EQ(node["light"]["color"].as<glm::vec4>(glm::vec4{-1.0f}),
             light.color);
-  EXPECT_EQ(node["light"]["range"].as<float>(-1.0f), light.range);
+  EXPECT_EQ(node["light"]["range"].as<f32>(-1.0f), light.range);
 }
 
 // Camera
@@ -554,16 +554,16 @@ TEST_F(EntitySerializerTest, CreatesCameraFieldIfLensComponentExists) {
 
   EXPECT_TRUE(node["camera"]);
   EXPECT_TRUE(node["camera"].IsMap());
-  EXPECT_EQ(node["camera"]["type"].as<uint32_t>(1000), 0);
-  EXPECT_EQ(node["camera"]["near"].as<float>(-1.0f), lens.near);
-  EXPECT_EQ(node["camera"]["far"].as<float>(-1.0f), lens.far);
-  EXPECT_EQ(node["camera"]["aspectRatio"].as<float>(-1.0f), lens.aspectRatio);
+  EXPECT_EQ(node["camera"]["type"].as<u32>(1000), 0);
+  EXPECT_EQ(node["camera"]["near"].as<f32>(-1.0f), lens.near);
+  EXPECT_EQ(node["camera"]["far"].as<f32>(-1.0f), lens.far);
+  EXPECT_EQ(node["camera"]["aspectRatio"].as<f32>(-1.0f), lens.aspectRatio);
   EXPECT_EQ(node["camera"]["sensorSize"].as<glm::vec2>(glm::vec2{-1.0f, -1.0f}),
             lens.sensorSize);
-  EXPECT_EQ(node["camera"]["focalLength"].as<float>(-1.0f), lens.focalLength);
-  EXPECT_EQ(node["camera"]["aperture"].as<float>(-1.0f), lens.aperture);
-  EXPECT_EQ(node["camera"]["shutterSpeed"].as<float>(-1.0f), lens.shutterSpeed);
-  EXPECT_EQ(node["camera"]["sensitivity"].as<float>(-1.0f), lens.sensitivity);
+  EXPECT_EQ(node["camera"]["focalLength"].as<f32>(-1.0f), lens.focalLength);
+  EXPECT_EQ(node["camera"]["aperture"].as<f32>(-1.0f), lens.aperture);
+  EXPECT_EQ(node["camera"]["shutterSpeed"].as<f32>(-1.0f), lens.shutterSpeed);
+  EXPECT_EQ(node["camera"]["sensitivity"].as<f32>(-1.0f), lens.sensitivity);
 }
 
 TEST_F(EntitySerializerTest,
@@ -747,7 +747,7 @@ TEST_F(EntitySerializerTest,
   EXPECT_TRUE(node["text"]);
   EXPECT_TRUE(node["text"].IsMap());
   EXPECT_EQ(node["text"]["content"].as<quoll::String>(""), "Hello world");
-  EXPECT_EQ(node["text"]["lineHeight"].as<float>(-1.0f), component.lineHeight);
+  EXPECT_EQ(node["text"]["lineHeight"].as<f32>(-1.0f), component.lineHeight);
   EXPECT_EQ(node["text"]["font"].as<quoll::String>(""), "Roboto.ttf");
 }
 
@@ -776,7 +776,7 @@ TEST_F(EntitySerializerTest, CreatesRigidBodyFieldIfRigidBodyComponentExists) {
             rigidBodyDesc.applyGravity);
   EXPECT_EQ(node["rigidBody"]["inertia"].as<glm::vec3>(),
             rigidBodyDesc.inertia);
-  EXPECT_EQ(node["rigidBody"]["mass"].as<float>(), rigidBodyDesc.mass);
+  EXPECT_EQ(node["rigidBody"]["mass"].as<f32>(), rigidBodyDesc.mass);
 }
 
 // Collidable
@@ -829,7 +829,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
   EXPECT_EQ(node["collidable"]["shape"].as<quoll::String>(""), "sphere");
   EXPECT_EQ(node["collidable"]["center"].as<glm::vec3>(glm::vec3(0.0f)),
             geometryDesc.center);
-  EXPECT_EQ(node["collidable"]["radius"].as<float>(0.0f), sphereParams.radius);
+  EXPECT_EQ(node["collidable"]["radius"].as<f32>(0.0f), sphereParams.radius);
   EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
   EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
 }
@@ -852,8 +852,8 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
   EXPECT_EQ(node["collidable"]["shape"].as<quoll::String>(""), "capsule");
   EXPECT_EQ(node["collidable"]["center"].as<glm::vec3>(glm::vec3(0.0f)),
             geometryDesc.center);
-  EXPECT_EQ(node["collidable"]["radius"].as<float>(0.0f), capsuleParams.radius);
-  EXPECT_EQ(node["collidable"]["halfHeight"].as<float>(0.0f),
+  EXPECT_EQ(node["collidable"]["radius"].as<f32>(0.0f), capsuleParams.radius);
+  EXPECT_EQ(node["collidable"]["halfHeight"].as<f32>(0.0f),
             capsuleParams.halfHeight);
   EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
   EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
@@ -891,11 +891,11 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldMaterialData) {
   auto node = entitySerializer.createComponentsNode(entity);
 
   EXPECT_TRUE(node["collidable"]);
-  EXPECT_EQ(node["collidable"]["dynamicFriction"].as<float>(0.0f),
+  EXPECT_EQ(node["collidable"]["dynamicFriction"].as<f32>(0.0f),
             materialDesc.dynamicFriction);
-  EXPECT_EQ(node["collidable"]["restitution"].as<float>(0.0f),
+  EXPECT_EQ(node["collidable"]["restitution"].as<f32>(0.0f),
             materialDesc.restitution);
-  EXPECT_EQ(node["collidable"]["staticFriction"].as<float>(0.0f),
+  EXPECT_EQ(node["collidable"]["staticFriction"].as<f32>(0.0f),
             materialDesc.staticFriction);
   EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
   EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
@@ -956,7 +956,7 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesEntityComponentIfParentIdExists) {
-  static constexpr uint64_t ParentId{50};
+  static constexpr u64 ParentId{50};
 
   auto parent = entityDatabase.create();
   entityDatabase.set<quoll::Id>(parent, {ParentId});
@@ -965,7 +965,7 @@ TEST_F(EntitySerializerTest, CreatesEntityComponentIfParentIdExists) {
   entityDatabase.set<quoll::Parent>(entity, {parent});
 
   auto node = entitySerializer.createComponentsNode(entity);
-  EXPECT_EQ(node["transform"]["parent"].as<uint64_t>(0), ParentId);
+  EXPECT_EQ(node["transform"]["parent"].as<u64>(0), ParentId);
 }
 
 // Skybox
@@ -1077,7 +1077,7 @@ TEST_F(EntitySerializerTest,
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["inputMap"]);
   EXPECT_EQ(node["inputMap"]["asset"].as<quoll::String>(""), "inputMap.asset");
-  EXPECT_EQ(node["inputMap"]["defaultScheme"].as<uint32_t>(999), 0);
+  EXPECT_EQ(node["inputMap"]["defaultScheme"].as<u32>(999), 0);
 }
 
 // UI Canvas

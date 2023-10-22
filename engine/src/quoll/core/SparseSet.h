@@ -25,9 +25,9 @@ namespace quoll {
  * @tparam TData Data type
  */
 template <class TData> class SparseSet {
-  static constexpr size_t SparseDataSize = 100;
+  static constexpr usize SparseDataSize = 100;
 
-  static constexpr size_t Empty = std::numeric_limits<size_t>::max();
+  static constexpr usize Empty = std::numeric_limits<usize>::max();
   using Iterator = typename std::vector<TData>::iterator;
 
 public:
@@ -42,7 +42,7 @@ public:
    * @param item Item data
    * @return Item key
    */
-  size_t insert(const TData &item) {
+  usize insert(const TData &item) {
     auto newKey = size();
     if (!mEmptyData.empty()) {
       newKey = mEmptyData.back();
@@ -61,7 +61,7 @@ public:
    *
    * @param key Item key
    */
-  void erase(size_t key) {
+  void erase(usize key) {
     QuollAssert(key < mSparseData.size(), "Index out of bounds");
 
     auto lastKey = size() - 1;
@@ -90,9 +90,9 @@ public:
    * @param key Item key
    * @return item data
    */
-  inline TData &at(size_t key) {
+  inline TData &at(usize key) {
     QuollAssert(key < mSparseData.size(), "Index out of bounds");
-    size_t denseIndex = mSparseData.at(key);
+    usize denseIndex = mSparseData.at(key);
 
     QuollAssert(denseIndex != Empty, "No data at key");
 
@@ -105,9 +105,9 @@ public:
    * @param key Item key
    * @return item data
    */
-  inline const TData &at(size_t key) const {
+  inline const TData &at(usize key) const {
     QuollAssert(key < mSparseData.size(), "Index out of bounds");
-    size_t denseIndex = mSparseData.at(key);
+    usize denseIndex = mSparseData.at(key);
 
     QuollAssert(denseIndex != Empty, "No data at key");
 
@@ -121,7 +121,7 @@ public:
    * @retval true Item exists
    * @retval false Item does not exist
    */
-  bool contains(size_t key) {
+  bool contains(usize key) {
     return key < mSparseData.size() && mSparseData.at(key) != Empty;
   }
 
@@ -138,7 +138,7 @@ public:
    *
    * @return Sparse set size
    */
-  inline size_t size() const { return mDenseData.size(); }
+  inline usize size() const { return mDenseData.size(); }
 
   /**
    * @brief Get begin iterator
@@ -155,10 +155,10 @@ public:
   inline Iterator end() { return mRealData.end(); }
 
 private:
-  std::vector<size_t> mDenseData;
-  std::vector<size_t> mSparseData;
+  std::vector<usize> mDenseData;
+  std::vector<usize> mSparseData;
   std::vector<TData> mRealData;
-  std::vector<size_t> mEmptyData;
+  std::vector<usize> mEmptyData;
 };
 
 } // namespace quoll

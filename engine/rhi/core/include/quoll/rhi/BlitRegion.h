@@ -9,17 +9,17 @@ struct BlitRegion {
   /**
    * Source mip level
    */
-  uint32_t srcMipLevel = 0;
+  u32 srcMipLevel = 0;
 
   /**
    * Source array layer start
    */
-  uint32_t srcBaseArrayLayer = 0;
+  u32 srcBaseArrayLayer = 0;
 
   /**
    * Source array layer count
    */
-  uint32_t srcLayerCount = 0;
+  u32 srcLayerCount = 0;
 
   /**
    * Source offsets
@@ -29,17 +29,17 @@ struct BlitRegion {
   /**
    * Destination mip level
    */
-  uint32_t dstMipLevel = 0;
+  u32 dstMipLevel = 0;
 
   /**
    * Destination array layer start
    */
-  uint32_t dstBaseArrayLayer = 0;
+  u32 dstBaseArrayLayer = 0;
 
   /**
    * Destination array layer count
    */
-  uint32_t dstLayerCount = 0;
+  u32 dstLayerCount = 0;
 
   /**
    * Destination offsets

@@ -27,7 +27,7 @@ VulkanUploadContext::~VulkanUploadContext() {
 
 void VulkanUploadContext::submit(const SubmitFn &submitFn) const {
   vkWaitForFences(mDevice, 1, &mUploadFence, true,
-                  std::numeric_limits<uint32_t>::max());
+                  std::numeric_limits<u32>::max());
 
   vkResetFences(mDevice, 1, &mUploadFence);
 
@@ -55,7 +55,7 @@ void VulkanUploadContext::submit(const SubmitFn &submitFn) const {
   vkQueueSubmit(mQueue, 1, &submitInfo, mUploadFence);
 
   vkWaitForFences(mDevice, 1, &mUploadFence, true,
-                  std::numeric_limits<uint32_t>::max());
+                  std::numeric_limits<u32>::max());
 
   vkResetCommandBuffer(commandBuffer, 0);
 }

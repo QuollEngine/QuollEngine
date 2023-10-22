@@ -103,13 +103,13 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   }
 
   mFramebuffers.resize(swapchain.textures.size());
-  for (size_t i = 0; i < mFramebuffers.size(); ++i) {
+  for (usize i = 0; i < mFramebuffers.size(); ++i) {
     if (!rhi::isHandleValid(mFramebuffers.at(i))) {
       mFramebuffers.at(i) = mRenderStorage.getNewFramebufferHandle();
     }
   }
 
-  for (size_t i = 0; i < mFramebuffers.size(); ++i) {
+  for (usize i = 0; i < mFramebuffers.size(); ++i) {
     rhi::FramebufferDescription framebufferDescription{};
     framebufferDescription.width = mExtent.x;
     framebufferDescription.height = mExtent.y;
@@ -125,7 +125,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 }
 
 void Presenter::present(rhi::RenderCommandList &commandList,
-                        rhi::TextureHandle handle, uint32_t imageIndex) {
+                        rhi::TextureHandle handle, u32 imageIndex) {
 
   if (handle != mPresentTexture) {
     mPresentTexture = handle;

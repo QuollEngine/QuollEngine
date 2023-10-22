@@ -12,12 +12,12 @@ void *Buffer::map() { return mNativeBuffer->map(); }
 
 void Buffer::unmap() { mNativeBuffer->unmap(); }
 
-void Buffer::update(const void *data, size_t size) {
+void Buffer::update(const void *data, usize size) {
   auto *mappedData = map();
   memcpy(mappedData, data, size);
   unmap();
 }
 
-void Buffer::resize(size_t size) { mNativeBuffer->resize(size); }
+void Buffer::resize(usize size) { mNativeBuffer->resize(size); }
 
 } // namespace quoll::rhi

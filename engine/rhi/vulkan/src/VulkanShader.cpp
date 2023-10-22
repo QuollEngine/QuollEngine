@@ -21,7 +21,7 @@ VulkanShader::VulkanShader(const ShaderDescription &description,
   createInfo.pNext = nullptr;
 
   createInfo.codeSize = shaderBytes.size();
-  createInfo.pCode = reinterpret_cast<const uint32_t *>(shaderBytes.data());
+  createInfo.pCode = reinterpret_cast<const u32 *>(shaderBytes.data());
 
   checkForVulkanError(
       vkCreateShaderModule(device, &createInfo, nullptr, &mShaderModule),
@@ -81,7 +81,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
 
   // Push constants
   {
-    uint32_t count = 0;
+    u32 count = 0;
     spvReflectEnumeratePushConstantBlocks(&shaderReflectModule, &count,
                                           nullptr);
 
@@ -106,7 +106,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
 
   // Descriptor layouts
   {
-    uint32_t count = 0;
+    u32 count = 0;
     spvReflectEnumerateDescriptorSets(&shaderReflectModule, &count, nullptr);
 
     if (count > 0) {
@@ -119,9 +119,9 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
 
         DescriptorLayoutDescription description{};
 
-        std::map<uint32_t, DescriptorLayoutBindingDescription> bindingsMap;
+        std::map<u32, DescriptorLayoutBindingDescription> bindingsMap;
 
-        for (uint32_t i = 0; i < reflectDescriptorSet.binding_count; ++i) {
+        for (u32 i = 0; i < reflectDescriptorSet.binding_count; ++i) {
           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
 
           auto *reflectBinding = reflectDescriptorSet.bindings[i];
@@ -140,7 +140,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
               static_cast<VkDescriptorType>(reflectBinding->descriptor_type));
           layoutBinding.descriptorCount = 1;
 
-          for (uint32_t j = 0; j < reflectBinding->array.dims_count; ++j) {
+          for (u32 j = 0; j < reflectBinding->array.dims_count; ++j) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
             layoutBinding.descriptorCount *= reflectBinding->array.dims[j];
           }

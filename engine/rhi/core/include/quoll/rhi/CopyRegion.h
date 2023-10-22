@@ -9,22 +9,22 @@ struct CopyRegion {
   /**
    * Offset of buffer during copy
    */
-  uint32_t bufferOffset = 0;
+  u32 bufferOffset = 0;
 
   /**
    * Image array layer start
    */
-  uint32_t imageBaseArrayLayer = 0;
+  u32 imageBaseArrayLayer = 0;
 
   /**
    * Image array layer count
    */
-  uint32_t imageLayerCount = 1;
+  u32 imageLayerCount = 1;
 
   /**
    * Image mip level
    */
-  uint32_t imageLevel = 0;
+  u32 imageLevel = 0;
 
   /**
    * Image offset

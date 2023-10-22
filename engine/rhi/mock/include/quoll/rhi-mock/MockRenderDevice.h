@@ -187,7 +187,7 @@ public:
    * @param handle Texture handle
    * @return Texture updates
    */
-  uint32_t getTextureUpdates(TextureHandle handle);
+  u32 getTextureUpdates(TextureHandle handle);
 
   /**
    * @brief Create texture view
@@ -346,7 +346,7 @@ private:
 
   std::array<RenderCommandList, NumFrames> mCommandLists;
   std::vector<MockCommandList> mSubmittedCommandLists;
-  uint32_t mFrameIndex = 0;
+  u32 mFrameIndex = 0;
 
   DeviceStats mDeviceStats;
 };

@@ -27,7 +27,7 @@ public:
   /**
    * @brief Number of frames
    */
-  static constexpr size_t NumFrames = 2;
+  static constexpr usize NumFrames = 2;
 
 public:
   RenderDevice(const RenderDevice &) = delete;

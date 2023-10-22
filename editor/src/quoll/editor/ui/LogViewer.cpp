@@ -17,8 +17,8 @@ void LogViewer::render(LogMemoryStorage &userLogs) {
 }
 
 void LogViewer::renderLogContainer(const String &name,
-                                   LogMemoryStorage &logStorage,
-                                   size_t &logSize, float width) {
+                                   LogMemoryStorage &logStorage, usize &logSize,
+                                   f32 width) {
   ImGui::PushID(name.c_str());
   ImGui::BeginGroup();
   auto flags = ImGuiWindowFlags_HorizontalScrollbar |

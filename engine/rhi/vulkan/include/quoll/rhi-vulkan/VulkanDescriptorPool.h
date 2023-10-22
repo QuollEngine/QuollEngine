@@ -49,7 +49,7 @@ public:
    * @return Vulkan descriptor set
    */
   inline VkDescriptorSet getDescriptorSet(DescriptorHandle handle) const {
-    return mDescriptorSets.at(static_cast<size_t>(handle) - 1);
+    return mDescriptorSets.at(static_cast<usize>(handle) - 1);
   }
 
   /**
@@ -57,7 +57,7 @@ public:
    *
    * @return Number of descriptors
    */
-  inline size_t getDescriptorsCount() const { return mDescriptorSets.size(); }
+  inline usize getDescriptorsCount() const { return mDescriptorSets.size(); }
 
   /**
    * @brief Get layout from descriptor

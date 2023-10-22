@@ -22,7 +22,7 @@ public:
    * @param descriptorPool Descriptor pool
    * @param stats Device stats
    */
-  VulkanCommandPool(VulkanDeviceObject &device, uint32_t queueFamilyIndex,
+  VulkanCommandPool(VulkanDeviceObject &device, u32 queueFamilyIndex,
                     const VulkanResourceRegistry &registry,
                     const VulkanDescriptorPool &descriptorPool,
                     DeviceStats &stats);
@@ -43,7 +43,7 @@ public:
    * @param count Number of buffers
    * @return List of render command lists
    */
-  std::vector<RenderCommandList> createCommandLists(uint32_t count);
+  std::vector<RenderCommandList> createCommandLists(u32 count);
 
   /**
    * @brief Free command list
@@ -58,7 +58,7 @@ private:
   DeviceStats &mStats;
   const VulkanResourceRegistry &mRegistry;
   const VulkanDescriptorPool &mDescriptorPool;
-  uint32_t mQueueFamilyIndex = 0;
+  u32 mQueueFamilyIndex = 0;
 };
 
 } // namespace quoll::rhi

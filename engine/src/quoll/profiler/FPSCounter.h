@@ -12,17 +12,17 @@ public:
    *
    * @param fps Frames per second
    */
-  void collectFPS(uint32_t fps);
+  void collectFPS(u32 fps);
 
   /**
    * @brief Get frames per second
    *
    * @return Frames per second
    */
-  inline uint32_t getFPS() const { return mFps; }
+  inline u32 getFPS() const { return mFps; }
 
 private:
-  uint32_t mFps = 0;
+  u32 mFps = 0;
 };
 
 } // namespace quoll

@@ -56,9 +56,9 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create 2 transforms that point to previous entity
-  for (int32_t i = 1; i < 3; ++i) {
-    glm::vec3 position(static_cast<float>(i));
-    glm::quat rotation(static_cast<float>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
+  for (i32 i = 1; i < 3; ++i) {
+    glm::vec3 position(static_cast<f32>(i));
+    glm::quat rotation(static_cast<f32>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
     glm::vec3 scale = position;
 
     quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
@@ -71,9 +71,9 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create transforms that point to previous parent
-  for (int32_t i = 3; i < 5; ++i) {
-    glm::vec3 position(static_cast<float>(i));
-    glm::quat rotation(static_cast<float>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
+  for (i32 i = 3; i < 5; ++i) {
+    glm::vec3 position(static_cast<f32>(i));
+    glm::quat rotation(static_cast<f32>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
     glm::vec3 scale = position;
 
     quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
@@ -86,7 +86,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create two meshes
-  for (uint32_t i = 0; i < 2; ++i) {
+  for (u32 i = 0; i < 2; ++i) {
     quoll::AssetData<quoll::MeshAsset> meshAsset{};
     meshAsset.type = quoll::AssetType::Mesh;
 
@@ -97,7 +97,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create two mesh renderers with 3 materials each
-  for (uint32_t i = 0; i < 2; ++i) {
+  for (u32 i = 0; i < 2; ++i) {
     quoll::PrefabComponent<quoll::MeshRenderer> renderer{};
     renderer.entity = i;
     renderer.value.materials.push_back(quoll::MaterialAssetHandle{1});
@@ -107,7 +107,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create three skinned mesh renderers with 2 materials each
-  for (uint32_t i = 0; i < 3; ++i) {
+  for (u32 i = 0; i < 3; ++i) {
     quoll::PrefabComponent<quoll::SkinnedMeshRenderer> renderer{};
     renderer.entity = i;
     renderer.value.materials.push_back(quoll::MaterialAssetHandle{1});
@@ -116,7 +116,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create names
-  for (uint32_t i = 3; i < 5; ++i) {
+  for (u32 i = 3; i < 5; ++i) {
     quoll::PrefabComponent<quoll::String> name{};
     name.entity = i;
     name.value = "Test name " + std::to_string(i);
@@ -124,7 +124,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create three skinned meshes
-  for (uint32_t i = 2; i < 5; ++i) {
+  for (u32 i = 2; i < 5; ++i) {
     quoll::AssetData<quoll::MeshAsset> meshAsset{};
     meshAsset.type = quoll::AssetType::SkinnedMesh;
 
@@ -135,21 +135,21 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // create skeletons for skinned meshes
-  for (uint32_t i = 2; i < 5; ++i) {
+  for (u32 i = 2; i < 5; ++i) {
     quoll::PrefabComponent<quoll::SkeletonAssetHandle> skeleton{};
     skeleton.entity = i;
     skeleton.value = assetRegistry.getSkeletons().addAsset({});
     asset.data.skeletons.push_back(skeleton);
   }
 
-  for (uint32_t i = 2; i < 5; ++i) {
+  for (u32 i = 2; i < 5; ++i) {
     quoll::AnimationAssetHandle animation{i};
     asset.data.animations.push_back(animation);
   }
 
   // create animators for skinned meshes
   // also create one additional animator
-  for (uint32_t i = 2; i < 5; ++i) {
+  for (u32 i = 2; i < 5; ++i) {
     quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
     animatorAsset.data.initialState = i;
     auto handle = assetRegistry.getAnimators().addAsset(animatorAsset);
@@ -161,7 +161,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create two directional lights
-  for (uint32_t i = 1; i < 3; ++i) {
+  for (u32 i = 1; i < 3; ++i) {
     quoll::PrefabComponent<quoll::DirectionalLight> light{};
     light.entity = i;
     light.value.intensity = 25.0f;
@@ -169,7 +169,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Create two point lights
-  for (uint32_t i = 3; i < 5; ++i) {
+  for (u32 i = 3; i < 5; ++i) {
     quoll::PrefabComponent<quoll::PointLight> light{};
     light.entity = i;
     light.value.range = 25.0f;
@@ -193,13 +193,13 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   EXPECT_EQ(db.get<quoll::Children>(res.at(0)).children.at(1), res.at(2));
 
   // Second and third items have first entity as parent
-  for (uint32_t i = 1; i < 3; ++i) {
+  for (u32 i = 1; i < 3; ++i) {
     auto current = res.at(i);
     EXPECT_TRUE(db.has<quoll::Parent>(current));
     EXPECT_EQ(db.get<quoll::Parent>(current).parent, res.at(0));
   }
 
-  for (uint32_t i = 3; i < 5; ++i) {
+  for (u32 i = 3; i < 5; ++i) {
     auto current = res.at(i);
     auto parent = res.at(i - 1);
     // All transform items have parent that is the previous item
@@ -217,7 +217,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
             transform.localPosition);
   EXPECT_TRUE(db.has<quoll::WorldTransform>(res.at(0)));
 
-  for (uint32_t i = 1; i < 5; ++i) {
+  for (u32 i = 1; i < 5; ++i) {
     auto entity = res.at(i);
 
     const auto &transform = db.get<quoll::LocalTransform>(entity);
@@ -231,14 +231,14 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   // Test names
 
   // First three items have names with Untitled
-  for (uint32_t i = 0; i < 3; ++i) {
+  for (u32 i = 0; i < 3; ++i) {
     auto entity = res.at(i);
     const auto &name = db.get<quoll::Name>(entity);
 
     EXPECT_EQ(name.name, "New entity");
   }
 
-  for (uint32_t i = 3; i < 5; ++i) {
+  for (u32 i = 3; i < 5; ++i) {
     auto entity = res.at(i);
     const auto &name = db.get<quoll::Name>(entity);
 
@@ -246,7 +246,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Test meshes
-  for (uint32_t i = 0; i < 2; ++i) {
+  for (u32 i = 0; i < 2; ++i) {
     auto entity = res.at(i);
 
     const auto &mesh = db.get<quoll::Mesh>(entity);
@@ -254,7 +254,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Test skinned meshes
-  for (uint32_t i = 2; i < 5; ++i) {
+  for (u32 i = 2; i < 5; ++i) {
     auto entity = res.at(i);
 
     const auto &mesh = db.get<quoll::SkinnedMesh>(entity);
@@ -262,29 +262,29 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Test mesh renderers
-  for (uint32_t i = 0; i < 2; ++i) {
+  for (u32 i = 0; i < 2; ++i) {
     auto entity = res.at(i);
     const auto &renderer = db.get<quoll::MeshRenderer>(entity);
 
-    for (size_t mi = 0; mi < renderer.materials.size(); ++mi) {
+    for (usize mi = 0; mi < renderer.materials.size(); ++mi) {
       EXPECT_EQ(renderer.materials.at(mi),
                 static_cast<quoll::MaterialAssetHandle>(mi + 1));
     }
   }
 
   // Test skinned mesh renderer
-  for (uint32_t i = 0; i < 3; ++i) {
+  for (u32 i = 0; i < 3; ++i) {
     auto entity = res.at(i);
     const auto &renderer = db.get<quoll::SkinnedMeshRenderer>(entity);
 
-    for (size_t mi = 0; mi < renderer.materials.size(); ++mi) {
+    for (usize mi = 0; mi < renderer.materials.size(); ++mi) {
       EXPECT_EQ(renderer.materials.at(mi),
                 static_cast<quoll::MaterialAssetHandle>(mi + 1));
     }
   }
 
   // Test skeletons
-  for (uint32_t i = 2; i < 5; ++i) {
+  for (u32 i = 2; i < 5; ++i) {
     auto entity = res.at(i);
 
     const auto &skeleton = db.get<quoll::Skeleton>(entity);
@@ -294,7 +294,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   }
 
   // Test animators
-  for (uint32_t i = 2; i < 5; ++i) {
+  for (u32 i = 2; i < 5; ++i) {
     auto entity = res.at(i);
     const auto &animator = db.get<quoll::Animator>(entity);
     EXPECT_NE(animator.asset, quoll::AnimatorAssetHandle::Null);
@@ -305,13 +305,13 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     EXPECT_EQ(animator.normalizedTime, 0.0f);
   }
 
-  for (uint32_t i = 1; i < 3; ++i) {
+  for (u32 i = 1; i < 3; ++i) {
     auto entity = res.at(i);
     const auto &light = db.get<quoll::DirectionalLight>(entity);
     EXPECT_EQ(light.intensity, 25.0f);
   }
 
-  for (uint32_t i = 3; i < 5; ++i) {
+  for (u32 i = 3; i < 5; ++i) {
     auto entity = res.at(i);
     const auto &light = db.get<quoll::PointLight>(entity);
     EXPECT_EQ(light.range, 25.0f);
@@ -383,7 +383,7 @@ TEST_F(
 
   auto children = db.get<quoll::Children>(root).children;
   EXPECT_EQ(children.size(), 2);
-  for (size_t i = 0; i < children.size(); ++i) {
+  for (usize i = 0; i < children.size(); ++i) {
     auto entity = res.at(i);
     EXPECT_EQ(children.at(i), entity);
     EXPECT_EQ(db.get<quoll::Parent>(entity).parent, root);
@@ -393,9 +393,9 @@ TEST_F(
 TEST_F(EntitySpawnerTest,
        SpawnPrefabCreatesSingleEntityIfPrefabHasOneRootEntity) {
   quoll::AssetData<quoll::PrefabAsset> asset{};
-  for (int32_t i = 0; i < 2; ++i) {
-    glm::vec3 position(static_cast<float>(i));
-    glm::quat rotation(static_cast<float>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
+  for (i32 i = 0; i < 2; ++i) {
+    glm::vec3 position(static_cast<f32>(i));
+    glm::quat rotation(static_cast<f32>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
     glm::vec3 scale = position;
 
     quoll::PrefabComponent<quoll::PrefabTransformData> transform{};

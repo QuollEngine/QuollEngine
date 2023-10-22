@@ -12,7 +12,7 @@ enum class ShaderStage {
 
 EnableBitwiseEnum(ShaderStage);
 
-enum class PipelineStage : uint64_t {
+enum class PipelineStage : u64 {
   None = 0ULL,
   DrawIndirect = 0x00000002ULL,
   VertexShader = 0x00000008ULL,

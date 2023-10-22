@@ -57,7 +57,7 @@ TEST_F(TextLuaTableTest, GetLineHeightReturnsLineHeightIfComponentExists) {
 
   auto state = call(entity, "text_get_line_height");
 
-  auto name = state["text_line_height"].get<float>();
+  auto name = state["text_line_height"].get<f32>();
   EXPECT_EQ(name, 25.0f);
 }
 

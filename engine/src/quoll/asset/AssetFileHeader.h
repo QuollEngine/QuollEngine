@@ -4,7 +4,7 @@
 
 namespace quoll {
 
-static constexpr size_t AssetFileMagicLength = 11;
+static constexpr usize AssetFileMagicLength = 11;
 
 /**
  * @brief Asset file header

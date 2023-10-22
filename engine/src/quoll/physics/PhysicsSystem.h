@@ -34,7 +34,7 @@ public:
    * @param dt Time delta
    * @param entityDatabase Entity database
    */
-  inline void update(float dt, EntityDatabase &entityDatabase) {
+  inline void update(f32 dt, EntityDatabase &entityDatabase) {
     mBackend->update(dt, entityDatabase);
   }
 
@@ -68,7 +68,7 @@ public:
    * @retval false Entity not collided
    */
   inline bool sweep(EntityDatabase &entityDatabase, Entity entity,
-                    const glm::vec3 &direction, float distance,
+                    const glm::vec3 &direction, f32 distance,
                     CollisionHit &hit) {
     return mBackend->sweep(entityDatabase, entity, direction, distance, hit);
   }

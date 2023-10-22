@@ -11,7 +11,7 @@ struct JointAttachment {
   /**
    * Joint index
    */
-  int16_t joint = -1;
+  i16 joint = -1;
 };
 
 } // namespace quoll

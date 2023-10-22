@@ -12,11 +12,11 @@
 
 namespace quoll::editor {
 
-static constexpr uint32_t ItemWidth = 90;
-static constexpr uint32_t ItemHeight = 100;
+static constexpr u32 ItemWidth = 90;
+static constexpr u32 ItemHeight = 100;
 static constexpr ImVec2 IconSize(80.0f, 80.0f);
-static constexpr float ImagePadding = ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
-static constexpr uint32_t TextWidth = ItemWidth - 8;
+static constexpr f32 ImagePadding = ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
+static constexpr u32 TextWidth = ItemWidth - 8;
 
 /**
  * @brief Imgui text callback user data
@@ -129,7 +129,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
 
   if (auto _ = widgets::Window("Asset Browser")) {
     const auto &size = ImGui::GetContentRegionAvail();
-    auto itemsPerRow = static_cast<int32_t>(size.x / ItemWidth);
+    auto itemsPerRow = static_cast<i32>(size.x / ItemWidth);
 
     if (itemsPerRow == 0)
       itemsPerRow = 1;
@@ -154,7 +154,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
 
     if (ImGui::BeginTable("CurrentDir", itemsPerRow,
                           ImGuiTableFlags_NoPadInnerX)) {
-      size_t i = 0;
+      usize i = 0;
 
       for (; i < mEntries.size(); ++i) {
         const auto &entry = mEntries.at(i);
@@ -168,7 +168,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
         ImGui::TableNextColumn();
 
         String id = "###" + std::to_string(entry.asset) + "-" +
-                    std::to_string(static_cast<uint32_t>(entry.assetType));
+                    std::to_string(static_cast<u32>(entry.assetType));
         if (ImGui::Selectable(id.c_str(), mSelected == i,
                               ImGuiSelectableFlags_AllowDoubleClick,
                               ImVec2(ItemWidth, ItemHeight))) {
@@ -212,7 +212,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
           if (ImGui::BeginDragDropSource()) {
             ImGui::SetDragDropPayload(
                 getAssetTypeString(entry.assetType).c_str(), &entry.asset,
-                sizeof(uint32_t));
+                sizeof(u32));
             renderEntry(entry);
             ImGui::EndDragDropSource();
           }
@@ -378,15 +378,15 @@ void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
 void AssetBrowser::renderEntry(const Entry &entry) {
 
   {
-    float initialCursorPos = ImGui::GetCursorPosX();
+    f32 initialCursorPos = ImGui::GetCursorPosX();
     ImGui::SetCursorPosX(initialCursorPos + ImagePadding);
     imgui::image(entry.preview, IconSize);
     ImGui::SetCursorPosX(initialCursorPos);
   }
 
   {
-    float initialCursorPos = ImGui::GetCursorPosX();
-    const float centerPos =
+    f32 initialCursorPos = ImGui::GetCursorPosX();
+    const f32 centerPos =
         initialCursorPos + (ItemWidth * 1.0f - entry.textWidth) * 0.5f;
     ImGui::SetCursorPosX(centerPos);
     ImGui::Text("%s", entry.truncatedName.c_str());
@@ -455,7 +455,7 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
     entry.name = removePrefabName(asset.name);
     entry.assetType = asset.type;
     entry.uuid = asset.uuid;
-    entry.asset = static_cast<uint32_t>(handle);
+    entry.asset = static_cast<u32>(handle);
     setDefaultProps(entry, assetManager.getAssetRegistry());
 
     return entry;

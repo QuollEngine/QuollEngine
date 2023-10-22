@@ -78,7 +78,7 @@ TEST_F(SceneWriterTest, SavingNewEntityAddsNewNodeInSceneFile) {
   writer.saveEntities({e1, e2});
 
   auto node = loadSceneFile();
-  EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0),
+  EXPECT_EQ(node["entities"][1]["id"].as<u64>(0),
             scene.entityDatabase.get<quoll::Id>(e2).id);
   EXPECT_EQ(node["entities"][1]["name"].as<quoll::String>(""), "E2");
 }
@@ -95,10 +95,10 @@ TEST_F(SceneWriterTest, SavingExistingEntityUpdatesExistingNodeInSceneFile) {
 
     auto node = loadSceneFile();
     EXPECT_EQ(node["entities"].size(), 2);
-    EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), 155);
+    EXPECT_EQ(node["entities"][0]["id"].as<u64>(0), 155);
     EXPECT_EQ(node["entities"][0]["name"].as<quoll::String>(""), "E1");
 
-    EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0),
+    EXPECT_EQ(node["entities"][1]["id"].as<u64>(0),
               scene.entityDatabase.get<quoll::Id>(e2).id);
     EXPECT_EQ(node["entities"][1]["name"].as<quoll::String>(""), "E2");
   }
@@ -110,10 +110,10 @@ TEST_F(SceneWriterTest, SavingExistingEntityUpdatesExistingNodeInSceneFile) {
 
     auto node = loadSceneFile();
     EXPECT_EQ(node["entities"].size(), 2);
-    EXPECT_EQ(node["entities"][0]["id"].as<uint32_t>(0), 155);
+    EXPECT_EQ(node["entities"][0]["id"].as<u32>(0), 155);
     EXPECT_EQ(node["entities"][0]["name"].as<quoll::String>(""), "E1 New");
 
-    EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0),
+    EXPECT_EQ(node["entities"][1]["id"].as<u64>(0),
               scene.entityDatabase.get<quoll::Id>(e2).id);
     EXPECT_EQ(node["entities"][1]["name"].as<quoll::String>(""), "E2");
   }
@@ -139,9 +139,9 @@ TEST_F(SceneWriterTest, SavingEntitySavesParentBeforeEntityIfParentIsNotSaved) {
 
   auto node = loadSceneFile();
   EXPECT_EQ(node["entities"].size(), 3);
-  EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), parent2Id);
-  EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0), parentId);
-  EXPECT_EQ(node["entities"][2]["id"].as<uint64_t>(0), entityId);
+  EXPECT_EQ(node["entities"][0]["id"].as<u64>(0), parent2Id);
+  EXPECT_EQ(node["entities"][1]["id"].as<u64>(0), parentId);
+  EXPECT_EQ(node["entities"][2]["id"].as<u64>(0), entityId);
 }
 
 TEST_F(SceneWriterTest, SavingEntityAndParentTogetherSavesTheParentOnce) {
@@ -164,9 +164,9 @@ TEST_F(SceneWriterTest, SavingEntityAndParentTogetherSavesTheParentOnce) {
 
   auto node = loadSceneFile();
   EXPECT_EQ(node["entities"].size(), 3);
-  EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), parent2Id);
-  EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0), parentId);
-  EXPECT_EQ(node["entities"][2]["id"].as<uint64_t>(0), entityId);
+  EXPECT_EQ(node["entities"][0]["id"].as<u64>(0), parent2Id);
+  EXPECT_EQ(node["entities"][1]["id"].as<u64>(0), parentId);
+  EXPECT_EQ(node["entities"][2]["id"].as<u64>(0), entityId);
 }
 
 TEST_F(SceneWriterTest, DeletingEntityDeletesItFromSceneFile) {
@@ -179,13 +179,13 @@ TEST_F(SceneWriterTest, DeletingEntityDeletesItFromSceneFile) {
 
     auto node = loadSceneFile();
     EXPECT_EQ(node["entities"].size(), 3);
-    EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(1),
+    EXPECT_EQ(node["entities"][0]["id"].as<u64>(1),
               scene.entityDatabase.get<quoll::Id>(e1).id);
 
-    EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(2),
+    EXPECT_EQ(node["entities"][1]["id"].as<u64>(2),
               scene.entityDatabase.get<quoll::Id>(e2).id);
 
-    EXPECT_EQ(node["entities"][2]["id"].as<uint64_t>(3),
+    EXPECT_EQ(node["entities"][2]["id"].as<u64>(3),
               scene.entityDatabase.get<quoll::Id>(e3).id);
   }
 
@@ -194,7 +194,7 @@ TEST_F(SceneWriterTest, DeletingEntityDeletesItFromSceneFile) {
 
     auto node = loadSceneFile();
     EXPECT_EQ(node["entities"].size(), 1);
-    EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0),
+    EXPECT_EQ(node["entities"][0]["id"].as<u64>(0),
               scene.entityDatabase.get<quoll::Id>(e2).id);
   }
 }
@@ -241,7 +241,7 @@ TEST_F(SceneWriterTest, DeletingStartingCameraSetsStartingCameraToNull) {
 
   {
     auto node = loadSceneFile();
-    EXPECT_EQ(node["zones"][0]["startingCamera"].as<uint64_t>(0),
+    EXPECT_EQ(node["zones"][0]["startingCamera"].as<u64>(0),
               scene.entityDatabase.get<quoll::Id>(e1).id);
   }
 
@@ -261,7 +261,7 @@ TEST_F(SceneWriterTest, DeletingEnvironmentSetsEnvironmentToNull) {
 
   {
     auto node = loadSceneFile();
-    EXPECT_EQ(node["zones"][0]["environment"].as<uint64_t>(0),
+    EXPECT_EQ(node["zones"][0]["environment"].as<u64>(0),
               scene.entityDatabase.get<quoll::Id>(e1).id);
   }
 
@@ -306,7 +306,7 @@ TEST_F(SceneWriterTest, SavesEntityAsStartingCameraIfItHasCameraComponent) {
   writer.saveScene();
 
   auto node = loadSceneFile();
-  EXPECT_EQ(node["zones"][0]["startingCamera"].as<uint64_t>(0), 15);
+  EXPECT_EQ(node["zones"][0]["startingCamera"].as<u64>(0), 15);
 }
 
 TEST_F(SceneWriterTest, DoesNotSaveEntityAsEnvironmentIfItDoesNotHaveId) {
@@ -326,5 +326,5 @@ TEST_F(SceneWriterTest, SetsEnvironmentToEntityIdIfEnvironmentEntityHasId) {
   auto node = loadSceneFile();
   auto envNode = node["zones"][0]["environment"];
 
-  EXPECT_EQ(envNode.as<uint64_t>(0), 10);
+  EXPECT_EQ(envNode.as<u64>(0), 10);
 }

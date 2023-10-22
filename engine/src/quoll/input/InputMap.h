@@ -19,7 +19,7 @@ struct InputMapAssetRef {
   /**
    * Default scheme
    */
-  size_t defaultScheme = 0;
+  usize defaultScheme = 0;
 };
 
 /**
@@ -29,7 +29,7 @@ struct InputMapBindingTable {
   /**
    * Input key to command map
    */
-  std::unordered_map<int, size_t> inputKeyToCommandMap;
+  std::unordered_map<int, usize> inputKeyToCommandMap;
 
   /**
    * Used to identify what part of a value
@@ -52,7 +52,7 @@ struct InputMap {
   /**
    * Command name to internal command key map
    */
-  std::unordered_map<String, size_t> commandNameMap;
+  std::unordered_map<String, usize> commandNameMap;
 
   /**
    * Command values
@@ -67,12 +67,12 @@ struct InputMap {
   /**
    * Scheme name to internal scheme key map
    */
-  std::unordered_map<String, size_t> schemeNameMap;
+  std::unordered_map<String, usize> schemeNameMap;
 
   /**
    * Currently active scheme
    */
-  size_t activeScheme = 0;
+  usize activeScheme = 0;
 };
 
 } // namespace quoll

@@ -9,7 +9,7 @@
 
 namespace quoll {
 
-Window::Window(StringView title, uint32_t width, uint32_t height,
+Window::Window(StringView title, u32 width, u32 height,
                InputDeviceManager &deviceManager, EventSystem &eventSystem)
     : mDeviceManager(deviceManager), mEventSystem(eventSystem) {
   auto initReturnValue = glfwInit();
@@ -49,7 +49,7 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
         auto *window =
             static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
         for (auto &[_, handler] : window->mResizeHandlers) {
-          handler(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+          handler(static_cast<u32>(width), static_cast<u32>(height));
         }
       });
 
@@ -81,15 +81,15 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
     }
   });
 
-  glfwSetCursorPosCallback(mWindowInstance, [](::GLFWwindow *windowInstance,
-                                               double xpos, double ypos) {
-    auto *window =
-        static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
+  glfwSetCursorPosCallback(
+      mWindowInstance, [](::GLFWwindow *windowInstance, f64 xpos, f64 ypos) {
+        auto *window =
+            static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
-    window->mEventSystem.dispatch(
-        MouseCursorEvent::Moved,
-        {static_cast<float>(xpos), static_cast<float>(ypos)});
-  });
+        window->mEventSystem.dispatch(
+            MouseCursorEvent::Moved,
+            {static_cast<f32>(xpos), static_cast<f32>(ypos)});
+      });
 
   glfwSetMouseButtonCallback(mWindowInstance, [](::GLFWwindow *windowInstance,
                                                  int button, int action,
@@ -105,12 +105,12 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
   });
 
   glfwSetScrollCallback(mWindowInstance, [](::GLFWwindow *windowInstance,
-                                            double xoffset, double yoffset) {
+                                            f64 xoffset, f64 yoffset) {
     auto *window =
         static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
     window->mEventSystem.dispatch(
         MouseScrollEvent::Scroll,
-        {static_cast<float>(xoffset), static_cast<float>(yoffset)});
+        {static_cast<f32>(xoffset), static_cast<f32>(yoffset)});
   });
 
   mDeviceManager.addDevice({.type = InputDeviceType::Keyboard,
@@ -140,7 +140,7 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
       addGamepad(jid, window);
     } else if (event == GLFW_DISCONNECTED) {
       window->mDeviceManager.removeDevice(InputDeviceType::Gamepad,
-                                          static_cast<uint32_t>(jid));
+                                          static_cast<u32>(jid));
     }
   });
 }
@@ -159,8 +159,8 @@ glm::uvec2 Window::getFramebufferSize() {
   glfwGetFramebufferSize(mWindowInstance, &width, &height);
 
   return {
-      static_cast<uint32_t>(width),
-      static_cast<uint32_t>(height),
+      static_cast<u32>(width),
+      static_cast<u32>(height),
   };
 }
 
@@ -169,8 +169,8 @@ glm::uvec2 Window::getWindowSize() {
   glfwGetWindowSize(mWindowInstance, &width, &height);
 
   return {
-      static_cast<uint32_t>(width),
-      static_cast<uint32_t>(height),
+      static_cast<u32>(width),
+      static_cast<u32>(height),
   };
 }
 
@@ -178,28 +178,26 @@ bool Window::shouldClose() { return glfwWindowShouldClose(mWindowInstance); }
 
 void Window::pollEvents() { glfwPollEvents(); }
 
-uint32_t Window::addFramebufferResizeHandler(
-    const std::function<void(uint32_t, uint32_t)> &handler) {
-  uint32_t id = static_cast<uint32_t>(mResizeHandlers.size());
+u32 Window::addFramebufferResizeHandler(
+    const std::function<void(u32, u32)> &handler) {
+  u32 id = static_cast<u32>(mResizeHandlers.size());
 
   mResizeHandlers.insert(std::make_pair(id, handler));
   return id;
 }
 
-void Window::removeResizeHandler(uint32_t handle) {
+void Window::removeResizeHandler(u32 handle) {
   mResizeHandlers.erase(mResizeHandlers.find(handle));
 }
 
-uint32_t Window::addFocusHandler(const std::function<void(bool)> &handler) {
-  uint32_t id = static_cast<uint32_t>(mFocusHandlers.size());
+u32 Window::addFocusHandler(const std::function<void(bool)> &handler) {
+  u32 id = static_cast<u32>(mFocusHandlers.size());
   mFocusHandlers.insert(std::make_pair(id, handler));
 
   return id;
 }
 
-void Window::removeFocusHandler(uint32_t handle) {
-  mFocusHandlers.erase(handle);
-}
+void Window::removeFocusHandler(u32 handle) { mFocusHandlers.erase(handle); }
 
 glm::vec2 Window::getCurrentMousePosition() const {
   glm::dvec2 mousePos;
@@ -225,14 +223,13 @@ InputStateValue Window::getKeyboardState(int key) {
 
 InputStateValue Window::getMouseState(int key) {
   if (input::isMouseMove(key)) {
-    double xpos = 0.0, ypos = 0.0;
+    f64 xpos = 0.0, ypos = 0.0;
     glfwGetCursorPos(mWindowInstance, &xpos, &ypos);
 
     auto windowSize = getWindowSize();
 
-    return glm::vec2{
-        static_cast<float>(xpos) / static_cast<float>(windowSize.x),
-        static_cast<float>(ypos) / static_cast<float>(windowSize.y)};
+    return glm::vec2{static_cast<f32>(xpos) / static_cast<f32>(windowSize.x),
+                     static_cast<f32>(ypos) / static_cast<f32>(windowSize.y)};
   }
 
   return glfwGetMouseButton(mWindowInstance, input::getGlfwMouseButton(key)) ==
@@ -265,7 +262,7 @@ void Window::addGamepad(int jid, Window *window) {
 
   InputDevice device = {.type = InputDeviceType::Gamepad,
                         .name = name,
-                        .index = static_cast<uint32_t>(jid),
+                        .index = static_cast<u32>(jid),
                         .stateFn = std::bind(&Window::getGamepadState, window,
                                              jid, std::placeholders::_1)};
 

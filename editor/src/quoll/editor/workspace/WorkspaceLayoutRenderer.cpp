@@ -8,7 +8,7 @@
 namespace quoll::editor {
 
 bool WorkspaceLayoutRenderer::begin() {
-  const float WINDOW_AND_STATUS_BAR_HEIGHT = ImGui::GetFrameHeight() * 2.0f;
+  const f32 WINDOW_AND_STATUS_BAR_HEIGHT = ImGui::GetFrameHeight() * 2.0f;
 
   const auto &viewport = ImGui::GetMainViewport();
 
@@ -65,9 +65,9 @@ void WorkspaceLayoutRenderer::reset() {
   // Sidebar - Hierarchy (top) and Inspector (bottom)
   // Main - View (top) and Asset browser (bottom)
 
-  static constexpr float RatioSidebar = 1.0f / 6.0f;
-  static constexpr float RatioMainBottom = 1.0f / 4.0f;
-  static constexpr float RatioSideBottom = 2.0f / 3.0f;
+  static constexpr f32 RatioSidebar = 1.0f / 6.0f;
+  static constexpr f32 RatioMainBottom = 1.0f / 4.0f;
+  static constexpr f32 RatioSideBottom = 2.0f / 3.0f;
 
   ImGuiID mainId = -1;
   auto sidebarId = ImGui::DockBuilderSplitNode(dockspaceId, ImGuiDir_Right,

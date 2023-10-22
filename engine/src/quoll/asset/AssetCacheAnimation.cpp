@@ -32,7 +32,7 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   file.write(header);
 
   file.write(asset.data.time);
-  uint32_t numKeyframes = static_cast<uint32_t>(asset.data.keyframes.size());
+  u32 numKeyframes = static_cast<u32>(asset.data.keyframes.size());
   file.write(numKeyframes);
 
   for (auto &keyframe : asset.data.keyframes) {
@@ -41,7 +41,7 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
     file.write(keyframe.jointTarget);
     file.write(keyframe.joint);
 
-    uint32_t numValues = static_cast<uint32_t>(keyframe.keyframeTimes.size());
+    u32 numValues = static_cast<u32>(keyframe.keyframeTimes.size());
     file.write(numValues);
     file.write(keyframe.keyframeTimes);
     file.write(keyframe.keyframeValues);
@@ -62,7 +62,7 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
   animation.name = header.name;
 
   stream.read(animation.data.time);
-  uint32_t numKeyframes = 0;
+  u32 numKeyframes = 0;
   stream.read(numKeyframes);
   animation.data.keyframes.resize(numKeyframes);
 
@@ -72,7 +72,7 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
     stream.read(keyframe.jointTarget);
     stream.read(keyframe.joint);
 
-    uint32_t numValues = 0;
+    u32 numValues = 0;
     stream.read(numValues);
     keyframe.keyframeTimes.resize(numValues);
     keyframe.keyframeValues.resize(numValues);

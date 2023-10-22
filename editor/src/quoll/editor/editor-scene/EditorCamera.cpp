@@ -57,13 +57,13 @@ EditorCamera::EditorCamera(EventSystem &eventSystem, Window &window)
           return;
         }
 
-        static constexpr float MinOOBThreshold = 2.0f;
+        static constexpr f32 MinOOBThreshold = 2.0f;
         const auto &size = mWindow.getFramebufferSize();
 
-        float minX = 0;
-        float maxX = static_cast<float>(size.x);
-        float minY = 0;
-        float maxY = static_cast<float>(size.y);
+        f32 minX = 0;
+        f32 maxX = static_cast<f32>(size.x);
+        f32 minY = 0;
+        f32 maxY = static_cast<f32>(size.y);
 
         bool outOfBounds = false;
 
@@ -142,8 +142,7 @@ void EditorCamera::update(WorkspaceState &state) {
 
   lens.aspectRatio = mWidth / mHeight;
 
-  const float fovY =
-      2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
+  const f32 fovY = 2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
 
   camera.projectionMatrix =
       glm::perspective(fovY, lens.aspectRatio, lens.near, lens.far);
@@ -151,22 +150,22 @@ void EditorCamera::update(WorkspaceState &state) {
   camera.viewMatrix = glm::lookAt(lookAt.eye, lookAt.center, lookAt.up);
   camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
 
-  static constexpr float Ev100ForOneExposure = -0.263034f;
+  static constexpr f32 Ev100ForOneExposure = -0.263034f;
   camera.exposure.x = Ev100ForOneExposure;
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
-  float scaleX = static_cast<float>(mWindow.getFramebufferSize().x) / mWidth;
-  float scaleY = static_cast<float>(mWindow.getFramebufferSize().y) / mHeight;
+  f32 scaleX = static_cast<f32>(mWindow.getFramebufferSize().x) / mWidth;
+  f32 scaleY = static_cast<f32>(mWindow.getFramebufferSize().y) / mHeight;
 
-  float rX = pos.x - mX;
-  float rY = pos.y - mY;
+  f32 rX = pos.x - mX;
+  f32 rY = pos.y - mY;
 
   return glm::vec2(rX * scaleX, rY * scaleY);
 }
 
 void EditorCamera::pan(CameraLookAt &lookAt) {
-  static constexpr float PanSpeed = 0.03f;
+  static constexpr f32 PanSpeed = 0.03f;
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   glm::vec3 right = glm::normalize(
@@ -182,15 +181,15 @@ void EditorCamera::pan(CameraLookAt &lookAt) {
 }
 
 void EditorCamera::rotate(CameraLookAt &lookAt) {
-  static constexpr float TwoPi = 2.0f * glm::pi<float>();
+  static constexpr f32 TwoPi = 2.0f * glm::pi<f32>();
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   const auto &size = mWindow.getFramebufferSize();
 
   glm ::vec2 screenToSphere{// horizontal = 2pi
-                            (TwoPi / static_cast<float>(size.x)),
+                            (TwoPi / static_cast<f32>(size.x)),
                             // vertical = pi
-                            (glm::pi<float>() / static_cast<float>(size.y))};
+                            (glm::pi<f32>() / static_cast<f32>(size.y))};
 
   // Convert mouse position difference to angle
   // difference for arcball
@@ -210,7 +209,7 @@ void EditorCamera::rotate(CameraLookAt &lookAt) {
 
 void EditorCamera::zoom(CameraLookAt &lookAt) {
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
-  float zoomFactor = (mousePos.y - mPrevMousePos.y) * ZoomSpeed;
+  f32 zoomFactor = (mousePos.y - mPrevMousePos.y) * ZoomSpeed;
 
   glm::vec3 change = glm::vec3(lookAt.eye - lookAt.center) * zoomFactor;
   lookAt.center += change;
@@ -228,7 +227,7 @@ void EditorCamera::zoomWheel(CameraLookAt &lookAt) {
   mInputState = InputState::None;
 }
 
-void EditorCamera::setViewport(float x, float y, float width, float height,
+void EditorCamera::setViewport(f32 x, f32 y, f32 width, f32 height,
                                bool captureMouse) {
   mX = x;
   mY = y;

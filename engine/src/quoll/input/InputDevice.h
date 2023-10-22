@@ -4,7 +4,7 @@ namespace quoll {
 
 enum class InputDeviceType { Keyboard, Mouse, Gamepad, Unknown };
 
-using InputStateValue = std::variant<bool, float, glm::vec2>;
+using InputStateValue = std::variant<bool, f32, glm::vec2>;
 
 /**
  * @brief Input device
@@ -23,7 +23,7 @@ struct InputDevice {
   /**
    * Device index
    */
-  uint32_t index = 0;
+  u32 index = 0;
 
   /**
    * Device state function

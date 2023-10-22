@@ -118,7 +118,7 @@ public:
 private:
   THandle getNewHandle() {
     THandle handle = mLastHandle;
-    mLastHandle = THandle{static_cast<uint32_t>(mLastHandle) + 1};
+    mLastHandle = THandle{static_cast<u32>(mLastHandle) + 1};
     return handle;
   }
 

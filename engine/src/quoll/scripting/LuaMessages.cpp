@@ -19,13 +19,13 @@ String LuaMessages::noEntityTable(const String &interfaceName,
 String LuaMessages::entityDoesNotExist(const String &interfaceName,
                                        const String &functionName,
                                        Entity entity) {
-  return "Entity " + std::to_string(static_cast<uint32_t>(entity)) +
+  return "Entity " + std::to_string(static_cast<u32>(entity)) +
          " does not exist";
 }
 
 String LuaMessages::componentDoesNotExist(const String &componentName,
                                           Entity entity) {
-  return "Entity " + std::to_string(static_cast<uint32_t>(entity)) +
+  return "Entity " + std::to_string(static_cast<u32>(entity)) +
          " does not have " + componentName + " component";
 }
 

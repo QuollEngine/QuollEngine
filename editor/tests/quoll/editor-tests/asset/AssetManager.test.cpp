@@ -206,7 +206,7 @@ TEST_P(AssetTest, ImportModifiesTheNameAndCopiesSourceToAssetsIfDuplicate) {
               (AssetsPath / "valid-asset").replace_extension(fixtureExtension));
   }
 
-  for (uint32_t i = 1; i < 10; ++i) {
+  for (u32 i = 1; i < 10; ++i) {
     auto duplicateName = (AssetsPath / ("valid-asset-" + std::to_string(i)))
                              .replace_extension(fixtureExtension);
 
@@ -250,7 +250,7 @@ TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
   auto node = YAML::Load(stream);
   auto sourceAssetHash = node["sourceHash"].as<quoll::String>();
   auto uuid = node["uuid"]["root"].as<quoll::String>();
-  auto revision = node["revision"].as<uint32_t>();
+  auto revision = node["revision"].as<u32>();
   stream.close();
 
   EXPECT_EQ(uuid.size(), 32);

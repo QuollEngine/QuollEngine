@@ -50,8 +50,8 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
       physicalDevice.getPresentModes(backend.getSurface()));
   calculateExtent(surfaceCapabilities, backend.getFramebufferSize());
 
-  uint32_t imageCount = std::min(surfaceCapabilities.minImageCount + 1,
-                                 surfaceCapabilities.maxImageCount);
+  u32 imageCount = std::min(surfaceCapabilities.minImageCount + 1,
+                            surfaceCapabilities.maxImageCount);
 
   bool sameQueueFamily =
       physicalDevice.getQueueFamilyIndices().getGraphicsFamily() ==
@@ -72,7 +72,7 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
   if (sameQueueFamily) {
     auto &array = physicalDevice.getQueueFamilyIndices().toArray();
     createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    createInfo.queueFamilyIndexCount = static_cast<uint32_t>(array.size());
+    createInfo.queueFamilyIndexCount = static_cast<u32>(array.size());
     createInfo.pQueueFamilyIndices = array.data();
   } else {
     // TODO: Handle the case where graphics
@@ -96,16 +96,16 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
   std::vector<VkImage> images(imageCount, VK_NULL_HANDLE);
   vkGetSwapchainImagesKHR(mDevice, mSwapchain, &imageCount, images.data());
 
-  size_t oldSize = mTextures.size();
+  usize oldSize = mTextures.size();
 
   // Delete old textures
-  for (size_t i = oldSize + 1; i < images.size(); ++i) {
+  for (usize i = oldSize + 1; i < images.size(); ++i) {
     mRegistry.deleteTexture(static_cast<TextureHandle>(i));
   }
 
   mTextures.resize(images.size());
 
-  for (size_t i = 0; i < mTextures.size(); ++i) {
+  for (usize i = 0; i < mTextures.size(); ++i) {
     VkImage image = images.at(i);
     VkImageView imageView = VK_NULL_HANDLE;
 
@@ -175,12 +175,10 @@ void VulkanSwapchain::pickMostSuitablePresentMode(
 void VulkanSwapchain::calculateExtent(
     const VkSurfaceCapabilitiesKHR &capabilities, const glm::uvec2 &size) {
 
-  uint32_t width =
-      std::max(capabilities.minImageExtent.width,
-               std::min(capabilities.maxImageExtent.width, size.x));
-  uint32_t height =
-      std::max(capabilities.minImageExtent.height,
-               std::min(capabilities.maxImageExtent.height, size.y));
+  u32 width = std::max(capabilities.minImageExtent.width,
+                       std::min(capabilities.maxImageExtent.width, size.x));
+  u32 height = std::max(capabilities.minImageExtent.height,
+                        std::min(capabilities.maxImageExtent.height, size.y));
 
   mExtent = glm::uvec2{width, height};
 }
@@ -205,16 +203,15 @@ VkCompositeAlphaFlagBitsKHR VulkanSwapchain::getSuitableCompositeAlpha(
   return VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 }
 
-uint32_t
-VulkanSwapchain::acquireNextImage(VkSemaphore imageAvailableSemaphore) {
+u32 VulkanSwapchain::acquireNextImage(VkSemaphore imageAvailableSemaphore) {
   QUOLL_PROFILE_EVENT("VulkanSwapchain::acquireNextImage");
-  uint32_t imageIndex = 0;
+  u32 imageIndex = 0;
   VkResult result = vkAcquireNextImageKHR(
-      mDevice, mSwapchain, std::numeric_limits<uint64_t>::max(),
+      mDevice, mSwapchain, std::numeric_limits<u64>::max(),
       imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-    return std::numeric_limits<uint32_t>::max();
+    return std::numeric_limits<u32>::max();
   }
 
   return imageIndex;
