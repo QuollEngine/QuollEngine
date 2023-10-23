@@ -34,18 +34,28 @@ struct PerspectiveLens {
   static constexpr u32 DefaultSensitivity = 200;
 
   /**
+   * Default near plane
+   */
+  static constexpr f32 DefaultNearPlane = 0.1f;
+
+  /**
+   * Default far plane
+   */
+  static constexpr f32 DefaultFarPlane = 1000.0f;
+
+  /**
    * Near plane
    *
    * Measured in meters
    */
-  f32 near = 0.1f;
+  f32 near = DefaultNearPlane;
 
   /**
    * Far plane
    *
    * Measured in meters
    */
-  f32 far = 1000.0f;
+  f32 far = DefaultFarPlane;
 
   /**
    * Aspect ratio

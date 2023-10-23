@@ -1,4 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/scene/DirectionalLight.h"
+#include "quoll/scene/CascadedShadowMap.h"
+
 #include "quoll/editor/actions/EntityLightActions.h"
 
 #include "quoll/editor-tests/Testing.h"
@@ -6,39 +9,6 @@
 #include "DefaultEntityTests.h"
 
 // Directional light
-using EntityCreateDirectionalLightActionTest = ActionTestBase;
-InitDefaultCreateComponentTests(EntityCreateDirectionalLightActionTest,
-                                EntityCreateDirectionalLight, DirectionalLight);
-InitActionsTestSuite(EntityActionsTest, EntityCreateDirectionalLightActionTest);
-
-using EntitySetDirectionalLightActionTest = ActionTestBase;
-InitDefaultUpdateComponentTests(EntitySetDirectionalLightActionTest,
-                                EntitySetDirectionalLight, DirectionalLight,
-                                color, glm::vec4{2.5f});
-InitActionsTestSuite(EntityActionsTest, EntitySetDirectionalLightActionTest);
-
-// Shadow maps
-using EntityEnableCascadedShadowMapsActionTest = ActionTestBase;
-InitDefaultCreateComponentTests(EntityEnableCascadedShadowMapsActionTest,
-                                EntityEnableCascadedShadowMap,
-                                CascadedShadowMap);
-InitActionsTestSuite(EntityActionsTest,
-                     EntityEnableCascadedShadowMapsActionTest);
-
-using EntityDisableCascadedShadowMapActionTest = ActionTestBase;
-InitDefaultDeleteComponentTests(EntityDisableCascadedShadowMapActionTest,
-                                EntityDisableCascadedShadowMap,
-                                CascadedShadowMap);
-InitActionsTestSuite(EntityActionsTest,
-                     EntityDisableCascadedShadowMapActionTest);
-
-using EntitySetCascadedShadowMapActionTest = ActionTestBase;
-
-InitDefaultUpdateComponentTests(EntitySetCascadedShadowMapActionTest,
-                                EntitySetCascadedShadowMap, CascadedShadowMap,
-                                splitLambda, 1.2f);
-
-InitActionsTestSuite(EntityActionsTest, EntitySetCascadedShadowMapActionTest);
 
 using EntityDeleteDirectionalLightActionTest = ActionTestBase;
 

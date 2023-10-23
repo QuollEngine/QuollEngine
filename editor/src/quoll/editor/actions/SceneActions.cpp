@@ -1,6 +1,8 @@
 #include "quoll/core/Base.h"
 #include "SceneActions.h"
 
+#include "quoll/scene/PerspectiveLens.h"
+
 namespace quoll::editor {
 
 SceneSetStartingCamera::SceneSetStartingCamera(Entity entity)

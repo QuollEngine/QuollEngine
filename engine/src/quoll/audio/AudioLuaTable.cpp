@@ -1,5 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/audio/AudioSource.h"
+#include "quoll/audio/AudioStart.h"
+#include "quoll/audio/AudioStatus.h"
 
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scripting/LuaMessages.h"

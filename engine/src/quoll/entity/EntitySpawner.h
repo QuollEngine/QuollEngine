@@ -2,6 +2,7 @@
 
 #include "EntityDatabase.h"
 #include "quoll/asset/AssetRegistry.h"
+#include "quoll/scene/LocalTransform.h"
 
 namespace quoll {
 

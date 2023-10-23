@@ -3,6 +3,8 @@
 #include "Action.h"
 #include "EntityDefaultDeleteAction.h"
 
+#include "quoll/scene/LocalTransform.h"
+
 namespace quoll::editor {
 
 /**

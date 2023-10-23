@@ -2,6 +2,7 @@
 
 #include "quoll/rhi/RenderHandle.h"
 #include "quoll/asset/EnvironmentAsset.h"
+#include "quoll/asset/Asset.h"
 
 namespace quoll {
 

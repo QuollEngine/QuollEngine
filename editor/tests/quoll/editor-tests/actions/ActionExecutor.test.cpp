@@ -1,4 +1,8 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Id.h"
+#include "quoll/core/Name.h"
+#include "quoll/scene/PerspectiveLens.h"
+
 #include "quoll/editor/actions/ActionExecutor.h"
 
 #include "quoll/editor-tests/Testing.h"

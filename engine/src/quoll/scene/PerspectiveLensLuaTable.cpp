@@ -4,6 +4,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scripting/LuaMessages.h"
 
+#include "PerspectiveLens.h"
 #include "PerspectiveLensLuaTable.h"
 
 namespace quoll {

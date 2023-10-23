@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
-#include "quoll-tests/Testing.h"
+#include "quoll/scene/LocalTransform.h"
 
+#include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 
 class TransformLuaTableTest : public LuaScriptingInterfaceTestBase {};

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "quoll/editor/actions/Action.h"
+#include "quoll/scene/AutoAspectRatio.h"
+#include "quoll/scene/PerspectiveLens.h"
+
 #include "EntityDefaultDeleteAction.h"
 
 namespace quoll::editor {
@@ -50,14 +53,6 @@ public:
 private:
   Entity mEntity;
 };
-
-using EntitySetPerspectiveLens = EntityDefaultUpdateComponent<PerspectiveLens>;
-
-using EntitySetCameraAutoAspectRatio =
-    EntityDefaultCreateComponent<AutoAspectRatio>;
-
-using EntitySetCameraCustomAspectRatio =
-    EntityDefaultDeleteAction<AutoAspectRatio>;
 
 /**
  * @brief Delete camera action

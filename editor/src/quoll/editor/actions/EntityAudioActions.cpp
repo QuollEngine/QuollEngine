@@ -1,4 +1,6 @@
 #include "quoll/core/Base.h"
+#include "quoll/audio/AudioSource.h"
+
 #include "EntityAudioActions.h"
 
 namespace quoll::editor {

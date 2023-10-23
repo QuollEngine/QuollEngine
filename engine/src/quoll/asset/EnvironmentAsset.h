@@ -1,5 +1,7 @@
 #pragma once
 
+#include "quoll/asset/Asset.h"
+
 namespace quoll {
 
 /**

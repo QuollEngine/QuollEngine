@@ -7,12 +7,18 @@
 #include "quoll/editor/state/WorkspaceState.h"
 #include "quoll/editor/actions/ActionExecutor.h"
 #include "quoll/editor/actions/EntityScriptingActions.h"
-#include "quoll/editor/actions/EntityNameActions.h"
 #include "quoll/editor/actions/EntityCollidableActions.h"
-#include "quoll/editor/actions/EntityRigidBodyActions.h"
-#include "quoll/editor/actions/EntityTextActions.h"
 #include "quoll/editor/actions/EntityLightActions.h"
 #include "quoll/editor/actions/EntityCameraActions.h"
+#include "quoll/editor/actions/EntityTransformActions.h"
+
+#include "quoll/core/Name.h"
+#include "quoll/scene/CascadedShadowMap.h"
+#include "quoll/scene/EnvironmentSkybox.h"
+#include "quoll/scene/PerspectiveLens.h"
+#include "quoll/text/Text.h"
+#include "quoll/physics/Collidable.h"
+#include "quoll/physics/RigidBody.h"
 
 namespace quoll::editor {
 
@@ -270,16 +276,19 @@ private:
   bool mIsNameActivated = false;
 
 private:
-  std::unique_ptr<EntitySetName> mNameAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<Name>> mNameAction;
   std::unique_ptr<EntitySetLocalTransformContinuous> mLocalTransformAction;
-  std::unique_ptr<EntitySetCollidable> mCollidableAction;
-  std::unique_ptr<EntitySetRigidBody> mRigidBodyAction;
-  std::unique_ptr<EntitySetText> mTextAction;
-  std::unique_ptr<EntitySetDirectionalLight> mDirectionalLightAction;
-  std::unique_ptr<EntitySetCascadedShadowMap> mCascadedShadowMapAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<Collidable>> mCollidableAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<RigidBody>> mRigidBodyAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<Text>> mTextAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<DirectionalLight>>
+      mDirectionalLightAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<CascadedShadowMap>>
+      mCascadedShadowMapAction;
   std::unique_ptr<EntitySetScriptVariable> mSetScriptVariable;
-  std::unique_ptr<EntitySetPointLight> mPointLightAction;
-  std::unique_ptr<EntitySetPerspectiveLens> mPerspectiveLensAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<PointLight>> mPointLightAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<PerspectiveLens>>
+      mPerspectiveLensAction;
   std::unique_ptr<EntityDefaultUpdateComponent<EnvironmentSkybox>>
       mEnvironmentSkyboxAction;
 };

@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
-#include "quoll-tests/Testing.h"
+#include "quoll/physics/Collidable.h"
 
+#include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 
 class CollidableLuaTableTest : public LuaScriptingInterfaceTestBase {};

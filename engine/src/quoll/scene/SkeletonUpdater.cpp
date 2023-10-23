@@ -1,4 +1,6 @@
 #include "quoll/core/Base.h"
+
+#include "Skeleton.h"
 #include "SkeletonUpdater.h"
 
 namespace quoll {

@@ -1,5 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/animation/AnimationSystem.h"
+#include "quoll/animation/AnimatorEvent.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/Skeleton.h"
 
 #include "quoll-tests/Testing.h"
 

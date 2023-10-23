@@ -1,27 +1,11 @@
 #include "quoll/core/Base.h"
+#include "quoll/physics/Collidable.h"
 #include "quoll/editor/actions/EntityCollidableActions.h"
 
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 
 #include "DefaultEntityTests.h"
-
-using EntityCreateCollidableActionTest = ActionTestBase;
-InitDefaultCreateComponentTests(EntityCreateCollidableActionTest,
-                                EntityCreateCollidable, Collidable);
-InitActionsTestSuite(EntityActionsTest, EntityCreateCollidableActionTest);
-
-using EntityDeleteCollidableActionTest = ActionTestBase;
-InitDefaultDeleteComponentTests(EntityDeleteCollidableActionTest,
-                                EntityDeleteCollidable, Collidable);
-InitActionsTestSuite(EntityActionsTest, EntityDeleteCollidableActionTest);
-
-using EntitySetCollidableActionTest = ActionTestBase;
-
-InitDefaultUpdateComponentTests(EntitySetCollidableActionTest,
-                                EntitySetCollidable, Collidable,
-                                materialDesc.staticFriction, 2.5f);
-InitActionsTestSuite(EntityActionsTest, EntitySetCollidableActionTest);
 
 using EntitySetCollidableTypeActionTest = ActionTestBase;
 

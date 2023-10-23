@@ -6,6 +6,12 @@
 #include "quoll/renderer/Material.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/renderer/BindlessDrawParameters.h"
+#include "quoll/scene/CascadedShadowMap.h"
+#include "quoll/scene/WorldTransform.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/PerspectiveLens.h"
+#include "quoll/scene/DirectionalLight.h"
+#include "quoll/scene/PointLight.h"
 
 namespace quoll {
 

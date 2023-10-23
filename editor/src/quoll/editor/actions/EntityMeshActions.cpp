@@ -1,4 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/scene/Mesh.h"
+#include "quoll/scene/SkinnedMesh.h"
+
 #include "EntityMeshActions.h"
 
 namespace quoll::editor {

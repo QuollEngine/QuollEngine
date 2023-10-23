@@ -102,6 +102,4 @@ private:
   AudioAssetHandle mHandle;
 };
 
-using EntityDeleteAudio = EntityDefaultDeleteAction<AudioSource>;
-
 } // namespace quoll::editor

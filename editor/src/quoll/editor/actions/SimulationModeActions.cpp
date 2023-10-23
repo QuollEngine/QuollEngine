@@ -1,4 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/Parent.h"
+
 #include "SimulationModeActions.h"
 
 namespace quoll::editor {

@@ -3,6 +3,8 @@
 #include "quoll/editor/actions/Action.h"
 #include "quoll/editor/actions/EntityDefaultDeleteAction.h"
 
+#include "quoll/scene/Skeleton.h"
+
 namespace quoll::editor {
 
 /**

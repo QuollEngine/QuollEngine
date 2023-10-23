@@ -1,5 +1,13 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/scene/WorldTransform.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/Parent.h"
+#include "quoll/physics/Collidable.h"
+#include "quoll/physics/RigidBody.h"
+#include "quoll/physics/Torque.h"
+#include "quoll/physics/Force.h"
+#include "quoll/physics/RigidBodyClear.h"
 
 #include "PhysxBackend.h"
 #include "PhysxMapping.h"

@@ -1,9 +1,16 @@
 #include "quoll/core/Base.h"
-#include "quoll-tests/Testing.h"
+#include "quoll/core/Id.h"
+#include "quoll/scene/EnvironmentLighting.h"
+#include "quoll/scene/EnvironmentSkybox.h"
+#include "quoll/scene/PerspectiveLens.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/Parent.h"
 
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/SceneIO.h"
 #include "quoll/scene/private/EntitySerializer.h"
+
+#include "quoll-tests/Testing.h"
 
 const quoll::Path ScenePath =
     std::filesystem::current_path() / "scene-io-test" / "main.scene";

@@ -1,4 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/scene/Mesh.h"
+#include "quoll/scene/SkinnedMesh.h"
+
 #include "quoll/editor/actions/EntityMeshActions.h"
 
 #include "quoll/editor-tests/Testing.h"

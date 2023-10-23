@@ -6,6 +6,8 @@
 #include "quoll/asset/MeshAsset.h"
 
 #include "quoll/scene/Camera.h"
+#include "quoll/physics/Collidable.h"
+
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/BindlessDrawParameters.h"
 #include "quoll/renderer/SceneRendererFrameData.h"

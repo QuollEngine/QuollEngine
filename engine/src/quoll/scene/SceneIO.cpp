@@ -1,8 +1,12 @@
 #include "quoll/core/Base.h"
-#include "SceneIO.h"
+#include "quoll/core/Id.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/PerspectiveLens.h"
 
 #include "private/SceneLoader.h"
 #include "private/EntitySerializer.h"
+
+#include "SceneIO.h"
 
 namespace quoll {
 
