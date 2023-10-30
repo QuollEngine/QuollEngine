@@ -7,6 +7,7 @@
 #include "quoll/physics/RigidBody.h"
 #include "quoll/physics/Torque.h"
 #include "quoll/physics/Force.h"
+#include "quoll/physics/Impulse.h"
 #include "quoll/physics/RigidBodyClear.h"
 
 #include "PhysxBackend.h"
@@ -380,10 +381,24 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
     for (auto [entity, force, _, physx] :
          entityDatabase.view<Force, RigidBody, PhysxInstance>()) {
       physx.rigidDynamic->addForce(
-          PxVec3(force.force.x, force.force.y, force.force.z));
+          PxVec3(force.force.x, force.force.y, force.force.z),
+          physx::PxForceMode::eFORCE);
     };
 
     entityDatabase.destroyComponents<Force>();
+  }
+
+  {
+    QUOLL_PROFILE_EVENT("Apply impulses");
+
+    for (auto [entity, impulse, _, physx] :
+         entityDatabase.view<Impulse, RigidBody, PhysxInstance>()) {
+      physx.rigidDynamic->addForce(
+          PxVec3(impulse.impulse.x, impulse.impulse.y, impulse.impulse.z),
+          physx::PxForceMode::eIMPULSE);
+    };
+
+    entityDatabase.destroyComponents<Impulse>();
   }
 
   {

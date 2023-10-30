@@ -8,6 +8,7 @@
 #include "RigidBodyClear.h"
 #include "Force.h"
 #include "Torque.h"
+#include "Impulse.h"
 #include "RigidBodyLuaTable.h"
 
 namespace quoll {
@@ -94,6 +95,11 @@ void RigidBodyLuaTable::applyForce(f32 x, f32 y, f32 z) {
   mScriptGlobals.entityDatabase.set<Force>(mEntity, {force});
 }
 
+void RigidBodyLuaTable::applyImpulse(f32 x, f32 y, f32 z) {
+  glm::vec3 impulse{x, y, z};
+  mScriptGlobals.entityDatabase.set<Impulse>(mEntity, {impulse});
+}
+
 void RigidBodyLuaTable::applyTorque(f32 x, f32 y, f32 z) {
   glm::vec3 torque{x, y, z};
   mScriptGlobals.entityDatabase.set<Torque>(mEntity, {torque});
@@ -118,6 +124,7 @@ void RigidBodyLuaTable::create(sol::usertype<RigidBodyLuaTable> usertype) {
   usertype["is_gravity_applied"] = &RigidBodyLuaTable::isGravityApplied;
   usertype["apply_gravity"] = &RigidBodyLuaTable::applyGravity;
   usertype["apply_force"] = &RigidBodyLuaTable::applyForce;
+  usertype["apply_impulse"] = &RigidBodyLuaTable::applyImpulse;
   usertype["apply_torque"] = &RigidBodyLuaTable::applyTorque;
   usertype["clear"] = &RigidBodyLuaTable::clear;
   usertype["delete"] = &RigidBodyLuaTable::deleteThis;

@@ -3,6 +3,7 @@
 #include "quoll/physics/RigidBodyClear.h"
 #include "quoll/physics/Force.h"
 #include "quoll/physics/Torque.h"
+#include "quoll/physics/Impulse.h"
 
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
@@ -165,6 +166,18 @@ TEST_F(RigidBodyLuaTableTest, ApplyForceSetsForceComponent) {
   const auto &force = entityDatabase.get<quoll::Force>(entity).force;
 
   EXPECT_EQ(force, glm::vec3(10.0f, 0.2f, 5.0f));
+}
+
+TEST_F(RigidBodyLuaTableTest, ApplyImpulseSetsImpulseComponent) {
+  auto entity = entityDatabase.create();
+  EXPECT_FALSE(entityDatabase.has<quoll::Impulse>(entity));
+
+  call(entity, "rigid_body_apply_impulse");
+  EXPECT_TRUE(entityDatabase.has<quoll::Impulse>(entity));
+
+  const auto &impulse = entityDatabase.get<quoll::Impulse>(entity).impulse;
+
+  EXPECT_EQ(impulse, glm::vec3(10.0f, 0.2f, 5.0f));
 }
 
 TEST_F(RigidBodyLuaTableTest, ApplyTorqueSetsTorqueComponent) {

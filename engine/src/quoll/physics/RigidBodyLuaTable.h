@@ -77,6 +77,15 @@ public:
   void applyForce(f32 x, f32 y, f32 z);
 
   /**
+   * @brief Apply impulse
+   *
+   * @param x Impulse in x axis
+   * @param y Impulse in y axis
+   * @param z Impulse in z axis
+   */
+  void applyImpulse(f32 x, f32 y, f32 z);
+
+  /**
    * @brief Apply torque
    *
    * @param x Torque in x axis

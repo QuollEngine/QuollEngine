@@ -129,12 +129,12 @@ void Runtime::start() {
 
     inputMapSystem.update(entityDatabase);
     cameraAspectRatioUpdater.update(entityDatabase);
+    physicsSystem.update(dt, entityDatabase);
     scriptingSystem.start(entityDatabase, physicsSystem);
     scriptingSystem.update(dt, entityDatabase);
     animationSystem.update(dt, entityDatabase);
     skeletonUpdater.update(entityDatabase);
     sceneUpdater.update(entityDatabase);
-    physicsSystem.update(dt, entityDatabase);
     audioSystem.output(entityDatabase);
 
     return true;
