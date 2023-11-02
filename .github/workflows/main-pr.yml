@@ -58,8 +58,10 @@ jobs:
     steps:
       - name: Install clang-tidy
         run: |
-          sudo apt-get update
-          sudo apt-get install clang-tidy
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 16 all
+          rm llvm.sh
 
       - uses: actions/checkout@v4
 
@@ -80,7 +82,7 @@ jobs:
 
       - name: Static Analysis
         run: |
-          ./scripts/clang-tidy-all.sh 14
+          ./scripts/clang-tidy-all.sh 16
 
   docs-checker:
     name: Documentation checker

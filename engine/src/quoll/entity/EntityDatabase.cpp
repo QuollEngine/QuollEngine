@@ -29,6 +29,7 @@
 #include "quoll/physics/Collidable.h"
 #include "quoll/physics/Force.h"
 #include "quoll/physics/Torque.h"
+#include "quoll/physics/Impulse.h"
 #include "quoll/physics/RigidBodyClear.h"
 #include "quoll/text/Text.h"
 #include "quoll/renderer/MeshRenderer.h"
@@ -74,6 +75,7 @@ EntityDatabase::EntityDatabase() {
   reg<Collidable>();
   reg<PhysxInstance>();
   reg<Force>();
+  reg<Impulse>();
   reg<Torque>();
   reg<RigidBodyClear>();
   reg<Script>();

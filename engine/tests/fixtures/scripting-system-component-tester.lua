@@ -118,7 +118,6 @@ function rigid_body_set_inertia()
     entity.rigid_body:set_inertia(2.5, 2.5, 2.5)
 end
 
-
 is_gravity_applied = true
 function rigid_body_is_gravity_applied()
     is_gravity_applied = entity.rigid_body:is_gravity_applied()
@@ -130,6 +129,10 @@ end
 
 function rigid_body_apply_force()
     entity.rigid_body:apply_force(10.0, 0.2, 5.0);
+end
+
+function rigid_body_apply_impulse()
+    entity.rigid_body:apply_impulse(10.0, 0.2, 5.0)
 end
 
 function rigid_body_apply_torque()
