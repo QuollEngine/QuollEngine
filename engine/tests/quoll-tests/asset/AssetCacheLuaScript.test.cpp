@@ -44,24 +44,6 @@ TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfFileCannotBeOpened) {
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfScriptHasNoStartFunction) {
-  auto scriptPath = FixturesPath / "script-asset-no-start.lua";
-
-  auto result = loadFromSource(scriptPath);
-  EXPECT_TRUE(result.hasError());
-  EXPECT_FALSE(result.hasWarnings());
-  EXPECT_FALSE(result.hasData());
-}
-
-TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfScriptHasNoUpdateFunction) {
-  auto scriptPath = FixturesPath / "script-asset-no-update.lua";
-
-  auto result = loadFromSource(scriptPath);
-  EXPECT_TRUE(result.hasError());
-  EXPECT_FALSE(result.hasWarnings());
-  EXPECT_FALSE(result.hasData());
-}
-
 TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfScriptHasSyntaxError) {
   auto scriptPath = FixturesPath / "script-asset-invalid-syntax.lua";
 

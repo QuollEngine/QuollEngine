@@ -109,7 +109,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   EXPECT_EQ(state["value"].get<i32>(), 9);
 }
 
-TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
+TEST_F(ScriptingSystemTest, LoadsScriptOnStart) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
@@ -125,7 +125,7 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
   EXPECT_EQ(state["value"].get<i32>(), -1);
 }
 
-TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
+TEST_F(ScriptingSystemTest, LoadsScriptOnlyOnceOnStart) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();

@@ -2,6 +2,7 @@
 
 #include "quoll/scripting/LuaInterpreter.h"
 #include "quoll/scripting/LuaMessages.h"
+#include "quoll/scripting/lua/NoopMetatable.h"
 #include "AssetCache.h"
 
 namespace quoll {
@@ -111,6 +112,14 @@ Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
   LuaInterpreter interpreter;
 
   sol::state state;
+  NoopMetatable::create(state);
+  state["entity"] = NoopMetatable{};
+  state["entity_query"] = NoopMetatable{};
+  state["entity_spawner"] = NoopMetatable{};
+  state["logger"] = NoopMetatable{};
+  state["ui"] = NoopMetatable{};
+  state["table"] = NoopMetatable{};
+
   injectInputVarsInterface(state, asset.data);
 
   auto *luaState = state.lua_state();
@@ -119,16 +128,6 @@ Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
   if (!success) {
     const auto *message = lua_tostring(luaState, -1);
     return Result<LuaScriptAssetHandle>::Error(message);
-  }
-
-  if (state["start"].get_type() != sol::type::function) {
-    return Result<LuaScriptAssetHandle>::Error(
-        "`start` function is missing from script");
-  }
-
-  if (state["update"].get_type() != sol::type::function) {
-    return Result<LuaScriptAssetHandle>::Error(
-        "`update` function is missing from script");
   }
 
   auto handle = mRegistry.getLuaScripts().findHandleByUuid(uuid);

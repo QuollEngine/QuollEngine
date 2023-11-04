@@ -54,11 +54,6 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase,
     scriptDecorator.removeVariableInjectors(state);
 
     createScriptingData(component, entity);
-    auto res = state["start"]();
-    if (!res.valid()) {
-      sol::error error = res;
-      Engine::getUserLogger().error() << error.what();
-    }
   }
 
   for (auto entity : deleteList) {
@@ -76,6 +71,11 @@ void ScriptingSystem::update(f32 dt, EntityDatabase &entityDatabase) {
 
   for (auto [entity, component] : entityDatabase.view<Script>()) {
     auto state = sol::state_view(component.state);
+
+    if (state["update"].get_type() != sol::type::function) {
+      continue;
+    }
+
     auto res = state["update"](dt);
     if (!res.valid()) {
       sol::error error = res;

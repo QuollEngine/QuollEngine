@@ -1,2 +1,0 @@
-function update()
-end

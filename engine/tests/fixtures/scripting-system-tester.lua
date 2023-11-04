@@ -5,9 +5,7 @@ key_value = -1
 key_mods = -1
 global_dt = 0.0
 
-function start()
-    value = value - 1
-end
+value = value - 1
 
 function update(dt)
     value = value + 1
