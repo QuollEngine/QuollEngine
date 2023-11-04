@@ -4,9 +4,6 @@ var_texture = input_vars.register('texture_value', input_vars.types.AssetTexture
 
 global_vars = input_vars
 
-function start()
-end
-
 function update()
     -- After script is started the 
     -- `input_vars` global variable

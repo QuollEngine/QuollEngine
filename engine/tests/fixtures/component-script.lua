@@ -1,8 +1,4 @@
-state = 'none'
-
-function start()
-    state = 'start'
-end
+state = 'start'
 
 function update()
     state = 'update'

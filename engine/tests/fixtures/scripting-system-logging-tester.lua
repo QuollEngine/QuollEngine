@@ -1,9 +1,3 @@
-function start()
-end
-
-function update()
-end
-
 function debug()
     logger.debug("Hello world")
 end

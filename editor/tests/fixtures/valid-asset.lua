@@ -1,7 +1,1 @@
-function start()
-
-end
-
-function update()
-
-end
+a = 10
