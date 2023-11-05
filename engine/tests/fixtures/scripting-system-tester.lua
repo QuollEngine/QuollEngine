@@ -7,9 +7,13 @@ global_dt = 0.0
 
 value = value - 1
 
-function update(dt)
-    value = value + 1
-    global_dt = dt
+updater_fn = game.on_update:connect(function(dt)
+  value = value + 1
+  global_dt = dt
+end)
+
+function disconnect_updater()
+  updater_fn:disconnect()
 end
 
 function on_collision_start(collision)

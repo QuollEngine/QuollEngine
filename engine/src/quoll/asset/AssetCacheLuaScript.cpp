@@ -119,6 +119,7 @@ Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
   state["logger"] = NoopMetatable{};
   state["ui"] = NoopMetatable{};
   state["table"] = NoopMetatable{};
+  state["game"] = NoopMetatable{};
 
   injectInputVarsInterface(state, asset.data);
 

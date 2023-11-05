@@ -12,7 +12,8 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 
 void ScriptingSystem::start(EntityDatabase &entityDatabase,
                             PhysicsSystem &physicsSystem) {
-  ScriptGlobals scriptGlobals{entityDatabase, physicsSystem, mAssetRegistry};
+  ScriptGlobals scriptGlobals{entityDatabase, physicsSystem, mAssetRegistry,
+                              mScriptLoop};
   QUOLL_PROFILE_EVENT("ScriptingSystem::start");
   ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
@@ -69,19 +70,7 @@ void ScriptingSystem::update(f32 dt, EntityDatabase &entityDatabase) {
   }
   mScriptRemoveObserver.clear();
 
-  for (auto [entity, component] : entityDatabase.view<Script>()) {
-    auto state = sol::state_view(component.state);
-
-    if (state["update"].get_type() != sol::type::function) {
-      continue;
-    }
-
-    auto res = state["update"](dt);
-    if (!res.valid()) {
-      sol::error error = res;
-      Engine::getUserLogger().error() << error.what();
-    }
-  }
+  mScriptLoop.getUpdateSignal().notify(dt);
 }
 
 void ScriptingSystem::cleanup(EntityDatabase &entityDatabase) {
@@ -150,8 +139,8 @@ void ScriptingSystem::createScriptingData(Script &component, Entity entity) {
 }
 
 void ScriptingSystem::destroyScriptingData(Script &component) {
-  if (component.state) {
-    mLuaInterpreter.destroyState(component.state);
+  for (auto slot : component.signalSlots) {
+    slot.disconnect();
   }
 
   if (component.onCollisionStart != EventObserverMax) {
@@ -171,6 +160,10 @@ void ScriptingSystem::destroyScriptingData(Script &component) {
   if (component.onKeyRelease != EventObserverMax) {
     mEventSystem.removeObserver(KeyboardEvent::Released,
                                 component.onKeyRelease);
+  }
+
+  if (component.state) {
+    mLuaInterpreter.destroyState(component.state);
   }
 }
 

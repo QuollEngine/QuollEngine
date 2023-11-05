@@ -13,8 +13,7 @@ public:
     scriptingSystem.observeChanges(entityDatabase);
   }
 
-  quoll::LuaScriptAssetHandle
-  loadLuaScript(quoll::String filename = "scripting-system-tester.lua") {
+  quoll::LuaScriptAssetHandle loadLuaScript(quoll::String filename) {
     auto uuid = quoll::Uuid::generate();
     cache.createLuaScriptFromSource(FixturesPath / filename, uuid);
     return cache.loadLuaScript(uuid).getData();
@@ -31,7 +30,7 @@ using ScriptingSystemDeathTest = ScriptingSystemTest;
 static constexpr f32 TimeDelta = 0.2f;
 
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -50,7 +49,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
 }
 
 TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   static constexpr usize NumEntities = 20;
 
@@ -89,8 +88,30 @@ TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
   }
 }
 
+TEST_F(ScriptingSystemTest, DoesNothingIfScriptHasNoUpdater) {
+  auto handle = loadLuaScript("scripting-system-tester.lua");
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::Script>(entity, {handle});
+
+  auto &component = entityDatabase.get<quoll::Script>(entity);
+  EXPECT_EQ(component.state, nullptr);
+
+  scriptingSystem.start(entityDatabase, physicsSystem);
+  EXPECT_NE(component.state, nullptr);
+
+  sol::state_view state(component.state);
+  state["disconnect_updater"]();
+
+  for (usize i = 0; i < 10; ++i) {
+    scriptingSystem.update(TimeDelta, entityDatabase);
+  }
+
+  EXPECT_EQ(state["value"].get<i32>(), -1);
+}
+
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -110,7 +131,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
 }
 
 TEST_F(ScriptingSystemTest, LoadsScriptOnStart) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -126,7 +147,7 @@ TEST_F(ScriptingSystemTest, LoadsScriptOnStart) {
 }
 
 TEST_F(ScriptingSystemTest, LoadsScriptOnlyOnceOnStart) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -232,7 +253,7 @@ TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
 }
 
 TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -249,7 +270,7 @@ TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
 
 TEST_F(ScriptingSystemTest,
        DoesNotCallScriptCollisionEventIfEntityDidNotCollide) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -267,7 +288,7 @@ TEST_F(ScriptingSystemTest,
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -286,7 +307,7 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -305,7 +326,7 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});
@@ -324,7 +345,7 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
-  auto handle = loadLuaScript();
+  auto handle = loadLuaScript("scripting-system-tester.lua");
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Script>(entity, {handle});

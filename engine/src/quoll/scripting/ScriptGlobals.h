@@ -3,6 +3,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/physics/PhysicsSystem.h"
 #include "quoll/asset/AssetRegistry.h"
+#include "ScriptLoop.h"
 
 namespace quoll {
 
@@ -24,6 +25,11 @@ struct ScriptGlobals {
    * Asset registry
    */
   AssetRegistry &assetRegistry;
+
+  /**
+   * Script loop
+   */
+  ScriptLoop &scriptLoop;
 };
 
 } // namespace quoll

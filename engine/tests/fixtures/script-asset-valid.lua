@@ -3,6 +3,6 @@ var_prefab = input_vars.register('prefab_value', input_vars.types.AssetPrefab)
 
 state = 'start'
 
-function update()
+game.on_update:connect(function()
     state = 'update'
-end
+end)
