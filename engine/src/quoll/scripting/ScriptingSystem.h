@@ -6,6 +6,7 @@
 #include "quoll/physics/PhysicsSystem.h"
 
 #include "Script.h"
+#include "ScriptLoop.h"
 #include "LuaInterpreter.h"
 
 namespace quoll {
@@ -83,6 +84,7 @@ private:
   EventSystem &mEventSystem;
   AssetRegistry &mAssetRegistry;
   LuaInterpreter mLuaInterpreter;
+  ScriptLoop mScriptLoop;
 
   EntityDatabaseObserver<Script> mScriptRemoveObserver;
 };

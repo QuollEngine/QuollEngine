@@ -21,7 +21,9 @@
 #include "LuaHeaders.h"
 #include "ScriptDecorator.h"
 #include "ScriptLogger.h"
+#include "ScriptSignal.h"
 
+#include "GameLuaTable.h"
 #include "EntityTable.h"
 
 namespace quoll {
@@ -34,12 +36,15 @@ void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
   EntitySpawnerLuaTable::create(state);
   EntityQueryLuaTable::create(state);
   UILuaTable::create(state);
+  GameLuaTable::create(state);
 
   state["entity"] = EntityTable(entity, scriptGlobals);
   state["entity_spawner"] = EntitySpawnerLuaTable(scriptGlobals);
   state["entity_query"] = EntityQueryLuaTable(scriptGlobals);
+  state["game"] = GameLuaTable(entity, scriptGlobals);
 
   createScriptLogger(state);
+  createScriptSignalTables(state);
 }
 
 void ScriptDecorator::attachVariableInjectors(

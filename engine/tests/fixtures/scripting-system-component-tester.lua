@@ -6,12 +6,6 @@ function expect_eq(a, b)
     end
 end
 
-function start()
-end
-
-function update()
-end
-
 found_entity = -1
 
 -- Entity query: get first by name

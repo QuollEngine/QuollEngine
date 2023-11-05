@@ -5,6 +5,7 @@
 #include "quoll/events/EventObserver.h"
 #include "quoll/scripting/LuaScriptInputVariable.h"
 #include "LuaHeaders.h"
+#include "ScriptSignalSlot.h"
 
 namespace quoll {
 
@@ -54,6 +55,11 @@ struct Script {
    * Key release observer
    */
   EventObserverId onKeyRelease = EventObserverMax;
+
+  /**
+   * Signal slots
+   */
+  std::vector<ScriptSignalSlot> signalSlots;
 };
 
 } // namespace quoll
