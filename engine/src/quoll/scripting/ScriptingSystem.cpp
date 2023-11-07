@@ -17,9 +17,10 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase,
   QUOLL_PROFILE_EVENT("ScriptingSystem::start");
   ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
+  std::vector<DeferredLoader *> loaders;
   for (auto [entity, component] : entityDatabase.view<Script>()) {
     if (component.started) {
-      return;
+      continue;
     }
 
     bool valid = true;
@@ -38,23 +39,30 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase,
       continue;
     }
 
-    component.started = true;
+    component.loader = [&, entity]() {
+      component.started = true;
 
-    if (component.state) {
-      mLuaInterpreter.destroyState(component.state);
-    }
-    component.state = mLuaInterpreter.createState();
-    auto state = sol::state_view(component.state);
+      if (component.state) {
+        mLuaInterpreter.destroyState(component.state);
+      }
+      component.state = mLuaInterpreter.createState();
+      auto state = sol::state_view(component.state);
 
-    scriptDecorator.attachToScope(state, entity, scriptGlobals);
-    scriptDecorator.attachVariableInjectors(state, component.variables);
+      scriptDecorator.attachToScope(state, entity, scriptGlobals);
+      scriptDecorator.attachVariableInjectors(state, component.variables);
 
-    bool success = mLuaInterpreter.evaluate(script.data.bytes, component.state);
-    QuollAssert(success, "Cannot evaluate script");
+      bool success =
+          mLuaInterpreter.evaluate(script.data.bytes, component.state);
+      QuollAssert(success, "Cannot evaluate script");
+      scriptDecorator.removeVariableInjectors(state);
+      createScriptingData(component, entity);
+    };
 
-    scriptDecorator.removeVariableInjectors(state);
+    loaders.push_back(&component.loader);
+  }
 
-    createScriptingData(component, entity);
+  for (auto *loader : loaders) {
+    loader->wait();
   }
 
   for (auto entity : deleteList) {

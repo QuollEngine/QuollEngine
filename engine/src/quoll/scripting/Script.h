@@ -6,6 +6,7 @@
 #include "quoll/scripting/LuaScriptInputVariable.h"
 #include "LuaHeaders.h"
 #include "ScriptSignalSlot.h"
+#include "DeferredLoader.h"
 
 namespace quoll {
 
@@ -60,6 +61,11 @@ struct Script {
    * Signal slots
    */
   std::vector<ScriptSignalSlot> signalSlots;
+
+  /**
+   * Deferred loader
+   */
+  DeferredLoader loader;
 };
 
 } // namespace quoll

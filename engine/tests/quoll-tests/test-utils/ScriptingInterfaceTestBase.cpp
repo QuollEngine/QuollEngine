@@ -17,13 +17,7 @@ LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
 sol::state_view
 LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
                                     const quoll::String &functionName) {
-  auto uuid = quoll::Uuid::generate();
-  assetCache.createLuaScriptFromSource(FixturesPath / mScriptName, uuid);
-
-  auto res = assetCache.loadLuaScript(uuid);
-  QuollAssert(res.hasData(), "Error loading script");
-  auto handle = res.getData();
-
+  auto handle = loadScript(mScriptName);
   entityDatabase.set<quoll::Script>(entity, {handle});
 
   scriptingSystem.start(entityDatabase, physicsSystem);
@@ -40,6 +34,16 @@ LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
   }
 
   return state;
+}
+
+quoll::LuaScriptAssetHandle
+LuaScriptingInterfaceTestBase::loadScript(quoll::String scriptName) {
+  auto uuid = quoll::Uuid::generate();
+  assetCache.createLuaScriptFromSource(FixturesPath / scriptName, uuid);
+
+  auto res = assetCache.loadLuaScript(uuid);
+  QuollAssert(res.hasData(), "Error loading script");
+  return res.getData();
 }
 
 void LuaScriptingInterfaceTestBase::SetUp() {

@@ -20,7 +20,7 @@ EntityTable::EntityTable(Entity entity, ScriptGlobals &scriptGlobals)
       mRigidBody(entity, scriptGlobals), mCollidable(entity, scriptGlobals),
       mAudio(entity, scriptGlobals), mText(entity, scriptGlobals),
       mAnimator(entity, scriptGlobals), mInputMap(entity, scriptGlobals),
-      mUICanvas(entity, scriptGlobals) {}
+      mUICanvas(entity, scriptGlobals), mScript(entity, scriptGlobals) {}
 
 void EntityTable::create(sol::state_view state) {
   auto entityTable =
@@ -36,6 +36,7 @@ void EntityTable::create(sol::state_view state) {
   setToStruct(state, entityTable, &EntityTable::mAnimator);
   setToStruct(state, entityTable, &EntityTable::mInputMap);
   setToStruct(state, entityTable, &EntityTable::mUICanvas);
+  setToStruct(state, entityTable, &EntityTable::mScript);
 }
 
 } // namespace quoll
