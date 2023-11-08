@@ -29,6 +29,13 @@ public:
   sol::state_view call(quoll::Entity entity, const quoll::String &functionName);
 
   /**
+   * @brief Load script
+   *
+   * @return Script handle
+   */
+  quoll::LuaScriptAssetHandle loadScript(quoll::String scriptName);
+
+  /**
    * @brief Set up test
    */
   void SetUp() override;

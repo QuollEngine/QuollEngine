@@ -12,6 +12,7 @@
 #include "quoll/animation/AnimatorLuaTable.h"
 #include "quoll/input/InputMapLuaTable.h"
 #include "quoll/ui/UICanvasLuaTable.h"
+#include "quoll/scripting/ScriptLuaTable.h"
 
 #include "ScriptGlobals.h"
 #include "LuaHeaders.h"
@@ -58,6 +59,7 @@ private:
   AnimatorLuaTable mAnimator;
   InputMapLuaTable mInputMap;
   UICanvasLuaTable mUICanvas;
+  ScriptLuaTable mScript;
 };
 
 } // namespace quoll
