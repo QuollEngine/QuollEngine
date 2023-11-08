@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/editor/actions/Action.h"
+#include "Action.h"
 #include "quoll/editor/asset/SceneWriter.h"
 #include "quoll/scene/SceneIO.h"
 

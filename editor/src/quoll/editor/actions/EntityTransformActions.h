@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Action.h"
-#include "EntityDefaultDeleteAction.h"
 
 #include "quoll/scene/LocalTransform.h"
 

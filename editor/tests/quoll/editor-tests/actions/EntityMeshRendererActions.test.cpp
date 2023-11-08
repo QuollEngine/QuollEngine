@@ -292,15 +292,3 @@ TEST_P(EntityRemoveLastMeshRendererMaterialSlotActionTest,
 
 InitActionsTestSuite(EntityActionsTest,
                      EntityRemoveLastMeshRendererMaterialSlotActionTest);
-
-// Default tests
-using EntityCreateMeshRendererActionTest = ActionTestBase;
-InitDefaultCreateComponentTests(EntityCreateMeshRendererActionTest,
-                                EntityCreateMeshRenderer, MeshRenderer);
-InitActionsTestSuite(EntityActionsTest, EntityCreateMeshRendererActionTest);
-
-using EntityDeleteMeshRendererActionTest = ActionTestBase;
-
-InitDefaultDeleteComponentTests(EntityDeleteMeshRendererActionTest,
-                                EntityDeleteMeshRenderer, MeshRenderer);
-InitActionsTestSuite(EntityActionsTest, EntityDeleteMeshRendererActionTest);

@@ -297,19 +297,3 @@ TEST_P(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
 
 InitActionsTestSuite(EntityActionsTest,
                      EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest);
-
-// Default tests
-using EntityCreateSkinnedMeshRendererActionTest = ActionTestBase;
-InitDefaultCreateComponentTests(EntityCreateSkinnedMeshRendererActionTest,
-                                EntityCreateSkinnedMeshRenderer,
-                                SkinnedMeshRenderer);
-InitActionsTestSuite(EntityActionsTest,
-                     EntityCreateSkinnedMeshRendererActionTest);
-
-using EntityDeleteSkinnedMeshRendererActionTest = ActionTestBase;
-
-InitDefaultDeleteComponentTests(EntityDeleteSkinnedMeshRendererActionTest,
-                                EntityDeleteSkinnedMeshRenderer,
-                                SkinnedMeshRenderer);
-InitActionsTestSuite(EntityActionsTest,
-                     EntityDeleteSkinnedMeshRendererActionTest);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/editor/actions/Action.h"
+#include "Action.h"
 
 namespace quoll::editor {
 

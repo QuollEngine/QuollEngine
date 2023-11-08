@@ -1,7 +1,6 @@
 #pragma once
 
-#include "quoll/editor/actions/Action.h"
-#include "quoll/editor/actions/EntityDefaultDeleteAction.h"
+#include "Action.h"
 
 namespace quoll::editor {
 
@@ -101,7 +100,5 @@ private:
   AnimatorAssetHandle mAnimator;
   AnimatorAssetHandle mOldAnimator{};
 };
-
-using EntityDeleteAnimator = EntityDefaultDeleteAction<Animator>;
 
 } // namespace quoll::editor

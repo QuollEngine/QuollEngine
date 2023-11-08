@@ -1,7 +1,6 @@
 #pragma once
 
-#include "quoll/editor/actions/Action.h"
-#include "quoll/editor/actions/EntityDefaultDeleteAction.h"
+#include "Action.h"
 #include "quoll/lua-scripting/LuaScript.h"
 
 namespace quoll::editor {

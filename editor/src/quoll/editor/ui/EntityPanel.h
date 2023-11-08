@@ -11,6 +11,7 @@
 #include "quoll/editor/actions/EntityLightActions.h"
 #include "quoll/editor/actions/EntityCameraActions.h"
 #include "quoll/editor/actions/EntityTransformActions.h"
+#include "quoll/editor/actions/EntityUpdateComponentAction.h"
 
 #include "quoll/core/Name.h"
 #include "quoll/scene/CascadedShadowMap.h"
@@ -276,20 +277,20 @@ private:
   bool mIsNameActivated = false;
 
 private:
-  std::unique_ptr<EntityDefaultUpdateComponent<Name>> mNameAction;
+  std::unique_ptr<EntityUpdateComponent<Name>> mNameAction;
   std::unique_ptr<EntitySetLocalTransformContinuous> mLocalTransformAction;
-  std::unique_ptr<EntityDefaultUpdateComponent<Collidable>> mCollidableAction;
-  std::unique_ptr<EntityDefaultUpdateComponent<RigidBody>> mRigidBodyAction;
-  std::unique_ptr<EntityDefaultUpdateComponent<Text>> mTextAction;
-  std::unique_ptr<EntityDefaultUpdateComponent<DirectionalLight>>
+  std::unique_ptr<EntityUpdateComponent<Collidable>> mCollidableAction;
+  std::unique_ptr<EntityUpdateComponent<RigidBody>> mRigidBodyAction;
+  std::unique_ptr<EntityUpdateComponent<Text>> mTextAction;
+  std::unique_ptr<EntityUpdateComponent<DirectionalLight>>
       mDirectionalLightAction;
-  std::unique_ptr<EntityDefaultUpdateComponent<CascadedShadowMap>>
+  std::unique_ptr<EntityUpdateComponent<CascadedShadowMap>>
       mCascadedShadowMapAction;
   std::unique_ptr<EntitySetScriptVariable> mSetScriptVariable;
-  std::unique_ptr<EntityDefaultUpdateComponent<PointLight>> mPointLightAction;
-  std::unique_ptr<EntityDefaultUpdateComponent<PerspectiveLens>>
+  std::unique_ptr<EntityUpdateComponent<PointLight>> mPointLightAction;
+  std::unique_ptr<EntityUpdateComponent<PerspectiveLens>>
       mPerspectiveLensAction;
-  std::unique_ptr<EntityDefaultUpdateComponent<EnvironmentSkybox>>
+  std::unique_ptr<EntityUpdateComponent<EnvironmentSkybox>>
       mEnvironmentSkyboxAction;
 };
 

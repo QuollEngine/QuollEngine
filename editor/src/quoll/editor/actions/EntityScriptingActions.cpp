@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "EntityCameraActions.h"
 #include "EntityScriptingActions.h"
+#include "EntityCreateComponentAction.h"
 
 namespace quoll::editor {
 
@@ -11,13 +12,13 @@ EntityCreateScript::EntityCreateScript(Entity entity,
 ActionExecutorResult
 EntityCreateScript::onExecute(WorkspaceState &state,
                               AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<LuaScript>(mEntity, {mHandle})
+  return EntityCreateComponent<LuaScript>(mEntity, {mHandle})
       .onExecute(state, assetRegistry);
 }
 
 ActionExecutorResult EntityCreateScript::onUndo(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<LuaScript>(mEntity, {mHandle})
+  return EntityCreateComponent<LuaScript>(mEntity, {mHandle})
       .onUndo(state, assetRegistry);
 }
 
