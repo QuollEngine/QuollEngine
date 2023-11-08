@@ -1,10 +1,8 @@
 #pragma once
 
-#include "quoll/editor/actions/Action.h"
+#include "Action.h"
 #include "quoll/scene/DirectionalLight.h"
 #include "quoll/scene/CascadedShadowMap.h"
-
-#include "EntityDefaultDeleteAction.h"
 
 namespace quoll::editor {
 

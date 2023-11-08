@@ -107,8 +107,3 @@ TEST_P(EntitySetAnimatorActionTest, PredicateReturnsTrueIfAnimatorExists) {
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetAnimatorActionTest);
-
-using EntityDeleteAnimatorActionTest = ActionTestBase;
-InitDefaultDeleteComponentTests(EntityDeleteAnimatorActionTest,
-                                EntityDeleteAnimator, Animator);
-InitActionsTestSuite(EntityActionsTest, EntityDeleteAnimatorActionTest);

@@ -2,6 +2,7 @@
 #include "quoll/audio/AudioSource.h"
 
 #include "EntityAudioActions.h"
+#include "EntityCreateComponentAction.h"
 
 namespace quoll::editor {
 
@@ -44,13 +45,13 @@ EntityCreateAudio::EntityCreateAudio(Entity entity, AudioAssetHandle handle)
 ActionExecutorResult
 EntityCreateAudio::onExecute(WorkspaceState &state,
                              AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<AudioSource>(mEntity, {mHandle})
+  return EntityCreateComponent<AudioSource>(mEntity, {mHandle})
       .onExecute(state, assetRegistry);
 }
 
 ActionExecutorResult EntityCreateAudio::onUndo(WorkspaceState &state,
                                                AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<AudioSource>(mEntity, {mHandle})
+  return EntityCreateComponent<AudioSource>(mEntity, {mHandle})
       .onUndo(state, assetRegistry);
 }
 

@@ -2,6 +2,7 @@
 #include "quoll/scene/Sprite.h"
 
 #include "EntitySpriteActions.h"
+#include "EntityCreateComponentAction.h"
 
 namespace quoll::editor {
 
@@ -44,13 +45,13 @@ EntityCreateSprite::EntityCreateSprite(Entity entity, TextureAssetHandle handle)
 ActionExecutorResult
 EntityCreateSprite::onExecute(WorkspaceState &state,
                               AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<Sprite>(mEntity, {mHandle})
+  return EntityCreateComponent<Sprite>(mEntity, {mHandle})
       .onExecute(state, assetRegistry);
 }
 
 ActionExecutorResult EntityCreateSprite::onUndo(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<Sprite>(mEntity, {mHandle})
+  return EntityCreateComponent<Sprite>(mEntity, {mHandle})
       .onUndo(state, assetRegistry);
 }
 

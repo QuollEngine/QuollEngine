@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "EntityAnimatorActions.h"
+#include "EntityCreateComponentAction.h"
 
 namespace quoll::editor {
 
@@ -10,14 +11,14 @@ EntityCreateAnimator::EntityCreateAnimator(Entity entity,
 ActionExecutorResult
 EntityCreateAnimator::onExecute(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<Animator>(mEntity, {mHandle})
+  return EntityCreateComponent<Animator>(mEntity, {mHandle})
       .onExecute(state, assetRegistry);
 }
 
 ActionExecutorResult
 EntityCreateAnimator::onUndo(WorkspaceState &state,
                              AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<Animator>(mEntity, {mHandle})
+  return EntityCreateComponent<Animator>(mEntity, {mHandle})
       .onUndo(state, assetRegistry);
 }
 

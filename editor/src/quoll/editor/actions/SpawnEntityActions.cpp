@@ -10,6 +10,7 @@
 #include "EntitySkeletonActions.h"
 #include "EntityTransformActions.h"
 #include "EntityLightActions.h"
+#include "EntityUpdateComponentAction.h"
 
 #include "SpawnEntityActions.h"
 
@@ -68,7 +69,7 @@ SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
   mSpawnedEntity =
       EntitySpawner(scene.entityDatabase, assetRegistry).spawnEmpty(transform);
 
-  EntityDefaultUpdateComponent<Name>(mSpawnedEntity, {}, Name{"New entity"})
+  EntityUpdateComponent<Name>(mSpawnedEntity, {}, Name{"New entity"})
       .onExecute(state, assetRegistry);
 
   ActionExecutorResult res{};

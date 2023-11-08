@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Action.h"
-#include "EntityDefaultDeleteAction.h"
 
 #include "quoll/renderer/MeshRenderer.h"
 
@@ -153,9 +152,5 @@ private:
   Entity mEntity;
   MaterialAssetHandle mOldMaterial = MaterialAssetHandle::Null;
 };
-
-using EntityCreateMeshRenderer = EntityDefaultCreateComponent<MeshRenderer>;
-
-using EntityDeleteMeshRenderer = EntityDefaultDeleteAction<MeshRenderer>;
 
 } // namespace quoll::editor
