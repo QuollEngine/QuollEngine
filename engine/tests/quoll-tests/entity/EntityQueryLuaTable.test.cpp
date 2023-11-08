@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
 #include "quoll/core/Delete.h"
-#include "quoll/scripting/EntityTable.h"
+#include "quoll/entity/EntityLuaTable.h"
 
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
@@ -25,8 +25,8 @@ TEST_F(EntityQueryLuaTableTest,
 
   auto state = call(entity, "entity_query_get_first_by_name");
 
-  EXPECT_TRUE(state["found_entity"].is<quoll::EntityTable>());
-  EXPECT_EQ(state["found_entity"].get<quoll::EntityTable>().getEntity(), e1);
+  EXPECT_TRUE(state["found_entity"].is<quoll::EntityLuaTable>());
+  EXPECT_EQ(state["found_entity"].get<quoll::EntityLuaTable>().getEntity(), e1);
 }
 
 TEST_F(EntityQueryLuaTableTest,

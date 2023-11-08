@@ -11,13 +11,13 @@ EntityCreateScript::EntityCreateScript(Entity entity,
 ActionExecutorResult
 EntityCreateScript::onExecute(WorkspaceState &state,
                               AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<Script>(mEntity, {mHandle})
+  return EntityDefaultCreateComponent<LuaScript>(mEntity, {mHandle})
       .onExecute(state, assetRegistry);
 }
 
 ActionExecutorResult EntityCreateScript::onUndo(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
-  return EntityDefaultCreateComponent<Script>(mEntity, {mHandle})
+  return EntityDefaultCreateComponent<LuaScript>(mEntity, {mHandle})
       .onUndo(state, assetRegistry);
 }
 
@@ -25,7 +25,7 @@ bool EntityCreateScript::predicate(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
-  return !scene.entityDatabase.has<Script>(mEntity) &&
+  return !scene.entityDatabase.has<LuaScript>(mEntity) &&
          assetRegistry.getLuaScripts().hasAsset(mHandle);
 }
 
@@ -37,9 +37,9 @@ ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state,
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  mOldScript = scene.entityDatabase.get<Script>(mEntity).handle;
+  mOldScript = scene.entityDatabase.get<LuaScript>(mEntity).handle;
 
-  scene.entityDatabase.set<Script>(mEntity, {mScript});
+  scene.entityDatabase.set<LuaScript>(mEntity, {mScript});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -52,7 +52,7 @@ ActionExecutorResult EntitySetScript::onUndo(WorkspaceState &state,
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  scene.entityDatabase.set<Script>(mEntity, {mOldScript});
+  scene.entityDatabase.set<LuaScript>(mEntity, {mOldScript});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -74,7 +74,7 @@ EntitySetScriptVariable::onExecute(WorkspaceState &state,
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  auto &script = scene.entityDatabase.get<Script>(mEntity);
+  auto &script = scene.entityDatabase.get<LuaScript>(mEntity);
   mOldScript = script;
 
   script.variables.insert_or_assign(mName, mValue);
@@ -103,11 +103,11 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state,
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  if (!scene.entityDatabase.has<Script>(mEntity)) {
+  if (!scene.entityDatabase.has<LuaScript>(mEntity)) {
     return false;
   }
 
-  auto scriptHandle = scene.entityDatabase.get<Script>(mEntity).handle;
+  auto scriptHandle = scene.entityDatabase.get<LuaScript>(mEntity).handle;
   if (!assetRegistry.getLuaScripts().hasAsset(scriptHandle)) {
     return false;
   }

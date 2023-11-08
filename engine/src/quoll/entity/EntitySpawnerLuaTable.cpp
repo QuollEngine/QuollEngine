@@ -1,8 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 
-#include "quoll/scripting/ScriptDecorator.h"
-#include "quoll/scripting/LuaMessages.h"
+#include "quoll/lua-scripting/ScriptDecorator.h"
+#include "quoll/lua-scripting/Messages.h"
 
 #include "EntitySpawner.h"
 #include "EntitySpawnerLuaTable.h"
@@ -26,17 +26,17 @@ static bool isPrefabEmpty(const PrefabAsset &prefab) {
 EntitySpawnerLuaTable::EntitySpawnerLuaTable(ScriptGlobals &scriptGlobals)
     : mScriptGlobals(scriptGlobals) {}
 
-EntityTable EntitySpawnerLuaTable::spawnEmpty() {
+EntityLuaTable EntitySpawnerLuaTable::spawnEmpty() {
   auto entity =
       EntitySpawner(mScriptGlobals.entityDatabase, mScriptGlobals.assetRegistry)
           .spawnEmpty({});
-  return EntityTable(entity, mScriptGlobals);
+  return EntityLuaTable(entity, mScriptGlobals);
 }
 
-sol_maybe<EntityTable>
+sol_maybe<EntityLuaTable>
 EntitySpawnerLuaTable::spawnPrefab(PrefabAssetHandle prefab) {
   if (!mScriptGlobals.assetRegistry.getPrefabs().hasAsset(prefab)) {
-    Engine::getUserLogger().error() << LuaMessages::assetNotFound(
+    Engine::getUserLogger().error() << lua::Messages::assetNotFound(
         getName(), "spawn_prefab", getAssetTypeString(AssetType::Prefab));
 
     return sol::nil;
@@ -45,7 +45,7 @@ EntitySpawnerLuaTable::spawnPrefab(PrefabAssetHandle prefab) {
   if (isPrefabEmpty(
           mScriptGlobals.assetRegistry.getPrefabs().getAsset(prefab).data)) {
     Engine::getUserLogger().warning()
-        << LuaMessages::nothingSpawnedBecauseEmptyPrefab(
+        << lua::Messages::nothingSpawnedBecauseEmptyPrefab(
                getName(), "spawn_prefab",
                mScriptGlobals.assetRegistry.getPrefabs().getAsset(prefab).name);
 
@@ -56,13 +56,13 @@ EntitySpawnerLuaTable::spawnPrefab(PrefabAssetHandle prefab) {
       EntitySpawner(mScriptGlobals.entityDatabase, mScriptGlobals.assetRegistry)
           .spawnPrefab(prefab, {});
 
-  return EntityTable(entities.at(0), mScriptGlobals);
+  return EntityLuaTable(entities.at(0), mScriptGlobals);
 }
 
-sol_maybe<EntityTable>
+sol_maybe<EntityLuaTable>
 EntitySpawnerLuaTable::spawnSprite(TextureAssetHandle texture) {
   if (!mScriptGlobals.assetRegistry.getTextures().hasAsset(texture)) {
-    Engine::getUserLogger().error() << LuaMessages::assetNotFound(
+    Engine::getUserLogger().error() << lua::Messages::assetNotFound(
         getName(), "spawn_sprite", getAssetTypeString(AssetType::Texture));
 
     return sol::nil;
@@ -72,7 +72,7 @@ EntitySpawnerLuaTable::spawnSprite(TextureAssetHandle texture) {
       EntitySpawner(mScriptGlobals.entityDatabase, mScriptGlobals.assetRegistry)
           .spawnSprite(texture, {});
 
-  return EntityTable(entity, mScriptGlobals);
+  return EntityLuaTable(entity, mScriptGlobals);
 }
 
 void EntitySpawnerLuaTable::create(sol::state_view state) {

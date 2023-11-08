@@ -20,7 +20,7 @@ enum class EditorIcon {
   InputMap,
   Audio,
   Prefab,
-  Script,
+  LuaScript,
   Sun,
   Light,
   Camera,

@@ -12,14 +12,14 @@ TEST_F(ScriptLuaTableTest, ReturnsScriptVariableIfExistsInScript) {
 
   auto target = entityDatabase.create();
   entityDatabase.set<quoll::Name>(target, {"target"});
-  entityDatabase.set<quoll::Script>(target, {handleTarget});
+  entityDatabase.set<quoll::LuaScript>(target, {handleTarget});
 
   auto source = entityDatabase.create();
-  entityDatabase.set<quoll::Script>(source, {handleSource});
+  entityDatabase.set<quoll::LuaScript>(source, {handleSource});
 
   scriptingSystem.start(entityDatabase, physicsSystem);
 
-  sol::state_view state(entityDatabase.get<quoll::Script>(source).state);
+  sol::state_view state(entityDatabase.get<quoll::LuaScript>(source).state);
 
   EXPECT_EQ(state["retrieved_script_value"].get<u32>(), 10);
 }
@@ -30,14 +30,14 @@ TEST_F(ScriptLuaTableTest, ReturnsNilIfVariableDoesNotExistInScript) {
 
   auto target = entityDatabase.create();
   entityDatabase.set<quoll::Name>(target, {"target"});
-  entityDatabase.set<quoll::Script>(target, {handleTarget});
+  entityDatabase.set<quoll::LuaScript>(target, {handleTarget});
 
   auto source = entityDatabase.create();
-  entityDatabase.set<quoll::Script>(source, {handleSource});
+  entityDatabase.set<quoll::LuaScript>(source, {handleSource});
 
   scriptingSystem.start(entityDatabase, physicsSystem);
 
-  sol::state_view state(entityDatabase.get<quoll::Script>(source).state);
+  sol::state_view state(entityDatabase.get<quoll::LuaScript>(source).state);
 
   EXPECT_TRUE(state["non_existent_script_value"].is<sol::nil_t>());
 }
@@ -48,15 +48,15 @@ TEST_F(ScriptLuaTableTest, WaitsForTargetScriptToBeLoadedBeforeLoadingScript) {
 
   // Source is intentionally added first
   auto source = entityDatabase.create();
-  entityDatabase.set<quoll::Script>(source, {handleSource});
+  entityDatabase.set<quoll::LuaScript>(source, {handleSource});
 
   auto target = entityDatabase.create();
   entityDatabase.set<quoll::Name>(target, {"target"});
-  entityDatabase.set<quoll::Script>(target, {handleTarget});
+  entityDatabase.set<quoll::LuaScript>(target, {handleTarget});
 
   scriptingSystem.start(entityDatabase, physicsSystem);
 
-  sol::state_view state(entityDatabase.get<quoll::Script>(source).state);
+  sol::state_view state(entityDatabase.get<quoll::LuaScript>(source).state);
 
   EXPECT_EQ(state["retrieved_script_value"].get<u32>(), 10);
 }

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "quoll/scripting/ComponentLuaInterface.h"
-#include "quoll/scripting/EntityTable.h"
+#include "EntityLuaTable.h"
 
 namespace quoll {
 
@@ -23,14 +22,14 @@ public:
    * @param name Entity name
    * @return Found entity
    */
-  sol_maybe<EntityTable> getFirstEntityByName(String name);
+  sol_maybe<EntityLuaTable> getFirstEntityByName(String name);
 
   /**
    * @brief Delete entity
    *
    * @param entity Entity table
    */
-  void deleteEntity(EntityTable entity);
+  void deleteEntity(EntityLuaTable entity);
 
   /**
    * @brief Get component name in scripts

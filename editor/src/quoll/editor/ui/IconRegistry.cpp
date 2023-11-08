@@ -39,7 +39,7 @@ void IconRegistry::loadIcons(RenderStorage &renderStorage,
                             loader.loadFromFile(iconsPath / "input-map.png"));
   mIconMap.insert_or_assign(EditorIcon::Prefab,
                             loader.loadFromFile(iconsPath / "prefab.png"));
-  mIconMap.insert_or_assign(EditorIcon::Script,
+  mIconMap.insert_or_assign(EditorIcon::LuaScript,
                             loader.loadFromFile(iconsPath / "script.png"));
   mIconMap.insert_or_assign(EditorIcon::Environment,
                             loader.loadFromFile(iconsPath / "environment.png"));

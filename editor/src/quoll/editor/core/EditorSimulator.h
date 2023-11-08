@@ -7,7 +7,7 @@
 #include "quoll/scene/SkeletonUpdater.h"
 #include "quoll/scene/CameraAspectRatioUpdater.h"
 #include "quoll/animation/AnimationSystem.h"
-#include "quoll/scripting/ScriptingSystem.h"
+#include "quoll/lua-scripting/LuaScriptingSystem.h"
 #include "quoll/physics/PhysicsSystem.h"
 #include "quoll/audio/AudioSystem.h"
 #include "quoll/window/Window.h"
@@ -106,7 +106,7 @@ private:
   SkeletonUpdater mSkeletonUpdater;
   SceneUpdater mSceneUpdater;
   AnimationSystem mAnimationSystem;
-  ScriptingSystem mScriptingSystem;
+  LuaScriptingSystem mScriptingSystem;
   PhysicsSystem mPhysicsSystem;
   AudioSystem<DefaultAudioBackend> mAudioSystem;
   InputMapSystem mInputMapSystem;

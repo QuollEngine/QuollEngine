@@ -34,7 +34,7 @@
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/input/InputMap.h"
 #include "quoll/physx/PhysxInstance.h"
-#include "quoll/scripting/Script.h"
+#include "quoll/lua-scripting/LuaScript.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 
@@ -662,7 +662,7 @@ TEST_F(EntitySerializerTest,
   static constexpr quoll::LuaScriptAssetHandle NonExistentHandle{45};
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Script>(entity, {NonExistentHandle});
+  entityDatabase.set<quoll::LuaScript>(entity, {NonExistentHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["script"]);
@@ -692,7 +692,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
 
   auto entity = entityDatabase.create();
 
-  quoll::Script component{handle};
+  quoll::LuaScript component{handle};
   component.variables.insert_or_assign("test_str",
                                        quoll::String("hello world"));
   component.variables.insert_or_assign("test_str_invalid",

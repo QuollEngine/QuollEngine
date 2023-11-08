@@ -87,6 +87,10 @@
     "unordered_set": "cpp",
     "span": "cpp",
     "bitset": "cpp",
-    "ranges": "cpp"
+    "ranges": "cpp",
+    "codecvt": "cpp",
+    "coroutine": "cpp",
+    "resumable": "cpp",
+    "future": "cpp"
   }
 }

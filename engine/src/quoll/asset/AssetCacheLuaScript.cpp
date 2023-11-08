@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
 
-#include "quoll/scripting/LuaInterpreter.h"
-#include "quoll/scripting/LuaMessages.h"
-#include "quoll/scripting/lua/NoopMetatable.h"
+#include "quoll/lua-scripting/Interpreter.h"
+#include "quoll/lua-scripting/NoopMetatable.h"
 #include "AssetCache.h"
 
 namespace quoll {
@@ -109,17 +108,17 @@ Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
 
   stream.close();
 
-  LuaInterpreter interpreter;
+  lua::Interpreter interpreter;
 
   sol::state state;
-  NoopMetatable::create(state);
-  state["entity"] = NoopMetatable{};
-  state["entity_query"] = NoopMetatable{};
-  state["entity_spawner"] = NoopMetatable{};
-  state["logger"] = NoopMetatable{};
-  state["ui"] = NoopMetatable{};
-  state["table"] = NoopMetatable{};
-  state["game"] = NoopMetatable{};
+  lua::NoopMetatable::create(state);
+  state["entity"] = lua::NoopMetatable{};
+  state["entity_query"] = lua::NoopMetatable{};
+  state["entity_spawner"] = lua::NoopMetatable{};
+  state["logger"] = lua::NoopMetatable{};
+  state["ui"] = lua::NoopMetatable{};
+  state["table"] = lua::NoopMetatable{};
+  state["game"] = lua::NoopMetatable{};
 
   injectInputVarsInterface(state, asset.data);
 

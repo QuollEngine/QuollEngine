@@ -28,7 +28,7 @@ Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
   std::vector<FileTypeEntry> entries{
       FileTypeEntry{"Prefab files", AssetManager::PrefabExtensions},
       FileTypeEntry{"Audio files", AssetManager::AudioExtensions},
-      FileTypeEntry{"Script files", AssetManager::ScriptExtensions},
+      FileTypeEntry{"Lua script files", AssetManager::ScriptExtensions},
       FileTypeEntry{"Font files", AssetManager::FontExtensions},
       FileTypeEntry{"Texture files", AssetManager::TextureExtensions},
       FileTypeEntry{"Animator files", AssetManager::AnimatorExtensions},

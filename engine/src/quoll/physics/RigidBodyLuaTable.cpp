@@ -2,7 +2,7 @@
 #include "quoll/core/Engine.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaMessages.h"
+#include "quoll/lua-scripting/Messages.h"
 
 #include "RigidBody.h"
 #include "RigidBodyClear.h"
@@ -23,7 +23,7 @@ void RigidBodyLuaTable::setDefaultParams() {
 sol_maybe<f32> RigidBodyLuaTable::getMass() {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
@@ -45,7 +45,7 @@ std::tuple<sol_maybe<f32>, sol_maybe<f32>, sol_maybe<f32>>
 RigidBodyLuaTable::getInertia() {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return {sol::nil, sol::nil, sol::nil};
   }
 
@@ -71,7 +71,7 @@ void RigidBodyLuaTable::setInertia(f32 x, f32 y, f32 z) {
 sol_maybe<bool> RigidBodyLuaTable::isGravityApplied() {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 

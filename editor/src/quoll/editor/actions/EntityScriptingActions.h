@@ -2,7 +2,7 @@
 
 #include "quoll/editor/actions/Action.h"
 #include "quoll/editor/actions/EntityDefaultDeleteAction.h"
-#include "quoll/scripting/Script.h"
+#include "quoll/lua-scripting/LuaScript.h"
 
 namespace quoll::editor {
 
@@ -173,9 +173,7 @@ private:
   Entity mEntity;
   String mName;
   LuaScriptInputVariable mValue;
-  Script mOldScript{};
+  LuaScript mOldScript{};
 };
-
-using EntityDeleteScript = EntityDefaultDeleteAction<Script>;
 
 } // namespace quoll::editor

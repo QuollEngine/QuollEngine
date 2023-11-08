@@ -34,7 +34,7 @@
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/input/InputMap.h"
 #include "quoll/physx/PhysxInstance.h"
-#include "quoll/scripting/Script.h"
+#include "quoll/lua-scripting/LuaScript.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 #include "quoll/entity/EntityDatabase.h"
@@ -1607,7 +1607,7 @@ TEST_F(SceneLoaderScriptTest,
   auto [node, entity] = createNode();
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Script>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
 }
 
 TEST_F(SceneLoaderScriptTest,
@@ -1621,7 +1621,7 @@ TEST_F(SceneLoaderScriptTest,
     auto [node, entity] = createNode();
     node["script"] = invalidNode;
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
-    EXPECT_FALSE(entityDatabase.has<quoll::Script>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
   }
 }
 
@@ -1636,7 +1636,7 @@ TEST_F(SceneLoaderScriptTest,
   node["script"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Script>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
 }
 
 TEST_F(SceneLoaderScriptTest,
@@ -1649,8 +1649,8 @@ TEST_F(SceneLoaderScriptTest,
   node["script"] = data.uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
-  ASSERT_TRUE(entityDatabase.has<quoll::Script>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::Script>(entity).handle, handle);
+  ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::LuaScript>(entity).handle, handle);
 }
 
 TEST_F(SceneLoaderScriptTest,
@@ -1683,8 +1683,8 @@ TEST_F(SceneLoaderScriptTest,
 
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
-  ASSERT_TRUE(entityDatabase.has<quoll::Script>(entity));
-  const auto &script = entityDatabase.get<quoll::Script>(entity);
+  ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
+  const auto &script = entityDatabase.get<quoll::LuaScript>(entity);
 
   EXPECT_EQ(script.handle, handle);
 

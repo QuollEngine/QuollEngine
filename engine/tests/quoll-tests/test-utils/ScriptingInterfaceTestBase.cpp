@@ -18,11 +18,11 @@ sol::state_view
 LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
                                     const quoll::String &functionName) {
   auto handle = loadScript(mScriptName);
-  entityDatabase.set<quoll::Script>(entity, {handle});
+  entityDatabase.set<quoll::LuaScript>(entity, {handle});
 
   scriptingSystem.start(entityDatabase, physicsSystem);
 
-  auto &script = entityDatabase.get<quoll::Script>(entity);
+  auto &script = entityDatabase.get<quoll::LuaScript>(entity);
   sol::state_view state(script.state);
 
   state["assert_native"] = [](bool value) { return value; };

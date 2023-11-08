@@ -2,8 +2,8 @@
 #include "quoll/core/Engine.h"
 #include "quoll/core/Delete.h"
 
-#include "quoll/scripting/ScriptDecorator.h"
-#include "quoll/scripting/LuaMessages.h"
+#include "quoll/lua-scripting/ScriptDecorator.h"
+#include "quoll/lua-scripting/Messages.h"
 
 #include "EntityQuery.h"
 #include "EntityQueryLuaTable.h"
@@ -13,7 +13,8 @@ namespace quoll {
 EntityQueryLuaTable::EntityQueryLuaTable(ScriptGlobals &scriptGlobals)
     : mScriptGlobals(scriptGlobals) {}
 
-sol_maybe<EntityTable> EntityQueryLuaTable::getFirstEntityByName(String name) {
+sol_maybe<EntityLuaTable>
+EntityQueryLuaTable::getFirstEntityByName(String name) {
   EntityQuery query(mScriptGlobals.entityDatabase);
 
   auto entity = query.getFirstEntityByName(name);
@@ -21,12 +22,12 @@ sol_maybe<EntityTable> EntityQueryLuaTable::getFirstEntityByName(String name) {
     return sol::nil;
   }
 
-  return EntityTable(entity, mScriptGlobals);
+  return EntityLuaTable(entity, mScriptGlobals);
 }
 
-void EntityQueryLuaTable::deleteEntity(EntityTable entity) {
+void EntityQueryLuaTable::deleteEntity(EntityLuaTable entity) {
   if (!mScriptGlobals.entityDatabase.exists(entity.getEntity())) {
-    Engine::getUserLogger().error() << LuaMessages::entityDoesNotExist(
+    Engine::getUserLogger().error() << lua::Messages::entityDoesNotExist(
         getName(), "delete_entity", entity.getEntity());
     return;
   }

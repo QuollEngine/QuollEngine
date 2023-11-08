@@ -3,7 +3,6 @@
 #include "quoll/core/Name.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaMessages.h"
 
 #include "NameLuaTable.h"
 

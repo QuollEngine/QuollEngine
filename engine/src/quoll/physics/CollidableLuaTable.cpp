@@ -3,7 +3,7 @@
 
 #include "quoll/physics/Collidable.h"
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaMessages.h"
+#include "quoll/lua-scripting/Messages.h"
 
 #include "CollidableLuaTable.h"
 
@@ -25,7 +25,7 @@ void CollidableLuaTable::setDefaultMaterial() {
 sol_maybe<f32> CollidableLuaTable::getStaticFriction() {
   if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
@@ -47,7 +47,7 @@ void CollidableLuaTable::setStaticFriction(f32 staticFriction) {
 sol_maybe<f32> CollidableLuaTable::getDynamicFriction() {
   if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
@@ -69,7 +69,7 @@ void CollidableLuaTable::setDynamicFriction(f32 dynamicFriction) {
 sol_maybe<f32> CollidableLuaTable::getRestitution() {
   if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 

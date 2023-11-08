@@ -1,5 +1,5 @@
 #include "quoll/core/Base.h"
-#include "quoll/scripting/EntityTable.h"
+#include "quoll/entity/EntityLuaTable.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/scene/WorldTransform.h"
 #include "quoll/scene/Sprite.h"
@@ -14,9 +14,10 @@ TEST_F(EntitySpawnerLuaTableTest,
   auto entity = entityDatabase.create();
   auto state = call(entity, "entity_spawner_spawn_empty");
 
-  EXPECT_TRUE(state["created_entity"].is<quoll::EntityTable>());
+  EXPECT_TRUE(state["created_entity"].is<quoll::EntityLuaTable>());
 
-  auto createdEntityTable = state["created_entity"].get<quoll::EntityTable>();
+  auto createdEntityTable =
+      state["created_entity"].get<quoll::EntityLuaTable>();
   auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);
@@ -51,9 +52,10 @@ TEST_F(EntitySpawnerLuaTableTest,
 
   auto state = call(entity, "entity_spawner_spawn_prefab");
 
-  EXPECT_TRUE(state["created_entity"].is<quoll::EntityTable>());
+  EXPECT_TRUE(state["created_entity"].is<quoll::EntityLuaTable>());
 
-  auto createdEntityTable = state["created_entity"].get<quoll::EntityTable>();
+  auto createdEntityTable =
+      state["created_entity"].get<quoll::EntityLuaTable>();
   auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);
@@ -84,9 +86,10 @@ TEST_F(EntitySpawnerLuaTableTest,
 
   auto state = call(entity, "entity_spawner_spawn_sprite");
 
-  EXPECT_TRUE(state["created_entity"].is<quoll::EntityTable>());
+  EXPECT_TRUE(state["created_entity"].is<quoll::EntityLuaTable>());
 
-  auto createdEntityTable = state["created_entity"].get<quoll::EntityTable>();
+  auto createdEntityTable =
+      state["created_entity"].get<quoll::EntityLuaTable>();
   auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);

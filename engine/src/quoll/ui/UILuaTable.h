@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/scripting/LuaHeaders.h"
+#include "quoll/lua-scripting/LuaHeaders.h"
 #include "UIComponents.h"
 
 namespace quoll {

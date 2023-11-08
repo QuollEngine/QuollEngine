@@ -34,7 +34,7 @@
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/input/InputMap.h"
 #include "quoll/physx/PhysxInstance.h"
-#include "quoll/scripting/Script.h"
+#include "quoll/lua-scripting/LuaScript.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 
@@ -266,8 +266,8 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     }
   }
 
-  if (mEntityDatabase.has<Script>(entity)) {
-    const auto &script = mEntityDatabase.get<Script>(entity);
+  if (mEntityDatabase.has<LuaScript>(entity)) {
+    const auto &script = mEntityDatabase.get<LuaScript>(entity);
     if (mAssetRegistry.getLuaScripts().hasAsset(script.handle)) {
       const auto &asset =
           mAssetRegistry.getLuaScripts().getAsset(script.handle);

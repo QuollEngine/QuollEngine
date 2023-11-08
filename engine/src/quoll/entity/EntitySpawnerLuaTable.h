@@ -1,7 +1,7 @@
 #pragma once
 
-#include "quoll/scripting/ComponentLuaInterface.h"
-#include "quoll/scripting/EntityTable.h"
+#include "quoll/lua-scripting/LuaUserTypeBase.h"
+#include "EntityLuaTable.h"
 
 namespace quoll {
 
@@ -22,7 +22,7 @@ public:
    *
    * @return Newly created empty entity
    */
-  EntityTable spawnEmpty();
+  EntityLuaTable spawnEmpty();
 
   /**
    * @brief Spawn prefab
@@ -30,7 +30,7 @@ public:
    * @param prefab Prefab asset
    * @return Root prefab entity
    */
-  sol_maybe<EntityTable> spawnPrefab(PrefabAssetHandle prefab);
+  sol_maybe<EntityLuaTable> spawnPrefab(PrefabAssetHandle prefab);
 
   /**
    * @brief Spawn sprite
@@ -38,7 +38,7 @@ public:
    * @param texture Texture asset
    * @return Sprite entity
    */
-  sol_maybe<EntityTable> spawnSprite(TextureAssetHandle texture);
+  sol_maybe<EntityLuaTable> spawnSprite(TextureAssetHandle texture);
 
   /**
    * @brief Get component name in scripts

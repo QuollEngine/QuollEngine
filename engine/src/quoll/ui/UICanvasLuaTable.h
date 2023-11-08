@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/scripting/ComponentLuaInterface.h"
+#include "quoll/lua-scripting/LuaUserTypeBase.h"
 #include "UIComponents.h"
 
 namespace quoll {
