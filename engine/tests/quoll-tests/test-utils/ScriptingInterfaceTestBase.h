@@ -1,7 +1,7 @@
 #pragma once
 
 #include "quoll/asset/AssetCache.h"
-#include "quoll/scripting/ScriptingSystem.h"
+#include "quoll/lua-scripting/LuaScriptingSystem.h"
 
 #include "TestPhysicsBackend.h"
 
@@ -49,7 +49,7 @@ protected:
   quoll::EntityDatabase entityDatabase;
   quoll::EventSystem eventSystem;
   quoll::AssetCache assetCache;
-  quoll::ScriptingSystem scriptingSystem;
+  quoll::LuaScriptingSystem scriptingSystem;
   TestPhysicsBackend *physicsBackend = new TestPhysicsBackend;
   quoll::PhysicsSystem physicsSystem;
 

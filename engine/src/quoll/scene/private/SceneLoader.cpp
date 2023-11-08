@@ -35,7 +35,7 @@
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/input/InputMap.h"
 #include "quoll/physx/PhysxInstance.h"
-#include "quoll/scripting/Script.h"
+#include "quoll/lua-scripting/LuaScript.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 
@@ -380,7 +380,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["script"]) {
-    Script script{};
+    LuaScript script{};
     Uuid uuid;
     if (node["script"].IsScalar()) {
       uuid = node["script"].as<Uuid>(Uuid{});

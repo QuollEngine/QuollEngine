@@ -7,7 +7,7 @@
 #include "quoll/profiler/FPSCounter.h"
 #include "quoll/loop/MainLoop.h"
 #include "quoll/renderer/Renderer.h"
-#include "quoll/scripting/ScriptingSystem.h"
+#include "quoll/lua-scripting/LuaScriptingSystem.h"
 #include "quoll/scene/SceneUpdater.h"
 #include "quoll/physics/PhysicsSystem.h"
 #include "quoll/renderer/Presenter.h"
@@ -80,7 +80,7 @@ void Runtime::start() {
     return RendererTextures{imguiData.imguiColor, passData.finalColor};
   });
 
-  ScriptingSystem scriptingSystem(eventSystem, assetCache.getRegistry());
+  LuaScriptingSystem scriptingSystem(eventSystem, assetCache.getRegistry());
   SceneUpdater sceneUpdater;
   PhysicsSystem physicsSystem = PhysicsSystem::createPhysxBackend(eventSystem);
   CameraAspectRatioUpdater cameraAspectRatioUpdater;

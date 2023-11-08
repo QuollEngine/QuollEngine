@@ -50,7 +50,7 @@
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/input/InputMap.h"
 #include "quoll/physx/PhysxInstance.h"
-#include "quoll/scripting/Script.h"
+#include "quoll/lua-scripting/LuaScript.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 
@@ -1366,14 +1366,14 @@ void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
 
 void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
                                   ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<Script>(mSelectedEntity)) {
+  if (!scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
     return;
   }
 
-  static const String SectionName = String(fa::Scroll) + "  Script";
+  static const String SectionName = String(fa::Scroll) + " Lua script";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &script = scene.entityDatabase.get<Script>(mSelectedEntity);
+    auto &script = scene.entityDatabase.get<LuaScript>(mSelectedEntity);
     const auto &asset = assetRegistry.getLuaScripts().getAsset(script.handle);
 
     ImGui::Text("Name: %s", asset.name.c_str());
@@ -1504,8 +1504,9 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
     }
   }
 
-  if (shouldDelete("Scripting")) {
-    actionExecutor.execute<EntityDeleteScript>(mSelectedEntity);
+  if (shouldDelete("Lua script")) {
+    actionExecutor.execute<EntityDefaultDeleteAction<LuaScript>>(
+        mSelectedEntity);
   }
 }
 
@@ -1878,7 +1879,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
             getAssetTypeString(AssetType::LuaScript).c_str())) {
       auto asset = *static_cast<LuaScriptAssetHandle *>(payload->Data);
 
-      if (scene.entityDatabase.has<Script>(mSelectedEntity)) {
+      if (scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
         actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
       } else {
         actionExecutor.execute<EntityCreateScript>(mSelectedEntity, asset);

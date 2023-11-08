@@ -9,7 +9,7 @@
 #include "quoll/profiler/ImguiDebugLayer.h"
 #include "quoll/scene/SceneUpdater.h"
 #include "quoll/scene/SkeletonUpdater.h"
-#include "quoll/scripting/ScriptingSystem.h"
+#include "quoll/lua-scripting/LuaScriptingSystem.h"
 #include "quoll/renderer/Presenter.h"
 #include "quoll/renderer/SceneRenderer.h"
 #include "quoll/imgui/ImguiRenderer.h"

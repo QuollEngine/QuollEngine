@@ -3,7 +3,6 @@
 #include "quoll/animation/AnimatorEvent.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaMessages.h"
 
 #include "AnimatorLuaTable.h"
 

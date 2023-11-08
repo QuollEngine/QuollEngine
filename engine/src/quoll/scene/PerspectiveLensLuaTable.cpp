@@ -2,7 +2,7 @@
 #include "quoll/core/Engine.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaMessages.h"
+#include "quoll/lua-scripting/Messages.h"
 
 #include "PerspectiveLens.h"
 #include "PerspectiveLensLuaTable.h"
@@ -16,7 +16,7 @@ PerspectiveLensLuaTable::PerspectiveLensLuaTable(Entity entity,
 sol_maybe<f32> PerspectiveLensLuaTable::getNear() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
 
     return sol::nil;
   }
@@ -40,7 +40,7 @@ void PerspectiveLensLuaTable::setNear(f32 near) {
 sol_maybe<f32> PerspectiveLensLuaTable::getFar() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
 
     return sol::nil;
   }
@@ -65,7 +65,7 @@ std::tuple<sol_maybe<f32>, sol_maybe<f32>>
 PerspectiveLensLuaTable::getSensorSize() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
 
     return {sol::nil, sol::nil};
   }
@@ -90,7 +90,7 @@ void PerspectiveLensLuaTable::setSensorSize(f32 width, f32 height) {
 sol_maybe<f32> PerspectiveLensLuaTable::getFocalLength() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
 
     return sol::nil;
   }
@@ -115,7 +115,7 @@ void PerspectiveLensLuaTable::setFocalLength(f32 focalLength) {
 sol_maybe<f32> PerspectiveLensLuaTable::getAperture() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
 
     return sol::nil;
   }
@@ -140,7 +140,7 @@ void PerspectiveLensLuaTable::setAperture(f32 aperture) {
 sol_maybe<f32> PerspectiveLensLuaTable::getShutterSpeed() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
 
     return sol::nil;
   }
@@ -167,7 +167,7 @@ void PerspectiveLensLuaTable::setShutterSpeed(f32 shutterSpeed) {
 sol_maybe<u32> PerspectiveLensLuaTable::getSensitivity() {
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
 
     return sol::nil;
   }

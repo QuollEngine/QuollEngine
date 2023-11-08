@@ -14,7 +14,7 @@ TEST_P(EntityCreateScriptActionTest, ExecutorCreatesScriptSourceComponent) {
                                            quoll::LuaScriptAssetHandle{15});
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Script>(entity).handle,
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::LuaScript>(entity).handle,
             quoll::LuaScriptAssetHandle{15});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
@@ -22,14 +22,14 @@ TEST_P(EntityCreateScriptActionTest, ExecutorCreatesScriptSourceComponent) {
 
 TEST_P(EntityCreateScriptActionTest, UndoDeletesScriptSourceComponet) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(
+  activeScene().entityDatabase.set<quoll::LuaScript>(
       entity, {quoll::LuaScriptAssetHandle{25}});
 
   quoll::editor::EntityCreateScript action(entity,
                                            quoll::LuaScriptAssetHandle{15});
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Script>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::LuaScript>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
@@ -64,13 +64,13 @@ using EntitySetScriptActionTest = ActionTestBase;
 
 TEST_P(EntitySetScriptActionTest, ExecutorSetsScriptForEntity) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(entity, {});
+  activeScene().entityDatabase.set<quoll::LuaScript>(entity, {});
 
   quoll::editor::EntitySetScript action(entity,
                                         quoll::LuaScriptAssetHandle{15});
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Script>(entity).handle,
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::LuaScript>(entity).handle,
             quoll::LuaScriptAssetHandle{15});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
@@ -78,7 +78,7 @@ TEST_P(EntitySetScriptActionTest, ExecutorSetsScriptForEntity) {
 
 TEST_P(EntitySetScriptActionTest, UndoSetsPreviousScriptForEntity) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(
+  activeScene().entityDatabase.set<quoll::LuaScript>(
       entity, {quoll::LuaScriptAssetHandle{25}});
 
   quoll::editor::EntitySetScript action(entity,
@@ -86,7 +86,7 @@ TEST_P(EntitySetScriptActionTest, UndoSetsPreviousScriptForEntity) {
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Script>(entity).handle,
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::LuaScript>(entity).handle,
             quoll::LuaScriptAssetHandle{25});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
@@ -112,7 +112,7 @@ using EntitySetScriptVariableActionTest = ActionTestBase;
 
 TEST_P(EntitySetScriptVariableActionTest, ExecutorSetsScriptVariableForEntity) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(
+  activeScene().entityDatabase.set<quoll::LuaScript>(
       entity, {quoll::LuaScriptAssetHandle{25}});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var1",
@@ -121,7 +121,7 @@ TEST_P(EntitySetScriptVariableActionTest, ExecutorSetsScriptVariableForEntity) {
   auto res = action.onExecute(state, assetRegistry);
 
   const auto &variables =
-      activeScene().entityDatabase.get<quoll::Script>(entity).variables;
+      activeScene().entityDatabase.get<quoll::LuaScript>(entity).variables;
 
   EXPECT_EQ(variables.size(), 1);
   EXPECT_EQ(variables.at("var1").get<quoll::PrefabAssetHandle>(),
@@ -136,7 +136,7 @@ TEST_P(EntitySetScriptVariableActionTest,
        UndoSetsPreviousScriptVariableForEntity) {
   auto entity = activeScene().entityDatabase.create();
 
-  quoll::Script script;
+  quoll::LuaScript script;
   script.handle = quoll::LuaScriptAssetHandle{45};
   script.variables.insert({"var1", quoll::PrefabAssetHandle{25}});
   activeScene().entityDatabase.set(entity, script);
@@ -148,7 +148,7 @@ TEST_P(EntitySetScriptVariableActionTest,
   auto res = action.onUndo(state, assetRegistry);
 
   const auto &variables =
-      activeScene().entityDatabase.get<quoll::Script>(entity).variables;
+      activeScene().entityDatabase.get<quoll::LuaScript>(entity).variables;
 
   EXPECT_EQ(variables.size(), 1);
   EXPECT_EQ(variables.at("var1").get<quoll::PrefabAssetHandle>(),
@@ -171,7 +171,7 @@ TEST_P(EntitySetScriptVariableActionTest,
 TEST_P(EntitySetScriptVariableActionTest,
        PredicateReturnsFalseIfEntityScriptIsInvalid) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(
+  activeScene().entityDatabase.set<quoll::LuaScript>(
       entity, {quoll::LuaScriptAssetHandle{15}});
 
   quoll::editor::EntitySetScriptVariable action(entity, "test",
@@ -188,7 +188,7 @@ TEST_P(EntitySetScriptVariableActionTest,
   auto handle = assetRegistry.getLuaScripts().addAsset(asset);
 
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(entity, {handle});
+  activeScene().entityDatabase.set<quoll::LuaScript>(entity, {handle});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var2",
                                                 quoll::String("Hello world"));
@@ -204,7 +204,7 @@ TEST_P(EntitySetScriptVariableActionTest,
   auto handle = assetRegistry.getLuaScripts().addAsset(asset);
 
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(entity, {handle});
+  activeScene().entityDatabase.set<quoll::LuaScript>(entity, {handle});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var1",
                                                 quoll::String("Test value"));
@@ -220,7 +220,7 @@ TEST_P(EntitySetScriptVariableActionTest,
   auto handle = assetRegistry.getLuaScripts().addAsset(asset);
 
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(entity, {handle});
+  activeScene().entityDatabase.set<quoll::LuaScript>(entity, {handle});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var1",
                                                 quoll::PrefabAssetHandle{25});
@@ -237,15 +237,10 @@ TEST_P(EntitySetScriptVariableActionTest, PredicateReturnsTrueIfValidVariable) {
   auto prefabHandle = assetRegistry.getPrefabs().addAsset({});
 
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Script>(entity, {handle});
+  activeScene().entityDatabase.set<quoll::LuaScript>(entity, {handle});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var1", prefabHandle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetScriptVariableActionTest);
-
-using EntityDeleteScriptActionTest = ActionTestBase;
-InitDefaultDeleteComponentTests(EntityDeleteScriptActionTest,
-                                EntityDeleteScript, Script);
-InitActionsTestSuite(EntityActionsTest, EntityDeleteScriptActionTest);

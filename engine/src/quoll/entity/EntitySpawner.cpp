@@ -34,7 +34,7 @@
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/input/InputMap.h"
 #include "quoll/physx/PhysxInstance.h"
-#include "quoll/scripting/Script.h"
+#include "quoll/lua-scripting/LuaScript.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 

@@ -3,7 +3,7 @@
 #include "quoll/input/InputMap.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaMessages.h"
+#include "quoll/lua-scripting/Messages.h"
 
 #include "InputMapLuaTable.h"
 
@@ -15,7 +15,7 @@ InputMapLuaTable::InputMapLuaTable(Entity entity, ScriptGlobals scriptGlobals)
 sol_maybe<usize> InputMapLuaTable::getCommand(String name) {
   if (!mScriptGlobals.entityDatabase.has<InputMap>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
@@ -32,7 +32,7 @@ sol_maybe<usize> InputMapLuaTable::getCommand(String name) {
 sol_maybe<bool> InputMapLuaTable::getCommandValueBoolean(usize command) {
   if (!mScriptGlobals.entityDatabase.has<InputMap>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
@@ -58,7 +58,7 @@ std::tuple<sol_maybe<f32>, sol_maybe<f32>>
 InputMapLuaTable::getCommandValueAxis2d(usize command) {
   if (!mScriptGlobals.entityDatabase.has<InputMap>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return {sol::nil, sol::nil};
   }
 
@@ -85,7 +85,7 @@ InputMapLuaTable::getCommandValueAxis2d(usize command) {
 void InputMapLuaTable::setScheme(String name) {
   if (!mScriptGlobals.entityDatabase.has<InputMap>(mEntity)) {
     Engine::getUserLogger().error()
-        << LuaMessages::componentDoesNotExist(getName(), mEntity);
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return;
   }
 

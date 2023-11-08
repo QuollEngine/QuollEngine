@@ -93,7 +93,7 @@ static EditorIcon getIconFromAssetType(AssetType type) {
   case AssetType::Prefab:
     return EditorIcon::Prefab;
   case AssetType::LuaScript:
-    return EditorIcon::Script;
+    return EditorIcon::LuaScript;
   case AssetType::Animator:
     return EditorIcon::Animator;
   case AssetType::InputMap:
@@ -293,7 +293,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
 
         if (ImGui::MenuItem("Create Lua script")) {
           mHasStagingEntry = true;
-          mStagingEntry.icon = EditorIcon::Script;
+          mStagingEntry.icon = EditorIcon::LuaScript;
           mStagingEntry.isDirectory = false;
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::LuaScript;

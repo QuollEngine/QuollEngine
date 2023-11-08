@@ -3,7 +3,6 @@
 #include "quoll/scene/LocalTransform.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scripting/LuaMessages.h"
 
 #include "TransformLuaTable.h"
 
