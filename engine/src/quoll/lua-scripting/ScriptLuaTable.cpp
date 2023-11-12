@@ -24,8 +24,23 @@ sol::object ScriptLuaTable::get(const String &name) {
   return sol::nil;
 }
 
+void ScriptLuaTable::set(const String &name, sol::object value) {
+  if (!mScriptGlobals.entityDatabase.has<LuaScript>(mEntity)) {
+    return;
+  }
+
+  auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
+  script.loader.wait();
+
+  sol::state_view state(script.state);
+  if (state[name].valid()) {
+    state[name] = value;
+  }
+}
+
 void ScriptLuaTable::create(sol::usertype<ScriptLuaTable> usertype) {
   usertype["get"] = &ScriptLuaTable::get;
+  usertype["set"] = &ScriptLuaTable::set;
 }
 
 } // namespace quoll
