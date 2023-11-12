@@ -26,6 +26,14 @@ public:
   sol::object get(const String &name);
 
   /**
+   * @brief Set script variable
+   *
+   * @param name Variable name
+   * @param value Variable value
+   */
+  void set(const String &name, sol::object value);
+
+  /**
    * @brief Get component name in scripts
    *
    * @return Component name
