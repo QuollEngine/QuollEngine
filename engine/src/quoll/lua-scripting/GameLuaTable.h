@@ -18,7 +18,7 @@ public:
    * @param entity Entity
    * @param scriptGlobals Script globals
    */
-  GameLuaTable(Entity entity, ScriptGlobals &scriptGlobals);
+  GameLuaTable(Entity entity, ScriptGlobals scriptGlobals);
 
   /**
    * @brief Get on update signal

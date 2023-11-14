@@ -1,0 +1,25 @@
+name: Setup compiler
+description: Install MSVC for Windows and LLVM for Linux
+runs:
+  using: composite
+  steps:
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 16 all
+
+        sudo update-alternatives --remove-all clang
+        sudo update-alternatives --remove-all clang++
+
+        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-16 0
+        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-16 0
+
+        rm ./llvm.sh
+
+        clang -v
+        clang++ -v
+
+    - if: runner.os == 'Windows'
+      uses: microsoft/setup-msbuild@v1.1

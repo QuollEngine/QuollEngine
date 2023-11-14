@@ -19,11 +19,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Setup MSBuild
-        if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v1.1
-
       - uses: actions/checkout@v4
+
+      - name: Setup compiler
+        uses: ./.github/actions/setup-compiler
 
       - name: Setup Vulkan SDK
         uses: ./.github/actions/setup-vulkan

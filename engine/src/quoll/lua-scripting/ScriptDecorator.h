@@ -24,7 +24,7 @@ public:
    * @param scriptGlobals Script globals
    */
   void attachToScope(sol::state_view state, Entity entity,
-                     ScriptGlobals &scriptGlobals);
+                     ScriptGlobals scriptGlobals);
 
   /**
    * @brief Attach variable injectors

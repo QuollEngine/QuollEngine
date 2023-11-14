@@ -14,7 +14,7 @@ public:
    *
    * @param scriptGlobals Script globals
    */
-  EntityQueryLuaTable(ScriptGlobals &scriptGlobals);
+  EntityQueryLuaTable(ScriptGlobals scriptGlobals);
 
   /**
    * @brief Get first entity by name

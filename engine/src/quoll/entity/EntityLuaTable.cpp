@@ -14,7 +14,7 @@ void setToStruct(sol::state_view state,
   entityTable[TFieldType::getName()] = field;
 }
 
-EntityLuaTable::EntityLuaTable(Entity entity, ScriptGlobals &scriptGlobals)
+EntityLuaTable::EntityLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mName(entity, scriptGlobals),
       mTransform(entity, scriptGlobals),
       mPerspectiveLens(entity, scriptGlobals),

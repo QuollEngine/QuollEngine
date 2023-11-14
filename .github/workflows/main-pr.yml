@@ -56,14 +56,10 @@ jobs:
             mono: "mono"
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install clang-tidy
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 16 all
-          rm llvm.sh
-
       - uses: actions/checkout@v4
+
+      - name: Setup compiler
+        uses: ./.github/actions/setup-compiler
 
       - name: Setup Vulkan sdk
         uses: ./.github/actions/setup-vulkan
@@ -123,11 +119,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install lcov
 
-      - name: Setup MSBuild
-        if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v1.1
-
       - uses: actions/checkout@v4
+
+      - name: Setup compiler
+        uses: ./.github/actions/setup-compiler
 
       - name: Setup Vulkan SDK
         uses: ./.github/actions/setup-vulkan

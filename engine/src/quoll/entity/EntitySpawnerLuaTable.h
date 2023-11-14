@@ -15,7 +15,7 @@ public:
    *
    * @param scriptGlobals Script globals
    */
-  EntitySpawnerLuaTable(ScriptGlobals &scriptGlobals);
+  EntitySpawnerLuaTable(ScriptGlobals scriptGlobals);
 
   /**
    * @brief Spawn empty entity

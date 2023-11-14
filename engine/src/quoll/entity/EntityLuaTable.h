@@ -28,7 +28,7 @@ public:
    * @param entity Entity
    * @param scriptGlobals Script globals
    */
-  EntityLuaTable(Entity entity, ScriptGlobals &scriptGlobals);
+  EntityLuaTable(Entity entity, ScriptGlobals scriptGlobals);
 
   /**
    * @brief Create interface
