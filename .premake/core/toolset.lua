@@ -1,5 +1,9 @@
 -- Setup toolset specific options
 function setupToolsetOptions()
+    filter { "system:linux or system:macosx" }
+        toolset "clang"
+    filter {}
+
     filter { "system:macosx" }
         xcodebuildsettings {
             ["MACOSX_DEPLOYMENT_TARGET"] = "12.0",
@@ -35,11 +39,11 @@ function setupToolsetOptions()
             ["ENABLE_STRICT_OBJC_MSGSEND"] = "YES",
         }
 
-        filter { "configurations:Debug or configurations:Test" }
-            xcodebuildsettings {
-                ["CLANG_ENABLE_OBJC_WEAK"] = "YES",
-                ["CODE_SIGN_IDENTITY"] = "-"
-            }
+    filter { "system:macosx", "configurations:Debug or configurations:Test" }
+       xcodebuildsettings {
+            ["CLANG_ENABLE_OBJC_WEAK"] = "YES",
+            ["CODE_SIGN_IDENTITY"] = "-"
+        }
 
     -- Sets working directory for Visual Studio
     -- so that, applications use the same path

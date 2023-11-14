@@ -3,7 +3,7 @@
 
 namespace quoll {
 
-GameLuaTable::GameLuaTable(Entity entity, ScriptGlobals &scriptGlobals)
+GameLuaTable::GameLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
 lua::ScriptSignalView GameLuaTable::onUpdate() {

@@ -148,7 +148,7 @@ public:
    * @param handle Texture handle
    */
   void createTexture(const TextureDescription &description,
-                     TextureHandle handle);
+                     TextureHandle handle) override;
 
   /**
    * @brief Get texture description
@@ -214,7 +214,7 @@ public:
    * @param handle Framebuffer handle
    */
   void createFramebuffer(const FramebufferDescription &description,
-                         FramebufferHandle handle);
+                         FramebufferHandle handle) override;
 
   /**
    * @brief Destroy framebuffer

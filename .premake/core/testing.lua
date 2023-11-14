@@ -1,24 +1,16 @@
 function setupTestingOptions()
     filter { "configurations:Test", "toolset:clang" }
         buildoptions {
-            "-fprofile-instr-generate",
-            "-fcoverage-mapping"
+            "-fprofile-arcs",
+	        "-ftest-coverage"
         }
 
         linkoptions {
-            "-fprofile-instr-generate",
-            "-fcoverage-mapping"
+    	  "-fprofile-arcs",
+	      "-ftest-coverage"
         }
 
-    filter { "configurations:Test", "toolset:gcc" }
-        buildoptions {
-            "-fprofile-arcs",
-            "-ftest-coverage"
-        }
+	    links { "gcov" }
 
-        linkoptions {
-            "-fprofile-arcs",
-            "-ftest-coverage"
-        }
     filter{}
 end

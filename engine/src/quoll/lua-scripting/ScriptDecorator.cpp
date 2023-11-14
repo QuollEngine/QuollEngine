@@ -18,7 +18,7 @@
 namespace quoll::lua {
 
 void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
-                                    ScriptGlobals &scriptGlobals) {
+                                    ScriptGlobals scriptGlobals) {
   MathLuaTable::create(state);
   CollisionHitLuaTable::create(state);
   EntityLuaTable::create(state);

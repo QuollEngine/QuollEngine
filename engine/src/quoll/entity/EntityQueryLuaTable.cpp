@@ -10,7 +10,7 @@
 
 namespace quoll {
 
-EntityQueryLuaTable::EntityQueryLuaTable(ScriptGlobals &scriptGlobals)
+EntityQueryLuaTable::EntityQueryLuaTable(ScriptGlobals scriptGlobals)
     : mScriptGlobals(scriptGlobals) {}
 
 sol_maybe<EntityLuaTable>

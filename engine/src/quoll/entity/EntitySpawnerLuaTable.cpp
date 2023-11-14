@@ -23,7 +23,7 @@ static bool isPrefabEmpty(const PrefabAsset &prefab) {
          prefab.skinnedMeshRenderers.empty() && prefab.transforms.empty();
 }
 
-EntitySpawnerLuaTable::EntitySpawnerLuaTable(ScriptGlobals &scriptGlobals)
+EntitySpawnerLuaTable::EntitySpawnerLuaTable(ScriptGlobals scriptGlobals)
     : mScriptGlobals(scriptGlobals) {}
 
 EntityLuaTable EntitySpawnerLuaTable::spawnEmpty() {

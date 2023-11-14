@@ -1,4 +1,3 @@
-
 workspace "QuollEngine"
     basedir "../workspace/"
     language "C++"
@@ -7,11 +6,11 @@ workspace "QuollEngine"
 
     -- Set editor as starting project
     startproject "QuollEditor"
-    
+
+    setupToolsetOptions{}
     setupLibraryDirectories{}
     setupPlatformDefines{}
     linkPlatformLibraries{}
-    setupToolsetOptions{}
     setupTestingOptions{}
     
     includedirs {

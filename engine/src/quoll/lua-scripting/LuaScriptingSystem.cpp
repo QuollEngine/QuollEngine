@@ -39,7 +39,9 @@ void LuaScriptingSystem::start(EntityDatabase &entityDatabase,
       continue;
     }
 
-    component.loader = [&, entity]() {
+    component.loader = [this, scriptGlobals, &scriptDecorator, &script,
+                        entity]() {
+      auto &component = scriptGlobals.entityDatabase.get<LuaScript>(entity);
       component.started = true;
 
       if (component.state) {
