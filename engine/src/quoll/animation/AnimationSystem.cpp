@@ -55,8 +55,10 @@ void AnimationSystem::update(f32 dt, EntityDatabase &entityDatabase) {
       animator.normalizedTime = std::min(
           // Divide delta time by animation time
           // to advance time at a constant speed
-          animator.normalizedTime + (dt / animation.data.time), 1.0f);
-      if (animator.normalizedTime >= 1.0f) {
+          animator.normalizedTime + (dt * state.speed / animation.data.time),
+          1.0f);
+      if (animator.normalizedTime >= 1.0f &&
+          state.loopMode == AnimationLoopMode::Linear) {
         animator.normalizedTime = 0.0f;
       }
     }

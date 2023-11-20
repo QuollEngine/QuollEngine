@@ -58,6 +58,8 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   stateWalk.animation = walk;
   stateWalk.transitions.push_back({"IDLE", 0});
   stateWalk.transitions.push_back({"RUN", 2});
+  stateWalk.speed = 0.5f;
+  stateWalk.loopMode = quoll::AnimationLoopMode::Linear;
 
   quoll::AnimationState stateRun;
   stateRun.name = "run";
@@ -101,6 +103,8 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
     EXPECT_TRUE(output.IsMap());
     EXPECT_EQ(output["type"].as<quoll::String>(""), "animation");
     EXPECT_EQ(output["animation"].as<quoll::String>(""), "idle");
+    EXPECT_EQ(output["speed"].as<f32>(-2.0f), 1.0f);
+    EXPECT_EQ(output["loopMode"].as<quoll::String>(""), "none");
 
     auto on = state["on"];
     EXPECT_TRUE(on.IsSequence());
@@ -129,6 +133,8 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
     EXPECT_TRUE(output.IsMap());
     EXPECT_EQ(output["type"].as<quoll::String>(""), "animation");
     EXPECT_EQ(output["animation"].as<quoll::String>(""), "walk");
+    EXPECT_EQ(output["speed"].as<f32>(-2.0f), 0.5f);
+    EXPECT_EQ(output["loopMode"].as<quoll::String>(""), "linear");
 
     auto on = state["on"];
     EXPECT_TRUE(on.IsSequence());
@@ -157,6 +163,8 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
     EXPECT_TRUE(output.IsMap());
     EXPECT_EQ(output["type"].as<quoll::String>(""), "animation");
     EXPECT_EQ(output["animation"].as<quoll::String>(""), "run");
+    EXPECT_EQ(output["speed"].as<f32>(-2.0f), 1.0f);
+    EXPECT_EQ(output["loopMode"].as<quoll::String>(""), "none");
 
     auto on = state["on"];
     EXPECT_TRUE(on.IsSequence());
@@ -178,7 +186,6 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
 
 TEST_F(AssetCacheAnimatorTest,
        LoadAnimatorFailsIfRequiredPropertiesAreInvalid) {
-
   {
     auto uuid = quoll::Uuid::generate();
     auto filePath = cache.getPathFromUuid(uuid);
@@ -356,7 +363,6 @@ TEST_F(AssetCacheAnimatorTest,
 }
 
 TEST_F(AssetCacheAnimatorTest, LoadAnimatorSetsInitialState) {
-
   YAML::Node node;
   node["version"] = "0.1";
   node["type"] = "animator";
@@ -382,6 +388,49 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorSetsInitialState) {
 
   EXPECT_EQ(animator.data.initialState, 1);
   EXPECT_EQ(animator.data.states.size(), 2);
+}
+
+TEST_F(AssetCacheAnimatorTest,
+       LoadAnimatorSetsDefaultValuesForInvalidSpeedAndTime) {
+  std::vector<YAML::Node> invalidNodes{YAML::Node(YAML::NodeType::Null),
+                                       YAML::Node(YAML::NodeType::Map),
+                                       YAML::Node(YAML::NodeType::Scalar),
+                                       YAML::Node(YAML::NodeType::Sequence),
+                                       YAML::Node("Test"),
+                                       YAML::Node(-1.0f)};
+
+  YAML::Node node;
+  node["version"] = "0.1";
+  node["type"] = "animator";
+
+  for (usize i = 0; i < invalidNodes.size(); ++i) {
+    auto invalidNode = invalidNodes.at(i);
+    auto state = "state_" + std::to_string(i);
+
+    node["states"][state]["output"]["loopMode"] = invalidNode;
+    node["states"][state]["output"]["speed"] = invalidNode;
+  }
+
+  auto uuid = quoll::Uuid::generate();
+  auto filePath = cache.getPathFromUuid(uuid);
+  std::ofstream stream(filePath);
+  stream << node;
+  stream.close();
+
+  auto res = cache.loadAnimator(uuid);
+  EXPECT_TRUE(res.hasData());
+  EXPECT_FALSE(res.hasError());
+  EXPECT_FALSE(res.hasWarnings());
+
+  auto handle = res.getData();
+  EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
+  const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+
+  EXPECT_EQ(animator.data.states.size(), invalidNodes.size());
+  for (auto state : animator.data.states) {
+    EXPECT_EQ(state.loopMode, quoll::AnimationLoopMode::None);
+    EXPECT_EQ(state.speed, 1.0f);
+  }
 }
 
 TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
@@ -469,7 +518,6 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
 }
 
 TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
-
   quoll::AssetData<quoll::AnimationAsset> animData{};
   animData.uuid = quoll::Uuid("my-animation");
 
@@ -516,6 +564,8 @@ TEST_F(AssetCacheAnimatorTest,
   auto state = node["states"]["idle"];
   state["output"]["type"] = "animation";
   state["output"]["animation"] = path.getData().stem().string();
+  state["output"]["loopMode"] = "linear";
+  state["output"]["speed"] = 0.5f;
 
   std::ofstream stream(FilePath);
   stream << node;
@@ -536,6 +586,9 @@ TEST_F(AssetCacheAnimatorTest,
   EXPECT_EQ(animator.name, "test.animator");
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "idle");
+  EXPECT_EQ(animator.data.states.at(0).loopMode,
+            quoll::AnimationLoopMode::Linear);
+  EXPECT_EQ(animator.data.states.at(0).speed, 0.5f);
   EXPECT_NE(animator.data.states.at(0).animation,
             quoll::AnimationAssetHandle{0});
 }

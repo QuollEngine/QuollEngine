@@ -16,13 +16,17 @@ public:
 
   quoll::Entity
   create(quoll::AnimationAssetHandle animIndex = quoll::AnimationAssetHandle{1},
-         bool playing = true) {
+         bool playing = true, f32 speed = 1.0f,
+         quoll::AnimationLoopMode loopMode = quoll::AnimationLoopMode::None) {
     auto entity = entityDatabase.create();
     entityDatabase.set<quoll::LocalTransform>(entity, {});
 
     quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
     animatorAsset.data.initialState = 0;
-    animatorAsset.data.states.push_back({"Animation", animIndex});
+    animatorAsset.data.states.push_back({.name = "Animation",
+                                         .animation = animIndex,
+                                         .speed = speed,
+                                         .loopMode = loopMode});
 
     auto animatorHandle = assetRegistry.getAnimators().addAsset(animatorAsset);
 
@@ -210,30 +214,53 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = create(animIndex, false);
 
-  const auto &animation = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animation.normalizedTime, 0.0f);
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.update(0.5f, entityDatabase);
-  EXPECT_EQ(animation.normalizedTime, 0.0f);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
 }
 
-TEST_F(AnimationSystemTest,
-       AdvancedEntityAnimationNormalizedTimeByDeltaTimeAndAnimationSpeed) {
+TEST_F(AnimationSystemTest, AdvancesAnimatorNormalizedTimeByDeltaTime) {
   createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = create();
 
-  const auto &animation = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animation.normalizedTime, 0.0f);
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.update(0.5f, entityDatabase);
-  EXPECT_EQ(animation.normalizedTime, 0.25f);
+  EXPECT_EQ(animator.normalizedTime, 0.25f);
 }
 
-TEST_F(AnimationSystemTest, RestartsAnimationTimeWhenEndOfAnimationIsReached) {
+TEST_F(AnimationSystemTest,
+       AdvancesAnimatorNormalizedTimeByDeltaTimeAndAnimationStateSpeed) {
+  auto anim0 =
+      createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
+  auto entity = create(anim0, true, 0.5f);
+
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  system.update(0.5f, entityDatabase);
+  EXPECT_EQ(animator.normalizedTime, 0.125f);
+}
+
+TEST_F(AnimationSystemTest,
+       StaysAtTheEndIfEndOfAnimationIsReachedAndLoopModeIsNone) {
   createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = create();
-  const auto &animation = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animation.normalizedTime, 0.0f);
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.update(1.0f, entityDatabase);
-  EXPECT_EQ(animation.normalizedTime, 0.0f);
+  EXPECT_EQ(animator.normalizedTime, 1.0f);
+}
+
+TEST_F(AnimationSystemTest,
+       RestartsAnimationTimeWhenEndOfAnimationIsReachedAndLoopModeIsLinear) {
+  auto animation =
+      createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
+  auto entity = create(animation, true, 1.0f, quoll::AnimationLoopMode::Linear);
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  system.update(1.0f, entityDatabase);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
