@@ -9,6 +9,24 @@
 
 namespace quoll {
 
+static String serializeLoopMode(AnimationLoopMode loopMode) {
+  switch (loopMode) {
+  case AnimationLoopMode::Linear:
+    return "linear";
+  case AnimationLoopMode::None:
+  default:
+    return "none";
+  }
+}
+
+static AnimationLoopMode deserializeLoopMode(String loopMode) {
+  if (loopMode == "linear") {
+    return AnimationLoopMode::Linear;
+  }
+
+  return AnimationLoopMode::None;
+}
+
 Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
                                                   const Uuid &uuid) {
   if (uuid.isEmpty()) {
@@ -57,6 +75,8 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
     stateNode["output"]["type"] = "animation";
     stateNode["output"]["animation"] =
         getAssetUuid(mRegistry.getAnimations(), state.animation);
+    stateNode["output"]["speed"] = state.speed;
+    stateNode["output"]["loopMode"] = serializeLoopMode(state.loopMode);
 
     for (const auto &transition : state.transitions) {
       YAML::Node transitionNode(YAML::NodeType::Map);
@@ -135,6 +155,9 @@ Result<AnimatorAssetHandle> AssetCache::loadAnimator(const Uuid &uuid) {
         if (res.hasData()) {
           state.animation = res.getData();
         }
+
+        state.speed = std::max(output["speed"].as<f32>(1.0f), 0.0f);
+        state.loopMode = deserializeLoopMode(output["loopMode"].as<String>(""));
 
         if (res.hasWarnings()) {
           warnings.insert(warnings.end(), res.getWarnings().begin(),

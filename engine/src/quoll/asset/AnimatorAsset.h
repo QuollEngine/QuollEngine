@@ -3,6 +3,14 @@
 namespace quoll {
 
 /**
+ * @brief Animation state loop mode
+ *
+ * - None = No looping
+ * - Linear = Loops in one direction
+ */
+enum class AnimationLoopMode { None = 0, Linear = 1 };
+
+/**
  * @brief Animation state transition
  */
 struct AnimationStateTransition {
@@ -32,6 +40,22 @@ struct AnimationState {
    * Animation corresponding to the state
    */
   AnimationAssetHandle animation = AnimationAssetHandle::Null;
+
+  /**
+   * Animation speed
+   *
+   * Speed is used as a multiplier
+   *
+   * - 1.0 is the normal speed
+   * - < 1.0 slows down the animation
+   * - > 1.0 speeds up the animation
+   */
+  f32 speed = 1.0f;
+
+  /**
+   * Animation loop mode
+   */
+  AnimationLoopMode loopMode = AnimationLoopMode::None;
 
   /**
    * Transitions to other states
