@@ -1,3 +1,5 @@
+local logger = game:get('Logger')
+
 function debug()
     logger.debug("Hello world")
 end

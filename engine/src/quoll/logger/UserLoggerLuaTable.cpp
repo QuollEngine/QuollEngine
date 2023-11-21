@@ -5,8 +5,8 @@
 
 namespace quoll {
 
-void UserLoggerLuaTable::create(sol::state_view state) {
-  auto logger = state.create_named_table("logger");
+sol::table UserLoggerLuaTable::create(sol::state_view state) {
+  auto logger = state.create_table();
   logger["debug"] = [](String message) {
     Engine::getUserLogger().debug() << message;
   };
@@ -26,6 +26,8 @@ void UserLoggerLuaTable::create(sol::state_view state) {
   logger["fatal"] = [](String message) {
     Engine::getUserLogger().fatal() << message;
   };
+
+  return logger;
 }
 
 } // namespace quoll

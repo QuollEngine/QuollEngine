@@ -13,8 +13,9 @@ public:
    * @brief Create user logger user type
    *
    * @param state Sol state
+   * @return User logger Lua table
    */
-  static void create(sol::state_view state);
+  static sol::table create(sol::state_view state);
 };
 
 } // namespace quoll
