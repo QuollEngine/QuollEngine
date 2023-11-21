@@ -9,11 +9,11 @@ using ::testing::_;
 
 using LS = quoll::LogSeverity;
 
-class ScriptLoggerTest
+class UserLoggerLuaTableTest
     : public LuaScriptingInterfaceTestBase,
       public testing::WithParamInterface<std::tuple<quoll::String, LS>> {
 public:
-  ScriptLoggerTest()
+  UserLoggerLuaTableTest()
       : LuaScriptingInterfaceTestBase("scripting-system-logging-tester.lua") {}
 
   void SetUp() override {
@@ -36,7 +36,7 @@ public:
               (quoll::LogSeverity, quoll::LogTimestamp, quoll::String));
 };
 
-TEST_P(ScriptLoggerTest, LogsMessageOnCall) {
+TEST_P(UserLoggerLuaTableTest, LogsMessageOnCall) {
   auto [value, severity] = GetParam();
 
   EXPECT_CALL(*this, mockTransport(severity, _, "Hello world")).Times(1);
@@ -46,12 +46,11 @@ TEST_P(ScriptLoggerTest, LogsMessageOnCall) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    ScriptLoggerSuite, ScriptLoggerTest,
+    UserLoggerLuaTableTest, UserLoggerLuaTableTest,
     ::testing::Values(std::make_tuple("debug", LS::Debug),
                       std::make_tuple("info", LS::Info),
                       std::make_tuple("warning", LS::Warning),
                       std::make_tuple("error", LS::Error),
                       std::make_tuple("fatal", LS::Fatal)),
-    [](const ::testing::TestParamInfo<ScriptLoggerTest::ParamType> &info) {
-      return std::get<0>(info.param);
-    });
+    [](const ::testing::TestParamInfo<UserLoggerLuaTableTest::ParamType>
+           &info) { return std::get<0>(info.param); });

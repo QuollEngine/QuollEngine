@@ -20,7 +20,7 @@ static YGFlexDirection getYogaDirectionFromString(String direction) {
   return YGFlexDirectionColumn;
 }
 
-void UILuaTable::create(sol::state_view state) {
+sol::table UILuaTable::create(sol::state_view state) {
   auto uiImage = state.new_usertype<UIImage>("UIImage", sol::no_constructor);
   uiImage["texture"] = &UIImage::texture;
 
@@ -30,7 +30,8 @@ void UILuaTable::create(sol::state_view state) {
   auto uiView = state.new_usertype<UIView>("UIView", sol::no_constructor);
   uiView["children"] = &UIView::children;
 
-  auto ui = state.create_named_table("ui");
+  auto ui = state.create_table();
+
   ui["image"] = [](sol::table props) {
     return UIImage{.texture = props.get<TextureAssetHandle>("texture")};
   };
@@ -66,6 +67,8 @@ void UILuaTable::create(sol::state_view state) {
 
     return view;
   };
+
+  return ui;
 }
 
 } // namespace quoll

@@ -8,12 +8,14 @@ end
 
 found_entity = -1
 
--- Entity query: get first by name
+
+-- Entity query
+local entity_query = game:get("EntityQuery")
+
 function entity_query_get_first_by_name()
     found_entity = entity_query:get_first_entity_by_name("Test")
 end
 
--- Entity query: delete entity
 function entity_query_delete_entity()
     entity_query:delete_entity(entity)
 end
@@ -21,6 +23,8 @@ end
 created_entity = -1
 
 -- Entity spawner
+local entity_spawner = game:get("EntitySpawner")
+
 function entity_spawner_spawn_empty()
     created_entity = entity_spawner:spawn_empty()
 end
@@ -338,6 +342,8 @@ function my_component()
 end
 
 -- UI canvas
+local ui = game:get("UI")
+
 function ui_element_image()
   image = ui.image{texture=10}
   expect_eq(image.texture, 10)

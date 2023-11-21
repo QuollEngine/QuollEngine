@@ -14,8 +14,9 @@ public:
    * @brief Create Lua table
    *
    * @param state Sol state
+   * @return UI Lua table
    */
-  static void create(sol::state_view state);
+  static sol::table create(sol::state_view state);
 };
 
 } // namespace quoll

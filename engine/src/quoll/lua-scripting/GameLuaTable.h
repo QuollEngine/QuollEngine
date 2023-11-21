@@ -21,6 +21,14 @@ public:
   GameLuaTable(Entity entity, ScriptGlobals scriptGlobals);
 
   /**
+   * @brief Get service
+   *
+   * @param name Service name
+   * @return Service Lua table
+   */
+  sol::object get(String name);
+
+  /**
    * @brief Get on update signal
    *
    * @return On update signal

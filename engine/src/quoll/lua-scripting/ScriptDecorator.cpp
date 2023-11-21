@@ -6,8 +6,6 @@
 #include "quoll/entity/EntitySpawnerLuaTable.h"
 #include "quoll/entity/EntityLuaTable.h"
 #include "quoll/physics/CollisionHitLuaTable.h"
-#include "quoll/ui/UILuaTable.h"
-#include "quoll/logger/UserLoggerLuaTable.h"
 
 #include "LuaHeaders.h"
 #include "ScriptDecorator.h"
@@ -22,15 +20,9 @@ void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
   MathLuaTable::create(state);
   CollisionHitLuaTable::create(state);
   EntityLuaTable::create(state);
-  EntitySpawnerLuaTable::create(state);
-  EntityQueryLuaTable::create(state);
-  UILuaTable::create(state);
   GameLuaTable::create(state);
-  UserLoggerLuaTable::create(state);
 
   state["entity"] = EntityLuaTable(entity, scriptGlobals);
-  state["entity_spawner"] = EntitySpawnerLuaTable(scriptGlobals);
-  state["entity_query"] = EntityQueryLuaTable(scriptGlobals);
   state["game"] = GameLuaTable(entity, scriptGlobals);
 
   createScriptSignalTables(state);
