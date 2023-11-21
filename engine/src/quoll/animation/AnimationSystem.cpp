@@ -14,6 +14,15 @@ void AnimationSystem::update(f32 dt, EntityDatabase &entityDatabase) {
   QUOLL_PROFILE_EVENT("AnimationSystem::update");
   const auto &animMap = mAssetRegistry.getAnimations();
 
+  for (auto [entity, animator] : entityDatabase.view<Animator>()) {
+    const auto &animatorAsset =
+        mAssetRegistry.getAnimators().getAsset(animator.asset);
+
+    if (animator.currentState >= animatorAsset.data.states.size()) {
+      animator.currentState = animatorAsset.data.initialState;
+    }
+  }
+
   for (auto [entity, animator, animatorEvent] :
        entityDatabase.view<Animator, AnimatorEvent>()) {
     const auto &state = mAssetRegistry.getAnimators()
@@ -36,10 +45,6 @@ void AnimationSystem::update(f32 dt, EntityDatabase &entityDatabase) {
 
     const auto &animatorAsset =
         mAssetRegistry.getAnimators().getAsset(animator.asset);
-
-    if (animator.currentState >= animatorAsset.data.states.size()) {
-      animator.currentState = animatorAsset.data.initialState;
-    }
 
     const auto &state = animatorAsset.data.states.at(animator.currentState);
 
