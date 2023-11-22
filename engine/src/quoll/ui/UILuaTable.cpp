@@ -1,24 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/ui/UILuaTable.h"
 #include "UILuaTable.h"
+#include "YogaSerializer.h"
 
 namespace quoll {
-
-static YGFlexDirection getYogaDirectionFromString(String direction) {
-  if (direction == "row") {
-    return YGFlexDirectionRow;
-  }
-
-  if (direction == "row-reverse") {
-    return YGFlexDirectionRowReverse;
-  }
-
-  if (direction == "column-reverse") {
-    return YGFlexDirectionColumnReverse;
-  }
-
-  return YGFlexDirectionColumn;
-}
 
 sol::table UILuaTable::create(sol::state_view state) {
   auto uiImage = state.new_usertype<UIImage>("UIImage", sol::no_constructor);
@@ -37,7 +22,9 @@ sol::table UILuaTable::create(sol::state_view state) {
   };
 
   ui["text"] = [](sol::table props) {
-    return UIText{.content = props.get<String>("content")};
+    UIText text{.content = props.get<String>("content")};
+
+    return text;
   };
 
   ui["view"] = [](sol::table props) {
@@ -45,8 +32,45 @@ sol::table UILuaTable::create(sol::state_view state) {
 
     auto style = props["style"];
     if (style.is<sol::table>()) {
-      if (style["flexDirection"].is<String>()) {
-        view.flexDirection = getYogaDirectionFromString(style["flexDirection"]);
+      if (style["grow"].is<f32>()) {
+        // TODO: Throw warning if value is less than 0
+        view.style.grow = std::max(0.0f, style["grow"].get<f32>());
+      }
+
+      if (style["shrink"].is<f32>()) {
+        // TODO: Throw warning if value is less than 0
+        view.style.shrink = std::max(0.0f, style["shrink"].get<f32>());
+      }
+
+      if (style["direction"].is<String>()) {
+        view.style.direction = getYogaDirectionFromString(style["direction"],
+                                                          view.style.direction);
+      }
+
+      if (style["justifyContent"].is<String>()) {
+        view.style.justifyContent = getYogaJustifyFromString(
+            style["justifyContent"], view.style.justifyContent);
+      }
+
+      if (style["alignContent"].is<String>()) {
+        view.style.alignContent = getYogaAlignFromString(
+            style["alignContent"], view.style.alignContent);
+      }
+
+      if (style["alignItems"].is<String>()) {
+        view.style.alignItems =
+            getYogaAlignFromString(style["alignItems"], view.style.alignItems);
+      }
+
+      static constexpr usize ColorNumComponents = 4;
+      if (style["backgroundColor"]
+              .is<std::array<float, ColorNumComponents>>()) {
+        // TODO: Throw warning if color value is not in range [0.0, 1.0]
+        auto color = style["backgroundColor"].get<std::array<float, 4>>();
+        view.style.backgroundColor = {glm::clamp(color.at(0), 0.0f, 1.0f),
+                                      glm::clamp(color.at(1), 0.0f, 1.0f),
+                                      glm::clamp(color.at(2), 0.0f, 1.0f),
+                                      glm::clamp(color.at(3), 0.0f, 1.0f)};
       }
     }
 

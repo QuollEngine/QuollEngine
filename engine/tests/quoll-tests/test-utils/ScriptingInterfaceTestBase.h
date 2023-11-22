@@ -52,7 +52,5 @@ protected:
   quoll::LuaScriptingSystem scriptingSystem;
   TestPhysicsBackend *physicsBackend = new TestPhysicsBackend;
   quoll::PhysicsSystem physicsSystem;
-
-private:
   quoll::String mScriptName;
 };

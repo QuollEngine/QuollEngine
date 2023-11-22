@@ -13,6 +13,11 @@ struct UIImage {
    * Texture asset
    */
   TextureAssetHandle texture;
+
+  /**
+   * ID
+   */
+  String id;
 };
 
 /**
@@ -23,6 +28,51 @@ struct UIText {
    * Text content
    */
   String content;
+
+  /**
+   * ID
+   */
+  String id;
+};
+
+/**
+ * @brief UI view style
+ */
+struct UIViewStyle {
+  /**
+   * Flex grow
+   */
+  f32 grow = 0.0f;
+
+  /**
+   * Flex shrink
+   */
+  f32 shrink = 1.0f;
+
+  /**
+   * Flex direction
+   */
+  YGFlexDirection direction{YGFlexDirectionRow};
+
+  /**
+   * Justify content
+   */
+  YGJustify justifyContent{YGJustifyFlexStart};
+
+  /**
+   * Align items
+   */
+  YGAlign alignItems{YGAlignStretch};
+
+  /**
+   * Align items
+   */
+  YGAlign alignContent{YGAlignFlexStart};
+
+  /**
+   * Background color
+   */
+  glm::vec4 backgroundColor{0.0f};
 };
 
 /**
@@ -35,9 +85,14 @@ struct UIView {
   std::vector<std::variant<UIView, UIImage, UIText>> children;
 
   /**
-   * Flex direction
+   * Style
    */
-  YGFlexDirection flexDirection{YGFlexDirectionColumn};
+  UIViewStyle style{};
+
+  /**
+   * ID
+   */
+  String id;
 };
 
 /**

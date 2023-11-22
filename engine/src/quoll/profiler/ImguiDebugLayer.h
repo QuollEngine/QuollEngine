@@ -52,6 +52,11 @@ private:
   void renderUsageMetrics();
 
   /**
+   * @brief Render imgui demo window
+   */
+  void renderDemoWindow();
+
+  /**
    * @brief Render two col row
    *
    * @param header Row header
@@ -67,6 +72,7 @@ private:
   bool mUsageMetricsVisible = false;
   bool mPhysicalDeviceInfoVisible = false;
   bool mPerformanceMetricsVisible = false;
+  bool mDemoWindowVisible = false;
 };
 
 } // namespace quoll

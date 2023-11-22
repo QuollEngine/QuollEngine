@@ -345,12 +345,12 @@ end
 local ui = game:get("UI")
 
 function ui_element_image()
-  image = ui.image{texture=10}
+  local image = ui.image{texture=10}
   expect_eq(image.texture, 10)
 end
 
 function ui_element_text()
-  text = ui.text{content="Hello"}
+  local text = ui.text{content="Hello"}
   expect_eq(text.content, "Hello")
 end
 
@@ -361,7 +361,7 @@ function table_length(T)
   end
 
 function ui_element_view()
-  view = ui.view{children={
+  local view = ui.view{children={
     ui.image{texture=10},
     ui.text{content="Hello"},
     ui.image{texture=20},
@@ -384,6 +384,34 @@ function ui_element_view()
   expect_eq(view.children[5].children[1].content, "Child")
   expect_eq(view.children[5].children[2].texture, 30)
   expect_eq(table_length(view.children[6].children), 0)
+end
+
+function ui_element_view_direction(direction)
+    return ui.view{style={direction=direction}}
+end
+
+function ui_element_view_align_items(alignItems)
+    return ui.view{style={alignItems=alignItems}}
+end
+
+function ui_element_view_align_content(alignContent)
+    return ui.view{style={alignContent=alignContent}}
+end
+
+function ui_element_view_justify_content(justifyContent)
+    return ui.view{style={justifyContent=justifyContent}}
+end
+
+function ui_element_view_flex_grow(grow)
+    return ui.view{style={grow=grow}}
+end
+
+function ui_element_view_flex_shrink(shrink)
+    return ui.view{style={shrink=shrink}}
+end
+
+function ui_element_view_background_color(backgroundColor)
+    return ui.view{style={backgroundColor=backgroundColor}}
 end
 
 function ui_canvas_render()

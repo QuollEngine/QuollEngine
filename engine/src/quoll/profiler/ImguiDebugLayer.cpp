@@ -19,6 +19,7 @@ void ImguiDebugLayer::renderMenu() {
 
     ImGui::MenuItem("Performance Metrics", nullptr,
                     &mPerformanceMetricsVisible);
+    ImGui::MenuItem("Imgui demo", nullptr, &mDemoWindowVisible);
     ImGui::EndMenu();
   }
 }
@@ -27,6 +28,7 @@ void ImguiDebugLayer::render() {
   renderPhysicalDeviceInfo();
   renderUsageMetrics();
   renderPerformanceMetrics();
+  renderDemoWindow();
 }
 
 void ImguiDebugLayer::renderPerformanceMetrics() {
@@ -117,6 +119,13 @@ void ImguiDebugLayer::renderUsageMetrics() {
 
     ImGui::End();
   }
+}
+
+void ImguiDebugLayer::renderDemoWindow() {
+  if (!mDemoWindowVisible)
+    return;
+
+  ImGui::ShowDemoWindow(&mDemoWindowVisible);
 }
 
 void ImguiDebugLayer::renderPhysicalDeviceInfo() {
