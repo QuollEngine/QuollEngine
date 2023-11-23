@@ -1,9 +1,9 @@
 #pragma once
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/events/EventSystem.h"
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/physics/PhysicsSystem.h"
+#include "quoll/window/Window.h"
 
 #include "LuaScript.h"
 #include "ScriptLoop.h"
@@ -19,10 +19,9 @@ public:
   /**
    * @brief Create scripting system
    *
-   * @param eventSystem Event system
    * @param assetRegistry Asset registry
    */
-  LuaScriptingSystem(EventSystem &eventSystem, AssetRegistry &assetRegistry);
+  LuaScriptingSystem(AssetRegistry &assetRegistry);
 
   ~LuaScriptingSystem() = default;
 
@@ -36,8 +35,10 @@ public:
    *
    * @param entityDatabase Entity database
    * @param physicsSystem Physics system
+   * @param windowSignals Window signals
    */
-  void start(EntityDatabase &entityDatabase, PhysicsSystem &physicsSystem);
+  void start(EntityDatabase &entityDatabase, PhysicsSystem &physicsSystem,
+             WindowSignals &windowSignals);
 
   /**
    * @brief Call script update on new scripts
@@ -81,7 +82,6 @@ private:
   void createScriptingData(LuaScript &component, Entity event);
 
 private:
-  EventSystem &mEventSystem;
   AssetRegistry &mAssetRegistry;
   lua::Interpreter mLuaInterpreter;
   lua::ScriptLoop mScriptLoop;

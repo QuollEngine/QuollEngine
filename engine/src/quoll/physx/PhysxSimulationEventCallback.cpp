@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/physics/CollisionEvent.h"
 #include "PhysxSimulationEventCallback.h"
 
 using namespace physx;
@@ -6,8 +7,8 @@ using namespace physx;
 namespace quoll {
 
 PhysxSimulationEventCallback::PhysxSimulationEventCallback(
-    EventSystem &eventSystem)
-    : mEventSystem(eventSystem) {}
+    PhysicsSignals &signals)
+    : mSignals(signals) {}
 
 void PhysxSimulationEventCallback::onConstraintBreak(
     physx::PxConstraintInfo *constraints, physx::PxU32 count) {}
@@ -31,9 +32,9 @@ void PhysxSimulationEventCallback::onContact(
     const PxContactPair &cp = pairs[i];
 
     if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND) {
-      mEventSystem.dispatch(CollisionEvent::CollisionStarted, {e1, e2});
+      mSignals.getCollisionStartSignal().notify(CollisionEvent{e1, e2});
     } else if (cp.events & PxPairFlag::eNOTIFY_TOUCH_LOST) {
-      mEventSystem.dispatch(CollisionEvent::CollisionEnded, {e1, e2});
+      mSignals.getCollisionEndSignal().notify(CollisionEvent{e1, e2});
     }
   }
 }

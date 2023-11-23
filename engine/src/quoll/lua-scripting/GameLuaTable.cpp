@@ -3,6 +3,7 @@
 #include "quoll/entity/EntitySpawnerLuaTable.h"
 #include "quoll/logger/UserLoggerLuaTable.h"
 #include "quoll/ui/UILuaTable.h"
+#include "quoll/input/InputSystemLuaTable.h"
 
 #include "GameLuaTable.h"
 
@@ -31,6 +32,11 @@ sol::object GameLuaTable::get(String name) {
 
   if (name == "Logger") {
     return UserLoggerLuaTable::create(state);
+  }
+
+  if (name == "Input") {
+    return sol::make_object(
+        state, InputSystemLuaTable::create(state, mEntity, mScriptGlobals));
   }
 
   return sol::make_object(state, sol::nil);

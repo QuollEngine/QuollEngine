@@ -105,8 +105,7 @@ static PxFilterFlags phyxFilterAllCollisionShader(
   return PxFilterFlag::eDEFAULT;
 }
 
-PhysxBackend::PhysxBackend(EventSystem &eventSystem)
-    : mSimulationEventCallback(eventSystem) {
+PhysxBackend::PhysxBackend() : mSimulationEventCallback(mSignals) {
   static constexpr u32 PvdPort = 5425;
   static constexpr u32 PvdTimeoutInMs = 2000;
   static constexpr glm::vec3 Gravity(0.0f, -9.8f, 0.0f);

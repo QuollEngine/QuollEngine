@@ -71,11 +71,15 @@ Window::Window(StringView title, u32 width, u32 height,
     if (action == GLFW_PRESS) {
       window->mEventSystem.dispatch(KeyboardEvent::Pressed,
                                     {key, scancode, mods});
+
+      window->mSignals.getKeyDownSignal().notify(
+          KeyboardEventObject{key, scancode, mods});
     } else if (action == GLFW_RELEASE) {
       window->mEventSystem.dispatch(KeyboardEvent::Released,
                                     {key, scancode, mods});
+      window->mSignals.getKeyUpSignal().notify(
+          KeyboardEventObject{key, scancode, mods});
     } else if (action == GLFW_REPEAT) {
-
       window->mEventSystem.dispatch(KeyboardEvent::Pressed,
                                     {key, scancode, mods});
     }

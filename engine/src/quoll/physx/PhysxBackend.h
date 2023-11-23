@@ -1,7 +1,6 @@
 #pragma once
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/events/EventSystem.h"
 #include "quoll/physics/PhysicsObjects.h"
 #include "quoll/physics/PhysicsBackend.h"
 
@@ -22,10 +21,8 @@ class PhysxBackend : public PhysicsBackend {
 public:
   /**
    * @brief Create physics system
-   *
-   * @param eventSystem Event system
    */
-  PhysxBackend(EventSystem &eventSystem);
+  PhysxBackend();
 
   /**
    * @brief Destroy physics system
@@ -76,6 +73,13 @@ public:
              const glm::vec3 &direction, f32 distance,
              CollisionHit &hit) override;
 
+  /**
+   * @brief Get physics signals
+   *
+   * @return Physics signals
+   */
+  inline PhysicsSignals &getSignals() override { return mSignals; }
+
 private:
   /**
    * @brief Synchronize physics components
@@ -105,6 +109,8 @@ private:
                               const glm::mat4 &worldTransform);
 
 private:
+  PhysicsSignals mSignals;
+
   physx::PxDefaultAllocator mDefaultAllocator;
   physx::PxDefaultErrorCallback mDefaultErrorCallback;
   PhysxSimulationEventCallback mSimulationEventCallback;

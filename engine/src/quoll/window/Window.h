@@ -2,6 +2,8 @@
 
 #include "quoll/events/EventSystem.h"
 #include "quoll/input/InputDeviceManager.h"
+#include "quoll/lua-scripting/ScriptSignal.h"
+#include "WindowSignals.h"
 
 struct GLFWwindow;
 
@@ -141,6 +143,13 @@ public:
    */
   void focus();
 
+  /**
+   * @brief Get window signals
+   *
+   * @return Window signals
+   */
+  inline WindowSignals &getSignals() { return mSignals; }
+
 private:
   InputStateValue getKeyboardState(int key);
 
@@ -157,6 +166,8 @@ private:
 
   template <class TFunctionType>
   using HandlerMap = std::map<u32, std::function<TFunctionType>>;
+
+  WindowSignals mSignals;
 
   HandlerMap<void(u32, u32)> mResizeHandlers;
   HandlerMap<void(bool)> mFocusHandlers;

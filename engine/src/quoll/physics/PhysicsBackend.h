@@ -1,7 +1,9 @@
 #pragma once
 
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/lua-scripting/ScriptSignal.h"
 #include "CollisionHit.h"
+#include "PhysicsSignals.h"
 
 namespace quoll {
 
@@ -63,6 +65,13 @@ public:
   virtual bool sweep(EntityDatabase &entityDatabase, Entity entity,
                      const glm::vec3 &direction, f32 distance,
                      CollisionHit &hit) = 0;
+
+  /**
+   * @brief Get physics signals
+   *
+   * @return Physics signals
+   */
+  virtual PhysicsSignals &getSignals() = 0;
 };
 
 } // namespace quoll

@@ -5,7 +5,7 @@
 #include <extensions/PxDefaultAllocator.h>
 #include <extensions/PxDefaultErrorCallback.h>
 
-#include "quoll/events/EventSystem.h"
+#include "quoll/physics/PhysicsSignals.h"
 
 namespace quoll {
 
@@ -19,9 +19,9 @@ public:
   /**
    * @brief Create simulation event callback
    *
-   * @param eventSystem Event system
+   * @param signals Physics signals
    */
-  PhysxSimulationEventCallback(EventSystem &eventSystem);
+  PhysxSimulationEventCallback(PhysicsSignals &signals);
 
   /**
    * @brief Event when constraint is broken
@@ -78,7 +78,7 @@ public:
                  const physx::PxU32 count) override;
 
 private:
-  EventSystem &mEventSystem;
+  PhysicsSignals &mSignals;
 };
 
 } // namespace quoll

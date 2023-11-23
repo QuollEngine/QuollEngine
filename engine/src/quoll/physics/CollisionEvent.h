@@ -4,12 +4,10 @@
 
 namespace quoll {
 
-enum class CollisionEvent { CollisionStarted, CollisionEnded };
-
 /**
  * @brief Collision event data
  */
-struct CollisionObject {
+struct CollisionEvent {
   /**
    * Collided entity A
    */

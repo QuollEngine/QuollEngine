@@ -23,7 +23,7 @@ class EventSystem {
    * @brief Tuple that wraps every element with EventPool
    *
    * This tuple can be defined in the following way
-   *          PoolTuple<CollisionEvent, MouseButtonEvent, ...> mPools;
+   *          PoolTuple<MouseButtonEvent, ...> mPools;
    *
    * @tparam ...TEvents Event types
    */
@@ -122,8 +122,7 @@ private:
   }
 
 private:
-  PoolTuple<CollisionEvent, MouseButtonEvent, MouseCursorEvent,
-            MouseScrollEvent, KeyboardEvent>
+  PoolTuple<MouseButtonEvent, MouseCursorEvent, MouseScrollEvent, KeyboardEvent>
       mPools;
 };
 
