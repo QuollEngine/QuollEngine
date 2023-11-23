@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/physics/CollisionEvent.h"
 #include "quoll/window/MouseEvent.h"
 #include "quoll/window/KeyboardEvent.h"
 
@@ -15,16 +14,6 @@ namespace quoll::event_detail {
  * @tparam TEventType Event type
  */
 template <class TEventType> struct GetEventData {};
-
-/**
- * @brief Structure for collision event
- */
-template <> struct GetEventData<CollisionEvent> {
-  /**
-   * Collision event data
-   */
-  using Data = CollisionObject;
-};
 
 /**
  * @brief Structure for mouse button event

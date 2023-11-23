@@ -30,14 +30,12 @@ public:
    * @brief Create editor simulation
    *
    * @param deviceManager Device manager
-   * @param eventSystem Event system
    * @param window Window
    * @param assetRegistry Asset registry
    * @param editorCamera Editor camera
    */
-  EditorSimulator(InputDeviceManager &deviceManager, EventSystem &eventSystem,
-                  Window &window, AssetRegistry &assetRegistry,
-                  EditorCamera &editorCamera);
+  EditorSimulator(InputDeviceManager &deviceManager, Window &window,
+                  AssetRegistry &assetRegistry, EditorCamera &editorCamera);
 
   /**
    * @brief Main update function
@@ -110,6 +108,7 @@ private:
   PhysicsSystem mPhysicsSystem;
   AudioSystem<DefaultAudioBackend> mAudioSystem;
   InputMapSystem mInputMapSystem;
+  Window &mWindow;
 
   WorkspaceMode mMode = WorkspaceMode::Edit;
 };

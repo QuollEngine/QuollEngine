@@ -4,13 +4,11 @@
 namespace quoll::editor {
 
 EditorSimulator::EditorSimulator(InputDeviceManager &deviceManager,
-                                 EventSystem &eventSystem, Window &window,
-                                 AssetRegistry &assetRegistry,
+                                 Window &window, AssetRegistry &assetRegistry,
                                  EditorCamera &editorCamera)
-    : mInputMapSystem(deviceManager, assetRegistry),
-      mScriptingSystem(eventSystem, assetRegistry),
-      mAnimationSystem(assetRegistry),
-      mPhysicsSystem(PhysicsSystem::createPhysxBackend(eventSystem)),
+    : mWindow(window), mInputMapSystem(deviceManager, assetRegistry),
+      mScriptingSystem(assetRegistry), mAnimationSystem(assetRegistry),
+      mPhysicsSystem(PhysicsSystem::createPhysxBackend()),
       mEditorCamera(editorCamera), mAudioSystem(assetRegistry) {}
 
 void EditorSimulator::update(f32 dt, WorkspaceState &state) {
@@ -69,7 +67,7 @@ void EditorSimulator::updateSimulation(f32 dt, WorkspaceState &state) {
   mCameraAspectRatioUpdater.update(entityDatabase);
   mPhysicsSystem.update(dt, entityDatabase);
 
-  mScriptingSystem.start(entityDatabase, mPhysicsSystem);
+  mScriptingSystem.start(entityDatabase, mPhysicsSystem, mWindow.getSignals());
   mScriptingSystem.update(dt, entityDatabase);
   mAnimationSystem.update(dt, entityDatabase);
 

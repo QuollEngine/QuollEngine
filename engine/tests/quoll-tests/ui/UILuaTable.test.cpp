@@ -26,15 +26,7 @@ public:
   template <typename R, typename... T>
   R callWithArgs(quoll::Entity entity, const quoll::String &functionName,
                  T &&...args) {
-    auto handle = loadScript(mScriptName);
-    entityDatabase.set<quoll::LuaScript>(entity, {handle});
-
-    scriptingSystem.start(entityDatabase, physicsSystem);
-
-    auto &script = entityDatabase.get<quoll::LuaScript>(entity);
-    sol::state_view state(script.state);
-
-    state["assert_native"] = [](bool value) { return value; };
+    auto state = start(entity);
 
     return state[functionName](args...);
   }

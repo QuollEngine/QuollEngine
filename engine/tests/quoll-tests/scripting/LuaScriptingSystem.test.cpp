@@ -9,7 +9,7 @@
 
 class LuaScriptingSystemTest : public AssetCacheTestBase {
 public:
-  LuaScriptingSystemTest() : scriptingSystem(eventSystem, cache.getRegistry()) {
+  LuaScriptingSystemTest() : scriptingSystem(cache.getRegistry()) {
     scriptingSystem.observeChanges(entityDatabase);
   }
 
@@ -20,9 +20,9 @@ public:
   }
 
   quoll::EntityDatabase entityDatabase;
-  quoll::EventSystem eventSystem;
   quoll::LuaScriptingSystem scriptingSystem;
   quoll::PhysicsSystem physicsSystem{new TestPhysicsBackend};
+  quoll::WindowSignals windowSignals;
 };
 
 using ScriptingSystemDeathTest = LuaScriptingSystemTest;
@@ -38,7 +38,7 @@ TEST_F(LuaScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   EXPECT_EQ(component.state, nullptr);
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   EXPECT_NE(component.state, nullptr);
 
   scriptingSystem.update(TimeDelta, entityDatabase);
@@ -61,14 +61,12 @@ TEST_F(LuaScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
     entityDatabase.set<quoll::LuaScript>(entity, {handle});
   }
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
 
   std::vector<quoll::LuaScript> scripts(entities.size());
   for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
     scripts.at(i) = entityDatabase.get<quoll::LuaScript>(entity);
-    ASSERT_TRUE(eventSystem.hasObserver(quoll::CollisionEvent::CollisionEnded,
-                                        scripts.at(i).onCollisionEnd));
 
     if ((i % 2) == 0) {
       entityDatabase.remove<quoll::LuaScript>(entity);
@@ -80,11 +78,6 @@ TEST_F(LuaScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
     auto entity = entities.at(i);
     bool deleted = (i % 2) == 0;
     EXPECT_NE(entityDatabase.has<quoll::LuaScript>(entity), deleted);
-
-    if (deleted) {
-      EXPECT_FALSE(eventSystem.hasObserver(
-          quoll::CollisionEvent::CollisionEnded, scripts.at(i).onCollisionEnd));
-    }
   }
 }
 
@@ -97,7 +90,7 @@ TEST_F(LuaScriptingSystemTest, DoesNothingIfScriptHasNoUpdater) {
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   EXPECT_EQ(component.state, nullptr);
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   EXPECT_NE(component.state, nullptr);
 
   sol::state_view state(component.state);
@@ -119,7 +112,7 @@ TEST_F(LuaScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   EXPECT_EQ(component.state, nullptr);
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   EXPECT_NE(component.state, nullptr);
 
   for (usize i = 0; i < 10; ++i) {
@@ -139,7 +132,7 @@ TEST_F(LuaScriptingSystemTest, LoadsScriptOnStart) {
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   EXPECT_EQ(component.state, nullptr);
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   EXPECT_NE(component.state, nullptr);
 
   sol::state_view state(component.state);
@@ -157,7 +150,7 @@ TEST_F(LuaScriptingSystemTest, LoadsScriptOnlyOnceOnStart) {
 
   // Call 10 times
   for (usize i = 0; i < 10; ++i) {
-    scriptingSystem.start(entityDatabase, physicsSystem);
+    scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   }
   EXPECT_NE(component.state, nullptr);
 
@@ -173,7 +166,7 @@ TEST_F(LuaScriptingSystemTest, RemovesScriptComponentIfInputVarsAreNotSet) {
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
 }
 
@@ -193,7 +186,7 @@ TEST_F(LuaScriptingSystemTest,
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
 }
 
@@ -212,7 +205,7 @@ TEST_F(LuaScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
 
   auto state = sol::state_view(component.state);
@@ -237,7 +230,7 @@ TEST_F(LuaScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
   auto state = sol::state_view(component.state);
 
   EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
@@ -251,115 +244,4 @@ TEST_F(LuaScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
 
   EXPECT_TRUE(state["global_vars"].is<sol::nil_t>());
   EXPECT_TRUE(state["entity"].is<quoll::EntityLuaTable>());
-}
-
-TEST_F(LuaScriptingSystemTest, RegistersEventsOnStart) {
-  auto handle = loadLuaScript("scripting-system-tester.lua");
-
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
-
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-
-  scriptingSystem.start(entityDatabase, physicsSystem);
-
-  EXPECT_LT(component.onCollisionStart, quoll::EventObserverMax);
-  EXPECT_LT(component.onCollisionEnd, quoll::EventObserverMax);
-  EXPECT_LT(component.onKeyPress, quoll::EventObserverMax);
-  EXPECT_LT(component.onKeyRelease, quoll::EventObserverMax);
-}
-
-TEST_F(LuaScriptingSystemTest,
-       DoesNotCallScriptCollisionEventIfEntityDidNotCollide) {
-  auto handle = loadLuaScript("scripting-system-tester.lua");
-
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
-
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-
-  scriptingSystem.start(entityDatabase, physicsSystem);
-  auto state = sol::state_view(component.state);
-
-  eventSystem.dispatch(quoll::CollisionEvent::CollisionStarted,
-                       {quoll::Entity{5}, quoll::Entity{6}});
-  eventSystem.poll();
-
-  EXPECT_EQ(state["event"].get<i32>(), 0);
-}
-
-TEST_F(LuaScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
-  auto handle = loadLuaScript("scripting-system-tester.lua");
-
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
-
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-
-  scriptingSystem.start(entityDatabase, physicsSystem);
-  auto state = sol::state_view(component.state);
-
-  eventSystem.dispatch(quoll::CollisionEvent::CollisionStarted,
-                       {entity, quoll::Entity{6}});
-  eventSystem.poll();
-
-  EXPECT_EQ(state["event"].get<i32>(), 1);
-  EXPECT_EQ(state["target"].get<i32>(), 6);
-}
-
-TEST_F(LuaScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
-  auto handle = loadLuaScript("scripting-system-tester.lua");
-
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
-
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-
-  scriptingSystem.start(entityDatabase, physicsSystem);
-  auto state = sol::state_view(component.state);
-
-  eventSystem.dispatch(quoll::CollisionEvent::CollisionEnded,
-                       {quoll::Entity{5}, entity});
-  eventSystem.poll();
-
-  EXPECT_EQ(state["event"].get<i32>(), 2);
-  EXPECT_EQ(state["target"].get<i32>(), 5);
-}
-
-TEST_F(LuaScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
-  auto handle = loadLuaScript("scripting-system-tester.lua");
-
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
-
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-
-  scriptingSystem.start(entityDatabase, physicsSystem);
-  auto state = sol::state_view(component.state);
-
-  eventSystem.dispatch(quoll::KeyboardEvent::Pressed, {15, -1, 3});
-  eventSystem.poll();
-
-  EXPECT_EQ(state["event"].get<i32>(), 3);
-  EXPECT_EQ(state["key_value"].get<i32>(), 15);
-  EXPECT_EQ(state["key_mods"].get<i32>(), 3);
-}
-
-TEST_F(LuaScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
-  auto handle = loadLuaScript("scripting-system-tester.lua");
-
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
-
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-
-  scriptingSystem.start(entityDatabase, physicsSystem);
-  auto state = sol::state_view(component.state);
-
-  eventSystem.dispatch(quoll::KeyboardEvent::Released, {35, -1, 3});
-  eventSystem.poll();
-
-  EXPECT_EQ(state["event"].get<i32>(), 4);
-  EXPECT_EQ(state["key_value"].get<i32>(), 35);
-  EXPECT_EQ(state["key_mods"].get<i32>(), 3);
 }

@@ -185,7 +185,7 @@ void EditorScreen::start(const Project &rawProject) {
 
   ui.processShortcuts(context, mEventSystem);
 
-  EditorSimulator simulator(mDeviceManager, mEventSystem, mWindow,
+  EditorSimulator simulator(mDeviceManager, mWindow,
                             assetManager.getAssetRegistry(), editorCamera);
 
   mWindow.maximize();

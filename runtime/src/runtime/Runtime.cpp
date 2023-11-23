@@ -80,9 +80,9 @@ void Runtime::start() {
     return RendererTextures{imguiData.imguiColor, passData.finalColor};
   });
 
-  LuaScriptingSystem scriptingSystem(eventSystem, assetCache.getRegistry());
+  LuaScriptingSystem scriptingSystem(assetCache.getRegistry());
   SceneUpdater sceneUpdater;
-  PhysicsSystem physicsSystem = PhysicsSystem::createPhysxBackend(eventSystem);
+  PhysicsSystem physicsSystem = PhysicsSystem::createPhysxBackend();
   CameraAspectRatioUpdater cameraAspectRatioUpdater;
   AnimationSystem animationSystem(assetCache.getRegistry());
   SkeletonUpdater skeletonUpdater;
@@ -130,7 +130,7 @@ void Runtime::start() {
     inputMapSystem.update(entityDatabase);
     cameraAspectRatioUpdater.update(entityDatabase);
     physicsSystem.update(dt, entityDatabase);
-    scriptingSystem.start(entityDatabase, physicsSystem);
+    scriptingSystem.start(entityDatabase, physicsSystem, window.getSignals());
     scriptingSystem.update(dt, entityDatabase);
     animationSystem.update(dt, entityDatabase);
     skeletonUpdater.update(entityDatabase);

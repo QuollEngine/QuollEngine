@@ -6,14 +6,14 @@
 
 namespace quoll {
 
-LuaScriptingSystem::LuaScriptingSystem(EventSystem &eventSystem,
-                                       AssetRegistry &assetRegistry)
-    : mEventSystem(eventSystem), mAssetRegistry(assetRegistry) {}
+LuaScriptingSystem::LuaScriptingSystem(AssetRegistry &assetRegistry)
+    : mAssetRegistry(assetRegistry) {}
 
 void LuaScriptingSystem::start(EntityDatabase &entityDatabase,
-                               PhysicsSystem &physicsSystem) {
-  ScriptGlobals scriptGlobals{entityDatabase, physicsSystem, mAssetRegistry,
-                              mScriptLoop};
+                               PhysicsSystem &physicsSystem,
+                               WindowSignals &windowSignals) {
+  ScriptGlobals scriptGlobals{windowSignals, entityDatabase, physicsSystem,
+                              mAssetRegistry, mScriptLoop};
   QUOLL_PROFILE_EVENT("LuaScriptingSystem::start");
   lua::ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
@@ -57,7 +57,6 @@ void LuaScriptingSystem::start(EntityDatabase &entityDatabase,
           mLuaInterpreter.evaluate(script.data.bytes, component.state);
       QuollAssert(success, "Cannot evaluate script");
       scriptDecorator.removeVariableInjectors(state);
-      createScriptingData(component, entity);
     };
 
     loaders.push_back(&component.loader);
@@ -95,82 +94,9 @@ void LuaScriptingSystem::observeChanges(EntityDatabase &entityDatabase) {
   mScriptRemoveObserver = entityDatabase.observeRemove<LuaScript>();
 }
 
-void LuaScriptingSystem::createScriptingData(LuaScript &component,
-                                             Entity entity) {
-  auto state = sol::state_view(component.state);
-
-  if (state["on_collision_start"].get_type() == sol::type::function) {
-    component.onCollisionStart = mEventSystem.observe(
-        CollisionEvent::CollisionStarted,
-        [this, &component, entity](const CollisionObject &data) {
-          if (data.a == entity || data.b == entity) {
-            auto state = sol::state_view(component.state);
-            Entity target = data.a == entity ? data.b : data.a;
-            auto table = state.create_table_with("target", target);
-            state["on_collision_start"](table);
-          }
-        });
-  }
-
-  if (state["on_collision_end"].get_type() == sol::type::function) {
-    component.onCollisionEnd = mEventSystem.observe(
-        CollisionEvent::CollisionEnded,
-        [this, &component, entity](const CollisionObject &data) {
-          auto state = sol::state_view(component.state);
-
-          if (data.a == entity || data.b == entity) {
-            Entity target = data.a == entity ? data.b : data.a;
-            auto table = state.create_table_with("target", target);
-            state["on_collision_end"](table);
-          }
-        });
-  }
-
-  if (state["on_key_press"].get_type() == sol::type::function) {
-    component.onKeyPress = mEventSystem.observe(
-        KeyboardEvent::Pressed, [this, &component](const auto &data) {
-          auto state = sol::state_view(component.state);
-
-          auto table =
-              state.create_table_with("key", data.key, "mods", data.mods);
-          state["on_key_press"](table);
-        });
-  }
-
-  if (state["on_key_release"].get_type() == sol::type::function) {
-    component.onKeyRelease = mEventSystem.observe(
-        KeyboardEvent::Released, [this, &component](const auto &data) {
-          auto state = sol::state_view(component.state);
-
-          auto table =
-              state.create_table_with("key", data.key, "mods", data.mods);
-          state["on_key_release"](table);
-        });
-  }
-}
-
 void LuaScriptingSystem::destroyScriptingData(LuaScript &component) {
   for (auto slot : component.signalSlots) {
     slot.disconnect();
-  }
-
-  if (component.onCollisionStart != EventObserverMax) {
-    mEventSystem.removeObserver(CollisionEvent::CollisionStarted,
-                                component.onCollisionStart);
-  }
-
-  if (component.onCollisionEnd != EventObserverMax) {
-    mEventSystem.removeObserver(CollisionEvent::CollisionEnded,
-                                component.onCollisionEnd);
-  }
-
-  if (component.onKeyPress != EventObserverMax) {
-    mEventSystem.removeObserver(KeyboardEvent::Pressed, component.onKeyPress);
-  }
-
-  if (component.onKeyRelease != EventObserverMax) {
-    mEventSystem.removeObserver(KeyboardEvent::Released,
-                                component.onKeyRelease);
   }
 
   if (component.state) {

@@ -38,26 +38,6 @@ struct LuaScript {
   std::unordered_map<String, LuaScriptInputVariable> variables;
 
   /**
-   * Collision start observer
-   */
-  EventObserverId onCollisionStart = EventObserverMax;
-
-  /**
-   * Collision end observer
-   */
-  EventObserverId onCollisionEnd = EventObserverMax;
-
-  /**
-   * Key press observer
-   */
-  EventObserverId onKeyPress = EventObserverMax;
-
-  /**
-   * Key release observer
-   */
-  EventObserverId onKeyRelease = EventObserverMax;
-
-  /**
    * Signal slots
    */
   std::vector<lua::ScriptSignalSlot> signalSlots;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PhysicsBackend.h"
-#include "quoll/events/EventSystem.h"
 
 namespace quoll {
 
@@ -13,10 +12,9 @@ public:
   /**
    * @brief Create physx backend
    *
-   * @param eventSystem Event system
    * @return Physx backend
    */
-  static PhysicsSystem createPhysxBackend(EventSystem &eventSystem);
+  static PhysicsSystem createPhysxBackend();
 
 public:
   /**
@@ -72,6 +70,13 @@ public:
                     CollisionHit &hit) {
     return mBackend->sweep(entityDatabase, entity, direction, distance, hit);
   }
+
+  /**
+   * @brief Get physics signals
+   *
+   * @return Physics signals
+   */
+  inline PhysicsSignals &getSignals() { return mBackend->getSignals(); }
 
 private:
   std::unique_ptr<PhysicsBackend> mBackend;

@@ -10,22 +10,27 @@ const quoll::String LuaScriptingInterfaceTestBase::ScriptName =
 
 LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
     const quoll::String &scriptName)
-    : assetCache(CachePath),
-      scriptingSystem(eventSystem, assetCache.getRegistry()),
+    : assetCache(CachePath), scriptingSystem(assetCache.getRegistry()),
       mScriptName(scriptName), physicsSystem(physicsBackend) {}
 
-sol::state_view
-LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
-                                    const quoll::String &functionName) {
+sol::state_view LuaScriptingInterfaceTestBase::start(quoll::Entity entity) {
   auto handle = loadScript(mScriptName);
   entityDatabase.set<quoll::LuaScript>(entity, {handle});
 
-  scriptingSystem.start(entityDatabase, physicsSystem);
+  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
 
   auto &script = entityDatabase.get<quoll::LuaScript>(entity);
   sol::state_view state(script.state);
 
   state["assert_native"] = [](bool value) { return value; };
+
+  return state;
+}
+
+sol::state_view
+LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
+                                    const quoll::String &functionName) {
+  auto state = start(entity);
 
   auto fnRes = state[functionName]();
   if (!fnRes.valid()) {
