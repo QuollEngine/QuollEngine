@@ -144,10 +144,14 @@ void CollidableLuaTable::setPlaneGeometry() {
 }
 
 std::tuple<bool, sol_maybe<CollisionHit>>
-CollidableLuaTable::sweep(f32 dx, f32 dy, f32 dz, f32 distance) {
+CollidableLuaTable::sweep(f32 dx, f32 dy, f32 dz, f32 maxDistance) {
+  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+    return {false, sol::nil};
+  }
+
   CollisionHit hit{};
   auto result = mScriptGlobals.physicsSystem.sweep(
-      mScriptGlobals.entityDatabase, mEntity, {dx, dy, dz}, distance, hit);
+      mScriptGlobals.entityDatabase, mEntity, {dx, dy, dz}, maxDistance, hit);
 
   if (result) {
     return {result, hit};

@@ -13,10 +13,7 @@
 
 namespace quoll::editor {
 
-static const String LuaScriptTemplate = R"""(function update(dt)
-  -- Update data here
-end
-)""";
+static const String LuaScriptTemplate = R"""()""";
 
 static const String AnimatorTemplate = R"""(version: 0.1
 type: animator

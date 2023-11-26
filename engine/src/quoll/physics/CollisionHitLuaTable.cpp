@@ -5,7 +5,8 @@ namespace quoll {
 
 void CollisionHitLuaTable::create(sol::state_view state) {
   auto usertype = state.new_usertype<CollisionHit>(
-      "CollisionHit", sol::no_constructor, "normal", &CollisionHit::normal);
+      "CollisionHit", sol::no_constructor, "normal", &CollisionHit::normal,
+      "distance", &CollisionHit::distance);
 }
 
 } // namespace quoll

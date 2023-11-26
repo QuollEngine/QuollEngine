@@ -87,7 +87,7 @@ static void updateShapeWithGeometryData(const PhysicsGeometryDesc &geometryDesc,
 /**
  * @brief Shader that notifies on any collision
  */
-static PxFilterFlags phyxFilterAllCollisionShader(
+static PxFilterFlags physxFilterAllCollisionShader(
     PxFilterObjectAttributes attributes0, PxFilterData filterData0,
     PxFilterObjectAttributes attributes1, PxFilterData filterData1,
     PxPairFlags &pairFlags, const void *constantBlock,
@@ -131,7 +131,7 @@ PhysxBackend::PhysxBackend() : mSimulationEventCallback(mSignals) {
 
   PxSceneDesc sceneDesc(mPhysics->getTolerancesScale());
   sceneDesc.cpuDispatcher = mDispatcher;
-  sceneDesc.filterShader = phyxFilterAllCollisionShader;
+  sceneDesc.filterShader = physxFilterAllCollisionShader;
   sceneDesc.gravity = PxVec3(Gravity.x, Gravity.y, Gravity.z);
   sceneDesc.flags = PxSceneFlag::eENABLE_ACTIVE_ACTORS;
   sceneDesc.simulationEventCallback = &mSimulationEventCallback;
@@ -192,7 +192,7 @@ void PhysxBackend::observeChanges(EntityDatabase &entityDatabase) {
 }
 
 bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
-                         const glm::vec3 &direction, f32 distance,
+                         const glm::vec3 &direction, f32 maxDistance,
                          CollisionHit &hit) {
   QuollAssert(entityDatabase.has<PhysxInstance>(entity),
               "Physx instance not found");
@@ -207,10 +207,13 @@ bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
       mScene->sweep(physx.shape->getGeometry().any(),
                     PhysxMapping::getPhysxTransform(transform.worldTransform) *
                         physx.shape->getLocalPose(),
-                    PhysxMapping::getPhysxVec3(direction), distance, buffer);
+                    PhysxMapping::getPhysxVec3(direction), maxDistance, buffer,
+                    PxHitFlag::eDEFAULT);
 
   if (result) {
-    hit.normal = PhysxMapping::getVec3(buffer.getAnyHit(0).normal);
+    const auto &bh = buffer.getAnyHit(0);
+    hit.normal = PhysxMapping::getVec3(bh.normal);
+    hit.distance = bh.distance;
   }
 
   return result;
@@ -265,9 +268,8 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
 
       // Create or set shape
       if (!physx.shape) {
-        physx.shape = createShape(collidable.geometryDesc, *physx.material,
-                                  world.worldTransform);
-
+        physx.shape = createShape(entity, collidable.geometryDesc,
+                                  *physx.material, world.worldTransform);
         physx.material->release();
       } else if (PhysxMapping::getPhysxGeometryType(
                      collidable.geometryDesc.type) ==
@@ -275,8 +277,8 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
         updateShapeWithGeometryData(collidable.geometryDesc, physx.shape,
                                     world.worldTransform);
       } else {
-        auto *newShape = createShape(collidable.geometryDesc, *physx.material,
-                                     world.worldTransform);
+        auto *newShape = createShape(entity, collidable.geometryDesc,
+                                     *physx.material, world.worldTransform);
 
         if (entityDatabase.has<RigidBody>(entity)) {
           physx.rigidDynamic->detachShape(*physx.shape);
@@ -497,7 +499,8 @@ void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
   }
 }
 
-PxShape *PhysxBackend::createShape(const PhysicsGeometryDesc &geometryDesc,
+PxShape *PhysxBackend::createShape(Entity entity,
+                                   const PhysicsGeometryDesc &geometryDesc,
                                    PxMaterial &material,
                                    const glm::mat4 &worldTransform) {
   glm::vec3 scale;
@@ -535,6 +538,10 @@ PxShape *PhysxBackend::createShape(const PhysicsGeometryDesc &geometryDesc,
   } else if (geometryDesc.type == PhysicsGeometryType::Plane) {
     shape = mPhysics->createShape(PxPlaneGeometry(), material, true);
   }
+
+  PxFilterData filterData{};
+  filterData.word0 = static_cast<PxU32>(entity);
+  shape->setSimulationFilterData(filterData);
 
   return shape;
 }

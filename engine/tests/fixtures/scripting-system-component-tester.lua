@@ -195,12 +195,14 @@ end
 
 sweep_output = nil
 sweep_normal = nil
+sweep_distance = nil
 sweep_data = nil
 function collidable_sweep()
     sweep_output, sweep_data = entity.collidable:sweep(0.0, 0.0, 0.0, 0.0)
 
     if sweep_output then
        sweep_normal = sweep_data.normal
+       sweep_distance = sweep_data.distance
     end
 end
 
