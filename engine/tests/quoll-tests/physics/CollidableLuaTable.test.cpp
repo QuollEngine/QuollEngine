@@ -326,7 +326,7 @@ TEST_F(CollidableLuaTableTest,
 }
 
 // sweep
-TEST_F(CollidableLuaTableTest, SweepReturnsFalseIfSweepTestFails) {
+TEST_F(CollidableLuaTableTest, SweepReturnsFalseIfNoCollidable) {
   physicsBackend->setSweepValue(false);
 
   auto entity = entityDatabase.create();
@@ -336,19 +336,37 @@ TEST_F(CollidableLuaTableTest, SweepReturnsFalseIfSweepTestFails) {
   EXPECT_TRUE(state["sweep_data"].is<sol::nil_t>());
 }
 
-TEST_F(CollidableLuaTableTest, SweepReturnsTrueIfSweepTestSucceeds) {
-  physicsBackend->setSweepValue(true);
-  physicsBackend->setSweepHitData({.normal = glm::vec3{2.5f, 3.5f, 4.5f}});
+TEST_F(CollidableLuaTableTest, SweepReturnsFalseIfSweepTestFails) {
+  physicsBackend->setSweepValue(false);
 
   auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::Collidable>(entity, {});
+  auto state = call(entity, "collidable_sweep");
+  EXPECT_TRUE(state["sweep_output"].is<bool>());
+  EXPECT_FALSE(state["sweep_output"].get<bool>());
+  EXPECT_TRUE(state["sweep_data"].is<sol::nil_t>());
+}
+
+TEST_F(CollidableLuaTableTest, SweepReturnsTrueIfSweepTestSucceeds) {
+  physicsBackend->setSweepValue(true);
+  physicsBackend->setSweepHitData(
+      {.normal = glm::vec3{2.5f, 3.5f, 4.5f}, .distance = 0.5f});
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::Collidable>(entity, {});
+
   auto state = call(entity, "collidable_sweep");
   EXPECT_TRUE(state["sweep_output"].is<bool>());
   EXPECT_TRUE(state["sweep_output"].get<bool>());
 
   EXPECT_FALSE(state["sweep_normal"].is<sol::nil_t>());
+  EXPECT_FALSE(state["sweep_distance"].is<sol::nil_t>());
 
   auto normal = state["sweep_normal"].get<glm::vec3>();
   EXPECT_EQ(normal, glm::vec3(2.5f, 3.5f, 4.5f));
+
+  auto distance = state["sweep_distance"].get<f32>();
+  EXPECT_EQ(distance, 0.5f);
 }
 
 // Delete

@@ -64,13 +64,13 @@ public:
    * @param entityDatabase Entity database
    * @param entity Entity
    * @param direction Sweep direction
-   * @param distance Sweep distance
+   * @param maxDistance Maximum distance to search along the sweep
    * @param[out] hit Collision hit
    * @retval true Entity collided
    * @retval false Entity not collided
    */
   bool sweep(EntityDatabase &entityDatabase, Entity entity,
-             const glm::vec3 &direction, f32 distance,
+             const glm::vec3 &direction, f32 maxDistance,
              CollisionHit &hit) override;
 
   /**
@@ -99,12 +99,14 @@ private:
   /**
    * @brief Create Physx shape
    *
+   * @param entity Entity
    * @param geometryDesc Geometry description
    * @param material Physx material
    * @param worldTransform World transform
    * @return PhysX shape
    */
-  physx::PxShape *createShape(const PhysicsGeometryDesc &geometryDesc,
+  physx::PxShape *createShape(Entity entity,
+                              const PhysicsGeometryDesc &geometryDesc,
                               physx::PxMaterial &material,
                               const glm::mat4 &worldTransform);
 

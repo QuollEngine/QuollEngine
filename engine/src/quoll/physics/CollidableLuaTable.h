@@ -100,11 +100,11 @@ public:
    * @param dx Sweep direction in x axis
    * @param dy Sweep direction in y axis
    * @param dz Sweep direction in z axis
-   * @param distance Sweep distance
+   * @param maxDistance  Maximum distance to search along the sweep
    * @return Collision hit
    */
   std::tuple<bool, sol_maybe<CollisionHit>> sweep(f32 dx, f32 dy, f32 dz,
-                                                  f32 distance);
+                                                  f32 maxDistance);
 
   /**
    * @brief Delete component

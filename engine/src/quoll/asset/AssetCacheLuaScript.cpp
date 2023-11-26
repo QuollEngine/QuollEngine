@@ -113,10 +113,6 @@ Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
   sol::state state;
   lua::NoopMetatable::create(state);
   state["entity"] = lua::NoopMetatable{};
-  state["entity_query"] = lua::NoopMetatable{};
-  state["entity_spawner"] = lua::NoopMetatable{};
-  state["logger"] = lua::NoopMetatable{};
-  state["ui"] = lua::NoopMetatable{};
   state["table"] = lua::NoopMetatable{};
   state["game"] = lua::NoopMetatable{};
 
