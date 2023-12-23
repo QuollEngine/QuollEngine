@@ -336,9 +336,19 @@ if args.build:
                     params = params | { 'CMAKE_IS_DEBUG': 'ON' if buildMode == 'Debug' else 'OFF' }
                     print('CMake build')
 
+                    vcpkg_triplet = None
+                    if sys.platform == 'linux':
+                        vcpkg_triplet = 'x64-linux'
+                    elif sys.platform == 'win32':
+                        vcpkg_triplet = 'x64-windows-static'
+                    elif sys.platform == 'darwin':
+                        vcpkg_triplet = 'x64-osx'
+
                     options = {
-                        'CMAKE_INSTALL_PREFIX': parse_placeholders('{{VENDOR_INSTALL_DIR}}', params)
+                        'CMAKE_INSTALL_PREFIX': parse_placeholders('{{VENDOR_INSTALL_DIR}}', params),
+                        'CMAKE_PREFIX_PATH': os.path.join(workingDir, 'vcpkg_installed', vcpkg_triplet, 'share').replace('\\', '/')
                     }
+
                     source = '.'
                     if 'source' in cmdLine:
                         source = cmdLine['source']

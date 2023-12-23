@@ -60,15 +60,15 @@ public:
    * @param entityDatabase Entity database
    * @param entity Entity
    * @param direction Sweep direction
-   * @param distance Sweep distance
+   * @param maxDistance Maximum distance to search along the sweep
    * @param[out] hit Collision hit
    * @retval true Entity collided
    * @retval false Entity not collided
    */
   inline bool sweep(EntityDatabase &entityDatabase, Entity entity,
-                    const glm::vec3 &direction, f32 distance,
+                    const glm::vec3 &direction, f32 maxDistance,
                     CollisionHit &hit) {
-    return mBackend->sweep(entityDatabase, entity, direction, distance, hit);
+    return mBackend->sweep(entityDatabase, entity, direction, maxDistance, hit);
   }
 
   /**

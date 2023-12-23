@@ -1,7 +1,5 @@
 include ".premake/core.lua"
 include ".premake/workspace.lua"
-include ".premake/vendor-projects/libmsdfgen.lua"
-include ".premake/vendor-projects/libmsdf-atlas-gen.lua"
 include "platform/"
 include "engine/rhi/core/"
 include "engine/rhi/vulkan/"

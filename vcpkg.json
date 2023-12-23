@@ -23,7 +23,8 @@
     },
     {
       "name": "freetype",
-      "default-features": false
+      "default-features": false,
+      "features": ["brotli", "bzip2", "zlib", "error-strings", "png"]
     },
     {
       "name": "stduuid",
@@ -97,6 +98,11 @@
     {
       "name": "yoga",
       "default-features": false
+    },
+    {
+      "name": "msdfgen",
+      "default-features": false,
+      "features": ["extensions"]
     }
   ]
 }
