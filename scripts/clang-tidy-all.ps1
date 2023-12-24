@@ -78,35 +78,35 @@ function Start-Clang-Tidy {
 if ($LintRHICore) {
     Write-Output "Checking RHICore files"
 
-    Start-Clang-Tidy -Path "engine/rhi/core" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/core/include/quoll/rhi", "./platform/base/include"
+    Start-Clang-Tidy -Path "rhi/core" -Headers "./engine/src", "./rhi/core/include", "./rhi/core/include/quoll/rhi", "./platform/base/include"
 }
 
 if ($LintRHIVulkan) {
     Write-Output "Checking RHIVulkan files"
 
-    Start-Clang-Tidy -Path "engine/rhi/vulkan" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/vulkan/include", "./engine/rhi/vulkan/include/quoll/rhi-vulkan", "./platform/base/include"
+    Start-Clang-Tidy -Path "rhi/vulkan" -Headers "./engine/src", "./rhi/core/include", "./rhi/vulkan/include", "./rhi/vulkan/include/quoll/rhi-vulkan", "./platform/base/include"
 }
 
 if ($LintRHIMock) {
     Write-Output "Checking RHIMock files"
 
-    Start-Clang-Tidy -Path "engine/rhi/mock" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/mock/include", "./engine/rhi/mock/include/quoll/rhi-mock", "./platform/base/include"
+    Start-Clang-Tidy -Path "rhi/mock" -Headers "./engine/src", "./rhi/core/include", "./rhi/mock/include", "./rhi/mock/include/quoll/rhi-mock", "./platform/base/include"
 }
 
 if ($LintEngine) {
     Write-Output "Checking Engine files"
 
-    Start-Clang-Tidy -Path "engine/src" -Headers "./engine/src", "./engine/rhi/core/include", "./platform/base/include"
+    Start-Clang-Tidy -Path "engine/src" -Headers "./engine/src", "./rhi/core/include", "./platform/base/include"
 }
 
 if ($LintEditor) {
     Write-Output "Checking Editor files"
 
-    Start-Clang-Tidy -Path "editor/src" -Headers "./editor/src", "./engine/src", "./engine/rhi/core/include", "./engine/rhi/vulkan/include", "./platform/base/include"
+    Start-Clang-Tidy -Path "editor/src" -Headers "./editor/src", "./engine/src", "./rhi/core/include", "./rhi/vulkan/include", "./platform/base/include"
 }
 
 if ($LintRuntime) {
     Write-Output "Checking Runtime files"
 
-    Start-Clang-Tidy -Path "runtime/src" -Headers "./runtime/src", "./engine/src", "./engine/rhi/core/include", "./engine/rhi/vulkan/include", "./platform/base/include"
+    Start-Clang-Tidy -Path "runtime/src" -Headers "./runtime/src", "./engine/src", "./rhi/core/include", "./rhi/vulkan/include", "./platform/base/include"
 }

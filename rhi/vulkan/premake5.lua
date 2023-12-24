@@ -15,5 +15,5 @@ project "QuollRHIVulkan"
 
 function linkVulkanRHI()
     links { "QuollRHIVulkan", "QuollRHICore", "volk", "spirv-reflect" }
-    includedirs { "../engine/rhi/vulkan/include" }
+    includedirs { "../rhi/vulkan/include" }
 end

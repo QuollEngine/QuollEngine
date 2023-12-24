@@ -58,7 +58,7 @@ project "QuollEngineTest"
     includedirs {
         "../engine/tests",
         "../engine/src",
-        "../engine/rhi/mock/include"
+        "../rhi/mock/include"
     }
 
     files {

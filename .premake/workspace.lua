@@ -15,7 +15,7 @@ workspace "QuollEngine"
     
     includedirs {
         "../engine/src",
-        "../engine/rhi/core/include",
+        "../rhi/core/include",
         "../platform/base/include"
     }
     
