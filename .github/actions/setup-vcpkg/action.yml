@@ -12,8 +12,10 @@ runs:
       shell: bash
       run: |
         ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+        echo "VCPKG_ROOT=$(pwd)/vcpkg" >> $GITHUB_ENV
 
     - if: runner.os == 'Windows'
       shell: pwsh
       run: |
         ./vcpkg/bootstrap-vcpkg.bat -disableMetrics
+        Write-Output "VCPKG_ROOT=$(pwd)\\vcpkg" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append

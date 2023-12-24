@@ -11,7 +11,7 @@ namespace quoll {
 
 Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   static constexpr f64 MaxCornerAngle = 3.0;
-  static constexpr f64 MinimumScale = 32.0;
+  static constexpr f64 MinimumScale = 20.0;
   static constexpr f64 PixelRange = 2.0;
   static constexpr u32 NumChannels = 4;
   static constexpr f64 FontScale = 1.0;

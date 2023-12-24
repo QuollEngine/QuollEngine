@@ -1,30 +1,23 @@
 {
   "dependencies": [
     {
-      "name": "msdfgen",
-      "url": "https://github.com/Chlumsky/msdfgen/archive/4e8ff2321ea9696801675c908a4822c4d8e71eb8.zip",
-      "buildSource": "msdfgen-4e8ff2321ea9696801675c908a4822c4d8e71eb8",
-      "cmd": [
-        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/msdfgen",
-        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/msdfgen/core",
-        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/msdfgen/ext",
-        "{COPY} msdfgen.h msdfgen-ext.h {{VENDOR_INSTALL_DIR}}/include/msdfgen",
-        "{COPY} core/*.h core/*.hpp {{VENDOR_INSTALL_DIR}}/include/msdfgen/core",
-        "{COPY} ext/*.h ext/*.hpp {{VENDOR_INSTALL_DIR}}/include/msdfgen/ext",
-        "{COPY} core/*.cpp {{VENDOR_PROJECTS_DIR}}/msdfgen",
-        "{COPY} ext/*.cpp {{VENDOR_PROJECTS_DIR}}/msdfgen"
-      ]
-    },
-    {
       "name": "msdf-atlas-gen",
-      "url": "https://github.com/Chlumsky/msdf-atlas-gen/archive/50d1a1c275e78ee08afafbead2a2d347aa26f122.zip",
-      "buildSource": "msdf-atlas-gen-50d1a1c275e78ee08afafbead2a2d347aa26f122",
+      "url": "https://github.com/Chlumsky/msdf-atlas-gen/archive/3cf874b39a2ea0acd316651cf10f5d13f75371fd.zip",
+      "buildSource": "msdf-atlas-gen-3cf874b39a2ea0acd316651cf10f5d13f75371fd",
       "cmd": [
-        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/msdf-atlas-gen",
-        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/msdf-atlas-gen",
-        "{RM} msdf-atlas-gen/artery-font-export.cpp msdf-atlas-gen/image-encode.cpp",
-        "{COPY} msdf-atlas-gen/*.cpp {{VENDOR_PROJECTS_DIR}}/msdf-atlas-gen",
-        "{COPY} msdf-atlas-gen/*.h msdf-atlas-gen/*.hpp {{VENDOR_INSTALL_DIR}}/include/msdf-atlas-gen"
+        {
+          "type": "cmake",
+          "options": {
+            "common": {
+              "MSDF_ATLAS_MSDFGEN_EXTERNAL": "ON",
+              "MSDF_ATLAS_BUILD_STANDALONE": "OFF",
+              "MSDF_ATLAS_USE_VCPKG": "ON",
+              "MSDF_ATLAS_USE_SKIA": "OFF",
+              "MSDF_ATLAS_INSTALL": "ON",
+              "MSDF_ATLAS_NO_ARTERY_FONT": "ON"
+            }
+          }
+        }
       ]
     },
     {

@@ -7,26 +7,6 @@ function mapDirNames(arr, basePath)
     return t
 end
 
--- Set vendor includes based on configuration
--- Deprecated: Remove after migrating msdfgen
-function vendorIncludes(...) 
-    filter { "configurations:Debug or configurations:Test" }
-        externalincludedirs(mapDirNames(..., "../../vendor/Debug/include"))
-    
-    filter { "configurations:Release or configurations:Profile" }
-        externalincludedirs(mapDirNames(..., "../../vendor/Release/include"))
-end
-
--- Set vendor includes based on configuration
--- Deprecated: Remove after migrating msdfgen
-function vendorIncludesExternal(...) 
-    filter { "configurations:Debug or configurations:Test" }
-        externalincludedirs(mapDirNames(..., "../vendor/Debug/include"))
-    
-    filter { "configurations:Release or configurations:Profile" }
-        externalincludedirs(mapDirNames(..., "../vendor/Release/include"))
-end
-
 -- Setup all library directories
 function setupLibraryDirectories()
     -- This define is needed for libktx to reference
@@ -38,18 +18,31 @@ function setupLibraryDirectories()
     filter { "system:windows" }
         externalincludedirs {
             "../vcpkg_installed/x64-windows-static/include",
+            -- TODO: Get rid of this include directory
+            "../vcpkg_installed/x64-windows-static/include/msdfgen",
         }
     filter { "system:linux" }
         externalincludedirs {
             "../vcpkg_installed/x64-linux/include",
+
+            -- TODO: Get rid of this include directory
+            "../vcpkg_installed/x64-linux/include/msdfgen",
         }
     filter {}
 
-    vendorIncludesExternal {
-        "",
-        "msdfgen"
-    }
 
+    -- Deprecated: Remove after migrating
+    -- msdf-atlas-gen and optick
+    filter { "configurations:Debug or configurations:Test" }
+        externalincludedirs{
+            "../vendor/Debug/include"
+        }
+
+    filter { "configurations:Release or configurations:Profile" }
+        externalincludedirs{
+            "../vendor/Release/include"
+        }
+    filter {}
 
     filter { "system:windows", "configurations:Debug or configurations:Test" }
         libdirs { "../vendor/Debug/lib", "../vcpkg_installed/x64-windows-static/debug/lib" }

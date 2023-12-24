@@ -58,7 +58,7 @@ RUNTIME_FILES=$(find runtime/src -type f -name "*.cpp")
 RHI_CORE_FILES=$(find engine/rhi/core -type f -name "*.cpp")
 RHI_VULKAN_FILES=$(find engine/rhi/vulkan -type f -name "*.cpp")
 RHI_MOCK_FILES=$(find engine/rhi/mock -type f -name "*.cpp")
-VENDOR_INCLUDES="-isystem/usr/local/include -isystem./vcpkg_installed/x64-linux/include -isystem./vendor/Debug/include -isystem./vendor/Debug/include/msdfgen"
+VENDOR_INCLUDES="-isystem/usr/local/include -isystem./vcpkg_installed/x64-linux/include -isystem./vcpkg_installed/x64-linux/include/msdfgen -isystem./vendor/Debug/include"
 
 LINTERROR=0
 
