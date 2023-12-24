@@ -61,7 +61,7 @@ project "QuollEditorTest"
         "../editor/tests",
         "../editor/src",
         "../engine/src",
-        "../engine/rhi/mock/include"
+        "../rhi/mock/include"
     }
 
     files {
