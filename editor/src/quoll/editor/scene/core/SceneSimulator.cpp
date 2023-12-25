@@ -1,18 +1,18 @@
 #include "quoll/core/Base.h"
-#include "EditorSimulator.h"
+#include "SceneSimulator.h"
 
 namespace quoll::editor {
 
-EditorSimulator::EditorSimulator(InputDeviceManager &deviceManager,
-                                 Window &window, AssetRegistry &assetRegistry,
-                                 EditorCamera &editorCamera)
+SceneSimulator::SceneSimulator(InputDeviceManager &deviceManager,
+                               Window &window, AssetRegistry &assetRegistry,
+                               EditorCamera &editorCamera)
     : mWindow(window), mInputMapSystem(deviceManager, assetRegistry),
       mScriptingSystem(assetRegistry), mAnimationSystem(assetRegistry),
       mPhysicsSystem(PhysicsSystem::createPhysxBackend()),
       mEditorCamera(editorCamera), mAudioSystem(assetRegistry),
       mAssetRegistry(assetRegistry) {}
 
-void EditorSimulator::update(f32 dt, WorkspaceState &state) {
+void SceneSimulator::update(f32 dt, WorkspaceState &state) {
   if (state.mode != mMode) {
     // Reobserve changes when switching from
     // edit to simulation mode
@@ -35,24 +35,24 @@ void EditorSimulator::update(f32 dt, WorkspaceState &state) {
   }
 }
 
-void EditorSimulator::render(EntityDatabase &db) {
+void SceneSimulator::render(EntityDatabase &db) {
   mUICanvasUpdater.render(db, mAssetRegistry);
 }
 
-void EditorSimulator::cleanupSimulationDatabase(
+void SceneSimulator::cleanupSimulationDatabase(
     EntityDatabase &simulationDatabase) {
   mPhysicsSystem.cleanup(simulationDatabase);
   mScriptingSystem.cleanup(simulationDatabase);
   mAudioSystem.cleanup(simulationDatabase);
 }
 
-void EditorSimulator::observeChanges(EntityDatabase &simulationDatabase) {
+void SceneSimulator::observeChanges(EntityDatabase &simulationDatabase) {
   mPhysicsSystem.observeChanges(simulationDatabase);
   mScriptingSystem.observeChanges(simulationDatabase);
   mAudioSystem.observeChanges(simulationDatabase);
 }
 
-void EditorSimulator::updateEditor(f32 dt, WorkspaceState &state) {
+void SceneSimulator::updateEditor(f32 dt, WorkspaceState &state) {
   auto &entityDatabase = state.scene.entityDatabase;
   mEntityDeleter.update(state.scene);
 
@@ -63,7 +63,7 @@ void EditorSimulator::updateEditor(f32 dt, WorkspaceState &state) {
   mSceneUpdater.update(entityDatabase);
 }
 
-void EditorSimulator::updateSimulation(f32 dt, WorkspaceState &state) {
+void SceneSimulator::updateSimulation(f32 dt, WorkspaceState &state) {
   auto &entityDatabase = state.simulationScene.entityDatabase;
   mEntityDeleter.update(state.simulationScene);
 

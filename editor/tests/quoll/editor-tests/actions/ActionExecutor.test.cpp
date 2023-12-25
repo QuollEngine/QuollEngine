@@ -4,7 +4,7 @@
 #include "quoll/scene/PerspectiveLens.h"
 
 #include "quoll/editor/actions/ActionExecutor.h"
-#include "quoll/editor/asset/SceneWriter.h"
+#include "quoll/editor/scene/asset/SceneWriter.h"
 
 #include "quoll/editor-tests/Testing.h"
 
@@ -61,7 +61,7 @@ public:
 
   quoll::editor::ActionExecutorResult
   onExecute(quoll::editor::WorkspaceState &state,
-            quoll::AssetRegistry &assetRegistry) {
+            quoll::AssetRegistry &assetRegistry) override {
     mData->called = true;
 
     quoll::editor::ActionExecutorResult res{};

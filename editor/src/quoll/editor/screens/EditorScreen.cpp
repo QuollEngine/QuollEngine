@@ -22,8 +22,6 @@
 #include "quoll/imgui/ImguiUtils.h"
 #include "quoll/scene/CameraAspectRatioUpdater.h"
 
-#include "quoll/editor/editor-scene/EditorCamera.h"
-#include "quoll/editor/ui/UIRoot.h"
 #include "quoll/editor/ui/AssetLoadStatusDialog.h"
 #include "quoll/editor/ui/Theme.h"
 #include "quoll/editor/ui/Widgets.h"
@@ -31,13 +29,11 @@
 #include "quoll/editor/ui/FontAwesome.h"
 
 #include "quoll/editor/core/LogMemoryStorage.h"
-#include "quoll/editor/core/EditorRenderer.h"
-#include "quoll/editor/core/EditorSimulator.h"
-#include "quoll/editor/core/MousePickingGraph.h"
 
 #include "quoll/editor/asset/AssetManager.h"
 
-#include "quoll/editor/workspace/Workspace.h"
+#include "quoll/editor/scene/core/EditorCamera.h"
+#include "quoll/editor/scene/SceneEditorWorkspace.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"
 
 #include "quoll/ui/UICanvasUpdater.h"
@@ -109,8 +105,6 @@ void EditorScreen::start(const Project &rawProject) {
 
   EditorCamera editorCamera(mEventSystem, mWindow);
 
-  UIRoot ui(assetManager);
-
   MainLoop mainLoop(mWindow, fpsCounter);
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
@@ -145,17 +139,17 @@ void EditorScreen::start(const Project &rawProject) {
     presenter.enqueueFramebufferUpdate();
   });
 
-  EditorSimulator simulator(mDeviceManager, mWindow,
-                            assetManager.getAssetRegistry(), editorCamera);
+  SceneSimulator simulator(mDeviceManager, mWindow,
+                           assetManager.getAssetRegistry(), editorCamera);
 
   mWindow.maximize();
 
   // Workspace manager
   WorkspaceManager workspaceManager;
-  workspaceManager.add(
-      new Workspace(project, assetManager, sceneAsset,
-                    project.assetsPath / "scenes" / "main.scene", renderer,
-                    sceneRenderer, editorRenderer, mousePicking, simulator));
+  workspaceManager.add(new SceneEditorWorkspace(
+      project, assetManager, sceneAsset,
+      project.assetsPath / "scenes" / "main.scene", renderer, sceneRenderer,
+      editorRenderer, mousePicking, simulator));
   mEventSystem.observe(KeyboardEvent::Pressed, [&](const auto &data) {
     workspaceManager.getCurrentWorkspace()->processShortcuts(data.key,
                                                              data.mods);
@@ -185,10 +179,7 @@ void EditorScreen::start(const Project &rawProject) {
       }
     }
 
-    workspaceManager.getCurrentWorkspace()
-        ->getUIRoot()
-        .getAssetBrowser()
-        .reload();
+    workspaceManager.getCurrentWorkspace()->reload();
 
     if (!messages.empty()) {
       loadStatusDialog.setMessages(messages);
@@ -210,8 +201,6 @@ void EditorScreen::start(const Project &rawProject) {
       presenter.updateFramebuffers(mDevice->getSwapchain());
       return;
     }
-
-    auto context = workspace->getContext();
 
     renderer.rebuildIfSettingsChanged();
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/editor/editor-scene/EditorCamera.h"
+#include "quoll/editor/scene/core/EditorCamera.h"
 
 namespace quoll::editor {
 

@@ -2,25 +2,22 @@
 #include "quoll/imgui/Imgui.h"
 
 #include "quoll/editor/core/CameraLookAt.h"
-#include "quoll/editor/editor-scene/EditorCamera.h"
-
-#include "Workspace.h"
-#include "WorkspaceLayoutRenderer.h"
-#include "WorkspaceIO.h"
-#include "quoll/editor/asset/SceneWriter.h"
-
+#include "quoll/editor/workspace/WorkspaceLayoutRenderer.h"
+#include "quoll/editor/workspace/WorkspaceIO.h"
 #include "quoll/editor/actions/TypedActionCreator.h"
 #include "quoll/editor/actions/HistoryActions.h"
 #include "quoll/editor/actions/SpawnEntityActions.h"
 
+#include "core/EditorCamera.h"
+#include "SceneEditorWorkspace.h"
+
 namespace quoll::editor {
 
-Workspace::Workspace(Project project, AssetManager &assetManager,
-                     SceneAssetHandle scene, Path scenePath, Renderer &renderer,
-                     SceneRenderer &sceneRenderer,
-                     EditorRenderer &editorRenderer,
-                     MousePickingGraph &mousePickingGraph,
-                     EditorSimulator &editorSimulator)
+SceneEditorWorkspace::SceneEditorWorkspace(
+    Project project, AssetManager &assetManager, SceneAssetHandle scene,
+    Path scenePath, Renderer &renderer, SceneRenderer &sceneRenderer,
+    EditorRenderer &editorRenderer, MousePickingGraph &mousePickingGraph,
+    SceneSimulator &editorSimulator)
     : mAssetManager(assetManager), mState{project},
       mActionExecutor(mState, mAssetManager.getAssetRegistry()),
       mSceneAssetHandle(scene),
@@ -57,7 +54,7 @@ Workspace::Workspace(Project project, AssetManager &assetManager,
                         TypedActionCreator::create<Undo>(mActionExecutor));
 }
 
-Workspace::~Workspace() {
+SceneEditorWorkspace::~SceneEditorWorkspace() {
   ImGuiIO &io = ImGui::GetIO();
 
   ImGui::SaveIniSettingsToDisk(io.IniFilename);
@@ -66,7 +63,7 @@ Workspace::~Workspace() {
                                               "default.state");
 }
 
-void Workspace::renderLayout() {
+void SceneEditorWorkspace::renderLayout() {
   if (WorkspaceLayoutRenderer::begin()) {
     if (mRequiresDockspaceInit) {
       WorkspaceLayoutRenderer::reset();
@@ -78,18 +75,17 @@ void Workspace::renderLayout() {
   WorkspaceLayoutRenderer::end();
 }
 
-void Workspace::update(f32 dt) {
+void SceneEditorWorkspace::update(f32 dt) {
   mActionExecutor.process();
   mEditorSimulator.update(dt, mState);
 }
 
-void Workspace::render() {
+void SceneEditorWorkspace::render() {
   renderLayout();
 
-  auto context = getContext();
-  mUIRoot.render(context);
-  mMouseClicked = mUIRoot.renderSceneView(context, mRenderer.getSceneTexture(),
-                                          mEditorSimulator);
+  mUIRoot.render(mState, mAssetManager, mActionExecutor);
+  mMouseClicked = mUIRoot.renderSceneView(
+      mState, mActionExecutor, mRenderer.getSceneTexture(), mEditorSimulator);
 
   auto &scene = mState.mode == WorkspaceMode::Edit ? mState.scene
                                                    : mState.simulationScene;
@@ -97,12 +93,12 @@ void Workspace::render() {
   mEditorSimulator.render(scene.entityDatabase);
 }
 
-void Workspace::processShortcuts(int key, int mods) {
+void SceneEditorWorkspace::processShortcuts(int key, int mods) {
   mShortcutsManager.process(key, mods, mActionExecutor);
 }
 
-void Workspace::updateFrameData(rhi::RenderCommandList &commandList,
-                                u32 frameIndex) {
+void SceneEditorWorkspace::updateFrameData(rhi::RenderCommandList &commandList,
+                                           u32 frameIndex) {
   auto &scene = mState.mode == WorkspaceMode::Edit ? mState.scene
                                                    : mState.simulationScene;
 
@@ -129,10 +125,12 @@ void Workspace::updateFrameData(rhi::RenderCommandList &commandList,
   }
 }
 
-WorkspaceMatchParams Workspace::getMatchParams() const {
+WorkspaceMatchParams SceneEditorWorkspace::getMatchParams() const {
   return {.type = "SceneEditor",
           .asset = static_cast<u32>(mSceneAssetHandle),
           .assetType = AssetType::Scene};
 }
+
+void SceneEditorWorkspace::reload() { mUIRoot.getAssetBrowser().reload(); }
 
 } // namespace quoll::editor

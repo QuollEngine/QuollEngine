@@ -4,12 +4,10 @@
 
 #include "quoll/editor/asset/AssetLoader.h"
 #include "quoll/editor/actions/ActionExecutor.h"
-#include "quoll/editor/workspace/WorkspaceContext.h"
 
-#include "AssetLoadStatusDialog.h"
-
-#include "IconRegistry.h"
-#include "MaterialViewer.h"
+#include "quoll/editor/ui/AssetLoadStatusDialog.h"
+#include "quoll/editor/ui/IconRegistry.h"
+#include "quoll/editor/ui/MaterialViewer.h"
 
 namespace quoll::editor {
 
@@ -33,11 +31,14 @@ class AssetBrowser {
 
 public:
   /**
-   * @brief Render status bar
+   * @brief Render asset browser
    *
-   * @param context Workspace context
+   * @param state Workspace state
+   * @param assetManager Asset manager
+   * @param actionExecutor Action executor
    */
-  void render(WorkspaceContext &context);
+  void render(WorkspaceState &state, AssetManager &assetManager,
+              ActionExecutor &actionExecutor);
 
   /**
    * @brief Reload contents in current directory

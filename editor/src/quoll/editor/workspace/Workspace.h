@@ -1,22 +1,8 @@
 #pragma once
 
-#include "quoll/scene/SceneIO.h"
-#include "quoll/editor/workspace/WorkspaceState.h"
-#include "quoll/editor/actions/ActionExecutor.h"
-#include "quoll/editor/asset/AssetManager.h"
-#include "quoll/editor/asset/SceneWriter.h"
-#include "quoll/editor/ui/ShortcutsManager.h"
+#include "quoll/rhi/RenderCommandList.h"
 
 #include "WorkspaceMatchParams.h"
-#include "WorkspaceContext.h"
-
-#include "quoll/renderer/Renderer.h"
-#include "quoll/renderer/SceneRenderer.h"
-#include "quoll/editor/core/EditorRenderer.h"
-#include "quoll/editor/core/MousePickingGraph.h"
-#include "quoll/editor/core/EditorSimulator.h"
-
-#include "quoll/editor/ui/UIRoot.h"
 
 namespace quoll::editor {
 
@@ -26,23 +12,14 @@ namespace quoll::editor {
 class Workspace {
 public:
   /**
-   * @brief Create workspace
-   *
-   * @param project Project
-   * @param assetManager Asset manager
-   * @param scene Scene asset
-   * @param scenePath Scene path
-   * @param renderer Renderer
-   * @param sceneRenderer Scene renderer
-   * @param editorRenderer Editor renderer
-   * @param mousePickingGraph Mouse picking graph
-   * @param editorSimulator Editor simulator
+   * @brief Default constructor
    */
-  Workspace(Project project, AssetManager &assetManager, SceneAssetHandle scene,
-            Path scenePath, Renderer &renderer, SceneRenderer &sceneRenderer,
-            EditorRenderer &editorRenderer,
-            MousePickingGraph &mousePickingGraph,
-            EditorSimulator &editorSimulator);
+  Workspace() = default;
+
+  /**
+   * @brief Default destructor
+   */
+  virtual ~Workspace() = default;
 
   Workspace(const Workspace &) = delete;
   Workspace &operator=(const Workspace &) = delete;
@@ -50,35 +27,16 @@ public:
   Workspace &operator=(Workspace &&) = delete;
 
   /**
-   * @brief Destroy workspace
-   */
-  ~Workspace();
-
-  /**
-   * @brief Get context
-   *
-   * @return Workspace context
-   */
-  inline WorkspaceContext getContext() {
-    return WorkspaceContext{mState, mActionExecutor, mAssetManager};
-  }
-
-  /**
-   * @brief Render layout
-   */
-  void renderLayout();
-
-  /**
    * @brief Update
    *
    * @param dt Delta time
    */
-  void update(f32 dt);
+  virtual void update(f32 dt) = 0;
 
   /**
    * @brief Render
    */
-  void render();
+  virtual void render() = 0;
 
   /**
    * @brief Process shortcuts
@@ -86,7 +44,7 @@ public:
    * @param key Key
    * @param mods Modifiers
    */
-  void processShortcuts(int key, int mods);
+  virtual void processShortcuts(int key, int mods) = 0;
 
   /**
    * @brief Update frame data
@@ -94,44 +52,20 @@ public:
    * @param commandList Render command list
    * @param frameIndex Frame index
    */
-  void updateFrameData(rhi::RenderCommandList &commandList, u32 frameIndex);
+  virtual void updateFrameData(rhi::RenderCommandList &commandList,
+                               u32 frameIndex) = 0;
 
   /**
    * @brief Get match params
    *
    * @return Match params
    */
-  WorkspaceMatchParams getMatchParams() const;
+  virtual WorkspaceMatchParams getMatchParams() const = 0;
 
   /**
-   * @brief Get UI root
-   *
-   * @return UI root
+   * Reload workspace
    */
-  inline UIRoot &getUIRoot() { return mUIRoot; }
-
-private:
-  AssetManager &mAssetManager;
-  WorkspaceState mState;
-  SceneWriter mSceneWriter;
-  SceneAssetHandle mSceneAssetHandle;
-  ActionExecutor mActionExecutor;
-  SceneIO mSceneIO;
-  ShortcutsManager mShortcutsManager;
-
-  UIRoot mUIRoot;
-
-  Renderer &mRenderer;
-  SceneRenderer &mSceneRenderer;
-  EditorRenderer &mEditorRenderer;
-  MousePickingGraph &mMousePickingGraph;
-  EditorSimulator &mEditorSimulator;
-
-  bool mMouseClicked = false;
-
-  bool mRequiresDockspaceInit = false;
-
-  String mLayoutPath;
+  virtual void reload() = 0;
 };
 
 } // namespace quoll::editor
