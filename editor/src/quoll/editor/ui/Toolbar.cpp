@@ -12,8 +12,6 @@ Toolbar::Toolbar() {
   ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, Height));
   ImGui::SetNextWindowPos(ImVec2(0.0f, ImGui::GetFrameHeight()));
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-  ImGui::PushStyleColor(ImGuiCol_WindowBg,
-                        Theme::getColor(ThemeColor::Neutral300));
   mOpen = ImGui::Begin("Toolbar", 0,
                        ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                            ImGuiWindowFlags_NoResize |
@@ -24,7 +22,6 @@ Toolbar::Toolbar() {
 Toolbar::~Toolbar() {
   ImGui::End();
   ImGui::PopStyleVar();
-  ImGui::PopStyleColor();
 }
 
 bool Toolbar::item(String label, String icon, bool active) {

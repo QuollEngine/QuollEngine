@@ -218,6 +218,8 @@ void EditorScreen::start(const Project &rawProject) {
     if (auto _ = MainMenuBar()) {
       debugLayer.renderMenu();
 
+      static constexpr f32 SpaceBetweenMainMenuAndTabBar = 20.0f;
+      ImGui::Dummy(ImVec2(SpaceBetweenMainMenuAndTabBar, 0.0));
       WorkspaceTabs::render(workspaceManager);
     }
 

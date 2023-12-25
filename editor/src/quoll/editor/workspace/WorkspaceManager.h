@@ -28,6 +28,13 @@ public:
   }
 
   /**
+   * @brief Get index of current workspace
+   *
+   * @return Current workspace index
+   */
+  inline size_t getCurrentWorkspaceIndex() const { return mCurrentIndex; }
+
+  /**
    * @brief Get all workspaces
    *
    * @return Workspaces
@@ -35,6 +42,13 @@ public:
   inline const std::vector<std::unique_ptr<Workspace>> &getWorkspaces() const {
     return mWorkspaces;
   };
+
+  /**
+   * @brief Switch workspace
+   *
+   * @param index Workspace index
+   */
+  void switchWorkspace(size_t index);
 
 private:
   std::vector<std::unique_ptr<Workspace>> mWorkspaces;

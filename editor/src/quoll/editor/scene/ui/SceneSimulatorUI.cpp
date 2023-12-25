@@ -17,7 +17,7 @@
 #include "quoll/editor/ui/MainMenuBar.h"
 #include "quoll/editor/ui/Widgets.h"
 
-#include "SceneEditorUI.h"
+#include "SceneSimulatorUI.h"
 #include "../SceneSimulatorWorkspace.h"
 
 #include "ImGuizmo.h"
@@ -36,23 +36,12 @@ static void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
 }
 
 static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
-                          ActionExecutor &actionExecutor,
-                          SceneAssetHandle sceneHandle, Renderer &renderer,
+                          ActionExecutor &actionExecutor, Renderer &renderer,
                           SceneRenderer &sceneRenderer,
                           EditorRenderer &editorRenderer,
                           MousePickingGraph &mousePickingGraph,
-                          SceneSimulator &editorSimulator,
-                          WorkspaceManager &workspaceManager) {
+                          SceneSimulator &editorSimulator) {
   if (auto toolbar = Toolbar()) {
-    if (toolbar.item("Play the scene", fa::Play, false)) {
-
-      auto *workspace = new SceneSimulatorWorkspace(
-          state.project, assetManager, sceneHandle, state.scene, renderer,
-          sceneRenderer, editorRenderer, mousePickingGraph, editorSimulator);
-
-      actionExecutor.execute<AddWorkspace>(workspace, workspaceManager);
-    }
-
     if (toolbar.item("Move", fa::Arrows,
                      state.activeTransform == TransformOperation::Move)) {
       actionExecutor.execute<SetActiveTransform>(TransformOperation::Move);
@@ -70,14 +59,12 @@ static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
   }
 }
 
-void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
-                           ActionExecutor &actionExecutor,
-                           SceneAssetHandle sceneHandle, Renderer &renderer,
-                           SceneRenderer &sceneRenderer,
-                           EditorRenderer &editorRenderer,
-                           MousePickingGraph &mousePickingGraph,
-                           SceneSimulator &editorSimulator,
-                           WorkspaceManager &workspaceManager) {
+void SceneSimulatorUI::render(WorkspaceState &state, AssetManager &assetManager,
+                              ActionExecutor &actionExecutor,
+                              Renderer &renderer, SceneRenderer &sceneRenderer,
+                              EditorRenderer &editorRenderer,
+                              MousePickingGraph &mousePickingGraph,
+                              SceneSimulator &editorSimulator) {
   if (auto _ = MainMenuBar()) {
     if (auto projects = Menu("Projects")) {
       if (projects.item("Export as game")) {
@@ -86,9 +73,8 @@ void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
     }
   }
 
-  renderToolbar(state, assetManager, actionExecutor, sceneHandle, renderer,
-                sceneRenderer, editorRenderer, mousePickingGraph,
-                editorSimulator, workspaceManager);
+  renderToolbar(state, assetManager, actionExecutor, renderer, sceneRenderer,
+                editorRenderer, mousePickingGraph, editorSimulator);
 
   mSceneHierarchyPanel.render(state, actionExecutor);
   mInspector.render(state, assetManager.getAssetRegistry(), actionExecutor);
@@ -96,11 +82,11 @@ void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
   mAssetBrowser.render(state, assetManager, actionExecutor);
 }
 
-bool SceneEditorUI::renderSceneView(WorkspaceState &state,
-                                    AssetManager &assetManager,
-                                    ActionExecutor &actionExecutor,
-                                    rhi::TextureHandle sceneTexture,
-                                    SceneSimulator &editorSimulator) {
+bool SceneSimulatorUI::renderSceneView(WorkspaceState &state,
+                                       AssetManager &assetManager,
+                                       ActionExecutor &actionExecutor,
+                                       rhi::TextureHandle sceneTexture,
+                                       SceneSimulator &editorSimulator) {
   mEditorCameraPanel.render(state, actionExecutor);
 
   if (auto _ = SceneView(sceneTexture)) {
@@ -118,7 +104,14 @@ bool SceneEditorUI::renderSceneView(WorkspaceState &state,
     aspectRatioUpdater.setViewportSize(
         {static_cast<u32>(size.x), static_cast<u32>(size.y)});
 
-    bool isItemClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+    bool isItemClicked = false;
+
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+      auto mousePos = ImGui::GetMousePos();
+
+      isItemClicked = mousePos.x >= pos.x && mousePos.x < size.x &&
+                      mousePos.y >= pos.y && mousePos.y < size.y;
+    }
 
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);

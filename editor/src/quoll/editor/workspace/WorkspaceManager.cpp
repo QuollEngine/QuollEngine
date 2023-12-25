@@ -22,6 +22,17 @@ void WorkspaceManager::add(Workspace *workspace) {
   } else {
     mWorkspaces.push_back(std::unique_ptr<Workspace>(workspace));
   }
+
+  switchWorkspace(found);
+}
+
+void WorkspaceManager::switchWorkspace(size_t index) {
+  QuollAssert(index < mWorkspaces.size(), "Workspace does not exist");
+
+  if (mCurrentIndex == index)
+    return;
+
+  mCurrentIndex = index;
 }
 
 } // namespace quoll::editor

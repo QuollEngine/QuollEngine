@@ -77,21 +77,20 @@ void SceneEditorWorkspace::renderLayout() {
 
 void SceneEditorWorkspace::update(f32 dt) {
   mActionExecutor.process();
-  mEditorSimulator.update(dt, mState);
+  mEditorSimulator.updateEditor(dt, mState);
 }
 
 void SceneEditorWorkspace::render() {
   renderLayout();
 
-  mUIRoot.render(mState, mAssetManager, mActionExecutor, mRenderer,
-                 mSceneRenderer, mEditorRenderer, mMousePickingGraph,
+  mUIRoot.render(mState, mAssetManager, mActionExecutor, mSceneAssetHandle,
+                 mRenderer, mSceneRenderer, mEditorRenderer, mMousePickingGraph,
                  mEditorSimulator, mWorkspaceManager);
   mMouseClicked =
       mUIRoot.renderSceneView(mState, mAssetManager, mActionExecutor,
                               mRenderer.getSceneTexture(), mEditorSimulator);
 
-  auto &scene = mState.mode == WorkspaceMode::Edit ? mState.scene
-                                                   : mState.simulationScene;
+  auto &scene = mState.scene;
 
   mEditorSimulator.render(scene.entityDatabase);
 }
@@ -102,8 +101,7 @@ void SceneEditorWorkspace::processShortcuts(int key, int mods) {
 
 void SceneEditorWorkspace::updateFrameData(rhi::RenderCommandList &commandList,
                                            u32 frameIndex) {
-  auto &scene = mState.mode == WorkspaceMode::Edit ? mState.scene
-                                                   : mState.simulationScene;
+  auto &scene = mState.scene;
 
   mSceneRenderer.updateFrameData(scene.entityDatabase, mState.activeCamera,
                                  frameIndex);

@@ -30,17 +30,12 @@ static constexpr f32 SrgbToLinear(f32 value) {
 /**
  * @brief Srgb color to linear
  *
- * @param r Red
- * @param g Greed
- * @param b Blue
- * @param a Alpha
+ * @param color Srgb color
  * @return Linear color
  */
-static ImVec4 SrgbToLinear(int r, int g, int b, int a = 255) {
-  ImVec4 color(ImColor(r, g, b, a));
-
-  return {SrgbToLinear(color.x), SrgbToLinear(color.y), SrgbToLinear(color.z),
-          color.w};
+static ImVec4 SrgbToLinear(ImColor color) {
+  return {SrgbToLinear(color.Value.x), SrgbToLinear(color.Value.y),
+          SrgbToLinear(color.Value.z), color.Value.w};
 }
 
 static constexpr f32 FontSize = 18.0f;
@@ -50,28 +45,32 @@ static constexpr usize NumFonts = 2;
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static std::array<ImFont *, NumFonts> Fonts{};
 
-static const std::unordered_map<ThemeColor, ImVec4> Colors{
-    {ThemeColor::White, SrgbToLinear(255, 255, 255)},
-    {ThemeColor::Black, SrgbToLinear(0, 0, 0)},
-    {ThemeColor::Transparent, SrgbToLinear(0, 0, 0, 0)},
+static const std::unordered_map<ThemeColor, ImColor> Colors{
+    {ThemeColor::White, ImColor(255, 255, 255)},
+    {ThemeColor::Black, ImColor(0, 0, 0)},
+    {ThemeColor::Transparent, ImColor(0, 0, 0, 0)},
 
     // Neutral colors
-    {ThemeColor::Neutral100, SrgbToLinear(29, 29, 29)},
-    {ThemeColor::Neutral200, SrgbToLinear(32, 32, 32)},
-    {ThemeColor::Neutral300, SrgbToLinear(38, 38, 38)},
-    {ThemeColor::Neutral400, SrgbToLinear(49, 49, 49)},
-    {ThemeColor::Neutral500, SrgbToLinear(50, 50, 50)},
-    {ThemeColor::Neutral600, SrgbToLinear(58, 58, 58)},
-    {ThemeColor::Neutral700, SrgbToLinear(76, 76, 76)},
-    {ThemeColor::Neutral800, SrgbToLinear(83, 83, 83)},
-    {ThemeColor::Neutral900, SrgbToLinear(116, 116, 116)},
+    {ThemeColor::Neutral100, ImColor(29, 29, 29)},
+    {ThemeColor::Neutral200, ImColor(32, 32, 32)},
+    {ThemeColor::Neutral300, ImColor(38, 38, 38)},
+    {ThemeColor::Neutral400, ImColor(49, 49, 49)},
+    {ThemeColor::Neutral500, ImColor(50, 50, 50)},
+    {ThemeColor::Neutral600, ImColor(58, 58, 58)},
+    {ThemeColor::Neutral700, ImColor(76, 76, 76)},
+    {ThemeColor::Neutral800, ImColor(83, 83, 83)},
+    {ThemeColor::Neutral900, ImColor(116, 116, 116)},
 
     // Primary colors
-    {ThemeColor::Primary100, SrgbToLinear(52, 55, 110)},
-    {ThemeColor::Primary200, SrgbToLinear(65, 67, 129)},
+    {ThemeColor::Primary100, ImColor(210, 103, 47)},
+    {ThemeColor::Primary200, ImColor(65, 67, 129)},
 
     // Misc
-    {ThemeColor::ModalBackdrop, SrgbToLinear(0, 0, 0, 220)},
+    {ThemeColor::ModalBackdrop, ImColor(0, 0, 0, 220)},
+
+    // Semantic colors
+    {ThemeColor::MidnightBlack100, ImColor(27, 27, 29)},
+    {ThemeColor::MidnightBlack200, ImColor(32, 32, 35)}
 
     // End
 };
@@ -93,12 +92,13 @@ static void setImguiStyles() {
   style.Colors[ImGuiCol_Border] = Theme::getColor(ThemeColor::Neutral500);
   style.Colors[ImGuiCol_SeparatorHovered] =
       Theme::getColor(ThemeColor::Primary100);
-  style.Colors[ImGuiCol_SeparatorActive] = SrgbToLinear(65, 67, 129);
+  style.Colors[ImGuiCol_SeparatorActive] = ImColor(65, 67, 129);
   style.Colors[ImGuiCol_DockingPreview] =
       Theme::getColor(ThemeColor::Primary100);
 
   // All items
-  style.Colors[ImGuiCol_FrameBg] = Theme::getColor(ThemeColor::Neutral800);
+  style.Colors[ImGuiCol_FrameBg] =
+      Theme::getColor(ThemeColor::MidnightBlack100);
   style.Colors[ImGuiCol_FrameBgHovered] =
       Theme::getColor(ThemeColor::Neutral700);
   style.Colors[ImGuiCol_FrameBgActive] =
@@ -120,33 +120,39 @@ static void setImguiStyles() {
   // Tables
   style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
   style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-  style.Colors[ImGuiCol_TableHeaderBg] = SrgbToLinear(68, 68, 68, 255);
-  style.Colors[ImGuiCol_TableRowBg] = SrgbToLinear(68, 68, 68, 255);
-  style.Colors[ImGuiCol_TableRowBgAlt] = SrgbToLinear(58, 58, 58, 255);
+  style.Colors[ImGuiCol_TableHeaderBg] = ImColor(68, 68, 68, 255);
+  style.Colors[ImGuiCol_TableRowBg] = ImColor(68, 68, 68, 255);
+  style.Colors[ImGuiCol_TableRowBgAlt] = ImColor(58, 58, 58, 255);
   style.CellPadding = ImVec2(8.0f, 8.0f);
 
   // Window
-  style.Colors[ImGuiCol_WindowBg] = Theme::getColor(ThemeColor::Neutral300);
-  style.Colors[ImGuiCol_MenuBarBg] = Theme::getColor(ThemeColor::Neutral300);
-  style.Colors[ImGuiCol_TitleBg] = Theme::getColor(ThemeColor::Neutral300);
+  style.Colors[ImGuiCol_WindowBg] =
+      Theme::getColor(ThemeColor::MidnightBlack200);
+  style.Colors[ImGuiCol_MenuBarBg] =
+      Theme::getColor(ThemeColor::MidnightBlack200);
+  style.Colors[ImGuiCol_TitleBg] =
+      Theme::getColor(ThemeColor::MidnightBlack100);
   style.Colors[ImGuiCol_TitleBgCollapsed] =
-      Theme::getColor(ThemeColor::Neutral300);
+      Theme::getColor(ThemeColor::MidnightBlack100);
   style.Colors[ImGuiCol_TitleBgActive] =
-      Theme::getColor(ThemeColor::Neutral300);
-  style.Colors[ImGuiCol_ResizeGrip] = SrgbToLinear(255, 255, 255, 125);
-  style.Colors[ImGuiCol_ResizeGripHovered] = SrgbToLinear(255, 255, 255, 255);
-  style.Colors[ImGuiCol_ResizeGripActive] = SrgbToLinear(255, 255, 255, 255);
+      Theme::getColor(ThemeColor::MidnightBlack100);
+  style.Colors[ImGuiCol_ResizeGrip] = ImColor(255, 255, 255, 125);
+  style.Colors[ImGuiCol_ResizeGripHovered] = ImColor(255, 255, 255, 255);
+  style.Colors[ImGuiCol_ResizeGripActive] = ImColor(255, 255, 255, 255);
   style.WindowRounding = 8.0f;
   style.WindowPadding = Styles.windowPadding;
   style.WindowBorderSize = 0.0f;
 
   // Tabs
-  style.Colors[ImGuiCol_Tab] = Theme::getColor(ThemeColor::Neutral300);
-  style.Colors[ImGuiCol_TabUnfocused] = Theme::getColor(ThemeColor::Neutral300);
-  style.Colors[ImGuiCol_TabHovered] = Theme::getColor(ThemeColor::Neutral500);
-  style.Colors[ImGuiCol_TabActive] = Theme::getColor(ThemeColor::Neutral500);
+  style.Colors[ImGuiCol_Tab] = Theme::getColor(ThemeColor::MidnightBlack100);
+  style.Colors[ImGuiCol_TabUnfocused] =
+      Theme::getColor(ThemeColor::MidnightBlack100);
+  style.Colors[ImGuiCol_TabHovered] =
+      Theme::getColor(ThemeColor::MidnightBlack200);
+  style.Colors[ImGuiCol_TabActive] =
+      Theme::getColor(ThemeColor::MidnightBlack200);
   style.Colors[ImGuiCol_TabUnfocusedActive] =
-      Theme::getColor(ThemeColor::Neutral500);
+      Theme::getColor(ThemeColor::MidnightBlack200);
 
   // Headers
   // Used by collapsing header
@@ -156,7 +162,7 @@ static void setImguiStyles() {
       Theme::getColor(ThemeColor::Primary100);
 
   // Buttons
-  style.Colors[ImGuiCol_Button] = Theme::getColor(ThemeColor::Neutral500);
+  style.Colors[ImGuiCol_Button] = Theme::getColor(ThemeColor::MidnightBlack100);
   style.Colors[ImGuiCol_ButtonHovered] =
       Theme::getColor(ThemeColor::Primary100);
   style.Colors[ImGuiCol_ButtonActive] = Theme::getColor(ThemeColor::Primary100);
@@ -203,12 +209,12 @@ void Theme::apply() {
 }
 
 glm::vec4 Theme::getEngineColor(ThemeColor color) {
-  auto c = Colors.at(color);
+  auto c = SrgbToLinear(Colors.at(color));
   return glm::vec4(c.x, c.y, c.z, c.w);
 }
 
 glm::vec4 Theme::getClearColor() {
-  return getEngineColor(ThemeColor::Neutral500);
+  return getEngineColor(ThemeColor::MidnightBlack100);
 }
 
 ImVec4 Theme::getColor(ThemeColor color) { return Colors.at(color); }

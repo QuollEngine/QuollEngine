@@ -2,7 +2,7 @@
 
 #include "quoll/asset/Asset.h"
 
-namespace quoll {
+namespace quoll::editor {
 
 /**
  * @brief Workspace match parameters
@@ -24,4 +24,4 @@ struct WorkspaceMatchParams {
   AssetType assetType;
 };
 
-} // namespace quoll
+} // namespace quoll::editor
