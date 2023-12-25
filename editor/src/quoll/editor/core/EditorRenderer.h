@@ -2,7 +2,7 @@
 
 #include "quoll/renderer/RenderGraph.h"
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/editor/state/WorkspaceState.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
 #include "quoll/renderer/SceneRenderer.h"
 
 #include "EditorRendererFrameData.h"

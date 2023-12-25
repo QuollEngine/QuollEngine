@@ -3,7 +3,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/editor/editor-scene/EditorCamera.h"
 
-#include "quoll/editor/state/WorkspaceState.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
 #include "quoll/editor/actions/ActionExecutor.h"
 
 namespace quoll::editor {

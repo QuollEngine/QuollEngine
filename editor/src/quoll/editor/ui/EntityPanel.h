@@ -4,7 +4,7 @@
 #include "quoll/animation/AnimationSystem.h"
 #include "quoll/physics/PhysicsSystem.h"
 
-#include "quoll/editor/state/WorkspaceState.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
 #include "quoll/editor/actions/ActionExecutor.h"
 #include "quoll/editor/actions/EntityScriptingActions.h"
 #include "quoll/editor/actions/EntityCollidableActions.h"

@@ -8,6 +8,7 @@
 #include "quoll/editor/actions/DeleteEntityAction.h"
 #include "quoll/editor/actions/TypedActionCreator.h"
 #include "quoll/editor/actions/HistoryActions.h"
+#include "quoll/editor/ui/FontAwesome.h"
 
 #include "UIRoot.h"
 #include "ImGuizmo.h"
@@ -55,12 +56,14 @@ void UIRoot::render(WorkspaceContext &context) {
 
 bool UIRoot::renderSceneView(WorkspaceContext &context,
                              rhi::TextureHandle sceneTexture,
-                             EditorCamera &editorCamera,
-                             CameraAspectRatioUpdater &aspectRatioUpdater,
-                             UICanvasUpdater &uiCanvasUpdater) {
+                             EditorSimulator &editorSimulator) {
   if (auto _ = SceneView(sceneTexture)) {
     const auto &pos = ImGui::GetItemRectMin();
     const auto &size = ImGui::GetItemRectSize();
+
+    auto &aspectRatioUpdater = editorSimulator.getCameraAspectRatioUpdater();
+    auto &uiCanvasUpdater = editorSimulator.getUICanvasUpdater();
+    auto &editorCamera = editorSimulator.getEditorCamera();
 
     editorCamera.setViewport(pos.x, pos.y, size.x, size.y,
                              ImGui::IsItemHovered());
@@ -82,23 +85,6 @@ bool UIRoot::renderSceneView(WorkspaceContext &context,
   }
 
   return false;
-}
-
-void UIRoot::processShortcuts(WorkspaceContext &context,
-                              EventSystem &eventSystem) {
-  mShortcutsManager.add(Shortcut().control().key('N'),
-                        TypedActionCreator::create<SpawnEmptyEntityAtView>());
-  mShortcutsManager.add(
-      Shortcut().control().shift().key('Z'),
-      TypedActionCreator::create<Redo>(context.actionExecutor));
-  mShortcutsManager.add(
-      Shortcut().control().key('Z'),
-      TypedActionCreator::create<Undo>(context.actionExecutor));
-
-  eventSystem.observe(
-      KeyboardEvent::Pressed, [this, &context](const auto &data) {
-        mShortcutsManager.process(data.key, data.mods, context.actionExecutor);
-      });
 }
 
 } // namespace quoll::editor

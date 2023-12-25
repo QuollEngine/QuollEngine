@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/editor/state/WorkspaceState.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
 #include "quoll/editor/actions/Action.h"
 
 #include "quoll/editor-tests/Testing.h"

@@ -38,6 +38,8 @@
 #include "quoll/editor/asset/AssetManager.h"
 
 #include "quoll/editor/workspace/Workspace.h"
+#include "quoll/editor/workspace/WorkspaceManager.h"
+
 #include "quoll/ui/UICanvasUpdater.h"
 
 #include "ImGuizmo.h"
@@ -65,8 +67,6 @@ void EditorScreen::start(const Project &rawProject) {
 
   AssetManager assetManager(project.assetsPath, project.assetsCachePath,
                             renderStorage, true, true);
-
-  SceneRenderer sceneRenderer(assetManager.getAssetRegistry(), renderStorage);
 
   ImguiRenderer imguiRenderer(mWindow, renderStorage);
 
@@ -109,13 +109,6 @@ void EditorScreen::start(const Project &rawProject) {
 
   EditorCamera editorCamera(mEventSystem, mWindow);
 
-  Workspace workspace(project, assetManager, sceneAsset,
-                      project.assetsPath / "scenes" / "main.scene");
-
-  auto context = workspace.getContext();
-
-  auto &state = context.state;
-
   UIRoot ui(assetManager);
 
   MainLoop mainLoop(mWindow, fpsCounter);
@@ -126,8 +119,8 @@ void EditorScreen::start(const Project &rawProject) {
   IconRegistry::loadIcons(renderStorage,
                           std::filesystem::current_path() / "assets" / "icons");
 
+  SceneRenderer sceneRenderer(assetManager.getAssetRegistry(), renderStorage);
   EditorRenderer editorRenderer(renderStorage, mDevice);
-  UICanvasUpdater uiCanvasUpdater;
 
   renderer.setGraphBuilder([&](auto &graph, const auto &options) {
     auto scenePassGroup = sceneRenderer.attach(graph, options);
@@ -152,8 +145,25 @@ void EditorScreen::start(const Project &rawProject) {
     presenter.enqueueFramebufferUpdate();
   });
 
+  EditorSimulator simulator(mDeviceManager, mWindow,
+                            assetManager.getAssetRegistry(), editorCamera);
+
+  mWindow.maximize();
+
+  // Workspace manager
+  WorkspaceManager workspaceManager;
+  workspaceManager.add(
+      new Workspace(project, assetManager, sceneAsset,
+                    project.assetsPath / "scenes" / "main.scene", renderer,
+                    sceneRenderer, editorRenderer, mousePicking, simulator));
+  mEventSystem.observe(KeyboardEvent::Pressed, [&](const auto &data) {
+    workspaceManager.getCurrentWorkspace()->processShortcuts(data.key,
+                                                             data.mods);
+  });
+  auto *workspace = workspaceManager.getCurrentWorkspace();
+
   mWindow.addFocusHandler([&tracker, &loadStatusDialog, &assetManager,
-                           &renderer, &ui](bool focused) {
+                           &renderer, &workspaceManager](bool focused) {
     if (!focused)
       return;
 
@@ -175,7 +185,10 @@ void EditorScreen::start(const Project &rawProject) {
       }
     }
 
-    ui.getAssetBrowser().reload();
+    workspaceManager.getCurrentWorkspace()
+        ->getUIRoot()
+        .getAssetBrowser()
+        .reload();
 
     if (!messages.empty()) {
       loadStatusDialog.setMessages(messages);
@@ -183,17 +196,10 @@ void EditorScreen::start(const Project &rawProject) {
     }
   });
 
-  ui.processShortcuts(context, mEventSystem);
-
-  EditorSimulator simulator(mDeviceManager, mWindow,
-                            assetManager.getAssetRegistry(), editorCamera);
-
-  mWindow.maximize();
-
-  mainLoop.setUpdateFn([&state, &workspace, &simulator, this](f32 dt) mutable {
-    workspace.update();
+  mainLoop.setUpdateFn([workspace, &simulator, this](f32 dt) mutable {
     mEventSystem.poll();
-    simulator.update(dt, state);
+
+    workspace->update(dt);
     return true;
   });
 
@@ -205,9 +211,7 @@ void EditorScreen::start(const Project &rawProject) {
       return;
     }
 
-    auto &scene = state.mode == WorkspaceMode::Simulation
-                      ? state.simulationScene
-                      : state.scene;
+    auto context = workspace->getContext();
 
     renderer.rebuildIfSettingsChanged();
 
@@ -217,23 +221,24 @@ void EditorScreen::start(const Project &rawProject) {
     imguiRenderer.beginRendering();
     ImGuizmo::BeginFrame();
 
-    workspace.renderLayout();
-
-    ui.render(context);
+    workspace->render();
 
     if (auto _ = widgets::MainMenuBar()) {
       debugLayer.renderMenu();
+
+      if (ImGui::BeginTabBar("Workspaces")) {
+        for (const auto &w : workspaceManager.getWorkspaces()) {
+          if (ImGui::BeginTabItem("Scene")) {
+            ImGui::EndTabItem();
+          }
+        }
+        ImGui::EndTabBar();
+      }
     }
+
     debugLayer.render();
 
     logViewer.render(userLogStorage);
-
-    bool mouseClicked = ui.renderSceneView(
-        context, renderer.getSceneTexture(), editorCamera,
-        simulator.getCameraAspectRatioUpdater(), uiCanvasUpdater);
-
-    uiCanvasUpdater.render(scene.entityDatabase,
-                           context.assetManager.getAssetRegistry());
 
     StatusBar::render(editorCamera);
 
@@ -245,29 +250,10 @@ void EditorScreen::start(const Project &rawProject) {
 
     if (renderFrame.frameIndex < std::numeric_limits<u32>::max()) {
       imguiRenderer.updateFrameData(renderFrame.frameIndex);
-      sceneRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,
-                                    renderFrame.frameIndex);
-      editorRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,
-                                     state, assetManager.getAssetRegistry(),
-                                     renderFrame.frameIndex);
-
-      if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
-        auto entity = mousePicking.getSelectedEntity();
-        context.state.selectedEntity = entity;
-      }
+      workspace->updateFrameData(renderFrame.commandList,
+                                 renderFrame.frameIndex);
 
       renderer.execute(renderFrame.commandList, renderFrame.frameIndex);
-
-      if (mouseClicked) {
-        auto mousePos = mWindow.getCurrentMousePosition();
-
-        if (editorCamera.isWithinViewport(mousePos)) {
-          auto scaledMousePos = editorCamera.scaleToViewport(mousePos);
-          mousePicking.execute(renderFrame.commandList, scaledMousePos,
-                               renderFrame.frameIndex);
-        }
-        mouseClicked = false;
-      }
 
       presenter.present(renderFrame.commandList, renderer.getFinalTexture(),
                         renderFrame.swapchainImageIndex);

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "quoll/editor/state/WorkspaceState.h"
-#include "quoll/editor/ui/FontAwesome.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
 
 namespace quoll::editor {
 
