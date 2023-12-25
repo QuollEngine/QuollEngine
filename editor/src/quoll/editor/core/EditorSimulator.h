@@ -12,9 +12,10 @@
 #include "quoll/audio/AudioSystem.h"
 #include "quoll/window/Window.h"
 #include "quoll/input/InputMapSystem.h"
+#include "quoll/ui/UICanvasUpdater.h"
 
 #include "quoll/editor/editor-scene/EditorCamera.h"
-#include "quoll/editor/state/WorkspaceState.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
 
 namespace quoll::editor {
 
@@ -49,6 +50,13 @@ public:
   void update(f32 dt, WorkspaceState &state);
 
   /**
+   * @brief Render
+   *
+   * @param db Entity database
+   */
+  void render(EntityDatabase &db);
+
+  /**
    * @brief Get physics system
    *
    * @return Physics system
@@ -63,6 +71,27 @@ public:
   inline CameraAspectRatioUpdater &getCameraAspectRatioUpdater() {
     return mCameraAspectRatioUpdater;
   }
+
+  /**
+   * @brief Get UI Canvas updater
+   *
+   * @return UI Canvas updater
+   */
+  inline UICanvasUpdater &getUICanvasUpdater() { return mUICanvasUpdater; }
+
+  /**
+   * @brief Get editor camera
+   *
+   * @return Editor camera
+   */
+  inline EditorCamera &getEditorCamera() { return mEditorCamera; }
+
+  /**
+   * @brief Get window
+   *
+   * @return Window
+   */
+  inline Window &getWindow() { return mWindow; }
 
 private:
   /**
@@ -98,6 +127,8 @@ private:
 private:
   std::function<void(f32, WorkspaceState &)> mUpdater;
 
+  AssetRegistry &mAssetRegistry;
+
   EditorCamera &mEditorCamera;
   CameraAspectRatioUpdater mCameraAspectRatioUpdater;
   EntityDeleter mEntityDeleter;
@@ -109,6 +140,7 @@ private:
   AudioSystem<DefaultAudioBackend> mAudioSystem;
   InputMapSystem mInputMapSystem;
   Window &mWindow;
+  UICanvasUpdater mUICanvasUpdater;
 
   WorkspaceMode mMode = WorkspaceMode::Edit;
 };

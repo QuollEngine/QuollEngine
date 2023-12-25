@@ -46,7 +46,7 @@ public:
 
 TEST_F(SceneWriterTest, SavingEntityCreatesIdComponentForEntityThatHasNoId) {
   auto entity = scene.entityDatabase.create();
-  writer.saveEntities({entity});
+  writer.syncEntities({entity});
 
   EXPECT_TRUE(scene.entityDatabase.has<quoll::Id>(entity));
 }
@@ -54,7 +54,7 @@ TEST_F(SceneWriterTest, SavingEntityCreatesIdComponentForEntityThatHasNoId) {
 TEST_F(SceneWriterTest, SavingEntityWithIdDoesNotRegenerateTheId) {
   auto entity = scene.entityDatabase.create();
   scene.entityDatabase.set<quoll::Id>(entity, {10});
-  writer.saveEntities({entity});
+  writer.syncEntities({entity});
 
   EXPECT_TRUE(scene.entityDatabase.has<quoll::Id>(entity));
   EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(entity).id, 10);
@@ -68,7 +68,7 @@ TEST_F(SceneWriterTest, SavingEntityCreatesNonconflictingId) {
 
   auto e2 = scene.entityDatabase.create();
 
-  writer.saveEntities({e2});
+  writer.syncEntities({e2});
 
   EXPECT_TRUE(scene.entityDatabase.has<quoll::Id>(e2));
   EXPECT_NE(scene.entityDatabase.get<quoll::Id>(e2).id, 10);
@@ -81,7 +81,7 @@ TEST_F(SceneWriterTest, SavingNewEntityAddsNewNodeInSceneFile) {
   scene.entityDatabase.set<quoll::Name>(e1, {"E1"});
   scene.entityDatabase.set<quoll::Name>(e2, {"E2"});
 
-  writer.saveEntities({e1, e2});
+  writer.syncEntities({e1, e2});
 
   auto node = loadSceneFile();
   EXPECT_EQ(node["entities"][1]["id"].as<u64>(0),
@@ -97,7 +97,7 @@ TEST_F(SceneWriterTest, SavingExistingEntityUpdatesExistingNodeInSceneFile) {
     scene.entityDatabase.set<quoll::Name>(e1, {"E1"});
     scene.entityDatabase.set<quoll::Name>(e2, {"E2"});
 
-    writer.saveEntities({e1, e2});
+    writer.syncEntities({e1, e2});
 
     auto node = loadSceneFile();
     EXPECT_EQ(node["entities"].size(), 2);
@@ -112,7 +112,7 @@ TEST_F(SceneWriterTest, SavingExistingEntityUpdatesExistingNodeInSceneFile) {
   {
     scene.entityDatabase.set<quoll::Name>(e1, {"E1 New"});
 
-    writer.saveEntities({e1});
+    writer.syncEntities({e1});
 
     auto node = loadSceneFile();
     EXPECT_EQ(node["entities"].size(), 2);
@@ -133,7 +133,7 @@ TEST_F(SceneWriterTest, SavingEntitySavesParentBeforeEntityIfParentIsNotSaved) {
   scene.entityDatabase.set<quoll::Parent>(entity, {parent});
   scene.entityDatabase.set<quoll::Parent>(parent, {parent2});
 
-  writer.saveEntities({entity});
+  writer.syncEntities({entity});
 
   ASSERT_TRUE(scene.entityDatabase.has<quoll::Id>(entity));
   ASSERT_TRUE(scene.entityDatabase.has<quoll::Id>(parent));
@@ -158,7 +158,7 @@ TEST_F(SceneWriterTest, SavingEntityAndParentTogetherSavesTheParentOnce) {
   scene.entityDatabase.set<quoll::Parent>(entity, {parent});
   scene.entityDatabase.set<quoll::Parent>(parent, {parent2});
 
-  writer.saveEntities({entity, parent});
+  writer.syncEntities({entity, parent});
 
   ASSERT_TRUE(scene.entityDatabase.has<quoll::Id>(entity));
   ASSERT_TRUE(scene.entityDatabase.has<quoll::Id>(parent));
@@ -181,7 +181,7 @@ TEST_F(SceneWriterTest, DeletingEntityDeletesItFromSceneFile) {
   auto e3 = scene.entityDatabase.create();
 
   {
-    writer.saveEntities({e1, e2, e3});
+    writer.syncEntities({e1, e2, e3});
 
     auto node = loadSceneFile();
     EXPECT_EQ(node["entities"].size(), 3);
@@ -217,7 +217,7 @@ TEST_F(SceneWriterTest, DeletingEntityDeletesItsChildrenFromSceneFile) {
     scene.entityDatabase.set<quoll::Parent>(e3, {e1});
 
     scene.entityDatabase.set<quoll::Parent>(e4, {e2});
-    writer.saveEntities({e1, e2, e3, e4});
+    writer.syncEntities({e1, e2, e3, e4});
 
     scene.entityDatabase.set<quoll::Children>(e1, {{e2, e3}});
     scene.entityDatabase.set<quoll::Children>(e3, {{e4}});
@@ -242,8 +242,8 @@ TEST_F(SceneWriterTest, DeletingStartingCameraSetsStartingCameraToNull) {
   scene.activeCamera = e1;
   scene.entityDatabase.set<quoll::PerspectiveLens>(e1, {});
 
-  writer.saveEntities({e1});
-  writer.saveScene();
+  writer.syncEntities({e1});
+  writer.syncScene();
 
   {
     auto node = loadSceneFile();
@@ -262,8 +262,8 @@ TEST_F(SceneWriterTest, DeletingEnvironmentSetsEnvironmentToNull) {
   auto e1 = scene.entityDatabase.create();
   scene.activeEnvironment = e1;
 
-  writer.saveEntities({e1});
-  writer.saveScene();
+  writer.syncEntities({e1});
+  writer.syncScene();
 
   {
     auto node = loadSceneFile();
@@ -281,10 +281,10 @@ TEST_F(SceneWriterTest, DeletingEnvironmentSetsEnvironmentToNull) {
 TEST_F(SceneWriterTest,
        DoesNotSaveEntityAsInitialCameraIfItDoesNotHaveCameraComponent) {
   auto entity = scene.entityDatabase.create();
-  writer.saveEntities({entity});
+  writer.syncEntities({entity});
 
   scene.activeCamera = entity;
-  writer.saveScene();
+  writer.syncScene();
 
   auto node = loadSceneFile();
   EXPECT_FALSE(node["zones"][0]["startingCamera"]);
@@ -296,7 +296,7 @@ TEST_F(SceneWriterTest,
   scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
 
   scene.activeCamera = entity;
-  writer.saveScene();
+  writer.syncScene();
 
   auto node = loadSceneFile();
   EXPECT_FALSE(node["zones"][0]["startingCamera"]);
@@ -306,10 +306,10 @@ TEST_F(SceneWriterTest, SavesEntityAsStartingCameraIfItHasCameraComponent) {
   auto entity = scene.entityDatabase.create();
   scene.entityDatabase.set<quoll::Id>(entity, {15});
   scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
-  writer.saveEntities({entity});
+  writer.syncEntities({entity});
 
   scene.activeCamera = entity;
-  writer.saveScene();
+  writer.syncScene();
 
   auto node = loadSceneFile();
   EXPECT_EQ(node["zones"][0]["startingCamera"].as<u64>(0), 15);
@@ -317,7 +317,7 @@ TEST_F(SceneWriterTest, SavesEntityAsStartingCameraIfItHasCameraComponent) {
 
 TEST_F(SceneWriterTest, DoesNotSaveEntityAsEnvironmentIfItDoesNotHaveId) {
   scene.activeEnvironment = scene.entityDatabase.create();
-  writer.saveScene();
+  writer.syncScene();
 
   auto node = loadSceneFile();
   EXPECT_FALSE(node["zones"][0]["environment"].IsNull());
@@ -327,7 +327,7 @@ TEST_F(SceneWriterTest, SetsEnvironmentToEntityIdIfEnvironmentEntityHasId) {
   scene.activeEnvironment = scene.entityDatabase.create();
   scene.entityDatabase.set<quoll::Id>(scene.activeEnvironment, {10});
 
-  writer.saveScene();
+  writer.syncScene();
 
   auto node = loadSceneFile();
   auto envNode = node["zones"][0]["environment"];

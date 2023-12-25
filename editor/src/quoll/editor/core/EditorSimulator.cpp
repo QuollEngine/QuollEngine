@@ -9,7 +9,8 @@ EditorSimulator::EditorSimulator(InputDeviceManager &deviceManager,
     : mWindow(window), mInputMapSystem(deviceManager, assetRegistry),
       mScriptingSystem(assetRegistry), mAnimationSystem(assetRegistry),
       mPhysicsSystem(PhysicsSystem::createPhysxBackend()),
-      mEditorCamera(editorCamera), mAudioSystem(assetRegistry) {}
+      mEditorCamera(editorCamera), mAudioSystem(assetRegistry),
+      mAssetRegistry(assetRegistry) {}
 
 void EditorSimulator::update(f32 dt, WorkspaceState &state) {
   if (state.mode != mMode) {
@@ -32,6 +33,10 @@ void EditorSimulator::update(f32 dt, WorkspaceState &state) {
   } else {
     updateSimulation(dt, state);
   }
+}
+
+void EditorSimulator::render(EntityDatabase &db) {
+  mUICanvasUpdater.render(db, mAssetRegistry);
 }
 
 void EditorSimulator::cleanupSimulationDatabase(

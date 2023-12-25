@@ -4,6 +4,7 @@
 #include "quoll/scene/PerspectiveLens.h"
 
 #include "quoll/editor/actions/ActionExecutor.h"
+#include "quoll/editor/asset/SceneWriter.h"
 
 #include "quoll/editor-tests/Testing.h"
 
@@ -28,7 +29,9 @@ public:
     stream << root;
     stream.close();
 
-    executor.getSceneWriter().open(ScenePath);
+    sceneWriter.open(ScenePath);
+
+    executor.setAssetSyncer(&sceneWriter);
   }
 
   void TearDown() override {
@@ -38,7 +41,8 @@ public:
 public:
   quoll::AssetRegistry assetRegistry;
   quoll::editor::WorkspaceState state{};
-  quoll::editor::ActionExecutor executor{state, assetRegistry, ScenePath};
+  quoll::editor::SceneWriter sceneWriter{state.scene, assetRegistry};
+  quoll::editor::ActionExecutor executor{state, assetRegistry};
 };
 
 struct TestActionData {
@@ -142,6 +146,21 @@ TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
   EXPECT_TRUE(executor.getRedoStack().empty());
 }
 
+TEST_F(ActionExecutorTest, ProcessDoesNotBreakIfNoAssetSyncer) {
+  executor.setAssetSyncer(nullptr);
+
+  state.mode = quoll::editor::WorkspaceMode::Simulation;
+
+  auto *actionPtr = new TestAction;
+  auto actionData = actionPtr->getData();
+
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
+  EXPECT_TRUE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+}
+
 TEST_F(ActionExecutorTest,
        ExecuteCreatesEntityFilesIfActionReturnsEntitiesToSaveAndModeIsEdit) {
   auto entity = state.scene.entityDatabase.create();
@@ -211,7 +230,7 @@ TEST_F(ActionExecutorTest,
   state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
   state.scene.entityDatabase.set<quoll::Id>(entity, {15});
 
-  executor.getSceneWriter().saveEntities({entity});
+  sceneWriter.syncEntities({entity});
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
@@ -237,7 +256,7 @@ TEST_F(
   state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
   state.scene.entityDatabase.set<quoll::Id>(entity, {15});
 
-  executor.getSceneWriter().saveEntities({entity});
+  sceneWriter.syncEntities({entity});
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
@@ -262,7 +281,7 @@ TEST_F(ActionExecutorTest,
   state.scene.entityDatabase.set<quoll::Id>(entity, {15});
   state.scene.activeCamera = entity;
 
-  executor.getSceneWriter().saveEntities({entity});
+  sceneWriter.syncEntities({entity});
 
   auto *actionPtr = new TestAction;
   actionPtr->saveSceneOnExecute();

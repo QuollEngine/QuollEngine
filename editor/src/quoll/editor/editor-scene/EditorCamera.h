@@ -5,7 +5,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/events/EventSystem.h"
 #include "quoll/editor/core/CameraLookAt.h"
-#include "quoll/editor/state/WorkspaceState.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
 
 namespace quoll::editor {
 

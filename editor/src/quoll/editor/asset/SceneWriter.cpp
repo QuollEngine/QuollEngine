@@ -34,7 +34,7 @@ void SceneWriter::open(Path sourcePath) {
   mLastId++;
 }
 
-void SceneWriter::saveEntities(const std::vector<Entity> &entities) {
+void SceneWriter::syncEntities(const std::vector<Entity> &entities) {
   std::unordered_map<Entity, bool> updateCache;
 
   for (auto entity : entities) {
@@ -96,7 +96,7 @@ void SceneWriter::deleteEntities(const std::vector<Entity> &entities) {
   save();
 }
 
-void SceneWriter::saveScene() {
+void SceneWriter::syncScene() {
   updateStartingCamera();
   updateEnvironment();
   save();

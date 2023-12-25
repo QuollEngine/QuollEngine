@@ -4,9 +4,12 @@
 namespace quoll::editor {
 
 ActionExecutor::ActionExecutor(WorkspaceState &state,
-                               AssetRegistry &assetRegistry, Path scenePath)
-    : mState(state), mScenePath(scenePath), mAssetRegistry(assetRegistry),
-      mSceneWriter(mState.scene, mAssetRegistry) {}
+                               AssetRegistry &assetRegistry)
+    : mState(state), mAssetRegistry(assetRegistry) {}
+
+void ActionExecutor::setAssetSyncer(AssetSyncer *assetSyncer) {
+  mAssetSyncer = assetSyncer;
+}
 
 void ActionExecutor::process() {
   if (!mActionToProcess) {
@@ -72,20 +75,24 @@ void ActionExecutor::redo() {
 }
 
 void ActionExecutor::saveActionResult(const ActionExecutorResult &result) {
+  if (!mAssetSyncer) {
+    return;
+  }
+
   if (mState.mode == WorkspaceMode::Simulation) {
     return;
   }
 
   if (!result.entitiesToDelete.empty()) {
-    mSceneWriter.deleteEntities(result.entitiesToDelete);
+    mAssetSyncer->deleteEntities(result.entitiesToDelete);
   }
 
   if (!result.entitiesToSave.empty()) {
-    mSceneWriter.saveEntities(result.entitiesToSave);
+    mAssetSyncer->syncEntities(result.entitiesToSave);
   }
 
   if (result.saveScene) {
-    mSceneWriter.saveScene();
+    mAssetSyncer->syncScene();
   }
 }
 

@@ -49,8 +49,7 @@ TEST_F(UndoActionTest, ExecutorCallsActionExecutorUndo) {
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  quoll::editor::ActionExecutor executor(state, assetRegistry,
-                                         std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry);
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
@@ -67,8 +66,7 @@ TEST_F(UndoActionTest,
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  quoll::editor::ActionExecutor executor(state, assetRegistry,
-                                         std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry);
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
@@ -78,8 +76,7 @@ TEST_F(UndoActionTest,
 }
 
 TEST_F(UndoActionTest, PredicateReturnsFalseIfActionExecutorUndoStackIsEmpty) {
-  quoll::editor::ActionExecutor executor(state, assetRegistry,
-                                         std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry);
 
   EXPECT_FALSE(quoll::editor::Undo(executor).predicate(state, assetRegistry));
 }
@@ -90,8 +87,7 @@ TEST_F(RedoActionTest, ExecutorCallsActionExecutor) {
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  quoll::editor::ActionExecutor executor(state, assetRegistry,
-                                         std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry);
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
@@ -113,8 +109,7 @@ TEST_F(RedoActionTest,
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  quoll::editor::ActionExecutor executor(state, assetRegistry,
-                                         std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry);
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
@@ -126,8 +121,7 @@ TEST_F(RedoActionTest,
 }
 
 TEST_F(RedoActionTest, PredicateReturnsFalseIfActionExecutorRedoStackIsEmpty) {
-  quoll::editor::ActionExecutor executor(state, assetRegistry,
-                                         std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry);
 
   EXPECT_FALSE(quoll::editor::Redo(executor).predicate(state, assetRegistry));
 }

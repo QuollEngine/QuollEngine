@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Action.h"
-#include "quoll/editor/asset/SceneWriter.h"
-#include "quoll/scene/SceneIO.h"
+#include "quoll/editor/asset/AssetSyncer.h"
 
 namespace quoll::editor {
 
@@ -18,10 +17,15 @@ public:
    *
    * @param state Workspace state
    * @param assetRegistry Asset registry
-   * @param scenePath Scene path
    */
-  ActionExecutor(WorkspaceState &state, AssetRegistry &assetRegistry,
-                 Path scenePath);
+  ActionExecutor(WorkspaceState &state, AssetRegistry &assetRegistry);
+
+  /**
+   * @brief Set asset syncer
+   *
+   * @param assetSyncer Asset syncer
+   */
+  void setAssetSyncer(AssetSyncer *assetSyncer);
 
   /**
    * @brief Process actions
@@ -70,13 +74,6 @@ public:
    */
   inline const ActionStack &getRedoStack() const { return mRedoStack; }
 
-  /**
-   * @brief Get scene writer
-   *
-   * @return Scene writer
-   */
-  inline SceneWriter &getSceneWriter() { return mSceneWriter; }
-
 private:
   /**
    * @brief Save action result
@@ -89,7 +86,7 @@ private:
   WorkspaceState &mState;
   AssetRegistry &mAssetRegistry;
   Path mScenePath;
-  SceneWriter mSceneWriter;
+  AssetSyncer *mAssetSyncer = nullptr;
 
   std::unique_ptr<Action> mActionToProcess;
   ActionStack mUndoStack;

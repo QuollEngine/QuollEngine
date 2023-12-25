@@ -16,10 +16,10 @@
 #include "SceneView.h"
 #include "SceneGizmos.h"
 #include "MainMenu.h"
-#include "ShortcutsManager.h"
 #include "Inspector.h"
 
 #include "quoll/editor/workspace/WorkspaceContext.h"
+#include "quoll/editor/core/EditorSimulator.h"
 
 namespace quoll::editor {
 
@@ -51,18 +51,14 @@ public:
    *
    * @param context Workspace context
    * @param sceneTexture Scene texture
-   * @param editorCamera Editor camera
-   * @param aspectRatioUpdater Aspect ratio updater
-   * @param uiCanvasUpdater UI Canvas updater
+   * @param editorSimulator Editor simulator
    *
    * @retval true Entity is clicked
    * @retval false Entity is not clicked
    */
   bool renderSceneView(WorkspaceContext &context,
                        rhi::TextureHandle sceneTexture,
-                       EditorCamera &editorCamera,
-                       CameraAspectRatioUpdater &aspectRatioUpdater,
-                       UICanvasUpdater &uiCanvasUpdater);
+                       EditorSimulator &editorSimulator);
 
   /**
    * @brief Get asset browser panel
@@ -80,14 +76,6 @@ public:
     return mSceneHierarchyPanel;
   }
 
-  /**
-   * @brief Process shortcuts
-   *
-   * @param context Workspace context
-   * @param eventSystem Event system
-   */
-  void processShortcuts(WorkspaceContext &context, EventSystem &eventSystem);
-
 private:
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;
@@ -100,7 +88,6 @@ private:
   Toolbar mToolbar;
   MainMenu mMainMenu;
   SceneGizmos mSceneGizmos;
-  ShortcutsManager mShortcutsManager;
 };
 
 } // namespace quoll::editor

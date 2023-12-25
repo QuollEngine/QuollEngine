@@ -2,6 +2,7 @@
 
 #include "quoll/scene/Scene.h"
 #include "quoll/asset/AssetRegistry.h"
+#include "quoll/editor/asset/AssetSyncer.h"
 
 #include "quoll/yaml/Yaml.h"
 
@@ -12,7 +13,7 @@ namespace quoll::editor {
  *
  * Writes scene to a file
  */
-class SceneWriter {
+class SceneWriter : public AssetSyncer {
 public:
   /**
    * @brief Create scene writer
@@ -21,6 +22,16 @@ public:
    * @param assetRegistry Asset registry
    */
   SceneWriter(Scene &scene, AssetRegistry &assetRegistry);
+
+  SceneWriter(const SceneWriter &) = delete;
+  SceneWriter &operator=(const SceneWriter &) = delete;
+  SceneWriter(SceneWriter &&) = delete;
+  SceneWriter &operator=(SceneWriter &&) = delete;
+
+  /**
+   * @brief Virtual destructor
+   */
+  virtual ~SceneWriter() = default;
 
   /**
    * @brief Open scene file
@@ -32,23 +43,23 @@ public:
   /**
    * @brief Save entities
    *
-   * @param entities
+   * @param entities Entities
    */
-  void saveEntities(const std::vector<Entity> &entities);
+  void syncEntities(const std::vector<Entity> &entities) override;
 
   /**
    * @brief Delete entities
    *
-   * @param entities
+   * @param entities Entities
    */
-  void deleteEntities(const std::vector<Entity> &entities);
+  void deleteEntities(const std::vector<Entity> &entities) override;
 
   /**
    * @brief Save scene
    *
    * Saves starting camera and environment
    */
-  void saveScene();
+  void syncScene() override;
 
 private:
   /**
