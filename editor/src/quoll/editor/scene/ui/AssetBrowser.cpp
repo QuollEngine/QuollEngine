@@ -2,12 +2,11 @@
 #include "quoll/core/Engine.h"
 #include "quoll/imgui/Imgui.h"
 #include "quoll/imgui/ImguiUtils.h"
-
 #include "quoll/platform/tools/FileOpener.h"
 
 #include "quoll/editor/actions/SpawnEntityActions.h"
+#include "quoll/editor/ui/Widgets.h"
 
-#include "Widgets.h"
 #include "AssetBrowser.h"
 
 namespace quoll::editor {
@@ -108,8 +107,8 @@ static EditorIcon getIconFromAssetType(AssetType type) {
   }
 }
 
-void AssetBrowser::render(WorkspaceContext &context) {
-  auto &assetManager = context.assetManager;
+void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
+                          ActionExecutor &actionExecutor) {
 
   if (mCurrentDirectory.empty()) {
     setCurrentFetch(assetManager.getAssetsPath());
@@ -180,13 +179,11 @@ void AssetBrowser::render(WorkspaceContext &context) {
             if (entry.isDirectory) {
               setCurrentFetch(entry.path);
             } else if (entry.assetType == AssetType::Prefab) {
-              context.actionExecutor.execute<SpawnPrefabAtView>(
-                  static_cast<PrefabAssetHandle>(entry.asset),
-                  context.state.camera);
+              actionExecutor.execute<SpawnPrefabAtView>(
+                  static_cast<PrefabAssetHandle>(entry.asset), state.camera);
             } else if (entry.assetType == AssetType::Texture) {
-              context.actionExecutor.execute<SpawnSpriteAtView>(
-                  static_cast<TextureAssetHandle>(entry.asset),
-                  context.state.camera);
+              actionExecutor.execute<SpawnSpriteAtView>(
+                  static_cast<TextureAssetHandle>(entry.asset), state.camera);
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
                   static_cast<MaterialAssetHandle>(entry.asset));
@@ -281,7 +278,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
                   ImGuiPopupFlags_MouseButtonRight |
                   ImGuiPopupFlags_NoOpenOverExistingPopup)) {
         if (ImGui::MenuItem("Import asset")) {
-          handleAssetImport(context.assetManager);
+          handleAssetImport(assetManager);
         }
 
         if (ImGui::MenuItem("Create directory")) {

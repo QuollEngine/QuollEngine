@@ -56,10 +56,10 @@
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 
-#include "EntityPanel.h"
+#include "quoll/editor/ui/Widgets.h"
+#include "quoll/editor/ui/FontAwesome.h"
 
-#include "Widgets.h"
-#include "FontAwesome.h"
+#include "EntityPanel.h"
 
 namespace quoll::editor {
 

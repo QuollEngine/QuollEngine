@@ -9,13 +9,15 @@
 #include "quoll/editor/actions/TypedActionCreator.h"
 #include "quoll/editor/actions/HistoryActions.h"
 #include "quoll/editor/ui/FontAwesome.h"
+#include "quoll/editor/ui/Shortcut.h"
 
-#include "UIRoot.h"
+#include "SceneEditorUI.h"
+
 #include "ImGuizmo.h"
 
 namespace quoll::editor {
 
-UIRoot::UIRoot(AssetManager &assetManager) {
+SceneEditorUI::SceneEditorUI(AssetManager &assetManager) {
   mMainMenu.begin("Project")
       .add("Export as game",
            TypedActionCreator::create<ExportAsGame>(assetManager))
@@ -41,22 +43,22 @@ UIRoot::UIRoot(AssetManager &assetManager) {
       "Scale", fa::ExpandAlt, ToolbarItemType::Toggleable);
 }
 
-void UIRoot::render(WorkspaceContext &context) {
-  mMainMenu.render(context.actionExecutor);
-  mToolbar.render(context.state, context.assetManager.getAssetRegistry(),
-                  context.actionExecutor);
+void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
+                           ActionExecutor &actionExecutor) {
+  mMainMenu.render(actionExecutor);
+  mToolbar.render(state, assetManager.getAssetRegistry(), actionExecutor);
 
-  mSceneHierarchyPanel.render(context.state, context.actionExecutor);
-  mInspector.render(context.state, context.assetManager.getAssetRegistry(),
-                    context.actionExecutor);
+  mSceneHierarchyPanel.render(state, actionExecutor);
+  mInspector.render(state, assetManager.getAssetRegistry(), actionExecutor);
 
-  mEditorCameraPanel.render(context.state, context.actionExecutor);
-  mAssetBrowser.render(context);
+  mEditorCameraPanel.render(state, actionExecutor);
+  mAssetBrowser.render(state, assetManager, actionExecutor);
 }
 
-bool UIRoot::renderSceneView(WorkspaceContext &context,
-                             rhi::TextureHandle sceneTexture,
-                             EditorSimulator &editorSimulator) {
+bool SceneEditorUI::renderSceneView(WorkspaceState &state,
+                                    ActionExecutor &actionExecutor,
+                                    rhi::TextureHandle sceneTexture,
+                                    SceneSimulator &editorSimulator) {
   if (auto _ = SceneView(sceneTexture)) {
     const auto &pos = ImGui::GetItemRectMin();
     const auto &size = ImGui::GetItemRectSize();
@@ -77,9 +79,8 @@ bool UIRoot::renderSceneView(WorkspaceContext &context,
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 
-    if (context.state.selectedEntity != Entity::Null) {
-      isItemClicked &=
-          !mSceneGizmos.render(context.state, context.actionExecutor);
+    if (state.selectedEntity != Entity::Null) {
+      isItemClicked &= !mSceneGizmos.render(state, actionExecutor);
     }
     return isItemClicked;
   }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Action.h"
-#include "quoll/editor/editor-scene/EditorCamera.h"
+#include "quoll/editor/scene/core/EditorCamera.h"
 
 #include <glm/gtc/matrix_access.hpp>
 

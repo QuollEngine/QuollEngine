@@ -2,8 +2,8 @@
 #include "EditorGridPanel.h"
 
 #include "quoll/imgui/Imgui.h"
-#include "Widgets.h"
 
+#include "quoll/editor/ui/Widgets.h"
 #include "quoll/editor/actions/EditorGridActions.h"
 
 namespace quoll::editor {

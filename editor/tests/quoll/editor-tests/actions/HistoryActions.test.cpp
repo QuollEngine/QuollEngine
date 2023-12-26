@@ -35,7 +35,7 @@ public:
   }
 
   bool predicate(quoll::editor::WorkspaceState &state,
-                 quoll::AssetRegistry &assetRegistry) {
+                 quoll::AssetRegistry &assetRegistry) override {
     return true;
   }
 

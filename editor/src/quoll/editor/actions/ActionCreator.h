@@ -10,6 +10,11 @@ namespace quoll::editor {
 class ActionCreator {
 public:
   /**
+   * @brief Default destructor
+   */
+  virtual ~ActionCreator() = default;
+
+  /**
    * @brief Create action
    *
    * @return Action

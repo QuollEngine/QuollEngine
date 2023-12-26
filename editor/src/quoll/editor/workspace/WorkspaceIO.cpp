@@ -4,7 +4,7 @@
 #include "quoll/scene/PerspectiveLens.h"
 
 #include "quoll/editor/core/CameraLookAt.h"
-#include "quoll/editor/editor-scene/EditorCamera.h"
+#include "quoll/editor/scene/core/EditorCamera.h"
 
 #include "WorkspaceIO.h"
 #include <glm/gtc/matrix_access.hpp>

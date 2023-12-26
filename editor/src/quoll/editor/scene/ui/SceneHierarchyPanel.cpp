@@ -13,16 +13,17 @@
 #include "quoll/audio/AudioSource.h"
 #include "quoll/imgui/Imgui.h"
 
-#include "ConfirmationDialog.h"
-#include "SceneHierarchyPanel.h"
-#include "Widgets.h"
-#include "StyleStack.h"
-#include "FontAwesome.h"
-#include "Theme.h"
+#include "quoll/editor/ui/ConfirmationDialog.h"
+#include "quoll/editor/ui/Widgets.h"
+#include "quoll/editor/ui/StyleStack.h"
+#include "quoll/editor/ui/FontAwesome.h"
+#include "quoll/editor/ui/Theme.h"
 
 #include "quoll/editor/actions/EditorCameraActions.h"
 #include "quoll/editor/actions/DeleteEntityAction.h"
 #include "quoll/editor/actions/EntityRelationActions.h"
+
+#include "SceneHierarchyPanel.h"
 
 namespace quoll::editor {
 

@@ -6,20 +6,19 @@
 #include "quoll/scene/CameraAspectRatioUpdater.h"
 #include "quoll/ui/UICanvasUpdater.h"
 
-#include "Toolbar.h"
+#include "quoll/editor/ui/Toolbar.h"
+#include "quoll/editor/ui/StatusBar.h"
+#include "quoll/editor/ui/IconRegistry.h"
+#include "quoll/editor/ui/MainMenu.h"
+
 #include "SceneHierarchyPanel.h"
 #include "EntityPanel.h"
 #include "EditorGridPanel.h"
-#include "StatusBar.h"
-#include "AssetBrowser.h"
-#include "IconRegistry.h"
 #include "SceneView.h"
 #include "SceneGizmos.h"
-#include "MainMenu.h"
 #include "Inspector.h"
-
-#include "quoll/editor/workspace/WorkspaceContext.h"
-#include "quoll/editor/core/EditorSimulator.h"
+#include "AssetBrowser.h"
+#include "../core/SceneSimulator.h"
 
 namespace quoll::editor {
 
@@ -28,37 +27,41 @@ namespace quoll::editor {
  *
  * Renders all the UI in the scene
  */
-class UIRoot {
+class SceneEditorUI {
 public:
   /**
    * @brief Create UI root
    *
    * @param assetManager Asset manager
    */
-  UIRoot(AssetManager &assetManager);
+  SceneEditorUI(AssetManager &assetManager);
 
   /**
    * @brief Render UI Root
    *
    * Renders all components inside the root
    *
-   * @param context Workspace context
+   * @param state Workspace state
+   * @param assetManager Asset manager
+   * @param actionExecutor Action executor
    */
-  void render(WorkspaceContext &context);
+  void render(WorkspaceState &state, AssetManager &assetManager,
+              ActionExecutor &actionExecutor);
 
   /**
    * @brief Render scene view
    *
-   * @param context Workspace context
+   * @param state Workspace state
+   * @param actionExecutor Action executor
    * @param sceneTexture Scene texture
    * @param editorSimulator Editor simulator
    *
    * @retval true Entity is clicked
    * @retval false Entity is not clicked
    */
-  bool renderSceneView(WorkspaceContext &context,
+  bool renderSceneView(WorkspaceState &state, ActionExecutor &actionExecutor,
                        rhi::TextureHandle sceneTexture,
-                       EditorSimulator &editorSimulator);
+                       SceneSimulator &editorSimulator);
 
   /**
    * @brief Get asset browser panel

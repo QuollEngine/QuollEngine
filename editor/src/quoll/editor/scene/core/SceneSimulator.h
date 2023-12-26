@@ -1,7 +1,6 @@
 #pragma once
 
 #include "quoll/asset/AssetRegistry.h"
-
 #include "quoll/core/EntityDeleter.h"
 #include "quoll/scene/SceneUpdater.h"
 #include "quoll/scene/SkeletonUpdater.h"
@@ -14,8 +13,9 @@
 #include "quoll/input/InputMapSystem.h"
 #include "quoll/ui/UICanvasUpdater.h"
 
-#include "quoll/editor/editor-scene/EditorCamera.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
+
+#include "EditorCamera.h"
 
 namespace quoll::editor {
 
@@ -25,7 +25,7 @@ namespace quoll::editor {
  * Provides different updaters for
  * editor simulation
  */
-class EditorSimulator {
+class SceneSimulator {
 public:
   /**
    * @brief Create editor simulation
@@ -35,8 +35,8 @@ public:
    * @param assetRegistry Asset registry
    * @param editorCamera Editor camera
    */
-  EditorSimulator(InputDeviceManager &deviceManager, Window &window,
-                  AssetRegistry &assetRegistry, EditorCamera &editorCamera);
+  SceneSimulator(InputDeviceManager &deviceManager, Window &window,
+                 AssetRegistry &assetRegistry, EditorCamera &editorCamera);
 
   /**
    * @brief Main update function
@@ -93,7 +93,7 @@ public:
    */
   inline Window &getWindow() { return mWindow; }
 
-private:
+public:
   /**
    * @brief Cleanup simulation database
    *
@@ -114,7 +114,7 @@ private:
    * @param dt Time delta
    * @param state Workspace state
    */
-  void updateEditor(f32 dt, WorkspaceState &scene);
+  void updateEditor(f32 dt, WorkspaceState &state);
 
   /**
    * @brief Simulation updater
@@ -122,7 +122,7 @@ private:
    * @param dt Time delta
    * @param state Workspace state
    */
-  void updateSimulation(f32 dt, WorkspaceState &scene);
+  void updateSimulation(f32 dt, WorkspaceState &state);
 
 private:
   std::function<void(f32, WorkspaceState &)> mUpdater;

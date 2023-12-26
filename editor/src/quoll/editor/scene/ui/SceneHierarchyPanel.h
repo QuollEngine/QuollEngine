@@ -1,10 +1,11 @@
 #pragma once
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/editor/editor-scene/EditorCamera.h"
 
 #include "quoll/editor/workspace/WorkspaceState.h"
 #include "quoll/editor/actions/ActionExecutor.h"
+
+#include "../core/EditorCamera.h"
 
 namespace quoll::editor {
 

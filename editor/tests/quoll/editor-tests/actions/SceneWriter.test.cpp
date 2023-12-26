@@ -8,7 +8,7 @@
 
 #include "quoll/yaml/Yaml.h"
 
-#include "quoll/editor/asset/SceneWriter.h"
+#include "quoll/editor/scene/asset/SceneWriter.h"
 
 #include "quoll/editor-tests/Testing.h"
 
