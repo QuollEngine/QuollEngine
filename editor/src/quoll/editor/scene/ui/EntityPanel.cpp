@@ -562,7 +562,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     }
 
     if (scene.activeCamera != mSelectedEntity) {
-      if (ImGui::Button("Set as starting camera")) {
+      if (widgets::Button("Set as starting camera")) {
         actionExecutor.execute<SceneSetStartingCamera>(mSelectedEntity);
       }
     } else {
@@ -743,7 +743,7 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
         ImGui::TableNextColumn();
         ImGui::Text("Slot %d", static_cast<u32>(i));
         ImGui::TableNextColumn();
-        ImGui::Button(asset.name.c_str());
+        widgets::Button(asset.name.c_str());
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
@@ -756,7 +756,7 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
       }
 
       ImGui::TableNextColumn();
-      ImGui::Button("Drop a new material slot");
+      widgets::Button("Drop a new material slot");
       if (ImGui::BeginDragDropTarget()) {
         if (auto *payload = ImGui::AcceptDragDropPayload(
                 getAssetTypeString(AssetType::Material).c_str())) {
@@ -770,7 +770,7 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
       if (renderer.materials.size() > 0) {
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        if (ImGui::Button("Delete last row")) {
+        if (widgets::Button("Delete last row")) {
           actionExecutor.execute<EntityRemoveLastMeshRendererMaterialSlot>(
               mSelectedEntity);
         }
@@ -806,7 +806,7 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
         ImGui::TableNextColumn();
         ImGui::Text("Slot %d", static_cast<u32>(i));
         ImGui::TableNextColumn();
-        ImGui::Button(asset.name.c_str());
+        widgets::Button(asset.name.c_str());
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
@@ -819,7 +819,7 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
       }
 
       ImGui::TableNextColumn();
-      ImGui::Button("Drop a new material slot");
+      widgets::Button("Drop a new material slot");
       if (ImGui::BeginDragDropTarget()) {
         if (auto *payload = ImGui::AcceptDragDropPayload(
                 getAssetTypeString(AssetType::Material).c_str())) {
@@ -832,7 +832,7 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
 
       if (renderer.materials.size() > 0) {
         ImGui::TableNextColumn();
-        if (ImGui::Button("Delete last row")) {
+        if (widgets::Button("Delete last row")) {
           actionExecutor
               .execute<EntityRemoveLastSkinnedMeshRendererMaterialSlot>(
                   mSelectedEntity);
@@ -908,7 +908,7 @@ void EntityPanel::renderJointAttachment(Scene &scene,
                        ? skeleton.jointNames.at(attachment.joint)
                        : "Select joint";
 
-      if (ImGui::Button(label.c_str())) {
+      if (widgets::Button(label.c_str())) {
         ImGui::OpenPopup("SetJointAttachment");
       }
 
@@ -967,7 +967,7 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
         if (isSimulation) {
           ImGui::TableNextColumn();
           ImGui::PushID(transition.eventName.c_str());
-          if (ImGui::Button("Toggle")) {
+          if (widgets::Button("Toggle")) {
             scene.entityDatabase.set<AnimatorEvent>(mSelectedEntity,
                                                     {transition.eventName});
           }
@@ -989,18 +989,18 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
         }
 
         if (!component.playing) {
-          if (ImGui::Button("Play")) {
+          if (widgets::Button("Play")) {
             component.playing = true;
           }
         } else {
-          if (ImGui::Button("Pause")) {
+          if (widgets::Button("Pause")) {
             component.playing = false;
           }
         }
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Reset")) {
+        if (widgets::Button("Reset")) {
           component.normalizedTime = 0.0f;
         }
       }
@@ -1442,12 +1442,12 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             const auto width = ImGui::GetWindowContentRegionWidth();
             const f32 halfWidth = width * 0.5f;
             if (value == PrefabAssetHandle::Null) {
-              ImGui::Button("Drag prefab here", ImVec2(width, halfWidth));
+              widgets::Button("Drag prefab here", ImVec2(width, halfWidth));
             } else {
               String buttonLabel =
                   "Replace current prefab: " +
                   assetRegistry.getPrefabs().getAsset(value).name;
-              ImGui::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
+              widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
             }
 
             if (ImGui::BeginDragDropTarget()) {
@@ -1468,12 +1468,12 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             const auto width = ImGui::GetWindowContentRegionWidth();
             const f32 halfWidth = width * 0.5f;
             if (value == TextureAssetHandle::Null) {
-              ImGui::Button("Drag texture here", ImVec2(width, halfWidth));
+              widgets::Button("Drag texture here", ImVec2(width, halfWidth));
             } else {
               String buttonLabel =
                   "Replace current texture: " +
                   assetRegistry.getTextures().getAsset(value).name;
-              ImGui::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
+              widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
             }
 
             if (ImGui::BeginDragDropTarget()) {
@@ -1518,9 +1518,9 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
       const auto &asset =
           assetRegistry.getInputMaps().getAsset(component.handle);
 
-      ImGui::Button(asset.name.c_str(), ImVec2(width, height));
+      widgets::Button(asset.name.c_str(), ImVec2(width, height));
     } else {
-      ImGui::Button("Drag input map here", ImVec2(width, height));
+      widgets::Button("Drag input map here", ImVec2(width, height));
     }
 
     static constexpr f32 DropBorderWidth = 3.5f;
@@ -1668,7 +1668,7 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
 
         dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);
 
-        if (ImGui::Button(fa::Times)) {
+        if (widgets::Button(fa::Times)) {
           auto newSkybox = skybox;
           newSkybox.texture = EnvironmentAssetHandle::Null;
           actionExecutor.execute<EntityUpdateComponent<EnvironmentSkybox>>(
@@ -1676,13 +1676,13 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
         }
 
       } else {
-        ImGui::Button("Drag environment asset here", ImVec2(width, height));
+        widgets::Button("Drag environment asset here", ImVec2(width, height));
         dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);
       }
     }
 
     if (scene.activeEnvironment != mSelectedEntity) {
-      if (ImGui::Button("Set as starting environment")) {
+      if (widgets::Button("Set as starting environment")) {
         actionExecutor.execute<SceneSetStartingEnvironment>(mSelectedEntity);
       }
     } else {
@@ -1736,7 +1736,7 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
   if (hasAllComponents)
     return;
 
-  if (ImGui::Button("Add component")) {
+  if (widgets::Button("Add component")) {
     ImGui::OpenPopup("AddComponentPopup");
   }
 
@@ -1837,7 +1837,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
   const auto width = ImGui::GetWindowContentRegionWidth();
   const f32 halfWidth = width * 0.5f;
 
-  ImGui::Button("Drag asset here", ImVec2(width, halfWidth));
+  widgets::Button("Drag asset here", ImVec2(width, halfWidth));
 
   if (ImGui::BeginDragDropTarget()) {
     if (auto *payload = ImGui::AcceptDragDropPayload(

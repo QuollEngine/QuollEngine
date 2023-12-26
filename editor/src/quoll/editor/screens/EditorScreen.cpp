@@ -25,8 +25,10 @@
 #include "quoll/editor/ui/AssetLoadStatusDialog.h"
 #include "quoll/editor/ui/Theme.h"
 #include "quoll/editor/ui/Widgets.h"
+#include "quoll/editor/ui/MainMenuBar.h"
 #include "quoll/editor/ui/LogViewer.h"
 #include "quoll/editor/ui/FontAwesome.h"
+#include "quoll/editor/ui/StyleStack.h"
 
 #include "quoll/editor/core/LogMemoryStorage.h"
 
@@ -35,6 +37,7 @@
 #include "quoll/editor/scene/core/EditorCamera.h"
 #include "quoll/editor/scene/SceneEditorWorkspace.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"
+#include "quoll/editor/workspace/WorkspaceTabs.h"
 
 #include "quoll/ui/UICanvasUpdater.h"
 
@@ -149,12 +152,11 @@ void EditorScreen::start(const Project &rawProject) {
   workspaceManager.add(new SceneEditorWorkspace(
       project, assetManager, sceneAsset,
       project.assetsPath / "scenes" / "main.scene", renderer, sceneRenderer,
-      editorRenderer, mousePicking, simulator));
+      editorRenderer, mousePicking, simulator, workspaceManager));
   mEventSystem.observe(KeyboardEvent::Pressed, [&](const auto &data) {
     workspaceManager.getCurrentWorkspace()->processShortcuts(data.key,
                                                              data.mods);
   });
-  auto *workspace = workspaceManager.getCurrentWorkspace();
 
   mWindow.addFocusHandler([&tracker, &loadStatusDialog, &assetManager,
                            &renderer, &workspaceManager](bool focused) {
@@ -187,10 +189,10 @@ void EditorScreen::start(const Project &rawProject) {
     }
   });
 
-  mainLoop.setUpdateFn([workspace, &simulator, this](f32 dt) mutable {
+  mainLoop.setUpdateFn([&workspaceManager, this](f32 dt) mutable {
     mEventSystem.poll();
 
-    workspace->update(dt);
+    workspaceManager.getCurrentWorkspace()->update(dt);
     return true;
   });
 
@@ -210,19 +212,13 @@ void EditorScreen::start(const Project &rawProject) {
     imguiRenderer.beginRendering();
     ImGuizmo::BeginFrame();
 
+    auto *workspace = workspaceManager.getCurrentWorkspace();
     workspace->render();
 
-    if (auto _ = widgets::MainMenuBar()) {
+    if (auto _ = MainMenuBar()) {
       debugLayer.renderMenu();
 
-      if (ImGui::BeginTabBar("Workspaces")) {
-        for (const auto &w : workspaceManager.getWorkspaces()) {
-          if (ImGui::BeginTabItem("Scene")) {
-            ImGui::EndTabItem();
-          }
-        }
-        ImGui::EndTabBar();
-      }
+      WorkspaceTabs::render(workspaceManager);
     }
 
     debugLayer.render();

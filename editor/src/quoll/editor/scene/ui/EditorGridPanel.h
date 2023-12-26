@@ -11,6 +11,11 @@ namespace quoll::editor {
 class EditorGridPanel {
 public:
   /**
+   * @brief Render menu
+   */
+  void renderMenu();
+
+  /**
    * @brief Render editor grid panel
    *
    * @param state Workspace state
