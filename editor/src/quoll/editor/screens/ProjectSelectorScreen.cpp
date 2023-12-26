@@ -13,6 +13,7 @@
 #include "quoll/editor/ui/FontAwesome.h"
 #include "quoll/editor/ui/Widgets.h"
 #include "quoll/editor/ui/StyleStack.h"
+#include "quoll/editor/ui/MainMenuBar.h"
 
 #include "ProjectSelectorScreen.h"
 
@@ -82,7 +83,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     imgui.beginRendering();
 
-    if (auto _ = widgets::MainMenuBar()) {
+    if (auto _ = MainMenuBar()) {
       debugLayer.renderMenu();
     }
     debugLayer.render();
@@ -110,7 +111,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
       static const auto CreateProjectLabel =
           String(fa::FolderPlus) + "  Create project";
-      if (ImGui::Button(CreateProjectLabel.c_str(), ActionButtonSize)) {
+      if (widgets::Button(CreateProjectLabel.c_str(), ActionButtonSize)) {
         if (projectManager.createProjectInPath()) {
           project = projectManager.getProject();
         }
@@ -118,7 +119,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
       static const auto OpenProjectLabel =
           String(fa::FolderOpen) + "  Open project";
-      if (ImGui::Button(OpenProjectLabel.c_str(), ActionButtonSize)) {
+      if (widgets::Button(OpenProjectLabel.c_str(), ActionButtonSize)) {
         if (projectManager.openProjectInPath()) {
           project = projectManager.getProject();
         }

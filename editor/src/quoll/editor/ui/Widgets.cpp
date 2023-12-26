@@ -7,6 +7,10 @@
 
 namespace quoll::editor::widgets {
 
+bool Button(const char *label, ImVec2 size) {
+  return ImGui::Button(label, size);
+}
+
 /**
  * @brief Section horizontal bounds
  */
@@ -110,20 +114,6 @@ FixedWindow::FixedWindow(const char *title, bool &open) {
 }
 
 FixedWindow::~FixedWindow() { ImGui::End(); }
-
-MainMenuBar::MainMenuBar() {
-  ImGui::PushStyleColor(ImGuiCol_MenuBarBg,
-                        Theme::getColor(ThemeColor::Neutral200));
-  mExpanded = ImGui::BeginMainMenuBar();
-}
-
-MainMenuBar::~MainMenuBar() {
-  if (mExpanded) {
-    ImGui::EndMainMenuBar();
-  }
-
-  ImGui::PopStyleColor();
-}
 
 ContextMenu::ContextMenu() { mExpanded = ImGui::BeginPopupContextWindow(); }
 

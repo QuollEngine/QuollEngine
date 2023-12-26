@@ -1,29 +1,11 @@
 #pragma once
 
-#include "quoll/editor/workspace/WorkspaceState.h"
-#include "quoll/editor/actions/ActionExecutor.h"
-#include "quoll/editor/actions/ActionCreator.h"
-
 namespace quoll::editor {
 
-enum class ToolbarItemType { Toggleable, HideWhenInactive };
-
 /**
- * @brief Toolbar widget
- *
- * Actions such as "Play"
- * is stored in this widget
+ * @brief Toolbar
  */
 class Toolbar {
-private:
-  struct ToolbarItem {
-    std::unique_ptr<ActionCreator> actionCreator;
-    std::unique_ptr<Action> action;
-    String label;
-    String icon;
-    ToolbarItemType type;
-  };
-
 public:
   /**
    * @brief Toolbar height
@@ -32,28 +14,42 @@ public:
 
 public:
   /**
-   * @brief Render toolbar
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @param actionExecutor Action executor
+   * @brief Begin toolbar
    */
-  void render(WorkspaceState &state, AssetRegistry &assetRegistry,
-              ActionExecutor &actionExecutor);
+  Toolbar();
 
   /**
-   * @brief Add toolbar item
-   *
-   * @param actionCreator Action creator
-   * @param label Button label
-   * @param icon Button icon
-   * @param type Item type
+   * @brief End toolbar
    */
-  void add(ActionCreator *actionCreator, String label, String icon,
-           ToolbarItemType type);
+  ~Toolbar();
+
+  /**
+   * @brief Render toolbar item
+   *
+   * @param label Toolbar item label
+   * @param icon Toolbar item icon
+   * @param active Item is active
+   *
+   * @retval true Item is clicked
+   * @retval false Item is not clicked
+   */
+  bool item(String label, String icon, bool active);
+
+  /**
+   * @brief Check if toolbar is open
+   *
+   * @retval true Toolbar is open
+   * @retval false Toolbar is not open
+   */
+  inline operator bool() { return mOpen; }
+
+  Toolbar(const Toolbar &) = delete;
+  Toolbar(Toolbar &&) = delete;
+  Toolbar &operator=(const Toolbar &) = delete;
+  Toolbar &operator=(Toolbar &&) = delete;
 
 private:
-  std::vector<ToolbarItem> mItems;
+  bool mOpen = false;
 };
 
 } // namespace quoll::editor

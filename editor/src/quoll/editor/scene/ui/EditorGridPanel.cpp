@@ -4,19 +4,24 @@
 #include "quoll/imgui/Imgui.h"
 
 #include "quoll/editor/ui/Widgets.h"
+#include "quoll/editor/ui/MenuBar.h"
+#include "quoll/editor/ui/Menu.h"
 #include "quoll/editor/actions/EditorGridActions.h"
 
 namespace quoll::editor {
 
-void EditorGridPanel::render(WorkspaceState &state,
-                             ActionExecutor &actionExecutor) {
-  if (auto _ = widgets::MainMenuBar()) {
-    if (ImGui::BeginMenu("Editor")) {
-      ImGui::MenuItem("Grid", nullptr, &mOpen);
-      ImGui::EndMenu();
+void EditorGridPanel::renderMenu() {
+  if (auto _ = MenuBar()) {
+    if (auto editor = Menu("Editor")) {
+      if (editor.item("Grid")) {
+        mOpen = true;
+      }
     }
   }
+}
 
+void EditorGridPanel::render(WorkspaceState &state,
+                             ActionExecutor &actionExecutor) {
   if (!mOpen) {
     return;
   }

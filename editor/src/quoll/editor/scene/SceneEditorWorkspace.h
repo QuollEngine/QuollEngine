@@ -37,13 +37,15 @@ public:
    * @param editorRenderer Editor renderer
    * @param mousePickingGraph Mouse picking graph
    * @param editorSimulator Editor simulator
+   * @param workspaceManager Workspace manager
    */
   SceneEditorWorkspace(Project project, AssetManager &assetManager,
                        SceneAssetHandle scene, Path scenePath,
                        Renderer &renderer, SceneRenderer &sceneRenderer,
                        EditorRenderer &editorRenderer,
                        MousePickingGraph &mousePickingGraph,
-                       SceneSimulator &editorSimulator);
+                       SceneSimulator &editorSimulator,
+                       WorkspaceManager &workspaceManager);
 
   SceneEditorWorkspace(const SceneEditorWorkspace &) = delete;
   SceneEditorWorkspace &operator=(const SceneEditorWorkspace &) = delete;
@@ -118,6 +120,7 @@ private:
   EditorRenderer &mEditorRenderer;
   MousePickingGraph &mMousePickingGraph;
   SceneSimulator &mEditorSimulator;
+  WorkspaceManager &mWorkspaceManager;
 
   bool mMouseClicked = false;
 

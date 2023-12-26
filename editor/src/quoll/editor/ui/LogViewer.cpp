@@ -24,7 +24,7 @@ void LogViewer::renderLogContainer(const String &name,
   auto flags = ImGuiWindowFlags_HorizontalScrollbar |
                ImGuiWindowFlags_AlwaysUseWindowPadding;
 
-  if (ImGui::Button("Clear")) {
+  if (widgets::Button("Clear")) {
     logStorage.clear();
     logSize = 0;
   }

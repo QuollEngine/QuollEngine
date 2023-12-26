@@ -139,7 +139,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
                                                   assetManager.getAssetsPath());
 
     if (currentFetchPath != assetManager.getAssetsPath()) {
-      if (ImGui::Button("Back")) {
+      if (widgets::Button("Back")) {
         setCurrentFetch(currentFetchPath.parent_path());
       }
       ImGui::SameLine();

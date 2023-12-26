@@ -17,7 +17,7 @@ SceneEditorWorkspace::SceneEditorWorkspace(
     Project project, AssetManager &assetManager, SceneAssetHandle scene,
     Path scenePath, Renderer &renderer, SceneRenderer &sceneRenderer,
     EditorRenderer &editorRenderer, MousePickingGraph &mousePickingGraph,
-    SceneSimulator &editorSimulator)
+    SceneSimulator &editorSimulator, WorkspaceManager &workspaceManager)
     : mAssetManager(assetManager), mState{project},
       mActionExecutor(mState, mAssetManager.getAssetRegistry()),
       mSceneAssetHandle(scene),
@@ -25,7 +25,7 @@ SceneEditorWorkspace::SceneEditorWorkspace(
       mSceneIO(mAssetManager.getAssetRegistry(), mState.scene),
       mRenderer(renderer), mSceneRenderer(sceneRenderer),
       mEditorRenderer(editorRenderer), mMousePickingGraph(mousePickingGraph),
-      mEditorSimulator(editorSimulator), mUIRoot(assetManager) {
+      mEditorSimulator(editorSimulator), mWorkspaceManager(workspaceManager) {
   mSceneIO.loadScene(scene);
 
   mActionExecutor.setAssetSyncer(&mSceneWriter);
@@ -83,9 +83,12 @@ void SceneEditorWorkspace::update(f32 dt) {
 void SceneEditorWorkspace::render() {
   renderLayout();
 
-  mUIRoot.render(mState, mAssetManager, mActionExecutor);
-  mMouseClicked = mUIRoot.renderSceneView(
-      mState, mActionExecutor, mRenderer.getSceneTexture(), mEditorSimulator);
+  mUIRoot.render(mState, mAssetManager, mActionExecutor, mRenderer,
+                 mSceneRenderer, mEditorRenderer, mMousePickingGraph,
+                 mEditorSimulator, mWorkspaceManager);
+  mMouseClicked =
+      mUIRoot.renderSceneView(mState, mAssetManager, mActionExecutor,
+                              mRenderer.getSceneTexture(), mEditorSimulator);
 
   auto &scene = mState.mode == WorkspaceMode::Edit ? mState.scene
                                                    : mState.simulationScene;

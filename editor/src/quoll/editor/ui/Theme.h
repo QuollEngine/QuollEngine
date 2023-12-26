@@ -1,5 +1,7 @@
 #pragma once
 
+#include <imgui.h>
+
 namespace quoll::editor {
 
 enum class ThemeColor {
@@ -44,6 +46,11 @@ struct ThemeStyles {
    * Window padding
    */
   ImVec2 windowPadding;
+
+  /**
+   * Window padding
+   */
+  ImVec2 framePadding;
 
   /**
    * Child rounding

@@ -5,11 +5,16 @@
 #include "quoll/renderer/Renderer.h"
 #include "quoll/scene/CameraAspectRatioUpdater.h"
 #include "quoll/ui/UICanvasUpdater.h"
+#include "quoll/renderer/Renderer.h"
+#include "quoll/renderer/SceneRenderer.h"
 
-#include "quoll/editor/ui/Toolbar.h"
 #include "quoll/editor/ui/StatusBar.h"
 #include "quoll/editor/ui/IconRegistry.h"
-#include "quoll/editor/ui/MainMenu.h"
+#include "quoll/editor/workspace/WorkspaceManager.h"
+
+#include "../core/SceneSimulator.h"
+#include "../renderer/EditorRenderer.h"
+#include "../renderer/MousePickingGraph.h"
 
 #include "SceneHierarchyPanel.h"
 #include "EntityPanel.h"
@@ -18,7 +23,6 @@
 #include "SceneGizmos.h"
 #include "Inspector.h"
 #include "AssetBrowser.h"
-#include "../core/SceneSimulator.h"
 
 namespace quoll::editor {
 
@@ -30,13 +34,6 @@ namespace quoll::editor {
 class SceneEditorUI {
 public:
   /**
-   * @brief Create UI root
-   *
-   * @param assetManager Asset manager
-   */
-  SceneEditorUI(AssetManager &assetManager);
-
-  /**
    * @brief Render UI Root
    *
    * Renders all components inside the root
@@ -44,14 +41,25 @@ public:
    * @param state Workspace state
    * @param assetManager Asset manager
    * @param actionExecutor Action executor
+   * @param renderer Renderer
+   * @param sceneRenderer Scene renderer
+   * @param editorRenderer Editor renderer
+   * @param mousePickingGraph Mouse picking graph
+   * @param editorSimulator Editor simulator
+   * @param workspaceManager Workspace manager
    */
   void render(WorkspaceState &state, AssetManager &assetManager,
-              ActionExecutor &actionExecutor);
+              ActionExecutor &actionExecutor, Renderer &renderer,
+              SceneRenderer &sceneRenderer, EditorRenderer &editorRenderer,
+              MousePickingGraph &mousePickingGraph,
+              SceneSimulator &editorSimulator,
+              WorkspaceManager &workspaceManager);
 
   /**
    * @brief Render scene view
    *
    * @param state Workspace state
+   * @param assetManager Asset manager
    * @param actionExecutor Action executor
    * @param sceneTexture Scene texture
    * @param editorSimulator Editor simulator
@@ -59,7 +67,8 @@ public:
    * @retval true Entity is clicked
    * @retval false Entity is not clicked
    */
-  bool renderSceneView(WorkspaceState &state, ActionExecutor &actionExecutor,
+  bool renderSceneView(WorkspaceState &state, AssetManager &assetManager,
+                       ActionExecutor &actionExecutor,
                        rhi::TextureHandle sceneTexture,
                        SceneSimulator &editorSimulator);
 
@@ -88,8 +97,6 @@ private:
 
   // Unclosable UI
   StatusBar mStatusBar;
-  Toolbar mToolbar;
-  MainMenu mMainMenu;
   SceneGizmos mSceneGizmos;
 };
 

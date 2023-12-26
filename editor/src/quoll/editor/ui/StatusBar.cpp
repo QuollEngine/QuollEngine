@@ -4,6 +4,7 @@
 #include "StatusBar.h"
 #include "Theme.h"
 #include "StyleStack.h"
+#include "MenuBar.h"
 
 namespace quoll::editor {
 
@@ -43,9 +44,8 @@ void StatusBar::render(EditorCamera &editorCamera) {
   stack.pushStyle(ImGuiStyleVar_WindowRounding, 0.0f);
 
   if (ImGui::Begin("StatusBar", nullptr, flags)) {
-    if (ImGui::BeginMenuBar()) {
+    if (auto _ = MenuBar()) {
       ImGui::Text("%s", state.c_str());
-      ImGui::EndMenuBar();
     }
     ImGui::End();
   }

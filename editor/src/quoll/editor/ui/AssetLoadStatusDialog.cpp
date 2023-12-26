@@ -1,7 +1,8 @@
 #include "quoll/core/Base.h"
-#include "AssetLoadStatusDialog.h"
-
 #include "quoll/imgui/Imgui.h"
+
+#include "AssetLoadStatusDialog.h"
+#include "Widgets.h"
 
 namespace quoll::editor {
 
@@ -22,7 +23,7 @@ void AssetLoadStatusDialog::render() {
       ImGui::BulletText("%s", message.c_str());
     }
 
-    if (ImGui::Button(mOkayButton.c_str())) {
+    if (widgets::Button(mOkayButton.c_str())) {
       ImGui::CloseCurrentPopup();
     }
 
