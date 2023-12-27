@@ -5,31 +5,25 @@
 namespace quoll::editor {
 
 enum class ThemeColor {
+  // Base
   White,
   Black,
   Transparent,
 
-  // Neutral colors
-  Neutral100,
-  Neutral200,
-  Neutral300,
-  Neutral400,
-  Neutral500,
-  Neutral600,
-  Neutral700,
-  Neutral800,
-  Neutral900,
+  // Charcoal
+  Charcoal300,
+  Charcoal400,
+  Charcoal500,
+  Charcoal600,
+  Charcoal700,
+  Charcoal800,
 
-  // Primary colors
-  Primary100,
-  Primary200,
+  // Sienna
+  Sienna500,
+  Sienna600,
 
   // Misc
   ModalBackdrop,
-
-  // New colors
-  MidnightBlack100,
-  MidnightBlack200,
 };
 
 /**

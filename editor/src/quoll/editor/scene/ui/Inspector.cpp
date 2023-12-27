@@ -34,9 +34,9 @@ void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
     {
       StyleStack stack;
       stack.pushColor(ImGuiCol_ChildBg,
-                      Theme::getColor(ThemeColor::MidnightBlack100));
+                      Theme::getColor(ThemeColor::Charcoal800));
 
-      auto SelectionColor = Theme::getColor(ThemeColor::MidnightBlack200);
+      auto SelectionColor = Theme::getColor(ThemeColor::Charcoal700);
 
       if (ImGui::BeginChild("Tabs", ImVec2(TabItemSize.x, 0), false)) {
         StyleStack stack;
@@ -69,7 +69,7 @@ void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
       stack.pushStyle(ImGuiStyleVar_WindowPadding,
                       Theme::getStyles().windowPadding);
       stack.pushColor(ImGuiCol_ChildBg,
-                      Theme::getColor(ThemeColor::MidnightBlack200));
+                      Theme::getColor(ThemeColor::Charcoal700));
 
       if (ImGui::BeginChild("Content", ImVec2(0, 0), false,
                             ImGuiWindowFlags_AlwaysUseWindowPadding)) {

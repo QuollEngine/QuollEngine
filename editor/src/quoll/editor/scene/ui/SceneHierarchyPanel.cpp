@@ -166,10 +166,10 @@ u32 SceneHierarchyPanel::renderEntity(Entity entity, u32 index, int flags,
     if (state.selectedEntity == entity) {
       styleStack.pushFont(Theme::getBoldFont());
       styleStack.pushColor(ImGuiCol_Header,
-                           Theme::getColor(ThemeColor::Primary100));
+                           Theme::getColor(ThemeColor::Sienna600));
     } else if ((innerIndex % 2) != 0) {
       styleStack.pushColor(ImGuiCol_Header,
-                           Theme::getColor(ThemeColor::Neutral200));
+                           Theme::getColor(ThemeColor::Charcoal500));
     }
 
     ImGui::PushID(static_cast<i32>(entity));

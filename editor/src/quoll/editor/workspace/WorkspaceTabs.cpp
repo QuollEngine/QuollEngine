@@ -12,12 +12,11 @@ void WorkspaceTabs::render(WorkspaceManager &workspaceManager) {
   StyleStack stack;
   stack.pushStyle(ImGuiStyleVar_FrameRounding, 0.0f);
 
-  stack.pushColor(ImGuiCol_Button,
-                  Theme::getColor(ThemeColor::MidnightBlack100));
+  stack.pushColor(ImGuiCol_Button, Theme::getColor(ThemeColor::Charcoal800));
   stack.pushColor(ImGuiCol_ButtonHovered,
-                  Theme::getColor(ThemeColor::MidnightBlack200));
+                  Theme::getColor(ThemeColor::Charcoal700));
   stack.pushColor(ImGuiCol_ButtonActive,
-                  Theme::getColor(ThemeColor::MidnightBlack200));
+                  Theme::getColor(ThemeColor::Charcoal700));
 
   for (size_t i = 0; i < workspaceManager.getWorkspaces().size(); ++i) {
     StyleStack itemStack;
@@ -26,11 +25,11 @@ void WorkspaceTabs::render(WorkspaceManager &workspaceManager) {
 
     if (i == workspaceManager.getCurrentWorkspaceIndex()) {
       itemStack.pushColor(ImGuiCol_Button,
-                          Theme::getColor(ThemeColor::MidnightBlack200));
+                          Theme::getColor(ThemeColor::Charcoal700));
       itemStack.pushColor(ImGuiCol_ButtonHovered,
-                          Theme::getColor(ThemeColor::MidnightBlack200));
+                          Theme::getColor(ThemeColor::Charcoal700));
       itemStack.pushColor(ImGuiCol_ButtonActive,
-                          Theme::getColor(ThemeColor::MidnightBlack200));
+                          Theme::getColor(ThemeColor::Charcoal700));
     }
 
     if (ImGui::Button(w->getMatchParams().type.c_str())) {

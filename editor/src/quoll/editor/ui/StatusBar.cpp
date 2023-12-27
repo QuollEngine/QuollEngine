@@ -40,7 +40,7 @@ void StatusBar::render(EditorCamera &editorCamera) {
       ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
   StyleStack stack;
-  stack.pushColor(ImGuiCol_MenuBarBg, Theme::getColor(ThemeColor::Neutral100));
+  stack.pushColor(ImGuiCol_MenuBarBg, Theme::getColor(ThemeColor::Charcoal800));
   stack.pushStyle(ImGuiStyleVar_WindowRounding, 0.0f);
 
   if (ImGui::Begin("StatusBar", nullptr, flags)) {

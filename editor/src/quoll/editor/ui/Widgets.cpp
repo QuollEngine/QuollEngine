@@ -96,7 +96,7 @@ Section::~Section() {
     ImGui::GetWindowDrawList()->ChannelsSetCurrent(0);
     ImGui::GetWindowDrawList()->AddRectFilled(
         panelMin, panelMax,
-        ImGui::GetColorU32(Theme::getColor(ThemeColor::Neutral400)),
+        ImGui::GetColorU32(Theme::getColor(ThemeColor::Charcoal400)),
         Theme::getStyles().sectionRounding.x);
     ImGui::GetWindowDrawList()->ChannelsMerge();
 
