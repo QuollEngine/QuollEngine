@@ -36,8 +36,7 @@ EntitySetMesh::EntitySetMesh(Entity entity, MeshAssetHandle mesh)
 
 ActionExecutorResult EntitySetMesh::onExecute(WorkspaceState &state,
                                               AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   auto &db = scene.entityDatabase;
 
@@ -59,8 +58,7 @@ ActionExecutorResult EntitySetMesh::onExecute(WorkspaceState &state,
 
 ActionExecutorResult EntitySetMesh::onUndo(WorkspaceState &state,
                                            AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
   if (mOldMesh != MeshAssetHandle::Null) {
@@ -89,8 +87,7 @@ EntityDeleteMesh::EntityDeleteMesh(Entity entity) : mEntity(entity) {}
 
 ActionExecutorResult EntityDeleteMesh::onExecute(WorkspaceState &state,
                                                  AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
   if (db.has<Mesh>(mEntity)) {
@@ -110,8 +107,7 @@ ActionExecutorResult EntityDeleteMesh::onExecute(WorkspaceState &state,
 
 ActionExecutorResult EntityDeleteMesh::onUndo(WorkspaceState &state,
                                               AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   auto &db = scene.entityDatabase;
   auto type = assetRegistry.getMeshes().getAsset(mOldMesh).type;
 
@@ -125,8 +121,7 @@ ActionExecutorResult EntityDeleteMesh::onUndo(WorkspaceState &state,
 
 bool EntityDeleteMesh::predicate(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   return scene.entityDatabase.has<quoll::Mesh>(mEntity) ||
          scene.entityDatabase.has<quoll::SkinnedMesh>(mEntity);

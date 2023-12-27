@@ -11,8 +11,7 @@ EntitySetParent::EntitySetParent(Entity entity, Entity parent)
 
 ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
   if (db.has<Parent>(mEntity)) {
@@ -56,8 +55,7 @@ ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
 
 ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
   if (mPreviousParent != Entity::Null) {
@@ -96,8 +94,7 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
 
 bool EntitySetParent::predicate(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
   // Parent does not exist
@@ -126,8 +123,7 @@ EntityRemoveParent::EntityRemoveParent(Entity entity) : mEntity(entity) {}
 ActionExecutorResult
 EntityRemoveParent::onExecute(WorkspaceState &state,
                               AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   auto parent = scene.entityDatabase.get<Parent>(mEntity).parent;
 
@@ -154,8 +150,7 @@ EntityRemoveParent::onExecute(WorkspaceState &state,
 
 ActionExecutorResult EntityRemoveParent::onUndo(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set<Parent>(mEntity, {mPreviousParent});
   if (scene.entityDatabase.has<Children>(mPreviousParent)) {
@@ -174,8 +169,7 @@ ActionExecutorResult EntityRemoveParent::onUndo(WorkspaceState &state,
 
 bool EntityRemoveParent::predicate(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   return scene.entityDatabase.has<Parent>(mEntity);
 }

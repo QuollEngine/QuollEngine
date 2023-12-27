@@ -10,8 +10,7 @@ EntitySetSkinnedMeshRendererMaterial::EntitySetSkinnedMeshRendererMaterial(
 ActionExecutorResult
 EntitySetSkinnedMeshRendererMaterial::onExecute(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldMaterial =
       scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(
@@ -28,8 +27,7 @@ EntitySetSkinnedMeshRendererMaterial::onExecute(WorkspaceState &state,
 ActionExecutorResult
 EntitySetSkinnedMeshRendererMaterial::onUndo(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(mSlot) =
       mOldMaterial;
@@ -41,8 +39,7 @@ EntitySetSkinnedMeshRendererMaterial::onUndo(WorkspaceState &state,
 
 bool EntitySetSkinnedMeshRendererMaterial::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {
     return false;
@@ -63,8 +60,7 @@ EntityAddSkinnedMeshRendererMaterialSlot::
 
 ActionExecutorResult EntityAddSkinnedMeshRendererMaterialSlot::onExecute(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.push_back(
       mNewMaterial);
@@ -79,8 +75,7 @@ ActionExecutorResult
 EntityAddSkinnedMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
                                                  AssetRegistry &assetRegistry) {
 
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.pop_back();
 
@@ -91,8 +86,7 @@ EntityAddSkinnedMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
 
 bool EntityAddSkinnedMeshRendererMaterialSlot::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {
     return false;
@@ -107,8 +101,7 @@ EntityRemoveLastSkinnedMeshRendererMaterialSlot::
 
 ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onExecute(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldMaterial =
       scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.back();
@@ -123,8 +116,7 @@ ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onExecute(
 
 ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onUndo(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.push_back(
       mOldMaterial);
@@ -136,8 +128,7 @@ ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onUndo(
 
 bool EntityRemoveLastSkinnedMeshRendererMaterialSlot::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {
     return false;

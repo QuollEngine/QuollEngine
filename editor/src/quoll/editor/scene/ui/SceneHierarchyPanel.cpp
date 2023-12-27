@@ -89,8 +89,7 @@ void SceneHierarchyPanel::renderRoot(WorkspaceState &state,
   static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
   static constexpr f32 TreeNodeIndentSpacing = 10.0f;
 
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   int treeNodeFlags =
       ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth |
@@ -137,8 +136,7 @@ u32 SceneHierarchyPanel::renderEntity(Entity entity, u32 index, int flags,
                                       WorkspaceState &state,
                                       ActionExecutor &actionExecutor) {
   u32 innerIndex = index;
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   String name = scene.entityDatabase.has<Name>(entity)
                     ? scene.entityDatabase.get<Name>(entity).name

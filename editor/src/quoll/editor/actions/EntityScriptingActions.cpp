@@ -24,8 +24,7 @@ ActionExecutorResult EntityCreateScript::onUndo(WorkspaceState &state,
 
 bool EntityCreateScript::predicate(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   return !scene.entityDatabase.has<LuaScript>(mEntity) &&
          assetRegistry.getLuaScripts().hasAsset(mHandle);
 }
@@ -35,8 +34,7 @@ EntitySetScript::EntitySetScript(Entity entity, LuaScriptAssetHandle script)
 
 ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldScript = scene.entityDatabase.get<LuaScript>(mEntity).handle;
 
@@ -50,8 +48,7 @@ ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state,
 
 ActionExecutorResult EntitySetScript::onUndo(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set<LuaScript>(mEntity, {mOldScript});
 
@@ -72,8 +69,7 @@ EntitySetScriptVariable::EntitySetScriptVariable(
 ActionExecutorResult
 EntitySetScriptVariable::onExecute(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   auto &script = scene.entityDatabase.get<LuaScript>(mEntity);
   mOldScript = script;
@@ -89,8 +85,7 @@ EntitySetScriptVariable::onExecute(WorkspaceState &state,
 ActionExecutorResult
 EntitySetScriptVariable::onUndo(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set(mEntity, mOldScript);
 
@@ -101,8 +96,7 @@ EntitySetScriptVariable::onUndo(WorkspaceState &state,
 
 bool EntitySetScriptVariable::predicate(WorkspaceState &state,
                                         AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<LuaScript>(mEntity)) {
     return false;

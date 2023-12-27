@@ -11,8 +11,7 @@ EntitySetSprite::EntitySetSprite(Entity entity, TextureAssetHandle handle)
 
 ActionExecutorResult EntitySetSprite::onExecute(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldSprite = scene.entityDatabase.get<Sprite>(mEntity).handle;
   scene.entityDatabase.set<Sprite>(mEntity, {mSprite});
@@ -24,8 +23,7 @@ ActionExecutorResult EntitySetSprite::onExecute(WorkspaceState &state,
 
 ActionExecutorResult EntitySetSprite::onUndo(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set<Sprite>(mEntity, {mOldSprite});
 
@@ -57,8 +55,7 @@ ActionExecutorResult EntityCreateSprite::onUndo(WorkspaceState &state,
 
 bool EntityCreateSprite::predicate(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   return !scene.entityDatabase.has<Sprite>(mEntity) &&
          assetRegistry.getTextures().hasAsset(mHandle);
 }

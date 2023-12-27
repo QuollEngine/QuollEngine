@@ -9,8 +9,7 @@ EntityToggleSkeletonDebugBones::EntityToggleSkeletonDebugBones(Entity entity)
 ActionExecutorResult
 EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state,
                                           AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   if (scene.entityDatabase.has<SkeletonDebug>(mEntity)) {
     scene.entityDatabase.remove<SkeletonDebug>(mEntity);
@@ -37,8 +36,7 @@ EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state,
 
 bool EntityToggleSkeletonDebugBones::predicate(WorkspaceState &state,
                                                AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   return scene.entityDatabase.has<Skeleton>(mEntity);
 }
@@ -48,8 +46,7 @@ EntityDeleteSkeleton::EntityDeleteSkeleton(Entity entity) : mEntity(entity) {}
 ActionExecutorResult
 EntityDeleteSkeleton::onExecute(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldComponent = scene.entityDatabase.get<Skeleton>(mEntity);
 
@@ -69,8 +66,7 @@ EntityDeleteSkeleton::onExecute(WorkspaceState &state,
 ActionExecutorResult
 EntityDeleteSkeleton::onUndo(WorkspaceState &state,
                              AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set(mEntity, mOldComponent);
   if (mOldSkeletonDebug.has_value()) {
@@ -84,8 +80,7 @@ EntityDeleteSkeleton::onUndo(WorkspaceState &state,
 
 bool EntityDeleteSkeleton::predicate(WorkspaceState &state,
                                      AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   return scene.entityDatabase.has<Skeleton>(mEntity);
 }

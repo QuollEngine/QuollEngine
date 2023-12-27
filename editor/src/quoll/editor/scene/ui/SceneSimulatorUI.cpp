@@ -2,7 +2,6 @@
 #include "quoll/imgui/Imgui.h"
 
 #include "quoll/editor/actions/TransformOperationActions.h"
-#include "quoll/editor/actions/SimulationModeActions.h"
 #include "quoll/editor/actions/SpawnEntityActions.h"
 #include "quoll/editor/actions/ProjectActions.h"
 #include "quoll/editor/actions/DeleteEntityAction.h"

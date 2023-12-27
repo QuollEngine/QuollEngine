@@ -9,21 +9,21 @@
 
 using DeleteEntityActionTest = ActionTestBase;
 
-TEST_P(DeleteEntityActionTest,
+TEST_F(DeleteEntityActionTest,
        ExecuteAddsDeleteComponentToEntityInSceneIfWorkspaceModeIsEdit) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Delete>(entity));
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Delete>(entity));
   ASSERT_EQ(res.entitiesToDelete.size(), 1);
   EXPECT_EQ(res.entitiesToDelete.at(0), entity);
 }
 
-TEST_P(DeleteEntityActionTest,
+TEST_F(DeleteEntityActionTest,
        ExecuteSetsSelectedEntityToNullIfSelectedEntityIsDeletedEntity) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
   state.selectedEntity = entity;
 
   quoll::editor::DeleteEntity action(entity);
@@ -32,17 +32,17 @@ TEST_P(DeleteEntityActionTest,
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
-TEST_P(
+TEST_F(
     DeleteEntityActionTest,
     ExecuteSetsSelectedEntityToNullIfSelectedEntityIsADescendantOfDeletedEntity) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
-    auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
+    auto e1 = state.scene.entityDatabase.create();
+    state.scene.entityDatabase.set<quoll::Parent>(e1, {entity});
 
-    auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
+    auto e2 = state.scene.entityDatabase.create();
+    state.scene.entityDatabase.set<quoll::Parent>(e2, {e1});
     state.selectedEntity = e2;
   }
 
@@ -52,11 +52,11 @@ TEST_P(
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
-TEST_P(
+TEST_F(
     DeleteEntityActionTest,
     ExecuteDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotProvidedEntity) {
-  auto entity = activeScene().entityDatabase.create();
-  state.selectedEntity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  state.selectedEntity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
@@ -64,63 +64,63 @@ TEST_P(
   EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
 
-TEST_P(DeleteEntityActionTest,
+TEST_F(DeleteEntityActionTest,
        ExecuteSetsStartingCameraToDummyCameraIfStartingCameraIsDeletedEntity) {
-  activeScene().dummyCamera = activeScene().entityDatabase.create();
+  state.scene.dummyCamera = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
-  activeScene().activeCamera = entity;
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.activeCamera = entity;
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
+  EXPECT_EQ(state.scene.activeCamera, state.scene.dummyCamera);
   EXPECT_TRUE(res.saveScene);
 }
 
-TEST_P(
+TEST_F(
     DeleteEntityActionTest,
     ExecuteSetsStartingCameraToDummyCameraIfStartingCameraIsADescendantOfDeletedEntity) {
-  activeScene().dummyCamera = activeScene().entityDatabase.create();
+  state.scene.dummyCamera = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
-    auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
+    auto e1 = state.scene.entityDatabase.create();
+    state.scene.entityDatabase.set<quoll::Parent>(e1, {entity});
 
-    auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
-    activeScene().activeCamera = e2;
+    auto e2 = state.scene.entityDatabase.create();
+    state.scene.entityDatabase.set<quoll::Parent>(e2, {e1});
+    state.scene.activeCamera = e2;
   }
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
+  EXPECT_EQ(state.scene.activeCamera, state.scene.dummyCamera);
   EXPECT_TRUE(res.saveScene);
 }
 
-TEST_P(
+TEST_F(
     DeleteEntityActionTest,
     ExecuteDoesNotSetStartingCameraToDummyCameraIfStartingCameraIsNotAffectedByDelete) {
-  activeScene().dummyCamera = activeScene().entityDatabase.create();
-  activeScene().activeCamera = activeScene().entityDatabase.create();
+  state.scene.dummyCamera = state.scene.entityDatabase.create();
+  state.scene.activeCamera = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_NE(activeScene().activeCamera, activeScene().dummyCamera);
+  EXPECT_NE(state.scene.activeCamera, state.scene.dummyCamera);
   EXPECT_FALSE(res.saveScene);
 }
 
-TEST_P(DeleteEntityActionTest,
+TEST_F(DeleteEntityActionTest,
        ExecuteSetsActiveCameraToWorkspaceCameraIfActiveCameraIsDeletedEntity) {
-  state.camera = activeScene().entityDatabase.create();
+  state.camera = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
   state.activeCamera = entity;
 
   quoll::editor::DeleteEntity action(entity);
@@ -129,19 +129,19 @@ TEST_P(DeleteEntityActionTest,
   EXPECT_EQ(state.activeCamera, state.camera);
 }
 
-TEST_P(
+TEST_F(
     DeleteEntityActionTest,
     ExecuteSetsActiveCameraToWorkspaceCameraIfActiveCameraIsADescendantOfDeletedEntity) {
-  state.camera = activeScene().entityDatabase.create();
+  state.camera = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
-    auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
+    auto e1 = state.scene.entityDatabase.create();
+    state.scene.entityDatabase.set<quoll::Parent>(e1, {entity});
 
-    auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
+    auto e2 = state.scene.entityDatabase.create();
+    state.scene.entityDatabase.set<quoll::Parent>(e2, {e1});
     state.activeCamera = e2;
   }
 
@@ -151,13 +151,13 @@ TEST_P(
   EXPECT_EQ(state.activeCamera, state.camera);
 }
 
-TEST_P(
+TEST_F(
     DeleteEntityActionTest,
     ExecuteDoesNotSetActiveCameraToWorkspaceCameraIfActiveCameraIsNotAffectedByDelete) {
-  state.camera = activeScene().entityDatabase.create();
-  state.activeCamera = activeScene().entityDatabase.create();
+  state.camera = state.scene.entityDatabase.create();
+  state.activeCamera = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
@@ -165,55 +165,53 @@ TEST_P(
   EXPECT_NE(state.activeCamera, state.camera);
 }
 
-TEST_P(DeleteEntityActionTest,
+TEST_F(DeleteEntityActionTest,
        ExecuteSetsEnvironmentToDummyEnvironmentIfEnvironmnetIsDeletedEntity) {
-  activeScene().dummyEnvironment = activeScene().entityDatabase.create();
+  state.scene.dummyEnvironment = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
-  activeScene().activeEnvironment = entity;
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.activeEnvironment = entity;
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(activeScene().activeEnvironment, activeScene().dummyEnvironment);
+  EXPECT_EQ(state.scene.activeEnvironment, state.scene.dummyEnvironment);
 }
 
-TEST_P(
+TEST_F(
     DeleteEntityActionTest,
     ExecuteSetsEnvironmentToDummyEnvironmentEnvironmentIsADescendantOfDeletedEntity) {
-  activeScene().dummyEnvironment = activeScene().entityDatabase.create();
+  state.scene.dummyEnvironment = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
-    auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
+    auto e1 = state.scene.entityDatabase.create();
+    state.scene.entityDatabase.set<quoll::Parent>(e1, {entity});
 
-    auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
-    activeScene().activeEnvironment = e2;
+    auto e2 = state.scene.entityDatabase.create();
+    state.scene.entityDatabase.set<quoll::Parent>(e2, {e1});
+    state.scene.activeEnvironment = e2;
   }
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(activeScene().activeEnvironment, activeScene().dummyEnvironment);
+  EXPECT_EQ(state.scene.activeEnvironment, state.scene.dummyEnvironment);
   EXPECT_TRUE(res.saveScene);
 }
 
-TEST_P(
+TEST_F(
     DeleteEntityActionTest,
     ExecuteDoesNotSetEnvironmentToDummyEnvironmentIfEnvironmentIsNotAffectedByDelete) {
-  activeScene().dummyEnvironment = activeScene().entityDatabase.create();
-  activeScene().activeEnvironment = activeScene().entityDatabase.create();
+  state.scene.dummyEnvironment = state.scene.entityDatabase.create();
+  state.scene.activeEnvironment = state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_NE(activeScene().activeEnvironment, activeScene().dummyEnvironment);
+  EXPECT_NE(state.scene.activeEnvironment, state.scene.dummyEnvironment);
   EXPECT_FALSE(res.saveScene);
 }
-
-InitActionsTestSuite(EntityActionsTest, DeleteEntityActionTest);
