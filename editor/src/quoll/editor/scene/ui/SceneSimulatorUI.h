@@ -31,7 +31,7 @@ namespace quoll::editor {
  *
  * Renders all the UI in the scene
  */
-class SceneEditorUI {
+class SceneSimulatorUI {
 public:
   /**
    * @brief Render UI Root
@@ -41,21 +41,17 @@ public:
    * @param state Workspace state
    * @param assetManager Asset manager
    * @param actionExecutor Action executor
-   * @param sceneHandle Scene asset handle
    * @param renderer Renderer
    * @param sceneRenderer Scene renderer
    * @param editorRenderer Editor renderer
    * @param mousePickingGraph Mouse picking graph
    * @param editorSimulator Editor simulator
-   * @param workspaceManager Workspace manager
    */
   void render(WorkspaceState &state, AssetManager &assetManager,
-              ActionExecutor &actionExecutor, SceneAssetHandle sceneHandle,
-              Renderer &renderer, SceneRenderer &sceneRenderer,
-              EditorRenderer &editorRenderer,
+              ActionExecutor &actionExecutor, Renderer &renderer,
+              SceneRenderer &sceneRenderer, EditorRenderer &editorRenderer,
               MousePickingGraph &mousePickingGraph,
-              SceneSimulator &editorSimulator,
-              WorkspaceManager &workspaceManager);
+              SceneSimulator &editorSimulator);
 
   /**
    * @brief Render scene view

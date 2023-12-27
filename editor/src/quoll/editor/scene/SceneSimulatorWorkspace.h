@@ -8,7 +8,6 @@
 
 #include "quoll/editor/workspace/WorkspaceMatchParams.h"
 #include "quoll/editor/workspace/Workspace.h"
-#include "quoll/editor/workspace/WorkspaceManager.h"
 
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
@@ -17,14 +16,14 @@
 #include "renderer/EditorRenderer.h"
 #include "renderer/MousePickingGraph.h"
 #include "asset/SceneWriter.h"
-#include "ui/SceneEditorUI.h"
+#include "ui/SceneSimulatorUI.h"
 
 namespace quoll::editor {
 
 /**
  * @brief Workspace
  */
-class SceneEditorWorkspace : public Workspace {
+class SceneSimulatorWorkspace : public Workspace {
 public:
   /**
    * @brief Create workspace
@@ -32,31 +31,29 @@ public:
    * @param project Project
    * @param assetManager Asset manager
    * @param scene Scene asset
-   * @param scenePath Scene path
+   * @param sourceScene Source scene
    * @param renderer Renderer
    * @param sceneRenderer Scene renderer
    * @param editorRenderer Editor renderer
    * @param mousePickingGraph Mouse picking graph
    * @param editorSimulator Editor simulator
-   * @param workspaceManager Workspace manager
    */
-  SceneEditorWorkspace(Project project, AssetManager &assetManager,
-                       SceneAssetHandle scene, Path scenePath,
-                       Renderer &renderer, SceneRenderer &sceneRenderer,
-                       EditorRenderer &editorRenderer,
-                       MousePickingGraph &mousePickingGraph,
-                       SceneSimulator &editorSimulator,
-                       WorkspaceManager &workspaceManager);
+  SceneSimulatorWorkspace(Project project, AssetManager &assetManager,
+                          SceneAssetHandle scene, Scene &sourceScene,
+                          Renderer &renderer, SceneRenderer &sceneRenderer,
+                          EditorRenderer &editorRenderer,
+                          MousePickingGraph &mousePickingGraph,
+                          SceneSimulator &editorSimulator);
 
-  SceneEditorWorkspace(const SceneEditorWorkspace &) = delete;
-  SceneEditorWorkspace &operator=(const SceneEditorWorkspace &) = delete;
-  SceneEditorWorkspace(SceneEditorWorkspace &&) = delete;
-  SceneEditorWorkspace &operator=(SceneEditorWorkspace &&) = delete;
+  SceneSimulatorWorkspace(const SceneSimulatorWorkspace &) = delete;
+  SceneSimulatorWorkspace &operator=(const SceneSimulatorWorkspace &) = delete;
+  SceneSimulatorWorkspace(SceneSimulatorWorkspace &&) = delete;
+  SceneSimulatorWorkspace &operator=(SceneSimulatorWorkspace &&) = delete;
 
   /**
    * @brief Destroy workspace
    */
-  virtual ~SceneEditorWorkspace();
+  virtual ~SceneSimulatorWorkspace();
 
   /**
    * @brief Update
@@ -114,18 +111,16 @@ private:
   SceneIO mSceneIO;
   ShortcutsManager mShortcutsManager;
 
-  SceneEditorUI mUIRoot;
+  SceneSimulatorUI mUIRoot;
 
   Renderer &mRenderer;
   SceneRenderer &mSceneRenderer;
   EditorRenderer &mEditorRenderer;
   MousePickingGraph &mMousePickingGraph;
   SceneSimulator &mEditorSimulator;
-  WorkspaceManager &mWorkspaceManager;
-
-  bool mMouseClicked = false;
 
   bool mRequiresDockspaceInit = false;
+  bool mMouseClicked = false;
 
   String mLayoutPath;
 };

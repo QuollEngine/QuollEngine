@@ -10,17 +10,32 @@ namespace quoll::editor {
 
 void WorkspaceTabs::render(WorkspaceManager &workspaceManager) {
   StyleStack stack;
-  stack.pushColor(ImGuiCol_Tab, Theme::getColor(ThemeColor::Neutral100));
-  stack.pushColor(ImGuiCol_TabActive, Theme::getColor(ThemeColor::Neutral300));
-  stack.pushColor(ImGuiCol_TabHovered, Theme::getColor(ThemeColor::Neutral300));
+  stack.pushStyle(ImGuiStyleVar_FrameRounding, 0.0f);
 
-  if (ImGui::BeginTabBar("Workspaces")) {
-    for (const auto &w : workspaceManager.getWorkspaces()) {
-      if (ImGui::BeginTabItem("Scene")) {
-        ImGui::EndTabItem();
-      }
+  stack.pushColor(ImGuiCol_Button,
+                  Theme::getColor(ThemeColor::MidnightBlack100));
+  stack.pushColor(ImGuiCol_ButtonHovered,
+                  Theme::getColor(ThemeColor::MidnightBlack200));
+  stack.pushColor(ImGuiCol_ButtonActive,
+                  Theme::getColor(ThemeColor::MidnightBlack200));
+
+  for (size_t i = 0; i < workspaceManager.getWorkspaces().size(); ++i) {
+    StyleStack itemStack;
+
+    const auto &w = workspaceManager.getWorkspaces().at(i);
+
+    if (i == workspaceManager.getCurrentWorkspaceIndex()) {
+      itemStack.pushColor(ImGuiCol_Button,
+                          Theme::getColor(ThemeColor::MidnightBlack200));
+      itemStack.pushColor(ImGuiCol_ButtonHovered,
+                          Theme::getColor(ThemeColor::MidnightBlack200));
+      itemStack.pushColor(ImGuiCol_ButtonActive,
+                          Theme::getColor(ThemeColor::MidnightBlack200));
     }
-    ImGui::EndTabBar();
+
+    if (ImGui::Button(w->getMatchParams().type.c_str())) {
+      workspaceManager.switchWorkspace(i);
+    }
   }
 }
 

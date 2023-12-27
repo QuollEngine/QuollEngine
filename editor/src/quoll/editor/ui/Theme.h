@@ -25,7 +25,11 @@ enum class ThemeColor {
   Primary200,
 
   // Misc
-  ModalBackdrop
+  ModalBackdrop,
+
+  // New colors
+  MidnightBlack100,
+  MidnightBlack200,
 };
 
 /**
