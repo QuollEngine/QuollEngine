@@ -12,6 +12,7 @@
 
 #include "PhysxBackend.h"
 #include "PhysxMapping.h"
+#include "PhysxQueryFilterCallback.h"
 
 #ifdef QUOLL_PROFILER
 static const bool RECORD_MEMORY_ALLOCATIONS = true;
@@ -203,12 +204,16 @@ bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
 
   PxSweepBuffer buffer;
 
+  PxQueryFilterData filterData(PxQueryFlag::eDYNAMIC | PxQueryFlag::eSTATIC |
+                               PxQueryFlag::ePREFILTER);
+  PhysxQueryFilterCallback filterCallback(physx.shape);
+
   bool result =
       mScene->sweep(physx.shape->getGeometry().any(),
                     PhysxMapping::getPhysxTransform(transform.worldTransform) *
                         physx.shape->getLocalPose(),
                     PhysxMapping::getPhysxVec3(direction), maxDistance, buffer,
-                    PxHitFlag::eDEFAULT);
+                    PxHitFlag::eDEFAULT, filterData, &filterCallback);
 
   if (result) {
     const auto &bh = buffer.getAnyHit(0);
