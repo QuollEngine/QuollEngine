@@ -157,8 +157,7 @@ void EntityPanel::renderContent(WorkspaceState &state,
     return;
   }
 
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   setSelectedEntity(scene, state.selectedEntity);
   if (scene.entityDatabase.exists(mSelectedEntity)) {
     renderName(scene, actionExecutor);
@@ -976,7 +975,7 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
       }
     }
 
-    if (state.mode == WorkspaceMode::Simulation) {
+    if (isSimulation) {
       if (assetRegistry.getAnimations().hasAsset(currentState.animation)) {
         const auto &animationAsset =
             assetRegistry.getAnimations().getAsset(currentState.animation).data;

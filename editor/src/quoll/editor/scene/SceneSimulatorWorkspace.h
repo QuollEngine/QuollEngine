@@ -15,7 +15,6 @@
 #include "core/SceneSimulator.h"
 #include "renderer/EditorRenderer.h"
 #include "renderer/MousePickingGraph.h"
-#include "asset/SceneWriter.h"
 #include "ui/SceneSimulatorUI.h"
 
 namespace quoll::editor {
@@ -105,7 +104,6 @@ private:
 private:
   AssetManager &mAssetManager;
   WorkspaceState mState;
-  SceneWriter mSceneWriter;
   SceneAssetHandle mSceneAssetHandle;
   ActionExecutor mActionExecutor;
   SceneIO mSceneIO;

@@ -11,8 +11,7 @@ EntitySetAudio::EntitySetAudio(Entity entity, AudioAssetHandle audio)
 
 ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state,
                                                AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldAudio = scene.entityDatabase.get<AudioSource>(mEntity).source;
   scene.entityDatabase.set<AudioSource>(mEntity, {mAudio});
@@ -24,8 +23,7 @@ ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state,
 
 ActionExecutorResult EntitySetAudio::onUndo(WorkspaceState &state,
                                             AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set<AudioSource>(mEntity, {mOldAudio});
 
@@ -57,8 +55,7 @@ ActionExecutorResult EntityCreateAudio::onUndo(WorkspaceState &state,
 
 bool EntityCreateAudio::predicate(WorkspaceState &state,
                                   AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   return !scene.entityDatabase.has<AudioSource>(mEntity) &&
          assetRegistry.getAudios().hasAsset(mHandle);
 }

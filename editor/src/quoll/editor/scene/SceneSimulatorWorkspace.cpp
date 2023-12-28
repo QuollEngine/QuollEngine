@@ -21,23 +21,22 @@ SceneSimulatorWorkspace::SceneSimulatorWorkspace(
     : mAssetManager(assetManager), mState{project},
       mActionExecutor(mState, mAssetManager.getAssetRegistry()),
       mSceneAssetHandle(scene),
-      mSceneWriter(mState.simulationScene, mAssetManager.getAssetRegistry()),
-      mSceneIO(mAssetManager.getAssetRegistry(), mState.simulationScene),
+      mSceneIO(mAssetManager.getAssetRegistry(), mState.scene),
       mRenderer(renderer), mSceneRenderer(sceneRenderer),
       mEditorRenderer(editorRenderer), mMousePickingGraph(mousePickingGraph),
       mEditorSimulator(editorSimulator) {
 
-  sourceScene.entityDatabase.duplicate(mState.simulationScene.entityDatabase);
-  mState.simulationScene.dummyCamera = sourceScene.dummyCamera;
-  mState.simulationScene.activeEnvironment = sourceScene.activeEnvironment;
-  mState.simulationScene.dummyEnvironment = sourceScene.dummyEnvironment;
+  sourceScene.entityDatabase.duplicate(mState.scene.entityDatabase);
+  mState.scene.dummyCamera = sourceScene.dummyCamera;
+  mState.scene.activeEnvironment = sourceScene.activeEnvironment;
+  mState.scene.dummyEnvironment = sourceScene.dummyEnvironment;
   mState.mode = WorkspaceMode::Simulation;
 
   if (sourceScene.entityDatabase.has<Camera>(sourceScene.activeCamera)) {
-    mState.simulationScene.activeCamera = sourceScene.activeCamera;
+    mState.scene.activeCamera = sourceScene.activeCamera;
     mState.activeCamera = sourceScene.activeCamera;
   } else {
-    mState.simulationScene.activeCamera = sourceScene.dummyCamera;
+    mState.scene.activeCamera = sourceScene.dummyCamera;
     mState.activeCamera = sourceScene.dummyCamera;
   }
 
@@ -48,12 +47,11 @@ SceneSimulatorWorkspace::SceneSimulatorWorkspace(
   ImGuiIO &io = ImGui::GetIO();
   io.IniFilename = nullptr;
 
-  mEditorSimulator.observeChanges(mState.simulationScene.entityDatabase);
+  mEditorSimulator.observeChanges(mState.scene.entityDatabase);
 }
 
 SceneSimulatorWorkspace::~SceneSimulatorWorkspace() {
-  mEditorSimulator.cleanupSimulationDatabase(
-      mState.simulationScene.entityDatabase);
+  mEditorSimulator.cleanupSimulationDatabase(mState.scene.entityDatabase);
 }
 
 void SceneSimulatorWorkspace::renderLayout() {
@@ -83,7 +81,7 @@ void SceneSimulatorWorkspace::render() {
       mUIRoot.renderSceneView(mState, mAssetManager, mActionExecutor,
                               mRenderer.getSceneTexture(), mEditorSimulator);
 
-  mEditorSimulator.render(mState.simulationScene.entityDatabase);
+  mEditorSimulator.render(mState.scene.entityDatabase);
 }
 
 void SceneSimulatorWorkspace::processShortcuts(int key, int mods) {}
@@ -91,9 +89,9 @@ void SceneSimulatorWorkspace::processShortcuts(int key, int mods) {}
 void SceneSimulatorWorkspace::updateFrameData(
     rhi::RenderCommandList &commandList, u32 frameIndex) {
 
-  mSceneRenderer.updateFrameData(mState.simulationScene.entityDatabase,
+  mSceneRenderer.updateFrameData(mState.scene.entityDatabase,
                                  mState.activeCamera, frameIndex);
-  mEditorRenderer.updateFrameData(mState.simulationScene.entityDatabase,
+  mEditorRenderer.updateFrameData(mState.scene.entityDatabase,
                                   mState.activeCamera, mState,
                                   mAssetManager.getAssetRegistry(), frameIndex);
 

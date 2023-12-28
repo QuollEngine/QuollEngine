@@ -12,29 +12,6 @@ SceneSimulator::SceneSimulator(InputDeviceManager &deviceManager,
       mEditorCamera(editorCamera), mAudioSystem(assetRegistry),
       mAssetRegistry(assetRegistry) {}
 
-void SceneSimulator::update(f32 dt, WorkspaceState &state) {
-  if (state.mode != mMode) {
-    // Reobserve changes when switching from
-    // edit to simulation mode
-    if (mMode == WorkspaceMode::Edit) {
-      observeChanges(state.simulationScene.entityDatabase);
-    }
-
-    // Cleanup simulation database when switchin from simulation
-    // to edit mode
-    if (mMode == WorkspaceMode::Simulation) {
-      cleanupSimulationDatabase(state.simulationScene.entityDatabase);
-    }
-    mMode = state.mode;
-  }
-
-  if (state.mode == WorkspaceMode::Edit) {
-    updateEditor(dt, state);
-  } else {
-    updateSimulation(dt, state);
-  }
-}
-
 void SceneSimulator::render(EntityDatabase &db) {
   mUICanvasUpdater.render(db, mAssetRegistry);
 }
@@ -64,8 +41,8 @@ void SceneSimulator::updateEditor(f32 dt, WorkspaceState &state) {
 }
 
 void SceneSimulator::updateSimulation(f32 dt, WorkspaceState &state) {
-  auto &entityDatabase = state.simulationScene.entityDatabase;
-  mEntityDeleter.update(state.simulationScene);
+  auto &entityDatabase = state.scene.entityDatabase;
+  mEntityDeleter.update(state.scene);
 
   mInputMapSystem.update(entityDatabase);
 

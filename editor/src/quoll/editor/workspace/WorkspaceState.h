@@ -30,11 +30,6 @@ struct WorkspaceState {
   Scene scene;
 
   /**
-   * Simulation scene
-   */
-  Scene simulationScene;
-
-  /**
    * Active transform operation
    */
   TransformOperation activeTransform = TransformOperation::Move;

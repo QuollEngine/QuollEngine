@@ -10,8 +10,7 @@ DeleteEntity::DeleteEntity(Entity entity) : mEntity(entity) {}
 
 ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set<Delete>(mEntity, {});
 

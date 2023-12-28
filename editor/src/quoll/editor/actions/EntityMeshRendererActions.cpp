@@ -10,8 +10,7 @@ EntitySetMeshRendererMaterial::EntitySetMeshRendererMaterial(
 ActionExecutorResult
 EntitySetMeshRendererMaterial::onExecute(WorkspaceState &state,
                                          AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldMaterial =
       scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot);
@@ -27,8 +26,7 @@ EntitySetMeshRendererMaterial::onExecute(WorkspaceState &state,
 ActionExecutorResult
 EntitySetMeshRendererMaterial::onUndo(WorkspaceState &state,
                                       AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot) =
       mOldMaterial;
@@ -40,8 +38,7 @@ EntitySetMeshRendererMaterial::onUndo(WorkspaceState &state,
 
 bool EntitySetMeshRendererMaterial::predicate(WorkspaceState &state,
                                               AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {
     return false;
@@ -62,8 +59,7 @@ EntityAddMeshRendererMaterialSlot::EntityAddMeshRendererMaterialSlot(
 ActionExecutorResult
 EntityAddMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.push_back(
       mNewMaterial);
@@ -78,8 +74,7 @@ ActionExecutorResult
 EntityAddMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
                                           AssetRegistry &assetRegistry) {
 
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.pop_back();
 
@@ -90,8 +85,7 @@ EntityAddMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
 
 bool EntityAddMeshRendererMaterialSlot::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {
     return false;
@@ -106,8 +100,7 @@ EntityRemoveLastMeshRendererMaterialSlot::
 
 ActionExecutorResult EntityRemoveLastMeshRendererMaterialSlot::onExecute(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldMaterial =
       scene.entityDatabase.get<MeshRenderer>(mEntity).materials.back();
@@ -123,8 +116,7 @@ ActionExecutorResult EntityRemoveLastMeshRendererMaterialSlot::onExecute(
 ActionExecutorResult
 EntityRemoveLastMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
                                                  AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.push_back(
       mOldMaterial);
@@ -136,8 +128,7 @@ EntityRemoveLastMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
 
 bool EntityRemoveLastMeshRendererMaterialSlot::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {
     return false;

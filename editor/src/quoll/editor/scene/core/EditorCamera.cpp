@@ -125,8 +125,7 @@ EditorCamera::~EditorCamera() {
 }
 
 void EditorCamera::update(WorkspaceState &state) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   auto &lookAt = scene.entityDatabase.get<CameraLookAt>(state.camera);
 

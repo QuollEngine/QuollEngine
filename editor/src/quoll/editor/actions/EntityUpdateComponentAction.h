@@ -41,9 +41,7 @@ public:
    */
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override {
-    auto &scene = state.mode == WorkspaceMode::Simulation
-                      ? state.simulationScene
-                      : state.scene;
+    auto &scene = state.scene;
 
     scene.entityDatabase.set(mEntity, mNewComponent.value());
 
@@ -63,9 +61,7 @@ public:
    */
   ActionExecutorResult onUndo(WorkspaceState &state,
                               AssetRegistry &assetRegistry) override {
-    auto &scene = state.mode == WorkspaceMode::Simulation
-                      ? state.simulationScene
-                      : state.scene;
+    auto &scene = state.scene;
 
     scene.entityDatabase.set(mEntity, mOldComponent);
 
@@ -83,9 +79,7 @@ public:
    * @retval false Entity does not have component
    */
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
-    auto &scene = state.mode == WorkspaceMode::Simulation
-                      ? state.simulationScene
-                      : state.scene;
+    auto &scene = state.scene;
 
     return mNewComponent.has_value() &&
            scene.entityDatabase.has<TComponent>(mEntity);

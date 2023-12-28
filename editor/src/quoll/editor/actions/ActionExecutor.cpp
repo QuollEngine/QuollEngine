@@ -24,10 +24,6 @@ void ActionExecutor::process() {
 
   auto result = action->onExecute(mState, mAssetRegistry);
 
-  if (mState.mode == WorkspaceMode::Simulation) {
-    return;
-  }
-
   if (result.addToHistory) {
     mUndoStack.push_back(std::move(action));
     mRedoStack.clear();
@@ -41,10 +37,6 @@ void ActionExecutor::execute(std::unique_ptr<Action> action) {
 }
 
 void ActionExecutor::undo() {
-  if (mState.mode == WorkspaceMode::Simulation) {
-    return;
-  }
-
   if (mUndoStack.empty()) {
     return;
   }
@@ -58,10 +50,6 @@ void ActionExecutor::undo() {
 }
 
 void ActionExecutor::redo() {
-  if (mState.mode == WorkspaceMode::Simulation) {
-    return;
-  }
-
   if (mRedoStack.empty()) {
     return;
   }
@@ -76,10 +64,6 @@ void ActionExecutor::redo() {
 
 void ActionExecutor::saveActionResult(const ActionExecutorResult &result) {
   if (!mAssetSyncer) {
-    return;
-  }
-
-  if (mState.mode == WorkspaceMode::Simulation) {
     return;
   }
 

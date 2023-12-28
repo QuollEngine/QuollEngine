@@ -39,17 +39,6 @@ public:
                  AssetRegistry &assetRegistry, EditorCamera &editorCamera);
 
   /**
-   * @brief Main update function
-   *
-   * Uses simulation and editing
-   * updates
-   *
-   * @param dt Time delta
-   * @param state Workspace state
-   */
-  void update(f32 dt, WorkspaceState &state);
-
-  /**
    * @brief Render
    *
    * @param db Entity database
@@ -141,8 +130,6 @@ private:
   InputMapSystem mInputMapSystem;
   Window &mWindow;
   UICanvasUpdater mUICanvasUpdater;
-
-  WorkspaceMode mMode = WorkspaceMode::Edit;
 };
 
 } // namespace quoll::editor

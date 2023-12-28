@@ -13,8 +13,7 @@ namespace quoll::editor {
 
 void WorkspaceIO::saveWorkspaceState(WorkspaceState &state,
                                      const std::filesystem::path &path) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   const auto &lens = scene.entityDatabase.get<PerspectiveLens>(state.camera);
   const auto &lookAt = scene.entityDatabase.get<CameraLookAt>(state.camera);
@@ -93,9 +92,7 @@ void WorkspaceIO::loadWorkspaceState(WorkspaceState &state,
       up = camera["up"].as<glm::vec3>(up);
     }
 
-    auto &scene = state.mode == WorkspaceMode::Simulation
-                      ? state.simulationScene
-                      : state.scene;
+    auto &scene = state.scene;
 
     PerspectiveLens lens{};
     lens.near = near;

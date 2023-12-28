@@ -9,9 +9,9 @@
 
 using EntitySetParentTest = ActionTestBase;
 
-TEST_P(EntitySetParentTest, ExecutorSetsParentForEntityAndChildrenForParent) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
+TEST_F(EntitySetParentTest, ExecutorSetsParentForEntityAndChildrenForParent) {
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
 
   quoll::editor::EntitySetParent action(entity, parent);
   auto res = action.onExecute(state, assetRegistry);
@@ -21,28 +21,28 @@ TEST_P(EntitySetParentTest, ExecutorSetsParentForEntityAndChildrenForParent) {
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_EQ(res.entitiesToSave.at(1), parent);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Parent>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Parent>(entity).parent,
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Parent>(entity));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Parent>(entity).parent,
             parent);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(parent));
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(parent));
   EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(parent).children.size(),
+      state.scene.entityDatabase.get<quoll::Children>(parent).children.size(),
       1);
   EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(parent).children.at(0),
+      state.scene.entityDatabase.get<quoll::Children>(parent).children.at(0),
       entity);
 }
 
-TEST_P(
+TEST_F(
     EntitySetParentTest,
     ExecutorChildrenOfPreviousParentOnExecuteIfPreviousParentOnlyHasEntityAsChildren) {
-  auto entity = activeScene().entityDatabase.create();
-  auto p1 = activeScene().entityDatabase.create();
-  auto p2 = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto p1 = state.scene.entityDatabase.create();
+  auto p2 = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {p1});
-  activeScene().entityDatabase.set<quoll::Children>(p1, {{entity}});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {p1});
+  state.scene.entityDatabase.set<quoll::Children>(p1, {{entity}});
 
   quoll::editor::EntitySetParent action(entity, p2);
   auto res = action.onExecute(state, assetRegistry);
@@ -54,32 +54,31 @@ TEST_P(
   EXPECT_EQ(res.entitiesToSave.at(2), p1);
 
   // Entity parent updated
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Parent>(entity).parent, p2);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Parent>(entity).parent, p2);
 
   // Entity removed from previous parent
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Children>(p1));
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Children>(p1));
 
   // Entity added to new parent
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(p2));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p2).children.size(), 1);
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p2).children.at(0),
-      entity);
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(p2));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p2).children.size(),
+            1);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p2).children.at(0),
+            entity);
 }
 
-TEST_P(
+TEST_F(
     EntitySetParentTest,
     ExecutorRemovesEntityFromChildrenOfParentIfEntityIsOneOfChildrenOfParent) {
-  auto entity = activeScene().entityDatabase.create();
-  auto child0 = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto child0 = state.scene.entityDatabase.create();
 
-  auto p1 = activeScene().entityDatabase.create();
-  auto p2 = activeScene().entityDatabase.create();
+  auto p1 = state.scene.entityDatabase.create();
+  auto p2 = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {p1});
-  activeScene().entityDatabase.set<quoll::Children>(p1, {{entity, child0}});
-  activeScene().entityDatabase.set<quoll::Children>(p2, {{}});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {p1});
+  state.scene.entityDatabase.set<quoll::Children>(p1, {{entity, child0}});
+  state.scene.entityDatabase.set<quoll::Children>(p2, {{}});
 
   quoll::editor::EntitySetParent action(entity, p2);
   auto res = action.onExecute(state, assetRegistry);
@@ -91,28 +90,26 @@ TEST_P(
   EXPECT_EQ(res.entitiesToSave.at(2), p1);
 
   // Entity parent updated
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Parent>(entity).parent, p2);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Parent>(entity).parent, p2);
 
   // Entity removed from previous parent
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(p1));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p1).children.size(), 1);
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p1).children.at(0),
-      child0);
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(p1));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p1).children.size(),
+            1);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p1).children.at(0),
+            child0);
 
   // Entity added to new parent
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(p2));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p2).children.size(), 1);
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p2).children.at(0),
-      entity);
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(p2));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p2).children.size(),
+            1);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p2).children.at(0),
+            entity);
 }
 
-TEST_P(EntitySetParentTest, UndoRemovesEntityParentIfEntityDidNotHaveParent) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
+TEST_F(EntitySetParentTest, UndoRemovesEntityParentIfEntityDidNotHaveParent) {
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
 
   quoll::editor::EntitySetParent action(entity, parent);
   action.onExecute(state, assetRegistry);
@@ -122,19 +119,19 @@ TEST_P(EntitySetParentTest, UndoRemovesEntityParentIfEntityDidNotHaveParent) {
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_EQ(res.entitiesToSave.at(1), parent);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Parent>(entity));
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Children>(parent));
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Parent>(entity));
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Children>(parent));
 }
 
-TEST_P(
+TEST_F(
     EntitySetParentTest,
     UndoSetsPreviousParentAndRemovesParentChildrenIfEntityIsTheOnlyChildOfCurrentParent) {
-  auto entity = activeScene().entityDatabase.create();
-  auto p1 = activeScene().entityDatabase.create();
-  auto p2 = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto p1 = state.scene.entityDatabase.create();
+  auto p2 = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {p1});
-  activeScene().entityDatabase.set<quoll::Children>(p1, {{entity}});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {p1});
+  state.scene.entityDatabase.set<quoll::Children>(p1, {{entity}});
 
   quoll::editor::EntitySetParent action(entity, p2);
   action.onExecute(state, assetRegistry);
@@ -146,32 +143,31 @@ TEST_P(
   EXPECT_EQ(res.entitiesToSave.at(2), p1);
 
   // Entity parent updated
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Parent>(entity).parent, p1);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Parent>(entity).parent, p1);
 
   // Entity removed from previous parent
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Children>(p2));
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Children>(p2));
 
   // Entity added to new parent
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(p1));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p1).children.size(), 1);
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p1).children.at(0),
-      entity);
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(p1));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p1).children.size(),
+            1);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p1).children.at(0),
+            entity);
 }
 
-TEST_P(
+TEST_F(
     EntitySetParentTest,
     UndoSetsPreviousParentAndRemovesEntityFromCurrentParentIfEntityIsOneOfTheChildrenOfCurrentParent) {
-  auto entity = activeScene().entityDatabase.create();
-  auto child0 = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto child0 = state.scene.entityDatabase.create();
 
-  auto p1 = activeScene().entityDatabase.create();
-  auto p2 = activeScene().entityDatabase.create();
+  auto p1 = state.scene.entityDatabase.create();
+  auto p2 = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {p1});
-  activeScene().entityDatabase.set<quoll::Children>(p1, {{entity}});
-  activeScene().entityDatabase.set<quoll::Children>(p2, {{child0}});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {p1});
+  state.scene.entityDatabase.set<quoll::Children>(p1, {{entity}});
+  state.scene.entityDatabase.set<quoll::Children>(p2, {{child0}});
 
   quoll::editor::EntitySetParent action(entity, p2);
   action.onExecute(state, assetRegistry);
@@ -183,95 +179,91 @@ TEST_P(
   EXPECT_EQ(res.entitiesToSave.at(2), p1);
 
   // Entity parent updated
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Parent>(entity).parent, p1);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Parent>(entity).parent, p1);
 
   // Entity removed from previous parent
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(p2));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p2).children.size(), 1);
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p2).children.at(0),
-      child0);
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(p2));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p2).children.size(),
+            1);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p2).children.at(0),
+            child0);
 
   // Entity added to new parent
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(p1));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p1).children.size(), 1);
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<quoll::Children>(p1).children.at(0),
-      entity);
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(p1));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p1).children.size(),
+            1);
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Children>(p1).children.at(0),
+            entity);
 }
 
-TEST_P(EntitySetParentTest, PredicateReturnsFalseIfParentDoesNotExist) {
-  auto entity = activeScene().entityDatabase.create();
+TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentDoesNotExist) {
+  auto entity = state.scene.entityDatabase.create();
 
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, quoll::Entity{25})
                    .predicate(state, assetRegistry));
 }
 
-TEST_P(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
-  auto entity = activeScene().entityDatabase.create();
-  auto child0 = activeScene().entityDatabase.create();
+TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
+  auto entity = state.scene.entityDatabase.create();
+  auto child0 = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(child0, {entity});
+  state.scene.entityDatabase.set<quoll::Parent>(child0, {entity});
 
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, child0)
                    .predicate(state, assetRegistry));
 }
 
-TEST_P(EntitySetParentTest,
+TEST_F(EntitySetParentTest,
        PredicateReturnsFalseIfParentIsADescendantOfEntity) {
-  auto entity = activeScene().entityDatabase.create();
-  auto child0 = activeScene().entityDatabase.create();
-  auto child1 = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto child0 = state.scene.entityDatabase.create();
+  auto child1 = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(child1, {child0});
-  activeScene().entityDatabase.set<quoll::Parent>(child0, {entity});
+  state.scene.entityDatabase.set<quoll::Parent>(child1, {child0});
+  state.scene.entityDatabase.set<quoll::Parent>(child0, {entity});
 
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, child1)
                    .predicate(state, assetRegistry));
 }
 
-TEST_P(EntitySetParentTest,
+TEST_F(EntitySetParentTest,
        PredicateReturnsFalseIfParentIsAlreadyParentOfEntity) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {parent});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {parent});
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, parent)
                    .predicate(state, assetRegistry));
 }
 
-TEST_P(EntitySetParentTest, PredicateReturnsFalseIfParentIsEntityItself) {
-  auto entity = activeScene().entityDatabase.create();
+TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsEntityItself) {
+  auto entity = state.scene.entityDatabase.create();
 
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, entity)
                    .predicate(state, assetRegistry));
 }
 
-TEST_P(EntitySetParentTest, PredicateReturnsTrueIfEntityParentIsValid) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
+TEST_F(EntitySetParentTest, PredicateReturnsTrueIfEntityParentIsValid) {
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
 
   EXPECT_TRUE(quoll::editor::EntitySetParent(entity, parent)
                   .predicate(state, assetRegistry));
 }
 
-InitActionsTestSuite(EntityActionsTest, EntitySetParentTest);
-
 using EntityRemoveParentTest = ActionTestBase;
 
-TEST_P(EntityRemoveParentTest,
+TEST_F(EntityRemoveParentTest,
        ExecutorRemovesParentFromEntityAndChildFromParent) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
-  auto c1 = activeScene().entityDatabase.create();
-  auto c2 = activeScene().entityDatabase.create();
-  auto c3 = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
+  auto c1 = state.scene.entityDatabase.create();
+  auto c2 = state.scene.entityDatabase.create();
+  auto c3 = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {parent});
-  activeScene().entityDatabase.set<quoll::Children>(parent,
-                                                    {{c1, entity, c2, c3}});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {parent});
+  state.scene.entityDatabase.set<quoll::Children>(parent,
+                                                  {{c1, entity, c2, c3}});
 
   quoll::editor::EntityRemoveParent action(entity);
   auto res = action.onExecute(state, assetRegistry);
@@ -280,11 +272,11 @@ TEST_P(EntityRemoveParentTest,
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Parent>(entity));
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(parent));
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Parent>(entity));
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(parent));
 
   const auto &children =
-      activeScene().entityDatabase.get<quoll::Children>(parent).children;
+      state.scene.entityDatabase.get<quoll::Children>(parent).children;
 
   EXPECT_EQ(children.size(), 3);
   EXPECT_EQ(children.at(0), c1);
@@ -292,14 +284,14 @@ TEST_P(EntityRemoveParentTest,
   EXPECT_EQ(children.at(2), c3);
 }
 
-TEST_P(
+TEST_F(
     EntityRemoveParentTest,
     ExecutorRemovesParentFromEntityAndChildrenFromParentIfEntityWasTheOnlyChild) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {parent});
-  activeScene().entityDatabase.set<quoll::Children>(parent, {{entity}});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {parent});
+  state.scene.entityDatabase.set<quoll::Children>(parent, {{entity}});
 
   quoll::editor::EntityRemoveParent action(entity);
   auto res = action.onExecute(state, assetRegistry);
@@ -308,21 +300,21 @@ TEST_P(
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Parent>(entity));
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Children>(parent));
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Parent>(entity));
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Children>(parent));
 }
 
-TEST_P(EntityRemoveParentTest,
+TEST_F(EntityRemoveParentTest,
        UndoAddsParentToEntityAndAddsEntityAsChildOfParentInTheSameSpot) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
-  auto c1 = activeScene().entityDatabase.create();
-  auto c2 = activeScene().entityDatabase.create();
-  auto c3 = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
+  auto c1 = state.scene.entityDatabase.create();
+  auto c2 = state.scene.entityDatabase.create();
+  auto c3 = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {parent});
-  activeScene().entityDatabase.set<quoll::Children>(parent,
-                                                    {{c1, entity, c2, c3}});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {parent});
+  state.scene.entityDatabase.set<quoll::Children>(parent,
+                                                  {{c1, entity, c2, c3}});
 
   quoll::editor::EntityRemoveParent action(entity);
   action.onExecute(state, assetRegistry);
@@ -331,14 +323,14 @@ TEST_P(EntityRemoveParentTest,
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Parent>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Parent>(entity).parent,
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Parent>(entity));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Parent>(entity).parent,
             parent);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(parent));
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(parent));
 
   const auto &children =
-      activeScene().entityDatabase.get<quoll::Children>(parent).children;
+      state.scene.entityDatabase.get<quoll::Children>(parent).children;
 
   EXPECT_EQ(children.size(), 4);
   EXPECT_EQ(children.at(0), c1);
@@ -347,13 +339,13 @@ TEST_P(EntityRemoveParentTest,
   EXPECT_EQ(children.at(3), c3);
 }
 
-TEST_P(EntityRemoveParentTest,
+TEST_F(EntityRemoveParentTest,
        UndoAddsParentToEntityAndAddsEntityAsChildOfParentIfItWasTheOnlyChild) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
 
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {parent});
-  activeScene().entityDatabase.set<quoll::Children>(parent, {{entity}});
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {parent});
+  state.scene.entityDatabase.set<quoll::Children>(parent, {{entity}});
 
   quoll::editor::EntityRemoveParent action(entity);
   action.onExecute(state, assetRegistry);
@@ -362,33 +354,31 @@ TEST_P(EntityRemoveParentTest,
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Parent>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Parent>(entity).parent,
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Parent>(entity));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Parent>(entity).parent,
             parent);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Children>(parent));
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Children>(parent));
 
   const auto &children =
-      activeScene().entityDatabase.get<quoll::Children>(parent).children;
+      state.scene.entityDatabase.get<quoll::Children>(parent).children;
 
   EXPECT_EQ(children.size(), 1);
   EXPECT_EQ(children.at(0), entity);
 }
 
-TEST_P(EntityRemoveParentTest, PredicateReturnsTrueIfEntityHasParent) {
-  auto entity = activeScene().entityDatabase.create();
-  auto parent = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Parent>(entity, {parent});
+TEST_F(EntityRemoveParentTest, PredicateReturnsTrueIfEntityHasParent) {
+  auto entity = state.scene.entityDatabase.create();
+  auto parent = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<quoll::Parent>(entity, {parent});
 
   EXPECT_TRUE(quoll::editor::EntityRemoveParent(entity).predicate(
       state, assetRegistry));
 }
 
-TEST_P(EntityRemoveParentTest, PredicateReturnsFalseIfEntityDoesNotHaveParent) {
-  auto entity = activeScene().entityDatabase.create();
+TEST_F(EntityRemoveParentTest, PredicateReturnsFalseIfEntityDoesNotHaveParent) {
+  auto entity = state.scene.entityDatabase.create();
 
   EXPECT_FALSE(quoll::editor::EntityRemoveParent(entity).predicate(
       state, assetRegistry));
 }
-
-InitActionsTestSuite(EntityActionsTest, EntityRemoveParentTest);

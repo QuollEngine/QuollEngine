@@ -4,44 +4,35 @@
 #include "quoll/scene/PerspectiveLens.h"
 
 #include "quoll/editor/actions/ActionExecutor.h"
-#include "quoll/editor/scene/asset/SceneWriter.h"
 
 #include "quoll/editor-tests/Testing.h"
 
-static const quoll::Path ScenePath{std::filesystem::current_path() /
-                                   "scene-test" / "main.scene"};
+class TestAssetSyncer : public quoll::editor::AssetSyncer {
+public:
+  void syncEntities(const std::vector<quoll::Entity> &entities) override {
+    syncedEntities = entities;
+  }
+
+  void deleteEntities(const std::vector<quoll::Entity> &entities) override {
+    deletedEntities = entities;
+  }
+
+  void syncScene() override { syncedScene = true; }
+
+public:
+  std::vector<quoll::Entity> syncedEntities;
+  std::vector<quoll::Entity> deletedEntities;
+  bool syncedScene = false;
+};
 
 class ActionExecutorTest : public ::testing::Test {
 public:
-  void SetUp() override {
-    TearDown();
-    std::filesystem::create_directories(ScenePath.parent_path());
-
-    YAML::Node root;
-    root["name"] = "TestScene";
-    root["version"] = "0.1";
-
-    YAML::Node zoneNode;
-    zoneNode["name"] = "TestZone";
-    root["zones"][0] = zoneNode;
-
-    std::ofstream stream(ScenePath);
-    stream << root;
-    stream.close();
-
-    sceneWriter.open(ScenePath);
-
-    executor.setAssetSyncer(&sceneWriter);
-  }
-
-  void TearDown() override {
-    std::filesystem::remove_all(ScenePath.parent_path());
-  }
+  void SetUp() override { executor.setAssetSyncer(&assetSyncer); }
 
 public:
   quoll::AssetRegistry assetRegistry;
   quoll::editor::WorkspaceState state{};
-  quoll::editor::SceneWriter sceneWriter{state.scene, assetRegistry};
+  TestAssetSyncer assetSyncer;
   quoll::editor::ActionExecutor executor{state, assetRegistry};
 };
 
@@ -134,8 +125,6 @@ TEST_F(ActionExecutorTest,
 }
 
 TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
-  state.mode = quoll::editor::WorkspaceMode::Simulation;
-
   auto *actionPtr = new TestAction;
   auto actionData = actionPtr->getData();
 
@@ -149,8 +138,6 @@ TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
 TEST_F(ActionExecutorTest, ProcessDoesNotBreakIfNoAssetSyncer) {
   executor.setAssetSyncer(nullptr);
 
-  state.mode = quoll::editor::WorkspaceMode::Simulation;
-
   auto *actionPtr = new TestAction;
   auto actionData = actionPtr->getData();
 
@@ -162,17 +149,9 @@ TEST_F(ActionExecutorTest, ProcessDoesNotBreakIfNoAssetSyncer) {
 }
 
 TEST_F(ActionExecutorTest,
-       ExecuteCreatesEntityFilesIfActionReturnsEntitiesToSaveAndModeIsEdit) {
+       ExecuteSyncsEntitiesWithSyncerIfActionReturnsEntitiesToSave) {
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
-
-  {
-    std::ifstream stream(ScenePath);
-    auto node = YAML::Load(stream);
-    stream.close();
-
-    EXPECT_EQ(node["entities"].size(), 0);
-  }
 
   auto *actionPtr = new TestAction;
   actionPtr->saveEntityOnExecute(entity);
@@ -180,57 +159,19 @@ TEST_F(ActionExecutorTest,
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
+
   EXPECT_TRUE(actionData->called);
-
-  {
-    std::ifstream stream(ScenePath);
-    auto node = YAML::Load(stream);
-    stream.close();
-
-    EXPECT_EQ(node["entities"].size(), 1);
-    auto id = state.scene.entityDatabase.get<quoll::Id>(entity).id;
-    EXPECT_EQ(node["entities"][0]["id"].as<u64>(0), id);
-  }
-}
-
-TEST_F(
-    ActionExecutorTest,
-    ExecuteDoesNotCreateEntityFilesIfActionReturnsEntitiesToSaveAndModeIsSimulation) {
-  state.mode = quoll::editor::WorkspaceMode::Simulation;
-
-  auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
-
-  {
-    std::ifstream stream(ScenePath);
-    auto node = YAML::Load(stream);
-    stream.close();
-    EXPECT_EQ(node["entities"].size(), 0);
-  }
-
-  auto *actionPtr = new TestAction;
-  actionPtr->saveEntityOnExecute(entity);
-  auto actionData = actionPtr->getData();
-
-  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
-  executor.process();
-  EXPECT_TRUE(actionData->called);
-
-  {
-    std::ifstream stream(ScenePath);
-    auto node = YAML::Load(stream);
-    stream.close();
-    EXPECT_EQ(node["entities"].size(), 0);
-  }
+  EXPECT_EQ(assetSyncer.syncedEntities.size(), 1);
+  EXPECT_EQ(assetSyncer.syncedEntities.at(0), entity);
+  EXPECT_EQ(assetSyncer.deletedEntities.size(), 0);
+  EXPECT_EQ(assetSyncer.syncedScene, false);
 }
 
 TEST_F(ActionExecutorTest,
-       ExecuteDeletesEntityFilesIfActionReturnsEntitiesToDeleteAndModeIsEdit) {
+       ExecuteDeletesEntitiesWithSyncerIfActionReturnsEntitiesToDelete) {
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
   state.scene.entityDatabase.set<quoll::Id>(entity, {15});
-
-  sceneWriter.syncEntities({entity});
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
@@ -238,73 +179,16 @@ TEST_F(ActionExecutorTest,
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
+
   EXPECT_TRUE(actionData->called);
-  {
-    std::ifstream stream(ScenePath);
-    auto node = YAML::Load(stream);
-    stream.close();
-    EXPECT_EQ(node["entities"].size(), 0);
-  }
-}
-
-TEST_F(
-    ActionExecutorTest,
-    ExecuteDoesNotDeleteEntityFilesIfActionReturnsEntitiesToDeleteAndModeIsSimulation) {
-  state.mode = quoll::editor::WorkspaceMode::Simulation;
-
-  auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
-  state.scene.entityDatabase.set<quoll::Id>(entity, {15});
-
-  sceneWriter.syncEntities({entity});
-
-  auto *actionPtr = new TestAction;
-  actionPtr->deleteEntityOnExecute(entity);
-  auto actionData = actionPtr->getData();
-
-  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
-  executor.process();
-  EXPECT_TRUE(actionData->called);
-
-  {
-    std::ifstream stream(ScenePath);
-    auto node = YAML::Load(stream);
-    stream.close();
-    EXPECT_EQ(node["entities"].size(), 1);
-  }
+  EXPECT_EQ(assetSyncer.deletedEntities.size(), 1);
+  EXPECT_EQ(assetSyncer.deletedEntities.at(0), entity);
+  EXPECT_EQ(assetSyncer.syncedScene, false);
+  EXPECT_EQ(assetSyncer.syncedEntities.size(), 0);
 }
 
 TEST_F(ActionExecutorTest,
-       ExecuteSavesSceneFileIfActionReturnsSaveSceneAndModeIsEdit) {
-  auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
-  state.scene.entityDatabase.set<quoll::Id>(entity, {15});
-  state.scene.activeCamera = entity;
-
-  sceneWriter.syncEntities({entity});
-
-  auto *actionPtr = new TestAction;
-  actionPtr->saveSceneOnExecute();
-  auto actionData = actionPtr->getData();
-
-  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
-  executor.process();
-  EXPECT_TRUE(actionData->called);
-
-  std::ifstream stream(ScenePath);
-  auto node = YAML::Load(stream);
-  stream.close();
-
-  auto startingCamera = node["zones"][0]["startingCamera"];
-  EXPECT_TRUE(startingCamera);
-  EXPECT_TRUE(startingCamera.IsScalar());
-  EXPECT_EQ(startingCamera.as<u32>(0), 15);
-}
-
-TEST_F(ActionExecutorTest,
-       ExecuteDoesNotSaveSceneFileIfActionReturnsSaveSceneAndModeIsSimulation) {
-  state.mode = quoll::editor::WorkspaceMode::Simulation;
-
+       ExecuteSyncsSceneWithSyncerIfActionReturnsSaveScene) {
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
   state.scene.entityDatabase.set<quoll::Id>(entity, {15});
@@ -316,18 +200,15 @@ TEST_F(ActionExecutorTest,
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
+
   EXPECT_TRUE(actionData->called);
-
-  std::ifstream stream(ScenePath);
-  auto node = YAML::Load(stream);
-  stream.close();
-
-  auto startingCamera = node["zones"][0]["startingCamera"];
-  EXPECT_FALSE(startingCamera);
+  EXPECT_EQ(assetSyncer.syncedScene, true);
+  EXPECT_EQ(assetSyncer.deletedEntities.size(), 0);
+  EXPECT_EQ(assetSyncer.syncedEntities.size(), 0);
 }
 
 TEST_F(ActionExecutorTest,
-       ExecuteAddsActionToUndoStackIfActionReturnsAddToHistoryAndModeIsEdit) {
+       ExecuteAddsActionToUndoStackIfActionReturnsAddToHistory) {
   auto *actionPtr = new TestAction;
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
@@ -337,23 +218,6 @@ TEST_F(ActionExecutorTest,
   EXPECT_TRUE(actionData->called);
 
   EXPECT_FALSE(executor.getUndoStack().empty());
-  EXPECT_TRUE(executor.getRedoStack().empty());
-}
-
-TEST_F(
-    ActionExecutorTest,
-    ExecuteDoesNotAddActionToUndoStackIfActionReturnsAddToHistoryAndModeIsSimulation) {
-  state.mode = quoll::editor::WorkspaceMode::Simulation;
-
-  auto *actionPtr = new TestAction;
-  actionPtr->addToHistory();
-  auto actionData = actionPtr->getData();
-
-  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
-  executor.process();
-  EXPECT_TRUE(actionData->called);
-
-  EXPECT_TRUE(executor.getUndoStack().empty());
   EXPECT_TRUE(executor.getRedoStack().empty());
 }
 
@@ -361,26 +225,7 @@ TEST_F(ActionExecutorTest, UndoDoesNothingIfUndoStackIsEmpty) {
   executor.undo();
 }
 
-TEST_F(ActionExecutorTest, UndoDoesNothingIfModeIsSimulation) {
-  auto *actionPtr = new TestAction;
-  actionPtr->addToHistory();
-  auto actionData = actionPtr->getData();
-
-  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
-  executor.process();
-  EXPECT_TRUE(actionData->called);
-  EXPECT_FALSE(executor.getUndoStack().empty());
-  EXPECT_TRUE(executor.getRedoStack().empty());
-
-  state.mode = quoll::editor::WorkspaceMode::Simulation;
-  executor.undo();
-
-  EXPECT_FALSE(executor.getUndoStack().empty());
-  EXPECT_TRUE(executor.getRedoStack().empty());
-}
-
-TEST_F(ActionExecutorTest,
-       UndoCallsLastActionUndoAndUpdatesRedoStackIfModeIsEdit) {
+TEST_F(ActionExecutorTest, UndoCallsLastActionUndoAndUpdatesRedoStack) {
   auto *actionPtr = new TestAction;
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
@@ -402,29 +247,7 @@ TEST_F(ActionExecutorTest, RedoDoesNothingIfRedoStackIsEmpty) {
   executor.redo();
 }
 
-TEST_F(ActionExecutorTest, RedoDoesNothingIfModeIsSimulation) {
-  auto *actionPtr = new TestAction;
-  actionPtr->addToHistory();
-  auto actionData = actionPtr->getData();
-
-  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
-  executor.process();
-  EXPECT_TRUE(actionData->called);
-  EXPECT_FALSE(executor.getUndoStack().empty());
-  EXPECT_TRUE(executor.getRedoStack().empty());
-
-  executor.undo();
-  EXPECT_TRUE(executor.getUndoStack().empty());
-  EXPECT_FALSE(executor.getRedoStack().empty());
-
-  state.mode = quoll::editor::WorkspaceMode::Simulation;
-  executor.redo();
-  EXPECT_TRUE(executor.getUndoStack().empty());
-  EXPECT_FALSE(executor.getRedoStack().empty());
-}
-
-TEST_F(ActionExecutorTest,
-       RedoCallsLastActionExecuteAndUpdatesUndoStackifModeIsEdit) {
+TEST_F(ActionExecutorTest, RedoCallsLastActionExecuteAndUpdatesUndoStack) {
   auto *actionPtr = new TestAction;
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
@@ -447,9 +270,8 @@ TEST_F(ActionExecutorTest,
   EXPECT_TRUE(executor.getRedoStack().empty());
 }
 
-TEST_F(
-    ActionExecutorTest,
-    ExecuteAfterUndoDoesNotClearRedoStackIfActionDoesNotReturnAddToHistoryAndModeIsEdit) {
+TEST_F(ActionExecutorTest,
+       ExecuteAfterUndoDoesNotClearRedoStackIfActionDoesNotReturnAddToHistory) {
   {
     auto *actionPtr = new TestAction;
     actionPtr->addToHistory();
@@ -481,9 +303,8 @@ TEST_F(
   }
 }
 
-TEST_F(
-    ActionExecutorTest,
-    ExecuteAfterUndoClearsRedoStackIfActionReturnsAddToHistoryAndModeIsEdit) {
+TEST_F(ActionExecutorTest,
+       ExecuteAfterUndoClearsRedoStackIfActionReturnsAddToHistory) {
   {
     auto *actionPtr = new TestAction;
     actionPtr->addToHistory();

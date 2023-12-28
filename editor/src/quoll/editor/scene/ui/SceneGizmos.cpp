@@ -24,8 +24,7 @@ namespace quoll::editor {
 static LocalTransform
 calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
                                  const glm::mat4 &worldTransform) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   auto &entityDatabase = scene.entityDatabase;
 
   glm::vec3 localScale;
@@ -96,8 +95,7 @@ getImguizmoOperation(TransformOperation transformOperation) {
 
 bool SceneGizmos::render(WorkspaceState &state,
                          ActionExecutor &actionExecutor) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   const auto &pos = ImGui::GetItemRectMin();
   const auto &size = ImGui::GetItemRectSize();

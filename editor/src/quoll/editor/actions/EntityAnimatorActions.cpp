@@ -24,8 +24,7 @@ EntityCreateAnimator::onUndo(WorkspaceState &state,
 
 bool EntityCreateAnimator::predicate(WorkspaceState &state,
                                      AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
   return !scene.entityDatabase.has<Animator>(mEntity) &&
          assetRegistry.getAnimators().hasAsset(mHandle);
 }
@@ -36,8 +35,7 @@ EntitySetAnimator::EntitySetAnimator(Entity entity, AnimatorAssetHandle script)
 ActionExecutorResult
 EntitySetAnimator::onExecute(WorkspaceState &state,
                              AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   mOldAnimator = scene.entityDatabase.get<Animator>(mEntity).asset;
 
@@ -51,8 +49,7 @@ EntitySetAnimator::onExecute(WorkspaceState &state,
 
 ActionExecutorResult EntitySetAnimator::onUndo(WorkspaceState &state,
                                                AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set<Animator>(mEntity, {mOldAnimator});
 

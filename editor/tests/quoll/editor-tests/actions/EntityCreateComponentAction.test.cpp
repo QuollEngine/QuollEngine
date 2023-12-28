@@ -7,51 +7,48 @@
 
 using EntityCreateComponentActionTest = ActionTestBase;
 
-TEST_P(EntityCreateComponentActionTest,
+TEST_F(EntityCreateComponentActionTest,
        PredicateReturnsFalseIfEntityHasProvidedComponent) {
-  auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::Name>(entity, {"Hello"});
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<quoll::Name>(entity, {"Hello"});
   quoll::editor::EntityCreateComponent<quoll::Name> action(entity);
 
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
-TEST_P(EntityCreateComponentActionTest,
+TEST_F(EntityCreateComponentActionTest,
        PredicateReturnsTrueIfEntityDoesNotHaveProvidedComponent) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntityCreateComponent<quoll::Name> action(entity);
 
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
-TEST_P(EntityCreateComponentActionTest, ExecutorCreatesComponentForEntity) {
-  activeScene().entityDatabase.create();
+TEST_F(EntityCreateComponentActionTest, ExecutorCreatesComponentForEntity) {
+  state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntityCreateComponent<quoll::Name> action(entity, {"Hello"});
 
   auto res = action.onExecute(state, assetRegistry);
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Name>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Name>(entity).name,
-            "Hello");
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Name>(entity));
+  EXPECT_EQ(state.scene.entityDatabase.get<quoll::Name>(entity).name, "Hello");
 }
 
-TEST_P(EntityCreateComponentActionTest, UndoDeletesComponentFromEntity) {
-  activeScene().entityDatabase.create();
+TEST_F(EntityCreateComponentActionTest, UndoDeletesComponentFromEntity) {
+  state.scene.entityDatabase.create();
 
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntityCreateComponent<quoll::Name> action(entity, {"Hello"});
 
   action.onExecute(state, assetRegistry);
-  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Name>(entity));
+  EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Name>(entity));
 
   auto res = action.onUndo(state, assetRegistry);
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
-  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Name>(entity));
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Name>(entity));
 }
-
-InitActionsTestSuite(EntityActionsTest, EntityCreateComponentActionTest);

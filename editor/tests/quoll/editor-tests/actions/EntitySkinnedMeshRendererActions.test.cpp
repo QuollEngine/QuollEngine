@@ -8,15 +8,15 @@
 // SetSkinnedMeshRendererMaterialSlot
 using EntitySetSkinnedMeshRendererMaterialActionTest = ActionTestBase;
 
-TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
+TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
        ExecutorSetsMaterialInSpecifiedSlot) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   quoll::editor::EntitySetSkinnedMeshRendererMaterial action(
@@ -24,7 +24,7 @@ TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
   auto res = action.onExecute(state, assetRegistry);
 
   const auto &renderer =
-      activeScene().entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
+      state.scene.entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 2);
   EXPECT_EQ(renderer.materials.at(0), quoll::MaterialAssetHandle{1});
@@ -33,15 +33,15 @@ TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
   EXPECT_TRUE(res.addToHistory);
 }
 
-TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
+TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
        UndoSetsPreviousMaterialInSpecifiedSlot) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   quoll::editor::EntitySetSkinnedMeshRendererMaterial action(
@@ -50,31 +50,31 @@ TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
   action.onUndo(state, assetRegistry);
 
   const auto &renderer =
-      activeScene().entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
+      state.scene.entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 2);
   EXPECT_EQ(renderer.materials.at(0), quoll::MaterialAssetHandle{1});
   EXPECT_EQ(renderer.materials.at(1), quoll::MaterialAssetHandle{2});
 }
 
-TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
+TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
        PredicateReturnsFalseIfNoSkinnedMeshRendererComponent) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
   auto material = assetRegistry.getMaterials().addAsset({});
   EXPECT_FALSE(
       quoll::editor::EntitySetSkinnedMeshRendererMaterial(entity, 0, material)
           .predicate(state, assetRegistry));
 }
 
-TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
+TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
        PredicateReturnsFalseIfSlotIsBiggerThanExistingSlots) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   auto material = assetRegistry.getMaterials().addAsset({});
@@ -84,15 +84,15 @@ TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
           .predicate(state, assetRegistry));
 }
 
-TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
+TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
        PredicateReturnsFalseIfMaterialDoesNotExist) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   EXPECT_FALSE(quoll::editor::EntitySetSkinnedMeshRendererMaterial(
@@ -100,15 +100,15 @@ TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
                    .predicate(state, assetRegistry));
 }
 
-TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
+TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
        PredicateReturnsTrueIfSlotIsValidAndMaterialExists) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   auto material = assetRegistry.getMaterials().addAsset({});
@@ -118,21 +118,18 @@ TEST_P(EntitySetSkinnedMeshRendererMaterialActionTest,
           .predicate(state, assetRegistry));
 }
 
-InitActionsTestSuite(EntityActionsTest,
-                     EntitySetSkinnedMeshRendererMaterialActionTest);
-
 // CreateSkinnedMeshRendererMaterialSlot
 using EntityAddSkinnedMeshRendererMaterialSlotActionTest = ActionTestBase;
 
-TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
        ExecutorCreatesNewSlotInSkinnedMeshRendererMaterials) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   quoll::editor::EntityAddSkinnedMeshRendererMaterialSlot action(
@@ -140,7 +137,7 @@ TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
   auto res = action.onExecute(state, assetRegistry);
 
   const auto &renderer =
-      activeScene().entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
+      state.scene.entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 3);
   EXPECT_EQ(renderer.materials.at(0), quoll::MaterialAssetHandle{1});
@@ -150,15 +147,15 @@ TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
   EXPECT_TRUE(res.addToHistory);
 }
 
-TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
        UndoRemovesLastSlotFromSkinnedMeshRendererMaterials) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   quoll::editor::EntityAddSkinnedMeshRendererMaterialSlot action(
@@ -167,40 +164,40 @@ TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
   action.onUndo(state, assetRegistry);
 
   const auto &renderer =
-      activeScene().entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
+      state.scene.entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 2);
   EXPECT_EQ(renderer.materials.at(0), quoll::MaterialAssetHandle{1});
   EXPECT_EQ(renderer.materials.at(1), quoll::MaterialAssetHandle{2});
 }
 
-TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
        PredicateReturnsFalseIfNoSkinnedMeshRenderer) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
   auto material = assetRegistry.getMaterials().addAsset({});
   EXPECT_FALSE(
       quoll::editor::EntityAddSkinnedMeshRendererMaterialSlot(entity, material)
           .predicate(state, assetRegistry));
 }
 
-TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
        PredicateReturnsFalseIfMaterialDoesNotExist) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   quoll::SkinnedMeshRenderer renderer{};
-  activeScene().entityDatabase.set(entity, renderer);
+  state.scene.entityDatabase.set(entity, renderer);
 
   EXPECT_FALSE(quoll::editor::EntityAddSkinnedMeshRendererMaterialSlot(
                    entity, quoll::MaterialAssetHandle{25})
                    .predicate(state, assetRegistry));
 }
 
-TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
        PredicateReturnsTrueIfMaterialExists) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   quoll::SkinnedMeshRenderer renderer{};
-  activeScene().entityDatabase.set(entity, renderer);
+  state.scene.entityDatabase.set(entity, renderer);
 
   auto material = assetRegistry.getMaterials().addAsset({});
 
@@ -209,29 +206,26 @@ TEST_P(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
           .predicate(state, assetRegistry));
 }
 
-InitActionsTestSuite(EntityActionsTest,
-                     EntityAddSkinnedMeshRendererMaterialSlotActionTest);
-
 // EntityRemoveLastSkinnedMeshRendererMaterialSlot
 using EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest =
     ActionTestBase;
 
-TEST_P(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
        ExecutorRemovesLastSlotFromSkinnedMeshRenderer) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   quoll::editor::EntityRemoveLastSkinnedMeshRendererMaterialSlot action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   const auto &renderer =
-      activeScene().entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
+      state.scene.entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 1);
   EXPECT_EQ(renderer.materials.at(0), quoll::MaterialAssetHandle{1});
@@ -239,15 +233,15 @@ TEST_P(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
   EXPECT_TRUE(res.addToHistory);
 }
 
-TEST_P(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
        UndoAddsLastRemovedMaterialToEnd) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   {
     std::vector<quoll::MaterialAssetHandle> materials{
         quoll::MaterialAssetHandle{1}, quoll::MaterialAssetHandle{2}};
     quoll::SkinnedMeshRenderer renderer{materials};
-    activeScene().entityDatabase.set(entity, renderer);
+    state.scene.entityDatabase.set(entity, renderer);
   }
 
   quoll::editor::EntityRemoveLastSkinnedMeshRendererMaterialSlot action(entity);
@@ -255,45 +249,42 @@ TEST_P(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
   action.onUndo(state, assetRegistry);
 
   const auto &renderer =
-      activeScene().entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
+      state.scene.entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 2);
   EXPECT_EQ(renderer.materials.at(0), quoll::MaterialAssetHandle{1});
   EXPECT_EQ(renderer.materials.at(1), quoll::MaterialAssetHandle{2});
 }
 
-TEST_P(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
        PredicateReturnsFalseIfNoSkinnedMeshRenderer) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
   auto material = assetRegistry.getMaterials().addAsset({});
   EXPECT_FALSE(
       quoll::editor::EntityRemoveLastSkinnedMeshRendererMaterialSlot(entity)
           .predicate(state, assetRegistry));
 }
 
-TEST_P(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
        PredicateReturnsFalseIfSkinnedMeshRendererHasNoMaterialSlots) {
-  auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<quoll::SkinnedMeshRenderer>(entity, {});
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<quoll::SkinnedMeshRenderer>(entity, {});
 
   EXPECT_FALSE(
       quoll::editor::EntityRemoveLastSkinnedMeshRendererMaterialSlot(entity)
           .predicate(state, assetRegistry));
 }
 
-TEST_P(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
+TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
        PredicateReturnsTrueIfSkinnedMeshRendererHasMaterials) {
-  auto entity = activeScene().entityDatabase.create();
+  auto entity = state.scene.entityDatabase.create();
 
   std::vector<quoll::MaterialAssetHandle> materials{
       quoll::MaterialAssetHandle{1}};
   quoll::SkinnedMeshRenderer renderer{materials};
-  activeScene().entityDatabase.set(entity, renderer);
+  state.scene.entityDatabase.set(entity, renderer);
 
   EXPECT_TRUE(
       quoll::editor::EntityRemoveLastSkinnedMeshRendererMaterialSlot(entity)
           .predicate(state, assetRegistry));
 }
-
-InitActionsTestSuite(EntityActionsTest,
-                     EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest);

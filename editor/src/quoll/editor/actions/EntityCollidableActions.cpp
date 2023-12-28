@@ -33,8 +33,7 @@ EntitySetCollidableType::EntitySetCollidableType(Entity entity,
 ActionExecutorResult
 EntitySetCollidableType::onExecute(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   auto &collidable = scene.entityDatabase.get<Collidable>(mEntity);
   mOldCollidable = collidable;
@@ -53,8 +52,7 @@ EntitySetCollidableType::onExecute(WorkspaceState &state,
 ActionExecutorResult
 EntitySetCollidableType::onUndo(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   scene.entityDatabase.set(mEntity, mOldCollidable);
 
@@ -65,8 +63,7 @@ EntitySetCollidableType::onUndo(WorkspaceState &state,
 
 bool EntitySetCollidableType::predicate(WorkspaceState &state,
                                         AssetRegistry &assetRegistry) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
+  auto &scene = state.scene;
 
   return scene.entityDatabase.has<Collidable>(mEntity) &&
          scene.entityDatabase.get<Collidable>(mEntity).geometryDesc.type !=
