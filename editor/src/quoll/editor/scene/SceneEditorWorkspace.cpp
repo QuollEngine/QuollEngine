@@ -28,6 +28,7 @@ SceneEditorWorkspace::SceneEditorWorkspace(
       mEditorSimulator(editorSimulator), mWorkspaceManager(workspaceManager) {
   mSceneIO.loadScene(scene);
 
+  mSceneWriter.open(scenePath);
   mActionExecutor.setAssetSyncer(&mSceneWriter);
 
   mLayoutPath = (project.settingsPath / "layout.ini").string();
