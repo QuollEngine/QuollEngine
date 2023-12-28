@@ -27,6 +27,12 @@ static constexpr f32 SrgbToLinear(f32 value) {
   return pow((value + 0.055f) / 1.055f, 2.4f);
 }
 
+static constexpr ImColor rgb(i32 r, i32 g, i32 b) { return ImColor(r, g, b); }
+
+static constexpr ImColor rgba(i32 r, i32 g, i32 b, i32 a) {
+  return ImColor(r, g, b, a);
+}
+
 /**
  * @brief Srgb color to linear
  *
@@ -46,31 +52,25 @@ static constexpr usize NumFonts = 2;
 static std::array<ImFont *, NumFonts> Fonts{};
 
 static const std::unordered_map<ThemeColor, ImColor> Colors{
-    {ThemeColor::White, ImColor(255, 255, 255)},
-    {ThemeColor::Black, ImColor(0, 0, 0)},
-    {ThemeColor::Transparent, ImColor(0, 0, 0, 0)},
+    // Base
+    {ThemeColor::White, rgb(255, 255, 255)},
+    {ThemeColor::Black, rgb(0, 0, 0)},
+    {ThemeColor::Transparent, rgba(0, 0, 0, 0)},
 
-    // Neutral colors
-    {ThemeColor::Neutral100, ImColor(29, 29, 29)},
-    {ThemeColor::Neutral200, ImColor(32, 32, 32)},
-    {ThemeColor::Neutral300, ImColor(38, 38, 38)},
-    {ThemeColor::Neutral400, ImColor(49, 49, 49)},
-    {ThemeColor::Neutral500, ImColor(50, 50, 50)},
-    {ThemeColor::Neutral600, ImColor(58, 58, 58)},
-    {ThemeColor::Neutral700, ImColor(76, 76, 76)},
-    {ThemeColor::Neutral800, ImColor(83, 83, 83)},
-    {ThemeColor::Neutral900, ImColor(116, 116, 116)},
+    // Charcoal
+    {ThemeColor::Charcoal300, rgb(49, 49, 53)},
+    {ThemeColor::Charcoal400, rgb(44, 44, 48)},
+    {ThemeColor::Charcoal500, rgb(39, 39, 43)},
+    {ThemeColor::Charcoal600, rgb(34, 34, 37)},
+    {ThemeColor::Charcoal700, rgb(32, 32, 35)},
+    {ThemeColor::Charcoal800, rgb(27, 27, 29)},
 
-    // Primary colors
-    {ThemeColor::Primary100, ImColor(210, 103, 47)},
-    {ThemeColor::Primary200, ImColor(65, 67, 129)},
+    // Sienna
+    {ThemeColor::Sienna500, rgb(210, 103, 47)},
+    {ThemeColor::Sienna600, rgb(168, 82, 36)},
 
     // Misc
-    {ThemeColor::ModalBackdrop, ImColor(0, 0, 0, 220)},
-
-    // Semantic colors
-    {ThemeColor::MidnightBlack100, ImColor(27, 27, 29)},
-    {ThemeColor::MidnightBlack200, ImColor(32, 32, 35)}
+    {ThemeColor::ModalBackdrop, rgba(0, 0, 0, 220)},
 
     // End
 };
@@ -88,23 +88,23 @@ static void setImguiStyles() {
   auto &style = ImGui::GetStyle();
 
   // Separator
-  style.Colors[ImGuiCol_Separator] = Theme::getColor(ThemeColor::Neutral500);
-  style.Colors[ImGuiCol_Border] = Theme::getColor(ThemeColor::Neutral500);
+  style.Colors[ImGuiCol_Separator] = Theme::getColor(ThemeColor::Charcoal800);
   style.Colors[ImGuiCol_SeparatorHovered] =
-      Theme::getColor(ThemeColor::Primary100);
-  style.Colors[ImGuiCol_SeparatorActive] = ImColor(65, 67, 129);
+      Theme::getColor(ThemeColor::Sienna600);
+  style.Colors[ImGuiCol_SeparatorActive] =
+      Theme::getColor(ThemeColor::Sienna600);
+  style.Colors[ImGuiCol_Border] = Theme::getColor(ThemeColor::Charcoal800);
   style.Colors[ImGuiCol_DockingPreview] =
-      Theme::getColor(ThemeColor::Primary100);
+      Theme::getColor(ThemeColor::Sienna600);
 
   // All items
-  style.Colors[ImGuiCol_FrameBg] =
-      Theme::getColor(ThemeColor::MidnightBlack100);
+  style.Colors[ImGuiCol_FrameBg] = Theme::getColor(ThemeColor::Charcoal600);
   style.Colors[ImGuiCol_FrameBgHovered] =
-      Theme::getColor(ThemeColor::Neutral700);
+      Theme::getColor(ThemeColor::Charcoal800);
   style.Colors[ImGuiCol_FrameBgActive] =
-      Theme::getColor(ThemeColor::Neutral700);
-  style.Colors[ImGuiCol_PopupBg] = Theme::getColor(ThemeColor::Neutral100);
-  style.Colors[ImGuiCol_ChildBg] = Theme::getColor(ThemeColor::Neutral100);
+      Theme::getColor(ThemeColor::Charcoal800);
+  style.Colors[ImGuiCol_PopupBg] = Theme::getColor(ThemeColor::Charcoal800);
+  style.Colors[ImGuiCol_ChildBg] = Theme::getColor(ThemeColor::Charcoal800);
   style.Colors[ImGuiCol_ModalWindowDimBg] =
       Theme::getColor(ThemeColor::ModalBackdrop);
   style.ItemSpacing = Styles.itemSpacing;
@@ -118,24 +118,25 @@ static void setImguiStyles() {
   style.WindowMenuButtonPosition = ImGuiDir_None;
 
   // Tables
-  style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-  style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-  style.Colors[ImGuiCol_TableHeaderBg] = ImColor(68, 68, 68, 255);
-  style.Colors[ImGuiCol_TableRowBg] = ImColor(68, 68, 68, 255);
-  style.Colors[ImGuiCol_TableRowBgAlt] = ImColor(58, 58, 58, 255);
+  style.Colors[ImGuiCol_TableBorderLight] =
+      Theme::getColor(ThemeColor::Transparent);
+  style.Colors[ImGuiCol_TableBorderStrong] =
+      Theme::getColor(ThemeColor::Transparent);
+  style.Colors[ImGuiCol_TableHeaderBg] =
+      Theme::getColor(ThemeColor::Charcoal500);
+  style.Colors[ImGuiCol_TableRowBg] = Theme::getColor(ThemeColor::Charcoal600);
+  style.Colors[ImGuiCol_TableRowBgAlt] =
+      Theme::getColor(ThemeColor::Charcoal500);
   style.CellPadding = ImVec2(8.0f, 8.0f);
 
   // Window
-  style.Colors[ImGuiCol_WindowBg] =
-      Theme::getColor(ThemeColor::MidnightBlack200);
-  style.Colors[ImGuiCol_MenuBarBg] =
-      Theme::getColor(ThemeColor::MidnightBlack200);
-  style.Colors[ImGuiCol_TitleBg] =
-      Theme::getColor(ThemeColor::MidnightBlack100);
+  style.Colors[ImGuiCol_WindowBg] = Theme::getColor(ThemeColor::Charcoal700);
+  style.Colors[ImGuiCol_MenuBarBg] = Theme::getColor(ThemeColor::Charcoal700);
+  style.Colors[ImGuiCol_TitleBg] = Theme::getColor(ThemeColor::Charcoal800);
   style.Colors[ImGuiCol_TitleBgCollapsed] =
-      Theme::getColor(ThemeColor::MidnightBlack100);
+      Theme::getColor(ThemeColor::Charcoal800);
   style.Colors[ImGuiCol_TitleBgActive] =
-      Theme::getColor(ThemeColor::MidnightBlack100);
+      Theme::getColor(ThemeColor::Charcoal800);
   style.Colors[ImGuiCol_ResizeGrip] = ImColor(255, 255, 255, 125);
   style.Colors[ImGuiCol_ResizeGripHovered] = ImColor(255, 255, 255, 255);
   style.Colors[ImGuiCol_ResizeGripActive] = ImColor(255, 255, 255, 255);
@@ -144,33 +145,34 @@ static void setImguiStyles() {
   style.WindowBorderSize = 0.0f;
 
   // Tabs
-  style.Colors[ImGuiCol_Tab] = Theme::getColor(ThemeColor::MidnightBlack100);
+  style.Colors[ImGuiCol_Tab] = Theme::getColor(ThemeColor::Charcoal800);
   style.Colors[ImGuiCol_TabUnfocused] =
-      Theme::getColor(ThemeColor::MidnightBlack100);
-  style.Colors[ImGuiCol_TabHovered] =
-      Theme::getColor(ThemeColor::MidnightBlack200);
-  style.Colors[ImGuiCol_TabActive] =
-      Theme::getColor(ThemeColor::MidnightBlack200);
+      Theme::getColor(ThemeColor::Charcoal800);
+  style.Colors[ImGuiCol_TabHovered] = Theme::getColor(ThemeColor::Charcoal700);
+  style.Colors[ImGuiCol_TabActive] = Theme::getColor(ThemeColor::Charcoal700);
   style.Colors[ImGuiCol_TabUnfocusedActive] =
-      Theme::getColor(ThemeColor::MidnightBlack200);
+      Theme::getColor(ThemeColor::Charcoal700);
 
   // Headers
   // Used by collapsing header
   style.Colors[ImGuiCol_Header] = Theme::getColor(ThemeColor::Transparent);
-  style.Colors[ImGuiCol_HeaderActive] = Theme::getColor(ThemeColor::Primary100);
-  style.Colors[ImGuiCol_HeaderHovered] =
-      Theme::getColor(ThemeColor::Primary100);
+  style.Colors[ImGuiCol_HeaderActive] = Theme::getColor(ThemeColor::Sienna600);
+  style.Colors[ImGuiCol_HeaderHovered] = Theme::getColor(ThemeColor::Sienna600);
 
   // Buttons
-  style.Colors[ImGuiCol_Button] = Theme::getColor(ThemeColor::MidnightBlack100);
-  style.Colors[ImGuiCol_ButtonHovered] =
-      Theme::getColor(ThemeColor::Primary100);
-  style.Colors[ImGuiCol_ButtonActive] = Theme::getColor(ThemeColor::Primary100);
+  style.Colors[ImGuiCol_Button] = Theme::getColor(ThemeColor::Charcoal800);
+  style.Colors[ImGuiCol_ButtonHovered] = Theme::getColor(ThemeColor::Sienna600);
+  style.Colors[ImGuiCol_ButtonActive] = Theme::getColor(ThemeColor::Sienna600);
 
   style.Colors[ImGuiCol_CheckMark] = Theme::getColor(ThemeColor::White);
-  style.Colors[ImGuiCol_SliderGrab] = Theme::getColor(ThemeColor::Neutral600);
+  style.Colors[ImGuiCol_SliderGrab] = Theme::getColor(ThemeColor::Charcoal400);
   style.Colors[ImGuiCol_SliderGrabActive] =
-      Theme::getColor(ThemeColor::Neutral900);
+      Theme::getColor(ThemeColor::Charcoal300);
+
+  style.Colors[ImGuiCol_TextSelectedBg] =
+      Theme::getColor(ThemeColor::Sienna600);
+  style.Colors[ImGuiCol_DragDropTarget] =
+      Theme::getColor(ThemeColor::Sienna600);
 }
 
 /**
@@ -214,7 +216,7 @@ glm::vec4 Theme::getEngineColor(ThemeColor color) {
 }
 
 glm::vec4 Theme::getClearColor() {
-  return getEngineColor(ThemeColor::MidnightBlack100);
+  return getEngineColor(ThemeColor::Charcoal800);
 }
 
 ImVec4 Theme::getColor(ThemeColor color) { return Colors.at(color); }

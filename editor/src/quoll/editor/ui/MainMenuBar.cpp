@@ -7,7 +7,7 @@ namespace quoll::editor {
 
 MainMenuBar::MainMenuBar() {
   ImGui::PushStyleColor(ImGuiCol_MenuBarBg,
-                        Theme::getColor(ThemeColor::MidnightBlack100));
+                        Theme::getColor(ThemeColor::Charcoal800));
   mExpanded = ImGui::BeginMainMenuBar();
 }
 
