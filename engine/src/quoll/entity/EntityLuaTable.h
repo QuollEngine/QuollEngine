@@ -44,6 +44,17 @@ public:
    */
   inline Entity getEntity() { return mEntity; }
 
+  /**
+   * @brief Equality operator
+   *
+   * @param rhs Other entity lua table
+   * @retval true Entities are equal
+   * @retval false Entities are not equal
+   */
+  inline bool operator==(const EntityLuaTable &rhs) const {
+    return mEntity == rhs.mEntity;
+  }
+
 private:
   Entity mEntity;
 

@@ -244,6 +244,11 @@ private:
                                  ActionExecutor &actionExecutor);
 
   /**
+   * @brief Render debug information
+   */
+  void renderDebug();
+
+  /**
    * @brief Render add component button
    *
    * @param scene Scene

@@ -3,6 +3,8 @@
 #include "quoll/scene/WorldTransform.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/scene/Parent.h"
+#include "quoll/scene/Skeleton.h"
+#include "quoll/scene/JointAttachment.h"
 #include "quoll/physics/Collidable.h"
 #include "quoll/physics/RigidBody.h"
 #include "quoll/physics/Torque.h"
@@ -485,11 +487,25 @@ void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
         auto &transform = entityDatabase.get<LocalTransform>(entity);
 
         if (entityDatabase.has<Parent>(entity)) {
-          const auto &parentTransform = entityDatabase.get<WorldTransform>(
-              entityDatabase.get<Parent>(entity).parent);
+          auto parent = entityDatabase.get<Parent>(entity).parent;
+          const auto &parentTransform =
+              entityDatabase.get<WorldTransform>(parent);
 
-          const auto &invParentTransform =
-              glm::inverse(parentTransform.worldTransform);
+          glm::mat4 invParentTransform{1.0f};
+          i16 jointId = -1;
+          if (entityDatabase.has<JointAttachment>(entity) &&
+              entityDatabase.has<Skeleton>(parent)) {
+            jointId = entityDatabase.get<JointAttachment>(entity).joint;
+
+            const auto &jointTransform =
+                entityDatabase.get<Skeleton>(parent).jointWorldTransforms.at(
+                    jointId);
+
+            invParentTransform =
+                glm::inverse(parentTransform.worldTransform * jointTransform);
+          } else {
+            invParentTransform = glm::inverse(parentTransform.worldTransform);
+          }
 
           transform.localPosition =
               glm::vec3(invParentTransform * glm::vec4(position, 1.0));

@@ -181,6 +181,10 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderUICanvas(scene, actionExecutor);
     renderSkybox(scene, assetRegistry, actionExecutor);
     renderEnvironmentLighting(scene, assetRegistry, actionExecutor);
+
+#ifdef QUOLL_DEBUG
+    renderDebug();
+#endif
     renderAddComponent(scene, assetRegistry, actionExecutor);
     handleDragAndDrop(scene, assetRegistry, actionExecutor);
   }
@@ -1716,6 +1720,14 @@ void EntityPanel::renderEnvironmentLighting(Scene &scene,
     actionExecutor
         .execute<EntityDeleteComponent<EnvironmentLightingSkyboxSource>>(
             mSelectedEntity);
+  }
+}
+
+void EntityPanel::renderDebug() {
+  static const String SectionName = String(fa::MagnifyingGlass) + " Debug";
+
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    ImGui::Text("Entity: %d", mSelectedEntity);
   }
 }
 
