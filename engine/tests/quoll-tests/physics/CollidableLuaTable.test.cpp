@@ -11,7 +11,7 @@ TEST_F(CollidableLuaTableTest,
   auto entity = entityDatabase.create();
 
   EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_default_material");
+  call(entity, "collidableSetDefaultMaterial");
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
 }
 
@@ -24,7 +24,7 @@ TEST_F(CollidableLuaTableTest,
   collidable.geometryDesc.type = quoll::PhysicsGeometryType::Sphere;
   entityDatabase.set(entity, collidable);
 
-  call(entity, "collidable_set_default_material");
+  call(entity, "collidableSetDefaultMaterial");
 
   const auto &updatedCollidable = entityDatabase.get<quoll::Collidable>(entity);
   EXPECT_EQ(updatedCollidable.geometryDesc.type, collidable.geometryDesc.type);
@@ -39,8 +39,8 @@ TEST_F(CollidableLuaTableTest,
        GetStaticFrictionReturnsNullIfCollidableDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "collidable_get_static_friction");
-  EXPECT_TRUE(state["static_friction"].is<sol::nil_t>());
+  auto state = call(entity, "collidableGetStaticFriction");
+  EXPECT_TRUE(state["staticFriction"].is<sol::nil_t>());
 }
 
 TEST_F(CollidableLuaTableTest,
@@ -50,8 +50,8 @@ TEST_F(CollidableLuaTableTest,
   collidable.materialDesc.staticFriction = 2.5f;
   entityDatabase.set(entity, collidable);
 
-  auto state = call(entity, "collidable_get_static_friction");
-  EXPECT_EQ(state["static_friction"].get<f32>(), 2.5f);
+  auto state = call(entity, "collidableGetStaticFriction");
+  EXPECT_EQ(state["staticFriction"].get<f32>(), 2.5f);
 }
 
 // Set static friction
@@ -59,7 +59,7 @@ TEST_F(CollidableLuaTableTest,
        SetStaticFrictionCreatesCollidableIfItDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "collidable_set_static_friction");
+  call(entity, "collidableSetStaticFriction");
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
   EXPECT_EQ(
       entityDatabase.get<quoll::Collidable>(entity).materialDesc.staticFriction,
@@ -74,7 +74,7 @@ TEST_F(CollidableLuaTableTest,
   collidable.materialDesc.restitution = 2.5f;
   entityDatabase.set(entity, collidable);
 
-  call(entity, "collidable_set_static_friction");
+  call(entity, "collidableSetStaticFriction");
 
   const auto &updatedCollidable = entityDatabase.get<quoll::Collidable>(entity);
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
@@ -90,8 +90,8 @@ TEST_F(CollidableLuaTableTest,
        GetDynamicFrictionReturnsNullIfCollidableDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "collidable_get_dynamic_friction");
-  EXPECT_TRUE(state["dynamic_friction"].is<sol::nil_t>());
+  auto state = call(entity, "collidableGetDynamicFriction");
+  EXPECT_TRUE(state["dynamicFriction"].is<sol::nil_t>());
 }
 
 TEST_F(CollidableLuaTableTest,
@@ -101,8 +101,8 @@ TEST_F(CollidableLuaTableTest,
   collidable.materialDesc.dynamicFriction = 2.5f;
   entityDatabase.set(entity, collidable);
 
-  auto state = call(entity, "collidable_get_dynamic_friction");
-  EXPECT_EQ(state["dynamic_friction"].get<f32>(), 2.5f);
+  auto state = call(entity, "collidableGetDynamicFriction");
+  EXPECT_EQ(state["dynamicFriction"].get<f32>(), 2.5f);
 }
 
 // Set dynamic friction
@@ -110,7 +110,7 @@ TEST_F(CollidableLuaTableTest,
        SetDynamicFrictionCreatesCollidableIfItDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "collidable_set_dynamic_friction");
+  call(entity, "collidableSetDynamicFriction");
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::Collidable>(entity)
                 .materialDesc.dynamicFriction,
@@ -125,7 +125,7 @@ TEST_F(CollidableLuaTableTest,
   collidable.materialDesc.restitution = 2.5f;
   entityDatabase.set(entity, collidable);
 
-  call(entity, "collidable_set_dynamic_friction");
+  call(entity, "collidableSetDynamicFriction");
 
   const auto &updatedCollidable = entityDatabase.get<quoll::Collidable>(entity);
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
@@ -141,7 +141,7 @@ TEST_F(CollidableLuaTableTest,
        GetRestitutionReturnsNullIfCollidableDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "collidable_get_restitution");
+  auto state = call(entity, "collidableGetRestitution");
   EXPECT_TRUE(state["restitution"].is<sol::nil_t>());
 }
 
@@ -151,7 +151,7 @@ TEST_F(CollidableLuaTableTest, GetRestitutionReturnsCollidableRestitution) {
   collidable.materialDesc.restitution = 2.5f;
   entityDatabase.set(entity, collidable);
 
-  auto state = call(entity, "collidable_get_restitution");
+  auto state = call(entity, "collidableGetRestitution");
   EXPECT_EQ(state["restitution"].get<f32>(), 2.5f);
 }
 
@@ -160,7 +160,7 @@ TEST_F(CollidableLuaTableTest,
        SetRestitutionCreatesCollidableIfItDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "collidable_set_restitution");
+  call(entity, "collidableSetRestitution");
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
   EXPECT_EQ(
       entityDatabase.get<quoll::Collidable>(entity).materialDesc.restitution,
@@ -171,7 +171,7 @@ TEST_F(CollidableLuaTableTest,
        SetBoxGeometryCreatesCollidableIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "collidable_set_box_geometry");
+  call(entity, "collidableSetBoxGeometry");
 
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::Collidable>(entity).geometryDesc.type,
@@ -191,7 +191,7 @@ TEST_F(CollidableLuaTableTest,
   collidable.geometryDesc.type = quoll::PhysicsGeometryType::Plane;
   entityDatabase.set(entity, collidable);
 
-  call(entity, "collidable_set_box_geometry");
+  call(entity, "collidableSetBoxGeometry");
 
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
   auto &updatedCollidable = entityDatabase.get<quoll::Collidable>(entity);
@@ -210,7 +210,7 @@ TEST_F(CollidableLuaTableTest,
        SetSphereGeometryCreatesCollidableIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "collidable_set_sphere_geometry");
+  call(entity, "collidableSetSphereGeometry");
 
   EXPECT_EQ(entityDatabase.get<quoll::Collidable>(entity).geometryDesc.type,
             quoll::PhysicsGeometryType::Sphere);
@@ -229,7 +229,7 @@ TEST_F(CollidableLuaTableTest,
   collidable.geometryDesc.type = quoll::PhysicsGeometryType::Plane;
   entityDatabase.set(entity, collidable);
 
-  call(entity, "collidable_set_sphere_geometry");
+  call(entity, "collidableSetSphereGeometry");
 
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
   auto &updatedCollidable = entityDatabase.get<quoll::Collidable>(entity);
@@ -248,7 +248,7 @@ TEST_F(CollidableLuaTableTest,
        SetCapsuleGeometryCreatesCollidableIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "collidable_set_capsule_geometry");
+  call(entity, "collidableSetCapsuleGeometry");
 
   EXPECT_EQ(entityDatabase.get<quoll::Collidable>(entity).geometryDesc.type,
             quoll::PhysicsGeometryType::Capsule);
@@ -272,7 +272,7 @@ TEST_F(CollidableLuaTableTest,
   collidable.geometryDesc.type = quoll::PhysicsGeometryType::Plane;
   entityDatabase.set(entity, collidable);
 
-  call(entity, "collidable_set_capsule_geometry");
+  call(entity, "collidableSetCapsuleGeometry");
 
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
   auto &updatedCollidable = entityDatabase.get<quoll::Collidable>(entity);
@@ -296,7 +296,7 @@ TEST_F(CollidableLuaTableTest,
        SetPlaneGeometryCreatesCollidableIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "collidable_set_plane_geometry");
+  call(entity, "collidableSetPlaneGeometry");
 
   EXPECT_EQ(entityDatabase.get<quoll::Collidable>(entity).geometryDesc.type,
             quoll::PhysicsGeometryType::Plane);
@@ -312,7 +312,7 @@ TEST_F(CollidableLuaTableTest,
   collidable.geometryDesc.type = quoll::PhysicsGeometryType::Box;
   entityDatabase.set(entity, collidable);
 
-  call(entity, "collidable_set_plane_geometry");
+  call(entity, "collidableSetPlaneGeometry");
 
   EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
   auto &updatedCollidable = entityDatabase.get<quoll::Collidable>(entity);
@@ -330,10 +330,10 @@ TEST_F(CollidableLuaTableTest, SweepReturnsFalseIfNoCollidable) {
   physicsBackend->setSweepValue(false);
 
   auto entity = entityDatabase.create();
-  auto state = call(entity, "collidable_sweep");
-  EXPECT_TRUE(state["sweep_output"].is<bool>());
-  EXPECT_FALSE(state["sweep_output"].get<bool>());
-  EXPECT_TRUE(state["sweep_data"].is<sol::nil_t>());
+  auto state = call(entity, "collidableSweep");
+  EXPECT_TRUE(state["sweepOutput"].is<bool>());
+  EXPECT_FALSE(state["sweepOutput"].get<bool>());
+  EXPECT_TRUE(state["sweepData"].is<sol::nil_t>());
 }
 
 TEST_F(CollidableLuaTableTest, SweepReturnsFalseIfSweepTestFails) {
@@ -341,10 +341,10 @@ TEST_F(CollidableLuaTableTest, SweepReturnsFalseIfSweepTestFails) {
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Collidable>(entity, {});
-  auto state = call(entity, "collidable_sweep");
-  EXPECT_TRUE(state["sweep_output"].is<bool>());
-  EXPECT_FALSE(state["sweep_output"].get<bool>());
-  EXPECT_TRUE(state["sweep_data"].is<sol::nil_t>());
+  auto state = call(entity, "collidableSweep");
+  EXPECT_TRUE(state["sweepOutput"].is<bool>());
+  EXPECT_FALSE(state["sweepOutput"].get<bool>());
+  EXPECT_TRUE(state["sweepData"].is<sol::nil_t>());
 }
 
 TEST_F(CollidableLuaTableTest, SweepReturnsTrueIfSweepTestSucceeds) {
@@ -355,17 +355,17 @@ TEST_F(CollidableLuaTableTest, SweepReturnsTrueIfSweepTestSucceeds) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Collidable>(entity, {});
 
-  auto state = call(entity, "collidable_sweep");
-  EXPECT_TRUE(state["sweep_output"].is<bool>());
-  EXPECT_TRUE(state["sweep_output"].get<bool>());
+  auto state = call(entity, "collidableSweep");
+  EXPECT_TRUE(state["sweepOutput"].is<bool>());
+  EXPECT_TRUE(state["sweepOutput"].get<bool>());
 
-  EXPECT_FALSE(state["sweep_normal"].is<sol::nil_t>());
-  EXPECT_FALSE(state["sweep_distance"].is<sol::nil_t>());
+  EXPECT_FALSE(state["sweepNormal"].is<sol::nil_t>());
+  EXPECT_FALSE(state["sweepDistance"].is<sol::nil_t>());
 
-  auto normal = state["sweep_normal"].get<glm::vec3>();
+  auto normal = state["sweepNormal"].get<glm::vec3>();
   EXPECT_EQ(normal, glm::vec3(2.5f, 3.5f, 4.5f));
 
-  auto distance = state["sweep_distance"].get<f32>();
+  auto distance = state["sweepDistance"].get<f32>();
   EXPECT_EQ(distance, 0.5f);
 }
 
@@ -373,7 +373,7 @@ TEST_F(CollidableLuaTableTest, SweepReturnsTrueIfSweepTestSucceeds) {
 TEST_F(CollidableLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "collidable_delete");
+  call(entity, "collidableDelete");
   EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
 }
 
@@ -381,6 +381,6 @@ TEST_F(CollidableLuaTableTest, DeleteRemovesCollidableComponentFromEntity) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Collidable>(entity, {});
 
-  call(entity, "collidable_delete");
+  call(entity, "collidableDelete");
   EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
 }

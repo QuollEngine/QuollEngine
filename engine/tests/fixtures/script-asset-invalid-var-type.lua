@@ -1,1 +1,1 @@
-input_vars.register("variable_name", 3)
+inputVars.register("variable_name", 3)

@@ -12,12 +12,11 @@ using EntitySpawnerLuaTableTest = LuaScriptingInterfaceTestBase;
 TEST_F(EntitySpawnerLuaTableTest,
        SpawnEmptyCreatesEmptyEntityAndReturnsEntityTable) {
   auto entity = entityDatabase.create();
-  auto state = call(entity, "entity_spawner_spawn_empty");
+  auto state = call(entity, "entitySpawnerSpawnEmpty");
 
-  EXPECT_TRUE(state["created_entity"].is<quoll::EntityLuaTable>());
+  EXPECT_TRUE(state["createdEntity"].is<quoll::EntityLuaTable>());
 
-  auto createdEntityTable =
-      state["created_entity"].get<quoll::EntityLuaTable>();
+  auto createdEntityTable = state["createdEntity"].get<quoll::EntityLuaTable>();
   auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);
@@ -35,8 +34,8 @@ TEST_F(EntitySpawnerLuaTableTest, SpawnPrefabReturnsNullIfPrefabIsEmpty) {
 
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "entity_spawner_spawn_prefab");
-  EXPECT_TRUE(state["created_entity"].is<sol::nil_t>());
+  auto state = call(entity, "entitySpawnerSpawnPrefab");
+  EXPECT_TRUE(state["createdEntity"].is<sol::nil_t>());
 }
 
 TEST_F(EntitySpawnerLuaTableTest,
@@ -50,12 +49,11 @@ TEST_F(EntitySpawnerLuaTableTest,
 
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "entity_spawner_spawn_prefab");
+  auto state = call(entity, "entitySpawnerSpawnPrefab");
 
-  EXPECT_TRUE(state["created_entity"].is<quoll::EntityLuaTable>());
+  EXPECT_TRUE(state["createdEntity"].is<quoll::EntityLuaTable>());
 
-  auto createdEntityTable =
-      state["created_entity"].get<quoll::EntityLuaTable>();
+  auto createdEntityTable = state["createdEntity"].get<quoll::EntityLuaTable>();
   auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);
@@ -72,9 +70,9 @@ TEST_F(EntitySpawnerLuaTableTest,
 
 TEST_F(EntitySpawnerLuaTableTest, SpawnSpriteReturnsNullIfTextureDoesNotExist) {
   auto entity = entityDatabase.create();
-  auto state = call(entity, "entity_spawner_spawn_sprite");
+  auto state = call(entity, "entitySpawnerSpawnSprite");
 
-  EXPECT_TRUE(state["created_entity"].is<sol::nil_t>());
+  EXPECT_TRUE(state["createdEntity"].is<sol::nil_t>());
 }
 
 TEST_F(EntitySpawnerLuaTableTest,
@@ -84,12 +82,11 @@ TEST_F(EntitySpawnerLuaTableTest,
 
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "entity_spawner_spawn_sprite");
+  auto state = call(entity, "entitySpawnerSpawnSprite");
 
-  EXPECT_TRUE(state["created_entity"].is<quoll::EntityLuaTable>());
+  EXPECT_TRUE(state["createdEntity"].is<quoll::EntityLuaTable>());
 
-  auto createdEntityTable =
-      state["created_entity"].get<quoll::EntityLuaTable>();
+  auto createdEntityTable = state["createdEntity"].get<quoll::EntityLuaTable>();
   auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);

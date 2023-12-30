@@ -1,343 +1,343 @@
-function expect_eq(a, b)
-    ret = assert_native(a == b)
+function expectEq(a, b)
+    ret = assertNative(a == b)
     if ret == false then
         msg = "Assertion failed: " .. tostring(a) .. " - " .. tostring(b)
         error(msg)
     end
 end
 
-found_entity = -1
+foundEntity = -1
 
 
 -- Entity query
-local entity_query = game:get("EntityQuery")
+local entityQuery = game:get("EntityQuery")
 
-function entity_query_get_first_by_name()
-    found_entity = entity_query:get_first_entity_by_name("Test")
+function entityQueryGetFirstByName()
+    foundEntity = entityQuery:getFirstEntityByName("Test")
 end
 
-function entity_query_delete_entity()
-    entity_query:delete_entity(entity)
+function entityQueryDeleteEntity()
+    entityQuery:deleteEntity(entity)
 end
 
-created_entity = -1
+createdEntity = -1
 
 -- Entity spawner
-local entity_spawner = game:get("EntitySpawner")
+local entitySpawner = game:get("EntitySpawner")
 
-function entity_spawner_spawn_empty()
-    created_entity = entity_spawner:spawn_empty()
+function entitySpawnerSpawnEmpty()
+    createdEntity = entitySpawner:spawnEmpty()
 end
 
-function entity_spawner_spawn_prefab()
-    created_entity = entity_spawner:spawn_prefab(1)
+function entitySpawnerSpawnPrefab()
+    createdEntity = entitySpawner:spawnPrefab(1)
 end
 
-function entity_spawner_spawn_sprite()
-    created_entity = entity_spawner:spawn_sprite(1)
+function entitySpawnerSpawnSprite()
+    createdEntity = entitySpawner:spawnSprite(1)
 end
 
 -- Name 
 name = ''
 
-function name_get()
-    name = entity.name:get()
+function nameGet()
+    name = entity.name.value
 end
 
-function name_set()
-    entity.name:set("Hello World")
+function nameSet()
+    entity.name.value = "Hello World"
 end
 
-function name_delete()
+function nameDelete()
     entity.name:delete()
 end
 
 -- Local transform 
-local_position_x = 0
-local_position_y = 0
-local_position_z = 0
+localPositionX = 0
+localPositionY = 0
+localPositionZ = 0
 
-function local_transform_position_get()
-    local_position_x, local_position_y, local_position_z = entity.local_transform:get_position()
+function localTransformPositionGet()
+    localPositionX, localPositionY, localPositionZ = entity.localTransform:getPosition()
 end
 
-function local_transform_position_set()
-    entity.local_transform:set_position(2.5, 3.5, 0.2)
+function localTransformPositionSet()
+    entity.localTransform:setPosition(2.5, 3.5, 0.2)
 end
 
-local_scale_x = 0
-local_scale_y = 0
-local_scale_z = 0
-function local_transform_scale_get()
-    local_scale_x, local_scale_y, local_scale_z = entity.local_transform:get_scale()
+localScaleX = 0
+localScaleY = 0
+localScaleZ = 0
+function localTransformScaleGet()
+    localScaleX, localScaleY, localScaleZ = entity.localTransform:getScale()
 end
 
-function local_transform_scale_set()
-    entity.local_transform:set_scale(2.5, 3.5, 0.2)
+function localTransformScaleSet()
+    entity.localTransform:setScale(2.5, 3.5, 0.2)
 end
 
-local_rotation_x = 0
-local_rotation_y = 0
-local_rotation_z = 0
-function local_transform_rotation_get()
-    local_rotation_x, local_rotation_y, local_rotation_z = entity.local_transform:get_rotation()
+localRotationX = 0
+localRotationY = 0
+localRotationZ = 0
+function localTransformRotationGet()
+    localRotationX, localRotationY, localRotationZ = entity.localTransform:getRotation()
 end
 
-function local_transform_rotation_set()
-    entity.local_transform:set_rotation(35.0, 25.0, 45.0)
+function localTransformRotationSet()
+    entity.localTransform:setRotation(35.0, 25.0, 45.0)
 end
 
-function local_transform_delete()
-    entity.local_transform:delete()
+function localTransformDelete()
+    entity.localTransform:delete()
 end
 
 -- Rigid body
-function rigid_body_set_default_params()
-    entity.rigid_body:set_default_params();
+function rigidBodySetDefaultParams()
+    entity.rigidBody:setDefaultParams();
 end
 
 mass = 0
-function rigid_body_get_mass()
-    mass = entity.rigid_body:get_mass()
+function rigidBodyGetMass()
+    mass = entity.rigidBody.mass
 end
 
-function rigid_body_set_mass()
-    entity.rigid_body:set_mass(2.5);
+function rigidBodySetMass()
+    entity.rigidBody.mass = 2.5
 end
 
-inertia_x = 0
-inertia_y = 0
-inertia_z = 0
-function rigid_body_get_inertia()
-    inertia_x, inertia_y, inertia_z = entity.rigid_body:get_inertia()
+inertiaX = 0
+inertiaY = 0
+inertiaZ = 0
+function rigidBodyGetInertia()
+    inertiaX, inertiaY, inertiaZ = entity.rigidBody:getInertia()
 end
 
-function rigid_body_set_inertia()
-    entity.rigid_body:set_inertia(2.5, 2.5, 2.5)
+function rigidBodySetInertia()
+    entity.rigidBody:setInertia(2.5, 2.5, 2.5)
 end
 
-is_gravity_applied = true
-function rigid_body_is_gravity_applied()
-    is_gravity_applied = entity.rigid_body:is_gravity_applied()
+isGravityApplied = true
+function rigidBodyIsGravityApplied()
+    isGravityApplied = entity.rigidBody.isGravityApplied
 end
 
-function rigid_body_apply_gravity()
-    entity.rigid_body:apply_gravity(false)
+function rigidBodyApplyGravity()
+    entity.rigidBody.isGravityApplied = false
 end
 
-function rigid_body_apply_force()
-    entity.rigid_body:apply_force(10.0, 0.2, 5.0);
+function rigidBodyApplyForce()
+    entity.rigidBody:applyForce(10.0, 0.2, 5.0);
 end
 
-function rigid_body_apply_impulse()
-    entity.rigid_body:apply_impulse(10.0, 0.2, 5.0)
+function rigidBodyApplyImpulse()
+    entity.rigidBody:applyImpulse(10.0, 0.2, 5.0)
 end
 
-function rigid_body_apply_torque()
-    entity.rigid_body:apply_torque(2.5, 3.5, 1.2)
+function rigidBodyApplyTorque()
+    entity.rigidBody:applyTorque(2.5, 3.5, 1.2)
 end
 
-function rigid_body_clear()
-    entity.rigid_body:clear()
+function rigidBodyClear()
+    entity.rigidBody:clear()
 end
 
-function rigid_body_delete()
-    entity.rigid_body:delete()
+function rigidBodyDelete()
+    entity.rigidBody:delete()
 end
 
 -- Collidable
-function collidable_set_default_material()
-    entity.collidable:set_default_material();
+function collidableSetDefaultMaterial()
+    entity.collidable:setDefaultMaterial();
 end
 
-static_friction = 0
-function collidable_get_static_friction()
-    static_friction = entity.collidable:get_static_friction()
+staticFriction = 0
+function collidableGetStaticFriction()
+    staticFriction = entity.collidable.staticFriction
 end
 
-function collidable_set_static_friction()
-    entity.collidable:set_static_friction(2.5);
+function collidableSetStaticFriction()
+    entity.collidable.staticFriction = 2.5
 end
 
-dynamic_friction = 0
-function collidable_get_dynamic_friction()
-    dynamic_friction = entity.collidable:get_dynamic_friction()
+dynamicFriction = 0
+function collidableGetDynamicFriction()
+    dynamicFriction = entity.collidable.dynamicFriction
 end
 
-function collidable_set_dynamic_friction()
-    entity.collidable:set_dynamic_friction(2.5);
+function collidableSetDynamicFriction()
+    entity.collidable.dynamicFriction = 2.5
 end
 
 restitution = 0
-function collidable_get_restitution()
-    restitution = entity.collidable:get_restitution()
+function collidableGetRestitution()
+    restitution = entity.collidable.restitution
 end
 
-function collidable_set_restitution()
-    entity.collidable:set_restitution(2.5);
+function collidableSetRestitution()
+    entity.collidable.restitution = 2.5
 end
 
-function collidable_set_box_geometry()
-    entity.collidable:set_box_geometry(2.5, 2.5, 2.5)
+function collidableSetBoxGeometry()
+    entity.collidable:setBoxGeometry(2.5, 2.5, 2.5)
 end
 
-function collidable_set_sphere_geometry()
-    entity.collidable:set_sphere_geometry(2.5)
+function collidableSetSphereGeometry()
+    entity.collidable:setSphereGeometry(2.5)
 end
 
-function collidable_set_capsule_geometry()
-    entity.collidable:set_capsule_geometry(2.5, 3.5)
+function collidableSetCapsuleGeometry()
+    entity.collidable:setCapsuleGeometry(2.5, 3.5)
 end
 
-function collidable_set_plane_geometry()
-    entity.collidable:set_plane_geometry()
+function collidableSetPlaneGeometry()
+    entity.collidable:setPlaneGeometry()
 end
 
-sweep_output = nil
-sweep_normal = nil
-sweep_distance = nil
-sweep_data = nil
-function collidable_sweep()
-    sweep_output, sweep_data = entity.collidable:sweep(0.0, 0.0, 0.0, 0.0)
+sweepOutput = nil
+sweepNormal = nil
+sweepDistance = nil
+sweepData = nil
+function collidableSweep()
+    sweepOutput, sweepData = entity.collidable:sweep(0.0, 0.0, 0.0, 0.0)
 
-    if sweep_output then
-       sweep_normal = sweep_data.normal
-       sweep_distance = sweep_data.distance
+    if sweepOutput then
+       sweepNormal = sweepData.normal
+       sweepDistance = sweepData.distance
     end
 end
 
-function collidable_delete()
+function collidableDelete()
     entity.collidable:delete()
 end
 
 -- Text
 text = ''
-text_line_height = -1
+textLineHeight = -1
 
-function text_get_text()
-    text = entity.text:get_text()
+function textGetText()
+    text = entity.text.content
 end
 
-function text_set_text()
-    entity.text:set_text("Hello World")
+function textSetText()
+    entity.text.content = "Hello World"
 end
 
-function text_get_line_height()
-    text_line_height = entity.text:get_line_height()
+function textGetLineHeight()
+    textLineHeight = entity.text.lineHeight
 end
 
-function text_set_line_height()
-    entity.text:set_line_height(12)
+function textSetLineHeight()
+    entity.text.lineHeight = 12
 end
 
-function text_delete()
+function textDelete()
     entity.text:delete()
 end
 
 -- Animator
-function animator_trigger()
+function animatorTrigger()
    entity.animator:trigger("Move")
 end
 
-function animator_delete()
+function animatorDelete()
     entity.animator:delete()
 end
 
 -- Audio 
-audio_is_playing_flag = false
-function audio_play()
+audioIsPlayingFlag = false
+function audioPlay()
     entity.audio:play()
 end
 
-function audio_is_playing()
-    audio_is_playing_flag = entity.audio:is_playing()
+function audioIsPlaying()
+    audioIsPlayingFlag = entity.audio.isPlaying
 end
 
-function audio_delete()
+function audioDelete()
     entity.audio:delete()
 end
 
 -- Perspective lens
-pr_near = 0
-pr_far = 0
-pr_sensor_width = 0
-pr_sensor_height = 0
-pr_focal_length = 0
-pr_aperture = 0
-pr_shutter_speed = 0
-pr_sensitivity = 0
+prNear = 0
+prFar = 0
+prSensorWidth = 0
+prSensorHeight = 0
+prFocalLength = 0
+prAperture = 0
+prShutterSpeed = 0
+prSensitivity = 0
 
-function perspective_lens_get()
-  pr_near = entity.perspective_lens:get_near()
-  pr_far = entity.perspective_lens:get_far()
-  pr_sensor_width, pr_sensor_height = entity.perspective_lens:get_sensor_size()
-  pr_focal_length = entity.perspective_lens:get_focal_length()
-  pr_aperture = entity.perspective_lens:get_aperture()
-  pr_shutter_speed = entity.perspective_lens:get_shutter_speed()
-  pr_sensitivity = entity.perspective_lens:get_sensitivity()
+function perspectiveLensGet()
+  prNear = entity.perspectiveLens.near
+  prFar = entity.perspectiveLens.far
+  prSensorWidth, prSensorHeight = entity.perspectiveLens:getSensorSize()
+  prFocalLength = entity.perspectiveLens.focalLength
+  prAperture = entity.perspectiveLens.aperture
+  prShutterSpeed = entity.perspectiveLens.shutterSpeed
+  prSensitivity = entity.perspectiveLens.sensitivity
 end
 
-function perspective_lens_set()
-    entity.perspective_lens:set_near(0.004)
-    entity.perspective_lens:set_far(4000.0)
-    entity.perspective_lens:set_sensor_size(200.0, 200.0)
-    entity.perspective_lens:set_focal_length(50.0)
-    entity.perspective_lens:set_aperture(65.0)
-    entity.perspective_lens:set_shutter_speed(2200.0)
-    entity.perspective_lens:set_sensitivity(4000)
+function perspectiveLensSet()
+    entity.perspectiveLens.near = 0.004
+    entity.perspectiveLens.far = 4000.0
+    entity.perspectiveLens:setSensorSize(200.0, 200.0)
+    entity.perspectiveLens.focalLength = 50.0
+    entity.perspectiveLens.aperture = 65.0
+    entity.perspectiveLens.shutterSpeed = 2200.0
+    entity.perspectiveLens.sensitivity = 4000
 end
 
-function perspective_lens_delete()
-    entity.perspective_lens:delete()
+function perspectiveLensDelete()
+    entity.perspectiveLens:delete()
 end
 
 -- Input map
-input_command = 'test'
-input_command_value = 'test'
-input_command_value_x = 'test'
-input_command_value_y = 'test'
+inputCommand = 'test'
+inputCommandValue = 'test'
+inputCommandValueX = 'test'
+inputCommandValueY = 'test'
 
---- get_command
-function input_get_command()
-    input_command = entity.input:get_command("Test")
+--- getCommand
+function inputGetCommand()
+    inputCommand = entity.input:getCommand("Test")
 end
 
---- get_value_boolean
-function input_get_value_boolean()
-    command = entity.input:get_command("Test")
-    input_command_value = entity.input:get_value_boolean(command)
+--- getValueBoolean
+function inputGetValueBoolean()
+    command = entity.input:getCommand("Test")
+    inputCommandValue = entity.input:getValueBoolean(command)
 end
 
-function input_get_value_boolean_non_existent_command()
-    input_command_value = entity.input:get_value_boolean(10)
+function inputGetValueBooleanNonExistentCommand()
+    inputCommandValue = entity.input:getValueBoolean(10)
 end
 
-function input_get_value_boolean_no_member()
-    command = entity.input:get_command("Test")
-    input_command_value = entity.input.get_value_boolean(command)
+function inputGetValueBooleanNoMember()
+    command = entity.input:getCommand("Test")
+    inputCommandValue = entity.input.getValueBoolean(command)
 end
 
-function input_get_value_boolean_no_param()
-    command = entity.input:get_command()
-    input_command_value = entity.input:get_value_boolean()
+function inputGetValueBooleanNoParam()
+    command = entity.input:getCommand()
+    inputCommandValue = entity.input:getValueBoolean()
 end
  
---- get_value_axis_2d
-function input_get_value_axis_2d()
-    command = entity.input:get_command("Test")
-    input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d(command)
+--- getValueAxis2d
+function inputGetValueAxis2d()
+    command = entity.input:getCommand("Test")
+    inputCommandValueX, inputCommandValueY = entity.input:getValueAxis2d(command)
 end
 
-function input_get_value_axis_2d_non_existent_command()
-    input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d(10)
+function inputGetValueAxis2dNonExistentCommand()
+    inputCommandValueX, inputCommandValueY = entity.input:getValueAxis2d(10)
 end
  
---- set_scheme
-function input_set_scheme()
-    entity.input:set_scheme("Test scheme")
+--- setScheme
+function inputSetScheme()
+    entity.input:setScheme("Test scheme")
 end
 
-function my_component()
+function myComponent()
   return ui.view{
     children={ui.image(10), ui.image(10), ui.image(10)}
   }
@@ -346,23 +346,23 @@ end
 -- UI canvas
 local ui = game:get("UI")
 
-function ui_element_image()
+function uiElementImage()
   local image = ui.image{texture=10}
-  expect_eq(image.texture, 10)
+  expectEq(image.texture, 10)
 end
 
-function ui_element_text()
+function uiElementText()
   local text = ui.text{content="Hello"}
-  expect_eq(text.content, "Hello")
+  expectEq(text.content, "Hello")
 end
 
-function table_length(T)
+function tableLength(T)
     local count = 0
     for _ in pairs(T) do count = count + 1 end
     return count
   end
 
-function ui_element_view()
+function uiElementView()
   local view = ui.view{children={
     ui.image{texture=10},
     ui.text{content="Hello"},
@@ -377,46 +377,46 @@ function ui_element_view()
     ui.view{}
   }}
 
-  expect_eq(table_length(view.children), 6)
-  expect_eq(view.children[1].texture, 10)
-  expect_eq(view.children[2].content, "Hello")
-  expect_eq(view.children[3].texture, 20)
-  expect_eq(view.children[4].content, "Test")
-  expect_eq(table_length(view.children[5].children), 2)
-  expect_eq(view.children[5].children[1].content, "Child")
-  expect_eq(view.children[5].children[2].texture, 30)
-  expect_eq(table_length(view.children[6].children), 0)
+  expectEq(tableLength(view.children), 6)
+  expectEq(view.children[1].texture, 10)
+  expectEq(view.children[2].content, "Hello")
+  expectEq(view.children[3].texture, 20)
+  expectEq(view.children[4].content, "Test")
+  expectEq(tableLength(view.children[5].children), 2)
+  expectEq(view.children[5].children[1].content, "Child")
+  expectEq(view.children[5].children[2].texture, 30)
+  expectEq(tableLength(view.children[6].children), 0)
 end
 
-function ui_element_view_direction(direction)
+function uiElementViewDirection(direction)
     return ui.view{style={direction=direction}}
 end
 
-function ui_element_view_align_items(alignItems)
+function uiElementViewAlignItems(alignItems)
     return ui.view{style={alignItems=alignItems}}
 end
 
-function ui_element_view_align_content(alignContent)
+function uiElementViewAlignContent(alignContent)
     return ui.view{style={alignContent=alignContent}}
 end
 
-function ui_element_view_justify_content(justifyContent)
+function uiElementViewJustifyContent(justifyContent)
     return ui.view{style={justifyContent=justifyContent}}
 end
 
-function ui_element_view_flex_grow(grow)
+function uiElementViewFlexGrow(grow)
     return ui.view{style={grow=grow}}
 end
 
-function ui_element_view_flex_shrink(shrink)
+function uiElementViewFlexShrink(shrink)
     return ui.view{style={shrink=shrink}}
 end
 
-function ui_element_view_background_color(backgroundColor)
+function uiElementViewBackgroundColor(backgroundColor)
     return ui.view{style={backgroundColor=backgroundColor}}
 end
 
-function ui_canvas_render()
+function uiCanvasRender()
     view = ui.view{children={
         ui.image{texture=10},
         ui.text{content="Hello"},
@@ -430,5 +430,5 @@ function ui_canvas_render()
         },
         ui.view{}
     }}
-    entity.ui_canvas:render(view)
+    entity.uiCanvas:render(view)
 end

@@ -18,9 +18,8 @@ InputSystemLuaTable InputSystemLuaTable::create(sol::state_view state,
   keyboardEvent["mods"] = &KeyboardEventObject::mods;
 
   auto usertype = state.new_usertype<InputSystemLuaTable>(sol::no_constructor);
-  usertype["on_key_press"] = sol::property(&InputSystemLuaTable::onKeyPress);
-  usertype["on_key_release"] =
-      sol::property(&InputSystemLuaTable::onKeyRelease);
+  usertype["onKeyPress"] = sol::property(&InputSystemLuaTable::onKeyPress);
+  usertype["onKeyRelease"] = sol::property(&InputSystemLuaTable::onKeyRelease);
 
   return InputSystemLuaTable(entity, scriptGlobals);
 }

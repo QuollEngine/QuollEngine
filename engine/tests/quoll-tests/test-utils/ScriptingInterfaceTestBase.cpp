@@ -22,7 +22,7 @@ sol::state_view LuaScriptingInterfaceTestBase::start(quoll::Entity entity) {
   auto &script = entityDatabase.get<quoll::LuaScript>(entity);
   sol::state_view state(script.state);
 
-  state["assert_native"] = [](bool value) { return value; };
+  state["assertNative"] = [](bool value) { return value; };
 
   return state;
 }

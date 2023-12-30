@@ -52,10 +52,10 @@ void TextLuaTable::deleteThis() {
 }
 
 void TextLuaTable::create(sol::usertype<TextLuaTable> usertype) {
-  usertype["get_text"] = &TextLuaTable::getText;
-  usertype["set_text"] = &TextLuaTable::setText;
-  usertype["get_line_height"] = &TextLuaTable::getLineHeight;
-  usertype["set_line_height"] = &TextLuaTable::setLineHeight;
+  usertype["content"] =
+      sol::property(&TextLuaTable::getText, &TextLuaTable::setText);
+  usertype["lineHeight"] =
+      sol::property(&TextLuaTable::getLineHeight, &TextLuaTable::setLineHeight);
   usertype["delete"] = &TextLuaTable::deleteThis;
 }
 

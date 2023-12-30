@@ -4,7 +4,7 @@ function debug()
     logger.debug("Hello world")
 end
 
-function debug_invalid()
+function debugInvalid()
     logger.debug()
     logger.debug(nil)
     logger.debug(true)
@@ -16,7 +16,7 @@ function info()
     logger.info("Hello world")
 end
 
-function info_invalid()
+function infoInvalid()
     logger.info()
     logger.info(nil)
     logger.info(true)
@@ -28,7 +28,7 @@ function warning()
     logger.warning("Hello world")
 end
 
-function warning_invalid()
+function warningInvalid()
     logger.warning()
     logger.warning(nil)
     logger.warning(true)
@@ -40,7 +40,7 @@ function error()
     logger.error("Hello world")
 end
 
-function error_invalid()
+function errorInvalid()
     logger.error()
     logger.error(nil)
     logger.error(true)
@@ -52,7 +52,7 @@ function fatal()
     logger.fatal("Hello world")
 end
 
-function fatal_invalid()
+function fatalInvalid()
     logger.fatal()
     logger.fatal(nil)
     logger.fatal(true)

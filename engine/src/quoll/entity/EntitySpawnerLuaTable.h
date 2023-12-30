@@ -41,13 +41,6 @@ public:
   sol_maybe<EntityLuaTable> spawnSprite(TextureAssetHandle texture);
 
   /**
-   * @brief Get component name in scripts
-   *
-   * @return Component name
-   */
-  static const String getName() { return "entity_spawner"; }
-
-  /**
    * @brief Create user type
    *
    * @param state Sol state

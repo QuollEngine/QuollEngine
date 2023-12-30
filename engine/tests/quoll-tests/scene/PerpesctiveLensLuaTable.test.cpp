@@ -9,16 +9,16 @@ class PerspectiveLensLuaTableTest : public LuaScriptingInterfaceTestBase {};
 
 TEST_F(PerspectiveLensLuaTableTest, GetReturnsNilIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
-  auto state = call(entity, "perspective_lens_get");
+  auto state = call(entity, "perspectiveLensGet");
 
-  EXPECT_TRUE(state["pr_near"].is<sol::nil_t>());
-  EXPECT_TRUE(state["pr_far"].is<sol::nil_t>());
-  EXPECT_TRUE(state["pr_sensor_width"].is<sol::nil_t>());
-  EXPECT_TRUE(state["pr_sensor_height"].is<sol::nil_t>());
-  EXPECT_TRUE(state["pr_focal_length"].is<sol::nil_t>());
-  EXPECT_TRUE(state["pr_aperture"].is<sol::nil_t>());
-  EXPECT_TRUE(state["pr_shutter_speed"].is<sol::nil_t>());
-  EXPECT_TRUE(state["pr_sensitivity"].is<sol::nil_t>());
+  EXPECT_TRUE(state["prNear"].is<sol::nil_t>());
+  EXPECT_TRUE(state["prFar"].is<sol::nil_t>());
+  EXPECT_TRUE(state["prSensorWidth"].is<sol::nil_t>());
+  EXPECT_TRUE(state["prSensorHeight"].is<sol::nil_t>());
+  EXPECT_TRUE(state["prFocalLength"].is<sol::nil_t>());
+  EXPECT_TRUE(state["prAperture"].is<sol::nil_t>());
+  EXPECT_TRUE(state["prShutterSpeed"].is<sol::nil_t>());
+  EXPECT_TRUE(state["prSensitivity"].is<sol::nil_t>());
 }
 
 TEST_F(PerspectiveLensLuaTableTest, GetReturnsComponentValues) {
@@ -34,24 +34,23 @@ TEST_F(PerspectiveLensLuaTableTest, GetReturnsComponentValues) {
   lens.sensitivity = 3000;
   entityDatabase.set(entity, lens);
 
-  auto state = call(entity, "perspective_lens_get");
+  auto state = call(entity, "perspectiveLensGet");
 
-  EXPECT_EQ(state["pr_near"].get<f32>(), lens.near);
-  EXPECT_EQ(state["pr_far"].get<f32>(), lens.far);
-  EXPECT_EQ(state["pr_sensor_width"].get<f32>(), lens.sensorSize.x);
-  EXPECT_EQ(state["pr_sensor_height"].get<f32>(), lens.sensorSize.y);
-  EXPECT_EQ(state["pr_focal_length"].get<f32>(), lens.focalLength);
-  EXPECT_EQ(state["pr_aperture"].get<f32>(), lens.aperture);
-  EXPECT_FLOAT_EQ(state["pr_shutter_speed"].get<f32>(),
-                  1.0f / lens.shutterSpeed);
-  EXPECT_EQ(state["pr_sensitivity"].get<f32>(), lens.sensitivity);
+  EXPECT_EQ(state["prNear"].get<f32>(), lens.near);
+  EXPECT_EQ(state["prFar"].get<f32>(), lens.far);
+  EXPECT_EQ(state["prSensorWidth"].get<f32>(), lens.sensorSize.x);
+  EXPECT_EQ(state["prSensorHeight"].get<f32>(), lens.sensorSize.y);
+  EXPECT_EQ(state["prFocalLength"].get<f32>(), lens.focalLength);
+  EXPECT_EQ(state["prAperture"].get<f32>(), lens.aperture);
+  EXPECT_FLOAT_EQ(state["prShutterSpeed"].get<f32>(), 1.0f / lens.shutterSpeed);
+  EXPECT_EQ(state["prSensitivity"].get<f32>(), lens.sensitivity);
 }
 
 TEST_F(PerspectiveLensLuaTableTest, SetCreatesComponentIfItDoesNotExist) {
   auto entity = entityDatabase.create();
   EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 
-  auto state = call(entity, "perspective_lens_set");
+  auto state = call(entity, "perspectiveLensSet");
 
   EXPECT_TRUE(entityDatabase.has<quoll::PerspectiveLens>(entity));
   const auto &lens = entityDatabase.get<quoll::PerspectiveLens>(entity);
@@ -69,7 +68,7 @@ TEST_F(PerspectiveLensLuaTableTest, SetStoresProvidedValuesInComponent) {
   auto entity = entityDatabase.create();
   entityDatabase.set(entity, quoll::PerspectiveLens{});
 
-  auto state = call(entity, "perspective_lens_set");
+  auto state = call(entity, "perspectiveLensSet");
 
   const auto &lens = entityDatabase.get<quoll::PerspectiveLens>(entity);
 
@@ -85,7 +84,7 @@ TEST_F(PerspectiveLensLuaTableTest, SetStoresProvidedValuesInComponent) {
 TEST_F(PerspectiveLensLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "perspective_lens_delete");
+  auto state = call(entity, "perspectiveLensDelete");
 
   EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 }
@@ -94,7 +93,7 @@ TEST_F(PerspectiveLensLuaTableTest, DeleteRemovesComponentIfComponentExists) {
   auto entity = entityDatabase.create();
   entityDatabase.set(entity, quoll::PerspectiveLens{});
 
-  auto state = call(entity, "perspective_lens_delete");
+  auto state = call(entity, "perspectiveLensDelete");
 
   EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 }

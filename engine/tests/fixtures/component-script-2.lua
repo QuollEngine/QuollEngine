@@ -1,5 +1,5 @@
 start = true
 
-game.on_update:connect(function()
+game.onUpdate:connect(function()
     start = false
 end)

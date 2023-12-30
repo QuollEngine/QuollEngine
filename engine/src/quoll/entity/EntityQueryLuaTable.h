@@ -32,13 +32,6 @@ public:
   void deleteEntity(EntityLuaTable entity);
 
   /**
-   * @brief Get component name in scripts
-   *
-   * @return Component name
-   */
-  static const String getName() { return "entity_query"; }
-
-  /**
    * @brief Create user type
    *
    * @param state Sol state

@@ -24,9 +24,9 @@ PhysicsSystemLuaTable::create(sol::state_view state, Entity entity,
 
   auto usertype =
       state.new_usertype<PhysicsSystemLuaTable>(sol::no_constructor);
-  usertype["on_collision_start"] =
+  usertype["onCollisionStart"] =
       sol::property(&PhysicsSystemLuaTable::onCollisionStart);
-  usertype["on_collision_end"] =
+  usertype["onCollisionEnd"] =
       sol::property(&PhysicsSystemLuaTable::onCollisionEnd);
 
   return PhysicsSystemLuaTable(entity, scriptGlobals);

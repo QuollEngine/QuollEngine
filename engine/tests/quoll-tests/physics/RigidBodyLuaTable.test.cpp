@@ -13,7 +13,7 @@ class RigidBodyLuaTableTest : public LuaScriptingInterfaceTestBase {};
 TEST_F(RigidBodyLuaTableTest, SetDefaultParamsSetsNewRigidBody) {
   auto entity = entityDatabase.create();
 
-  call(entity, "rigid_body_set_default_params");
+  call(entity, "rigidBodySetDefaultParams");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.mass,
             quoll::RigidBody{}.dynamicDesc.mass);
@@ -22,7 +22,7 @@ TEST_F(RigidBodyLuaTableTest, SetDefaultParamsSetsNewRigidBody) {
 TEST_F(RigidBodyLuaTableTest, GetMassReturnsNullIfRigidBodyDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "rigid_body_get_mass");
+  auto state = call(entity, "rigidBodyGetMass");
   EXPECT_TRUE(state["mass"].is<sol::nil_t>());
 }
 
@@ -32,14 +32,14 @@ TEST_F(RigidBodyLuaTableTest, GetMassReturnsRigidBodyMass) {
   rigidBody.dynamicDesc.mass = 2.5f;
   entityDatabase.set(entity, rigidBody);
 
-  auto state = call(entity, "rigid_body_get_mass");
+  auto state = call(entity, "rigidBodyGetMass");
   EXPECT_EQ(state["mass"].get<f32>(), 2.5f);
 }
 
 TEST_F(RigidBodyLuaTableTest, SetMassCreatesRigidBodyIfItDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "rigid_body_set_mass");
+  call(entity, "rigidBodySetMass");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.mass, 2.5);
 }
@@ -51,7 +51,7 @@ TEST_F(RigidBodyLuaTableTest, SetMassUpdatesMassPropertyOfRigidBodyIfExists) {
   rigidBody.dynamicDesc.inertia = glm::vec3(7.5f);
   entityDatabase.set(entity, rigidBody);
 
-  call(entity, "rigid_body_set_mass");
+  call(entity, "rigidBodySetMass");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.mass, 2.5);
   EXPECT_NE(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.mass,
@@ -63,10 +63,10 @@ TEST_F(RigidBodyLuaTableTest, SetMassUpdatesMassPropertyOfRigidBodyIfExists) {
 TEST_F(RigidBodyLuaTableTest, GetInertiaReturnsNullIfRigidBodyDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "rigid_body_get_inertia");
-  EXPECT_TRUE(state["inertia_x"].is<sol::nil_t>());
-  EXPECT_TRUE(state["inertia_y"].is<sol::nil_t>());
-  EXPECT_TRUE(state["inertia_z"].is<sol::nil_t>());
+  auto state = call(entity, "rigidBodyGetInertia");
+  EXPECT_TRUE(state["inertiaX"].is<sol::nil_t>());
+  EXPECT_TRUE(state["inertiaY"].is<sol::nil_t>());
+  EXPECT_TRUE(state["inertiaZ"].is<sol::nil_t>());
 }
 
 TEST_F(RigidBodyLuaTableTest, GetInertiaReturnsRigidBodyInertia) {
@@ -75,16 +75,16 @@ TEST_F(RigidBodyLuaTableTest, GetInertiaReturnsRigidBodyInertia) {
   rigidBody.dynamicDesc.inertia = glm::vec3(2.5f);
   entityDatabase.set(entity, rigidBody);
 
-  auto state = call(entity, "rigid_body_get_inertia");
-  EXPECT_EQ(state["inertia_x"].get<f32>(), 2.5f);
-  EXPECT_EQ(state["inertia_y"].get<f32>(), 2.5f);
-  EXPECT_EQ(state["inertia_z"].get<f32>(), 2.5f);
+  auto state = call(entity, "rigidBodyGetInertia");
+  EXPECT_EQ(state["inertiaX"].get<f32>(), 2.5f);
+  EXPECT_EQ(state["inertiaY"].get<f32>(), 2.5f);
+  EXPECT_EQ(state["inertiaZ"].get<f32>(), 2.5f);
 }
 
 TEST_F(RigidBodyLuaTableTest, SetInertiaCreatesRigidBodyIfItDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "rigid_body_set_inertia");
+  call(entity, "rigidBodySetInertia");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.inertia,
             glm::vec3(2.5));
@@ -98,7 +98,7 @@ TEST_F(RigidBodyLuaTableTest,
   rigidBody.dynamicDesc.mass = 7.5f;
   entityDatabase.set(entity, rigidBody);
 
-  call(entity, "rigid_body_set_inertia");
+  call(entity, "rigidBodySetInertia");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.mass,
             rigidBody.dynamicDesc.mass);
@@ -112,8 +112,8 @@ TEST_F(RigidBodyLuaTableTest,
        IsGravityAppliedReturnsNullIfRigidBodyDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "rigid_body_is_gravity_applied");
-  EXPECT_TRUE(state["is_gravity_applied"].is<sol::nil_t>());
+  auto state = call(entity, "rigidBodyIsGravityApplied");
+  EXPECT_TRUE(state["isGravityApplied"].is<sol::nil_t>());
 }
 
 TEST_F(RigidBodyLuaTableTest, IsGravityAppliedReturnsRigidBodyGravityApplied) {
@@ -122,14 +122,14 @@ TEST_F(RigidBodyLuaTableTest, IsGravityAppliedReturnsRigidBodyGravityApplied) {
   rigidBody.dynamicDesc.applyGravity = false;
   entityDatabase.set(entity, rigidBody);
 
-  auto state = call(entity, "rigid_body_is_gravity_applied");
-  EXPECT_EQ(state["is_gravity_applied"].get<bool>(), false);
+  auto state = call(entity, "rigidBodyIsGravityApplied");
+  EXPECT_EQ(state["isGravityApplied"].get<bool>(), false);
 }
 
 TEST_F(RigidBodyLuaTableTest, ApplyGravityCreatesRigidBodyIfItDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "rigid_body_apply_gravity");
+  call(entity, "rigidBodyApplyGravity");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
   EXPECT_EQ(
       entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.applyGravity,
@@ -144,7 +144,7 @@ TEST_F(RigidBodyLuaTableTest,
   rigidBody.dynamicDesc.mass = 7.5f;
   entityDatabase.set(entity, rigidBody);
 
-  call(entity, "rigid_body_apply_gravity");
+  call(entity, "rigidBodyApplyGravity");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.mass,
             rigidBody.dynamicDesc.mass);
@@ -160,7 +160,7 @@ TEST_F(RigidBodyLuaTableTest, ApplyForceSetsForceComponent) {
   auto entity = entityDatabase.create();
   EXPECT_FALSE(entityDatabase.has<quoll::Force>(entity));
 
-  call(entity, "rigid_body_apply_force");
+  call(entity, "rigidBodyApplyForce");
   EXPECT_TRUE(entityDatabase.has<quoll::Force>(entity));
 
   const auto &force = entityDatabase.get<quoll::Force>(entity).force;
@@ -172,7 +172,7 @@ TEST_F(RigidBodyLuaTableTest, ApplyImpulseSetsImpulseComponent) {
   auto entity = entityDatabase.create();
   EXPECT_FALSE(entityDatabase.has<quoll::Impulse>(entity));
 
-  call(entity, "rigid_body_apply_impulse");
+  call(entity, "rigidBodyApplyImpulse");
   EXPECT_TRUE(entityDatabase.has<quoll::Impulse>(entity));
 
   const auto &impulse = entityDatabase.get<quoll::Impulse>(entity).impulse;
@@ -184,7 +184,7 @@ TEST_F(RigidBodyLuaTableTest, ApplyTorqueSetsTorqueComponent) {
   auto entity = entityDatabase.create();
   EXPECT_FALSE(entityDatabase.has<quoll::Torque>(entity));
 
-  call(entity, "rigid_body_apply_torque");
+  call(entity, "rigidBodyApplyTorque");
   EXPECT_TRUE(entityDatabase.has<quoll::Torque>(entity));
 
   const auto &torque = entityDatabase.get<quoll::Torque>(entity).torque;
@@ -196,14 +196,14 @@ TEST_F(RigidBodyLuaTableTest, ClearSetsRigidBodyClearComponent) {
   auto entity = entityDatabase.create();
   EXPECT_FALSE(entityDatabase.has<quoll::RigidBodyClear>(entity));
 
-  call(entity, "rigid_body_clear");
+  call(entity, "rigidBodyClear");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBodyClear>(entity));
 }
 
 TEST_F(RigidBodyLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  call(entity, "rigid_body_delete");
+  call(entity, "rigidBodyDelete");
   EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
 }
 
@@ -211,6 +211,6 @@ TEST_F(RigidBodyLuaTableTest, DeleteRemovesRigidBodyComponentFromEntity) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::RigidBody>(entity, {});
 
-  call(entity, "rigid_body_delete");
+  call(entity, "rigidBodyDelete");
   EXPECT_FALSE(entityDatabase.has<quoll::RigidBody>(entity));
 }

@@ -4,7 +4,7 @@ b = nil
 
 local physics = game:get("Physics")
 
-physics.on_collision_start:connect(function(e)
+physics.onCollisionStart:connect(function(e)
     event = "start"
     a = e.a
     b = e.b
@@ -12,7 +12,7 @@ physics.on_collision_start:connect(function(e)
     assert_native(e.a == entity)
 end)
 
-physics.on_collision_end:connect(function(e)
+physics.onCollisionEnd:connect(function(e)
     event = "end"
     a = e.a
     b = e.b

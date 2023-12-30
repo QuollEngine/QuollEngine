@@ -1,8 +1,8 @@
-var_string = input_vars.register('string_value', input_vars.types.String)
-var_prefab = input_vars.register('prefab_value', input_vars.types.AssetPrefab)
+var_string = inputVars.register('string_value', inputVars.types.String)
+var_prefab = inputVars.register('prefab_value', inputVars.types.AssetPrefab)
 
 state = 'start'
 
-game.on_update:connect(function()
+game.onUpdate:connect(function()
     state = 'update'
 end)

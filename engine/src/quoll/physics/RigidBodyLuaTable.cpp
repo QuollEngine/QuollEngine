@@ -116,16 +116,16 @@ void RigidBodyLuaTable::deleteThis() {
 }
 
 void RigidBodyLuaTable::create(sol::usertype<RigidBodyLuaTable> usertype) {
-  usertype["set_default_params"] = &RigidBodyLuaTable::setDefaultParams;
-  usertype["get_mass"] = &RigidBodyLuaTable::getMass;
-  usertype["set_mass"] = &RigidBodyLuaTable::setMass;
-  usertype["get_inertia"] = &RigidBodyLuaTable::getInertia;
-  usertype["set_inertia"] = &RigidBodyLuaTable::setInertia;
-  usertype["is_gravity_applied"] = &RigidBodyLuaTable::isGravityApplied;
-  usertype["apply_gravity"] = &RigidBodyLuaTable::applyGravity;
-  usertype["apply_force"] = &RigidBodyLuaTable::applyForce;
-  usertype["apply_impulse"] = &RigidBodyLuaTable::applyImpulse;
-  usertype["apply_torque"] = &RigidBodyLuaTable::applyTorque;
+  usertype["setDefaultParams"] = &RigidBodyLuaTable::setDefaultParams;
+  usertype["mass"] =
+      sol::property(&RigidBodyLuaTable::getMass, &RigidBodyLuaTable::setMass);
+  usertype["getInertia"] = &RigidBodyLuaTable::getInertia;
+  usertype["setInertia"] = &RigidBodyLuaTable::setInertia;
+  usertype["isGravityApplied"] = sol::property(
+      &RigidBodyLuaTable::isGravityApplied, &RigidBodyLuaTable::applyGravity);
+  usertype["applyForce"] = &RigidBodyLuaTable::applyForce;
+  usertype["applyImpulse"] = &RigidBodyLuaTable::applyImpulse;
+  usertype["applyTorque"] = &RigidBodyLuaTable::applyTorque;
   usertype["clear"] = &RigidBodyLuaTable::clear;
   usertype["delete"] = &RigidBodyLuaTable::deleteThis;
 }
