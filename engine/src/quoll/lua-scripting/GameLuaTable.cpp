@@ -56,7 +56,7 @@ lua::ScriptSignalView GameLuaTable::onUpdate() {
 
 void GameLuaTable::create(sol::state_view state) {
   auto usertype = state.new_usertype<GameLuaTable>("Game", sol::no_constructor);
-  usertype["on_update"] = sol::property(&GameLuaTable::onUpdate);
+  usertype["onUpdate"] = sol::property(&GameLuaTable::onUpdate);
   usertype["get"] = &GameLuaTable::get;
 }
 

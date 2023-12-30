@@ -197,20 +197,25 @@ void PerspectiveLensLuaTable::deleteThis() {
 
 void PerspectiveLensLuaTable ::create(
     sol::usertype<PerspectiveLensLuaTable> usertype) {
-  usertype["get_near"] = &PerspectiveLensLuaTable::getNear;
-  usertype["set_near"] = &PerspectiveLensLuaTable::setNear;
-  usertype["get_far"] = &PerspectiveLensLuaTable::getFar;
-  usertype["set_far"] = &PerspectiveLensLuaTable::setFar;
-  usertype["get_sensor_size"] = &PerspectiveLensLuaTable::getSensorSize;
-  usertype["set_sensor_size"] = &PerspectiveLensLuaTable::setSensorSize;
-  usertype["get_focal_length"] = &PerspectiveLensLuaTable::getFocalLength;
-  usertype["set_focal_length"] = &PerspectiveLensLuaTable::setFocalLength;
-  usertype["get_aperture"] = &PerspectiveLensLuaTable::getAperture;
-  usertype["set_aperture"] = &PerspectiveLensLuaTable::setAperture;
-  usertype["get_shutter_speed"] = &PerspectiveLensLuaTable::getShutterSpeed;
-  usertype["set_shutter_speed"] = &PerspectiveLensLuaTable::setShutterSpeed;
-  usertype["get_sensitivity"] = &PerspectiveLensLuaTable::getSensitivity;
-  usertype["set_sensitivity"] = &PerspectiveLensLuaTable::setSensitivity;
+  usertype["near"] = sol::property(&PerspectiveLensLuaTable::getNear,
+                                   &PerspectiveLensLuaTable::setNear);
+  usertype["far"] = sol::property(&PerspectiveLensLuaTable::getFar,
+                                  &PerspectiveLensLuaTable::setFar);
+  usertype["getSensorSize"] = &PerspectiveLensLuaTable::getSensorSize;
+  usertype["setSensorSize"] = &PerspectiveLensLuaTable::setSensorSize;
+
+  usertype["focalLength"] =
+      sol::property(&PerspectiveLensLuaTable::getFocalLength,
+                    &PerspectiveLensLuaTable::setFocalLength);
+  usertype["aperture"] = sol::property(&PerspectiveLensLuaTable::getAperture,
+                                       &PerspectiveLensLuaTable::setAperture);
+  usertype["shutterSpeed"] =
+      sol::property(&PerspectiveLensLuaTable::getShutterSpeed,
+                    &PerspectiveLensLuaTable::setShutterSpeed);
+  usertype["sensitivity"] =
+      sol::property(&PerspectiveLensLuaTable::getSensitivity,
+                    &PerspectiveLensLuaTable::setSensitivity);
+
   usertype["delete"] = &PerspectiveLensLuaTable::deleteThis;
 }
 

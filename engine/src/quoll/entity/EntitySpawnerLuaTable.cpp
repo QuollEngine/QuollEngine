@@ -37,7 +37,7 @@ sol_maybe<EntityLuaTable>
 EntitySpawnerLuaTable::spawnPrefab(PrefabAssetHandle prefab) {
   if (!mScriptGlobals.assetRegistry.getPrefabs().hasAsset(prefab)) {
     Engine::getUserLogger().error() << lua::Messages::assetNotFound(
-        getName(), "spawn_prefab", getAssetTypeString(AssetType::Prefab));
+        "EntitySpawner", "spawnPrefab", getAssetTypeString(AssetType::Prefab));
 
     return sol::nil;
   }
@@ -46,7 +46,7 @@ EntitySpawnerLuaTable::spawnPrefab(PrefabAssetHandle prefab) {
           mScriptGlobals.assetRegistry.getPrefabs().getAsset(prefab).data)) {
     Engine::getUserLogger().warning()
         << lua::Messages::nothingSpawnedBecauseEmptyPrefab(
-               getName(), "spawn_prefab",
+               "EntitySpawner", "spawnPrefab",
                mScriptGlobals.assetRegistry.getPrefabs().getAsset(prefab).name);
 
     return sol::nil;
@@ -63,7 +63,7 @@ sol_maybe<EntityLuaTable>
 EntitySpawnerLuaTable::spawnSprite(TextureAssetHandle texture) {
   if (!mScriptGlobals.assetRegistry.getTextures().hasAsset(texture)) {
     Engine::getUserLogger().error() << lua::Messages::assetNotFound(
-        getName(), "spawn_sprite", getAssetTypeString(AssetType::Texture));
+        "EntitySpawner", "spawnSprite", getAssetTypeString(AssetType::Texture));
 
     return sol::nil;
   }
@@ -78,9 +78,9 @@ EntitySpawnerLuaTable::spawnSprite(TextureAssetHandle texture) {
 void EntitySpawnerLuaTable::create(sol::state_view state) {
   auto usertype = state.new_usertype<EntitySpawnerLuaTable>("EntitySpawner");
 
-  usertype["spawn_empty"] = &EntitySpawnerLuaTable::spawnEmpty;
-  usertype["spawn_prefab"] = &EntitySpawnerLuaTable::spawnPrefab;
-  usertype["spawn_sprite"] = &EntitySpawnerLuaTable::spawnSprite;
+  usertype["spawnEmpty"] = &EntitySpawnerLuaTable::spawnEmpty;
+  usertype["spawnPrefab"] = &EntitySpawnerLuaTable::spawnPrefab;
+  usertype["spawnSprite"] = &EntitySpawnerLuaTable::spawnSprite;
 }
 
 } // namespace quoll

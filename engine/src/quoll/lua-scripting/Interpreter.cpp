@@ -31,6 +31,7 @@ bool Interpreter::evaluate(const std::vector<u8> &bytes, lua_State *state) {
 
   ret = lua_pcall(state, 0, 0, 0);
   if (ret != LUA_OK) {
+    Engine::getUserLogger().error() << lua_tostring(state, -1);
     return false;
   }
 

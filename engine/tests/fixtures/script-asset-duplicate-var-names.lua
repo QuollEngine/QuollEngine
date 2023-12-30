@@ -1,2 +1,2 @@
-input_vars.register("variable_name", input_vars.types.AssetPrefab)
-input_vars.register("variable_name", input_vars.types.String)
+inputVars.register("variable_name", inputVars.types.AssetPrefab)
+inputVars.register("variable_name", inputVars.types.String)

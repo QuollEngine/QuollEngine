@@ -1,5 +1,5 @@
 state = 'start'
 
-game.on_update:connect(function()
+game.onUpdate:connect(function()
     state = 'update'
 end)

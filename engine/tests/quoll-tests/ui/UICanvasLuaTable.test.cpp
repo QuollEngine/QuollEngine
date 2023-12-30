@@ -10,14 +10,14 @@ using UICanvasLuaTableTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(UICanvasLuaTableTest, DoesNothingIfNoUICanvasComponent) {
   auto entity = entityDatabase.create();
-  call(entity, "ui_canvas_render");
+  call(entity, "uiCanvasRender");
   EXPECT_FALSE(entityDatabase.has<quoll::UICanvasRenderRequest>(entity));
 }
 
 TEST_F(UICanvasLuaTableTest, CreatesCanvasUIRenderRequestOnRender) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::UICanvas>(entity, {});
-  call(entity, "ui_canvas_render");
+  call(entity, "uiCanvasRender");
   EXPECT_TRUE(entityDatabase.has<quoll::UICanvasRenderRequest>(entity));
 
   auto view = entityDatabase.get<quoll::UICanvasRenderRequest>(entity).view;

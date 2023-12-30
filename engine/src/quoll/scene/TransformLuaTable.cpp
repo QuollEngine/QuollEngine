@@ -64,12 +64,12 @@ void TransformLuaTable::deleteThis() {
 }
 
 void TransformLuaTable::create(sol::usertype<TransformLuaTable> usertype) {
-  usertype["get_position"] = &TransformLuaTable::getPosition;
-  usertype["set_position"] = &TransformLuaTable::setPosition;
-  usertype["get_rotation"] = &TransformLuaTable::getRotation;
-  usertype["set_rotation"] = &TransformLuaTable::setRotation;
-  usertype["get_scale"] = &TransformLuaTable::getScale;
-  usertype["set_scale"] = &TransformLuaTable::setScale;
+  usertype["getPosition"] = &TransformLuaTable::getPosition;
+  usertype["setPosition"] = &TransformLuaTable::setPosition;
+  usertype["getRotation"] = &TransformLuaTable::getRotation;
+  usertype["setRotation"] = &TransformLuaTable::setRotation;
+  usertype["getScale"] = &TransformLuaTable::getScale;
+  usertype["setScale"] = &TransformLuaTable::setScale;
   usertype["delete"] = &TransformLuaTable::deleteThis;
 }
 

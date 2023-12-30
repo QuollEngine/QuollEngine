@@ -28,7 +28,7 @@ static std::vector<u8> readFileIntoBuffer(std::ifstream &stream) {
  * @param data Lua script asset data
  */
 static void injectInputVarsInterface(sol::state &state, LuaScriptAsset &data) {
-  auto inputVars = state.create_named_table("input_vars");
+  auto inputVars = state.create_named_table("inputVars");
   auto *luaState = state.lua_state();
   inputVars["register"] = [&data, luaState](String name, u32 type) {
     if (type >= static_cast<u32>(LuaScriptVariableType::Invalid)) {

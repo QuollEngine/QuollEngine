@@ -21,7 +21,7 @@ TEST_F(ScriptLuaTableTest, GetReturnsScriptVariableIfExistsInScript) {
 
   sol::state_view state(entityDatabase.get<quoll::LuaScript>(source).state);
 
-  EXPECT_EQ(state["retrieved_script_value"].get<u32>(), 10);
+  EXPECT_EQ(state["retrievedScriptValue"].get<u32>(), 10);
 }
 
 TEST_F(ScriptLuaTableTest, GetReturnsNilIfVariableDoesNotExistInScript) {
@@ -39,7 +39,7 @@ TEST_F(ScriptLuaTableTest, GetReturnsNilIfVariableDoesNotExistInScript) {
 
   sol::state_view state(entityDatabase.get<quoll::LuaScript>(source).state);
 
-  EXPECT_TRUE(state["non_existent_script_value"].is<sol::nil_t>());
+  EXPECT_TRUE(state["nonExistentScriptValue"].is<sol::nil_t>());
 }
 
 TEST_F(ScriptLuaTableTest, SetAssignsValueToTargetScript) {
@@ -57,7 +57,7 @@ TEST_F(ScriptLuaTableTest, SetAssignsValueToTargetScript) {
 
   sol::state_view state(entityDatabase.get<quoll::LuaScript>(target).state);
 
-  EXPECT_EQ(state["script_another_value"].get<quoll::String>(), "yes");
+  EXPECT_EQ(state["scriptAnotherValue"].get<quoll::String>(), "yes");
 }
 
 TEST_F(ScriptLuaTableTest,
@@ -78,9 +78,9 @@ TEST_F(ScriptLuaTableTest,
   sol::state_view sourceState(
       entityDatabase.get<quoll::LuaScript>(source).state);
 
-  EXPECT_EQ(sourceState["retrieved_script_value"].get<u32>(), 10);
+  EXPECT_EQ(sourceState["retrievedScriptValue"].get<u32>(), 10);
 
   sol::state_view targetState(
       entityDatabase.get<quoll::LuaScript>(target).state);
-  EXPECT_EQ(targetState["script_another_value"].get<quoll::String>(), "yes");
+  EXPECT_EQ(targetState["scriptAnotherValue"].get<quoll::String>(), "yes");
 }

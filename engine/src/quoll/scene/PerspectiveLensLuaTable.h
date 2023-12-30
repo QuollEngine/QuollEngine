@@ -133,7 +133,7 @@ public:
    *
    * @return Component name
    */
-  static const String getName() { return "perspective_lens"; }
+  static const String getName() { return "perspectiveLens"; }
 
 private:
   Entity mEntity;

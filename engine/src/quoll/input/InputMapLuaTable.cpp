@@ -100,11 +100,11 @@ void InputMapLuaTable::setScheme(String name) {
 }
 
 void InputMapLuaTable::create(sol::usertype<InputMapLuaTable> usertype) {
-  usertype["get_command"] = &InputMapLuaTable::getCommand;
-  usertype["get_value_boolean"] = &InputMapLuaTable::getCommandValueBoolean;
-  usertype["is_pressed"] = &InputMapLuaTable::getCommandValueBoolean;
-  usertype["get_value_axis_2d"] = &InputMapLuaTable::getCommandValueAxis2d;
-  usertype["set_scheme"] = &InputMapLuaTable::setScheme;
+  usertype["getCommand"] = &InputMapLuaTable::getCommand;
+  usertype["getValueBoolean"] = &InputMapLuaTable::getCommandValueBoolean;
+  usertype["isPressed"] = &InputMapLuaTable::getCommandValueBoolean;
+  usertype["getValueAxis2d"] = &InputMapLuaTable::getCommandValueAxis2d;
+  usertype["setScheme"] = &InputMapLuaTable::setScheme;
 }
 
 } // namespace quoll

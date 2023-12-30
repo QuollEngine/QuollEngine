@@ -31,7 +31,7 @@ void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
 void ScriptDecorator::attachVariableInjectors(
     sol::state_view state,
     std::unordered_map<String, LuaScriptInputVariable> &variables) {
-  auto inputVars = state.create_named_table("input_vars");
+  auto inputVars = state.create_named_table("inputVars");
   inputVars["register"] =
       [&variables](String name,
                    u32 type) -> std::variant<String, u32, sol::nil_t> {
@@ -65,7 +65,7 @@ void ScriptDecorator::attachVariableInjectors(
 }
 
 void ScriptDecorator::removeVariableInjectors(sol::state_view state) {
-  state["input_vars"] = sol::nil;
+  state["inputVars"] = sol::nil;
 }
 
 } // namespace quoll::lua

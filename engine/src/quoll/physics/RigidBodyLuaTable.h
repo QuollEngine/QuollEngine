@@ -116,7 +116,7 @@ public:
    *
    * @return Component name
    */
-  static const String getName() { return "rigid_body"; }
+  static const String getName() { return "rigidBody"; }
 
 private:
   Entity mEntity;

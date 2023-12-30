@@ -82,7 +82,7 @@ public:
    *
    * @return Component name
    */
-  static const String getName() { return "local_transform"; }
+  static const String getName() { return "localTransform"; }
 
 private:
   Entity mEntity;

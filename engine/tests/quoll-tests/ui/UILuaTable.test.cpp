@@ -8,17 +8,17 @@ using UILuaTableTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(UILuaTableTest, ImageReturnsTableForImageComponent) {
   auto entity = entityDatabase.create();
-  call(entity, "ui_element_image");
+  call(entity, "uiElementImage");
 }
 
 TEST_F(UILuaTableTest, TextReturnsTableForTextComponent) {
   auto entity = entityDatabase.create();
-  call(entity, "ui_element_text");
+  call(entity, "uiElementText");
 }
 
 TEST_F(UILuaTableTest, ViewReturnsTableForViewComponent) {
   auto entity = entityDatabase.create();
-  call(entity, "ui_element_view");
+  call(entity, "uiElementView");
 }
 
 class UIViewStylesLuaTableTest : public LuaScriptingInterfaceTestBase {
@@ -37,8 +37,7 @@ public:
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedDirection) {
   auto entity = entityDatabase.create();
   auto c = [this, entity](quoll::String value) {
-    return callWithArgs<quoll::UIView>(entity, "ui_element_view_direction",
-                                       value)
+    return callWithArgs<quoll::UIView>(entity, "uiElementViewDirection", value)
         .style;
   };
 
@@ -49,10 +48,10 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedDirection) {
   EXPECT_EQ(c("").direction, defaultValue.style.direction);
   EXPECT_EQ(c("test").direction, defaultValue.style.direction);
   EXPECT_EQ(
-      callWithArgs<quoll::UIView>(entity, "ui_element_view_direction", sol::nil)
+      callWithArgs<quoll::UIView>(entity, "uiElementViewDirection", sol::nil)
           .style.direction,
       defaultValue.style.direction);
-  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "ui_element_view_direction", 15)
+  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "uiElementViewDirection", 15)
                 .style.direction,
             defaultValue.style.direction);
 }
@@ -60,8 +59,7 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedDirection) {
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedAlignItems) {
   auto entity = entityDatabase.create();
   auto c = [this, entity](quoll::String value) {
-    return callWithArgs<quoll::UIView>(entity, "ui_element_view_align_items",
-                                       value)
+    return callWithArgs<quoll::UIView>(entity, "uiElementViewAlignItems", value)
         .style;
   };
 
@@ -74,20 +72,19 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedAlignItems) {
   EXPECT_EQ(c("space-between").alignItems, YGAlignSpaceBetween);
   EXPECT_EQ(c("").alignItems, defaultValue.style.alignItems);
   EXPECT_EQ(c("test").alignItems, defaultValue.style.alignItems);
-  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "ui_element_view_align_items",
-                                        sol::nil)
-                .style.alignItems,
-            defaultValue.style.alignItems);
   EXPECT_EQ(
-      callWithArgs<quoll::UIView>(entity, "ui_element_view_align_items", 15)
+      callWithArgs<quoll::UIView>(entity, "uiElementViewAlignItems", sol::nil)
           .style.alignItems,
       defaultValue.style.alignItems);
+  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "uiElementViewAlignItems", 15)
+                .style.alignItems,
+            defaultValue.style.alignItems);
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedAlignContent) {
   auto entity = entityDatabase.create();
   auto c = [this, entity](quoll::String value) {
-    return callWithArgs<quoll::UIView>(entity, "ui_element_view_align_content",
+    return callWithArgs<quoll::UIView>(entity, "uiElementViewAlignContent",
                                        value)
         .style;
   };
@@ -101,21 +98,20 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedAlignContent) {
   EXPECT_EQ(c("space-between").alignContent, YGAlignSpaceBetween);
   EXPECT_EQ(c("").alignContent, defaultValue.style.alignContent);
   EXPECT_EQ(c("test").alignContent, defaultValue.style.alignContent);
-  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "ui_element_view_align_content",
-                                        sol::nil)
-                .style.alignContent,
-            defaultValue.style.alignContent);
   EXPECT_EQ(
-      callWithArgs<quoll::UIView>(entity, "ui_element_view_align_content", 15)
+      callWithArgs<quoll::UIView>(entity, "uiElementViewAlignContent", sol::nil)
           .style.alignContent,
       defaultValue.style.alignContent);
+  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "uiElementViewAlignContent", 15)
+                .style.alignContent,
+            defaultValue.style.alignContent);
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedJustifyContent) {
   auto entity = entityDatabase.create();
   auto c = [this, entity](quoll::String value) {
-    return callWithArgs<quoll::UIView>(entity,
-                                       "ui_element_view_justify_content", value)
+    return callWithArgs<quoll::UIView>(entity, "uiElementViewJustifyContent",
+                                       value)
         .style;
   };
 
@@ -127,12 +123,12 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedJustifyContent) {
   EXPECT_EQ(c("space-evenly").justifyContent, YGJustifySpaceEvenly);
   EXPECT_EQ(c("").justifyContent, defaultValue.style.justifyContent);
   EXPECT_EQ(c("test").justifyContent, defaultValue.style.justifyContent);
-  EXPECT_EQ(callWithArgs<quoll::UIView>(
-                entity, "ui_element_view_justify_content", sol::nil)
+  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "uiElementViewJustifyContent",
+                                        sol::nil)
                 .style.justifyContent,
             defaultValue.style.justifyContent);
   EXPECT_EQ(
-      callWithArgs<quoll::UIView>(entity, "ui_element_view_justify_content", 15)
+      callWithArgs<quoll::UIView>(entity, "uiElementViewJustifyContent", 15)
           .style.justifyContent,
       defaultValue.style.justifyContent);
 }
@@ -140,8 +136,7 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedJustifyContent) {
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexGrow) {
   auto entity = entityDatabase.create();
   auto c = [this, entity](float value) {
-    return callWithArgs<quoll::UIView>(entity, "ui_element_view_flex_grow",
-                                       value)
+    return callWithArgs<quoll::UIView>(entity, "uiElementViewFlexGrow", value)
         .style;
   };
 
@@ -151,20 +146,18 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexGrow) {
   EXPECT_EQ(c(2.5f).grow, 2.5f);
   EXPECT_EQ(c(-1.0f).grow, 0.0f);
   EXPECT_EQ(
-      callWithArgs<quoll::UIView>(entity, "ui_element_view_flex_grow", sol::nil)
+      callWithArgs<quoll::UIView>(entity, "uiElementViewFlexGrow", sol::nil)
           .style.grow,
       defaultValue.style.grow);
-  EXPECT_EQ(
-      callWithArgs<quoll::UIView>(entity, "ui_element_view_flex_grow", "test")
-          .style.grow,
-      defaultValue.style.grow);
+  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "uiElementViewFlexGrow", "test")
+                .style.grow,
+            defaultValue.style.grow);
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexShrink) {
   auto entity = entityDatabase.create();
   auto c = [this, entity](float value) {
-    return callWithArgs<quoll::UIView>(entity, "ui_element_view_flex_shrink",
-                                       value)
+    return callWithArgs<quoll::UIView>(entity, "uiElementViewFlexShrink", value)
         .style;
   };
 
@@ -173,12 +166,12 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexShrink) {
   EXPECT_EQ(c(2.0f).shrink, 2.0f);
   EXPECT_EQ(c(2.5f).shrink, 2.5f);
   EXPECT_EQ(c(-1.0f).shrink, 0.0f);
-  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "ui_element_view_flex_shrink",
-                                        sol::nil)
-                .style.shrink,
-            defaultValue.style.shrink);
   EXPECT_EQ(
-      callWithArgs<quoll::UIView>(entity, "ui_element_view_flex_shrink", "test")
+      callWithArgs<quoll::UIView>(entity, "uiElementViewFlexShrink", sol::nil)
+          .style.shrink,
+      defaultValue.style.shrink);
+  EXPECT_EQ(
+      callWithArgs<quoll::UIView>(entity, "uiElementViewFlexShrink", "test")
           .style.shrink,
       defaultValue.style.shrink);
 }
@@ -186,8 +179,8 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexShrink) {
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedBackgroundColor) {
   auto entity = entityDatabase.create();
   auto c = [this, entity](std::array<f32, 4> value) {
-    return callWithArgs<quoll::UIView>(
-               entity, "ui_element_view_background_color", value)
+    return callWithArgs<quoll::UIView>(entity, "uiElementViewBackgroundColor",
+                                       value)
         .style;
   };
 
@@ -204,16 +197,16 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedBackgroundColor) {
   EXPECT_EQ(c({-1.0f, 0.5f, 2.0f, 0.2f}).backgroundColor,
             glm::vec4(0.0f, 0.5f, 1.0f, 0.2f));
 
-  EXPECT_EQ(callWithArgs<quoll::UIView>(
-                entity, "ui_element_view_background_color", sol::nil)
+  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "uiElementViewBackgroundColor",
+                                        sol::nil)
                 .style.backgroundColor,
             defaultValue.style.backgroundColor);
-  EXPECT_EQ(callWithArgs<quoll::UIView>(
-                entity, "ui_element_view_background_color", "test")
+  EXPECT_EQ(callWithArgs<quoll::UIView>(entity, "uiElementViewBackgroundColor",
+                                        "test")
                 .style.backgroundColor,
             defaultValue.style.backgroundColor);
-  EXPECT_EQ(callWithArgs<quoll::UIView>(entity,
-                                        "ui_element_view_background_color", 12)
-                .style.backgroundColor,
-            defaultValue.style.backgroundColor);
+  EXPECT_EQ(
+      callWithArgs<quoll::UIView>(entity, "uiElementViewBackgroundColor", 12)
+          .style.backgroundColor,
+      defaultValue.style.backgroundColor);
 }

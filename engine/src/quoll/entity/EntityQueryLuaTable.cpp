@@ -28,7 +28,7 @@ EntityQueryLuaTable::getFirstEntityByName(String name) {
 void EntityQueryLuaTable::deleteEntity(EntityLuaTable entity) {
   if (!mScriptGlobals.entityDatabase.exists(entity.getEntity())) {
     Engine::getUserLogger().error() << lua::Messages::entityDoesNotExist(
-        getName(), "delete_entity", entity.getEntity());
+        "EntityQuery", "deleteEntity", entity.getEntity());
     return;
   }
 
@@ -38,9 +38,8 @@ void EntityQueryLuaTable::deleteEntity(EntityLuaTable entity) {
 void EntityQueryLuaTable::create(sol::state_view state) {
   auto usertype = state.new_usertype<EntityQueryLuaTable>("EntityQuery");
 
-  usertype["get_first_entity_by_name"] =
-      &EntityQueryLuaTable::getFirstEntityByName;
-  usertype["delete_entity"] = &EntityQueryLuaTable::deleteEntity;
+  usertype["getFirstEntityByName"] = &EntityQueryLuaTable::getFirstEntityByName;
+  usertype["deleteEntity"] = &EntityQueryLuaTable::deleteEntity;
 }
 
 } // namespace quoll

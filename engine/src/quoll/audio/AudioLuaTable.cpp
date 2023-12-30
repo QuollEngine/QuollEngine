@@ -31,7 +31,7 @@ void AudioLuaTable::deleteThis() {
 
 void AudioLuaTable::create(sol::usertype<AudioLuaTable> usertype) {
   usertype["play"] = &AudioLuaTable::play;
-  usertype["is_playing"] = &AudioLuaTable::isPlaying;
+  usertype["isPlaying"] = sol::property(&AudioLuaTable::isPlaying);
   usertype["delete"] = &AudioLuaTable::deleteThis;
 }
 

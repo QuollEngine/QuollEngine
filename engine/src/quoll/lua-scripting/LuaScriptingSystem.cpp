@@ -53,9 +53,7 @@ void LuaScriptingSystem::start(EntityDatabase &entityDatabase,
       scriptDecorator.attachToScope(state, entity, scriptGlobals);
       scriptDecorator.attachVariableInjectors(state, component.variables);
 
-      bool success =
-          mLuaInterpreter.evaluate(script.data.bytes, component.state);
-      QuollAssert(success, "Cannot evaluate script");
+      mLuaInterpreter.evaluate(script.data.bytes, component.state);
       scriptDecorator.removeVariableInjectors(state);
     };
 

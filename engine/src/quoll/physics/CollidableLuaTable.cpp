@@ -167,17 +167,19 @@ void CollidableLuaTable::deleteThis() {
 }
 
 void CollidableLuaTable::create(sol::usertype<CollidableLuaTable> usertype) {
-  usertype["set_default_material"] = &CollidableLuaTable::setDefaultMaterial;
-  usertype["get_static_friction"] = &CollidableLuaTable::getStaticFriction;
-  usertype["set_static_friction"] = &CollidableLuaTable::setStaticFriction;
-  usertype["get_dynamic_friction"] = &CollidableLuaTable::getDynamicFriction;
-  usertype["set_dynamic_friction"] = &CollidableLuaTable::setDynamicFriction;
-  usertype["get_restitution"] = &CollidableLuaTable::getRestitution;
-  usertype["set_restitution"] = &CollidableLuaTable::setRestitution;
-  usertype["set_box_geometry"] = &CollidableLuaTable::setBoxGeometry;
-  usertype["set_sphere_geometry"] = &CollidableLuaTable::setSphereGeometry;
-  usertype["set_capsule_geometry"] = &CollidableLuaTable::setCapsuleGeometry;
-  usertype["set_plane_geometry"] = &CollidableLuaTable::setPlaneGeometry;
+  usertype["setDefaultMaterial"] = &CollidableLuaTable::setDefaultMaterial;
+  usertype["staticFriction"] =
+      sol::property(&CollidableLuaTable::getStaticFriction,
+                    &CollidableLuaTable::setStaticFriction);
+  usertype["dynamicFriction"] =
+      sol::property(&CollidableLuaTable::getDynamicFriction,
+                    &CollidableLuaTable::setDynamicFriction);
+  usertype["restitution"] = sol::property(&CollidableLuaTable::getRestitution,
+                                          &CollidableLuaTable::setRestitution);
+  usertype["setBoxGeometry"] = &CollidableLuaTable::setBoxGeometry;
+  usertype["setSphereGeometry"] = &CollidableLuaTable::setSphereGeometry;
+  usertype["setCapsuleGeometry"] = &CollidableLuaTable::setCapsuleGeometry;
+  usertype["setPlaneGeometry"] = &CollidableLuaTable::setPlaneGeometry;
   usertype["sweep"] = &CollidableLuaTable::sweep;
   usertype["delete"] = &CollidableLuaTable::deleteThis;
 }

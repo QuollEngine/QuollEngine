@@ -30,8 +30,7 @@ void NameLuaTable::deleteThis() {
 }
 
 void NameLuaTable::create(sol::usertype<NameLuaTable> usertype) {
-  usertype["get"] = &NameLuaTable::get;
-  usertype["set"] = &NameLuaTable::set;
+  usertype["value"] = sol::property(&NameLuaTable::get, &NameLuaTable::set);
   usertype["delete"] = &NameLuaTable::deleteThis;
 }
 

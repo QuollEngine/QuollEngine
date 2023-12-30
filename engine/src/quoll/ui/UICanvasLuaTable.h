@@ -37,7 +37,7 @@ public:
    *
    * @return Component name
    */
-  static const String getName() { return "ui_canvas"; }
+  static const String getName() { return "uiCanvas"; }
 
 private:
   Entity mEntity;
