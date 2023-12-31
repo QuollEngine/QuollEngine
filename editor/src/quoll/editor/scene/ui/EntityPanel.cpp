@@ -1219,36 +1219,57 @@ void EntityPanel::renderRigidBody(Scene &scene,
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &rigidBody = scene.entityDatabase.get<RigidBody>(mSelectedEntity);
 
-    bool sendAction = false;
-    f32 mass = rigidBody.dynamicDesc.mass;
-    if (widgets::Input("Mass", mass, false)) {
-      if (!mRigidBodyAction) {
+    if (ImGui::BeginCombo("###RigidBodyType",
+                          rigidBody.type == RigidBodyType::Kinematic
+                              ? "Kinematic"
+                              : "Dynamic",
+                          0)) {
+      if (ImGui::Selectable("Dynamic")) {
         mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
             mSelectedEntity, rigidBody);
+        rigidBody.type = RigidBodyType::Dynamic;
       }
 
-      rigidBody.dynamicDesc.mass = mass;
+      if (ImGui::Selectable("Kinematic")) {
+        mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
+            mSelectedEntity, rigidBody);
+        rigidBody.type = RigidBodyType::Kinematic;
+      }
+
+      ImGui::EndCombo();
     }
 
-    glm::vec3 inertia = rigidBody.dynamicDesc.inertia;
-    if (widgets::Input("Inertia", inertia, false)) {
-      if (!mRigidBodyAction) {
-        mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
-            mSelectedEntity, rigidBody);
+    if (rigidBody.type == RigidBodyType::Dynamic) {
+      f32 mass = rigidBody.dynamicDesc.mass;
+      if (widgets::Input("Mass", mass, false)) {
+        if (!mRigidBodyAction) {
+          mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
+              mSelectedEntity, rigidBody);
+        }
+
+        rigidBody.dynamicDesc.mass = mass;
       }
 
-      rigidBody.dynamicDesc.inertia = inertia;
-    }
+      glm::vec3 inertia = rigidBody.dynamicDesc.inertia;
+      if (widgets::Input("Inertia", inertia, false)) {
+        if (!mRigidBodyAction) {
+          mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
+              mSelectedEntity, rigidBody);
+        }
 
-    ImGui::Text("Apply gravity");
-    bool applyGravity = rigidBody.dynamicDesc.applyGravity;
-    if (ImGui::Checkbox("Apply gravity###ApplyGravity", &applyGravity)) {
-      if (!mRigidBodyAction) {
-        mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
-            mSelectedEntity, rigidBody);
+        rigidBody.dynamicDesc.inertia = inertia;
       }
 
-      rigidBody.dynamicDesc.applyGravity = applyGravity;
+      ImGui::Text("Apply gravity");
+      bool applyGravity = rigidBody.dynamicDesc.applyGravity;
+      if (ImGui::Checkbox("Apply gravity###ApplyGravity", &applyGravity)) {
+        if (!mRigidBodyAction) {
+          mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
+              mSelectedEntity, rigidBody);
+        }
+
+        rigidBody.dynamicDesc.applyGravity = applyGravity;
+      }
     }
 
     if (mRigidBodyAction) {

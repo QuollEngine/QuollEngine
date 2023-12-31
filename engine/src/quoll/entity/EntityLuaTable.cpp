@@ -9,7 +9,7 @@ void setToStruct(sol::state_view state,
                  TFieldType TFieldName::*field) {
   auto usertype = state.new_usertype<TFieldType>(
       "Entity_" + TFieldType::getName(), sol::no_constructor);
-  TFieldType::create(usertype);
+  TFieldType::create(usertype, state);
 
   entityTable[TFieldType::getName()] = field;
 }

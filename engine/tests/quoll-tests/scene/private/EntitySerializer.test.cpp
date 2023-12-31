@@ -796,7 +796,8 @@ TEST_F(EntitySerializerTest,
   EXPECT_FALSE(node["rigidBody"]);
 }
 
-TEST_F(EntitySerializerTest, CreatesRigidBodyFieldIfRigidBodyComponentExists) {
+TEST_F(EntitySerializerTest,
+       CreatesDynamicRigidBodyFieldIfRigidBodyComponentWithDynamicTypeExists) {
   auto entity = entityDatabase.create();
 
   quoll::PhysicsDynamicRigidBodyDesc rigidBodyDesc{};
@@ -804,16 +805,40 @@ TEST_F(EntitySerializerTest, CreatesRigidBodyFieldIfRigidBodyComponentExists) {
   rigidBodyDesc.inertia = glm::vec3(2.5f, 2.5f, 2.5f);
   rigidBodyDesc.mass = 4.5f;
 
-  entityDatabase.set<quoll::RigidBody>(entity, {rigidBodyDesc});
+  entityDatabase.set<quoll::RigidBody>(
+      entity, {quoll::RigidBodyType::Dynamic, rigidBodyDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
   EXPECT_TRUE(node["rigidBody"]);
+  EXPECT_EQ(node["rigidBody"]["type"].as<quoll::String>(""), "dynamic");
   EXPECT_EQ(node["rigidBody"]["applyGravity"].as<bool>(),
             rigidBodyDesc.applyGravity);
   EXPECT_EQ(node["rigidBody"]["inertia"].as<glm::vec3>(),
             rigidBodyDesc.inertia);
   EXPECT_EQ(node["rigidBody"]["mass"].as<f32>(), rigidBodyDesc.mass);
+}
+
+TEST_F(
+    EntitySerializerTest,
+    CreatesKinematicRigidBodyFieldIfRigidBodyComponentWithKinematicTypeExists) {
+  auto entity = entityDatabase.create();
+
+  quoll::PhysicsDynamicRigidBodyDesc rigidBodyDesc{};
+  rigidBodyDesc.applyGravity = true;
+  rigidBodyDesc.inertia = glm::vec3(2.5f, 2.5f, 2.5f);
+  rigidBodyDesc.mass = 4.5f;
+
+  entityDatabase.set<quoll::RigidBody>(
+      entity, {quoll::RigidBodyType::Kinematic, rigidBodyDesc});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["rigidBody"]);
+  EXPECT_EQ(node["rigidBody"]["type"].as<quoll::String>(""), "kinematic");
+  EXPECT_FALSE(node["rigidBody"]["applyGravity"]);
+  EXPECT_FALSE(node["rigidBody"]["inertia"]);
+  EXPECT_FALSE(node["rigidBody"]["mass"]);
 }
 
 // Collidable

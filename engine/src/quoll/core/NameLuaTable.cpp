@@ -29,7 +29,8 @@ void NameLuaTable::deleteThis() {
   }
 }
 
-void NameLuaTable::create(sol::usertype<NameLuaTable> usertype) {
+void NameLuaTable::create(sol::usertype<NameLuaTable> usertype,
+                          sol::state_view state) {
   usertype["value"] = sol::property(&NameLuaTable::get, &NameLuaTable::set);
   usertype["delete"] = &NameLuaTable::deleteThis;
 }

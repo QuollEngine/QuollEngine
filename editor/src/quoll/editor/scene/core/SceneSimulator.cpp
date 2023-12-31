@@ -47,7 +47,6 @@ void SceneSimulator::updateSimulation(f32 dt, WorkspaceState &state) {
   mInputMapSystem.update(entityDatabase);
 
   mCameraAspectRatioUpdater.update(entityDatabase);
-  mPhysicsSystem.update(dt, entityDatabase);
 
   mScriptingSystem.start(entityDatabase, mPhysicsSystem, mWindow.getSignals());
   mScriptingSystem.update(dt, entityDatabase);
@@ -55,6 +54,7 @@ void SceneSimulator::updateSimulation(f32 dt, WorkspaceState &state) {
 
   mSkeletonUpdater.update(entityDatabase);
   mSceneUpdater.update(entityDatabase);
+  mPhysicsSystem.update(dt, entityDatabase);
 
   mAudioSystem.output(entityDatabase);
 }

@@ -103,13 +103,21 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
   if (node["rigidBody"] && node["rigidBody"].IsMap()) {
     RigidBody rigidBody{};
-    rigidBody.dynamicDesc.mass =
-        node["rigidBody"]["mass"].as<f32>(rigidBody.dynamicDesc.mass);
-    rigidBody.dynamicDesc.inertia = node["rigidBody"]["inertia"].as<glm::vec3>(
-        rigidBody.dynamicDesc.inertia);
-    rigidBody.dynamicDesc.applyGravity =
-        node["rigidBody"]["applyGravity"].as<bool>(
-            rigidBody.dynamicDesc.applyGravity);
+
+    auto type = node["rigidBody"]["type"].as<quoll::String>("dynamic");
+    if (type == "kinematic") {
+      rigidBody.type = RigidBodyType::Kinematic;
+    } else {
+      rigidBody.type = RigidBodyType::Dynamic;
+      rigidBody.dynamicDesc.mass =
+          node["rigidBody"]["mass"].as<f32>(rigidBody.dynamicDesc.mass);
+      rigidBody.dynamicDesc.inertia =
+          node["rigidBody"]["inertia"].as<glm::vec3>(
+              rigidBody.dynamicDesc.inertia);
+      rigidBody.dynamicDesc.applyGravity =
+          node["rigidBody"]["applyGravity"].as<bool>(
+              rigidBody.dynamicDesc.applyGravity);
+    }
 
     mEntityDatabase.set(entity, rigidBody);
   }

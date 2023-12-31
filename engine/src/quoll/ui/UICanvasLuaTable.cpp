@@ -14,7 +14,8 @@ void UICanvasLuaTable::render(UIView view) {
   }
 }
 
-void UICanvasLuaTable::create(sol::usertype<UICanvasLuaTable> usertype) {
+void UICanvasLuaTable::create(sol::usertype<UICanvasLuaTable> usertype,
+                              sol::state_view state) {
   usertype["render"] = &UICanvasLuaTable::render;
 }
 

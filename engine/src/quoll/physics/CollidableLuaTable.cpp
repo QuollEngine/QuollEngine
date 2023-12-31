@@ -166,7 +166,8 @@ void CollidableLuaTable::deleteThis() {
   }
 }
 
-void CollidableLuaTable::create(sol::usertype<CollidableLuaTable> usertype) {
+void CollidableLuaTable::create(sol::usertype<CollidableLuaTable> usertype,
+                                sol::state_view state) {
   usertype["setDefaultMaterial"] = &CollidableLuaTable::setDefaultMaterial;
   usertype["staticFriction"] =
       sol::property(&CollidableLuaTable::getStaticFriction,

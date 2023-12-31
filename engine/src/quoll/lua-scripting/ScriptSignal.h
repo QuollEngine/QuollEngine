@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/core/SparseSet.h"
+#include "quoll/core/Engine.h"
 #include "LuaHeaders.h"
 #include "LuaScript.h"
 #include "ScriptSignalSlot.h"
@@ -11,7 +12,7 @@ namespace quoll::lua {
  * @brief Script signal
  */
 class ScriptSignal {
-  using Handler = sol::function;
+  using Handler = sol::protected_function;
 
 public:
   /**
@@ -35,7 +36,11 @@ public:
    */
   template <class... TArgs> void notify(TArgs... args) {
     for (auto handler : mHandlers) {
-      handler(args...);
+      auto res = handler(args...);
+      if (!res.valid()) {
+        sol::error error = res;
+        Engine::getUserLogger().error() << error.what();
+      }
     }
   }
 
