@@ -17,6 +17,30 @@ TEST_F(AnimatorLuaTableTest, TriggerAddsAnimatorEventComponent) {
   EXPECT_EQ(entityDatabase.get<quoll::AnimatorEvent>(entity).eventName, "Move");
 }
 
+TEST_F(AnimatorLuaTableTest, PropertiesReturnAnimatorDataIfAnimatorExists) {
+  quoll::AnimatorAsset animatorAsset{};
+  animatorAsset.states.push_back({.name = "StateA"});
+  animatorAsset.states.push_back({.name = "StateB"});
+
+  auto handle =
+      assetCache.getRegistry().getAnimators().addAsset({.data = animatorAsset});
+
+  auto entity = entityDatabase.create();
+  quoll::Animator animator{};
+  animator.asset = handle;
+  animator.normalizedTime = 0.4f;
+  animator.currentState = 1;
+  entityDatabase.set(entity, animator);
+
+  call(entity, "animatorPropertiesValid");
+}
+
+TEST_F(AnimatorLuaTableTest, PropertiesReturnNilIfAnimatorDoesNotExists) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "animatorPropertiesInvalid");
+}
+
 TEST_F(AnimatorLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 

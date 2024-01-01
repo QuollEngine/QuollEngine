@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/lua-scripting/LuaUserTypeBase.h"
+#include "AnimationStateLuaTable.h"
 
 namespace quoll {
 
@@ -16,6 +17,20 @@ public:
    * @param scriptGlobals Script globals
    */
   AnimatorLuaTable(Entity entity, ScriptGlobals scriptGlobals);
+
+  /**
+   * @brief Get normalized time
+   *
+   * @return Normalized time or nil
+   */
+  sol_maybe<f32> getNormalizedTime();
+
+  /**
+   * @brief Get current animation state
+   *
+   * @return Animation state or nil
+   */
+  sol_maybe<AnimationStateLuaTable> getCurrentState();
 
   /**
    * @brief Trigger animation event
