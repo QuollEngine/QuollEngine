@@ -138,6 +138,8 @@ PhysxBackend::PhysxBackend() : mSimulationEventCallback(mSignals) {
   sceneDesc.gravity = PxVec3(Gravity.x, Gravity.y, Gravity.z);
   sceneDesc.flags = PxSceneFlag::eENABLE_ACTIVE_ACTORS;
   sceneDesc.simulationEventCallback = &mSimulationEventCallback;
+  sceneDesc.staticKineFilteringMode = PxPairFilteringMode::eKEEP;
+  sceneDesc.kineKineFilteringMode = PxPairFilteringMode::eKEEP;
   mScene = mPhysics->createScene(sceneDesc);
 
   auto *pvdClient = mScene->getScenePvdClient();
@@ -309,6 +311,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
         physx.shape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE,
                              collidable.useInQueries);
       }
+
       physx.useShapeInQueries = collidable.useInQueries;
       physx.shape->setLocalPose(getShapeLocalTransform(
           collidable.geometryDesc.center, collidable.geometryDesc.type));
@@ -361,14 +364,23 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
         physx.rigidDynamic->attachShape(*physx.shape);
       }
 
+      physx.rigidDynamic->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC,
+                                           rigidBody.type ==
+                                               RigidBodyType::Kinematic);
       physx.rigidDynamic->setActorFlag(PxActorFlag::eDISABLE_GRAVITY,
                                        !rigidBody.dynamicDesc.applyGravity);
+      if (rigidBody.type == RigidBodyType::Kinematic) {
+        physx.rigidDynamic->setKinematicTarget(
+            PhysxMapping::getPhysxTransform(world.worldTransform));
+      } else {
+        physx.rigidDynamic->setGlobalPose(
+            PhysxMapping::getPhysxTransform(world.worldTransform));
+      }
+
       physx.rigidDynamic->setMass(rigidBody.dynamicDesc.mass);
       physx.rigidDynamic->setMassSpaceInertiaTensor(
           {rigidBody.dynamicDesc.inertia.x, rigidBody.dynamicDesc.inertia.y,
            rigidBody.dynamicDesc.inertia.z});
-      physx.rigidDynamic->setGlobalPose(
-          PhysxMapping::getPhysxTransform(world.worldTransform));
     };
   }
 

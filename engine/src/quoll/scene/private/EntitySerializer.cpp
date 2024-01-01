@@ -147,12 +147,17 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
   }
 
   if (mEntityDatabase.has<RigidBody>(entity)) {
-    const auto &rigidBodyDesc =
-        mEntityDatabase.get<RigidBody>(entity).dynamicDesc;
+    const auto &rigidBody = mEntityDatabase.get<RigidBody>(entity);
 
-    components["rigidBody"]["applyGravity"] = rigidBodyDesc.applyGravity;
-    components["rigidBody"]["inertia"] = rigidBodyDesc.inertia;
-    components["rigidBody"]["mass"] = rigidBodyDesc.mass;
+    if (rigidBody.type == RigidBodyType::Dynamic) {
+      components["rigidBody"]["type"] = "dynamic";
+      components["rigidBody"]["applyGravity"] =
+          rigidBody.dynamicDesc.applyGravity;
+      components["rigidBody"]["inertia"] = rigidBody.dynamicDesc.inertia;
+      components["rigidBody"]["mass"] = rigidBody.dynamicDesc.mass;
+    } else if (rigidBody.type == RigidBodyType::Kinematic) {
+      components["rigidBody"]["type"] = "kinematic";
+    }
   }
 
   if (mEntityDatabase.has<Collidable>(entity)) {

@@ -23,6 +23,13 @@ public:
   void setDefaultParams();
 
   /**
+   * @brief Get rigid body type
+   *
+   * @return Rigid body type
+   */
+  sol_maybe<u32> getType();
+
+  /**
    * @brief Get mass
    *
    * @return Mass
@@ -108,8 +115,10 @@ public:
    * @brief Create user type
    *
    * @param usertype User type
+   * @param state Sol state
    */
-  static void create(sol::usertype<RigidBodyLuaTable> usertype);
+  static void create(sol::usertype<RigidBodyLuaTable> usertype,
+                     sol::state_view state);
 
   /**
    * @brief Get component name in scripts

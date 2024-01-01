@@ -21,7 +21,8 @@ void AnimatorLuaTable::deleteThis() {
   }
 }
 
-void AnimatorLuaTable::create(sol::usertype<AnimatorLuaTable> usertype) {
+void AnimatorLuaTable::create(sol::usertype<AnimatorLuaTable> usertype,
+                              sol::state_view state) {
   usertype["trigger"] = &AnimatorLuaTable::trigger;
   usertype["delete"] = &AnimatorLuaTable::deleteThis;
 }

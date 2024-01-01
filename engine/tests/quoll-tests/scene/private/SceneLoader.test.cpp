@@ -1850,11 +1850,13 @@ TEST_F(SceneLoaderRigidBodyTest,
 }
 
 TEST_F(SceneLoaderRigidBodyTest,
-       TriesToFillRigidBodyComponentIfFieldPropertiesAreInvalid) {
-  std::vector<YAML::Node> invalidNodes{
-      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
-      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
-      YAML::Node(YAML::NodeType::Scalar)};
+       TriesToFillDynamicRigidBodyComponentIfFieldPropertiesAreInvalid) {
+  std::vector<YAML::Node> invalidNodes{YAML::Node(YAML::NodeType::Undefined),
+                                       YAML::Node(YAML::NodeType::Null),
+                                       YAML::Node(YAML::NodeType::Map),
+                                       YAML::Node(YAML::NodeType::Sequence),
+                                       YAML::Node(YAML::NodeType::Scalar),
+                                       YAML::Node("random-text")};
 
   quoll::RigidBody defaultComponent{};
   auto defaults = defaultComponent.dynamicDesc;
@@ -1865,60 +1867,81 @@ TEST_F(SceneLoaderRigidBodyTest,
 
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
+    node["rigidBody"]["type"] = invalidNode;
+    node["rigidBody"]["mass"] = validMass;
+    node["rigidBody"]["inertia"] = validInertia;
+    node["rigidBody"]["gravity"] = validGravity;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    ASSERT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
+    const auto &rigidBody = entityDatabase.get<quoll::RigidBody>(entity);
+
+    EXPECT_EQ(rigidBody.type, quoll::RigidBodyType::Dynamic);
+    EXPECT_EQ(rigidBody.dynamicDesc.mass, validMass);
+    EXPECT_EQ(rigidBody.dynamicDesc.inertia, validInertia);
+    EXPECT_EQ(rigidBody.dynamicDesc.applyGravity, validGravity);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["rigidBody"]["type"] = "dynamic";
     node["rigidBody"]["mass"] = invalidNode;
     node["rigidBody"]["inertia"] = validInertia;
     node["rigidBody"]["gravity"] = validGravity;
 
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
     ASSERT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
-    const auto &rigidBody =
-        entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc;
+    const auto &rigidBody = entityDatabase.get<quoll::RigidBody>(entity);
 
-    EXPECT_EQ(rigidBody.mass, defaults.mass);
-    EXPECT_EQ(rigidBody.inertia, validInertia);
-    EXPECT_EQ(rigidBody.applyGravity, validGravity);
+    EXPECT_EQ(rigidBody.type, quoll::RigidBodyType::Dynamic);
+    EXPECT_EQ(rigidBody.dynamicDesc.mass, defaults.mass);
+    EXPECT_EQ(rigidBody.dynamicDesc.inertia, validInertia);
+    EXPECT_EQ(rigidBody.dynamicDesc.applyGravity, validGravity);
   }
 
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
+    node["rigidBody"]["type"] = "dynamic";
     node["rigidBody"]["mass"] = validMass;
     node["rigidBody"]["inertia"] = invalidNode;
     node["rigidBody"]["gravity"] = validGravity;
 
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
     ASSERT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
-    const auto &rigidBody =
-        entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc;
+    const auto &rigidBody = entityDatabase.get<quoll::RigidBody>(entity);
 
-    EXPECT_EQ(rigidBody.mass, validMass);
-    EXPECT_EQ(rigidBody.inertia, defaults.inertia);
-    EXPECT_EQ(rigidBody.applyGravity, validGravity);
+    EXPECT_EQ(rigidBody.type, quoll::RigidBodyType::Dynamic);
+    EXPECT_EQ(rigidBody.dynamicDesc.mass, validMass);
+    EXPECT_EQ(rigidBody.dynamicDesc.inertia, defaults.inertia);
+    EXPECT_EQ(rigidBody.dynamicDesc.applyGravity, validGravity);
   }
 
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
+    node["rigidBody"]["type"] = "dynamic";
     node["rigidBody"]["mass"] = validMass;
     node["rigidBody"]["inertia"] = validInertia;
     node["rigidBody"]["gravity"] = invalidNode;
 
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
     ASSERT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
-    const auto &rigidBody =
-        entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc;
+    const auto &rigidBody = entityDatabase.get<quoll::RigidBody>(entity);
 
-    EXPECT_EQ(rigidBody.mass, validMass);
-    EXPECT_EQ(rigidBody.inertia, validInertia);
-    EXPECT_EQ(rigidBody.applyGravity, defaults.applyGravity);
+    EXPECT_EQ(rigidBody.type, quoll::RigidBodyType::Dynamic);
+    EXPECT_EQ(rigidBody.dynamicDesc.mass, validMass);
+    EXPECT_EQ(rigidBody.dynamicDesc.inertia, validInertia);
+    EXPECT_EQ(rigidBody.dynamicDesc.applyGravity, defaults.applyGravity);
   }
 }
 
 TEST_F(SceneLoaderRigidBodyTest,
-       CreatesRigidBodyComponentWithFileDataIfValidField) {
+       CreatesDynamicRigidBodyComponentWithFileDataIfValidField) {
   auto validMass = 2.5f;
   auto validInertia = glm::vec3(2.5f);
   auto validGravity = true;
 
   auto [node, entity] = createNode();
+  node["rigidBody"]["type"] = "dynamic";
   node["rigidBody"]["mass"] = validMass;
   node["rigidBody"]["inertia"] = validInertia;
   node["rigidBody"]["applyGravity"] = validGravity;
@@ -1926,12 +1949,50 @@ TEST_F(SceneLoaderRigidBodyTest,
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   ASSERT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
-  const auto &rigidBody =
-      entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc;
+  const auto &rigidBody = entityDatabase.get<quoll::RigidBody>(entity);
 
-  EXPECT_EQ(rigidBody.mass, validMass);
-  EXPECT_EQ(rigidBody.inertia, validInertia);
-  EXPECT_EQ(rigidBody.applyGravity, validGravity);
+  EXPECT_EQ(rigidBody.type, quoll::RigidBodyType::Dynamic);
+  EXPECT_EQ(rigidBody.dynamicDesc.mass, validMass);
+  EXPECT_EQ(rigidBody.dynamicDesc.inertia, validInertia);
+  EXPECT_EQ(rigidBody.dynamicDesc.applyGravity, validGravity);
+}
+
+TEST_F(SceneLoaderRigidBodyTest,
+       CreatesKinematicRigidBodyComponentWithFileDataIfValidField) {
+  auto [node, entity] = createNode();
+  node["rigidBody"]["type"] = "kinematic";
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  ASSERT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
+  const auto &rigidBody = entityDatabase.get<quoll::RigidBody>(entity);
+
+  EXPECT_EQ(rigidBody.type, quoll::RigidBodyType::Kinematic);
+}
+
+TEST_F(SceneLoaderRigidBodyTest, IgnoresDynamicRigidBodyDataIfTypeIsKinematic) {
+  quoll::RigidBody defaultComponent{};
+  auto defaults = defaultComponent.dynamicDesc;
+
+  auto validMass = 2.5f;
+  auto validInertia = glm::vec3(2.5f);
+  auto validGravity = true;
+
+  auto [node, entity] = createNode();
+  node["rigidBody"]["type"] = "kinematic";
+  node["rigidBody"]["mass"] = validMass;
+  node["rigidBody"]["inertia"] = validInertia;
+  node["rigidBody"]["applyGravity"] = validGravity;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  ASSERT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
+  const auto &rigidBody = entityDatabase.get<quoll::RigidBody>(entity);
+
+  EXPECT_EQ(rigidBody.type, quoll::RigidBodyType::Kinematic);
+  EXPECT_EQ(rigidBody.dynamicDesc.mass, defaults.mass);
+  EXPECT_EQ(rigidBody.dynamicDesc.inertia, defaults.inertia);
+  EXPECT_EQ(rigidBody.dynamicDesc.applyGravity, defaults.applyGravity);
 }
 
 using SceneLoaderCollidableTest = SceneLoaderTest;

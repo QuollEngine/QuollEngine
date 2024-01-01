@@ -19,6 +19,41 @@ TEST_F(RigidBodyLuaTableTest, SetDefaultParamsSetsNewRigidBody) {
             quoll::RigidBody{}.dynamicDesc.mass);
 }
 
+TEST_F(RigidBodyLuaTableTest,
+       GetRigidBodyTypeReturnsNilIfRigidBodyDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  auto state = call(entity, "rigidBodyGetType");
+  EXPECT_TRUE(state["rbType"].is<sol::nil_t>());
+}
+
+TEST_F(RigidBodyLuaTableTest, GetRigidBodyTypeReturnsRigidBodyType) {
+  auto entity = entityDatabase.create();
+  quoll::RigidBody rigidBody{};
+
+  {
+    rigidBody.type = quoll::RigidBodyType::Dynamic;
+    entityDatabase.set(entity, rigidBody);
+    auto state = call(entity, "rigidBodyGetType");
+    EXPECT_EQ(state["rbType"].get<u32>(),
+              static_cast<u32>(quoll::RigidBodyType::Dynamic));
+  }
+
+  {
+    rigidBody.type = quoll::RigidBodyType::Kinematic;
+    entityDatabase.set(entity, rigidBody);
+
+    auto state = call(entity, "rigidBodyGetType");
+    EXPECT_EQ(state["rbType"].get<u32>(),
+              static_cast<u32>(quoll::RigidBodyType::Kinematic));
+  }
+}
+
+TEST_F(RigidBodyLuaTableTest, GetRigidBodyTypeEnumValues) {
+  auto entity = entityDatabase.create();
+  call(entity, "rigidBodyCheckTypeEnumValues");
+}
+
 TEST_F(RigidBodyLuaTableTest, GetMassReturnsNullIfRigidBodyDoesNotExist) {
   auto entity = entityDatabase.create();
 

@@ -92,8 +92,18 @@ function localTransformDelete()
 end
 
 -- Rigid body
+function rigidBodyCheckTypeEnumValues()
+    expectEq(RigidBodyType.Dynamic, 0)
+    expectEq(RigidBodyType.Kinematic, 1)
+end
+
 function rigidBodySetDefaultParams()
     entity.rigidBody:setDefaultParams();
+end
+
+rbType = nil
+function rigidBodyGetType()
+  rbType = entity.rigidBody.type
 end
 
 mass = 0

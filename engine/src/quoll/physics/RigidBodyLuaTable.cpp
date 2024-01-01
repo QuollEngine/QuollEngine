@@ -20,6 +20,17 @@ void RigidBodyLuaTable::setDefaultParams() {
   mScriptGlobals.entityDatabase.set<RigidBody>(mEntity, {});
 }
 
+sol_maybe<u32> RigidBodyLuaTable::getType() {
+  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+    Engine::getUserLogger().error()
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
+    return sol::nil;
+  }
+
+  return static_cast<u32>(
+      mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).type);
+}
+
 sol_maybe<f32> RigidBodyLuaTable::getMass() {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
@@ -115,8 +126,13 @@ void RigidBodyLuaTable::deleteThis() {
   }
 }
 
-void RigidBodyLuaTable::create(sol::usertype<RigidBodyLuaTable> usertype) {
+void RigidBodyLuaTable::create(sol::usertype<RigidBodyLuaTable> usertype,
+                               sol::state_view state) {
+  state["RigidBodyType"] = state.create_table_with(
+      "Dynamic", RigidBodyType::Dynamic, "Kinematic", RigidBodyType::Kinematic);
+
   usertype["setDefaultParams"] = &RigidBodyLuaTable::setDefaultParams;
+  usertype["type"] = sol::property(&RigidBodyLuaTable::getType);
   usertype["mass"] =
       sol::property(&RigidBodyLuaTable::getMass, &RigidBodyLuaTable::setMass);
   usertype["getInertia"] = &RigidBodyLuaTable::getInertia;

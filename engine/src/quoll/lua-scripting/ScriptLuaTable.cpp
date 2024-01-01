@@ -38,7 +38,8 @@ void ScriptLuaTable::set(const String &name, sol::object value) {
   }
 }
 
-void ScriptLuaTable::create(sol::usertype<ScriptLuaTable> usertype) {
+void ScriptLuaTable::create(sol::usertype<ScriptLuaTable> usertype,
+                            sol::state_view state) {
   usertype["get"] = &ScriptLuaTable::get;
   usertype["set"] = &ScriptLuaTable::set;
 }

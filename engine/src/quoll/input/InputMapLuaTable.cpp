@@ -99,7 +99,8 @@ void InputMapLuaTable::setScheme(String name) {
   inputMap.activeScheme = inputMap.schemeNameMap.at(name);
 }
 
-void InputMapLuaTable::create(sol::usertype<InputMapLuaTable> usertype) {
+void InputMapLuaTable::create(sol::usertype<InputMapLuaTable> usertype,
+                              sol::state_view state) {
   usertype["getCommand"] = &InputMapLuaTable::getCommand;
   usertype["getValueBoolean"] = &InputMapLuaTable::getCommandValueBoolean;
   usertype["isPressed"] = &InputMapLuaTable::getCommandValueBoolean;

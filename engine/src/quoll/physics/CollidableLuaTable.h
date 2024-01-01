@@ -115,8 +115,10 @@ public:
    * @brief Create user type
    *
    * @param usertype User type
+   * @param state Sol state
    */
-  static void create(sol::usertype<CollidableLuaTable> usertype);
+  static void create(sol::usertype<CollidableLuaTable> usertype,
+                     sol::state_view state);
 
   /**
    * @brief Get component name in scripts

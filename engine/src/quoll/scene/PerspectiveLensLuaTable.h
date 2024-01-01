@@ -125,8 +125,10 @@ public:
    * @brief Create user type
    *
    * @param usertype User type
+   * @param state Sol state
    */
-  static void create(sol::usertype<PerspectiveLensLuaTable> usertype);
+  static void create(sol::usertype<PerspectiveLensLuaTable> usertype,
+                     sol::state_view state);
 
   /**
    * @brief Get component name in scripts

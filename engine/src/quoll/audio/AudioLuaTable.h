@@ -46,8 +46,10 @@ public:
    * @brief Create user type
    *
    * @param usertype User type
+   * @param state Sol state
    */
-  static void create(sol::usertype<AudioLuaTable> usertype);
+  static void create(sol::usertype<AudioLuaTable> usertype,
+                     sol::state_view state);
 
 private:
   Entity mEntity;

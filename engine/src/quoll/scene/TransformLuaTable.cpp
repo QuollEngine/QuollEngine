@@ -63,7 +63,8 @@ void TransformLuaTable::deleteThis() {
   }
 }
 
-void TransformLuaTable::create(sol::usertype<TransformLuaTable> usertype) {
+void TransformLuaTable::create(sol::usertype<TransformLuaTable> usertype,
+                               sol::state_view state) {
   usertype["getPosition"] = &TransformLuaTable::getPosition;
   usertype["setPosition"] = &TransformLuaTable::setPosition;
   usertype["getRotation"] = &TransformLuaTable::getRotation;

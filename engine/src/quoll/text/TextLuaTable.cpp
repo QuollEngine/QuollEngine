@@ -51,7 +51,8 @@ void TextLuaTable::deleteThis() {
   }
 }
 
-void TextLuaTable::create(sol::usertype<TextLuaTable> usertype) {
+void TextLuaTable::create(sol::usertype<TextLuaTable> usertype,
+                          sol::state_view state) {
   usertype["content"] =
       sol::property(&TextLuaTable::getText, &TextLuaTable::setText);
   usertype["lineHeight"] =

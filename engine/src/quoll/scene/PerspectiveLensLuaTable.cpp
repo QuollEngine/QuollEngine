@@ -196,7 +196,7 @@ void PerspectiveLensLuaTable::deleteThis() {
 }
 
 void PerspectiveLensLuaTable ::create(
-    sol::usertype<PerspectiveLensLuaTable> usertype) {
+    sol::usertype<PerspectiveLensLuaTable> usertype, sol::state_view state) {
   usertype["near"] = sol::property(&PerspectiveLensLuaTable::getNear,
                                    &PerspectiveLensLuaTable::setNear);
   usertype["far"] = sol::property(&PerspectiveLensLuaTable::getFar,
