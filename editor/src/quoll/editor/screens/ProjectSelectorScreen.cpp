@@ -62,10 +62,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
         presenter.enqueueFramebufferUpdate();
       });
 
-  mainLoop.setUpdateFn([&project, this](f32 dt) {
-    mEventSystem.poll();
-    return !project.has_value();
-  });
+  mainLoop.setUpdateFn([&project, this](f32 dt) { mEventSystem.poll(); });
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
@@ -125,6 +122,11 @@ std::optional<Project> ProjectSelectorScreen::start() {
         }
       }
     }
+
+    if (project.has_value()) {
+      mainLoop.stop();
+    }
+
     ImGui::End();
 
     imgui.endRendering();

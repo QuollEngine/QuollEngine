@@ -6,10 +6,10 @@
 #include "quoll/entity/EntitySpawnerLuaTable.h"
 #include "quoll/entity/EntityLuaTable.h"
 #include "quoll/physics/CollisionHitLuaTable.h"
+#include "quoll/signals/SignalLuaTable.h"
 
 #include "LuaHeaders.h"
 #include "ScriptDecorator.h"
-#include "ScriptSignal.h"
 
 #include "GameLuaTable.h"
 
@@ -21,11 +21,10 @@ void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
   CollisionHitLuaTable::create(state);
   EntityLuaTable::create(state);
   GameLuaTable::create(state);
+  SignalLuaTable::create(state);
 
   state["entity"] = EntityLuaTable(entity, scriptGlobals);
   state["game"] = GameLuaTable(entity, scriptGlobals);
-
-  createScriptSignalTables(state);
 }
 
 void ScriptDecorator::attachVariableInjectors(

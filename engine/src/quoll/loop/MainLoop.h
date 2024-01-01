@@ -32,7 +32,7 @@ public:
    *
    * @param updateFn Update function
    */
-  void setUpdateFn(const std::function<bool(f32)> &updateFn);
+  void setUpdateFn(const std::function<void(f32)> &updateFn);
 
   /**
    * @brief Set render function
@@ -41,10 +41,17 @@ public:
    */
   void setRenderFn(const std::function<void()> &renderFn);
 
+  /**
+   * @brief Stop main loop
+   */
+  void stop();
+
 private:
+  bool mRunning = true;
+
   Window &mWindow;
   FPSCounter &mFpsCounter;
-  std::function<bool(f32)> mUpdateFn;
+  std::function<void(f32)> mUpdateFn;
   std::function<void()> mRenderFn;
 };
 } // namespace quoll

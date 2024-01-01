@@ -32,16 +32,16 @@ PhysicsSystemLuaTable::create(sol::state_view state, Entity entity,
   return PhysicsSystemLuaTable(entity, scriptGlobals);
 }
 
-lua::ScriptSignalView PhysicsSystemLuaTable::onCollisionStart() {
+SignalLuaTable PhysicsSystemLuaTable::onCollisionStart() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return lua::ScriptSignalView(
+  return SignalLuaTable(
       mScriptGlobals.physicsSystem.getSignals().getCollisionStartSignal(),
       script);
 }
 
-lua::ScriptSignalView PhysicsSystemLuaTable::onCollisionEnd() {
+SignalLuaTable PhysicsSystemLuaTable::onCollisionEnd() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return lua::ScriptSignalView(
+  return SignalLuaTable(
       mScriptGlobals.physicsSystem.getSignals().getCollisionEndSignal(),
       script);
 }

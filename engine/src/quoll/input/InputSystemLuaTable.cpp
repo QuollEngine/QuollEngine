@@ -24,16 +24,15 @@ InputSystemLuaTable InputSystemLuaTable::create(sol::state_view state,
   return InputSystemLuaTable(entity, scriptGlobals);
 }
 
-lua::ScriptSignalView InputSystemLuaTable::onKeyPress() {
+SignalLuaTable InputSystemLuaTable::onKeyPress() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return lua::ScriptSignalView(mScriptGlobals.windowSignals.getKeyDownSignal(),
-                               script);
+  return SignalLuaTable(mScriptGlobals.windowSignals.getKeyDownSignal(),
+                        script);
 }
 
-lua::ScriptSignalView InputSystemLuaTable::onKeyRelease() {
+SignalLuaTable InputSystemLuaTable::onKeyRelease() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return lua::ScriptSignalView(mScriptGlobals.windowSignals.getKeyUpSignal(),
-                               script);
+  return SignalLuaTable(mScriptGlobals.windowSignals.getKeyUpSignal(), script);
 }
 
 } // namespace quoll
