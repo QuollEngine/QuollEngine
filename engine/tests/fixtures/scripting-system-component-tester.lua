@@ -6,6 +6,21 @@ function expectEq(a, b)
     end
 end
 
+function expectNear(a, b)
+  function abs(x)
+    if x < 0 then
+        return -x
+    else
+        return x
+    end
+  end
+  ret = assertNative(abs(a - b) < 0.001)
+  if ret == false then
+      msg = "Assertion failed: " .. tostring(a) .. " - " .. tostring(b)
+      error(msg)
+  end
+end
+
 foundEntity = -1
 
 
@@ -247,6 +262,16 @@ end
 -- Animator
 function animatorTrigger()
    entity.animator:trigger("Move")
+end
+
+function animatorPropertiesValid()
+   expectNear(entity.animator.normalizedTime, 0.4)
+   expectEq(entity.animator.currentState.name, "StateB")
+end
+
+function animatorPropertiesInvalid()
+    expectEq(entity.animator.normalizedTime, nil)
+    expectEq(entity.animator.currentState, nil)
 end
 
 function animatorDelete()
