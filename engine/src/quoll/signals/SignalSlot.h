@@ -1,18 +1,18 @@
 #pragma once
 
-namespace quoll::lua {
+namespace quoll {
 
 /**
- * @brief Script signal slot
+ * @brief Signal slot
  */
-class ScriptSignalSlot {
+class SignalSlot {
 public:
   /**
-   * @brief Create script signal slot
+   * @brief Create signal slot
    *
    * @param disconnect Disconnect function
    */
-  ScriptSignalSlot(std::function<void()> &&disconnect);
+  SignalSlot(std::function<void()> &&disconnect);
 
   /**
    * @brief Disconnect signal slot
@@ -23,4 +23,4 @@ private:
   std::function<void()> mDisconnect;
 };
 
-} // namespace quoll::lua
+} // namespace quoll

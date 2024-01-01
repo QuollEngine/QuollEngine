@@ -193,7 +193,6 @@ void EditorScreen::start(const Project &rawProject) {
     mEventSystem.poll();
 
     workspaceManager.getCurrentWorkspace()->update(dt);
-    return true;
   });
 
   LogViewer logViewer;

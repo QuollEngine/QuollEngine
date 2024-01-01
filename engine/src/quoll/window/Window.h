@@ -2,7 +2,6 @@
 
 #include "quoll/events/EventSystem.h"
 #include "quoll/input/InputDeviceManager.h"
-#include "quoll/lua-scripting/ScriptSignal.h"
 #include "WindowSignals.h"
 
 struct GLFWwindow;

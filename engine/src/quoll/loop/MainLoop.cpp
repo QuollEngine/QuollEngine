@@ -9,7 +9,7 @@ namespace quoll {
 MainLoop::MainLoop(Window &window, FPSCounter &fpsCounter)
     : mWindow(window), mFpsCounter(fpsCounter) {}
 
-void MainLoop::setUpdateFn(const std::function<bool(f32)> &updateFn) {
+void MainLoop::setUpdateFn(const std::function<void(f32)> &updateFn) {
   mUpdateFn = updateFn;
 }
 
@@ -17,9 +17,9 @@ void MainLoop::setRenderFn(const std::function<void()> &renderFn) {
   mRenderFn = renderFn;
 }
 
-void MainLoop::run() {
-  bool running = true;
+void MainLoop::stop() { mRunning = false; }
 
+void MainLoop::run() {
   static constexpr u32 OneSecondInMs = 1000;
   static constexpr f64 MaxUpdateTime = 0.25;
   static constexpr f64 TimeDelta = 0.01;
@@ -29,7 +29,7 @@ void MainLoop::run() {
 
   auto prevGameTime = std::chrono::high_resolution_clock::now();
   auto prevFrameTime = prevGameTime;
-  while (running) {
+  while (mRunning) {
     QUOLL_PROFILE_FRAME("MainLoop");
     auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -47,7 +47,7 @@ void MainLoop::run() {
     accumulator += frameTime;
 
     while (accumulator >= TimeDelta) {
-      running = mUpdateFn(static_cast<f32>(TimeDelta));
+      mUpdateFn(static_cast<f32>(TimeDelta));
       accumulator -= TimeDelta;
     }
 

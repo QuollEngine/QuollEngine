@@ -136,8 +136,6 @@ void Runtime::start() {
     scriptingSystem.update(dt, entityDatabase);
     animationSystem.update(dt, entityDatabase);
     audioSystem.output(entityDatabase);
-
-    return true;
   });
 
   mainLoop.setRenderFn([&]() {

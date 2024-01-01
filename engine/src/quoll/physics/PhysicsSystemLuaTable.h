@@ -1,8 +1,7 @@
 #pragma once
 
 #include "quoll/lua-scripting/ScriptGlobals.h"
-#include "quoll/lua-scripting/ScriptSignal.h"
-#include "quoll/lua-scripting/ScriptSignalView.h"
+#include "quoll/signals/SignalLuaTable.h"
 
 namespace quoll {
 
@@ -24,14 +23,14 @@ public:
    *
    * @return On collision start signal
    */
-  lua::ScriptSignalView onCollisionStart();
+  SignalLuaTable onCollisionStart();
 
   /**
    * @brief Get on collision end signal
    *
    * @return On collision end signal
    */
-  lua::ScriptSignalView onCollisionEnd();
+  SignalLuaTable onCollisionEnd();
 
   /**
    * @brief Create physics system lua table

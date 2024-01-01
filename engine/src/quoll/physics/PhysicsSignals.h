@@ -1,6 +1,7 @@
 #pragma once
 
-#include "quoll/lua-scripting/ScriptSignal.h"
+#include "quoll/signals/Signal.h"
+#include "CollisionEvent.h"
 
 namespace quoll {
 
@@ -14,7 +15,7 @@ public:
    *
    * @return Collision start signal
    */
-  inline lua::ScriptSignal &getCollisionStartSignal() {
+  inline Signal<CollisionEvent> &getCollisionStartSignal() {
     return mCollisionStartSignal;
   }
 
@@ -23,13 +24,13 @@ public:
    *
    * @return Collision end signal
    */
-  inline lua::ScriptSignal &getCollisionEndSignal() {
+  inline Signal<CollisionEvent> &getCollisionEndSignal() {
     return mCollisionEndSignal;
   }
 
 private:
-  lua::ScriptSignal mCollisionStartSignal;
-  lua::ScriptSignal mCollisionEndSignal;
+  Signal<CollisionEvent> mCollisionStartSignal;
+  Signal<CollisionEvent> mCollisionEndSignal;
 };
 
 } // namespace quoll

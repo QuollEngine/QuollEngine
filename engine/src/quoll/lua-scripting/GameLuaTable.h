@@ -1,8 +1,7 @@
 #pragma once
 
+#include "quoll/signals/SignalLuaTable.h"
 #include "LuaHeaders.h"
-#include "ScriptSignal.h"
-#include "ScriptSignalView.h"
 #include "ScriptGlobals.h"
 
 namespace quoll {
@@ -33,7 +32,7 @@ public:
    *
    * @return On update signal
    */
-  lua::ScriptSignalView onUpdate();
+  SignalLuaTable onUpdate();
 
   /**
    * @brief Create game sol user type

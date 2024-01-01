@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ScriptSignal.h"
+#include "quoll/signals/Signal.h"
 
 namespace quoll::lua {
 
@@ -14,10 +14,10 @@ public:
    *
    * @return Update signal
    */
-  inline ScriptSignal &getUpdateSignal() { return mUpdateSignal; }
+  inline Signal<f32> &getUpdateSignal() { return mUpdateSignal; }
 
 private:
-  ScriptSignal mUpdateSignal;
+  Signal<f32> mUpdateSignal;
 };
 
 } // namespace quoll::lua

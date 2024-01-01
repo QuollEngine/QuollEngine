@@ -48,10 +48,9 @@ sol::object GameLuaTable::get(String name) {
   return sol::make_object(state, sol::nil);
 }
 
-lua::ScriptSignalView GameLuaTable::onUpdate() {
+SignalLuaTable GameLuaTable::onUpdate() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return lua::ScriptSignalView(mScriptGlobals.scriptLoop.getUpdateSignal(),
-                               script);
+  return SignalLuaTable(mScriptGlobals.scriptLoop.getUpdateSignal(), script);
 }
 
 void GameLuaTable::create(sol::state_view state) {

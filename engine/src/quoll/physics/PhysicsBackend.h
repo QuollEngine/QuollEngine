@@ -1,7 +1,6 @@
 #pragma once
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/lua-scripting/ScriptSignal.h"
 #include "CollisionHit.h"
 #include "PhysicsSignals.h"
 

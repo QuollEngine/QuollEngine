@@ -1,8 +1,7 @@
 #pragma once
 
 #include "quoll/lua-scripting/ScriptGlobals.h"
-#include "quoll/lua-scripting/ScriptSignal.h"
-#include "quoll/lua-scripting/ScriptSignalView.h"
+#include "quoll/signals/SignalLuaTable.h"
 
 namespace quoll {
 
@@ -24,14 +23,14 @@ public:
    *
    * @return On key down signal
    */
-  lua::ScriptSignalView onKeyPress();
+  SignalLuaTable onKeyPress();
 
   /**
    * @brief Get on key up signal
    *
    * @return On key up signal
    */
-  lua::ScriptSignalView onKeyRelease();
+  SignalLuaTable onKeyRelease();
 
   /**
    * @brief Create input system lua table

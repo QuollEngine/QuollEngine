@@ -2,10 +2,10 @@
 
 #include "quoll/asset/Asset.h"
 #include "quoll/events/EventObserver.h"
+#include "quoll/signals/SignalSlot.h"
 
 #include "LuaHeaders.h"
 #include "LuaScriptInputVariable.h"
-#include "ScriptSignalSlot.h"
 #include "DeferredLoader.h"
 
 namespace quoll {
@@ -40,7 +40,7 @@ struct LuaScript {
   /**
    * Signal slots
    */
-  std::vector<lua::ScriptSignalSlot> signalSlots;
+  std::vector<SignalSlot> signalSlots;
 
   /**
    * Deferred loader

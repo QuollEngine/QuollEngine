@@ -1,6 +1,8 @@
 #pragma once
 
-#include "quoll/lua-scripting/ScriptSignal.h"
+#include "quoll/signals/Signal.h"
+#include "MouseEvent.h"
+#include "KeyboardEvent.h"
 
 namespace quoll {
 
@@ -14,18 +16,20 @@ public:
    *
    * @return Key down signal
    */
-  inline lua::ScriptSignal &getKeyDownSignal() { return mKeyDownSignal; }
+  inline Signal<KeyboardEventObject> &getKeyDownSignal() {
+    return mKeyDownSignal;
+  }
 
   /**
    * @brief Get key up signal
    *
    * @return Key up signal
    */
-  inline lua::ScriptSignal &getKeyUpSignal() { return mKeyUpSignal; }
+  inline Signal<KeyboardEventObject> &getKeyUpSignal() { return mKeyUpSignal; }
 
 private:
-  lua::ScriptSignal mKeyDownSignal;
-  lua::ScriptSignal mKeyUpSignal;
+  Signal<KeyboardEventObject> mKeyDownSignal;
+  Signal<KeyboardEventObject> mKeyUpSignal;
 };
 
 } // namespace quoll
