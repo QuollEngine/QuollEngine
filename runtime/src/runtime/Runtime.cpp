@@ -127,14 +127,14 @@ void Runtime::start() {
 
     eventSystem.poll();
 
+    skeletonUpdater.update(entityDatabase);
+    sceneUpdater.update(entityDatabase);
+    physicsSystem.update(dt, entityDatabase);
     inputMapSystem.update(entityDatabase);
     cameraAspectRatioUpdater.update(entityDatabase);
     scriptingSystem.start(entityDatabase, physicsSystem, window.getSignals());
     scriptingSystem.update(dt, entityDatabase);
     animationSystem.update(dt, entityDatabase);
-    skeletonUpdater.update(entityDatabase);
-    sceneUpdater.update(entityDatabase);
-    physicsSystem.update(dt, entityDatabase);
     audioSystem.output(entityDatabase);
 
     return true;
