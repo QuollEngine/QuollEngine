@@ -12,10 +12,9 @@ InputSystemLuaTable InputSystemLuaTable::create(sol::state_view state,
                                                 Entity entity,
                                                 ScriptGlobals scriptGlobals) {
 
-  auto keyboardEvent =
-      state.new_usertype<KeyboardEventObject>(sol::no_constructor);
-  keyboardEvent["key"] = &KeyboardEventObject::key;
-  keyboardEvent["mods"] = &KeyboardEventObject::mods;
+  auto keyboardEvent = state.new_usertype<KeyboardEvent>(sol::no_constructor);
+  keyboardEvent["key"] = &KeyboardEvent::key;
+  keyboardEvent["mods"] = &KeyboardEvent::mods;
 
   auto usertype = state.new_usertype<InputSystemLuaTable>(sol::no_constructor);
   usertype["onKeyPress"] = sol::property(&InputSystemLuaTable::onKeyPress);
@@ -26,13 +25,12 @@ InputSystemLuaTable InputSystemLuaTable::create(sol::state_view state,
 
 SignalLuaTable InputSystemLuaTable::onKeyPress() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return SignalLuaTable(mScriptGlobals.windowSignals.getKeyDownSignal(),
-                        script);
+  return SignalLuaTable(mScriptGlobals.windowSignals.onKeyPress(), script);
 }
 
 SignalLuaTable InputSystemLuaTable::onKeyRelease() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return SignalLuaTable(mScriptGlobals.windowSignals.getKeyUpSignal(), script);
+  return SignalLuaTable(mScriptGlobals.windowSignals.onKeyRelease(), script);
 }
 
 } // namespace quoll

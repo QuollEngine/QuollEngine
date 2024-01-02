@@ -8,6 +8,11 @@ namespace quoll {
 class SignalSlot {
 public:
   /**
+   * @brief Default constructor
+   */
+  SignalSlot() = default;
+
+  /**
    * @brief Create signal slot
    *
    * @param disconnect Disconnect function

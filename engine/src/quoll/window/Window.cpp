@@ -10,8 +10,8 @@
 namespace quoll {
 
 Window::Window(StringView title, u32 width, u32 height,
-               InputDeviceManager &deviceManager, EventSystem &eventSystem)
-    : mDeviceManager(deviceManager), mEventSystem(eventSystem) {
+               InputDeviceManager &deviceManager)
+    : mDeviceManager(deviceManager) {
   auto initReturnValue = glfwInit();
   if (initReturnValue == GLFW_FALSE) {
     const char *errorMsg = nullptr;
@@ -48,9 +48,9 @@ Window::Window(StringView title, u32 width, u32 height,
       mWindowInstance, [](::GLFWwindow *windowInstance, int width, int height) {
         auto *window =
             static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
-        for (auto &[_, handler] : window->mResizeHandlers) {
-          handler(static_cast<u32>(width), static_cast<u32>(height));
-        }
+
+        window->getSignals().onFramebufferResize().notify(
+            static_cast<u32>(width), static_cast<u32>(height));
       });
 
   glfwSetWindowFocusCallback(
@@ -58,9 +58,7 @@ Window::Window(StringView title, u32 width, u32 height,
         auto *window =
             static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
-        for (auto &[_, handler] : window->mFocusHandlers) {
-          handler(focused == GLFW_TRUE);
-        }
+        window->getSignals().onFocus().notify(focused == GLFW_TRUE);
       });
 
   glfwSetKeyCallback(mWindowInstance, [](::GLFWwindow *windowInstance, int key,
@@ -69,19 +67,12 @@ Window::Window(StringView title, u32 width, u32 height,
         static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
     if (action == GLFW_PRESS) {
-      window->mEventSystem.dispatch(KeyboardEvent::Pressed,
-                                    {key, scancode, mods});
-
-      window->mSignals.getKeyDownSignal().notify(
-          KeyboardEventObject{key, scancode, mods});
+      window->mSignals.onKeyPress().notify(KeyboardEvent{key, scancode, mods});
     } else if (action == GLFW_RELEASE) {
-      window->mEventSystem.dispatch(KeyboardEvent::Released,
-                                    {key, scancode, mods});
-      window->mSignals.getKeyUpSignal().notify(
-          KeyboardEventObject{key, scancode, mods});
+      window->mSignals.onKeyRelease().notify(
+          KeyboardEvent{key, scancode, mods});
     } else if (action == GLFW_REPEAT) {
-      window->mEventSystem.dispatch(KeyboardEvent::Pressed,
-                                    {key, scancode, mods});
+      window->mSignals.onKeyPress().notify(KeyboardEvent{key, scancode, mods});
     }
   });
 
@@ -90,30 +81,28 @@ Window::Window(StringView title, u32 width, u32 height,
         auto *window =
             static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
-        window->mEventSystem.dispatch(
-            MouseCursorEvent::Moved,
+        window->mSignals.onMouseMove().notify(
             {static_cast<f32>(xpos), static_cast<f32>(ypos)});
       });
 
-  glfwSetMouseButtonCallback(mWindowInstance, [](::GLFWwindow *windowInstance,
-                                                 int button, int action,
-                                                 int mods) {
-    auto *window =
-        static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
+  glfwSetMouseButtonCallback(
+      mWindowInstance,
+      [](::GLFWwindow *windowInstance, int button, int action, int mods) {
+        auto *window =
+            static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
-    if (action == GLFW_RELEASE) {
-      window->mEventSystem.dispatch(MouseButtonEvent::Released, {button, mods});
-    } else if (action == GLFW_PRESS) {
-      window->mEventSystem.dispatch(MouseButtonEvent::Pressed, {button, mods});
-    }
-  });
+        if (action == GLFW_RELEASE) {
+          window->mSignals.onMouseRelease().notify({button, mods});
+        } else if (action == GLFW_PRESS) {
+          window->mSignals.onMousePress().notify({button, mods});
+        }
+      });
 
   glfwSetScrollCallback(mWindowInstance, [](::GLFWwindow *windowInstance,
                                             f64 xoffset, f64 yoffset) {
     auto *window =
         static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
-    window->mEventSystem.dispatch(
-        MouseScrollEvent::Scroll,
+    window->mSignals.onMouseScroll().notify(
         {static_cast<f32>(xoffset), static_cast<f32>(yoffset)});
   });
 
@@ -181,27 +170,6 @@ glm::uvec2 Window::getWindowSize() {
 bool Window::shouldClose() { return glfwWindowShouldClose(mWindowInstance); }
 
 void Window::pollEvents() { glfwPollEvents(); }
-
-u32 Window::addFramebufferResizeHandler(
-    const std::function<void(u32, u32)> &handler) {
-  u32 id = static_cast<u32>(mResizeHandlers.size());
-
-  mResizeHandlers.insert(std::make_pair(id, handler));
-  return id;
-}
-
-void Window::removeResizeHandler(u32 handle) {
-  mResizeHandlers.erase(mResizeHandlers.find(handle));
-}
-
-u32 Window::addFocusHandler(const std::function<void(bool)> &handler) {
-  u32 id = static_cast<u32>(mFocusHandlers.size());
-  mFocusHandlers.insert(std::make_pair(id, handler));
-
-  return id;
-}
-
-void Window::removeFocusHandler(u32 handle) { mFocusHandlers.erase(handle); }
 
 glm::vec2 Window::getCurrentMousePosition() const {
   glm::dvec2 mousePos;

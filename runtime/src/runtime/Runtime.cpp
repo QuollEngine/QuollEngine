@@ -3,7 +3,6 @@
 
 // Core systems
 #include "quoll/window/Window.h"
-#include "quoll/events/EventSystem.h"
 #include "quoll/profiler/FPSCounter.h"
 #include "quoll/loop/MainLoop.h"
 #include "quoll/renderer/Renderer.h"
@@ -39,9 +38,8 @@ void Runtime::start() {
   static constexpr u32 Height = 600;
 
   Scene scene;
-  EventSystem eventSystem;
   InputDeviceManager deviceManager;
-  Window window(mConfig.name, Width, Height, deviceManager, eventSystem);
+  Window window(mConfig.name, Width, Height, deviceManager);
   AssetCache assetCache(std::filesystem::current_path() / "assets", true);
 
   rhi::VulkanRenderBackend backend(window);
@@ -100,13 +98,14 @@ void Runtime::start() {
   scriptingSystem.observeChanges(scene.entityDatabase);
   physicsSystem.observeChanges(scene.entityDatabase);
 
-  window.addFramebufferResizeHandler([&](auto width, auto height) {
-    renderer.setFramebufferSize({width, height});
-    presenter.enqueueFramebufferUpdate();
-    cameraAspectRatioUpdater.setViewportSize({width, height});
-    uiCanvasUpdater.setViewport(0.0f, 0.0f, static_cast<f32>(width),
-                                static_cast<f32>(height));
-  });
+  window.getSignals().onFramebufferResize().connect(
+      [&](auto width, auto height) {
+        renderer.setFramebufferSize({width, height});
+        presenter.enqueueFramebufferUpdate();
+        cameraAspectRatioUpdater.setViewportSize({width, height});
+        uiCanvasUpdater.setViewport(0.0f, 0.0f, static_cast<f32>(width),
+                                    static_cast<f32>(height));
+      });
 
   auto handle = assetCache.getRegistry().getScenes().findHandleByUuid(
       mConfig.startingScene);
@@ -124,8 +123,6 @@ void Runtime::start() {
   mainLoop.setUpdateFn([&](f32 dt) mutable {
     auto &entityDatabase = scene.entityDatabase;
     entityDeleter.update(scene);
-
-    eventSystem.poll();
 
     skeletonUpdater.update(entityDatabase);
     sceneUpdater.update(entityDatabase);

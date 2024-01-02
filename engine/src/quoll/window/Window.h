@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/events/EventSystem.h"
 #include "quoll/input/InputDeviceManager.h"
 #include "WindowSignals.h"
 
@@ -23,10 +22,9 @@ public:
    * @param width Window width
    * @param height Window height
    * @param deviceManager Device manager
-   * @param eventSystem Event system
    */
   Window(StringView title, u32 width, u32 height,
-         InputDeviceManager &deviceManager, EventSystem &eventSystem);
+         InputDeviceManager &deviceManager);
 
   /**
    * @brief Destroys window
@@ -85,36 +83,6 @@ public:
   void pollEvents();
 
   /**
-   * @brief Add framebuffer resize handler
-   *
-   * @param handler Framebuffer resize handler
-   * @return Framebuffer resize handler ID
-   */
-  u32 addFramebufferResizeHandler(const std::function<void(u32, u32)> &handler);
-
-  /**
-   * @brief Remove resize handler
-   *
-   * @param handle Handle
-   */
-  void removeResizeHandler(u32 handle);
-
-  /**
-   * @brief Add focus handler
-   *
-   * @param handler Focus handler
-   * @return Focus handler ID
-   */
-  u32 addFocusHandler(const std::function<void(bool)> &handler);
-
-  /**
-   * @brief Remove focus handler
-   *
-   * @param handle Handle
-   */
-  void removeFocusHandler(u32 handle);
-
-  /**
    * @brief Get current mouse position
    *
    * @return Current mouse position
@@ -160,16 +128,9 @@ private:
 
 private:
   InputDeviceManager &mDeviceManager;
-  EventSystem &mEventSystem;
-  ::GLFWwindow *mWindowInstance;
-
-  template <class TFunctionType>
-  using HandlerMap = std::map<u32, std::function<TFunctionType>>;
+  ::GLFWwindow *mWindowInstance = nullptr;
 
   WindowSignals mSignals;
-
-  HandlerMap<void(u32, u32)> mResizeHandlers;
-  HandlerMap<void(bool)> mFocusHandlers;
 };
 
 } // namespace quoll

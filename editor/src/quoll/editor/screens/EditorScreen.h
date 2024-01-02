@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/events/EventSystem.h"
 #include "quoll/window/Window.h"
 #include "quoll/rhi/RenderDevice.h"
 
@@ -21,11 +20,10 @@ public:
    *
    * @param window Window
    * @param deviceManager Device manager
-   * @param eventSystem Event system
    * @param device Render device
    */
   EditorScreen(Window &window, InputDeviceManager &deviceManager,
-               EventSystem &eventSystem, rhi::RenderDevice *device);
+               rhi::RenderDevice *device);
 
   /**
    * @brief Start editor screen
@@ -37,7 +35,6 @@ public:
 private:
   InputDeviceManager &mDeviceManager;
   Window &mWindow;
-  EventSystem &mEventSystem;
   rhi::RenderDevice *mDevice;
 };
 

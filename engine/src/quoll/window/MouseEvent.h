@@ -2,29 +2,25 @@
 
 namespace quoll {
 
-enum class MouseButtonEvent { Pressed, Released, Moved };
-
 /**
  * @brief Mouse button event data
  */
-struct MouseButtonEventObject {
+struct MouseButtonEvent {
   /**
    * Button
    */
-  int button = -1;
+  i32 button = -1;
 
   /**
    * Mods
    */
-  int mods = 0;
+  i32 mods = 0;
 };
-
-enum class MouseCursorEvent { Moved };
 
 /**
  * @brief Mouse cursor event data
  */
-struct MouseCursorEventObject {
+struct MouseCursorEvent {
   /**
    * Cursor x position
    */
@@ -36,12 +32,10 @@ struct MouseCursorEventObject {
   f32 ypos = 0.0f;
 };
 
-enum class MouseScrollEvent { Scroll };
-
 /**
  * @brief Mouse scroll event data
  */
-struct MouseScrollEventObject {
+struct MouseScrollEvent {
   /**
    * Scroll x offset
    */

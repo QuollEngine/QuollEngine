@@ -2,26 +2,24 @@
 
 namespace quoll {
 
-enum class KeyboardEvent { Pressed, Released, Repeat };
-
 /**
  * @brief Keyboard event data
  */
-struct KeyboardEventObject {
+struct KeyboardEvent {
   /**
    * Key code
    */
-  int key = -1;
+  i32 key = -1;
 
   /**
    * Key scan code
    */
-  int scanCode = -1;
+  i32 scanCode = -1;
 
   /**
    * Mods
    */
-  int mods = 0;
+  i32 mods = 0;
 };
 
 } // namespace quoll

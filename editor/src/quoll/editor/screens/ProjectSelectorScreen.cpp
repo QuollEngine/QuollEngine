@@ -20,9 +20,8 @@
 namespace quoll::editor {
 
 ProjectSelectorScreen::ProjectSelectorScreen(Window &window,
-                                             EventSystem &eventSystem,
                                              rhi::RenderDevice *device)
-    : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
+    : mWindow(window), mDevice(device) {}
 
 std::optional<Project> ProjectSelectorScreen::start() {
   EntityDatabase entityDatabase;
@@ -56,13 +55,14 @@ std::optional<Project> ProjectSelectorScreen::start() {
     return RendererTextures{imguiPassData.imguiColor, imguiPassData.imguiColor};
   });
 
-  auto resizeHandler =
-      mWindow.addFramebufferResizeHandler([&](auto width, auto height) {
-        renderer.setFramebufferSize({width, height});
-        presenter.enqueueFramebufferUpdate();
-      });
+  auto framebufferResizeSlot =
+      mWindow.getSignals().onFramebufferResize().connect(
+          [&](auto width, auto height) {
+            renderer.setFramebufferSize({width, height});
+            presenter.enqueueFramebufferUpdate();
+          });
 
-  mainLoop.setUpdateFn([&project, this](f32 dt) { mEventSystem.poll(); });
+  mainLoop.setUpdateFn([&project, this](f32 dt) {});
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
@@ -147,7 +147,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   mainLoop.run();
 
-  mWindow.removeResizeHandler(resizeHandler);
+  framebufferResizeSlot.disconnect();
   mDevice->waitForIdle();
 
   return project;

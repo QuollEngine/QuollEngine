@@ -18,7 +18,7 @@ TEST_F(PhysicsSystemLuaTable, RegistersCollisionStartSignal) {
 
   auto state = start(entity);
 
-  physicsSystem.getSignals().getCollisionStartSignal().notify(
+  physicsSystem.getSignals().onCollisionStart().notify(
       quoll::CollisionEvent{.a = entity, .b = other});
 
   EXPECT_TRUE(state["event"].is<quoll::String>());
@@ -38,7 +38,7 @@ TEST_F(PhysicsSystemLuaTable, RegistersCollisionEndSignal) {
 
   auto state = start(entity);
 
-  physicsSystem.getSignals().getCollisionEndSignal().notify(
+  physicsSystem.getSignals().onCollisionEnd().notify(
       quoll::CollisionEvent{.a = entity, .b = other});
 
   EXPECT_TRUE(state["event"].is<quoll::String>());

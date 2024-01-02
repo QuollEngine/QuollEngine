@@ -35,15 +35,13 @@ PhysicsSystemLuaTable::create(sol::state_view state, Entity entity,
 SignalLuaTable PhysicsSystemLuaTable::onCollisionStart() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
   return SignalLuaTable(
-      mScriptGlobals.physicsSystem.getSignals().getCollisionStartSignal(),
-      script);
+      mScriptGlobals.physicsSystem.getSignals().onCollisionStart(), script);
 }
 
 SignalLuaTable PhysicsSystemLuaTable::onCollisionEnd() {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
   return SignalLuaTable(
-      mScriptGlobals.physicsSystem.getSignals().getCollisionEndSignal(),
-      script);
+      mScriptGlobals.physicsSystem.getSignals().onCollisionEnd(), script);
 }
 
 } // namespace quoll

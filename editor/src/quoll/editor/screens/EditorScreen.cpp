@@ -46,9 +46,8 @@
 namespace quoll::editor {
 
 EditorScreen::EditorScreen(Window &window, InputDeviceManager &deviceManager,
-                           EventSystem &eventSystem, rhi::RenderDevice *device)
-    : mDeviceManager(deviceManager), mWindow(window), mEventSystem(eventSystem),
-      mDevice(device) {}
+                           rhi::RenderDevice *device)
+    : mDeviceManager(deviceManager), mWindow(window), mDevice(device) {}
 
 void EditorScreen::start(const Project &rawProject) {
   auto project = rawProject;
@@ -106,7 +105,7 @@ void EditorScreen::start(const Project &rawProject) {
   FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  EditorCamera editorCamera(mEventSystem, mWindow);
+  EditorCamera editorCamera(mWindow);
 
   MainLoop mainLoop(mWindow, fpsCounter);
 
@@ -136,11 +135,12 @@ void EditorScreen::start(const Project &rawProject) {
 
   mousePicking.setFramebufferSize(mWindow.getFramebufferSize());
 
-  mWindow.addFramebufferResizeHandler([&](auto width, auto height) {
-    renderer.setFramebufferSize({width, height});
-    mousePicking.setFramebufferSize({width, height});
-    presenter.enqueueFramebufferUpdate();
-  });
+  mWindow.getSignals().onFramebufferResize().connect(
+      [&](auto width, auto height) {
+        renderer.setFramebufferSize({width, height});
+        mousePicking.setFramebufferSize({width, height});
+        presenter.enqueueFramebufferUpdate();
+      });
 
   SceneSimulator simulator(mDeviceManager, mWindow,
                            assetManager.getAssetRegistry(), editorCamera);
@@ -153,13 +153,15 @@ void EditorScreen::start(const Project &rawProject) {
       project, assetManager, sceneAsset,
       project.assetsPath / "scenes" / "main.scene", renderer, sceneRenderer,
       editorRenderer, mousePicking, simulator, workspaceManager));
-  mEventSystem.observe(KeyboardEvent::Pressed, [&](const auto &data) {
+
+  mWindow.getSignals().onKeyPress().connect([&](const auto &data) {
     workspaceManager.getCurrentWorkspace()->processShortcuts(data.key,
                                                              data.mods);
   });
 
-  mWindow.addFocusHandler([&tracker, &loadStatusDialog, &assetManager,
-                           &renderer, &workspaceManager](bool focused) {
+  mWindow.getSignals().onFocus().connect([&tracker, &loadStatusDialog,
+                                          &assetManager, &renderer,
+                                          &workspaceManager](bool focused) {
     if (!focused)
       return;
 
@@ -190,8 +192,6 @@ void EditorScreen::start(const Project &rawProject) {
   });
 
   mainLoop.setUpdateFn([&workspaceManager, this](f32 dt) mutable {
-    mEventSystem.poll();
-
     workspaceManager.getCurrentWorkspace()->update(dt);
   });
 
