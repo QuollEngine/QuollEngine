@@ -27,14 +27,12 @@ Entity EditorCamera::createDefaultCamera(EntityDatabase &entityDatabase) {
   return camera;
 }
 
-EditorCamera::EditorCamera(EventSystem &eventSystem, Window &window)
-    : mEventSystem(eventSystem), mWindow(window) {
-  mMouseButtonReleaseHandler = mEventSystem.observe(
-      MouseButtonEvent::Released,
+EditorCamera::EditorCamera(Window &window) : mWindow(window) {
+  mOnMouseReleaseSlot = mWindow.getSignals().onMouseRelease().connect(
       [this](const auto &data) { mInputState = InputState::None; });
 
-  mMouseButtonPressHandler =
-      mEventSystem.observe(MouseButtonEvent::Pressed, [this](const auto &data) {
+  mOnMousePressSlot =
+      mWindow.getSignals().onMousePress().connect([this](const auto &data) {
         if (data.button != GLFW_MOUSE_BUTTON_MIDDLE || !mCaptureMouse) {
           return;
         }
@@ -53,8 +51,8 @@ EditorCamera::EditorCamera(EventSystem &eventSystem, Window &window)
         }
       });
 
-  mMouseCursorMoveHandler =
-      mEventSystem.observe(MouseCursorEvent::Moved, [this](const auto &data) {
+  mOnMouseMoveSlot =
+      mWindow.getSignals().onMouseMove().connect([this](const auto &data) {
         if (mInputState == InputState::None ||
             mInputState == InputState::ZoomWheel) {
           return;
@@ -94,8 +92,8 @@ EditorCamera::EditorCamera(EventSystem &eventSystem, Window &window)
         }
       });
 
-  mMouseScrollHandler =
-      mEventSystem.observe(MouseScrollEvent::Scroll, [this](const auto &event) {
+  mOnMouseScrollSlot =
+      mWindow.getSignals().onMouseScroll().connect([this](const auto &event) {
         if (!mCaptureMouse)
           return;
 
@@ -116,12 +114,10 @@ EditorCamera::EditorCamera(EventSystem &eventSystem, Window &window)
 }
 
 EditorCamera::~EditorCamera() {
-  mEventSystem.removeObserver(MouseButtonEvent::Pressed,
-                              mMouseButtonPressHandler);
-  mEventSystem.removeObserver(MouseButtonEvent::Released,
-                              mMouseButtonReleaseHandler);
-  mEventSystem.removeObserver(MouseCursorEvent::Moved, mMouseCursorMoveHandler);
-  mEventSystem.removeObserver(MouseScrollEvent::Scroll, mMouseScrollHandler);
+  mOnMousePressSlot.disconnect();
+  mOnMouseReleaseSlot.disconnect();
+  mOnMouseMoveSlot.disconnect();
+  mOnMouseScrollSlot.disconnect();
 }
 
 void EditorCamera::update(WorkspaceState &state) {

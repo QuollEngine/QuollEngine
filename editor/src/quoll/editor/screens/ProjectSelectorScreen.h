@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/events/EventSystem.h"
 #include "quoll/window/Window.h"
 #include "quoll/rhi/RenderDevice.h"
 
@@ -17,11 +16,9 @@ public:
    * @brief Create project selector screen
    *
    * @param window Window
-   * @param eventSystem Event system
    * @param device Render device
    */
-  ProjectSelectorScreen(Window &window, EventSystem &eventSystem,
-                        rhi::RenderDevice *device);
+  ProjectSelectorScreen(Window &window, rhi::RenderDevice *device);
 
   /**
    * @brief Start project selector screen
@@ -32,7 +29,6 @@ public:
 
 private:
   Window &mWindow;
-  EventSystem &mEventSystem;
   rhi::RenderDevice *mDevice;
 };
 

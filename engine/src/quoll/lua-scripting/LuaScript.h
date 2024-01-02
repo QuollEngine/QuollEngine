@@ -1,7 +1,6 @@
 #pragma once
 
 #include "quoll/asset/Asset.h"
-#include "quoll/events/EventObserver.h"
 #include "quoll/signals/SignalSlot.h"
 
 #include "LuaHeaders.h"

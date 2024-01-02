@@ -15,8 +15,8 @@ public:
    *
    * @return Collision start signal
    */
-  inline Signal<CollisionEvent> &getCollisionStartSignal() {
-    return mCollisionStartSignal;
+  inline Signal<CollisionEvent> &onCollisionStart() {
+    return mOnCollisionStartSignal;
   }
 
   /**
@@ -24,13 +24,13 @@ public:
    *
    * @return Collision end signal
    */
-  inline Signal<CollisionEvent> &getCollisionEndSignal() {
-    return mCollisionEndSignal;
+  inline Signal<CollisionEvent> &onCollisionEnd() {
+    return mOnCollisionEndSignal;
   }
 
 private:
-  Signal<CollisionEvent> mCollisionStartSignal;
-  Signal<CollisionEvent> mCollisionEndSignal;
+  Signal<CollisionEvent> mOnCollisionStartSignal;
+  Signal<CollisionEvent> mOnCollisionEndSignal;
 };
 
 } // namespace quoll

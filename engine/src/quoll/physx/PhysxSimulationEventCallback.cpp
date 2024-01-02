@@ -32,9 +32,9 @@ void PhysxSimulationEventCallback::onContact(
     const PxContactPair &cp = pairs[i];
 
     if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND) {
-      mSignals.getCollisionStartSignal().notify(CollisionEvent{e1, e2});
+      mSignals.onCollisionStart().notify(CollisionEvent{e1, e2});
     } else if (cp.events & PxPairFlag::eNOTIFY_TOUCH_LOST) {
-      mSignals.getCollisionEndSignal().notify(CollisionEvent{e1, e2});
+      mSignals.onCollisionEnd().notify(CollisionEvent{e1, e2});
     }
   }
 }

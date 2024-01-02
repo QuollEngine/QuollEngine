@@ -14,8 +14,8 @@ TEST_F(InputSystemLuaTableTest, RegistersKeyPressEvent) {
   auto entity = entityDatabase.create();
   auto state = start(entity);
 
-  windowSignals.getKeyDownSignal().notify(
-      quoll::KeyboardEventObject{.key = 10, .scanCode = 20, .mods = 3});
+  windowSignals.onKeyPress().notify(
+      quoll::KeyboardEvent{.key = 10, .scanCode = 20, .mods = 3});
 
   EXPECT_TRUE(state["event"].is<quoll::String>());
   EXPECT_TRUE(state["key"].is<u32>());
@@ -30,8 +30,8 @@ TEST_F(InputSystemLuaTableTest, RegistersKeyReleaseEvent) {
   auto entity = entityDatabase.create();
   auto state = start(entity);
 
-  windowSignals.getKeyUpSignal().notify(
-      quoll::KeyboardEventObject{.key = 10, .scanCode = 20, .mods = 3});
+  windowSignals.onKeyRelease().notify(
+      quoll::KeyboardEvent{.key = 10, .scanCode = 20, .mods = 3});
 
   EXPECT_TRUE(state["event"].is<quoll::String>());
   EXPECT_TRUE(state["key"].is<u32>());

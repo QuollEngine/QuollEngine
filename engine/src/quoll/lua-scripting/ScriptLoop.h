@@ -14,10 +14,10 @@ public:
    *
    * @return Update signal
    */
-  inline Signal<f32> &getUpdateSignal() { return mUpdateSignal; }
+  inline Signal<f32> &onUpdate() { return mOnUpdateSignal; }
 
 private:
-  Signal<f32> mUpdateSignal;
+  Signal<f32> mOnUpdateSignal;
 };
 
 } // namespace quoll::lua

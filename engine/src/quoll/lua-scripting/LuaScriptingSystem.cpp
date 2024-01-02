@@ -77,7 +77,7 @@ void LuaScriptingSystem::update(f32 dt, EntityDatabase &entityDatabase) {
   }
   mScriptRemoveObserver.clear();
 
-  mScriptLoop.getUpdateSignal().notify(dt);
+  mScriptLoop.onUpdate().notify(dt);
 }
 
 void LuaScriptingSystem::cleanup(EntityDatabase &entityDatabase) {

@@ -3,7 +3,6 @@
 #include "quoll/renderer/Renderer.h"
 #include "quoll/window/Window.h"
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/events/EventSystem.h"
 #include "quoll/editor/core/CameraLookAt.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
 
@@ -82,10 +81,9 @@ public:
   /**
    * @brief Create editor camera
    *
-   * @param eventSystem Event system
    * @param window Window
    */
-  EditorCamera(EventSystem &eventSystem, Window &window);
+  EditorCamera(Window &window);
 
   EditorCamera(const EditorCamera &) = delete;
   EditorCamera &operator=(const EditorCamera &) = delete;
@@ -184,13 +182,12 @@ private:
   InputState mInputState = InputState::None;
   glm::vec2 mPrevMousePos{};
 
-  EventObserverId mMouseButtonPressHandler = 0;
-  EventObserverId mMouseButtonReleaseHandler = 0;
-  EventObserverId mMouseCursorMoveHandler = 0;
-  EventObserverId mMouseScrollHandler = 0;
+  SignalSlot mOnMousePressSlot;
+  SignalSlot mOnMouseReleaseSlot;
+  SignalSlot mOnMouseMoveSlot;
+  SignalSlot mOnMouseScrollSlot;
 
   Window &mWindow;
-  EventSystem &mEventSystem;
 };
 
 } // namespace quoll::editor
