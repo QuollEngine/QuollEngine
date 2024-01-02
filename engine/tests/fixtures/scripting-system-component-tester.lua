@@ -68,38 +68,56 @@ function nameDelete()
 end
 
 -- Local transform 
-localPositionX = 0
-localPositionY = 0
-localPositionZ = 0
+localTransformPosition = nil
 
 function localTransformPositionGet()
-    localPositionX, localPositionY, localPositionZ = entity.localTransform:getPosition()
+  localTransformPosition = entity.localTransform.position
 end
 
 function localTransformPositionSet()
-    entity.localTransform:setPosition(2.5, 3.5, 0.2)
+    entity.localTransform.position = Vector3.new(2.5, 3.5, 0.2);
 end
 
-localScaleX = 0
-localScaleY = 0
-localScaleZ = 0
+function localTransformPositionSetIndividual()
+    local position = entity.localTransform.position
+    position.x = 2.5
+    position.y = 3.5
+    position.z = 0.2
+end
+
+localTransformScale = nil
 function localTransformScaleGet()
-    localScaleX, localScaleY, localScaleZ = entity.localTransform:getScale()
+    localTransformScale = entity.localTransform.scale
 end
 
 function localTransformScaleSet()
-    entity.localTransform:setScale(2.5, 3.5, 0.2)
+    entity.localTransform.scale = Vector3.new(2.5, 3.5, 0.2)
 end
 
-localRotationX = 0
-localRotationY = 0
-localRotationZ = 0
+function localTransformScaleSetIndividual()
+    local scale = entity.localTransform.scale
+    scale.x = 2.5
+    scale.y = 3.5
+    scale.z = 0.2
+end
+
+localTransformRotation = nil
 function localTransformRotationGet()
-    localRotationX, localRotationY, localRotationZ = entity.localTransform:getRotation()
+    localTransformRotation = entity.localTransform.rotation
 end
 
 function localTransformRotationSet()
-    entity.localTransform:setRotation(35.0, 25.0, 45.0)
+    entity.localTransform.rotation = Quaternion.fromEulerAngles(0.6108652, 0.4363323, 0.7853982)
+end
+
+function localTransformRotationSetIndividual()
+    local newRotation = Quaternion.fromEulerAngles(0.6108652, 0.4363323, 0.7853982)
+
+    local rotation = entity.localTransform.rotation
+    rotation.x = newRotation.x
+    rotation.y = newRotation.y
+    rotation.z = newRotation.z
+    rotation.w = newRotation.w
 end
 
 function localTransformDelete()
@@ -130,15 +148,20 @@ function rigidBodySetMass()
     entity.rigidBody.mass = 2.5
 end
 
-inertiaX = 0
-inertiaY = 0
-inertiaZ = 0
+rigidBodyInertia = false
 function rigidBodyGetInertia()
-    inertiaX, inertiaY, inertiaZ = entity.rigidBody:getInertia()
+    rigidBodyInertia = entity.rigidBody.inertia
 end
 
 function rigidBodySetInertia()
-    entity.rigidBody:setInertia(2.5, 2.5, 2.5)
+    entity.rigidBody.inertia = Vector3.new(2.5, 3.5, 4.5)
+end
+
+function rigidBodySetInertiaIndividual()
+    local inertia = entity.rigidBody.inertia
+    inertia.x = 2.5
+    inertia.y = 3.5
+    inertia.z = 4.5
 end
 
 isGravityApplied = true
