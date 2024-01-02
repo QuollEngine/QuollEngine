@@ -11,50 +11,32 @@ namespace quoll {
 TransformLuaTable::TransformLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-std::tuple<f32, f32, f32> TransformLuaTable::getPosition() {
-  auto pos =
-      mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localPosition;
-  return {pos.x, pos.y, pos.z};
+std::reference_wrapper<glm::vec3> TransformLuaTable::getPosition() {
+  return mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity)
+      .localPosition;
 }
 
-void TransformLuaTable::setPosition(f32 x, f32 y, f32 z) {
+void TransformLuaTable::setPosition(glm::vec3 position) {
   mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localPosition =
-      glm::vec3{x, y, z};
+      position;
 }
 
-std::tuple<f32, f32, f32> TransformLuaTable::getRotation() {
-  const auto &rotationQuat =
-      mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localRotation;
-
-  glm::vec3 rotationEuler{};
-
-  glm::extractEulerAngleXYZ(glm::toMat4(rotationQuat), rotationEuler.x,
-                            rotationEuler.y, rotationEuler.z);
-  rotationEuler = glm::degrees(rotationEuler);
-  return {rotationEuler.z, rotationEuler.y, rotationEuler.x};
+std::reference_wrapper<glm::quat> TransformLuaTable::getRotation() {
+  return mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity)
+      .localRotation;
 }
 
-void TransformLuaTable::setRotation(f32 x, f32 y, f32 z) {
-  glm::vec3 rotation{x, y, z};
-  auto newRotation = glm::radians(rotation);
-
-  // glm::quat accepts euler angles
-  // in pitch-yaw-roll representation,
-  // while we pass XYZ
+void TransformLuaTable::setRotation(glm::quat rotation) {
   mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localRotation =
-      glm::toQuat(
-          glm::eulerAngleXYZ(newRotation.x, newRotation.y, newRotation.z));
+      rotation;
 }
 
-std::tuple<f32, f32, f32> TransformLuaTable::getScale() {
-  auto scale =
-      mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localScale;
-  return {scale.x, scale.y, scale.z};
+std::reference_wrapper<glm::vec3> TransformLuaTable::getScale() {
+  return mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localScale;
 }
 
-void TransformLuaTable::setScale(f32 x, f32 y, f32 z) {
-  mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localScale =
-      glm::vec3{x, y, z};
+void TransformLuaTable::setScale(glm::vec3 scale) {
+  mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localScale = scale;
 }
 
 void TransformLuaTable::deleteThis() {
@@ -65,12 +47,13 @@ void TransformLuaTable::deleteThis() {
 
 void TransformLuaTable::create(sol::usertype<TransformLuaTable> usertype,
                                sol::state_view state) {
-  usertype["getPosition"] = &TransformLuaTable::getPosition;
-  usertype["setPosition"] = &TransformLuaTable::setPosition;
-  usertype["getRotation"] = &TransformLuaTable::getRotation;
-  usertype["setRotation"] = &TransformLuaTable::setRotation;
-  usertype["getScale"] = &TransformLuaTable::getScale;
-  usertype["setScale"] = &TransformLuaTable::setScale;
+  usertype["position"] = sol::property(&TransformLuaTable::getPosition,
+                                       &TransformLuaTable::setPosition);
+  usertype["scale"] =
+      sol::property(&TransformLuaTable::getScale, &TransformLuaTable::setScale);
+
+  usertype["rotation"] = sol::property(&TransformLuaTable::getRotation,
+                                       &TransformLuaTable::setRotation);
   usertype["delete"] = &TransformLuaTable::deleteThis;
 }
 

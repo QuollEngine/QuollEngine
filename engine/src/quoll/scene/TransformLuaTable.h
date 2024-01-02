@@ -18,52 +18,46 @@ public:
   TransformLuaTable(Entity entity, ScriptGlobals scriptGlobals);
 
   /**
-   * @brief Get local scale
-   *
-   * @return Local scale
-   */
-  std::tuple<f32, f32, f32> getScale();
-
-  /**
-   * @brief Set local scale
-   *
-   * @param x Local scale in x axis
-   * @param y Local scale in y axis
-   * @param z Local scale in z axis
-   */
-  void setScale(f32 x, f32 y, f32 z);
-
-  /**
    * @brief Get local position
    *
    * @return Local position
    */
-  std::tuple<f32, f32, f32> getPosition();
+  std::reference_wrapper<glm::vec3> getPosition();
 
   /**
    * @brief Set local position
    *
-   * @param x Local position in x axis
-   * @param y Local position in y axis
-   * @param z Local position in z axis
+   * @param position Local position
    */
-  void setPosition(f32 x, f32 y, f32 z);
+  void setPosition(glm::vec3 position);
 
   /**
    * @brief Get rotation
    *
-   * @return Local rotation in euler angles
+   * @return Local rotation
    */
-  std::tuple<f32, f32, f32> getRotation();
+  std::reference_wrapper<glm::quat> getRotation();
 
   /**
    * @brief Set local rotation
    *
-   * @param x Local rotation as euler angles in x axis
-   * @param y Local rotation as euler angles in y axis
-   * @param z Local rotation as euler angles in z axis
+   * @param rotation Local rotation
    */
-  void setRotation(f32 x, f32 y, f32 z);
+  void setRotation(glm::quat rotation);
+
+  /**
+   * @brief Get local scale
+   *
+   * @return Local scale
+   */
+  std::reference_wrapper<glm::vec3> getScale();
+
+  /**
+   * @brief Set local scale
+   *
+   * @param scale Local scale
+   */
+  void setScale(glm::vec3 scale);
 
   /**
    * @brief Delete component

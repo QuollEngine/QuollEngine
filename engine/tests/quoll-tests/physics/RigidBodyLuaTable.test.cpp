@@ -99,21 +99,18 @@ TEST_F(RigidBodyLuaTableTest, GetInertiaReturnsNullIfRigidBodyDoesNotExist) {
   auto entity = entityDatabase.create();
 
   auto state = call(entity, "rigidBodyGetInertia");
-  EXPECT_TRUE(state["inertiaX"].is<sol::nil_t>());
-  EXPECT_TRUE(state["inertiaY"].is<sol::nil_t>());
-  EXPECT_TRUE(state["inertiaZ"].is<sol::nil_t>());
+  EXPECT_TRUE(state["rigidBodyInertia"].is<sol::nil_t>());
 }
 
 TEST_F(RigidBodyLuaTableTest, GetInertiaReturnsRigidBodyInertia) {
   auto entity = entityDatabase.create();
   quoll::RigidBody rigidBody;
-  rigidBody.dynamicDesc.inertia = glm::vec3(2.5f);
+  rigidBody.dynamicDesc.inertia = glm::vec3(2.5f, 3.5, 5.5f);
   entityDatabase.set(entity, rigidBody);
 
   auto state = call(entity, "rigidBodyGetInertia");
-  EXPECT_EQ(state["inertiaX"].get<f32>(), 2.5f);
-  EXPECT_EQ(state["inertiaY"].get<f32>(), 2.5f);
-  EXPECT_EQ(state["inertiaZ"].get<f32>(), 2.5f);
+  EXPECT_EQ(state["rigidBodyInertia"].get<glm::vec3>(),
+            glm::vec3(2.5f, 3.5, 5.5f));
 }
 
 TEST_F(RigidBodyLuaTableTest, SetInertiaCreatesRigidBodyIfItDoesNotExist) {
@@ -122,7 +119,7 @@ TEST_F(RigidBodyLuaTableTest, SetInertiaCreatesRigidBodyIfItDoesNotExist) {
   call(entity, "rigidBodySetInertia");
   EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.inertia,
-            glm::vec3(2.5));
+            glm::vec3(2.5f, 3.5f, 4.5f));
 }
 
 TEST_F(RigidBodyLuaTableTest,
@@ -140,7 +137,20 @@ TEST_F(RigidBodyLuaTableTest,
   EXPECT_NE(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.inertia,
             rigidBody.dynamicDesc.inertia);
   EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.inertia,
-            glm::vec3{2.5f});
+            glm::vec3(2.5f, 3.5f, 4.5f));
+}
+
+TEST_F(RigidBodyLuaTableTest, SetIndividualComponentsOfInertia) {
+  auto entity = entityDatabase.create();
+
+  quoll::RigidBody rigidBody{};
+  rigidBody.dynamicDesc.mass = 7.5f;
+  entityDatabase.set(entity, rigidBody);
+
+  call(entity, "rigidBodySetInertiaIndividual");
+  EXPECT_TRUE(entityDatabase.has<quoll::RigidBody>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::RigidBody>(entity).dynamicDesc.inertia,
+            glm::vec3(2.5f, 3.5f, 4.5f));
 }
 
 TEST_F(RigidBodyLuaTableTest,

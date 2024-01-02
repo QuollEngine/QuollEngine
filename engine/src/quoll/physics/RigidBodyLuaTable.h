@@ -48,16 +48,14 @@ public:
    *
    * @return Inertia
    */
-  std::tuple<sol_maybe<f32>, sol_maybe<f32>, sol_maybe<f32>> getInertia();
+  sol_maybe<std::reference_wrapper<glm::vec3>> getInertia();
 
   /**
    * @brief Set inertia
    *
-   * @param x Inertia in x axis
-   * @param y Inertia in y axis
-   * @param z Inertia in z axis
+   * @param inertia Inertia
    */
-  void setInertia(f32 x, f32 y, f32 z);
+  void setInertia(glm::vec3 inertia);
 
   /**
    * @brief Check if gravity is applied

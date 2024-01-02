@@ -51,24 +51,18 @@ void RigidBodyLuaTable::setMass(f32 mass) {
         mass;
   }
 }
-
-std::tuple<sol_maybe<f32>, sol_maybe<f32>, sol_maybe<f32>>
-RigidBodyLuaTable::getInertia() {
+sol_maybe<std::reference_wrapper<glm::vec3>> RigidBodyLuaTable::getInertia() {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
-    return {sol::nil, sol::nil, sol::nil};
+    return sol::nil;
   }
 
-  const auto &inertia =
-      mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.inertia;
-
-  return {inertia.x, inertia.y, inertia.z};
+  return mScriptGlobals.entityDatabase.get<RigidBody>(mEntity)
+      .dynamicDesc.inertia;
 }
 
-void RigidBodyLuaTable::setInertia(f32 x, f32 y, f32 z) {
-  glm::vec3 inertia{x, y, z};
-
+void RigidBodyLuaTable::setInertia(glm::vec3 inertia) {
   if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.inertia = inertia;
@@ -135,8 +129,8 @@ void RigidBodyLuaTable::create(sol::usertype<RigidBodyLuaTable> usertype,
   usertype["type"] = sol::property(&RigidBodyLuaTable::getType);
   usertype["mass"] =
       sol::property(&RigidBodyLuaTable::getMass, &RigidBodyLuaTable::setMass);
-  usertype["getInertia"] = &RigidBodyLuaTable::getInertia;
-  usertype["setInertia"] = &RigidBodyLuaTable::setInertia;
+  usertype["inertia"] = sol::property(&RigidBodyLuaTable::getInertia,
+                                      &RigidBodyLuaTable::setInertia);
   usertype["isGravityApplied"] = sol::property(
       &RigidBodyLuaTable::isGravityApplied, &RigidBodyLuaTable::applyGravity);
   usertype["applyForce"] = &RigidBodyLuaTable::applyForce;
