@@ -15,6 +15,7 @@ bool TestPhysicsBackend::sweep(quoll::EntityDatabase &entityDatabase,
   if (mSweepValue) {
     hit.normal = mHit.normal;
     hit.distance = mHit.distance;
+    hit.entity = mHit.entity;
   }
 
   return mSweepValue;

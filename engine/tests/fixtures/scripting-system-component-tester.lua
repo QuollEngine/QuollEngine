@@ -53,18 +53,36 @@ function entitySpawnerSpawnSprite()
 end
 
 -- Name 
-name = ''
-
 function nameGet()
-    name = entity.name.value
+    expectEq(entity.name, "Test name")
+end
+
+function nameGetNil()
+    expectEq(entity.name, "")
 end
 
 function nameSet()
-    entity.name.value = "Hello World"
+    entity.name = "Hello World"
 end
 
-function nameDelete()
-    entity.name:delete()
+-- Parent
+function parentGet()
+    expectEq(entity.parent.name, "Parent")
+end
+
+function parentGetNil()
+    expectEq(entity.parent, nil)
+end
+
+function parentSet()
+    local parent2 = entityQuery:getFirstEntityByName('Parent 2')
+    expectEq(entity.parent.name, 'Parent 1')
+    entity.parent = parent2
+end
+
+function parentSetNil()
+    expectEq(entity.parent.name, 'Parent 1')
+    entity.parent = nil
 end
 
 -- Local transform 
@@ -245,12 +263,14 @@ sweepOutput = nil
 sweepNormal = nil
 sweepDistance = nil
 sweepData = nil
+sweepEntityName = nil
 function collidableSweep()
     sweepOutput, sweepData = entity.collidable:sweep(0.0, 0.0, 0.0, 0.0)
 
     if sweepOutput then
        sweepNormal = sweepData.normal
        sweepDistance = sweepData.distance
+       sweepEntityName = sweepData.entity.name
     end
 end
 
@@ -259,19 +279,24 @@ function collidableDelete()
 end
 
 -- Text
-text = ''
-textLineHeight = -1
+function textGetTextNil()
+    expectEq(entity.text.content, nil)
+end
 
 function textGetText()
-    text = entity.text.content
+    expectEq(entity.text.content, "Test content")
 end
 
 function textSetText()
     entity.text.content = "Hello World"
 end
 
+function textGetLineHeightNil()
+    expectEq(entity.text.lineHeight, nil)
+end
+
 function textGetLineHeight()
-    textLineHeight = entity.text.lineHeight
+    expectEq(entity.text.lineHeight, 25.0)
 end
 
 function textSetLineHeight()

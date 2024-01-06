@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Name.h"
 #include "quoll/physics/Collidable.h"
 
 #include "quoll-tests/Testing.h"
@@ -348,9 +349,13 @@ TEST_F(CollidableLuaTableTest, SweepReturnsFalseIfSweepTestFails) {
 }
 
 TEST_F(CollidableLuaTableTest, SweepReturnsTrueIfSweepTestSucceeds) {
+  auto entity2 = entityDatabase.create();
+  entityDatabase.set<quoll::Name>(entity2, {"Other entity"});
+
   physicsBackend->setSweepValue(true);
-  physicsBackend->setSweepHitData(
-      {.normal = glm::vec3{2.5f, 3.5f, 4.5f}, .distance = 0.5f});
+  physicsBackend->setSweepHitData({.normal = glm::vec3{2.5f, 3.5f, 4.5f},
+                                   .distance = 0.5f,
+                                   .entity = entity2});
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Collidable>(entity, {});
@@ -361,12 +366,16 @@ TEST_F(CollidableLuaTableTest, SweepReturnsTrueIfSweepTestSucceeds) {
 
   EXPECT_FALSE(state["sweepNormal"].is<sol::nil_t>());
   EXPECT_FALSE(state["sweepDistance"].is<sol::nil_t>());
+  EXPECT_FALSE(state["sweepEntityName"].is<sol::nil_t>());
 
   auto normal = state["sweepNormal"].get<glm::vec3>();
   EXPECT_EQ(normal, glm::vec3(2.5f, 3.5f, 4.5f));
 
   auto distance = state["sweepDistance"].get<f32>();
   EXPECT_EQ(distance, 0.5f);
+
+  auto entityName = state["sweepEntityName"].get<quoll::String>();
+  EXPECT_EQ(entityName, "Other entity");
 }
 
 // Delete

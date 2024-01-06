@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/Parent.h"
 #include "quoll/scene/Children.h"
+#include "quoll/scene/EntityRelationUtils.h"
 
 #include "EntityRelationActions.h"
 
@@ -16,32 +17,11 @@ ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
 
   if (db.has<Parent>(mEntity)) {
     mPreviousParent = db.get<Parent>(mEntity).parent;
-
-    QuollAssert(db.has<Children>(mPreviousParent),
-                "Parent entity must have children");
-    auto &children = db.get<Children>(mPreviousParent).children;
-
-    auto it = std::find(children.begin(), children.end(), mEntity);
-
-    QuollAssert(it != children.end(),
-                "Entity must exist in children of parent");
-
-    if (children.size() == 1) {
-      db.remove<Children>(mPreviousParent);
-    } else {
-      children.erase(it);
-    }
   } else {
     mPreviousParent = Entity::Null;
   }
 
-  db.set<Parent>(mEntity, {mParent});
-  if (db.has<Children>(mParent)) {
-    db.get<Children>(mParent).children.push_back(mEntity);
-  } else {
-    db.set<Children>(mParent, {{mEntity}});
-  }
-
+  EntityRelationUtils::setEntityParent(db, mEntity, mParent);
   ActionExecutorResult res;
   res.addToHistory = true;
 
@@ -59,27 +39,9 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
   auto &db = scene.entityDatabase;
 
   if (mPreviousParent != Entity::Null) {
-    if (db.has<Children>(mPreviousParent)) {
-      db.get<Children>(mPreviousParent).children.push_back(mEntity);
-    } else {
-      db.set<Children>(mPreviousParent, {{mEntity}});
-    }
-
-    db.set<Parent>(mEntity, {mPreviousParent});
+    EntityRelationUtils::setEntityParent(db, mEntity, mPreviousParent);
   } else {
-    db.remove<Parent>(mEntity);
-  }
-
-  QuollAssert(db.has<Children>(mParent), "Entity parent has no children");
-  auto &children = db.get<Children>(mParent).children;
-  auto it = std::find(children.begin(), children.end(), mEntity);
-
-  QuollAssert(it != children.end(), "Entity must exist in children of parent");
-
-  if (children.size() == 1) {
-    db.remove<Children>(mParent);
-  } else {
-    children.erase(it);
+    EntityRelationUtils::removeEntityParent(db, mEntity);
   }
 
   ActionExecutorResult res;
@@ -94,28 +56,11 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
 
 bool EntitySetParent::predicate(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
-  auto &scene = state.scene;
-  auto &db = scene.entityDatabase;
 
-  // Parent does not exist
-  if (!db.exists(mParent)) {
-    return false;
-  }
-
-  // Parent is already a parent of entity
-  if (db.has<Parent>(mEntity) && db.get<Parent>(mEntity).parent == mParent) {
-    return false;
-  }
-
-  auto parent = mParent;
-  bool parentIsNotDescendant = parent != mEntity;
-  while (parentIsNotDescendant && db.has<Parent>(parent)) {
-    auto p = db.get<Parent>(parent).parent;
-    parentIsNotDescendant = p != mEntity;
-    parent = p;
-  }
-
-  return parentIsNotDescendant;
+  return state.scene.entityDatabase.exists(mParent) &&
+         EntityRelationUtils::isValidParentForEntity(state.scene.entityDatabase,
+                                                     mEntity, mParent) ==
+             EntityReparentStatus::Ok;
 }
 
 EntityRemoveParent::EntityRemoveParent(Entity entity) : mEntity(entity) {}

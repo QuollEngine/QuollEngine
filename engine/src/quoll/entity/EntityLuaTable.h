@@ -3,7 +3,6 @@
 #include "quoll/entity/Entity.h"
 
 #include "quoll/lua-scripting/LuaUserTypeBase.h"
-#include "quoll/core/NameLuaTable.h"
 #include "quoll/physics/RigidBodyLuaTable.h"
 #include "quoll/physics/CollidableLuaTable.h"
 #include "quoll/audio/AudioLuaTable.h"
@@ -45,6 +44,13 @@ public:
   inline Entity getEntity() { return mEntity; }
 
   /**
+   * @brief Get script globals
+   *
+   * @return Script globals;
+   */
+  inline ScriptGlobals &getScriptGlobals() { return mScriptGlobals; }
+
+  /**
    * @brief Equality operator
    *
    * @param rhs Other entity lua table
@@ -57,8 +63,8 @@ public:
 
 private:
   Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 
-  NameLuaTable mName;
   TransformLuaTable mTransform;
   PerspectiveLensLuaTable mPerspectiveLens;
   RigidBodyLuaTable mRigidBody;

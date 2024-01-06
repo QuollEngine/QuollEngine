@@ -11,21 +11,14 @@ using NameLuaTableDeathTest = NameLuaTableTest;
 TEST_F(NameLuaTableTest, ReturnsEmptyStringIfNameComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto state = call(entity, "nameGet");
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
-  auto name = state["name"].get<quoll::String>();
-  EXPECT_EQ(name, "");
+  call(entity, "nameGetNil");
 }
 
 TEST_F(NameLuaTableTest, ReturnsNameIfComponentExists) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Name>(entity, {"Test name"});
 
-  auto state = call(entity, "nameGet");
-
-  auto name = state["name"].get<quoll::String>();
-  EXPECT_EQ(name, "Test name");
+  call(entity, "nameGet");
 }
 
 TEST_F(NameLuaTableTest, CreatesNameComponentOnSet) {
@@ -45,19 +38,4 @@ TEST_F(NameLuaTableTest, UpdatesExistingNameComponentOnSet) {
   call(entity, "nameSet");
 
   EXPECT_EQ(entityDatabase.get<quoll::Name>(entity).name, "Hello World");
-}
-
-TEST_F(NameLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
-
-  call(entity, "nameDelete");
-  EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
-}
-
-TEST_F(NameLuaTableTest, DeleteRemovesNameComponentFromEntity) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity, {});
-
-  call(entity, "nameDelete");
-  EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
 }
