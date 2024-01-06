@@ -8,31 +8,27 @@
 
 namespace quoll {
 
-NameLuaTable::NameLuaTable(Entity entity, ScriptGlobals scriptGlobals)
-    : mScriptGlobals(scriptGlobals), mEntity(entity) {}
+String NameLuaTable::get(EntityLuaTable &entityTable) {
+  auto &scriptGlobals = entityTable.getScriptGlobals();
+  auto entity = entityTable.getEntity();
 
-String NameLuaTable::get() {
-  if (mScriptGlobals.entityDatabase.has<Name>(mEntity)) {
-    return mScriptGlobals.entityDatabase.get<Name>(mEntity).name;
+  if (scriptGlobals.entityDatabase.has<Name>(entity)) {
+    return scriptGlobals.entityDatabase.get<Name>(entity).name;
   }
 
   return "";
 }
 
-void NameLuaTable::set(String name) {
-  mScriptGlobals.entityDatabase.set<Name>(mEntity, {name});
+void NameLuaTable::set(EntityLuaTable &entityTable, String name) {
+  auto &scriptGlobals = entityTable.getScriptGlobals();
+  auto entity = entityTable.getEntity();
+
+  return scriptGlobals.entityDatabase.set<Name>(entity, {name});
 }
 
-void NameLuaTable::deleteThis() {
-  if (mScriptGlobals.entityDatabase.has<Name>(mEntity)) {
-    mScriptGlobals.entityDatabase.remove<Name>(mEntity);
-  }
-}
-
-void NameLuaTable::create(sol::usertype<NameLuaTable> usertype,
+void NameLuaTable::create(sol::usertype<EntityLuaTable> entityUsertype,
                           sol::state_view state) {
-  usertype["value"] = sol::property(&NameLuaTable::get, &NameLuaTable::set);
-  usertype["delete"] = &NameLuaTable::deleteThis;
+  entityUsertype["name"] = sol::property(get, set);
 }
 
 } // namespace quoll

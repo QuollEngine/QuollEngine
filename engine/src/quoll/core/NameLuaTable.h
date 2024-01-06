@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/lua-scripting/LuaUserTypeBase.h"
+#include "quoll/entity/EntityLuaTable.h"
 
 namespace quoll {
 
@@ -10,51 +11,29 @@ namespace quoll {
 class NameLuaTable {
 public:
   /**
-   * @brief Create name
-   *
-   * @param entity Entity
-   * @param scriptGlobals Script globals
-   */
-  NameLuaTable(Entity entity, ScriptGlobals scriptGlobals);
-
-  /**
    * @brief Get name
    *
+   * @param entityTable Entity table
    * @return Name
    */
-  String get();
+  static String get(EntityLuaTable &entityTable);
 
   /**
    * @brief Set name
    *
+   * @param entityTable Entity table
    * @param name Name
    */
-  void set(String name);
-
-  /**
-   * @brief Delete component
-   */
-  void deleteThis();
+  static void set(EntityLuaTable &entityTable, String name);
 
   /**
    * @brief Create user type
    *
-   * @param usertype User type
+   * @param entityUsertype Entity user type
    * @param state Sol state
    */
-  static void create(sol::usertype<NameLuaTable> usertype,
+  static void create(sol::usertype<EntityLuaTable> entityUsertype,
                      sol::state_view state);
-
-  /**
-   * @brief Get component name in scripts
-   *
-   * @return Component name
-   */
-  static const String getName() { return "name"; }
-
-private:
-  Entity mEntity;
-  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

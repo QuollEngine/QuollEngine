@@ -65,7 +65,7 @@ struct UIViewStyle {
   YGAlign alignItems{YGAlignStretch};
 
   /**
-   * Align items
+   * Align content
    */
   YGAlign alignContent{YGAlignFlexStart};
 

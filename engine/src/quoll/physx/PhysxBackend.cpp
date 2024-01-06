@@ -223,6 +223,8 @@ bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
     const auto &bh = buffer.getAnyHit(0);
     hit.normal = PhysxMapping::getVec3(bh.normal);
     hit.distance = bh.distance;
+    hit.entity =
+        static_cast<Entity>(reinterpret_cast<uptr>(bh.actor->userData));
   }
 
   return result;

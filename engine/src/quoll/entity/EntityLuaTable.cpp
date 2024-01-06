@@ -1,5 +1,7 @@
 #include "quoll/core/Base.h"
 #include "EntityLuaTable.h"
+#include "quoll/scene/ParentLuaTable.h"
+#include "quoll/core/NameLuaTable.h"
 
 namespace quoll {
 
@@ -15,7 +17,7 @@ void setToStruct(sol::state_view state,
 }
 
 EntityLuaTable::EntityLuaTable(Entity entity, ScriptGlobals scriptGlobals)
-    : mEntity(entity), mName(entity, scriptGlobals),
+    : mEntity(entity), mScriptGlobals(scriptGlobals),
       mTransform(entity, scriptGlobals),
       mPerspectiveLens(entity, scriptGlobals),
       mRigidBody(entity, scriptGlobals), mCollidable(entity, scriptGlobals),
@@ -27,7 +29,6 @@ void EntityLuaTable::create(sol::state_view state) {
   auto entityTable =
       state.new_usertype<EntityLuaTable>("Entity", sol::no_constructor);
 
-  setToStruct(state, entityTable, &EntityLuaTable::mName);
   setToStruct(state, entityTable, &EntityLuaTable::mTransform);
   setToStruct(state, entityTable, &EntityLuaTable::mPerspectiveLens);
   setToStruct(state, entityTable, &EntityLuaTable::mRigidBody);
@@ -38,6 +39,9 @@ void EntityLuaTable::create(sol::state_view state) {
   setToStruct(state, entityTable, &EntityLuaTable::mInputMap);
   setToStruct(state, entityTable, &EntityLuaTable::mUICanvas);
   setToStruct(state, entityTable, &EntityLuaTable::mScript);
+
+  NameLuaTable::create(entityTable, state);
+  ParentLuaTable::create(entityTable, state);
 }
 
 } // namespace quoll
