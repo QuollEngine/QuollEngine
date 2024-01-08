@@ -15,6 +15,13 @@
 
 namespace quoll::lua {
 
+static void logMessages(LogStream &stream, sol::state_view state,
+                        sol::variadic_args args) {
+  for (auto arg : args) {
+    stream << state["tostring"](arg.get<sol::object>()).get<String>() << "\t";
+  }
+}
+
 void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
                                     ScriptGlobals scriptGlobals) {
   MathLuaTable::create(state);
@@ -22,6 +29,11 @@ void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
   EntityLuaTable::create(state);
   GameLuaTable::create(state);
   SignalLuaTable::create(state);
+
+  state.set_function("print", [state](sol::variadic_args args) {
+    auto log = Engine::getUserLogger().debug();
+    logMessages(log, state, args);
+  });
 
   state["entity"] = EntityLuaTable(entity, scriptGlobals);
   state["game"] = GameLuaTable(entity, scriptGlobals);

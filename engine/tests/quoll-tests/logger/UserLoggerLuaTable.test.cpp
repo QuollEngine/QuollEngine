@@ -5,9 +5,13 @@
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 
-using ::testing::_;
-
 using LS = quoll::LogSeverity;
+
+struct Output {
+  quoll::LogSeverity severity;
+  quoll::LogTimestamp timestamp;
+  quoll::String message;
+};
 
 class UserLoggerLuaTableTest
     : public LuaScriptingInterfaceTestBase,
@@ -21,7 +25,9 @@ public:
 
     quoll::Engine::getUserLogger().setTransport(
         [this](auto severity, auto timestamp, auto message) {
-          mockTransport(severity, timestamp, message);
+          output.severity = severity;
+          output.timestamp = timestamp;
+          output.message = message;
         });
     quoll::Engine::getUserLogger().setMinSeverity(quoll::LogSeverity::Debug);
   }
@@ -32,22 +38,25 @@ public:
     quoll::Engine::getUserLogger().setTransport(quoll::NoopLogTransport);
   }
 
-  MOCK_METHOD(void, mockTransport,
-              (quoll::LogSeverity, quoll::LogTimestamp, quoll::String));
+  Output output;
 };
 
 TEST_P(UserLoggerLuaTableTest, LogsMessageOnCall) {
   auto [value, severity] = GetParam();
 
-  EXPECT_CALL(*this, mockTransport(severity, _, "Hello world")).Times(1);
-
   auto entity = entityDatabase.create();
   call(entity, value);
+
+  EXPECT_THAT(output.message,
+              ::testing::MatchesRegex(
+                  "Hello world\t12\ttrue\tnil\tfunction: \\S+\ttable: \\S+\t"));
+  EXPECT_EQ(output.severity, severity);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     UserLoggerLuaTableTest, UserLoggerLuaTableTest,
-    ::testing::Values(std::make_tuple("debug", LS::Debug),
+    ::testing::Values(std::make_tuple("stdPrint", LS::Debug),
+                      std::make_tuple("debug", LS::Debug),
                       std::make_tuple("info", LS::Info),
                       std::make_tuple("warning", LS::Warning),
                       std::make_tuple("error", LS::Error),

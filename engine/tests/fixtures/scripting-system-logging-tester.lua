@@ -1,61 +1,29 @@
 local logger = game:get('Logger')
 
-function debug()
-    logger.debug("Hello world")
+function someFunc()
 end
 
-function debugInvalid()
-    logger.debug()
-    logger.debug(nil)
-    logger.debug(true)
-    logger.debug(debug)
-    logger.debug({})
+function stdPrint()
+    print("Hello world", 12, true, nil, someFunc, {hello="world"})
+end
+
+function debug()
+    logger.debug("Hello world", 12, true, nil, someFunc, {hello="world"})
 end
 
 function info()
-    logger.info("Hello world")
-end
-
-function infoInvalid()
-    logger.info()
-    logger.info(nil)
-    logger.info(true)
-    logger.info(debug)
-    logger.info({})
+    logger.info("Hello world", 12, true, nil, someFunc, {hello="world"})
 end
 
 function warning()
-    logger.warning("Hello world")
-end
-
-function warningInvalid()
-    logger.warning()
-    logger.warning(nil)
-    logger.warning(true)
-    logger.warning(debug)
-    logger.warning({})
+    logger.warning("Hello world", 12, true, nil, someFunc, {hello="world"})
 end
 
 function error()
-    logger.error("Hello world")
-end
-
-function errorInvalid()
-    logger.error()
-    logger.error(nil)
-    logger.error(true)
-    logger.error(debug)
-    logger.error({})
+    logger.error("Hello world", 12, true, nil, someFunc, {hello="world"})
 end
 
 function fatal()
-    logger.fatal("Hello world")
+    logger.fatal("Hello world", 12, true, nil, someFunc, {hello="world"})
 end
 
-function fatalInvalid()
-    logger.fatal()
-    logger.fatal(nil)
-    logger.fatal(true)
-    logger.fatal(debug)
-    logger.fatal({})
-end
