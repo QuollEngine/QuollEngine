@@ -5,26 +5,38 @@
 
 namespace quoll {
 
+static void logMessages(LogStream &stream, sol::state_view state,
+                        sol::variadic_args args) {
+  for (auto arg : args) {
+    stream << state["tostring"](arg.get<sol::object>()).get<String>() << "\t";
+  }
+}
+
 sol::table UserLoggerLuaTable::create(sol::state_view state) {
   auto logger = state.create_table();
-  logger["debug"] = [](String message) {
-    Engine::getUserLogger().debug() << message;
+  logger["debug"] = [state](sol::variadic_args args) {
+    auto stream = Engine::getUserLogger().debug();
+    logMessages(stream, state, args);
   };
 
-  logger["info"] = [](String message) {
-    Engine::getUserLogger().info() << message;
+  logger["info"] = [state](sol::variadic_args args) {
+    auto stream = Engine::getUserLogger().info();
+    logMessages(stream, state, args);
   };
 
-  logger["warning"] = [](String message) {
-    Engine::getUserLogger().warning() << message;
+  logger["warning"] = [state](sol::variadic_args args) {
+    auto stream = Engine::getUserLogger().warning();
+    logMessages(stream, state, args);
   };
 
-  logger["error"] = [](String message) {
-    Engine::getUserLogger().error() << message;
+  logger["error"] = [state](sol::variadic_args args) {
+    auto stream = Engine::getUserLogger().error();
+    logMessages(stream, state, args);
   };
 
-  logger["fatal"] = [](String message) {
-    Engine::getUserLogger().fatal() << message;
+  logger["fatal"] = [state](sol::variadic_args args) {
+    auto stream = Engine::getUserLogger().fatal();
+    logMessages(stream, state, args);
   };
 
   return logger;

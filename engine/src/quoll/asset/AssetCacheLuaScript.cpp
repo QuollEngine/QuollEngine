@@ -115,6 +115,7 @@ Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
   state["entity"] = lua::NoopMetatable{};
   state["table"] = lua::NoopMetatable{};
   state["game"] = lua::NoopMetatable{};
+  state["print"] = [](sol::variadic_args) {};
 
   injectInputVarsInterface(state, asset.data);
 
