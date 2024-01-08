@@ -53,7 +53,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       description.usage = rhi::TextureUsage::Color |
                           rhi::TextureUsage::TransferDestination |
                           rhi::TextureUsage::Sampled;
-      description.format = rhi::Format::Rgba8Srgb;
+      description.format = rhi::Format::Rgba8Unorm;
       description.debugName = font.name;
 
       font.data.deviceHandle = renderStorage.createTexture(description);

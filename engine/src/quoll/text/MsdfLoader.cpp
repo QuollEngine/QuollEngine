@@ -11,9 +11,8 @@ namespace quoll {
 
 Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   static constexpr f64 MaxCornerAngle = 3.0;
-  static constexpr f64 MinimumScale = 20.0;
+  static constexpr f64 GlyphScale = 40.0;
   static constexpr f64 PixelRange = 2.0;
-  static constexpr u32 NumChannels = 4;
   static constexpr f64 FontScale = 1.0;
 
   using namespace msdf_atlas;
@@ -44,7 +43,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
       TightAtlasPacker::DimensionsConstraint::SQUARE);
   packer.setDimensionsConstraint(
       TightAtlasPacker::DimensionsConstraint::POWER_OF_TWO_SQUARE);
-  packer.setMinimumScale(MinimumScale);
+  packer.setMinimumScale(GlyphScale);
   packer.setPixelRange(PixelRange);
   packer.setMiterLimit(1.0);
   packer.setPadding(0);
@@ -53,12 +52,14 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   int width = 0, height = 0;
   packer.getDimensions(width, height);
 
+  static constexpr u32 NumChannels = 4;
   ImmediateAtlasGenerator<f32, NumChannels, mtsdfGenerator,
                           BitmapAtlasStorage<byte, NumChannels>>
       generator(width, height);
 
   GeneratorAttributes attributes;
-  attributes.config.overlapSupport = false;
+  attributes.config.overlapSupport = true;
+  attributes.scanlinePass = true;
 
   generator.setAttributes(attributes);
   generator.setThreadCount(1);
