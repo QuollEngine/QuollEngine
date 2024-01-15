@@ -10,9 +10,8 @@ namespace quoll {
 AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
     : mAssetRegistry(assetRegistry) {}
 
-void AnimationSystem::update(f32 dt, EntityDatabase &entityDatabase) {
-  QUOLL_PROFILE_EVENT("AnimationSystem::update");
-  const auto &animMap = mAssetRegistry.getAnimations();
+void AnimationSystem::prepare(EntityDatabase &entityDatabase) {
+  QUOLL_PROFILE_EVENT("AnimationSystem::prepare");
 
   for (auto [entity, animator] : entityDatabase.view<Animator>()) {
     const auto &animatorAsset =
@@ -22,6 +21,11 @@ void AnimationSystem::update(f32 dt, EntityDatabase &entityDatabase) {
       animator.currentState = animatorAsset.data.initialState;
     }
   }
+}
+
+void AnimationSystem::update(f32 dt, EntityDatabase &entityDatabase) {
+  QUOLL_PROFILE_EVENT("AnimationSystem::update");
+  const auto &animMap = mAssetRegistry.getAnimations();
 
   for (auto [entity, animator, animatorEvent] :
        entityDatabase.view<Animator, AnimatorEvent>()) {

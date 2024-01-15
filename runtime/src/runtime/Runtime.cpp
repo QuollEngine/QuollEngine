@@ -120,7 +120,10 @@ void Runtime::start() {
 
   presenter.updateFramebuffers(device->getSwapchain());
 
-  mainLoop.setUpdateFn([&](f32 dt) mutable {
+  mainLoop.setPrepareFn(
+      [&]() { animationSystem.prepare(scene.entityDatabase); });
+
+  mainLoop.setUpdateFn([&](f32 dt) {
     auto &entityDatabase = scene.entityDatabase;
     entityDeleter.update(scene);
 
