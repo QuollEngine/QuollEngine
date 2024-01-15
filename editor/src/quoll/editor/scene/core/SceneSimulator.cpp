@@ -40,6 +40,10 @@ void SceneSimulator::updateEditor(f32 dt, WorkspaceState &state) {
   mSceneUpdater.update(entityDatabase);
 }
 
+void SceneSimulator::prepare(WorkspaceState &state) {
+  mAnimationSystem.prepare(state.scene.entityDatabase);
+}
+
 void SceneSimulator::updateSimulation(f32 dt, WorkspaceState &state) {
   auto &entityDatabase = state.scene.entityDatabase;
   mEntityDeleter.update(state.scene);

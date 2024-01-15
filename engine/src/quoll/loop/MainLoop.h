@@ -42,6 +42,13 @@ public:
   void setRenderFn(const std::function<void()> &renderFn);
 
   /**
+   * @brief Set prepare function
+   *
+   * @param prepareFn Prepare function
+   */
+  void setPrepareFn(const std::function<void()> &prepareFn);
+
+  /**
    * @brief Stop main loop
    */
   void stop();
@@ -51,7 +58,8 @@ private:
 
   Window &mWindow;
   FPSCounter &mFpsCounter;
-  std::function<void(f32)> mUpdateFn;
-  std::function<void()> mRenderFn;
+  std::function<void(f32)> mUpdateFn = [](f32) {};
+  std::function<void()> mRenderFn = []() {};
+  std::function<void()> mPrepareFn = []() {};
 };
 } // namespace quoll

@@ -54,6 +54,8 @@ SceneSimulatorWorkspace::~SceneSimulatorWorkspace() {
   mEditorSimulator.cleanupSimulationDatabase(mState.scene.entityDatabase);
 }
 
+void SceneSimulatorWorkspace::prepare() { mEditorSimulator.prepare(mState); }
+
 void SceneSimulatorWorkspace::renderLayout() {
   if (WorkspaceLayoutRenderer::begin()) {
     if (mRequiresDockspaceInit) {

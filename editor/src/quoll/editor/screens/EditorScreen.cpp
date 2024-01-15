@@ -191,7 +191,11 @@ void EditorScreen::start(const Project &rawProject) {
     }
   });
 
-  mainLoop.setUpdateFn([&workspaceManager, this](f32 dt) mutable {
+  mainLoop.setPrepareFn([&workspaceManager]() {
+    workspaceManager.getCurrentWorkspace()->prepare();
+  });
+
+  mainLoop.setUpdateFn([&workspaceManager](f32 dt) {
     workspaceManager.getCurrentWorkspace()->update(dt);
   });
 

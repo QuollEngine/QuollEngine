@@ -19,6 +19,13 @@ public:
   AnimationSystem(AssetRegistry &assetRegistry);
 
   /**
+   * @brief Prepare data
+   *
+   * @param entityDatabase Entity database
+   */
+  void prepare(EntityDatabase &entityDatabase);
+
+  /**
    * @brief Update all animations
    *
    * @param dt Time delta

@@ -113,9 +113,14 @@ public:
    */
   void updateSimulation(f32 dt, WorkspaceState &state);
 
-private:
-  std::function<void(f32, WorkspaceState &)> mUpdater;
+  /**
+   * @brief Prepare data
+   *
+   * @param state Workspace state
+   */
+  void prepare(WorkspaceState &state);
 
+private:
   AssetRegistry &mAssetRegistry;
 
   EditorCamera &mEditorCamera;

@@ -27,6 +27,11 @@ public:
   Workspace &operator=(Workspace &&) = delete;
 
   /**
+   * @brief Data preparation step
+   */
+  virtual void prepare() = 0;
+
+  /**
    * @brief Update
    *
    * @param dt Delta time

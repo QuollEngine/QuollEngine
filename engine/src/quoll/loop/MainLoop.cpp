@@ -17,6 +17,10 @@ void MainLoop::setRenderFn(const std::function<void()> &renderFn) {
   mRenderFn = renderFn;
 }
 
+void MainLoop::setPrepareFn(const std::function<void()> &prepareFn) {
+  mPrepareFn = prepareFn;
+}
+
 void MainLoop::stop() { mRunning = false; }
 
 void MainLoop::run() {
@@ -38,6 +42,8 @@ void MainLoop::run() {
     }
 
     mWindow.pollEvents();
+
+    mPrepareFn();
 
     f64 frameTime = std::clamp(
         std::chrono::duration<f64>(currentTime - prevGameTime).count(), 0.0,

@@ -76,6 +76,8 @@ void SceneEditorWorkspace::renderLayout() {
   WorkspaceLayoutRenderer::end();
 }
 
+void SceneEditorWorkspace::prepare() {}
+
 void SceneEditorWorkspace::update(f32 dt) {
   mActionExecutor.process();
   mEditorSimulator.updateEditor(dt, mState);

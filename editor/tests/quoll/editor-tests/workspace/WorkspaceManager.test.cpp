@@ -12,6 +12,8 @@ class TestWorkspace : public quoll::editor::Workspace {
 public:
   TestWorkspace(u32 asset) : mAsset(asset) {}
 
+  void prepare() override {}
+
   void update(f32 dt) override {}
 
   void render() override {}

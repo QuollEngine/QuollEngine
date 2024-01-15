@@ -55,6 +55,11 @@ public:
   virtual ~SceneSimulatorWorkspace();
 
   /**
+   * @brief Data preparation step
+   */
+  void prepare() override;
+
+  /**
    * @brief Update
    *
    * @param dt Delta time
