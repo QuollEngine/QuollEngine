@@ -1,10 +1,12 @@
 #pragma once
 
 #include "quoll/scene/SceneIO.h"
+#include "quoll/loop/MainEngineModules.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
 #include "quoll/editor/actions/ActionExecutor.h"
 #include "quoll/editor/asset/AssetManager.h"
 #include "quoll/editor/ui/ShortcutsManager.h"
+#include "quoll/loop/MainEngineModules.h"
 
 #include "quoll/editor/workspace/WorkspaceMatchParams.h"
 #include "quoll/editor/workspace/Workspace.h"
@@ -13,7 +15,6 @@
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
 
-#include "core/SceneSimulator.h"
 #include "renderer/EditorRenderer.h"
 #include "renderer/MousePickingGraph.h"
 #include "asset/SceneWriter.h"
@@ -37,7 +38,8 @@ public:
    * @param sceneRenderer Scene renderer
    * @param editorRenderer Editor renderer
    * @param mousePickingGraph Mouse picking graph
-   * @param editorSimulator Editor simulator
+   * @param engineModules Main engine modules
+   * @param editorCamera Editor camera
    * @param workspaceManager Workspace manager
    */
   SceneEditorWorkspace(Project project, AssetManager &assetManager,
@@ -45,7 +47,8 @@ public:
                        Renderer &renderer, SceneRenderer &sceneRenderer,
                        EditorRenderer &editorRenderer,
                        MousePickingGraph &mousePickingGraph,
-                       SceneSimulator &editorSimulator,
+                       MainEngineModules &engineModules,
+                       EditorCamera &editorCamera,
                        WorkspaceManager &workspaceManager);
 
   SceneEditorWorkspace(const SceneEditorWorkspace &) = delete;
@@ -62,6 +65,13 @@ public:
    * @brief Data preparation step
    */
   void prepare() override;
+
+  /**
+   * @brief Fixed update
+   *
+   * @param dt Delta time
+   */
+  void fixedUpdate(f32 dt) override;
 
   /**
    * @brief Update
@@ -119,13 +129,15 @@ private:
   SceneIO mSceneIO;
   ShortcutsManager mShortcutsManager;
 
+  MainEngineModules &mEngineModules;
+  EditorCamera &mEditorCamera;
+
   SceneEditorUI mUIRoot;
 
   Renderer &mRenderer;
   SceneRenderer &mSceneRenderer;
   EditorRenderer &mEditorRenderer;
   MousePickingGraph &mMousePickingGraph;
-  SceneSimulator &mEditorSimulator;
   WorkspaceManager &mWorkspaceManager;
 
   bool mMouseClicked = false;

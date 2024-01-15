@@ -17,7 +17,8 @@ SceneEditorWorkspace::SceneEditorWorkspace(
     Project project, AssetManager &assetManager, SceneAssetHandle scene,
     Path scenePath, Renderer &renderer, SceneRenderer &sceneRenderer,
     EditorRenderer &editorRenderer, MousePickingGraph &mousePickingGraph,
-    SceneSimulator &editorSimulator, WorkspaceManager &workspaceManager)
+    MainEngineModules &engineModules, EditorCamera &editorCamera,
+    WorkspaceManager &workspaceManager)
     : mAssetManager(assetManager), mState{project},
       mActionExecutor(mState, mAssetManager.getAssetRegistry()),
       mSceneAssetHandle(scene),
@@ -25,7 +26,8 @@ SceneEditorWorkspace::SceneEditorWorkspace(
       mSceneIO(mAssetManager.getAssetRegistry(), mState.scene),
       mRenderer(renderer), mSceneRenderer(sceneRenderer),
       mEditorRenderer(editorRenderer), mMousePickingGraph(mousePickingGraph),
-      mEditorSimulator(editorSimulator), mWorkspaceManager(workspaceManager) {
+      mEngineModules(engineModules), mEditorCamera(editorCamera),
+      mWorkspaceManager(workspaceManager) {
   mSceneIO.loadScene(scene);
 
   mSceneWriter.open(scenePath);
@@ -76,11 +78,13 @@ void SceneEditorWorkspace::renderLayout() {
   WorkspaceLayoutRenderer::end();
 }
 
-void SceneEditorWorkspace::prepare() {}
+void SceneEditorWorkspace::prepare() { mEngineModules.prepare(mState.scene); }
+
+void SceneEditorWorkspace::fixedUpdate(f32 dt) {}
 
 void SceneEditorWorkspace::update(f32 dt) {
   mActionExecutor.process();
-  mEditorSimulator.updateEditor(dt, mState);
+  mEditorCamera.update(mState);
 }
 
 void SceneEditorWorkspace::render() {
@@ -88,14 +92,10 @@ void SceneEditorWorkspace::render() {
 
   mUIRoot.render(mState, mAssetManager, mActionExecutor, mSceneAssetHandle,
                  mRenderer, mSceneRenderer, mEditorRenderer, mMousePickingGraph,
-                 mEditorSimulator, mWorkspaceManager);
-  mMouseClicked =
-      mUIRoot.renderSceneView(mState, mAssetManager, mActionExecutor,
-                              mRenderer.getSceneTexture(), mEditorSimulator);
-
-  auto &scene = mState.scene;
-
-  mEditorSimulator.render(scene.entityDatabase);
+                 mEngineModules, mEditorCamera, mWorkspaceManager);
+  mMouseClicked = mUIRoot.renderSceneView(
+      mState, mAssetManager, mActionExecutor, mRenderer.getSceneTexture(),
+      mEngineModules, mEditorCamera);
 }
 
 void SceneEditorWorkspace::processShortcuts(int key, int mods) {
@@ -118,11 +118,10 @@ void SceneEditorWorkspace::updateFrameData(rhi::RenderCommandList &commandList,
   }
 
   if (mMouseClicked) {
-    auto mousePos = mEditorSimulator.getWindow().getCurrentMousePosition();
+    auto mousePos = mEngineModules.getWindow().getCurrentMousePosition();
 
-    if (mEditorSimulator.getEditorCamera().isWithinViewport(mousePos)) {
-      auto scaledMousePos =
-          mEditorSimulator.getEditorCamera().scaleToViewport(mousePos);
+    if (mEditorCamera.isWithinViewport(mousePos)) {
+      auto scaledMousePos = mEditorCamera.scaleToViewport(mousePos);
       mMousePickingGraph.execute(commandList, scaledMousePos, frameIndex);
     }
     mMouseClicked = false;

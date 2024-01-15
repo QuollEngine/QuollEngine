@@ -17,14 +17,14 @@ SceneSimulatorWorkspace::SceneSimulatorWorkspace(
     Project project, AssetManager &assetManager, SceneAssetHandle scene,
     Scene &sourceScene, Renderer &renderer, SceneRenderer &sceneRenderer,
     EditorRenderer &editorRenderer, MousePickingGraph &mousePickingGraph,
-    SceneSimulator &editorSimulator)
+    MainEngineModules &engineModules, EditorCamera &editorCamera)
     : mAssetManager(assetManager), mState{project},
       mActionExecutor(mState, mAssetManager.getAssetRegistry()),
       mSceneAssetHandle(scene),
       mSceneIO(mAssetManager.getAssetRegistry(), mState.scene),
       mRenderer(renderer), mSceneRenderer(sceneRenderer),
       mEditorRenderer(editorRenderer), mMousePickingGraph(mousePickingGraph),
-      mEditorSimulator(editorSimulator) {
+      mEngineModules(engineModules), mEditorCamera(editorCamera) {
 
   sourceScene.entityDatabase.duplicate(mState.scene.entityDatabase);
   mState.scene.dummyCamera = sourceScene.dummyCamera;
@@ -47,14 +47,25 @@ SceneSimulatorWorkspace::SceneSimulatorWorkspace(
   ImGuiIO &io = ImGui::GetIO();
   io.IniFilename = nullptr;
 
-  mEditorSimulator.observeChanges(mState.scene.entityDatabase);
+  mEngineModules.observeChanges(mState.scene.entityDatabase);
 }
 
 SceneSimulatorWorkspace::~SceneSimulatorWorkspace() {
-  mEditorSimulator.cleanupSimulationDatabase(mState.scene.entityDatabase);
+  mEngineModules.cleanupObservers(mState.scene.entityDatabase);
 }
 
-void SceneSimulatorWorkspace::prepare() { mEditorSimulator.prepare(mState); }
+void SceneSimulatorWorkspace::prepare() {
+  mEngineModules.prepare(mState.scene);
+}
+
+void SceneSimulatorWorkspace::fixedUpdate(f32 dt) {
+  mEngineModules.fixedUpdate(dt, mState.scene);
+}
+
+void SceneSimulatorWorkspace::update(f32 dt) {
+  mActionExecutor.process();
+  mEngineModules.update(dt, mState.scene);
+}
 
 void SceneSimulatorWorkspace::renderLayout() {
   if (WorkspaceLayoutRenderer::begin()) {
@@ -68,22 +79,17 @@ void SceneSimulatorWorkspace::renderLayout() {
   WorkspaceLayoutRenderer::end();
 }
 
-void SceneSimulatorWorkspace::update(f32 dt) {
-  mActionExecutor.process();
-  mEditorSimulator.updateSimulation(dt, mState);
-}
-
 void SceneSimulatorWorkspace::render() {
   renderLayout();
 
   mUIRoot.render(mState, mAssetManager, mActionExecutor, mRenderer,
                  mSceneRenderer, mEditorRenderer, mMousePickingGraph,
-                 mEditorSimulator);
-  mMouseClicked =
-      mUIRoot.renderSceneView(mState, mAssetManager, mActionExecutor,
-                              mRenderer.getSceneTexture(), mEditorSimulator);
+                 mEngineModules);
+  mMouseClicked = mUIRoot.renderSceneView(
+      mState, mAssetManager, mActionExecutor, mRenderer.getSceneTexture(),
+      mEngineModules, mEditorCamera);
 
-  mEditorSimulator.render(mState.scene.entityDatabase);
+  mEngineModules.render(mState.scene);
 }
 
 void SceneSimulatorWorkspace::processShortcuts(int key, int mods) {}
@@ -103,11 +109,10 @@ void SceneSimulatorWorkspace::updateFrameData(
   }
 
   if (mMouseClicked) {
-    auto mousePos = mEditorSimulator.getWindow().getCurrentMousePosition();
+    auto mousePos = mEngineModules.getWindow().getCurrentMousePosition();
 
-    if (mEditorSimulator.getEditorCamera().isWithinViewport(mousePos)) {
-      auto scaledMousePos =
-          mEditorSimulator.getEditorCamera().scaleToViewport(mousePos);
+    if (mEditorCamera.isWithinViewport(mousePos)) {
+      auto scaledMousePos = mEditorCamera.scaleToViewport(mousePos);
       mMousePickingGraph.execute(commandList, scaledMousePos, frameIndex);
     }
     mMouseClicked = false;

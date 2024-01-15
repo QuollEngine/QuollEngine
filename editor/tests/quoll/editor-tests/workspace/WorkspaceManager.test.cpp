@@ -16,6 +16,8 @@ public:
 
   void update(f32 dt) override {}
 
+  void fixedUpdate(f32 dt) override {}
+
   void render() override {}
 
   void processShortcuts(int key, int mods) override {}

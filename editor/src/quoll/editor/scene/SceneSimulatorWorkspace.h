@@ -5,6 +5,7 @@
 #include "quoll/editor/actions/ActionExecutor.h"
 #include "quoll/editor/asset/AssetManager.h"
 #include "quoll/editor/ui/ShortcutsManager.h"
+#include "quoll/loop/MainEngineModules.h"
 
 #include "quoll/editor/workspace/WorkspaceMatchParams.h"
 #include "quoll/editor/workspace/Workspace.h"
@@ -12,7 +13,6 @@
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
 
-#include "core/SceneSimulator.h"
 #include "renderer/EditorRenderer.h"
 #include "renderer/MousePickingGraph.h"
 #include "ui/SceneSimulatorUI.h"
@@ -35,14 +35,16 @@ public:
    * @param sceneRenderer Scene renderer
    * @param editorRenderer Editor renderer
    * @param mousePickingGraph Mouse picking graph
-   * @param editorSimulator Editor simulator
+   * @param engineModules Main engine modules
+   * @param editorCamera Editor camera
    */
   SceneSimulatorWorkspace(Project project, AssetManager &assetManager,
                           SceneAssetHandle scene, Scene &sourceScene,
                           Renderer &renderer, SceneRenderer &sceneRenderer,
                           EditorRenderer &editorRenderer,
                           MousePickingGraph &mousePickingGraph,
-                          SceneSimulator &editorSimulator);
+                          MainEngineModules &engineModules,
+                          EditorCamera &editorCamera);
 
   SceneSimulatorWorkspace(const SceneSimulatorWorkspace &) = delete;
   SceneSimulatorWorkspace &operator=(const SceneSimulatorWorkspace &) = delete;
@@ -58,6 +60,13 @@ public:
    * @brief Data preparation step
    */
   void prepare() override;
+
+  /**
+   * @brief Fixed update
+   *
+   * @param dt Delta time
+   */
+  void fixedUpdate(f32 dt) override;
 
   /**
    * @brief Update
@@ -114,13 +123,15 @@ private:
   SceneIO mSceneIO;
   ShortcutsManager mShortcutsManager;
 
+  MainEngineModules &mEngineModules;
+  EditorCamera &mEditorCamera;
+
   SceneSimulatorUI mUIRoot;
 
   Renderer &mRenderer;
   SceneRenderer &mSceneRenderer;
   EditorRenderer &mEditorRenderer;
   MousePickingGraph &mMousePickingGraph;
-  SceneSimulator &mEditorSimulator;
 
   bool mRequiresDockspaceInit = false;
   bool mMouseClicked = false;

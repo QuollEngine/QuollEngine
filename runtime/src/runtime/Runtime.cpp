@@ -6,21 +6,12 @@
 #include "quoll/profiler/FPSCounter.h"
 #include "quoll/loop/MainLoop.h"
 #include "quoll/renderer/Renderer.h"
-#include "quoll/lua-scripting/LuaScriptingSystem.h"
-#include "quoll/scene/SceneUpdater.h"
-#include "quoll/physics/PhysicsSystem.h"
 #include "quoll/renderer/Presenter.h"
-#include "quoll/scene/CameraAspectRatioUpdater.h"
-#include "quoll/animation/AnimationSystem.h"
-#include "quoll/scene/SkeletonUpdater.h"
-#include "quoll/audio/AudioSystem.h"
-#include "quoll/core/EntityDeleter.h"
 #include "quoll/scene/SceneIO.h"
 #include "quoll/renderer/SceneRenderer.h"
 #include "quoll/imgui/ImguiRenderer.h"
 #include "quoll/imgui/ImguiUtils.h"
-#include "quoll/input/InputMapSystem.h"
-#include "quoll/ui/UICanvasUpdater.h"
+#include "quoll/loop/MainEngineModules.h"
 
 // Render hardware interfaces
 #include "quoll/rhi/RenderDevice.h"
@@ -41,6 +32,9 @@ void Runtime::start() {
   InputDeviceManager deviceManager;
   Window window(mConfig.name, Width, Height, deviceManager);
   AssetCache assetCache(std::filesystem::current_path() / "assets", true);
+
+  MainEngineModules engineModules(deviceManager, window,
+                                  assetCache.getRegistry());
 
   rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
@@ -78,33 +72,22 @@ void Runtime::start() {
     return RendererTextures{imguiData.imguiColor, passData.finalColor};
   });
 
-  LuaScriptingSystem scriptingSystem(assetCache.getRegistry());
-  SceneUpdater sceneUpdater;
-  PhysicsSystem physicsSystem = PhysicsSystem::createPhysxBackend();
-  CameraAspectRatioUpdater cameraAspectRatioUpdater;
-  AnimationSystem animationSystem(assetCache.getRegistry());
-  SkeletonUpdater skeletonUpdater;
-  AudioSystem audioSystem(assetCache.getRegistry());
-  EntityDeleter entityDeleter;
-  InputMapSystem inputMapSystem(deviceManager, assetCache.getRegistry());
-  UICanvasUpdater uiCanvasUpdater;
+  engineModules.getCameraAspectRatioUpdater().setViewportSize(
+      window.getFramebufferSize());
+  engineModules.getUICanvasUpdater().setViewport(
+      0.0f, 0.0f, static_cast<f32>(window.getFramebufferSize().x),
+      static_cast<f32>(window.getFramebufferSize().y));
 
-  cameraAspectRatioUpdater.setViewportSize(window.getFramebufferSize());
-  uiCanvasUpdater.setViewport(0.0f, 0.0f,
-                              static_cast<f32>(window.getFramebufferSize().x),
-                              static_cast<f32>(window.getFramebufferSize().y));
-
-  audioSystem.observeChanges(scene.entityDatabase);
-  scriptingSystem.observeChanges(scene.entityDatabase);
-  physicsSystem.observeChanges(scene.entityDatabase);
+  engineModules.observeChanges(scene.entityDatabase);
 
   window.getSignals().onFramebufferResize().connect(
       [&](auto width, auto height) {
         renderer.setFramebufferSize({width, height});
         presenter.enqueueFramebufferUpdate();
-        cameraAspectRatioUpdater.setViewportSize({width, height});
-        uiCanvasUpdater.setViewport(0.0f, 0.0f, static_cast<f32>(width),
-                                    static_cast<f32>(height));
+        engineModules.getCameraAspectRatioUpdater().setViewportSize(
+            {width, height});
+        engineModules.getUICanvasUpdater().setViewport(
+            0.0f, 0.0f, static_cast<f32>(width), static_cast<f32>(height));
       });
 
   auto handle = assetCache.getRegistry().getScenes().findHandleByUuid(
@@ -120,23 +103,12 @@ void Runtime::start() {
 
   presenter.updateFramebuffers(device->getSwapchain());
 
-  mainLoop.setPrepareFn(
-      [&]() { animationSystem.prepare(scene.entityDatabase); });
+  mainLoop.setPrepareFn([&]() { engineModules.prepare(scene); });
 
-  mainLoop.setUpdateFn([&](f32 dt) {
-    auto &entityDatabase = scene.entityDatabase;
-    entityDeleter.update(scene);
+  mainLoop.setFixedUpdateFn(
+      [&](f32 dt) { engineModules.fixedUpdate(dt, scene); });
 
-    skeletonUpdater.update(entityDatabase);
-    sceneUpdater.update(entityDatabase);
-    physicsSystem.update(dt, entityDatabase);
-    inputMapSystem.update(entityDatabase);
-    cameraAspectRatioUpdater.update(entityDatabase);
-    scriptingSystem.start(entityDatabase, physicsSystem, window.getSignals());
-    scriptingSystem.update(dt, entityDatabase);
-    animationSystem.update(dt, entityDatabase);
-    audioSystem.output(entityDatabase);
-  });
+  mainLoop.setUpdateFn([&](f32 dt) { engineModules.update(dt, scene); });
 
   mainLoop.setRenderFn([&]() {
     if (presenter.requiresFramebufferUpdate()) {
@@ -170,7 +142,7 @@ void Runtime::start() {
 
     ImGui::PopStyleVar();
 
-    uiCanvasUpdater.render(scene.entityDatabase, assetCache.getRegistry());
+    engineModules.render(scene);
 
     imguiRenderer.endRendering();
 

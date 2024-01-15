@@ -34,12 +34,8 @@ static void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
   }
 }
 
-static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
-                          ActionExecutor &actionExecutor, Renderer &renderer,
-                          SceneRenderer &sceneRenderer,
-                          EditorRenderer &editorRenderer,
-                          MousePickingGraph &mousePickingGraph,
-                          SceneSimulator &editorSimulator) {
+static void renderToolbar(WorkspaceState &state,
+                          ActionExecutor &actionExecutor) {
   if (auto toolbar = Toolbar()) {
     if (toolbar.item("Move", fa::Arrows,
                      state.activeTransform == TransformOperation::Move)) {
@@ -63,7 +59,7 @@ void SceneSimulatorUI::render(WorkspaceState &state, AssetManager &assetManager,
                               Renderer &renderer, SceneRenderer &sceneRenderer,
                               EditorRenderer &editorRenderer,
                               MousePickingGraph &mousePickingGraph,
-                              SceneSimulator &editorSimulator) {
+                              MainEngineModules &engineModules) {
   if (auto _ = MainMenuBar()) {
     if (auto projects = Menu("Projects")) {
       if (projects.item("Export as game")) {
@@ -72,8 +68,7 @@ void SceneSimulatorUI::render(WorkspaceState &state, AssetManager &assetManager,
     }
   }
 
-  renderToolbar(state, assetManager, actionExecutor, renderer, sceneRenderer,
-                editorRenderer, mousePickingGraph, editorSimulator);
+  renderToolbar(state, actionExecutor);
 
   mSceneHierarchyPanel.render(state, actionExecutor);
   mInspector.render(state, assetManager.getAssetRegistry(), actionExecutor);
@@ -85,16 +80,16 @@ bool SceneSimulatorUI::renderSceneView(WorkspaceState &state,
                                        AssetManager &assetManager,
                                        ActionExecutor &actionExecutor,
                                        rhi::TextureHandle sceneTexture,
-                                       SceneSimulator &editorSimulator) {
+                                       MainEngineModules &engineModules,
+                                       EditorCamera &editorCamera) {
   mEditorCameraPanel.render(state, actionExecutor);
 
   if (auto _ = SceneView(sceneTexture)) {
     const auto &pos = ImGui::GetItemRectMin();
     const auto &size = ImGui::GetItemRectSize();
 
-    auto &aspectRatioUpdater = editorSimulator.getCameraAspectRatioUpdater();
-    auto &uiCanvasUpdater = editorSimulator.getUICanvasUpdater();
-    auto &editorCamera = editorSimulator.getEditorCamera();
+    auto &aspectRatioUpdater = engineModules.getCameraAspectRatioUpdater();
+    auto &uiCanvasUpdater = engineModules.getUICanvasUpdater();
 
     editorCamera.setViewport(pos.x, pos.y, size.x, size.y,
                              ImGui::IsItemHovered());

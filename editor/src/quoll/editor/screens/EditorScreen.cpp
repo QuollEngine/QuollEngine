@@ -41,6 +41,8 @@
 
 #include "quoll/ui/UICanvasUpdater.h"
 
+#include "quoll/loop/MainEngineModules.h"
+
 #include "ImGuizmo.h"
 
 namespace quoll::editor {
@@ -142,8 +144,8 @@ void EditorScreen::start(const Project &rawProject) {
         presenter.enqueueFramebufferUpdate();
       });
 
-  SceneSimulator simulator(mDeviceManager, mWindow,
-                           assetManager.getAssetRegistry(), editorCamera);
+  MainEngineModules engineModules(mDeviceManager, mWindow,
+                                  assetManager.getAssetRegistry());
 
   mWindow.maximize();
 
@@ -152,7 +154,8 @@ void EditorScreen::start(const Project &rawProject) {
   workspaceManager.add(new SceneEditorWorkspace(
       project, assetManager, sceneAsset,
       project.assetsPath / "scenes" / "main.scene", renderer, sceneRenderer,
-      editorRenderer, mousePicking, simulator, workspaceManager));
+      editorRenderer, mousePicking, engineModules, editorCamera,
+      workspaceManager));
 
   mWindow.getSignals().onKeyPress().connect([&](const auto &data) {
     workspaceManager.getCurrentWorkspace()->processShortcuts(data.key,
@@ -193,6 +196,10 @@ void EditorScreen::start(const Project &rawProject) {
 
   mainLoop.setPrepareFn([&workspaceManager]() {
     workspaceManager.getCurrentWorkspace()->prepare();
+  });
+
+  mainLoop.setFixedUpdateFn([&workspaceManager](f32 dt) {
+    workspaceManager.getCurrentWorkspace()->fixedUpdate(dt);
   });
 
   mainLoop.setUpdateFn([&workspaceManager](f32 dt) {

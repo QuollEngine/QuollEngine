@@ -28,6 +28,13 @@ public:
   void run();
 
   /**
+   * @brief Set fixed update function
+   *
+   * @param fixedUpdateFn Fixed update function
+   */
+  void setFixedUpdateFn(const std::function<void(f32)> &fixedUpdateFn);
+
+  /**
    * @brief Set update function
    *
    * @param updateFn Update function
@@ -59,6 +66,8 @@ private:
   Window &mWindow;
   FPSCounter &mFpsCounter;
   std::function<void(f32)> mUpdateFn = [](f32) {};
+  std::function<void(f32)> mFixedUpdateFn = [](f32) {};
+
   std::function<void()> mRenderFn = []() {};
   std::function<void()> mPrepareFn = []() {};
 };

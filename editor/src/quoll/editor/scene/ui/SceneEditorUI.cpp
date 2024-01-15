@@ -40,14 +40,16 @@ static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
                           SceneRenderer &sceneRenderer,
                           EditorRenderer &editorRenderer,
                           MousePickingGraph &mousePickingGraph,
-                          SceneSimulator &editorSimulator,
+                          MainEngineModules &engineModules,
+                          EditorCamera &editorCamera,
                           WorkspaceManager &workspaceManager) {
   if (auto toolbar = Toolbar()) {
     if (toolbar.item("Play the scene", fa::Play, false)) {
 
       auto *workspace = new SceneSimulatorWorkspace(
           state.project, assetManager, sceneHandle, state.scene, renderer,
-          sceneRenderer, editorRenderer, mousePickingGraph, editorSimulator);
+          sceneRenderer, editorRenderer, mousePickingGraph, engineModules,
+          editorCamera);
 
       actionExecutor.execute<AddWorkspace>(workspace, workspaceManager);
     }
@@ -75,7 +77,8 @@ void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
                            SceneRenderer &sceneRenderer,
                            EditorRenderer &editorRenderer,
                            MousePickingGraph &mousePickingGraph,
-                           SceneSimulator &editorSimulator,
+                           MainEngineModules &engineModules,
+                           EditorCamera &editorCamera,
                            WorkspaceManager &workspaceManager) {
   if (auto _ = MainMenuBar()) {
     if (auto projects = Menu("Projects")) {
@@ -86,8 +89,8 @@ void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
   }
 
   renderToolbar(state, assetManager, actionExecutor, sceneHandle, renderer,
-                sceneRenderer, editorRenderer, mousePickingGraph,
-                editorSimulator, workspaceManager);
+                sceneRenderer, editorRenderer, mousePickingGraph, engineModules,
+                editorCamera, workspaceManager);
 
   mSceneHierarchyPanel.render(state, actionExecutor);
   mInspector.render(state, assetManager.getAssetRegistry(), actionExecutor);
@@ -99,16 +102,16 @@ bool SceneEditorUI::renderSceneView(WorkspaceState &state,
                                     AssetManager &assetManager,
                                     ActionExecutor &actionExecutor,
                                     rhi::TextureHandle sceneTexture,
-                                    SceneSimulator &editorSimulator) {
+                                    MainEngineModules &engineModules,
+                                    EditorCamera &editorCamera) {
   mEditorCameraPanel.render(state, actionExecutor);
 
   if (auto _ = SceneView(sceneTexture)) {
     const auto &pos = ImGui::GetItemRectMin();
     const auto &size = ImGui::GetItemRectSize();
 
-    auto &aspectRatioUpdater = editorSimulator.getCameraAspectRatioUpdater();
-    auto &uiCanvasUpdater = editorSimulator.getUICanvasUpdater();
-    auto &editorCamera = editorSimulator.getEditorCamera();
+    auto &aspectRatioUpdater = engineModules.getCameraAspectRatioUpdater();
+    auto &uiCanvasUpdater = engineModules.getUICanvasUpdater();
 
     editorCamera.setViewport(pos.x, pos.y, size.x, size.y,
                              ImGui::IsItemHovered());
