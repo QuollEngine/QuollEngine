@@ -1,11 +1,8 @@
 #include "quoll/core/Base.h"
-#include "quoll/scene/PerspectiveLens.h"
 #include "quoll/scene/Camera.h"
-
+#include "quoll/scene/PerspectiveLens.h"
 #include "quoll/editor/core/CameraLookAt.h"
-
 #include "EditorCamera.h"
-
 #include <GLFW/glfw3.h>
 
 namespace quoll::editor {

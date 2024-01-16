@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/core/Name.h"
-
 #include "quoll/entity/EntityDatabase.h"
-
 #include "NameLuaTable.h"
 
 namespace quoll {

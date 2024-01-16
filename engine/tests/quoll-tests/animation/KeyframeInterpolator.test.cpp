@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/animation/KeyframeInterpolator.h"
-
 #include "quoll-tests/Testing.h"
 
 using SequenceTarget = quoll::KeyframeSequenceAssetTarget;

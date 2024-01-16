@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "JointAttachment.h"
 #include "JointAttachmentSerializer.h"
 

@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "MaterialStep.h"
 #include "TextureUtils.h"
 

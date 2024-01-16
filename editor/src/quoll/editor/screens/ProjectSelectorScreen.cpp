@@ -1,20 +1,17 @@
 #include "quoll/core/Base.h"
-#include "quoll/renderer/Renderer.h"
-#include "quoll/renderer/Presenter.h"
 #include "quoll/asset/AssetRegistry.h"
+#include "quoll/imgui/ImguiRenderer.h"
+#include "quoll/imgui/ImguiUtils.h"
 #include "quoll/loop/MainLoop.h"
 #include "quoll/profiler/FPSCounter.h"
 #include "quoll/profiler/ImguiDebugLayer.h"
-#include "quoll/imgui/ImguiUtils.h"
-#include "quoll/imgui/ImguiRenderer.h"
+#include "quoll/renderer/Presenter.h"
 #include "quoll/renderer/Renderer.h"
-
-#include "quoll/editor/ui/Theme.h"
 #include "quoll/editor/ui/FontAwesome.h"
-#include "quoll/editor/ui/Widgets.h"
-#include "quoll/editor/ui/StyleStack.h"
 #include "quoll/editor/ui/MainMenuBar.h"
-
+#include "quoll/editor/ui/StyleStack.h"
+#include "quoll/editor/ui/Theme.h"
+#include "quoll/editor/ui/Widgets.h"
 #include "ProjectSelectorScreen.h"
 
 namespace quoll::editor {

@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/rhi/DeviceStats.h"
-
 #include "quoll-tests/Testing.h"
 
 class DeviceStatsTest : public ::testing::Test {

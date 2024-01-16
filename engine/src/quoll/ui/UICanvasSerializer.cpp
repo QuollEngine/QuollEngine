@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "UICanvasSerializer.h"
 #include "UICanvas.h"
+#include "UICanvasSerializer.h"
 
 namespace quoll {
 

@@ -1,12 +1,10 @@
 #pragma once
 
+#include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/Entity.h"
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/asset/AssetRegistry.h"
-
-#include "LuaScript.h"
 #include "quoll/physics/PhysicsSystem.h"
-
+#include "LuaScript.h"
 #include "ScriptGlobals.h"
 
 namespace quoll::lua {

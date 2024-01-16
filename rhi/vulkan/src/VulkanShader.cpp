@@ -1,9 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
-#include "VulkanShader.h"
 #include "VulkanError.h"
 #include "VulkanMapping.h"
+#include "VulkanShader.h"
 
 #define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
 #include <spirv_reflect.h>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "quoll/rhi/RenderHandle.h"
 #include "quoll/rhi/ImageLayout.h"
 #include "quoll/rhi/PipelineBindPoint.h"
+#include "quoll/rhi/RenderHandle.h"
 
 namespace quoll::rhi {
 

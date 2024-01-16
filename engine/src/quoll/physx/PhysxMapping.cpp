@@ -1,9 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/physics/PhysicsObjects.h"
-
+#include "PhysxMapping.h"
 #include <PxConfig.h>
 #include <PxPhysicsAPI.h>
-#include "PhysxMapping.h"
 
 using namespace physx;
 

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "quoll/animation/Animator.h"
-#include "quoll/scene/PointLight.h"
-#include "quoll/scene/DirectionalLight.h"
 #include "quoll/renderer/MeshRenderer.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
+#include "quoll/scene/DirectionalLight.h"
+#include "quoll/scene/PointLight.h"
 
 namespace quoll {
 

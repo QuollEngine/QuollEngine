@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
 #include "VulkanDeviceObject.h"
 #include "VulkanError.h"
 

@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Property.h"
-
 #include "quoll-tests/Testing.h"
 
 TEST(PropertyTest, SetsInt32Value) {

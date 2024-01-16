@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll/entity/EntityStorageSparseSet.h"
 #include "quoll/entity/EntityDatabase.h"
-
+#include "quoll/entity/EntityStorageSparseSet.h"
 #include "quoll-tests/Testing.h"
 
 struct Component1 {

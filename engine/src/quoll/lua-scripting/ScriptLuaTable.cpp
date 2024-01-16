@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
-#include "ScriptLuaTable.h"
 #include "LuaScript.h"
+#include "ScriptLuaTable.h"
 
 namespace quoll {
 

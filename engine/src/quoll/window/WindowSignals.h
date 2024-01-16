@@ -1,8 +1,8 @@
 #pragma once
 
 #include "quoll/signals/Signal.h"
-#include "MouseEvent.h"
 #include "KeyboardEvent.h"
+#include "MouseEvent.h"
 
 namespace quoll {
 

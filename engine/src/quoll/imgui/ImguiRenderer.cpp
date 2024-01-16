@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/renderer/TextureUtils.h"
-
 #include "ImguiRenderer.h"
-
 #include <imgui_impl_glfw.h>
 
 static constexpr u64 BufferMemoryAlignment = 256;

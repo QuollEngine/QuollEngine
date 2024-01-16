@@ -1,7 +1,6 @@
 #pragma once
 
 #include "quoll/rhi/NativeDescriptor.h"
-
 #include "VulkanDeviceObject.h"
 #include "VulkanResourceRegistry.h"
 

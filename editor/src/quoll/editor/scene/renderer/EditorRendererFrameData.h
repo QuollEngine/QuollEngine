@@ -1,17 +1,15 @@
 
 #pragma once
 
-#include "quoll/rhi/RenderHandle.h"
-#include "quoll/rhi/RenderDevice.h"
 #include "quoll/asset/MeshAsset.h"
-
-#include "quoll/scene/Camera.h"
-#include "quoll/physics/Collidable.h"
-
-#include "quoll/renderer/RenderStorage.h"
-#include "quoll/renderer/BindlessDrawParameters.h"
-#include "quoll/renderer/SceneRendererFrameData.h"
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/physics/Collidable.h"
+#include "quoll/renderer/BindlessDrawParameters.h"
+#include "quoll/renderer/RenderStorage.h"
+#include "quoll/renderer/SceneRendererFrameData.h"
+#include "quoll/rhi/RenderDevice.h"
+#include "quoll/rhi/RenderHandle.h"
+#include "quoll/scene/Camera.h"
 
 namespace quoll::editor {
 

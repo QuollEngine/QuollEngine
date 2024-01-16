@@ -1,10 +1,9 @@
 #pragma once
 
-#include "quoll/scene/Scene.h"
 #include "quoll/asset/AssetRegistry.h"
-#include "quoll/editor/asset/AssetSyncer.h"
-
+#include "quoll/scene/Scene.h"
 #include "quoll/yaml/Yaml.h"
+#include "quoll/editor/asset/AssetSyncer.h"
 
 namespace quoll::editor {
 

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "quoll/rhi/RenderCommandList.h"
 #include "quoll/rhi/DeviceStats.h"
-
-#include "VulkanDeviceObject.h"
+#include "quoll/rhi/RenderCommandList.h"
 #include "VulkanDescriptorPool.h"
+#include "VulkanDeviceObject.h"
 
 namespace quoll::rhi {
 

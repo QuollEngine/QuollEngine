@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "PrefabStep.h"
 #include "TransformUtils.h"
 

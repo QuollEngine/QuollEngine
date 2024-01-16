@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/asset/FileTracker.h"
-
 #include "quoll-tests/Testing.h"
 
 namespace fs = std::filesystem;

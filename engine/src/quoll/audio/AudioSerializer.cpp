@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "AudioSerializer.h"
 #include "AudioSource.h"
 

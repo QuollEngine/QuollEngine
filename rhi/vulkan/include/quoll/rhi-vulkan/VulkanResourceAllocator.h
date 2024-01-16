@@ -1,9 +1,8 @@
 #pragma once
 
+#include "VulkanDeviceObject.h"
 #include "VulkanPhysicalDevice.h"
 #include "VulkanRenderBackend.h"
-#include "VulkanDeviceObject.h"
-
 #include <vk_mem_alloc.h>
 
 namespace quoll::rhi {

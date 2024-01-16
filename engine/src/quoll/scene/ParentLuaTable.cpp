@@ -1,9 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-#include "ParentLuaTable.h"
-#include "Parent.h"
 #include "Children.h"
 #include "EntityRelationUtils.h"
+#include "Parent.h"
+#include "ParentLuaTable.h"
 
 namespace quoll {
 

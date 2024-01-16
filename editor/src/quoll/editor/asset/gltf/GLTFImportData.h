@@ -1,10 +1,9 @@
 #pragma once
 
 #include "quoll/asset/AssetCache.h"
-
 #include "quoll/editor/asset/ImageLoader.h"
-#include "quoll/editor/asset/gltf/TinyGLTF.h"
 #include "quoll/editor/asset/UUIDMap.h"
+#include "quoll/editor/asset/gltf/TinyGLTF.h"
 
 namespace quoll::editor {
 

@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
-#include "quoll/ui/UILuaTable.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
-
+#include "quoll/ui/UILuaTable.h"
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 

@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "NoopMetatable.h"
 
 namespace quoll::lua {

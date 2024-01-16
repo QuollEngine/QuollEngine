@@ -1,9 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Assert.h"
-
-#include "Parent.h"
 #include "Children.h"
 #include "EntityRelationUtils.h"
+#include "Parent.h"
 
 namespace quoll {
 

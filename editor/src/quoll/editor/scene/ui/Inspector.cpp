@@ -1,11 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/Imgui.h"
-
-#include "quoll/editor/ui/Widgets.h"
+#include "quoll/editor/ui/FontAwesome.h"
 #include "quoll/editor/ui/StyleStack.h"
 #include "quoll/editor/ui/Theme.h"
-#include "quoll/editor/ui/FontAwesome.h"
-
+#include "quoll/editor/ui/Widgets.h"
 #include "Inspector.h"
 
 namespace quoll::editor {

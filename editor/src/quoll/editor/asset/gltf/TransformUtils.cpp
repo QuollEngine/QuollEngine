@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "TransformUtils.h"
 
 namespace quoll::editor {

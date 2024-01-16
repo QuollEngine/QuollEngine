@@ -1,16 +1,15 @@
 #pragma once
 
-#include "quoll/rhi/RenderPassDescription.h"
-#include "quoll/rhi/PipelineDescription.h"
-#include "quoll/rhi/Descriptor.h"
 #include "quoll/rhi/AccessFlags.h"
-#include "quoll/rhi/ImageLayout.h"
-#include "quoll/rhi/StageFlags.h"
-#include "quoll/rhi/IndexType.h"
-#include "quoll/rhi/Format.h"
+#include "quoll/rhi/Descriptor.h"
 #include "quoll/rhi/Filter.h"
+#include "quoll/rhi/Format.h"
+#include "quoll/rhi/ImageLayout.h"
+#include "quoll/rhi/IndexType.h"
+#include "quoll/rhi/PipelineDescription.h"
+#include "quoll/rhi/RenderPassDescription.h"
+#include "quoll/rhi/StageFlags.h"
 #include "quoll/rhi/WrapMode.h"
-
 #include "VulkanHeaders.h"
 
 namespace quoll::rhi {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "quoll/rhi/RenderCommandList.h"
-
 #include "WorkspaceMatchParams.h"
 
 namespace quoll::editor {

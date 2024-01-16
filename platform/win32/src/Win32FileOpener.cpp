@@ -1,6 +1,10 @@
 #include "quoll/core/Base.h"
 #include "quoll/platform/tools/FileOpener.h"
+
+// Windows include
 #include <windows.h>
+
+// Shell API include
 #include <shellapi.h>
 
 namespace quoll::platform {

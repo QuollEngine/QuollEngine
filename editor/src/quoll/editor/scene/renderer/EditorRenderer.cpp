@@ -1,14 +1,12 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/renderer/Mesh.h"
-#include "quoll/scene/Sprite.h"
+#include "quoll/renderer/MeshVertexLayout.h"
 #include "quoll/renderer/SkinnedMesh.h"
+#include "quoll/scene/Sprite.h"
 #include "quoll/skeleton/Skeleton.h"
 #include "quoll/text/Text.h"
-#include "quoll/renderer/MeshVertexLayout.h"
-
 #include "quoll/editor/ui/IconRegistry.h"
-
 #include "EditorRenderer.h"
 
 namespace quoll::editor {

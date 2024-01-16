@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
-
-#include "MeshStep.h"
-#include "Buffer.h"
 #include "mikktspace/MikktspaceAdapter.h"
-
+#include "Buffer.h"
+#include "MeshStep.h"
 #include <meshoptimizer.h>
 
 namespace quoll::editor {

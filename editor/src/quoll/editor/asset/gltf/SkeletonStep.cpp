@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "SkeletonStep.h"
 #include "Buffer.h"
+#include "SkeletonStep.h"
 #include "TransformUtils.h"
 
 namespace quoll::editor {

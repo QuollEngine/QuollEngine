@@ -1,10 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/Imgui.h"
-
-#include "StatusBar.h"
-#include "Theme.h"
-#include "StyleStack.h"
 #include "MenuBar.h"
+#include "StatusBar.h"
+#include "StyleStack.h"
+#include "Theme.h"
 
 namespace quoll::editor {
 

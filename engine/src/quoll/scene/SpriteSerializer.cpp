@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Id.h"
-
 #include "Sprite.h"
 #include "SpriteSerializer.h"
 

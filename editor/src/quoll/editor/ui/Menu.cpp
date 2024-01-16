@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll/editor/ui/Menu.h"
 #include "quoll/imgui/Imgui.h"
+#include "quoll/editor/ui/Menu.h"
 
 namespace quoll::editor {
 

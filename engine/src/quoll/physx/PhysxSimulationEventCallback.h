@@ -1,11 +1,10 @@
 #pragma once
 
+#include "quoll/physics/PhysicsSignals.h"
 #include <PxConfig.h>
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
 #include <extensions/PxDefaultErrorCallback.h>
-
-#include "quoll/physics/PhysicsSignals.h"
 
 namespace quoll {
 

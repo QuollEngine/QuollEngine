@@ -1,14 +1,13 @@
 #pragma once
 
-#include "VulkanHeaders.h"
-#include <vk_mem_alloc.h>
-#include "VulkanDeviceObject.h"
-#include "VulkanUploadContext.h"
-#include "VulkanResourceAllocator.h"
-#include "VulkanResourceRegistry.h"
-
 #include "quoll/rhi/TextureDescription.h"
 #include "quoll/rhi/TextureViewDescription.h"
+#include "VulkanDeviceObject.h"
+#include "VulkanHeaders.h"
+#include "VulkanResourceAllocator.h"
+#include "VulkanResourceRegistry.h"
+#include "VulkanUploadContext.h"
+#include <vk_mem_alloc.h>
 
 namespace quoll::rhi {
 

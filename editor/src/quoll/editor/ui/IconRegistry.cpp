@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll/rhi/RenderDevice.h"
 #include "quoll/loaders/ImageTextureLoader.h"
-
+#include "quoll/rhi/RenderDevice.h"
 #include "IconRegistry.h"
 
 namespace quoll::editor {

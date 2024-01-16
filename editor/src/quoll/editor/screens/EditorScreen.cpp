@@ -1,42 +1,32 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
-#include "EditorScreen.h"
-
-#include "quoll/renderer/Renderer.h"
+#include "quoll/asset/FileTracker.h"
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/renderer/StandardPushConstants.h"
+#include "quoll/imgui/ImguiRenderer.h"
+#include "quoll/imgui/ImguiUtils.h"
+#include "quoll/logger/StreamTransport.h"
+#include "quoll/loop/MainEngineModules.h"
+#include "quoll/loop/MainLoop.h"
 #include "quoll/profiler/ImguiDebugLayer.h"
 #include "quoll/renderer/Presenter.h"
+#include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
-#include "quoll/imgui/ImguiRenderer.h"
-#include "quoll/asset/FileTracker.h"
-#include "quoll/logger/StreamTransport.h"
-
-#include "quoll/loop/MainLoop.h"
-#include "quoll/imgui/ImguiUtils.h"
-
+#include "quoll/renderer/StandardPushConstants.h"
+#include "quoll/ui/UICanvasUpdater.h"
+#include "quoll/editor/asset/AssetManager.h"
+#include "quoll/editor/core/LogMemoryStorage.h"
+#include "quoll/editor/scene/SceneEditorWorkspace.h"
+#include "quoll/editor/scene/core/EditorCamera.h"
 #include "quoll/editor/ui/AssetLoadStatusDialog.h"
+#include "quoll/editor/ui/FontAwesome.h"
+#include "quoll/editor/ui/LogViewer.h"
+#include "quoll/editor/ui/MainMenuBar.h"
+#include "quoll/editor/ui/StyleStack.h"
 #include "quoll/editor/ui/Theme.h"
 #include "quoll/editor/ui/Widgets.h"
-#include "quoll/editor/ui/MainMenuBar.h"
-#include "quoll/editor/ui/LogViewer.h"
-#include "quoll/editor/ui/FontAwesome.h"
-#include "quoll/editor/ui/StyleStack.h"
-
-#include "quoll/editor/core/LogMemoryStorage.h"
-
-#include "quoll/editor/asset/AssetManager.h"
-
-#include "quoll/editor/scene/core/EditorCamera.h"
-#include "quoll/editor/scene/SceneEditorWorkspace.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"
 #include "quoll/editor/workspace/WorkspaceTabs.h"
-
-#include "quoll/ui/UICanvasUpdater.h"
-
-#include "quoll/loop/MainEngineModules.h"
-
+#include "EditorScreen.h"
 #include "ImGuizmo.h"
 
 namespace quoll::editor {

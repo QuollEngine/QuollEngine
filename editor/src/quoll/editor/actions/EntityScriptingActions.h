@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Action.h"
 #include "quoll/lua-scripting/LuaScript.h"
+#include "Action.h"
 
 namespace quoll::editor {
 

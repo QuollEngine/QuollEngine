@@ -3,10 +3,8 @@
 #include "quoll/imgui/Imgui.h"
 #include "quoll/imgui/ImguiUtils.h"
 #include "quoll/platform/tools/FileOpener.h"
-
 #include "quoll/editor/actions/SpawnEntityActions.h"
 #include "quoll/editor/ui/Widgets.h"
-
 #include "AssetBrowser.h"
 
 namespace quoll::editor {

@@ -1,10 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
 #include "quoll/rhi/RenderCommandList.h"
-
-#include "RenderGraphSyncDependency.h"
 #include "RenderGraph.h"
+#include "RenderGraphSyncDependency.h"
 
 namespace quoll {
 

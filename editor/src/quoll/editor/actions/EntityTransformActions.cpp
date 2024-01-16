@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/WorldTransform.h"
-
 #include "EntityTransformActions.h"
 
 namespace quoll::editor {

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "quoll/rhi/Descriptor.h"
-#include "quoll/rhi/RenderHandle.h"
-#include "quoll/rhi/PipelineBarrier.h"
-#include "quoll/rhi/StageFlags.h"
-#include "quoll/rhi/IndexType.h"
-#include "quoll/rhi/Filter.h"
-#include "quoll/rhi/CopyRegion.h"
 #include "quoll/rhi/BlitRegion.h"
+#include "quoll/rhi/CopyRegion.h"
+#include "quoll/rhi/Descriptor.h"
+#include "quoll/rhi/Filter.h"
+#include "quoll/rhi/IndexType.h"
+#include "quoll/rhi/PipelineBarrier.h"
+#include "quoll/rhi/RenderHandle.h"
+#include "quoll/rhi/StageFlags.h"
 
 namespace quoll::rhi {
 

@@ -14,9 +14,9 @@ layout(location = 3) out mat3 outTBN;
 layout(location = 6) out uint outMaterialIndex;
 
 #include "bindless/base.glsl"
-#include "bindless/mesh.glsl"
 #include "bindless/camera.glsl"
 #include "bindless/material.glsl"
+#include "bindless/mesh.glsl"
 
 layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
 layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];

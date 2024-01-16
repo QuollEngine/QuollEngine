@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "RigidBody.h"
 #include "RigidBodySerializer.h"
 

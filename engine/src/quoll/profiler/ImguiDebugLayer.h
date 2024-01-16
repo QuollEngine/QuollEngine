@@ -1,8 +1,8 @@
 #pragma once
 
 #include "quoll/profiler/FPSCounter.h"
-#include "quoll/rhi/PhysicalDeviceInformation.h"
 #include "quoll/rhi/DeviceStats.h"
+#include "quoll/rhi/PhysicalDeviceInformation.h"
 
 namespace quoll {
 

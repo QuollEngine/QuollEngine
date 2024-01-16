@@ -2,8 +2,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 #include "bindless/base.glsl"
-#include "bindless/transform.glsl"
 #include "bindless/camera.glsl"
+#include "bindless/transform.glsl"
 
 Buffer(16) SpritesArray { uint items[]; };
 

@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
-#include "UICanvasLuaTable.h"
 #include "UICanvas.h"
+#include "UICanvasLuaTable.h"
 #include "UICanvasRenderRequest.h"
 
 namespace quoll {

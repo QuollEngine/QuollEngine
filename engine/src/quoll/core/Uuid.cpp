@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "Uuid.h"
-
 #include <stduuid/uuid.h>
 
 namespace quoll {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "EntityDatabase.h"
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/scene/LocalTransform.h"
+#include "EntityDatabase.h"
 
 namespace quoll {
 

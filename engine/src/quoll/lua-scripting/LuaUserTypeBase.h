@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ScriptGlobals.h"
 #include "LuaHeaders.h"
+#include "ScriptGlobals.h"
 
 namespace quoll {
 

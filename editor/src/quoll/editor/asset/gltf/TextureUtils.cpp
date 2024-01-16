@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "TextureUtils.h"
 
 namespace quoll::editor {

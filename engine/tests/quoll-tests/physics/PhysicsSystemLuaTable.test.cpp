@@ -2,7 +2,6 @@
 #include "quoll/core/Name.h"
 #include "quoll/entity/EntityLuaTable.h"
 #include "quoll/physics/CollisionEvent.h"
-
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 

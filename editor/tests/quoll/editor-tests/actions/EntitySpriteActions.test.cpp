@@ -1,8 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/Sprite.h"
-
 #include "quoll/editor/actions/EntitySpriteActions.h"
-
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 #include "DefaultEntityTests.h"

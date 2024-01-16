@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
 #include "LogViewer.h"
-
-#include "Widgets.h"
 #include "StyleStack.h"
+#include "Widgets.h"
 
 namespace quoll::editor {
 

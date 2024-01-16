@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/Children.h"
 #include "quoll/scene/Parent.h"
-
 #include "Delete.h"
 #include "EntityDeleter.h"
 

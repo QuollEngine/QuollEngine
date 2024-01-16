@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
 #include "quoll/editor/actions/EntityUpdateComponentAction.h"
-
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 

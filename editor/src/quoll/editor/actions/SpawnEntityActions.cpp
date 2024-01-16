@@ -1,17 +1,15 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Delete.h"
 #include "quoll/core/Name.h"
-#include "quoll/scene/LocalTransform.h"
-#include "quoll/scene/Camera.h"
-#include "quoll/scene/Parent.h"
 #include "quoll/entity/EntitySpawner.h"
-
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/Parent.h"
+#include "EntityLightActions.h"
 #include "EntityMeshActions.h"
 #include "EntitySkeletonActions.h"
 #include "EntityTransformActions.h"
-#include "EntityLightActions.h"
 #include "EntityUpdateComponentAction.h"
-
 #include "SpawnEntityActions.h"
 
 namespace quoll::editor {

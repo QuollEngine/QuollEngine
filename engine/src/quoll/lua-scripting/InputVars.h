@@ -1,7 +1,7 @@
 #pragma once
 
-#include "LuaScriptInputVariable.h"
 #include "LuaHeaders.h"
+#include "LuaScriptInputVariable.h"
 
 namespace quoll::lua {
 

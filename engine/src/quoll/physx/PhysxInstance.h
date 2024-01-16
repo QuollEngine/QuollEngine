@@ -1,8 +1,8 @@
 #pragma once
 
 #include <PxConfig.h>
-#include <PxShape.h>
 #include <PxMaterial.h>
+#include <PxShape.h>
 
 namespace quoll {
 

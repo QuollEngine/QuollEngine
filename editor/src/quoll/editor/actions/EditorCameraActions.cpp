@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/WorldTransform.h"
-
 #include "EditorCameraActions.h"
 
 namespace quoll::editor {

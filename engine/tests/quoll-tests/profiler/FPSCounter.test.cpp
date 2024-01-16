@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/profiler/FPSCounter.h"
-
 #include "quoll-tests/Testing.h"
 
 class FPSCounterTest : public ::testing::Test {

@@ -1,6 +1,4 @@
 #include "quoll/core/Base.h"
-
-#include "TinyGLTF.h"
 #include "Buffer.h"
 
 namespace quoll::editor {

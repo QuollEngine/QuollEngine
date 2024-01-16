@@ -1,18 +1,17 @@
 #pragma once
 
-#include "quoll/entity/Entity.h"
-
-#include "quoll/lua-scripting/LuaUserTypeBase.h"
-#include "quoll/physics/RigidBodyLuaTable.h"
-#include "quoll/physics/CollidableLuaTable.h"
-#include "quoll/audio/AudioLuaTable.h"
-#include "quoll/scene/TransformLuaTable.h"
-#include "quoll/scene/PerspectiveLensLuaTable.h"
-#include "quoll/text/TextLuaTable.h"
 #include "quoll/animation/AnimatorLuaTable.h"
+#include "quoll/audio/AudioLuaTable.h"
+#include "quoll/entity/Entity.h"
 #include "quoll/input/InputMapLuaTable.h"
-#include "quoll/ui/UICanvasLuaTable.h"
+#include "quoll/lua-scripting/LuaUserTypeBase.h"
 #include "quoll/lua-scripting/ScriptLuaTable.h"
+#include "quoll/physics/CollidableLuaTable.h"
+#include "quoll/physics/RigidBodyLuaTable.h"
+#include "quoll/scene/PerspectiveLensLuaTable.h"
+#include "quoll/scene/TransformLuaTable.h"
+#include "quoll/text/TextLuaTable.h"
+#include "quoll/ui/UICanvasLuaTable.h"
 
 namespace quoll {
 

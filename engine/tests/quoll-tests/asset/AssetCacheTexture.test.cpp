@@ -1,12 +1,10 @@
 #include "quoll/core/Base.h"
-#include <random>
-
 #include "quoll/core/Version.h"
 #include "quoll/asset/AssetCache.h"
 #include "quoll/asset/InputBinaryStream.h"
-
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
+#include <random>
 
 class AssetCacheTextureTest : public AssetCacheTestBase {
 public:

@@ -1,16 +1,14 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
-#include "quoll/scene/WorldTransform.h"
-#include "quoll/scene/LocalTransform.h"
-#include "quoll/scene/Parent.h"
-#include "quoll/scene/Children.h"
-#include "quoll/scene/Sprite.h"
+#include "quoll/entity/EntitySpawner.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/SkinnedMesh.h"
+#include "quoll/scene/Children.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/Parent.h"
+#include "quoll/scene/Sprite.h"
+#include "quoll/scene/WorldTransform.h"
 #include "quoll/skeleton/Skeleton.h"
-
-#include "quoll/entity/EntitySpawner.h"
-
 #include "quoll-tests/Testing.h"
 
 class EntitySpawnerTest : public ::testing::Test {

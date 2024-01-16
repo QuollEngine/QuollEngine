@@ -2,8 +2,8 @@
 #include "quoll/renderer/TextureUtils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 #include "ImageTextureLoader.h"
+#include <stb_image.h>
 
 namespace quoll {
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "quoll/rhi/FramebufferDescription.h"
-#include "VulkanResourceRegistry.h"
 #include "VulkanDeviceObject.h"
+#include "VulkanResourceRegistry.h"
 
 namespace quoll::rhi {
 

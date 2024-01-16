@@ -1,13 +1,12 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
-#include "GLTFImporter.h"
-#include "gltf/MaterialStep.h"
-#include "gltf/MeshStep.h"
-#include "gltf/SkeletonStep.h"
 #include "gltf/AnimationStep.h"
 #include "gltf/LightStep.h"
+#include "gltf/MaterialStep.h"
+#include "gltf/MeshStep.h"
 #include "gltf/PrefabStep.h"
+#include "gltf/SkeletonStep.h"
+#include "GLTFImporter.h"
 
 namespace quoll::editor {
 

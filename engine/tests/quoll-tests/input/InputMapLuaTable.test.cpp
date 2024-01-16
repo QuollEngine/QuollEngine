@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/input/InputMap.h"
-
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 

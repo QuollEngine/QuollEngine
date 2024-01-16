@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "Collidable.h"
 #include "CollidableSerializer.h"
 

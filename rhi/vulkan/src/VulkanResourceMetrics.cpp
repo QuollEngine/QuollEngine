@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
-#include "VulkanResourceMetrics.h"
 #include "VulkanBuffer.h"
+#include "VulkanResourceMetrics.h"
 #include "VulkanTexture.h"
 
 namespace quoll::rhi {

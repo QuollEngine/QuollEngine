@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll/window/Window.h"
 #include "quoll/profiler/FPSCounter.h"
-
+#include "quoll/window/Window.h"
 #include "MainLoop.h"
 
 namespace quoll {

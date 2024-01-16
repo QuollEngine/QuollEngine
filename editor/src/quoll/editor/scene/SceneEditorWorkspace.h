@@ -2,22 +2,18 @@
 
 #include "quoll/io/SceneIO.h"
 #include "quoll/loop/MainEngineModules.h"
-#include "quoll/editor/workspace/WorkspaceState.h"
+#include "quoll/renderer/Renderer.h"
+#include "quoll/renderer/SceneRenderer.h"
 #include "quoll/editor/actions/ActionExecutor.h"
 #include "quoll/editor/asset/AssetManager.h"
 #include "quoll/editor/ui/ShortcutsManager.h"
-#include "quoll/loop/MainEngineModules.h"
-
-#include "quoll/editor/workspace/WorkspaceMatchParams.h"
 #include "quoll/editor/workspace/Workspace.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"
-
-#include "quoll/renderer/Renderer.h"
-#include "quoll/renderer/SceneRenderer.h"
-
+#include "quoll/editor/workspace/WorkspaceMatchParams.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
+#include "asset/SceneWriter.h"
 #include "renderer/EditorRenderer.h"
 #include "renderer/MousePickingGraph.h"
-#include "asset/SceneWriter.h"
 #include "ui/SceneEditorUI.h"
 
 namespace quoll::editor {

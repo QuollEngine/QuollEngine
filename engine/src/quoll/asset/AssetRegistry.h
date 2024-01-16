@@ -1,25 +1,22 @@
 #pragma once
 
-#include "Asset.h"
-#include "AssetMap.h"
-
-#include "MaterialAsset.h"
-#include "TextureAsset.h"
-#include "FontAsset.h"
-#include "MeshAsset.h"
-#include "SkeletonAsset.h"
+#include "quoll/renderer/RenderStorage.h"
+#include "quoll/rhi/RenderDevice.h"
 #include "AnimationAsset.h"
 #include "AnimatorAsset.h"
+#include "Asset.h"
+#include "AssetMap.h"
 #include "AudioAsset.h"
-#include "PrefabAsset.h"
 #include "EnvironmentAsset.h"
-#include "LuaScriptAsset.h"
-#include "SceneAsset.h"
+#include "FontAsset.h"
 #include "InputMapAsset.h"
-
-#include "quoll/rhi/RenderDevice.h"
-
-#include "quoll/renderer/RenderStorage.h"
+#include "LuaScriptAsset.h"
+#include "MaterialAsset.h"
+#include "MeshAsset.h"
+#include "PrefabAsset.h"
+#include "SceneAsset.h"
+#include "SkeletonAsset.h"
+#include "TextureAsset.h"
 
 namespace quoll {
 

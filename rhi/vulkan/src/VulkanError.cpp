@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
-#include "VulkanHeaders.h"
 #include "VulkanError.h"
+#include "VulkanHeaders.h"
 
 // Reference:
 // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkResult.html

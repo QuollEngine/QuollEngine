@@ -2,7 +2,7 @@
 
 #include "quoll/asset/AssetCache.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"
-
+#include "quoll-tests/Testing.h"
 #include "TestPhysicsBackend.h"
 
 class LuaScriptingInterfaceTestBase : public ::testing::Test {

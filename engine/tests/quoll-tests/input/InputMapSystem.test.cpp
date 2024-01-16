@@ -1,10 +1,8 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetRegistry.h"
 #include "quoll/input/InputMapSystem.h"
 #include "quoll/input/KeyMappings.h"
-
 #include "quoll-tests/Testing.h"
-#include "quoll/asset/AssetRegistry.h"
-
 #include <GLFW/glfw3.h>
 
 class InputMapSystemTest : public ::testing::Test {

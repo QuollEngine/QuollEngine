@@ -3,9 +3,7 @@
 #include "quoll/audio/AudioSource.h"
 #include "quoll/audio/AudioStart.h"
 #include "quoll/audio/AudioStatus.h"
-
 #include "quoll/entity/EntityDatabase.h"
-
 #include "AudioLuaTable.h"
 
 namespace quoll {

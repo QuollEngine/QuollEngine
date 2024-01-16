@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Entity.h"
-#include "EntityUtils.h"
 #include "EntityStorageSparseSetComponentPool.h"
-#include "EntityStorageSparseSetView.h"
 #include "EntityStorageSparseSetObserver.h"
+#include "EntityStorageSparseSetView.h"
+#include "EntityUtils.h"
 
 namespace quoll {
 

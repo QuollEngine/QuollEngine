@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
-#include "SceneView.h"
-
 #include "quoll/imgui/ImguiUtils.h"
 #include "quoll/editor/ui/Theme.h"
+#include "SceneView.h"
 
 namespace quoll::editor {
 

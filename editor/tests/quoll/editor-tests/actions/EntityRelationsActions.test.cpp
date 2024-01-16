@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
-#include "quoll/scene/Parent.h"
 #include "quoll/scene/Children.h"
-
+#include "quoll/scene/Parent.h"
 #include "quoll/editor/actions/EntityRelationActions.h"
-
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 

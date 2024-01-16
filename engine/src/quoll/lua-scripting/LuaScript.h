@@ -2,10 +2,9 @@
 
 #include "quoll/asset/Asset.h"
 #include "quoll/signals/SignalSlot.h"
-
+#include "DeferredLoader.h"
 #include "LuaHeaders.h"
 #include "LuaScriptInputVariable.h"
-#include "DeferredLoader.h"
 
 namespace quoll {
 

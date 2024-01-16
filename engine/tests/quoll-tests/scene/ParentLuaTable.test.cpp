@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
-#include "quoll/scene/Parent.h"
 #include "quoll/scene/Children.h"
-
+#include "quoll/scene/Parent.h"
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 

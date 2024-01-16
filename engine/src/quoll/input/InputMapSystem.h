@@ -1,9 +1,8 @@
 #pragma once
 
-#include "quoll/entity/EntityDatabase.h"
 #include "quoll/asset/AssetRegistry.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "quoll/input/InputMap.h"
-
 #include "InputDeviceManager.h"
 
 namespace quoll {

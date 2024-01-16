@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/Sprite.h"
-
-#include "EntitySpriteActions.h"
 #include "EntityCreateComponentAction.h"
+#include "EntitySpriteActions.h"
 
 namespace quoll::editor {
 

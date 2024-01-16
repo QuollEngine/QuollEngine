@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-#include "MaterialViewer.h"
-
 #include "quoll/imgui/ImguiUtils.h"
+#include "MaterialViewer.h"
 #include "Widgets.h"
 
 namespace quoll::editor {

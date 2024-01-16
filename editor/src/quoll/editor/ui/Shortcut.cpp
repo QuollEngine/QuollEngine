@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "Shortcut.h"
-
 #include <GLFW/glfw3.h>
 
 namespace quoll::editor {

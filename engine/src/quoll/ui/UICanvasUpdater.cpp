@@ -1,10 +1,9 @@
 #include "quoll/core/Base.h"
-#include "UICanvasUpdater.h"
-#include "UICanvasRenderRequest.h"
-#include "UICanvas.h"
-
 #include "quoll/imgui/Imgui.h"
 #include "quoll/imgui/ImguiUtils.h"
+#include "UICanvas.h"
+#include "UICanvasRenderRequest.h"
+#include "UICanvasUpdater.h"
 
 namespace quoll {
 

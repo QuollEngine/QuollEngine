@@ -1,14 +1,14 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
-
-#include "AssetCache.h"
-
-#include "OutputBinaryStream.h"
-#include "InputBinaryStream.h"
-
 #include "quoll/loaders/KtxError.h"
+#include "AssetCache.h"
+#include "InputBinaryStream.h"
+#include "OutputBinaryStream.h"
 
+// Vulkan includes
 #include <vulkan/vulkan.hpp>
+
+// KTX includes
 #include <ktx.h>
 #include <ktxvulkan.h>
 

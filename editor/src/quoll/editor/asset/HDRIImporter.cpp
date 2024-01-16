@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/renderer/RenderGraph.h"
 #include "quoll/renderer/TextureUtils.h"
-
 #include "HDRIImporter.h"
-
 #include <stb_image.h>
 
 namespace quoll::editor {

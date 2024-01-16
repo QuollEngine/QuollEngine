@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
-#include "quoll/scene/Parent.h"
 #include "quoll/scene/Children.h"
 #include "quoll/scene/EntityRelationUtils.h"
-
+#include "quoll/scene/Parent.h"
 #include "EntityRelationActions.h"
 
 namespace quoll::editor {
