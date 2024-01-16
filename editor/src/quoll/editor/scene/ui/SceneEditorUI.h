@@ -7,12 +7,12 @@
 #include "quoll/ui/UICanvasUpdater.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
+#include "quoll/loop/MainEngineModules.h"
 
 #include "quoll/editor/ui/StatusBar.h"
 #include "quoll/editor/ui/IconRegistry.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"
 
-#include "../core/SceneSimulator.h"
 #include "../renderer/EditorRenderer.h"
 #include "../renderer/MousePickingGraph.h"
 
@@ -46,7 +46,8 @@ public:
    * @param sceneRenderer Scene renderer
    * @param editorRenderer Editor renderer
    * @param mousePickingGraph Mouse picking graph
-   * @param editorSimulator Editor simulator
+   * @param engineModules Engine modules
+   * @param editorCamera EditorCamera
    * @param workspaceManager Workspace manager
    */
   void render(WorkspaceState &state, AssetManager &assetManager,
@@ -54,7 +55,7 @@ public:
               Renderer &renderer, SceneRenderer &sceneRenderer,
               EditorRenderer &editorRenderer,
               MousePickingGraph &mousePickingGraph,
-              SceneSimulator &editorSimulator,
+              MainEngineModules &engineModules, EditorCamera &editorCamera,
               WorkspaceManager &workspaceManager);
 
   /**
@@ -64,7 +65,8 @@ public:
    * @param assetManager Asset manager
    * @param actionExecutor Action executor
    * @param sceneTexture Scene texture
-   * @param editorSimulator Editor simulator
+   * @param engineModules Engine modules
+   * @param editorCamera Editor camera
    *
    * @retval true Entity is clicked
    * @retval false Entity is not clicked
@@ -72,7 +74,8 @@ public:
   bool renderSceneView(WorkspaceState &state, AssetManager &assetManager,
                        ActionExecutor &actionExecutor,
                        rhi::TextureHandle sceneTexture,
-                       SceneSimulator &editorSimulator);
+                       MainEngineModules &engineModules,
+                       EditorCamera &editorCamera);
 
   /**
    * @brief Get asset browser panel

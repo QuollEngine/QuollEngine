@@ -32,6 +32,13 @@ public:
   virtual void prepare() = 0;
 
   /**
+   * @brief Fixed update
+   *
+   * @param dt Delta time
+   */
+  virtual void fixedUpdate(f32 dt) = 0;
+
+  /**
    * @brief Update
    *
    * @param dt Delta time
