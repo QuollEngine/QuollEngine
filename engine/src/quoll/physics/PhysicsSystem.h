@@ -6,9 +6,6 @@ namespace quoll {
 
 class PhysicsSystem {
 public:
-  static PhysicsSystem createPhysxBackend();
-
-public:
   PhysicsSystem(PhysicsBackend *backend);
 
   inline void update(f32 dt, EntityDatabase &entityDatabase) {
