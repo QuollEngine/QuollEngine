@@ -4,7 +4,7 @@
 #include "quoll/core/NameSerializer.h"
 #include "quoll/scene/TransformSerializer.h"
 #include "quoll/scene/SpriteSerializer.h"
-#include "quoll/scene/MeshSerializer.h"
+#include "quoll/renderer/MeshSerializer.h"
 #include "quoll/scene/LightSerializer.h"
 #include "quoll/scene/CameraSerializer.h"
 #include "quoll/scene/EnvironmentLightingSerializer.h"

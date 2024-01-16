@@ -5,8 +5,8 @@
 #include "quoll/scene/Parent.h"
 #include "quoll/scene/Children.h"
 #include "quoll/scene/Sprite.h"
-#include "quoll/scene/Mesh.h"
-#include "quoll/scene/SkinnedMesh.h"
+#include "quoll/renderer/Mesh.h"
+#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/skeleton/Skeleton.h"
 
 #include "quoll/entity/EntitySpawner.h"

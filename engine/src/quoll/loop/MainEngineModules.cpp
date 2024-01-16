@@ -1,6 +1,8 @@
 #include "quoll/core/Base.h"
 #include "MainEngineModules.h"
 
+#include "quoll/physx/PhysxBackend.h"
+
 namespace quoll {
 
 MainEngineModules::MainEngineModules(InputDeviceManager &deviceManager,
@@ -8,8 +10,8 @@ MainEngineModules::MainEngineModules(InputDeviceManager &deviceManager,
                                      AssetRegistry &assetRegistry)
     : mWindow(window), mInputMapSystem(deviceManager, assetRegistry),
       mScriptingSystem(assetRegistry), mAnimationSystem(assetRegistry),
-      mPhysicsSystem(PhysicsSystem::createPhysxBackend()),
-      mAudioSystem(assetRegistry), mAssetRegistry(assetRegistry) {}
+      mPhysicsSystem(new PhysxBackend), mAudioSystem(assetRegistry),
+      mAssetRegistry(assetRegistry) {}
 
 void MainEngineModules::observeChanges(EntityDatabase &entityDatabase) {
   mPhysicsSystem.observeChanges(entityDatabase);

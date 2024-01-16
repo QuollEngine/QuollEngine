@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll/scene/Mesh.h"
-#include "quoll/scene/SkinnedMesh.h"
+#include "quoll/renderer/Mesh.h"
+#include "quoll/renderer/SkinnedMesh.h"
 
 #include "EntityMeshActions.h"
 
