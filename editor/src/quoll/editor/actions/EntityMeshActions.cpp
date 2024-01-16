@@ -6,14 +6,6 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Replace mesh with new one
- *
- * @param type Mesh asset type
- * @param mesh Mesh asset handle
- * @param entity Entity
- * @param db Entity database
- */
 static void replaceMesh(AssetType type, MeshAssetHandle mesh, Entity entity,
                         EntityDatabase &db) {
   if (type == AssetType::Mesh) {

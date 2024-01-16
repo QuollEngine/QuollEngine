@@ -16,12 +16,6 @@ namespace quoll {
 
 static constexpr u32 CubemapSides = 6;
 
-/**
- * @brief Get Vulkan format from RHI format
- *
- * @param format Vulkan format
- * @return RHI format
- */
 static VkFormat getVulkanFormatFromFormat(rhi::Format format) {
   switch (format) {
   case rhi::Format::Rgba8Unorm:
@@ -51,12 +45,6 @@ static VkFormat getVulkanFormatFromFormat(rhi::Format format) {
   }
 }
 
-/**
- * @brief Get RHI format from Vulkan format
- *
- * @param format Vulkan format
- * @return RHI format
- */
 static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
   switch (format) {
   case VK_FORMAT_R8G8B8A8_UNORM:

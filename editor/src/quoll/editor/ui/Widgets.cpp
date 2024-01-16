@@ -11,27 +11,12 @@ bool Button(const char *label, ImVec2 size) {
   return ImGui::Button(label, size);
 }
 
-/**
- * @brief Section horizontal bounds
- */
 struct XBounds {
-  /**
-   * Start bound
-   */
   f32 start = 0.0f;
 
-  /**
-   * End bound
-   */
   f32 end = 0.0f;
 };
 
-/**
- * @brief Calculate section horizontal bounds
- *
- * @param padding Horizontal padding
- * @return Horizontal bounds
- */
 static XBounds calculateSectionBoundsX(f32 padding) {
   auto *window = ImGui::GetCurrentWindow();
   f32 windowStart = ImGui::GetWindowPos().x;

@@ -6,25 +6,12 @@
 
 namespace quoll::rhi {
 
-/**
- * @brief Vulkan framebuffer
- */
 class VulkanFramebuffer {
 public:
-  /**
-   * @brief Create Vulkan framebuffer
-   *
-   * @param description Framebuffer description
-   * @param device Vulkan device
-   * @param registry Resource registry
-   */
   VulkanFramebuffer(const FramebufferDescription &description,
                     VulkanDeviceObject &device,
                     const VulkanResourceRegistry &registry);
 
-  /**
-   * @brief Destroy framebuffer
-   */
   ~VulkanFramebuffer();
 
   VulkanFramebuffer(const VulkanFramebuffer &) = delete;
@@ -32,11 +19,6 @@ public:
   VulkanFramebuffer(VulkanFramebuffer &&) = delete;
   VulkanFramebuffer &operator=(VulkanFramebuffer &&) = delete;
 
-  /**
-   * @brief Get vulkan framebuffer
-   *
-   * @return Vulkan framebuffer
-   */
   inline VkFramebuffer getFramebuffer() const { return mFramebuffer; }
 
 private:

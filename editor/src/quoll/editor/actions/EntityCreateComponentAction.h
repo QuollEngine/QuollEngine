@@ -4,29 +4,11 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Entity create component action
- *
- * @tparam TComponent Component
- */
 template <class TComponent> class EntityCreateComponent : public Action {
 public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   * @param component Component
-   */
   EntityCreateComponent(Entity entity, TComponent component = {})
       : mEntity(entity), mComponent(component) {}
 
-  /**
-   * @brief Create component
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Execution result
-   */
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
@@ -39,13 +21,6 @@ public:
     return res;
   }
 
-  /**
-   * @brief Delete component
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Execution result
-   */
   ActionExecutorResult onUndo(WorkspaceState &state,
                               AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
@@ -58,14 +33,6 @@ public:
     return res;
   }
 
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @retval true Entity has component
-   * @retval false Entity does not have component
-   */
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
 

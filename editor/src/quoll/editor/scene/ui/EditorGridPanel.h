@@ -5,22 +5,10 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Editor grid panel component
- */
 class EditorGridPanel {
 public:
-  /**
-   * @brief Render menu
-   */
   void renderMenu();
 
-  /**
-   * @brief Render editor grid panel
-   *
-   * @param state Workspace state
-   * @param actionExecutor Action executor
-   */
   void render(WorkspaceState &state, ActionExecutor &actionExecutor);
 
 private:

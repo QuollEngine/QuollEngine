@@ -11,23 +11,10 @@ namespace quoll::lua {
  * does nothing.
  */
 struct NoopMetatable {
-  /**
-   * @brief Call function
-   * @return Noop metatable
-   */
   NoopMetatable call();
 
-  /**
-   * @brief Index function
-   * @return Noop metatable
-   */
   NoopMetatable index();
 
-  /**
-   * @brief Create metatable
-   *
-   * @param state Sol state
-   */
   static void create(sol::state &state);
 };
 

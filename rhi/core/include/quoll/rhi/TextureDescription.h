@@ -20,58 +20,25 @@ enum class TextureUsage : u8 {
 
 EnableBitwiseEnum(TextureUsage);
 
-/**
- * @brief Texture description
- */
 struct TextureDescription {
-  /**
-   * Texture type
-   */
   TextureType type = TextureType::Standard;
 
-  /**
-   * Texture usage
-   */
   TextureUsage usage = TextureUsage::None;
 
-  /**
-   * Texture format
-   */
   Format format = Format::Undefined;
 
-  /**
-   * Texture width
-   */
   u32 width = 0;
 
-  /**
-   * Texture height
-   */
   u32 height = 0;
 
-  /**
-   * Texture depth
-   */
   u32 depth = 1;
 
-  /**
-   * Number of layers in texture
-   */
   u32 layerCount = 1;
 
-  /**
-   * Number of mip levels
-   */
   u32 mipLevelCount = 1;
 
-  /**
-   * Number of samples
-   */
   u32 samples = 1;
 
-  /**
-   * Debug name
-   */
   String debugName;
 };
 

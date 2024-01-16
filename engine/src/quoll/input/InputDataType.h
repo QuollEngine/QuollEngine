@@ -2,13 +2,10 @@
 
 namespace quoll {
 
-/**
- * @brief Input data type
- */
 enum InputDataType { Boolean, Axis1d, Axis2d, Axis3d };
 
 /**
- * @brief Input data type field
+ * Input data type field
  *
  * Used to identify what part of data
  * the key represents

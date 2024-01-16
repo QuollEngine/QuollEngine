@@ -16,12 +16,6 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Get transform from camera view matrix
- *
- * @param viewMatrix Camera view matrix
- * @return Local transform
- */
 static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
   static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};
   const auto &invViewMatrix = glm::inverse(viewMatrix);
@@ -33,14 +27,6 @@ static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
   return transform;
 }
 
-/**
- * @brief Check if prefab is valid
- *
- * @param assetRegistry Asset registry
- * @param handle Prefab asset handle
- * @retval true Prefab exists and is not empty
- * @retval false Prefab does not exist or is empty
- */
 static bool isPrefabValid(AssetRegistry &assetRegistry,
                           PrefabAssetHandle handle) {
   const auto &prefabs = assetRegistry.getPrefabs();

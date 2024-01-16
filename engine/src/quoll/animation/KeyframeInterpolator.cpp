@@ -3,61 +3,21 @@
 
 namespace quoll {
 
-/**
- * @brief Convert vec4 to other values
- *
- * @tparam T Converted value type
- * @param value Vec4 value
- * @return Converted value
- */
 template <class T> T convertVec4(const glm::vec4 &value) { return T(value); }
 
-/**
- * @brief Convert vec4 to quat
- *
- * @param value Vec4 value
- * @return Converted quat value
- */
 template <> glm::quat convertVec4(const glm::vec4 &value) {
   return glm::quat(value.w, value.x, value.y, value.z);
 }
 
-/**
- * @brief Linear interpolation
- *
- * @tparam T Interpolated value type
- * @param a First value
- * @param b Second value
- * @param k Interpolation constant
- * @return Interpolated value
- */
 template <class T> T interpolateLinear(const T &a, const T &b, f32 k) {
   return a + k * (b - a);
 }
 
-/**
- * @brief Spherical linear interpolation
- *
- * Accepts quaternions
- *
- * @param a First value
- * @param b Second value
- * @param k Interpolation constant
- * @return Interpolated value
- */
 template <>
 glm::quat interpolateLinear(const glm::quat &a, const glm::quat &b, f32 k) {
   return glm::normalize(glm::slerp(a, b, k));
 }
 
-/**
- * @brief Get step interpolation value
- *
- * @tparam T Interpolated value type
- * @param sequence Keyframe sequence
- * @param time Normalized time
- * @return Step interpolated value
- */
 template <class T>
 T getStepValue(const KeyframeSequenceAsset &sequence, f32 time) {
   usize found = 0;
@@ -73,14 +33,6 @@ T getStepValue(const KeyframeSequenceAsset &sequence, f32 time) {
   return convertVec4<T>(sequence.keyframeValues.at(found));
 }
 
-/**
- * @brief Get linear interpolation value
- *
- * @tparam T Interpolated value type
- * @param sequence Keyframe sequence
- * @param time Normalized time
- * @return Linear interpolated value
- */
 template <class T>
 const T getLinearValue(const KeyframeSequenceAsset &sequence, f32 time) {
   usize found = 0;
@@ -108,14 +60,6 @@ const T getLinearValue(const KeyframeSequenceAsset &sequence, f32 time) {
   return interpolateLinear(currentVal, nextVal, k);
 }
 
-/**
- * @brief Interpolate value
- *
- * @tparam T Interpolated value type
- * @param sequence Keyframe sequence
- * @param time Normalized time
- * @return Interpolated value
- */
 template <class T>
 T interpolate(const KeyframeSequenceAsset &sequence, f32 time) {
   if (sequence.interpolation == KeyframeSequenceAssetInterpolation::Step) {

@@ -17,21 +17,10 @@ static constexpr ImVec2 IconSize(80.0f, 80.0f);
 static constexpr f32 ImagePadding = ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
 static constexpr u32 TextWidth = ItemWidth - 8;
 
-/**
- * @brief Imgui text callback user data
- */
 struct ImguiInputTextCallbackUserData {
-  /**
-   * Passed string value ref
-   */
   String &value;
 };
 
-/**
- * @brief ImGui input text resize callback
- *
- * @param data Imgui input text callback data
- */
 static int InputTextCallback(ImGuiInputTextCallbackData *data) {
   auto *userData =
       static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
@@ -45,13 +34,6 @@ static int InputTextCallback(ImGuiInputTextCallbackData *data) {
   return 0;
 }
 
-/**
- * @brief Input text for std::string
- *
- * @param label Label
- * @param value String value
- * @param flags Input text flags
- */
 static bool ImguiInputText(const String &label, String &value,
                            ImGuiInputTextFlags flags = 0) {
   QuollAssert((flags & ImGuiInputTextFlags_CallbackResize) == 0,
@@ -66,12 +48,6 @@ static bool ImguiInputText(const String &label, String &value,
                           flags, InputTextCallback, &userData);
 }
 
-/**
- * @brief Get icon type from asset type
- *
- * @param type Asset type
- * @return Icon type
- */
 static EditorIcon getIconFromAssetType(AssetType type) {
   switch (type) {
   case AssetType::Texture:

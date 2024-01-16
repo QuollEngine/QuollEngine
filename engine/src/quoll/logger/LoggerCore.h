@@ -14,12 +14,6 @@ using LogTimestamp = std::chrono::time_point<std::chrono::system_clock>;
 
 using LogTransport = std::function<void(LogSeverity, LogTimestamp, String)>;
 
-/**
- * @brief Get log severity string
- *
- * @param severity Severity
- * @return Severity string
- */
 static String getLogSeverityString(LogSeverity severity) {
   switch (severity) {
   case LogSeverity::Debug:

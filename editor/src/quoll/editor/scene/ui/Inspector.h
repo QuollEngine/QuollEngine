@@ -4,9 +4,6 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Inspector panel
- */
 class Inspector {
 private:
   struct Tab {
@@ -17,18 +14,8 @@ private:
   };
 
 public:
-  /**
-   * @brief Create inspector
-   */
   Inspector();
 
-  /**
-   * @brief Render inspector
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @param actionExecutor Action executor
-   */
   void render(WorkspaceState &state, AssetRegistry &assetRegistry,
               ActionExecutor &actionExecutor);
 

@@ -8,33 +8,15 @@
 
 namespace quoll {
 
-/**
- * @brief Global variables that are needed for scripts
- */
 struct ScriptGlobals {
-  /**
-   * Window signals
-   */
   WindowSignals &windowSignals;
 
-  /**
-   * Entity database
-   */
   EntityDatabase &entityDatabase;
 
-  /**
-   * Physics system
-   */
   PhysicsSystem &physicsSystem;
 
-  /**
-   * Asset registry
-   */
   AssetRegistry &assetRegistry;
 
-  /**
-   * Script loop
-   */
   lua::ScriptLoop &scriptLoop;
 };
 

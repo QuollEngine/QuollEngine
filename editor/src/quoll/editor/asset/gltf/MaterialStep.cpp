@@ -5,11 +5,6 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Load materials into registry
- *
- * @param importData GLTF import data
- */
 void loadMaterials(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
   const auto &model = importData.model;

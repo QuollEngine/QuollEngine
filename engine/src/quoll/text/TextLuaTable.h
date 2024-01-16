@@ -4,65 +4,22 @@
 
 namespace quoll {
 
-/**
- * @brief Lua interface for text component
- */
 class TextLuaTable {
 public:
-  /**
-   * @brief Create text table
-   *
-   * @param entity Entity
-   * @param scriptGlobals Script globals
-   */
   TextLuaTable(Entity entity, ScriptGlobals scriptGlobals);
 
-  /**
-   * @brief Get text contents
-   *
-   * @return Text contents
-   */
-  sol_maybe<String> getText();
+  sol_maybe<String> getContent();
 
-  /**
-   * @brief Set text contents
-   *
-   * @param text Text contents
-   */
-  void setText(String text);
+  void setContent(String content);
 
-  /**
-   * @brief Get line height
-   *
-   * @return Line height
-   */
   sol_maybe<f32> getLineHeight();
 
-  /**
-   * @brief Set line height
-   *
-   * @param lineHeight Line height
-   */
   void setLineHeight(f32 lineHeight);
 
-  /**
-   * @brief Delete component
-   */
   void deleteThis();
 
-  /**
-   * @brief Get component name in scripts
-   *
-   * @return Component name
-   */
   static const String getName() { return "text"; }
 
-  /**
-   * @brief Create user type
-   *
-   * @param usertype User type
-   * @param state Sol state
-   */
   static void create(sol::usertype<TextLuaTable> usertype,
                      sol::state_view state);
 

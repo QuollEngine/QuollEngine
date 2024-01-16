@@ -4,11 +4,6 @@
 
 namespace quoll {
 
-/**
- * @brief View for sparse set based entity storage
- *
- * @tparam ...TComponentTypes Component types
- */
 template <class... TComponentTypes> class EntityStorageSparseSetView {
   using PickedPools = std::array<EntityStorageSparseSetComponentPool *,
                                  sizeof...(TComponentTypes)>;
@@ -16,29 +11,12 @@ template <class... TComponentTypes> class EntityStorageSparseSetView {
   static constexpr usize DeadIndex = std::numeric_limits<usize>::max();
 
 public:
-  /**
-   * @brief View iterator
-   */
   class Iterator {
   public:
-    /**
-     * @brief Create iterator
-     *
-     * @param index Index
-     * @param pools Picked pools
-     * @param smallestPool Smallest pool
-     */
     Iterator(usize index, PickedPools &pools,
              EntityStorageSparseSetComponentPool *smallestPool)
         : mIndex(index), mPools(pools), mSmallestPool(smallestPool) {}
 
-    /**
-     * @brief Increment iterator
-     *
-     * Increment over invalid indices
-     *
-     * @return This iterator
-     */
     Iterator &operator++() {
       do {
         mIndex++;
@@ -48,41 +26,15 @@ public:
       return *this;
     }
 
-    /**
-     * @brief Check if iterators are equal
-     *
-     * @param rhs Other iterator
-     * @retval true Iterators are equal
-     * @retval false Iterators are not equal
-     */
     bool operator==(Iterator &rhs) { return mIndex == rhs.mIndex; }
 
-    /**
-     * @brief Check if iterators are not equal
-     *
-     * @param rhs Other iterator
-     * @retval true Iterators are not equal
-     * @retval false Iterators are equal
-     */
     bool operator!=(Iterator &rhs) { return mIndex != rhs.mIndex; }
 
-    /**
-     * @brief Get value
-     *
-     * @return Tuple with first item as entity and rest as components
-     */
     std::tuple<Entity, TComponentTypes &...> operator*() {
       return get(std::index_sequence_for<TComponentTypes...>{});
     }
 
   private:
-    /**
-     * @brief Get value
-     *
-     * @tparam ...TComponentIndices Component indices
-     * @param sequence Index sequence
-     * @return Tuple with first item as entity and rest as components
-     */
     template <usize... TComponentIndices>
     std::tuple<Entity, TComponentTypes &...>
     get(std::index_sequence<TComponentIndices...> sequence) {
@@ -105,21 +57,8 @@ public:
   };
 
 public:
-  /**
-   * @brief Create view for sparse set entity storage
-   *
-   * @param pools Picked pools
-   */
   EntityStorageSparseSetView(PickedPools pools) : mPools(pools) {}
 
-  /**
-   * @brief Get begin iterator
-   *
-   * Get smallest pool and find first valid
-   * index
-   *
-   * @return Begin iterator
-   */
   Iterator begin() {
     mSmallestPool = mPools.at(0);
     for (auto *pool : mPools) {
@@ -137,13 +76,6 @@ public:
     return Iterator(index, mPools, mSmallestPool);
   }
 
-  /**
-   * @brief Get end iterator
-   *
-   * Use smallest pool size as iterator end
-   *
-   * @return End iterator
-   */
   Iterator end() {
     QuollAssert(mSmallestPool != nullptr, "Begin is not called");
 
@@ -151,15 +83,6 @@ public:
   }
 
 private:
-  /**
-   * @brief Check if index is valid
-   *
-   * @param index Index
-   * @param pools Component pools
-   * @param smallestPool Smallest pools
-   * @retval true Index is valid
-   * @retval false Index is not valid
-   */
   static bool isValidIndex(usize index, PickedPools &pools,
                            EntityStorageSparseSetComponentPool *smallestPool) {
     bool isValid = true;

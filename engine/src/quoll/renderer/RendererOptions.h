@@ -2,14 +2,8 @@
 
 namespace quoll {
 
-/**
- * @brief Renderer options
- */
 struct RendererOptions {
-  /**
-   * Framebuffer size
-   */
-  glm::uvec2 size;
+  glm::uvec2 framebufferSize;
 };
 
 } // namespace quoll

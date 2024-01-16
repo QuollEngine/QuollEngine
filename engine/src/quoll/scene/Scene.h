@@ -4,20 +4,9 @@
 
 namespace quoll {
 
-/**
- * @brief Scene structure
- *
- * Stores entities and metadata about the scene
- */
 struct Scene {
-  /**
-   * Entity database
-   */
   EntityDatabase entityDatabase;
 
-  /**
-   * Active camera in the scene
-   */
   Entity activeCamera = Entity::Null;
 
   /**
@@ -28,9 +17,6 @@ struct Scene {
    */
   Entity dummyCamera = Entity::Null;
 
-  /**
-   * Environment
-   */
   Entity activeEnvironment = Entity::Null;
 
   /**

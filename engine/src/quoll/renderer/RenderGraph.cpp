@@ -52,14 +52,6 @@ RenderGraph::RGTexture RenderGraph::import(rhi::TextureHandle handle) {
   return RGTexture(mRegistry, textureIndex);
 }
 
-/**
- * @brief Topologically sort a graph
- *
- * @param index Index of current item
- * @param visited Visited nodes
- * @param adjacencyList Adjacency list
- * @param output Output array
- */
 static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
                             usize index, std::vector<bool> &visited,
                             const std::vector<std::set<usize>> &adjacencyList,

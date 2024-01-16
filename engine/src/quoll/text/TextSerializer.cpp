@@ -10,10 +10,10 @@ void TextSerializer::serialize(YAML::Node &node, EntityDatabase &entityDatabase,
   if (entityDatabase.has<Text>(entity)) {
     const auto &text = entityDatabase.get<Text>(entity);
 
-    if (!text.text.empty() && assetRegistry.getFonts().hasAsset(text.font)) {
+    if (!text.content.empty() && assetRegistry.getFonts().hasAsset(text.font)) {
       auto font = assetRegistry.getFonts().getAsset(text.font).uuid;
 
-      node["text"]["content"] = text.text;
+      node["text"]["content"] = text.content;
       node["text"]["lineHeight"] = text.lineHeight;
       node["text"]["font"] = font;
     }
@@ -32,8 +32,8 @@ void TextSerializer::deserialize(const YAML::Node &node,
 
     if (handle != FontAssetHandle::Null) {
       if (node["text"]["content"] && node["text"]["content"].IsScalar()) {
-        textComponent.text =
-            node["text"]["content"].as<String>(textComponent.text);
+        textComponent.content =
+            node["text"]["content"].as<String>(textComponent.content);
       }
 
       textComponent.lineHeight =

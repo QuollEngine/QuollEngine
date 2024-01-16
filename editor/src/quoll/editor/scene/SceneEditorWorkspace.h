@@ -22,26 +22,8 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Workspace
- */
 class SceneEditorWorkspace : public Workspace {
 public:
-  /**
-   * @brief Create workspace
-   *
-   * @param project Project
-   * @param assetManager Asset manager
-   * @param scene Scene asset
-   * @param scenePath Scene path
-   * @param renderer Renderer
-   * @param sceneRenderer Scene renderer
-   * @param editorRenderer Editor renderer
-   * @param mousePickingGraph Mouse picking graph
-   * @param engineModules Main engine modules
-   * @param editorCamera Editor camera
-   * @param workspaceManager Workspace manager
-   */
   SceneEditorWorkspace(Project project, AssetManager &assetManager,
                        SceneAssetHandle scene, Path scenePath,
                        Renderer &renderer, SceneRenderer &sceneRenderer,
@@ -56,68 +38,26 @@ public:
   SceneEditorWorkspace(SceneEditorWorkspace &&) = delete;
   SceneEditorWorkspace &operator=(SceneEditorWorkspace &&) = delete;
 
-  /**
-   * @brief Destroy workspace
-   */
   virtual ~SceneEditorWorkspace();
 
-  /**
-   * @brief Data preparation step
-   */
   void prepare() override;
 
-  /**
-   * @brief Fixed update
-   *
-   * @param dt Delta time
-   */
   void fixedUpdate(f32 dt) override;
 
-  /**
-   * @brief Update
-   *
-   * @param dt Delta time
-   */
   void update(f32 dt) override;
 
-  /**
-   * @brief Render
-   */
   void render() override;
 
-  /**
-   * @brief Process shortcuts
-   *
-   * @param key Key
-   * @param mods Modifiers
-   */
   void processShortcuts(int key, int mods) override;
 
-  /**
-   * @brief Update frame data
-   *
-   * @param commandList Render command list
-   * @param frameIndex Frame index
-   */
   void updateFrameData(rhi::RenderCommandList &commandList,
                        u32 frameIndex) override;
 
-  /**
-   * @brief Get match params
-   *
-   * @return Match params
-   */
   WorkspaceMatchParams getMatchParams() const override;
 
-  /**
-   * @brief Reload workspace UI
-   */
   void reload() override;
 
 private:
-  /**
-   * @brief Render layout
-   */
   void renderLayout();
 
 private:

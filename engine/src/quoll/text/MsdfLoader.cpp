@@ -79,7 +79,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
       f64 top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
       msdfGlyph.getQuadAtlasBounds(left, bottom, right, top);
 
-      glyph.bounds =
+      glyph.atlasBounds =
           glm::vec4(static_cast<f32>(left), static_cast<f32>(fHeight - bottom),
                     static_cast<f32>(right), static_cast<f32>(fHeight - top)) /
           fWidth;
@@ -118,7 +118,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   fontAsset.size =
       sizeof(std::byte) * bitmap.width * bitmap.height * NumChannels;
   fontAsset.data.glyphs = glyphs;
-  fontAsset.data.atlas = pixels;
+  fontAsset.data.atlasBytes = pixels;
   fontAsset.data.atlasDimensions = glm::uvec2{bitmap.width, bitmap.height};
   fontAsset.data.fontScale = static_cast<f32>(FontScale);
 

@@ -4,23 +4,11 @@
 
 namespace quoll {
 
-/**
- * @brief Text component
- */
 struct Text {
-  /**
-   * Text contents
-   */
-  String text;
+  String content;
 
-  /**
-   * Line height
-   */
   f32 lineHeight = 1.0f;
 
-  /**
-   * Font used for rendering
-   */
   FontAssetHandle font = FontAssetHandle::Null;
 };
 

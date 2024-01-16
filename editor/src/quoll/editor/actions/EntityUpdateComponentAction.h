@@ -4,41 +4,17 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Entity update component action
- *
- * @tparam TComponent Component
- */
 template <class TComponent> class EntityUpdateComponent : public Action {
 public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   * @param oldComponent Old component
-   * @param newComponent New component
-   */
   EntityUpdateComponent(Entity entity, TComponent oldComponent = {},
                         std::optional<TComponent> newComponent = std::nullopt)
       : mEntity(entity), mOldComponent(oldComponent),
         mNewComponent(newComponent) {}
 
-  /**
-   * @brief Set new component
-   *
-   * @param newComponent New component
-   */
   void setNewComponent(TComponent newComponent) {
     mNewComponent = newComponent;
   }
 
-  /**
-   * @brief Update to new component
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Execution result
-   */
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
@@ -52,13 +28,6 @@ public:
     return res;
   }
 
-  /**
-   * @brief Update to previous component
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Execution result
-   */
   ActionExecutorResult onUndo(WorkspaceState &state,
                               AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
@@ -70,14 +39,6 @@ public:
     return res;
   }
 
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @retval true Entity has component
-   * @retval false Entity does not have component
-   */
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
 

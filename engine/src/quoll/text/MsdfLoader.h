@@ -6,17 +6,8 @@
 
 namespace quoll {
 
-/**
- * @brief Msdf loader
- */
 class MsdfLoader {
 public:
-  /**
-   * @brief Load msdf font data
-   *
-   * @param path Font path
-   * @return Msdf data
-   */
   Result<AssetData<FontAsset>> loadFontData(const Path &path);
 };
 

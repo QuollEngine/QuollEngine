@@ -14,19 +14,10 @@
 
 namespace quoll {
 
-/**
- * @brief PhysX backend
- */
 class PhysxBackend : public PhysicsBackend {
 public:
-  /**
-   * @brief Create physics system
-   */
   PhysxBackend();
 
-  /**
-   * @brief Destroy physics system
-   */
   virtual ~PhysxBackend();
 
   PhysxBackend(const PhysxBackend &) = delete;
@@ -34,77 +25,24 @@ public:
   PhysxBackend(PhysxBackend &&) = delete;
   PhysxBackend &operator=(PhysxBackend &&) = delete;
 
-  /**
-   * @brief Update physics
-   *
-   * Performs physics simulation
-   *
-   * @param dt Time delta
-   * @param entityDatabase Entity database
-   */
   void update(f32 dt, EntityDatabase &entityDatabase) override;
 
-  /**
-   * @brief Cleanup Physx actors and shapes
-   *
-   * @param entityDatabase Entity database
-   */
   void cleanup(EntityDatabase &entityDatabase) override;
 
-  /**
-   * @brief Observer changes in entities
-   *
-   * @param entityDatabase Entity database
-   */
   void observeChanges(EntityDatabase &entityDatabase) override;
 
-  /**
-   * @brief Run sweep collision test
-   *
-   * @param entityDatabase Entity database
-   * @param entity Entity
-   * @param direction Sweep direction
-   * @param maxDistance Maximum distance to search along the sweep
-   * @param[out] hit Collision hit
-   * @retval true Entity collided
-   * @retval false Entity not collided
-   */
   bool sweep(EntityDatabase &entityDatabase, Entity entity,
              const glm::vec3 &direction, f32 maxDistance,
              CollisionHit &hit) override;
 
-  /**
-   * @brief Get physics signals
-   *
-   * @return Physics signals
-   */
   inline PhysicsSignals &getSignals() override { return mSignals; }
 
 private:
-  /**
-   * @brief Synchronize physics components
-   *
-   * @param entityDatabase Entity database
-   */
   void synchronizeComponents(EntityDatabase &entityDatabase);
 
-  /**
-   * @brief Synchronize transforms
-   *
-   * @param entityDatabase Entity database
-   */
   void synchronizeTransforms(EntityDatabase &entityDatabase);
 
 private:
-  /**
-   * @brief Create Physx shape
-   *
-   * @param entity Entity
-   * @param geometryDesc Geometry description
-   * @param material Physx material
-   * @param worldTransform World transform
-   * @return PhysX shape
-   */
   physx::PxShape *createShape(Entity entity,
                               const PhysicsGeometryDesc &geometryDesc,
                               physx::PxMaterial &material,

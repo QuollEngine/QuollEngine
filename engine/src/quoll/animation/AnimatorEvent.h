@@ -3,12 +3,12 @@
 namespace quoll {
 
 /**
- * Animator event component
+ * Animator event component is used
+ * as an event mechanism to trigger
+ * various animator states in entity's
+ * animator state machine.
  */
 struct AnimatorEvent {
-  /**
-   * Event name
-   */
   String eventName;
 };
 

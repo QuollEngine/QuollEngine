@@ -9,13 +9,6 @@
 
 namespace quoll {
 
-/**
- * @brief Check if prefab is empty
- *
- * @param prefab Prefab asset data
- * @retval true Prefab asset is empty
- * @retval false Prefab asset is not empty
- */
 static bool isPrefabEmpty(const PrefabAsset &prefab) {
   return prefab.animators.empty() && prefab.meshes.empty() &&
          prefab.skeletons.empty() && prefab.directionalLights.empty() &&

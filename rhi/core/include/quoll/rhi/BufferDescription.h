@@ -23,38 +23,17 @@ enum class BufferAllocationUsage : u8 {
 
 EnableBitwiseEnum(BufferAllocationUsage);
 
-/**
- * @brief Buffer description
- */
 struct BufferDescription {
-  /**
-   * Buffer usage
-   */
   BufferUsage usage = rhi::BufferUsage::Vertex;
 
-  /**
-   * Buffer size
-   */
   usize size = 0;
 
-  /**
-   * Buffer data
-   */
   const void *data = nullptr;
 
-  /**
-   * Buffer allocation usage
-   */
   BufferAllocationUsage allocationUsage = rhi::BufferAllocationUsage::HostWrite;
 
-  /**
-   * @brief Keep buffer always mapped
-   */
   bool mapped = false;
 
-  /**
-   * Debug name
-   */
   String debugName;
 };
 

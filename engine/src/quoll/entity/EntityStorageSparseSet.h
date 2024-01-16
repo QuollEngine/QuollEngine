@@ -9,7 +9,7 @@
 namespace quoll {
 
 /**
- * @brief Sparse set based entity storage
+ * Sparse set based entity storage
  */
 class EntityStorageSparseSet {
   static constexpr usize DeadIndex = std::numeric_limits<usize>::max();

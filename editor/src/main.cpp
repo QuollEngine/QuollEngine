@@ -9,7 +9,7 @@ int main() {
   static constexpr u32 InitialWidth = 1024;
   static constexpr u32 InitialHeight = 768;
 
-  quoll::Engine::setPath(std::filesystem::current_path() / "engine");
+  quoll::Engine::setEnginePath(std::filesystem::current_path() / "engine");
 
   quoll::InputDeviceManager deviceManager;
   quoll::Window window("Quoll Engine", InitialWidth, InitialHeight,

@@ -29,14 +29,6 @@ enum class DescriptorHandle : u32 { Null = 0 };
 template <class T, class... Rest>
 inline constexpr bool IsAnySame = (std::is_same_v<T, Rest> || ...);
 
-/**
- * @brief Check if handle is valid
- *
- * @tparam THandle Handle type
- * @param handle Handle
- * @retval true Handle is valid
- * @retval false Handle is not valid
- */
 template <class THandle> constexpr inline bool isHandleValid(THandle handle) {
   static_assert(
       IsAnySame<THandle, ShaderHandle, BufferHandle, TextureHandle,
@@ -46,13 +38,6 @@ template <class THandle> constexpr inline bool isHandleValid(THandle handle) {
   return handle != THandle::Null;
 }
 
-/**
- * @brief Cast handle to uint
- *
- * @tparam THandle Handle type
- * @param handle Handle
- * @return Handle value in uint
- */
 template <class THandle> constexpr inline u32 castHandleToUint(THandle handle) {
   static_assert(
       IsAnySame<THandle, ShaderHandle, BufferHandle, TextureHandle,

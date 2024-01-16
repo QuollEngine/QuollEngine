@@ -26,30 +26,8 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Root UI entry point
- *
- * Renders all the UI in the scene
- */
 class SceneEditorUI {
 public:
-  /**
-   * @brief Render UI Root
-   *
-   * Renders all components inside the root
-   *
-   * @param state Workspace state
-   * @param assetManager Asset manager
-   * @param actionExecutor Action executor
-   * @param sceneHandle Scene asset handle
-   * @param renderer Renderer
-   * @param sceneRenderer Scene renderer
-   * @param editorRenderer Editor renderer
-   * @param mousePickingGraph Mouse picking graph
-   * @param engineModules Engine modules
-   * @param editorCamera EditorCamera
-   * @param workspaceManager Workspace manager
-   */
   void render(WorkspaceState &state, AssetManager &assetManager,
               ActionExecutor &actionExecutor, SceneAssetHandle sceneHandle,
               Renderer &renderer, SceneRenderer &sceneRenderer,
@@ -58,37 +36,14 @@ public:
               MainEngineModules &engineModules, EditorCamera &editorCamera,
               WorkspaceManager &workspaceManager);
 
-  /**
-   * @brief Render scene view
-   *
-   * @param state Workspace state
-   * @param assetManager Asset manager
-   * @param actionExecutor Action executor
-   * @param sceneTexture Scene texture
-   * @param engineModules Engine modules
-   * @param editorCamera Editor camera
-   *
-   * @retval true Entity is clicked
-   * @retval false Entity is not clicked
-   */
   bool renderSceneView(WorkspaceState &state, AssetManager &assetManager,
                        ActionExecutor &actionExecutor,
                        rhi::TextureHandle sceneTexture,
                        MainEngineModules &engineModules,
                        EditorCamera &editorCamera);
 
-  /**
-   * @brief Get asset browser panel
-   *
-   * @return Asset browser panel
-   */
   inline AssetBrowser &getAssetBrowser() { return mAssetBrowser; }
 
-  /**
-   * @brief Get scene hierarchy panel
-   *
-   * @return Scene hierarchy panel
-   */
   inline SceneHierarchyPanel &getSceneHierarchyPanel() {
     return mSceneHierarchyPanel;
   }

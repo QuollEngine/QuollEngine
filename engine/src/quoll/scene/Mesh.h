@@ -4,13 +4,7 @@
 
 namespace quoll {
 
-/**
- * @brief Mesh component
- */
 struct Mesh {
-  /**
-   * Mesh asset handle
-   */
   MeshAssetHandle handle = MeshAssetHandle::Null;
 };
 

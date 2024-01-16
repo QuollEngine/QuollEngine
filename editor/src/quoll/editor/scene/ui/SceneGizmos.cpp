@@ -13,14 +13,6 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Calculate local transforms from world
- *
- * @param state Workspace state
- * @param entity Entity
- * @param worldTransform World transform
- * @return Local transform
- */
 static LocalTransform
 calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
                                  const glm::mat4 &worldTransform) {
@@ -74,12 +66,6 @@ calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
   return LocalTransform{localPosition, localRotation, localScale};
 }
 
-/**
- * @brief Get imguizmo operation
- *
- * @param transformOperation Transform operation
- * @return Imguizmo operation
- */
 static ImGuizmo::OPERATION
 getImguizmoOperation(TransformOperation transformOperation) {
   switch (transformOperation) {

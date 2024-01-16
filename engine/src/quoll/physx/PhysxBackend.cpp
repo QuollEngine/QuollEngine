@@ -26,13 +26,6 @@ using namespace physx;
 
 namespace quoll {
 
-/**
- * @brief Get shape local transform
- *
- * @param center Geometry center
- * @param type Shape type
- * @return Local transform
- */
 static PxTransform getShapeLocalTransform(const glm::vec3 &center,
                                           PhysicsGeometryType type) {
   if (type == PhysicsGeometryType::Capsule) {
@@ -43,13 +36,6 @@ static PxTransform getShapeLocalTransform(const glm::vec3 &center,
   return PxTransform(PhysxMapping::getPhysxVec3(center));
 }
 
-/**
- * @brief Update physx shape with geometry data
- *
- * @param geometryDesc Geometry description
- * @param shape Physx shape
- * @param worldTransform World transform
- */
 static void updateShapeWithGeometryData(const PhysicsGeometryDesc &geometryDesc,
                                         PxShape *shape,
                                         const glm::mat4 &worldTransform) {
@@ -87,9 +73,6 @@ static void updateShapeWithGeometryData(const PhysicsGeometryDesc &geometryDesc,
   }
 }
 
-/**
- * @brief Shader that notifies on any collision
- */
 static PxFilterFlags physxFilterAllCollisionShader(
     PxFilterObjectAttributes attributes0, PxFilterData filterData0,
     PxFilterObjectAttributes attributes1, PxFilterData filterData1,

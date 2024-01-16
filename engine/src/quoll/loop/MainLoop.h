@@ -14,50 +14,18 @@ class FPSCounter;
  */
 class MainLoop {
 public:
-  /**
-   * @brief Create main loop
-   *
-   * @param window Window
-   * @param fpsCounter FPS counter
-   */
   MainLoop(Window &window, FPSCounter &fpsCounter);
 
-  /**
-   * @brief Run main loop
-   */
   void run();
 
-  /**
-   * @brief Set fixed update function
-   *
-   * @param fixedUpdateFn Fixed update function
-   */
   void setFixedUpdateFn(const std::function<void(f32)> &fixedUpdateFn);
 
-  /**
-   * @brief Set update function
-   *
-   * @param updateFn Update function
-   */
   void setUpdateFn(const std::function<void(f32)> &updateFn);
 
-  /**
-   * @brief Set render function
-   *
-   * @param renderFn Render function
-   */
   void setRenderFn(const std::function<void()> &renderFn);
 
-  /**
-   * @brief Set prepare function
-   *
-   * @param prepareFn Prepare function
-   */
   void setPrepareFn(const std::function<void()> &prepareFn);
 
-  /**
-   * @brief Stop main loop
-   */
   void stop();
 
 private:

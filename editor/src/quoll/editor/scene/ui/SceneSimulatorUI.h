@@ -26,64 +26,22 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Root UI entry point
- *
- * Renders all the UI in the scene
- */
 class SceneSimulatorUI {
 public:
-  /**
-   * @brief Render UI Root
-   *
-   * Renders all components inside the root
-   *
-   * @param state Workspace state
-   * @param assetManager Asset manager
-   * @param actionExecutor Action executor
-   * @param renderer Renderer
-   * @param sceneRenderer Scene renderer
-   * @param editorRenderer Editor renderer
-   * @param mousePickingGraph Mouse picking graph
-   * @param engineModules Engine modules
-   */
   void render(WorkspaceState &state, AssetManager &assetManager,
               ActionExecutor &actionExecutor, Renderer &renderer,
               SceneRenderer &sceneRenderer, EditorRenderer &editorRenderer,
               MousePickingGraph &mousePickingGraph,
               MainEngineModules &engineModules);
 
-  /**
-   * @brief Render scene view
-   *
-   * @param state Workspace state
-   * @param assetManager Asset manager
-   * @param actionExecutor Action executor
-   * @param sceneTexture Scene texture
-   * @param engineModules Engine modules
-   * @param editorCamera Editor camera
-   *
-   * @retval true Entity is clicked
-   * @retval false Entity is not clicked
-   */
   bool renderSceneView(WorkspaceState &state, AssetManager &assetManager,
                        ActionExecutor &actionExecutor,
                        rhi::TextureHandle sceneTexture,
                        MainEngineModules &engineModules,
                        EditorCamera &editorCamera);
 
-  /**
-   * @brief Get asset browser panel
-   *
-   * @return Asset browser panel
-   */
   inline AssetBrowser &getAssetBrowser() { return mAssetBrowser; }
 
-  /**
-   * @brief Get scene hierarchy panel
-   *
-   * @return Scene hierarchy panel
-   */
   inline SceneHierarchyPanel &getSceneHierarchyPanel() {
     return mSceneHierarchyPanel;
   }

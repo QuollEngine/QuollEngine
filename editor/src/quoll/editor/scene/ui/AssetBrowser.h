@@ -11,9 +11,6 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Asset browser component
- */
 class AssetBrowser {
   struct Entry {
     Path path;
@@ -30,19 +27,9 @@ class AssetBrowser {
   };
 
 public:
-  /**
-   * @brief Render asset browser
-   *
-   * @param state Workspace state
-   * @param assetManager Asset manager
-   * @param actionExecutor Action executor
-   */
   void render(WorkspaceState &state, AssetManager &assetManager,
               ActionExecutor &actionExecutor);
 
-  /**
-   * @brief Reload contents in current directory
-   */
   void reload();
 
 private:

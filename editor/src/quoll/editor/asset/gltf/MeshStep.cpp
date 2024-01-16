@@ -8,13 +8,6 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Generate normals from vertex positions
- *
- * @param positions Positions
- * @param indices Indices
- * @param[out] normals Normals
- */
 void generateNormals(const std::vector<glm::vec3> &positions,
                      const std::vector<u32> &indices,
                      std::vector<glm::vec3> &normals) {
@@ -63,12 +56,6 @@ void generateNormals(const std::vector<glm::vec3> &positions,
   }
 }
 
-/**
- * @brief Generate tangents using Mikktspace
- *
- * @param vertices Vertices
- * @param indices Indices
- */
 void generateTangents(const std::vector<glm::vec3> &vertices,
                       const std::vector<glm::vec3> &normals,
                       const std::vector<glm::vec2> &texCoords,
@@ -79,12 +66,6 @@ void generateTangents(const std::vector<glm::vec3> &vertices,
   adapter.generate(vertices, normals, texCoords, indices, tangents);
 }
 
-/**
- * @brief Optimize meshes using meshoptimizer
- *
- * @param g Geometry
- * @param indices Indices
- */
 void optimizeMeshes(BaseGeometryAsset &g) {
   static constexpr f32 OverdrawThreshold = 1.05f;
 
@@ -121,19 +102,6 @@ void optimizeMeshes(BaseGeometryAsset &g) {
   }
 }
 
-/**
- * @brief Load standard mesh attributes
- *
- * Loads position, normal, tangents,
- * and texture coordinates that exist
- * for both mesh and skinned mesh
- *
- * @param primitiveName Primitive name
- * @param primitive GLTF mesh primitive
- * @param model GLTF model
- * @param geometry Mesh geometry
- * @return Vertices and indices
- */
 Result<bool> loadStandardMeshAttributes(const String &primitiveName,
                                         const tinygltf::Primitive &primitive,
                                         const tinygltf::Model &model,
@@ -383,14 +351,6 @@ Result<bool> loadSkinnedMeshAttributes(const String &primitiveName,
   return Result<bool>::Ok(true, warnings);
 }
 
-/**
- * @brief Loads meshes into asset registry
- *
- * Conforms to on GLTF 2.0 spec
- * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
- *
- * @param importData GLTF import data
- */
 void loadMeshes(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
   const auto &model = importData.model;

@@ -4,6 +4,19 @@
 
 namespace quoll {
 
+/**
+ * Asset revisions
+ *
+ * Revisions are internal engine
+ * versions of the asset that is typically
+ * used to identify if an asset needs to be
+ * recreated to be aligned with engine changes.
+ *
+ * Revision update values should be based on current date.
+ *
+ * Example: If current date is 2023-09-01, the
+ *          value should be `230901`
+ */
 enum class AssetRevision : u32 {
   Material = 230901,
   Texture = 230901,
@@ -21,12 +34,6 @@ enum class AssetRevision : u32 {
   Scene = 230901
 };
 
-/**
- * @brief Get revision for asset type
- *
- * @param type Asset type
- * @return Asset revision
- */
 static constexpr AssetRevision getRevisionForAssetType(AssetType type) {
   switch (type) {
   case AssetType::Material:

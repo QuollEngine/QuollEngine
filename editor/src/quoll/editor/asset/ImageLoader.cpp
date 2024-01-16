@@ -37,7 +37,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
                                          const Uuid &uuid, const String &name,
                                          bool generateMipMaps,
                                          rhi::Format format) {
-  std::vector<TextureAssetLevel> levels;
+  std::vector<TextureAssetMipLevel> levels;
   std::vector<u8> assetData;
   if (generateMipMaps) {
     auto numLevels =
@@ -104,7 +104,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
 }
 
 std::vector<u8> ImageLoader::generateMipMapsFromTextureData(
-    void *data, const std::vector<TextureAssetLevel> &levels,
+    void *data, const std::vector<TextureAssetMipLevel> &levels,
     rhi::Format format) {
   rhi::TextureDescription description{};
   description.mipLevelCount = static_cast<u32>(levels.size());
@@ -122,7 +122,7 @@ std::vector<u8> ImageLoader::generateMipMapsFromTextureData(
   TextureUtils::copyDataToTexture(
       mRenderStorage.getDevice(), data, texture,
       rhi::ImageLayout::TransferDestinationOptimal, 1,
-      {TextureAssetLevel{0, size, description.width, description.height}});
+      {TextureAssetMipLevel{0, size, description.width, description.height}});
 
   TextureUtils::generateMipMapsForTexture(
       mRenderStorage.getDevice(), texture,

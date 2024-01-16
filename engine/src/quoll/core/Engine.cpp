@@ -9,7 +9,7 @@ Engine Engine::engine;
 
 Engine::Engine() { resetLoggers(); }
 
-void Engine::setPath(const Path &path) {
+void Engine::setEnginePath(const Path &path) {
   engine.mEnginePath = path;
   engine.mAssetsPath = engine.mEnginePath / "assets";
 }

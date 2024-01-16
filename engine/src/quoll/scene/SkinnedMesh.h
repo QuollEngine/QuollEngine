@@ -4,13 +4,7 @@
 
 namespace quoll {
 
-/**
- * @brief Skinned mesh component
- */
 struct SkinnedMesh {
-  /**
-   * Skinned mesh asset handle
-   */
   MeshAssetHandle handle = MeshAssetHandle::Null;
 };
 
