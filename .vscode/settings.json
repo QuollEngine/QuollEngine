@@ -91,6 +91,7 @@
     "codecvt": "cpp",
     "coroutine": "cpp",
     "resumable": "cpp",
-    "future": "cpp"
+    "future": "cpp",
+    "cinttypes": "cpp"
   }
 }

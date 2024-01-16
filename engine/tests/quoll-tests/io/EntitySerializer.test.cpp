@@ -745,7 +745,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
 
   auto entity = entityDatabase.create();
   quoll::Text component{};
-  component.text = "";
+  component.content = "";
   component.font = handle;
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -758,7 +758,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
   auto entity = entityDatabase.create();
 
   quoll::Text component{};
-  component.text = "Hello world";
+  component.content = "Hello world";
   component.font = NonExistentHandle;
   entityDatabase.set(entity, component);
 
@@ -774,7 +774,7 @@ TEST_F(EntitySerializerTest,
 
   auto entity = entityDatabase.create();
   quoll::Text component{};
-  component.text = "Hello world";
+  component.content = "Hello world";
   component.lineHeight = 2.0f;
   component.font = handle;
 

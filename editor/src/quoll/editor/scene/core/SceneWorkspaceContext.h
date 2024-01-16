@@ -6,23 +6,11 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Workspace context
- */
 struct WorkspaceContext {
-  /**
-   * Workspace state
-   */
   WorkspaceState &state;
 
-  /**
-   * Action executor
-   */
   ActionExecutor &actionExecutor;
 
-  /**
-   * Asset manager
-   */
   AssetManager &assetManager;
 };
 

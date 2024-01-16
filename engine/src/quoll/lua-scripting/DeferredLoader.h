@@ -14,19 +14,8 @@ namespace quoll::lua {
  */
 class DeferredLoader {
 public:
-  /**
-   * @brief Set loader
-   *
-   * @param callback Callback
-   * @return Self
-   */
   DeferredLoader &operator=(std::function<void()> callback);
 
-  /**
-   * @brief Wait
-   *
-   * Requests loader to be called
-   */
   void wait();
 
 private:

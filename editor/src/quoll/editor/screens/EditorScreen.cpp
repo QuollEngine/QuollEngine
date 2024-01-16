@@ -56,7 +56,7 @@ void EditorScreen::start(const Project &rawProject) {
   RenderStorage renderStorage(mDevice);
 
   quoll::RendererOptions initialOptions{};
-  initialOptions.size = mWindow.getFramebufferSize();
+  initialOptions.framebufferSize = mWindow.getFramebufferSize();
   Renderer renderer(renderStorage, initialOptions);
 
   AssetManager assetManager(project.assetsPath, project.assetsCachePath,

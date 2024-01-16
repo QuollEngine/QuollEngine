@@ -10,33 +10,15 @@ namespace quoll::editor {
 
 enum class WorkspaceMode { Edit, Simulation };
 
-/**
- * @brief State for editor workspace
- */
 struct WorkspaceState {
-  /**
-   * Project data
-   */
   Project project;
 
-  /**
-   * Workspace mode
-   */
   WorkspaceMode mode = WorkspaceMode::Edit;
 
-  /**
-   * Scene
-   */
   Scene scene;
 
-  /**
-   * Active transform operation
-   */
   TransformOperation activeTransform = TransformOperation::Move;
 
-  /**
-   * Workspace camera
-   */
   Entity camera{Entity::Null};
 
   /**

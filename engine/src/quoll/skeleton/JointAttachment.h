@@ -4,13 +4,7 @@
 
 namespace quoll {
 
-/**
- * @brief Joint attachment
- */
 struct JointAttachment {
-  /**
-   * Joint index
-   */
   i16 joint = -1;
 };
 

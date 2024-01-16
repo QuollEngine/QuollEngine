@@ -5,29 +5,20 @@
 namespace quoll {
 
 /**
- * @brief Animator component
+ * Animator component that handles
+ * entity specific state machine
+ * for controlling animations
+ *
+ * The animator works with normalized time
+ * in range of [0.0, 1.0].
  */
 struct Animator {
-  /**
-   * Animator asset handle
-   */
   AnimatorAssetHandle asset = AnimatorAssetHandle::Null;
 
-  /**
-   * Current animator state
-   */
   usize currentState = std::numeric_limits<usize>::max();
 
-  /**
-   * Normalized time
-   *
-   * Range: [0.0, 1.0];
-   */
   f32 normalizedTime = 0.0f;
 
-  /**
-   * Animation is playing
-   */
   bool playing = true;
 };
 

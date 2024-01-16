@@ -9,57 +9,19 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Editor renderer
- *
- * Creates editor shaders and render pass
- */
 class EditorRenderer {
-  /**
-   * @brief Collidable shape draw information
-   */
   struct CollidableShapeDraw {
-    /**
-     * @brief Vertex buffer that holds shape data
-     */
     rhi::Buffer buffer;
 
-    /**
-     * @brief Number of vertices
-     *
-     * Used when recording draw command
-     */
     u32 vertexCount = 0;
   };
 
 public:
-  /**
-   * @brief Create editor renderer
-   *
-   * @param renderStorage Render storage
-   * @param device Render device
-   */
   EditorRenderer(RenderStorage &renderStorage, rhi::RenderDevice *device);
 
-  /**
-   * @brief Attach to render graph
-   *
-   * @param graph Render graph
-   * @param scenePassData Scene pass data
-   * @param options Renderer options
-   */
   void attach(RenderGraph &graph, const SceneRenderPassData &scenePassData,
               const RendererOptions &options);
 
-  /**
-   * @brief Update frame data
-   *
-   * @param entityDatabase Entity database
-   * @param camera Camera
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @param frameIndex Frame index
-   */
   void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
                        WorkspaceState &state, AssetRegistry &assetRegistry,
                        u32 frameIndex);
@@ -80,9 +42,6 @@ private:
                           rhi::PipelineHandle pipeline, u32 instanceStart,
                           u32 instanceEnd, glm::vec4 color, f32 scale);
 
-  /**
-   * @brief Create buffers for collidable shapes
-   */
   void createCollidableShapes();
 
 private:

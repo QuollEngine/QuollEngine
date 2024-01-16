@@ -5,7 +5,7 @@
 namespace quoll {
 
 /**
- * @brief Noop log transport
+ * Noop log transport
  *
  * Does nothing with incoming log data
  */

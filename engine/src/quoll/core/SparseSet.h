@@ -31,17 +31,8 @@ template <class TData> class SparseSet {
   using Iterator = typename std::vector<TData>::iterator;
 
 public:
-  /**
-   * @brief Create sparse set
-   */
   SparseSet() { mSparseData.resize(SparseDataSize, Empty); }
 
-  /**
-   * @brief Insert item
-   *
-   * @param item Item data
-   * @return Item key
-   */
   usize insert(const TData &item) {
     auto newKey = size();
     if (!mEmptyData.empty()) {
@@ -56,11 +47,6 @@ public:
     return newKey;
   }
 
-  /**
-   * @brief Erase item
-   *
-   * @param key Item key
-   */
   void erase(usize key) {
     QuollAssert(key < mSparseData.size(), "Index out of bounds");
 
@@ -84,12 +70,6 @@ public:
     mEmptyData.push_back(key);
   }
 
-  /**
-   * @brief Get item data
-   *
-   * @param key Item key
-   * @return item data
-   */
   inline TData &at(usize key) {
     QuollAssert(key < mSparseData.size(), "Index out of bounds");
     usize denseIndex = mSparseData.at(key);
@@ -99,12 +79,6 @@ public:
     return mRealData.at(denseIndex);
   }
 
-  /**
-   * @brief Get item data
-   *
-   * @param key Item key
-   * @return item data
-   */
   inline const TData &at(usize key) const {
     QuollAssert(key < mSparseData.size(), "Index out of bounds");
     usize denseIndex = mSparseData.at(key);
@@ -114,44 +88,16 @@ public:
     return mRealData.at(denseIndex);
   }
 
-  /**
-   * @brief Check if item exists
-   *
-   * @param key Item key
-   * @retval true Item exists
-   * @retval false Item does not exist
-   */
   bool contains(usize key) {
     return key < mSparseData.size() && mSparseData.at(key) != Empty;
   }
 
-  /**
-   * @brief Check if sparse set is empty
-   *
-   * @retval true Sparse set is empty
-   * @retval false Sparse set is not empty
-   */
   inline bool empty() const { return mDenseData.empty(); }
 
-  /**
-   * @brief Get sparse set size
-   *
-   * @return Sparse set size
-   */
   inline usize size() const { return mDenseData.size(); }
 
-  /**
-   * @brief Get begin iterator
-   *
-   * @return Begin iterator
-   */
   inline Iterator begin() { return mRealData.begin(); }
 
-  /**
-   * @brief Get end iterator
-   *
-   * @return End iterator
-   */
   inline Iterator end() { return mRealData.end(); }
 
 private:

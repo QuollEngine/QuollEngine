@@ -4,9 +4,6 @@
 
 namespace quoll {
 
-/**
- * @brief Bindless draw parameters
- */
 class BindlessDrawParameters {
   struct Range {
     usize offset = 0;
@@ -15,21 +12,9 @@ class BindlessDrawParameters {
   };
 
 public:
-  /**
-   * @brief Create bindless draw parameters
-   *
-   * @param minBufferAlignment Minimum buffer alignment
-   */
   BindlessDrawParameters(usize minBufferAlignment)
       : mMinBufferAlignment(minBufferAlignment) {}
 
-  /**
-   * @brief Add range to registry
-   *
-   * @tparam TData Data type
-   * @param data Data
-   * @return Range offset
-   */
   template <class TData> usize addRange(TData &&data) {
     usize structSize = sizeof(TData);
     auto *bytes = new TData;
@@ -42,34 +27,13 @@ public:
     return currentOffset;
   }
 
-  /**
-   * @brief Get descriptor
-   *
-   * @return Descriptor
-   */
   inline const rhi::Descriptor &getDescriptor() const { return mDescriptor; }
 
-  /**
-   * @brief Build buffers and descriptor
-   *
-   * @param device Render device
-   */
   void build(rhi::RenderDevice *device);
 
-  /**
-   * @brief Destroy buffers and descriptor
-   *
-   * @param device Render device
-   */
   void destroy(rhi::RenderDevice *device);
 
 private:
-  /**
-   * @brief Pad size to minimum uniform alignment
-   *
-   * @param originalSize Original size
-   * @return Padded size
-   */
   usize padSizeToMinimumUniformAlignment(usize originalSize);
 
 private:

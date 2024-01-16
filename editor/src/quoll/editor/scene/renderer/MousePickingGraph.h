@@ -8,71 +8,27 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Render graph for mouse picking
- *
- * Performs mouse picking using shaders
- * and writes the output to a host visible
- * storage buffer
- */
 class MousePickingGraph {
   struct MousePickingFrameData {
     std::vector<glm::vec4> textBounds;
   };
 
 public:
-  /**
-   * @brief Create mouse picking graph
-   *
-   * @param frameData Scene renderer frame data
-   * @param assetRegistry Asset registry
-   * @param renderStorage Render storage
-   */
   MousePickingGraph(const std::array<SceneRendererFrameData, 2> &frameData,
                     AssetRegistry &assetRegistry, RenderStorage &renderStorage);
 
-  /**
-   * @brief Execute the graph
-   *
-   * @param commandList Command list
-   * @param mousePos Mouse position
-   * @param frameIndex Frame index
-   */
   void execute(rhi::RenderCommandList &commandList, const glm::vec2 &mousePos,
                u32 frameIndex);
 
-  /**
-   * @brief Get selected entity
-   *
-   * If no entity is selected,
-   * returns null entity
-   *
-   * @return Selected entity
-   */
   Entity getSelectedEntity();
 
-  /**
-   * @brief Set framebuffer size
-   *
-   * @param size Framebuffer size
-   */
   void setFramebufferSize(glm::uvec2 size);
 
-  /**
-   * @brief Check is selection is performed in current frame
-   *
-   * @param frameIndex Frame index
-   * @retval true Selection is performed in current frame
-   * @retval false Selection is not performed in current frame
-   */
   inline bool isSelectionPerformedInFrame(u32 frameIndex) const {
     return frameIndex == mFrameIndex;
   }
 
 private:
-  /**
-   * @brief Create render graph
-   */
   void createRenderGraph();
 
 private:

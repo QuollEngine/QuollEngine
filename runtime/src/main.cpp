@@ -8,7 +8,7 @@
 int main() {
   auto gamePath = std::filesystem::current_path();
 
-  quoll::Engine::setPath(gamePath / "engine");
+  quoll::Engine::setEnginePath(gamePath / "engine");
 
   auto launchPath = gamePath / "launch.yml";
 

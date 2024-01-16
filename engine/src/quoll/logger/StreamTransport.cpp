@@ -3,13 +3,6 @@
 
 namespace quoll {
 
-/**
- * @brief Format log headers
- *
- * @param severity Severity
- * @param timestamp Timestamp
- * @return Formatted header string
- */
 String formatLogHeaders(
     LogSeverity severity,
     std::chrono::time_point<std::chrono::system_clock> &&timestamp) {

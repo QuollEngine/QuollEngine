@@ -11,21 +11,21 @@ namespace quoll {
 TextLuaTable::TextLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-sol_maybe<String> TextLuaTable::getText() {
+sol_maybe<String> TextLuaTable::getContent() {
   if (mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
-    return mScriptGlobals.entityDatabase.get<Text>(mEntity).text;
+    return mScriptGlobals.entityDatabase.get<Text>(mEntity).content;
   }
 
   return sol::nil;
 }
 
-void TextLuaTable::setText(String text) {
+void TextLuaTable::setContent(String content) {
   // Text needs to exist in order to change it
   if (!mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
     return;
   }
 
-  mScriptGlobals.entityDatabase.get<Text>(mEntity).text = text;
+  mScriptGlobals.entityDatabase.get<Text>(mEntity).content = content;
 }
 
 sol_maybe<f32> TextLuaTable::getLineHeight() {
@@ -54,7 +54,7 @@ void TextLuaTable::deleteThis() {
 void TextLuaTable::create(sol::usertype<TextLuaTable> usertype,
                           sol::state_view state) {
   usertype["content"] =
-      sol::property(&TextLuaTable::getText, &TextLuaTable::setText);
+      sol::property(&TextLuaTable::getContent, &TextLuaTable::setContent);
   usertype["lineHeight"] =
       sol::property(&TextLuaTable::getLineHeight, &TextLuaTable::setLineHeight);
   usertype["delete"] = &TextLuaTable::deleteThis;

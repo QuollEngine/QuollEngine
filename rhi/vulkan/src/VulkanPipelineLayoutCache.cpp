@@ -6,14 +6,6 @@
 
 namespace quoll::rhi {
 
-/**
- * @brief Check if two descriptor set bindings match
- *
- * @param a First binding
- * @param b Second binding
- * @retval true Bindings match
- * @retval false Bindings do not match
- */
 static bool bindingsMatch(const VkDescriptorSetLayoutBinding &a,
                           const VkDescriptorSetLayoutBinding &b) {
   return (a.binding == b.binding) && (a.descriptorCount == b.descriptorCount) &&
@@ -21,14 +13,6 @@ static bool bindingsMatch(const VkDescriptorSetLayoutBinding &a,
          (a.stageFlags == b.stageFlags);
 }
 
-/**
- * @brief Check if two descriptor set bindings match
- *
- * @param a First binding
- * @param b Second binding
- * @retval true Bindings match
- * @retval false Bindings do not match
- */
 static bool bindingsMatch(const DescriptorLayoutBindingDescription &a,
                           const DescriptorLayoutBindingDescription &b) {
   return (a.binding == b.binding) && (a.name == b.name);

@@ -6,12 +6,6 @@
 
 namespace quoll {
 
-/**
- * @brief Store text file contents in a buffer
- *
- * @param stream Input stream
- * @return Vector of characters
- */
 static std::vector<u8> readFileIntoBuffer(std::ifstream &stream) {
   std::ostringstream ss;
   ss << stream.rdbuf();
@@ -21,12 +15,6 @@ static std::vector<u8> readFileIntoBuffer(std::ifstream &stream) {
   return bytes;
 }
 
-/**
- * @brief Inject varibale register functions
- *
- * @param state Sol state
- * @param data Lua script asset data
- */
 static void injectInputVarsInterface(sol::state &state, LuaScriptAsset &data) {
   auto inputVars = state.create_named_table("inputVars");
   auto *luaState = state.lua_state();

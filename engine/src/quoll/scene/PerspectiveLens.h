@@ -2,58 +2,35 @@
 
 namespace quoll {
 
-/**
- * @brief Perspective lens component
- */
 struct PerspectiveLens {
   /**
-   * Default sensor size
-   *
    * Based on APS-C
    */
   static constexpr glm::vec2 DefaultSensorSize{23.6f, 15.6f};
 
-  /**
-   * Default focal length
-   */
   static constexpr f32 DefaultFocalLength = 23.0f;
 
-  /**
-   * Default aperture
-   */
   static constexpr f32 DefaultAperture = 16.0f;
 
-  /**
-   * Default shutter speed
-   */
   static constexpr f32 DefaultShutterSpeed = 1.0f / 250.0f;
 
-  /**
-   * Default sensitivity
-   */
   static constexpr u32 DefaultSensitivity = 200;
 
-  /**
-   * Default near plane
-   */
   static constexpr f32 DefaultNearPlane = 0.1f;
 
-  /**
-   * Default far plane
-   */
   static constexpr f32 DefaultFarPlane = 1000.0f;
 
   /**
-   * Near plane
+   * Near plane in meters
    *
-   * Measured in meters
+   * Example: 0.1m, 0.01m, 0.001m
    */
   f32 near = DefaultNearPlane;
 
   /**
-   * Far plane
+   * Far plane in meters
    *
-   * Measured in meters
+   * Example: 100m, 1000m, 10000m
    */
   f32 far = DefaultFarPlane;
 
@@ -63,23 +40,21 @@ struct PerspectiveLens {
   f32 aspectRatio = 1.0f;
 
   /**
-   * Sensor size
+   * Sensor size in millimeters
    *
-   * Measured in millimeters
+   * Example: (23.6mm, 15.6mm)
    */
   glm::vec2 sensorSize = DefaultSensorSize;
 
   /**
-   * Lens focal length
+   * Lens focal length in millimeters
    *
-   * Measured in millimeters
+   * Example: 23mm, 26mm, 12mm
    */
   f32 focalLength = DefaultFocalLength;
 
   /**
-   * Lens aperture
-   *
-   * Measured in f-stops
+   * Lens aperture in f-stops
    *
    * Example: f3.5, f1.6, f22
    */

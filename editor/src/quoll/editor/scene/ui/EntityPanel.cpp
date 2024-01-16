@@ -63,21 +63,10 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Imgui text callback user data
- */
 struct ImguiInputTextCallbackUserData {
-  /**
-   * Passed string value ref
-   */
   String &value;
 };
 
-/**
- * @brief ImGui input text resize callback
- *
- * @param data Imgui input text callback data
- */
 static int InputTextCallback(ImGuiInputTextCallbackData *data) {
   auto *userData =
       static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
@@ -91,13 +80,6 @@ static int InputTextCallback(ImGuiInputTextCallbackData *data) {
   return 0;
 }
 
-/**
- * @brief Multiline Input text for std::string
- *
- * @param label Label
- * @param value String value
- * @param flags Input text flags
- */
 static bool ImguiMultilineInputText(const String &label, String &value,
                                     const ImVec2 &size,
                                     ImGuiInputTextFlags flags = 0) {
@@ -1015,12 +997,6 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
   }
 }
 
-/**
- * @brief Get geometry name
- *
- * @param type Geometry type
- * @return String name for geometry
- */
 static String getGeometryName(const PhysicsGeometryType &type) {
   switch (type) {
   case PhysicsGeometryType::Box:
@@ -1300,7 +1276,7 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
     bool sendAction = false;
 
     ImGui::Text("Content");
-    String tmpText = text.text;
+    String tmpText = text.content;
     if (ImguiMultilineInputText(
             "###InputContent", tmpText,
             ImVec2(ImGui::GetWindowWidth(), ContentInputHeight), 0)) {
@@ -1309,7 +1285,7 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
             mSelectedEntity, text);
       }
 
-      text.text = tmpText;
+      text.content = tmpText;
     }
 
     if (ImGui::IsItemDeactivatedAfterEdit()) {

@@ -124,8 +124,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
   rhi::TextureDescription sceneColorDesc{};
   sceneColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  sceneColorDesc.width = options.size.x;
-  sceneColorDesc.height = options.size.y;
+  sceneColorDesc.width = options.framebufferSize.x;
+  sceneColorDesc.height = options.framebufferSize.y;
   sceneColorDesc.layerCount = 1;
   sceneColorDesc.format = rhi::Format::Rgba16Float;
   sceneColorDesc.samples = mMaxSampleCounts;
@@ -144,8 +144,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
   rhi::TextureDescription hdrColorDesc{};
   hdrColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  hdrColorDesc.width = options.size.x;
-  hdrColorDesc.height = options.size.y;
+  hdrColorDesc.width = options.framebufferSize.x;
+  hdrColorDesc.height = options.framebufferSize.y;
   hdrColorDesc.layerCount = 1;
   hdrColorDesc.format = rhi::Format::Rgba8Srgb;
   hdrColorDesc.debugName = "HDR";
@@ -158,8 +158,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
   rhi::TextureDescription depthBufferDesc{};
   depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
-  depthBufferDesc.width = options.size.x;
-  depthBufferDesc.height = options.size.y;
+  depthBufferDesc.width = options.framebufferSize.x;
+  depthBufferDesc.height = options.framebufferSize.y;
   depthBufferDesc.layerCount = 1;
   depthBufferDesc.samples = mMaxSampleCounts;
   depthBufferDesc.format = rhi::Format::Depth32Float;
@@ -481,8 +481,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
   description.format = rhi::Format::Rgba16Float;
   description.usage = rhi::TextureUsage::Sampled | rhi::TextureUsage::Storage |
                       rhi::TextureUsage::Color;
-  description.width = options.size.x;
-  description.height = options.size.y;
+  description.width = options.framebufferSize.x;
+  description.height = options.framebufferSize.y;
 
   auto bloomTexture =
       graph.create(description).onReady([](auto handle, auto &storage) {
@@ -500,14 +500,14 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     };
 
     std::vector<BloomMip> bloomChain;
-    bloomChain.push_back({bloomTexture, options.size});
+    bloomChain.push_back({bloomTexture, options.framebufferSize});
     bloomChain.reserve(BloomMipChainSize);
     for (u32 i = 1; i < BloomMipChainSize; ++i) {
       auto view = graph.createView(bloomTexture, i)
                       .onReady([](auto handle, auto &storage) {
                         storage.addToDescriptor(handle);
                       });
-      bloomChain.push_back({view, options.size / 2u});
+      bloomChain.push_back({view, options.framebufferSize / 2u});
     }
 
     auto extractBrightColorsPipeline =
@@ -549,8 +549,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
                                   sizeof(glm::uvec4), glm::value_ptr(texture));
 
         commandList.bindPipeline(extractBrightColorsPipeline);
-        commandList.dispatch(options.size.x / WorkGroupSize,
-                             options.size.y / WorkGroupSize, 1);
+        commandList.dispatch(options.framebufferSize.x / WorkGroupSize,
+                             options.framebufferSize.y / WorkGroupSize, 1);
       }
 
       // Downsample
@@ -824,11 +824,12 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
        entityDatabase.view<Text, WorldTransform>()) {
     const auto &font = mAssetRegistry.getFonts().getAsset(text.font).data;
 
-    std::vector<SceneRendererFrameData::GlyphData> glyphs(text.text.length());
+    std::vector<SceneRendererFrameData::GlyphData> glyphs(
+        text.content.length());
     f32 advanceX = 0;
     f32 advanceY = 0;
-    for (usize i = 0; i < text.text.length(); ++i) {
-      char c = text.text.at(i);
+    for (usize i = 0; i < text.content.length(); ++i) {
+      char c = text.content.at(i);
 
       if (c == '\n') {
         advanceX = 0.0f;
@@ -837,7 +838,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       }
 
       const auto &fontGlyph = font.glyphs.at(c);
-      glyphs.at(i).bounds = fontGlyph.bounds;
+      glyphs.at(i).atlasBounds = fontGlyph.atlasBounds;
       glyphs.at(i).planeBounds = fontGlyph.planeBounds;
 
       glyphs.at(i).planeBounds.x += advanceX;

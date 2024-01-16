@@ -16,47 +16,16 @@
 
 namespace quoll {
 
-/**
- * @brief Entity table
- */
 class EntityLuaTable {
 public:
-  /**
-   * @brief Create entity table
-   *
-   * @param entity Entity
-   * @param scriptGlobals Script globals
-   */
   EntityLuaTable(Entity entity, ScriptGlobals scriptGlobals);
 
-  /**
-   * @brief Create interface
-   *
-   * @param state Sol state
-   */
   static void create(sol::state_view state);
 
-  /**
-   * @brief Get entity
-   *
-   * @return Entity
-   */
   inline Entity getEntity() { return mEntity; }
 
-  /**
-   * @brief Get script globals
-   *
-   * @return Script globals;
-   */
   inline ScriptGlobals &getScriptGlobals() { return mScriptGlobals; }
 
-  /**
-   * @brief Equality operator
-   *
-   * @param rhs Other entity lua table
-   * @retval true Entities are equal
-   * @retval false Entities are not equal
-   */
   inline bool operator==(const EntityLuaTable &rhs) const {
     return mEntity == rhs.mEntity;
   }

@@ -19,11 +19,6 @@ namespace quoll::rhi {
  */
 class VulkanPipelineLayoutCache {
 public:
-  /**
-   * @brief Create Vulkan pipeline layout cache
-   *
-   * @param device Vulkan device
-   */
   VulkanPipelineLayoutCache(VulkanDeviceObject &device);
 
   VulkanPipelineLayoutCache(const VulkanPipelineLayoutCache &) = delete;
@@ -32,60 +27,27 @@ public:
   operator=(const VulkanPipelineLayoutCache &) = delete;
   VulkanPipelineLayoutCache &operator=(VulkanPipelineLayoutCache &&) = delete;
 
-  /**
-   * @brief Destroy pipeline layout cache
-   */
   ~VulkanPipelineLayoutCache();
 
-  /**
-   * @brief Get or create descriptor layout
-   *
-   * @param description Descriptor layout description
-   * @return Descriptor layout
-   */
   DescriptorLayoutHandle
   getOrCreateDescriptorLayout(const DescriptorLayoutDescription &description);
 
-  /**
-   * @brief Clear pipeline layout cache
-   */
   void clear();
 
-  /**
-   * @brief Get Vulkan descriptor set layout
-   *
-   * @param handle Descriptor layout handle
-   * @return Vulkan descriptor set layout
-   */
   inline VkDescriptorSetLayout
   getVulkanDescriptorSetLayout(DescriptorLayoutHandle handle) {
     return mDescriptorSetLayouts.at(static_cast<usize>(handle) - 1);
   }
 
-  /**
-   * @brief Get descriptor layout description
-   *
-   * @param handle Descriptor layout handle
-   * @return Descriptor l;ayout description
-   */
   inline const DescriptorLayoutDescription &
   getDescriptorLayoutDescription(DescriptorLayoutHandle handle) {
     return mDescriptorLayoutDescriptions.at(static_cast<usize>(handle) - 1);
   }
 
 private:
-  /**
-   * @brief Create descriptor layout
-   *
-   * @param info Descriptor layout description
-   * @return Vulkan descriptor set layout
-   */
   VkDescriptorSetLayout
   createDescriptorLayout(const DescriptorLayoutDescription &description);
 
-  /**
-   * @brief Destroy all descriptor layouts
-   */
   void destroyAllDescriptorLayouts();
 
 private:

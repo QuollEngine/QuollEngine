@@ -33,12 +33,6 @@ static constexpr ImColor rgba(i32 r, i32 g, i32 b, i32 a) {
   return ImColor(r, g, b, a);
 }
 
-/**
- * @brief Srgb color to linear
- *
- * @param color Srgb color
- * @return Linear color
- */
 static ImVec4 SrgbToLinear(ImColor color) {
   return {SrgbToLinear(color.Value.x), SrgbToLinear(color.Value.y),
           SrgbToLinear(color.Value.z), color.Value.w};
@@ -81,9 +75,6 @@ static constexpr ThemeStyles Styles{.itemSpacing = ImVec2(8.0f, 8.0f),
                                     .framePadding = ImVec2(10.0f, 10.0f),
                                     .childRounding = 4.0f};
 
-/**
- * @brief Set imgui styles
- */
 static void setImguiStyles() {
   auto &style = ImGui::GetStyle();
 
@@ -175,9 +166,6 @@ static void setImguiStyles() {
       Theme::getColor(ThemeColor::Sienna600);
 }
 
-/**
- * @brief Add fonts
- */
 static void addFonts() {
   auto &io = ImGui::GetIO();
 

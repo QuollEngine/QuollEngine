@@ -29,7 +29,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   RenderStorage renderStorage(mDevice);
 
   quoll::RendererOptions initialOptions{};
-  initialOptions.size = mWindow.getFramebufferSize();
+  initialOptions.framebufferSize = mWindow.getFramebufferSize();
 
   Renderer renderer(renderStorage, initialOptions);
 

@@ -7,24 +7,10 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Project selector screen
- */
 class ProjectSelectorScreen {
 public:
-  /**
-   * @brief Create project selector screen
-   *
-   * @param window Window
-   * @param device Render device
-   */
   ProjectSelectorScreen(Window &window, rhi::RenderDevice *device);
 
-  /**
-   * @brief Start project selector screen
-   *
-   * @return Optional project
-   */
   std::optional<Project> start();
 
 private:

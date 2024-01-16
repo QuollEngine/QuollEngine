@@ -12,51 +12,19 @@
 
 namespace quoll::rhi {
 
-/**
- * @brief Vulkan texture
- */
 class VulkanTexture {
 public:
-  /**
-   * @brief Create Vulkan texture
-   *
-   * Create texture from available resources
-   * @param image Vulkan image
-   * @param imageView Vulkan image view
-   * @param sampler Vulkan sampler
-   * @param format Vulkan format
-   * @param allocator Vulkan Resource allocator
-   * @param device Vulkan device
-   */
   VulkanTexture(VkImage image, VkImageView imageView, VkSampler sampler,
                 VkFormat format, VulkanResourceAllocator &allocator,
                 VulkanDeviceObject &device);
 
-  /**
-   * @brief Create Vulkan texture
-   *
-   * @param description Texture description
-   * @param allocator Vma allocator
-   * @param device Vulkan device
-   */
   VulkanTexture(const TextureDescription &description,
                 VulkanResourceAllocator &allocator, VulkanDeviceObject &device);
 
-  /**
-   * @brief Create Vulkan texture view
-   *
-   * @param description Texture description
-   * @param registry Vulkan resource registry
-   * @param allocator Vulkan resource allocator
-   * @param device Vulkan device
-   */
   VulkanTexture(const TextureViewDescription &description,
                 VulkanResourceRegistry &registry,
                 VulkanResourceAllocator &allocator, VulkanDeviceObject &device);
 
-  /**
-   * @brief Destroy texture
-   */
   ~VulkanTexture();
 
   VulkanTexture(const VulkanTexture &) = delete;
@@ -64,46 +32,16 @@ public:
   VulkanTexture(VulkanTexture &&) = delete;
   VulkanTexture &operator=(VulkanTexture &&) = delete;
 
-  /**
-   * @brief Get Vulkan image
-   *
-   * @return Vulkan image
-   */
   inline VkImage getImage() const { return mImage; }
 
-  /**
-   * @brief Get Vulkan image view
-   *
-   * @return Vulkan image view
-   */
   inline VkImageView getImageView() const { return mImageView; }
 
-  /**
-   * @brief Get Vulkan allocation
-   *
-   * @return Vulkan allocation
-   */
   inline VmaAllocation getAllocation() const { return mAllocation; }
 
-  /**
-   * @brief Get Vulkan format
-   *
-   * @return Vulkan format
-   */
   inline VkFormat getFormat() const { return mFormat; }
 
-  /**
-   * @brief Get image aspect flags
-   *
-   * @return Image aspect flags
-   */
   inline VkImageAspectFlags getImageAspectFlags() const { return mAspectFlags; }
 
-  /**
-   * @brief Get description
-   *
-   * @return Description
-   */
   inline const TextureDescription &getDescription() const {
     return mDescription;
   }

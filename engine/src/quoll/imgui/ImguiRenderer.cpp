@@ -75,8 +75,8 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph,
 
   rhi::TextureDescription imguiDesc{};
   imguiDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  imguiDesc.width = options.size.x;
-  imguiDesc.height = options.size.y;
+  imguiDesc.width = options.framebufferSize.x;
+  imguiDesc.height = options.framebufferSize.y;
   imguiDesc.layerCount = 1;
   imguiDesc.format = rhi::Format::Rgba8Srgb;
   imguiDesc.debugName = "Imgui color";
@@ -337,8 +337,9 @@ void ImguiRenderer::buildFonts() {
     TextureUtils::copyDataToTexture(
         mRenderStorage.getDevice(), pixels, mFontTexture,
         rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
-        {TextureAssetLevel{0, static_cast<usize>(width) * height * 4,
-                           static_cast<u32>(width), static_cast<u32>(height)}});
+        {TextureAssetMipLevel{0, static_cast<usize>(width) * height * 4,
+                              static_cast<u32>(width),
+                              static_cast<u32>(height)}});
   }
 
   io.Fonts->SetTexID(reinterpret_cast<void *>(static_cast<uptr>(mFontTexture)));

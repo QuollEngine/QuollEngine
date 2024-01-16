@@ -231,7 +231,7 @@ HDRIImporter::convertEquirectangularToCubemap(f32 *data, u32 width,
   auto numLevels =
       static_cast<u32>(std::floor(std::log2(CubemapResolution))) + 1;
 
-  std::vector<TextureAssetLevel> levels(numLevels);
+  std::vector<TextureAssetMipLevel> levels(numLevels);
   u32 bufferOffset = 0;
   u32 mipWidth = CubemapResolution;
   u32 mipHeight = CubemapResolution;

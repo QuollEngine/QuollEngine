@@ -5,7 +5,7 @@
 namespace quoll {
 
 /**
- * @brief Mesh render utilities
+ * Mesh render utilities
  */
 class MeshRenderUtils {
   static constexpr usize SkinGeometryContributors = 3;

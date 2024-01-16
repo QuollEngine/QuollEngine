@@ -9,13 +9,13 @@ jobs:
     name: Format Check
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install clang-format
+      - uses: actions/checkout@v4
+
+      - name: Setup compiler
+        uses: ./.github/actions/setup-compiler
+
       - name: Verify Clang Format
-        run: ./scripts/clang-format-all.sh 14 verify
+        run: ./scripts/clang-format-all.sh 16 verify
 
   build-dependencies:
     name: Build dependencies

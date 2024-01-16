@@ -6,39 +6,14 @@
 
 namespace quoll {
 
-/**
- * @brief Game lua table
- */
 class GameLuaTable {
 public:
-  /**
-   * @brief Create lua table
-   *
-   * @param entity Entity
-   * @param scriptGlobals Script globals
-   */
   GameLuaTable(Entity entity, ScriptGlobals scriptGlobals);
 
-  /**
-   * @brief Get service
-   *
-   * @param name Service name
-   * @return Service Lua table
-   */
-  sol::object get(String name);
+  sol::object getService(String name);
 
-  /**
-   * @brief Get on update signal
-   *
-   * @return On update signal
-   */
   SignalLuaTable onUpdate();
 
-  /**
-   * @brief Create game sol user type
-   *
-   * @param state Sol state
-   */
   static void create(sol::state_view state);
 
 private:

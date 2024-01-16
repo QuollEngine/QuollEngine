@@ -10,25 +10,10 @@
 
 namespace quoll {
 
-/**
- * @brief Audio system
- *
- * @tparam AudioBackend Audio backend
- */
 template <class AudioBackend = DefaultAudioBackend> class AudioSystem {
 public:
-  /**
-   * @brief Create audio system
-   *
-   * @param assetRegistry Asset regsitry
-   */
   AudioSystem(AssetRegistry &assetRegistry) : mAssetRegistry(assetRegistry) {}
 
-  /**
-   * @brief Output all sounds to device
-   *
-   * @param entityDatabase Entity database
-   */
   void output(EntityDatabase &entityDatabase) {
     QUOLL_PROFILE_EVENT("AudioSystem::output");
 
@@ -86,11 +71,6 @@ public:
     }
   }
 
-  /**
-   * @brief Cleanup all the audio instances
-   *
-   * @param entityDatabase Entity database
-   */
   void cleanup(EntityDatabase &entityDatabase) {
     for (auto [entity, status] : entityDatabase.view<AudioStatus>()) {
       mBackend.destroySound(status.instance);
@@ -100,21 +80,11 @@ public:
     entityDatabase.destroyComponents<AudioStart>();
   }
 
-  /**
-   * @brief Observer changes in entities
-   *
-   * @param entityDatabase Entity database
-   */
   void observeChanges(EntityDatabase &entityDatabase) {
     mAudioSourceRemoveObserver = entityDatabase.observeRemove<AudioSource>();
     mAudioStatusRemoveObserver = entityDatabase.observeRemove<AudioStatus>();
   }
 
-  /**
-   * @brief Get audio backend
-   *
-   * @return Audio backend
-   */
   inline AudioBackend &getBackend() { return mBackend; }
 
 private:

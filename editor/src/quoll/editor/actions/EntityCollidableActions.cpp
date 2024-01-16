@@ -5,12 +5,6 @@
 
 namespace quoll::editor {
 
-/**
- * @brief Get defaulty geometry from type
- *
- * @param type Geometry type
- * @return Default geometry parameters
- */
 static PhysicsGeometryParams
 getDefaultGeometryFromType(const PhysicsGeometryType &type) {
   switch (type) {

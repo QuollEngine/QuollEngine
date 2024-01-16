@@ -41,7 +41,7 @@ void Runtime::start() {
   RenderStorage renderStorage(device);
 
   RendererOptions initialOptions{};
-  initialOptions.size = {Width, Height};
+  initialOptions.framebufferSize = {Width, Height};
   Renderer renderer(renderStorage, initialOptions);
   ImguiRenderer imguiRenderer(window, renderStorage);
 

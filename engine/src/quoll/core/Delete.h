@@ -3,7 +3,7 @@
 namespace quoll {
 
 /**
- * @brief Delete component
+ * Marks entities for deletion
  */
 struct Delete {};
 

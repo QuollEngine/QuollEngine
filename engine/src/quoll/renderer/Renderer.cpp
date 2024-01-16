@@ -19,7 +19,7 @@ void Renderer::setGraphBuilder(GraphBuilderFn &&builderFn) {
 }
 
 void Renderer::setFramebufferSize(glm::uvec2 size) {
-  mOptions.size = size;
+  mOptions.framebufferSize = size;
   mOptionsChanged = true;
 }
 

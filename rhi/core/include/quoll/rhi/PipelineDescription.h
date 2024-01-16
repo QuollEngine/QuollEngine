@@ -25,38 +25,17 @@ enum class CullMode { None, Front, Back, FrontAndBack };
 
 enum class FrontFace { Clockwise, CounterClockwise };
 
-/**
- * @brief Pipeline input assembly
- */
 struct PipelineInputAssembly {
-  /**
-   * Primitive topology
-   */
   PrimitiveTopology primitiveTopology = PrimitiveTopology::TriangleList;
 };
 
-/**
- * @brief Pipeline rasterizer
- */
 struct PipelineRasterizer {
-  /**
-   * Polygon mode
-   */
   PolygonMode polygonMode = PolygonMode::Fill;
 
-  /**
-   * Cull mode
-   */
   CullMode cullMode = CullMode::None;
 
-  /**
-   * Front face direction
-   */
   FrontFace frontFace = FrontFace::Clockwise;
 
-  /**
-   * @brief Line width
-   */
   f32 lineWidth = 1.0f;
 };
 
@@ -104,263 +83,107 @@ enum CompareOp {
   Always
 };
 
-/**
- * @brief Pipeline vertex input binding
- */
 struct PipelineVertexInputBinding {
-  /**
-   * Vertex input binding
-   */
   u32 binding = 0;
 
-  /**
-   * Vertex input stride
-   */
   u32 stride = 0;
 
-  /**
-   * Vertex input rate
-   */
   VertexInputRate inputRate = VertexInputRate::Vertex;
 };
 
-/**
- * @brief Pipeline vertex input attribute
- */
 struct PipelineVertexInputAttribute {
-  /**
-   * Attribute slot
-   */
   u32 slot = 0;
 
-  /**
-   * Attribute binding
-   */
   u32 binding = 0;
 
-  /**
-   * Attribute format
-   */
   Format format = Format::Undefined;
 
-  /**
-   * Attribute offset
-   */
   u32 offset = 0;
 };
 
-/**
- * @brief Pipeline vertex input layout
- */
 struct PipelineVertexInputLayout {
-  /**
-   * Input layout bindings
-   */
   std::vector<PipelineVertexInputBinding> bindings;
 
-  /**
-   * Input layout attributes
-   */
   std::vector<PipelineVertexInputAttribute> attributes;
 };
 
-/**
- * @brief Pipeline color blend attachment
- */
 struct PipelineColorBlendAttachment {
-  /**
-   * Color blend attachment enabled
-   */
   bool enabled = false;
 
-  /**
-   * Source color factor
-   */
   BlendFactor srcColor = BlendFactor::Zero;
 
-  /**
-   * Destination color factor
-   */
   BlendFactor dstColor = BlendFactor::Zero;
 
-  /**
-   * Color blend operation
-   */
   BlendOp colorOp = BlendOp::Add;
 
-  /**
-   * Source alpha factor
-   */
   BlendFactor srcAlpha = BlendFactor::Zero;
 
-  /**
-   * Destination alpha factor
-   */
   BlendFactor dstAlpha = BlendFactor::Zero;
 
-  /**
-   * Alpha blend operation
-   */
   BlendOp alphaOp = BlendOp::Add;
 };
 
-/**
- * @brief Pipeline color blending description
- */
 struct PipelineColorBlend {
-  /**
-   * Color blend attachments
-   */
   std::vector<PipelineColorBlendAttachment> attachments;
 };
 
-/**
- * @brief Pipeline stencil description
- */
 struct PipelineStencil {
-  /**
-   * Stencil fail operation
-   */
   StencilOp failOp = StencilOp::Keep;
 
-  /**
-   * Stencil and depth pass operation
-   */
   StencilOp passOp = StencilOp::Keep;
 
-  /**
-   * Stencil pass but depth fail operation
-   */
   StencilOp depthFailOp = StencilOp::Keep;
 
-  /**
-   * Compare operation
-   */
   CompareOp compareOp = CompareOp::Always;
 
-  /**
-   * Compare mask
-   */
   u32 compareMask = 0;
 
-  /**
-   * Write mask
-   */
   u32 writeMask = 0;
 
-  /**
-   * Reference value
-   */
   u32 reference = 0;
 };
 
-/**
- * @brief Pipeline depth stencil state
- */
 struct PipelineDepthStencil {
-  /**
-   * Depth test
-   */
   bool depthTest = true;
 
-  /**
-   * Depth write
-   */
   bool depthWrite = true;
 
-  /**
-   * Stencil test
-   */
   bool stencilTest = false;
 
-  /**
-   * Front stencil
-   */
   PipelineStencil front{};
 
-  /**
-   * Back stencil
-   */
   PipelineStencil back{};
 };
 
-/**
- * @brief Pipeline multisampling description
- */
 struct PipelineMultisample {
-  /**
-   * Sample count
-   */
   u32 sampleCount = 1;
 };
 
-/**
- * @brief Graphics pipeline description
- */
 struct GraphicsPipelineDescription {
-  /**
-   * Vertex shader
-   */
   ShaderHandle vertexShader = ShaderHandle::Null;
 
-  /**
-   * Fragment shader
-   */
   ShaderHandle fragmentShader = ShaderHandle::Null;
 
-  /**
-   * Vertex input layout
-   */
   PipelineVertexInputLayout inputLayout;
 
-  /**
-   * Input assembly
-   */
   PipelineInputAssembly inputAssembly;
 
-  /**
-   * Rasterizer
-   */
   PipelineRasterizer rasterizer;
 
-  /**
-   * Color blending
-   */
   PipelineColorBlend colorBlend;
 
-  /**
-   * Depth stencil
-   */
   PipelineDepthStencil depthStencil;
 
-  /**
-   * Multisampling
-   */
   PipelineMultisample multisample;
 
-  /**
-   * Debug name
-   */
   String debugName;
 
-  /**
-   * Render pass
-   */
   RenderPassHandle renderPass = RenderPassHandle::Null;
 };
 
-/**
- * @brief Compute pipeline description
- */
 struct ComputePipelineDescription {
-  /**
-   * Compute shader
-   */
   ShaderHandle computeShader = ShaderHandle::Null;
 
-  /**
-   * Debug name
-   */
   String debugName;
 };
 

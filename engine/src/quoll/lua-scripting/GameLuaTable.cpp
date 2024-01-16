@@ -13,7 +13,7 @@ namespace quoll {
 GameLuaTable::GameLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-sol::object GameLuaTable::get(String name) {
+sol::object GameLuaTable::getService(String name) {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
 
   sol::state_view state(script.state);
@@ -56,7 +56,7 @@ SignalLuaTable GameLuaTable::onUpdate() {
 void GameLuaTable::create(sol::state_view state) {
   auto usertype = state.new_usertype<GameLuaTable>("Game", sol::no_constructor);
   usertype["onUpdate"] = sol::property(&GameLuaTable::onUpdate);
-  usertype["get"] = &GameLuaTable::get;
+  usertype["get"] = &GameLuaTable::getService;
 }
 
 } // namespace quoll

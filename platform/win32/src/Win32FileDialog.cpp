@@ -5,18 +5,9 @@
 
 namespace quoll::platform {
 
-/**
- * @brief Win32 file type entry
- */
 struct Win32Entry {
-  /**
-   * @brief Entry label
-   */
   std::wstring label;
 
-  /**
-   * @brief Entry extensions
-   */
   std::wstring extensions;
 };
 

@@ -254,8 +254,8 @@ void EditorRenderer::attach(RenderGraph &graph,
     depthBufferDesc.usage = rhi::TextureUsage::Depth |
                             rhi::TextureUsage::Stencil |
                             rhi::TextureUsage::Sampled;
-    depthBufferDesc.width = options.size.x;
-    depthBufferDesc.height = options.size.y;
+    depthBufferDesc.width = options.framebufferSize.x;
+    depthBufferDesc.height = options.framebufferSize.y;
     depthBufferDesc.layerCount = 1;
     depthBufferDesc.samples = scenePassData.sampleCount;
     depthBufferDesc.format = rhi::Format::Depth32FloatStencil8Uint;
@@ -527,11 +527,12 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 
-      std::vector<SceneRendererFrameData::GlyphData> glyphs(text.text.length());
+      std::vector<SceneRendererFrameData::GlyphData> glyphs(
+          text.content.length());
       f32 advanceX = 0;
       f32 advanceY = 0;
-      for (usize i = 0; i < text.text.length(); ++i) {
-        char c = text.text.at(i);
+      for (usize i = 0; i < text.content.length(); ++i) {
+        char c = text.content.at(i);
 
         if (c == '\n') {
           advanceX = 0.0f;
@@ -540,7 +541,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
         }
 
         const auto &fontGlyph = font.glyphs.at(c);
-        glyphs.at(i).bounds = fontGlyph.bounds;
+        glyphs.at(i).atlasBounds = fontGlyph.atlasBounds;
         glyphs.at(i).planeBounds = fontGlyph.planeBounds;
 
         glyphs.at(i).planeBounds.x += advanceX;

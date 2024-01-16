@@ -4,39 +4,19 @@
 
 namespace quoll {
 
-/**
- * @brief Miniaudio sound interface
- */
 struct MiniAudioSoundInstance {
-  /**
-   * @brief Miniaudio decoder
-   */
   ma_decoder decoder;
 
-  /**
-   * @brief Miniaudio sound
-   */
   ma_sound sound;
 };
 
-/**
- * @brief Miniaudio backend implementation
- *
- * Based on miniaudio
- */
 class MiniAudioBackend::BackendImpl {
 public:
-  /**
-   * @brief Create miniaudio engine
-   */
   BackendImpl() {
     auto result = ma_engine_init(nullptr, &mEngine);
     QuollAssert(result == MA_SUCCESS, "Could not create audio engine");
   }
 
-  /**
-   * @brief Destroy miniaudio engine
-   */
   ~BackendImpl() { ma_engine_uninit(&mEngine); }
 
   BackendImpl(const BackendImpl &) = delete;
@@ -44,12 +24,6 @@ public:
   BackendImpl &operator=(const BackendImpl &) = delete;
   BackendImpl &operator=(BackendImpl &&) = delete;
 
-  /**
-   * @brief Get encoding format
-   *
-   * @param format Asset format
-   * @return Encoding format
-   */
   ma_encoding_format getEncodingFormat(AudioAssetFormat format) {
     switch (format) {
     case AudioAssetFormat::Wav:
@@ -60,12 +34,6 @@ public:
     }
   }
 
-  /**
-   * @brief Play sound
-   *
-   * @param asset Audio asset data
-   * @return MiniAudio sound instance
-   */
   void *playSound(const AudioAsset &asset) {
     auto *instance = new MiniAudioSoundInstance;
 
@@ -88,24 +56,12 @@ public:
     return instance;
   }
 
-  /**
-   * @brief Destroy sound
-   *
-   * @param instance MiniAudio sound instance
-   */
   void destroySound(MiniAudioSoundInstance *instance) {
     ma_sound_uninit(&instance->sound);
     ma_decoder_uninit(&instance->decoder);
     delete instance;
   }
 
-  /**
-   * @brief Check if sound is playing
-   *
-   * @param instance MiniAudio sound instance
-   * @retval true Sound is playing
-   * @retval false Sound is not playing
-   */
   bool isPlaying(MiniAudioSoundInstance *instance) {
     return ma_sound_is_playing(&instance->sound);
   }

@@ -1777,7 +1777,7 @@ TEST_F(SceneLoaderScriptTest,
     ASSERT_TRUE(entityDatabase.has<quoll::Text>(entity));
     const auto &text = entityDatabase.get<quoll::Text>(entity);
 
-    EXPECT_EQ(text.text, validContent);
+    EXPECT_EQ(text.content, validContent);
     EXPECT_EQ(text.lineHeight, defaults.lineHeight);
   }
 
@@ -1791,7 +1791,7 @@ TEST_F(SceneLoaderScriptTest,
     ASSERT_TRUE(entityDatabase.has<quoll::Text>(entity));
     const auto &text = entityDatabase.get<quoll::Text>(entity);
 
-    EXPECT_EQ(text.text, defaults.text);
+    EXPECT_EQ(text.content, defaults.content);
     EXPECT_EQ(text.lineHeight, validLineHeight);
   }
 }
@@ -1821,7 +1821,7 @@ TEST_F(SceneLoaderTextTest, CreatesTextComponentWithFileDataIfValidField) {
   ASSERT_TRUE(entityDatabase.has<quoll::Text>(entity));
   const auto &text = entityDatabase.get<quoll::Text>(entity);
 
-  EXPECT_EQ(text.text, validContent);
+  EXPECT_EQ(text.content, validContent);
   EXPECT_EQ(text.lineHeight, validLineHeight);
   EXPECT_EQ(text.font, handle);
 }

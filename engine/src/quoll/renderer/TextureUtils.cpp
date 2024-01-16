@@ -6,7 +6,7 @@ namespace quoll {
 void TextureUtils::copyDataToTexture(
     rhi::RenderDevice *device, void *source, rhi::TextureHandle destination,
     rhi::ImageLayout destinationLayout, u32 destinationLayers,
-    const std::vector<TextureAssetLevel> &destinationLevels) {
+    const std::vector<TextureAssetMipLevel> &destinationLevels) {
 
   rhi::BufferDescription stagingBufferDesc{};
   stagingBufferDesc.size = getBufferSizeFromLevels(destinationLevels);
@@ -64,7 +64,7 @@ void TextureUtils::copyDataToTexture(
 void TextureUtils::copyTextureToData(
     rhi::RenderDevice *device, rhi::TextureHandle source,
     rhi::ImageLayout sourceLayout, u32 sourceLayers,
-    const std::vector<TextureAssetLevel> &sourceLevels, void *destination) {
+    const std::vector<TextureAssetMipLevel> &sourceLevels, void *destination) {
   rhi::BufferDescription stagingBufferDesc{};
   stagingBufferDesc.size = getBufferSizeFromLevels(sourceLevels);
   stagingBufferDesc.data = nullptr;
@@ -196,7 +196,7 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
 }
 
 usize TextureUtils::getBufferSizeFromLevels(
-    const std::vector<TextureAssetLevel> &levels) {
+    const std::vector<TextureAssetMipLevel> &levels) {
   usize size = 0;
   for (auto &level : levels) {
     size += level.size;

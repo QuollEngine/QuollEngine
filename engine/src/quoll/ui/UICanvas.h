@@ -5,18 +5,9 @@
 
 namespace quoll {
 
-/**
- * @brief Canvas for rendering UI
- */
 struct UICanvas {
-  /**
-   * Root view
-   */
   UIView rootView;
 
-  /**
-   * Yoga layout tree
-   */
   YGNodeRef flexRoot = nullptr;
 };
 
