@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/scene/SceneIO.h"
+#include "quoll/io/SceneIO.h"
 #include "quoll/loop/MainEngineModules.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
 #include "quoll/editor/actions/ActionExecutor.h"

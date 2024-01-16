@@ -6,7 +6,7 @@
 #include "quoll/scene/EnvironmentLighting.h"
 #include "quoll/scene/Sprite.h"
 #include "quoll/text/Text.h"
-#include "quoll/scene/Skeleton.h"
+#include "quoll/skeleton/Skeleton.h"
 
 #include "SceneRenderer.h"
 #include "StandardPushConstants.h"

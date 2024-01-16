@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll/scene/SkeletonUpdater.h"
-#include "quoll/scene/Skeleton.h"
+#include "quoll/skeleton/SkeletonUpdater.h"
+#include "quoll/skeleton/Skeleton.h"
 
 #include "quoll-tests/Testing.h"
 

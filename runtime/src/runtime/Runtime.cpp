@@ -7,7 +7,7 @@
 #include "quoll/loop/MainLoop.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/Presenter.h"
-#include "quoll/scene/SceneIO.h"
+#include "quoll/io/SceneIO.h"
 #include "quoll/renderer/SceneRenderer.h"
 #include "quoll/imgui/ImguiRenderer.h"
 #include "quoll/imgui/ImguiUtils.h"

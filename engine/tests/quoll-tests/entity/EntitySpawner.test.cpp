@@ -7,7 +7,7 @@
 #include "quoll/scene/Sprite.h"
 #include "quoll/scene/Mesh.h"
 #include "quoll/scene/SkinnedMesh.h"
-#include "quoll/scene/Skeleton.h"
+#include "quoll/skeleton/Skeleton.h"
 
 #include "quoll/entity/EntitySpawner.h"
 

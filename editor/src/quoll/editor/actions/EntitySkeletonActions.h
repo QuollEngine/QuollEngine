@@ -2,7 +2,7 @@
 
 #include "Action.h"
 
-#include "quoll/scene/Skeleton.h"
+#include "quoll/skeleton/Skeleton.h"
 
 namespace quoll::editor {
 

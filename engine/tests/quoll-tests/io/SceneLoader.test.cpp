@@ -9,8 +9,6 @@
 #include "quoll/scene/CascadedShadowMap.h"
 #include "quoll/scene/PerspectiveLens.h"
 #include "quoll/scene/AutoAspectRatio.h"
-#include "quoll/scene/Skeleton.h"
-#include "quoll/scene/JointAttachment.h"
 #include "quoll/scene/Camera.h"
 #include "quoll/scene/Parent.h"
 #include "quoll/scene/Children.h"
@@ -19,6 +17,8 @@
 #include "quoll/scene/EnvironmentSkybox.h"
 #include "quoll/scene/EnvironmentLighting.h"
 #include "quoll/scene/Sprite.h"
+#include "quoll/skeleton/Skeleton.h"
+#include "quoll/skeleton/JointAttachment.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/animation/AnimatorEvent.h"
 #include "quoll/audio/AudioSource.h"
@@ -40,7 +40,7 @@
 #include "quoll/entity/EntityDatabase.h"
 
 #include "quoll-tests/Testing.h"
-#include "quoll/scene/private/SceneLoader.h"
+#include "quoll/io/SceneLoader.h"
 
 class SceneLoaderTest : public ::testing::Test {
 public:
