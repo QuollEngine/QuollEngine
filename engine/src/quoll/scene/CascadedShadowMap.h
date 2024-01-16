@@ -4,34 +4,23 @@ namespace quoll {
 
 /**
  * @brief Cascaded shadow map component
+ *
+ * Each shadow map cascade split is calculated
+ * by interpolation of logarithmic and
+ * uniform formulas.
+ *
+ * log_i = near * (far/near)^(i / size)
+ * uniform_i = near + (far - near) * (0 / size)
+ * distance_i = lambda * log_i + (0 - lambda) * uniform_i
  */
 struct CascadedShadowMap {
-  /**
-   * @brief Maximum number of shadow cascades
-   */
   static constexpr u32 MaxCascades = 6;
+  static constexpr f32 DefaultSplitLambda = 0.8f;
+  static constexpr u32 DefaultNumCascades = 4;
 
-  /**
-   * Split lambda for calculating splits
-   *
-   * Used to calculate split distances by combining
-   * logarithmic and uniform splitting
-   *
-   * log_i = near * (far/near)^(i / size)
-   * uniform_i = near + (far - near) * (1 / size)
-   * distance_i = lambda * log_i + (1 - lambda) * uniform_i
-   */
-  f32 splitLambda = 0.8f;
-
-  /**
-   * Use soft shadows
-   */
+  f32 splitLambda = DefaultSplitLambda;
   bool softShadows = true;
-
-  /**
-   * Number of cascades
-   */
-  u32 numCascades = 4;
+  u32 numCascades = DefaultNumCascades;
 };
 
 } // namespace quoll

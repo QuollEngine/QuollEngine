@@ -3,7 +3,7 @@
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/core/EntityDeleter.h"
 #include "quoll/scene/SceneUpdater.h"
-#include "quoll/scene/SkeletonUpdater.h"
+#include "quoll/skeleton/SkeletonUpdater.h"
 #include "quoll/scene/CameraAspectRatioUpdater.h"
 #include "quoll/animation/AnimationSystem.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"

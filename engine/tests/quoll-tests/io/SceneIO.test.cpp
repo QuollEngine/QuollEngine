@@ -7,8 +7,8 @@
 #include "quoll/scene/Parent.h"
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/scene/SceneIO.h"
-#include "quoll/scene/private/EntitySerializer.h"
+#include "quoll/io/SceneIO.h"
+#include "quoll/io/EntitySerializer.h"
 
 #include "quoll-tests/Testing.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/scene/Joint.h"
+#include "quoll/skeleton/Joint.h"
 
 namespace quoll {
 

@@ -5,7 +5,7 @@
 #include "quoll/scene/PerspectiveLens.h"
 
 #include "quoll/yaml/Yaml.h"
-#include "quoll/scene/private/EntitySerializer.h"
+#include "quoll/io/EntitySerializer.h"
 
 #include "SceneWriter.h"
 
