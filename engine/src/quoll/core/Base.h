@@ -65,7 +65,6 @@ template <class T> using SharedPtr = std::shared_ptr<T>;
 #include "Assert.h"
 #include "BitwiseEnum.h"
 #include "DataTypes.h"
-#include "Profiler.h"
 #include "Uuid.h"
 
 #endif

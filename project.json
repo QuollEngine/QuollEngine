@@ -19,21 +19,6 @@
           }
         }
       ]
-    },
-    {
-      "name": "optick",
-      "buildSource": "optick-1.3.3.0",
-      "url": "https://github.com/bombomby/optick/archive/refs/tags/1.3.3.0.zip",
-      "cmd": [
-        {
-          "type": "cmake",
-          "options": {
-            "common": {
-              "OPTICK_USE_VULKAN": "ON"
-            }
-          }
-        }
-      ]
     }
   ]
 }

@@ -37,7 +37,7 @@ workspace "QuollEngine"
         symbols "Off"
 
     filter {"configurations:Profile"}
-        defines { "QUOLL_PROFILER" }
+        defines { "QUOLL_PROFILER", "TRACY_ENABLE" }
 
     defines { "configurations:Test" }
         defines { "QUOLL_TEST" }

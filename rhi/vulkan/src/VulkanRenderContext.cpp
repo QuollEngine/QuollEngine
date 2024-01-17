@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/core/Profiler.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanError.h"
 #include "VulkanRenderContext.h"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/core/Profiler.h"
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "AudioSource.h"

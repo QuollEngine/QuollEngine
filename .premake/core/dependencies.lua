@@ -83,14 +83,9 @@ function linkGoogleTest()
 end
 
 -- Link profiler dependencies
-function linkOptick()
+function linkTracy()
     filter { "configurations:Profile" }
-        links { "OptickCore" }
-
-    filter { "configurations:Profile", "system:windows" }
-        postbuildcommands {
-            '{COPY} %{wks.location}/../vendor/Release/bin/OptickCore.dll %{cfg.buildtarget.directory}'
-        }
+        links { "TracyClient" }
 
     filter{}
 end

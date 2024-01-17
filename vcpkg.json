@@ -103,6 +103,10 @@
       "name": "msdfgen",
       "default-features": false,
       "features": ["extensions"]
+    },
+    {
+      "name": "tracy",
+      "default-features": false
     }
   ]
 }

@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Profiler.h"
 #include "AutoAspectRatio.h"
 #include "CameraAspectRatioUpdater.h"
 #include "PerspectiveLens.h"

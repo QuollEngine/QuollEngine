@@ -18,6 +18,12 @@
       "repository": "https://github.com/Microsoft/vcpkg",
       "baseline": "307ac18b08e4125d3c521a86b7d7b317629be277",
       "packages": ["glm"]
+    },
+    {
+      "kind": "git",
+      "repository": "https://github.com/Microsoft/vcpkg",
+      "baseline": "38d1652f152d36481f2f4e8a85c0f1e14f3769f7",
+      "packages": ["tracy"]
     }
   ]
 }

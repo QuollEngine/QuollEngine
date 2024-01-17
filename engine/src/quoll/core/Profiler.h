@@ -1,33 +1,16 @@
 #pragma once
 
 #ifdef QUOLL_PROFILER
-#include <optick.h>
+#include <Tracy/Tracy.hpp>
 
-// Undefining this value since it is
-// defined by Vulkan as well
-#undef VKAPI_PTR
-
-#define QUOLL_PROFILE_EVENT OPTICK_EVENT
-#define QUOLL_PROFILE_FRAME OPTICK_FRAME
-#define QUOLL_PROFILE_CATEGORY OPTICK_CATEGORY
-#define QUOLL_PROFILE_TAG OPTICK_CATEGORY
-
-#define QUOLL_PROFILE_GPU_INIT_VULKAN OPTICK_GPU_INIT_VULKAN
-#define QUOLL_PROFILE_GPU_CONTEXT OPTICK_GPU_CONTEXT
-#define QUOLL_PROFILE_GPU_EVENT OPTICK_GPU_EVENT
-#define QUOLL_PROFILE_GPU_FLIP OPTICK_GPU_FLIP
+#define QUOLL_PROFILE_EVENT(name) ZoneScopedN(name)
+#define QUOLL_PROFILE_FRAME(...) FrameMark
+#define QUOLL_PROFILE_TAG(y, x) ZoneText(x, strlen(x))
 
 #else
 
 #define QUOLL_PROFILE_EVENT(...)
 #define QUOLL_PROFILE_FRAME(...)
-#define QUOLL_PROFILE_CATEGORY(...)
 #define QUOLL_PROFILE_TAG(...)
-#define QUOLL_PROFILE_INIT_VULKAN(...)
-
-#define QUOLL_PROFILE_GPU_INIT_VULKAN(...)
-#define QUOLL_PROFILE_GPU_CONTEXT(...)
-#define QUOLL_PROFILE_GPU_EVENT(...)
-#define QUOLL_PROFILE_GPU_FLIP(...)
 
 #endif

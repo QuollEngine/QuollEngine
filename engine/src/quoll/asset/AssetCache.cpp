@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Profiler.h"
 #include "quoll/core/Version.h"
 #include "AssetCache.h"
 #include "AssetFileHeader.h"
