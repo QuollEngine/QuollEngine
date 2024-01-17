@@ -11,10 +11,10 @@ layout(location = 0) out vec4 outColor;
 
 #include "bindless/base.glsl"
 #include "bindless/camera.glsl"
-#include "bindless/scene.glsl"
-#include "bindless/shadows.glsl"
 #include "bindless/lights.glsl"
 #include "bindless/material.glsl"
+#include "bindless/scene.glsl"
+#include "bindless/shadows.glsl"
 
 layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
 layout(set = 0, binding = 0) uniform texture2DArray uTextures2DArray[];

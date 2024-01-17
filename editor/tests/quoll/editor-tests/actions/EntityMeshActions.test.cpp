@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/SkinnedMesh.h"
-
 #include "quoll/editor/actions/EntityMeshActions.h"
-
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 #include "DefaultEntityTests.h"

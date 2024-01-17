@@ -1,8 +1,8 @@
 #pragma once
 
+#include "quoll/rhi/PhysicalDeviceInformation.h"
 #include "VulkanHeaders.h"
 #include "VulkanQueueFamily.h"
-#include "quoll/rhi/PhysicalDeviceInformation.h"
 
 namespace quoll::rhi {
 

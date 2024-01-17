@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/asset/AssetCache.h"
 #include "quoll/renderer/TextureUtils.h"
-
 #include "ImageLoader.h"
-
 #include <stb_image.h>
 
 namespace quoll::editor {

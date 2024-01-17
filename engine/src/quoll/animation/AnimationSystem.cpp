@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/skeleton/Skeleton.h"
-
 #include "AnimationSystem.h"
 #include "AnimatorEvent.h"
 

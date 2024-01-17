@@ -1,15 +1,13 @@
 #include "quoll/core/Base.h"
+#include "quoll/imgui/Imgui.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/scene/LocalTransform.h"
 #include "quoll/scene/Parent.h"
 #include "quoll/scene/WorldTransform.h"
-#include "quoll/scene/LocalTransform.h"
-#include "quoll/scene/Camera.h"
-#include "quoll/skeleton/Skeleton.h"
 #include "quoll/skeleton/JointAttachment.h"
-
-#include "SceneGizmos.h"
-
-#include "quoll/imgui/Imgui.h"
+#include "quoll/skeleton/Skeleton.h"
 #include "ImGuizmo.h"
+#include "SceneGizmos.h"
 
 namespace quoll::editor {
 

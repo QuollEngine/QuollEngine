@@ -2,11 +2,9 @@
 
 #include "quoll/rhi/RenderBackend.h"
 #include "quoll/rhi/RenderDevice.h"
-
+#include "quoll/window/Window.h"
 #include "VulkanPhysicalDevice.h"
 #include "VulkanValidator.h"
-
-#include "quoll/window/Window.h"
 
 namespace quoll::rhi {
 

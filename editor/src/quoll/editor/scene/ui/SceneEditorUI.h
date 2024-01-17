@@ -1,28 +1,24 @@
 #pragma once
 
 #include "quoll/animation/AnimationSystem.h"
+#include "quoll/loop/MainEngineModules.h"
 #include "quoll/physics/PhysicsSystem.h"
 #include "quoll/renderer/Renderer.h"
+#include "quoll/renderer/SceneRenderer.h"
 #include "quoll/scene/CameraAspectRatioUpdater.h"
 #include "quoll/ui/UICanvasUpdater.h"
-#include "quoll/renderer/Renderer.h"
-#include "quoll/renderer/SceneRenderer.h"
-#include "quoll/loop/MainEngineModules.h"
-
-#include "quoll/editor/ui/StatusBar.h"
 #include "quoll/editor/ui/IconRegistry.h"
+#include "quoll/editor/ui/StatusBar.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"
-
 #include "../renderer/EditorRenderer.h"
 #include "../renderer/MousePickingGraph.h"
-
-#include "SceneHierarchyPanel.h"
-#include "EntityPanel.h"
-#include "EditorGridPanel.h"
-#include "SceneView.h"
-#include "SceneGizmos.h"
-#include "Inspector.h"
 #include "AssetBrowser.h"
+#include "EditorGridPanel.h"
+#include "EntityPanel.h"
+#include "Inspector.h"
+#include "SceneGizmos.h"
+#include "SceneHierarchyPanel.h"
+#include "SceneView.h"
 
 namespace quoll::editor {
 

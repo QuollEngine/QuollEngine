@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VulkanHeaders.h"
 #include "quoll/window/Window.h"
+#include "VulkanHeaders.h"
 
 namespace quoll::rhi {
 

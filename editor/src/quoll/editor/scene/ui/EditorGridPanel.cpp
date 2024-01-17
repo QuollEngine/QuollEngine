@@ -1,12 +1,10 @@
 #include "quoll/core/Base.h"
-#include "EditorGridPanel.h"
-
 #include "quoll/imgui/Imgui.h"
-
-#include "quoll/editor/ui/Widgets.h"
-#include "quoll/editor/ui/MenuBar.h"
-#include "quoll/editor/ui/Menu.h"
 #include "quoll/editor/actions/EditorGridActions.h"
+#include "quoll/editor/ui/Menu.h"
+#include "quoll/editor/ui/MenuBar.h"
+#include "quoll/editor/ui/Widgets.h"
+#include "EditorGridPanel.h"
 
 namespace quoll::editor {
 

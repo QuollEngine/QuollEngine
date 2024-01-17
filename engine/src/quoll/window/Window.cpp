@@ -1,11 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-#include "Window.h"
-
-#include <GLFW/glfw3.h>
-
-#include "quoll/platform/tools/WindowUtils.h"
 #include "quoll/input/KeyMappings.h"
+#include "quoll/platform/tools/WindowUtils.h"
+#include "Window.h"
+#include <GLFW/glfw3.h>
 
 namespace quoll {
 

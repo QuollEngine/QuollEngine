@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
-#include "quoll/core/Version.h"
 #include "quoll/core/Engine.h"
+#include "quoll/core/Version.h"
 #include "quoll/yaml/Yaml.h"
-
 #include "runtime/Runtime.h"
 
 int main() {

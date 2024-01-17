@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/renderer/RenderGraph.h"
-
 #include "quoll-tests/Testing.h"
 
 class RenderGraphPassTest : public ::testing::Test {

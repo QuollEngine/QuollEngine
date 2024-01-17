@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "AnimationStep.h"
 #include "Buffer.h"
 

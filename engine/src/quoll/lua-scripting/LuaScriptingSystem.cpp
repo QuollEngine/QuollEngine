@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Engine.h"
 #include "LuaScriptingSystem.h"
 #include "ScriptDecorator.h"
-
-#include "quoll/core/Engine.h"
 
 namespace quoll {
 

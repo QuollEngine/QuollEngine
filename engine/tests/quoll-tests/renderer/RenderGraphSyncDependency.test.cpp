@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll-tests/Testing.h"
-
 #include "quoll/renderer/RenderGraphSyncDependency.h"
+#include "quoll-tests/Testing.h"
 
 class RenderGraphSyncDependencyTextureReadTest : public ::testing::Test {};
 

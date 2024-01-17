@@ -1,17 +1,17 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
 #include "quoll/core/EntityDeleter.h"
-#include "quoll/scene/SceneUpdater.h"
-#include "quoll/skeleton/SkeletonUpdater.h"
-#include "quoll/scene/CameraAspectRatioUpdater.h"
 #include "quoll/animation/AnimationSystem.h"
+#include "quoll/asset/AssetRegistry.h"
+#include "quoll/audio/AudioSystem.h"
+#include "quoll/input/InputMapSystem.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"
 #include "quoll/physics/PhysicsSystem.h"
-#include "quoll/audio/AudioSystem.h"
-#include "quoll/window/Window.h"
-#include "quoll/input/InputMapSystem.h"
+#include "quoll/scene/CameraAspectRatioUpdater.h"
+#include "quoll/scene/SceneUpdater.h"
+#include "quoll/skeleton/SkeletonUpdater.h"
 #include "quoll/ui/UICanvasUpdater.h"
+#include "quoll/window/Window.h"
 
 namespace quoll {
 

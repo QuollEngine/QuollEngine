@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
-#include "EntityLuaTable.h"
-#include "quoll/scene/ParentLuaTable.h"
 #include "quoll/core/NameLuaTable.h"
+#include "quoll/scene/ParentLuaTable.h"
+#include "EntityLuaTable.h"
 
 namespace quoll {
 

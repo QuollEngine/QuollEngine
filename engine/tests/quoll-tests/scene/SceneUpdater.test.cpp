@@ -1,15 +1,14 @@
 #include "quoll/core/Base.h"
-#include "quoll/scene/LocalTransform.h"
-#include "quoll/scene/WorldTransform.h"
-#include "quoll/scene/Parent.h"
-#include "quoll/scene/DirectionalLight.h"
-#include "quoll/scene/PointLight.h"
 #include "quoll/scene/Camera.h"
+#include "quoll/scene/DirectionalLight.h"
+#include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/Parent.h"
 #include "quoll/scene/PerspectiveLens.h"
+#include "quoll/scene/PointLight.h"
 #include "quoll/scene/SceneUpdater.h"
+#include "quoll/scene/WorldTransform.h"
 #include "quoll/skeleton/JointAttachment.h"
 #include "quoll/skeleton/Skeleton.h"
-
 #include "quoll-tests/Testing.h"
 
 class SceneUpdaterTest : public ::testing::Test {

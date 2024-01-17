@@ -13,45 +13,44 @@
 #undef _DEBUG
 #endif
 
-#include <iostream>
 #include <algorithm>
-#include <filesystem>
-#include <sstream>
-#include <string>
-#include <exception>
-#include <optional>
+#include <any>
 #include <array>
-#include <set>
-#include <limits>
-#include <fstream>
-#include <memory>
-#include <vector>
 #include <chrono>
 #include <ctime>
+#include <exception>
+#include <filesystem>
+#include <fstream>
 #include <functional>
 #include <iomanip>
-#include <any>
-#include <map>
-#include <unordered_map>
-#include <memory>
+#include <iostream>
+#include <limits>
 #include <list>
-#include <type_traits>
-#include <variant>
+#include <map>
+#include <memory>
+#include <optional>
 #include <random>
-#include <string_view>
-#include <typeinfo>
-#include <typeindex>
+#include <set>
 #include <span>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <typeindex>
+#include <typeinfo>
+#include <unordered_map>
+#include <variant>
+#include <vector>
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/transform.hpp>
 
 namespace quoll {
 
@@ -64,9 +63,9 @@ template <class T> using SharedPtr = std::shared_ptr<T>;
 } // namespace quoll
 
 #include "Assert.h"
-#include "Profiler.h"
 #include "BitwiseEnum.h"
-#include "Uuid.h"
 #include "DataTypes.h"
+#include "Profiler.h"
+#include "Uuid.h"
 
 #endif

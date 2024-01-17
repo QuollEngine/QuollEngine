@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/scene/WorldTransform.h"
-
 #include "quoll/editor/actions/EntityTransformActions.h"
-
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 

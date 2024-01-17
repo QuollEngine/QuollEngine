@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
 #include "quoll/physics/Collidable.h"
-
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 

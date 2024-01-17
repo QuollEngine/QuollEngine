@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/Imgui.h"
-
 #include "AssetLoadStatusDialog.h"
 #include "Widgets.h"
 

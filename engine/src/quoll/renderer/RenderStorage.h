@@ -1,7 +1,7 @@
 #pragma once
 
-#include "quoll/rhi/TextureDescription.h"
 #include "quoll/rhi/RenderDevice.h"
+#include "quoll/rhi/TextureDescription.h"
 #include "HandleCounter.h"
 
 namespace quoll {

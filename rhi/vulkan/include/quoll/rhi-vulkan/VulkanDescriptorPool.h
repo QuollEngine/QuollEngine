@@ -1,10 +1,9 @@
 #pragma once
 
 #include "quoll/rhi/Descriptor.h"
-
 #include "VulkanDeviceObject.h"
-#include "VulkanResourceRegistry.h"
 #include "VulkanPipelineLayoutCache.h"
+#include "VulkanResourceRegistry.h"
 
 namespace quoll::rhi {
 

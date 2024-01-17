@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "NoopLogTransport.h"
 #include "Logger.h"
+#include "NoopLogTransport.h"
 
 namespace quoll {
 

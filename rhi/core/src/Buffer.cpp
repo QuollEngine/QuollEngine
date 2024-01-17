@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "quoll/rhi/Buffer.h"
 #include "quoll/rhi/NativeBuffer.h"
 

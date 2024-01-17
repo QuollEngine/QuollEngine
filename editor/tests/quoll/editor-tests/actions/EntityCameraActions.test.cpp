@@ -1,10 +1,8 @@
 #include "quoll/core/Base.h"
-#include "quoll/scene/Camera.h"
 #include "quoll/scene/AutoAspectRatio.h"
+#include "quoll/scene/Camera.h"
 #include "quoll/scene/PerspectiveLens.h"
-
 #include "quoll/editor/actions/EntityCameraActions.h"
-
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 #include "DefaultEntityTests.h"

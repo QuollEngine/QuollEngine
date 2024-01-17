@@ -1,8 +1,7 @@
 #pragma once
 
-#include "quoll/window/Window.h"
 #include "quoll/rhi/RenderDevice.h"
-
+#include "quoll/window/Window.h"
 #include "../project/ProjectManager.h"
 
 namespace quoll::editor {

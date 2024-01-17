@@ -1,25 +1,23 @@
 #pragma once
 
-#include "quoll/entity/EntityDatabase.h"
-#include "quoll/animation/AnimationSystem.h"
-#include "quoll/physics/PhysicsSystem.h"
-
-#include "quoll/editor/workspace/WorkspaceState.h"
-#include "quoll/editor/actions/ActionExecutor.h"
-#include "quoll/editor/actions/EntityScriptingActions.h"
-#include "quoll/editor/actions/EntityCollidableActions.h"
-#include "quoll/editor/actions/EntityLightActions.h"
-#include "quoll/editor/actions/EntityCameraActions.h"
-#include "quoll/editor/actions/EntityTransformActions.h"
-#include "quoll/editor/actions/EntityUpdateComponentAction.h"
-
 #include "quoll/core/Name.h"
+#include "quoll/animation/AnimationSystem.h"
+#include "quoll/entity/EntityDatabase.h"
+#include "quoll/physics/Collidable.h"
+#include "quoll/physics/PhysicsSystem.h"
+#include "quoll/physics/RigidBody.h"
 #include "quoll/scene/CascadedShadowMap.h"
 #include "quoll/scene/EnvironmentSkybox.h"
 #include "quoll/scene/PerspectiveLens.h"
 #include "quoll/text/Text.h"
-#include "quoll/physics/Collidable.h"
-#include "quoll/physics/RigidBody.h"
+#include "quoll/editor/actions/ActionExecutor.h"
+#include "quoll/editor/actions/EntityCameraActions.h"
+#include "quoll/editor/actions/EntityCollidableActions.h"
+#include "quoll/editor/actions/EntityLightActions.h"
+#include "quoll/editor/actions/EntityScriptingActions.h"
+#include "quoll/editor/actions/EntityTransformActions.h"
+#include "quoll/editor/actions/EntityUpdateComponentAction.h"
+#include "quoll/editor/workspace/WorkspaceState.h"
 
 namespace quoll::editor {
 

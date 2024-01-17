@@ -1,8 +1,8 @@
 #pragma once
 
 #include "quoll/rhi/NativeResourceMetrics.h"
-#include "VulkanResourceRegistry.h"
 #include "VulkanDescriptorPool.h"
+#include "VulkanResourceRegistry.h"
 
 namespace quoll::rhi {
 

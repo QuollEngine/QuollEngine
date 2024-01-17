@@ -1,9 +1,8 @@
 #pragma once
 
+#include "quoll/asset/AssetRegistry.h"
 #include "quoll/renderer/RenderGraph.h"
 #include "quoll/renderer/SceneRendererFrameData.h"
-#include "quoll/asset/AssetRegistry.h"
-
 #include "quoll/window/Window.h"
 
 namespace quoll::editor {

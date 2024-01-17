@@ -1,7 +1,7 @@
 #pragma once
 
-#include "LoggerCore.h"
 #include "LogStream.h"
+#include "LoggerCore.h"
 
 namespace quoll {
 

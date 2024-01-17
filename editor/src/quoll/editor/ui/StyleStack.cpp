@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-#include "StyleStack.h"
-
 #include "quoll/imgui/Imgui.h"
+#include "StyleStack.h"
 
 namespace quoll::editor {
 

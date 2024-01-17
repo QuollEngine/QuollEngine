@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "MenuBar.h"
-
 #include "Theme.h"
 
 namespace quoll::editor {

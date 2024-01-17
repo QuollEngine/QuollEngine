@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/rhi/PhysicalDeviceInformation.h"
-
 #include "quoll-tests/Testing.h"
 
 TEST(PhysicalDeviceInformationTest, SetsNameTypePropertiesAndLimits) {

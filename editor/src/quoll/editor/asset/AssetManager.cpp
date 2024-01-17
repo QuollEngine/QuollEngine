@@ -1,15 +1,13 @@
 #include "quoll/core/Base.h"
-#include "quoll/yaml/Yaml.h"
 #include "quoll/asset/AssetRevision.h"
-
+#include "quoll/yaml/Yaml.h"
 #include "AssetManager.h"
 #include "GLTFImporter.h"
 #include "HDRIImporter.h"
-
-#include <stb_image.h>
-#include <cryptopp/sha.h>
 #include <cryptopp/files.h>
 #include <cryptopp/hex.h>
+#include <cryptopp/sha.h>
+#include <stb_image.h>
 
 namespace quoll::editor {
 

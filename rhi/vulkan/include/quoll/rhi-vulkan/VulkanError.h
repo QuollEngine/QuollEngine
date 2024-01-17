@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/core/Engine.h"
+#include "VulkanHeaders.h"
 
 namespace quoll::rhi {
 

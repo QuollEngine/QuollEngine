@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll-tests/Testing.h"
-
 #include "ScriptingInterfaceTestBase.h"
 
 static const quoll::Path CachePath = std::filesystem::current_path() / "cache";

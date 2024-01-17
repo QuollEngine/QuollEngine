@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-#include "VulkanQueue.h"
-
 #include "VulkanError.h"
+#include "VulkanQueue.h"
 
 namespace quoll::rhi {
 

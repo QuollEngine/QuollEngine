@@ -1,11 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
 #include "quoll/yaml/Yaml.h"
-
 #include "AssetCache.h"
-
-#include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
+#include "OutputBinaryStream.h"
 
 namespace quoll {
 

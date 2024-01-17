@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "EntityCameraActions.h"
-#include "EntityScriptingActions.h"
 #include "EntityCreateComponentAction.h"
+#include "EntityScriptingActions.h"
 
 namespace quoll::editor {
 

@@ -2,11 +2,11 @@
 
 #include "quoll/rhi/RenderDevice.h"
 #include "MockBuffer.h"
-#include "MockTexture.h"
+#include "MockCommandList.h"
 #include "MockDescriptor.h"
 #include "MockPipeline.h"
-#include "MockCommandList.h"
 #include "MockResourceMap.h"
+#include "MockTexture.h"
 
 namespace quoll::rhi {
 

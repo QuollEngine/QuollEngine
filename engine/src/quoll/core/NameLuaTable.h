@@ -1,7 +1,7 @@
 #pragma once
 
-#include "quoll/lua-scripting/LuaUserTypeBase.h"
 #include "quoll/entity/EntityLuaTable.h"
+#include "quoll/lua-scripting/LuaUserTypeBase.h"
 
 namespace quoll {
 

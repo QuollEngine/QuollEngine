@@ -1,9 +1,8 @@
 #include "quoll/core/Base.h"
-#include "quoll/core/EntityDeleter.h"
 #include "quoll/core/Delete.h"
+#include "quoll/core/EntityDeleter.h"
 #include "quoll/scene/Children.h"
 #include "quoll/scene/Parent.h"
-
 #include "quoll-tests/Testing.h"
 
 class EntityDeleterTest : public ::testing::Test {

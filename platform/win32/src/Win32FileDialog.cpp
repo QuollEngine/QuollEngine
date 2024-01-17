@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/platform/tools/FileDialog.h"
-#include <windows.h>
 #include <shobjidl.h>
+#include <windows.h>
 
 namespace quoll::platform {
 

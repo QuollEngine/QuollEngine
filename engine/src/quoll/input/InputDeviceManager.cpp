@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "InputDeviceManager.h"
-
 #include "KeyMappings.h"
-
 #include <GLFW/glfw3.h>
 
 namespace quoll {

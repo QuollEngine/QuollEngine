@@ -1,10 +1,9 @@
 #include "quoll/core/Base.h"
-
+#include "VulkanBuffer.h"
 #include "VulkanDescriptorSet.h"
 #include "VulkanMapping.h"
-#include "VulkanBuffer.h"
-#include "VulkanTexture.h"
 #include "VulkanSampler.h"
+#include "VulkanTexture.h"
 
 namespace quoll::rhi {
 

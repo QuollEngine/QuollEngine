@@ -2,10 +2,8 @@
 #include "quoll/core/Id.h"
 #include "quoll/scene/Camera.h"
 #include "quoll/scene/PerspectiveLens.h"
-
-#include "SceneLoader.h"
-
 #include "SceneIO.h"
+#include "SceneLoader.h"
 
 namespace quoll {
 

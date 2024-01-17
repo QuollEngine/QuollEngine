@@ -1,10 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
-#include "VulkanCommandPool.h"
 #include "VulkanCommandBuffer.h"
+#include "VulkanCommandPool.h"
 #include "VulkanError.h"
-
 #include "VulkanLog.h"
 
 namespace quoll::rhi {

@@ -1,11 +1,10 @@
 #include "quoll/core/Base.h"
 #include "quoll/entity/EntityQueryLuaTable.h"
 #include "quoll/entity/EntitySpawnerLuaTable.h"
-#include "quoll/logger/UserLoggerLuaTable.h"
-#include "quoll/ui/UILuaTable.h"
 #include "quoll/input/InputSystemLuaTable.h"
+#include "quoll/logger/UserLoggerLuaTable.h"
 #include "quoll/physics/PhysicsSystemLuaTable.h"
-
+#include "quoll/ui/UILuaTable.h"
 #include "GameLuaTable.h"
 
 namespace quoll {

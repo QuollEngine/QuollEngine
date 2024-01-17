@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Result.h"
-#include "AssetRegistry.h"
 #include "AssetFileHeader.h"
 #include "AssetMeta.h"
+#include "AssetRegistry.h"
+#include "Result.h"
 
 namespace quoll {
 

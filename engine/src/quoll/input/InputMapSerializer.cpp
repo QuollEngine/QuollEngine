@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "InputMapSerializer.h"
 #include "InputMap.h"
+#include "InputMapSerializer.h"
 
 namespace quoll {
 

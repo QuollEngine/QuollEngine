@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/SparseSet.h"
-
 #include "quoll-tests/Testing.h"
 
 class SparseSetTest : public ::testing::Test {

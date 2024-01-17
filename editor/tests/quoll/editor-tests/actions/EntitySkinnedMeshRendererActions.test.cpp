@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/editor/actions/EntitySkinnedMeshRendererActions.h"
-
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 #include "DefaultEntityTests.h"

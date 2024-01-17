@@ -1,7 +1,7 @@
 #pragma once
 
-#include "quoll/rhi/RenderHandle.h"
 #include "quoll/rhi/Format.h"
+#include "quoll/rhi/RenderHandle.h"
 
 namespace quoll {
 

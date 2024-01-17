@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/audio/AudioSystem.h"
-
 #include "quoll-tests/Testing.h"
 
 struct FakeAudioData {};

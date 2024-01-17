@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "VulkanHeaders.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)

@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/Imgui.h"
-
-#include "Theme.h"
 #include "StyleStack.h"
+#include "Theme.h"
 #include "Toolbar.h"
 #include "Widgets.h"
 

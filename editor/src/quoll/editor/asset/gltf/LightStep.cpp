@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "LightStep.h"
 
 namespace quoll::editor {

@@ -1,15 +1,13 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/lua-scripting/Messages.h"
-
+#include "Force.h"
+#include "Impulse.h"
 #include "RigidBody.h"
 #include "RigidBodyClear.h"
-#include "Force.h"
-#include "Torque.h"
-#include "Impulse.h"
 #include "RigidBodyLuaTable.h"
+#include "Torque.h"
 
 namespace quoll {
 

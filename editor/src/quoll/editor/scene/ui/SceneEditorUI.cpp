@@ -1,25 +1,22 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/Imgui.h"
-
-#include "quoll/editor/actions/TransformOperationActions.h"
-#include "quoll/editor/actions/SpawnEntityActions.h"
-#include "quoll/editor/actions/ProjectActions.h"
 #include "quoll/editor/actions/DeleteEntityAction.h"
-#include "quoll/editor/actions/TypedActionCreator.h"
 #include "quoll/editor/actions/HistoryActions.h"
+#include "quoll/editor/actions/ProjectActions.h"
+#include "quoll/editor/actions/SpawnEntityActions.h"
+#include "quoll/editor/actions/TransformOperationActions.h"
+#include "quoll/editor/actions/TypedActionCreator.h"
 #include "quoll/editor/actions/WorkspaceActions.h"
 #include "quoll/editor/ui/FontAwesome.h"
-#include "quoll/editor/ui/Shortcut.h"
-#include "quoll/editor/ui/Toolbar.h"
+#include "quoll/editor/ui/MainMenuBar.h"
 #include "quoll/editor/ui/Menu.h"
 #include "quoll/editor/ui/MenuBar.h"
-#include "quoll/editor/ui/MainMenuBar.h"
+#include "quoll/editor/ui/Shortcut.h"
+#include "quoll/editor/ui/Toolbar.h"
 #include "quoll/editor/ui/Widgets.h"
-
-#include "SceneEditorUI.h"
 #include "../SceneSimulatorWorkspace.h"
-
 #include "ImGuizmo.h"
+#include "SceneEditorUI.h"
 
 namespace quoll::editor {
 

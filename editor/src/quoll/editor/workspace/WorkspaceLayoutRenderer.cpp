@@ -1,8 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/Imgui.h"
-
 #include "quoll/editor/ui/Toolbar.h"
-
 #include "WorkspaceLayoutRenderer.h"
 
 namespace quoll::editor {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TinyGLTF.h"
+
 namespace quoll::editor {
 
 struct BufferMeta {

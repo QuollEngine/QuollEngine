@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "TextSerializer.h"
 #include "Text.h"
+#include "TextSerializer.h"
 
 namespace quoll {
 

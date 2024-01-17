@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
-
 #include "quoll/core/Version.h"
 #include "quoll/asset/AssetCache.h"
 #include "quoll/yaml/Yaml.h"
-
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
 

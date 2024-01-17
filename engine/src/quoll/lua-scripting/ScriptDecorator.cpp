@@ -1,17 +1,14 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
 #include "quoll/core/MathLuaTable.h"
+#include "quoll/entity/EntityLuaTable.h"
 #include "quoll/entity/EntityQueryLuaTable.h"
 #include "quoll/entity/EntitySpawnerLuaTable.h"
-#include "quoll/entity/EntityLuaTable.h"
 #include "quoll/physics/CollisionHitLuaTable.h"
 #include "quoll/signals/SignalLuaTable.h"
-
+#include "GameLuaTable.h"
 #include "LuaHeaders.h"
 #include "ScriptDecorator.h"
-
-#include "GameLuaTable.h"
 
 namespace quoll::lua {
 

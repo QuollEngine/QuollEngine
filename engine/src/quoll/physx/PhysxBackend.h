@@ -1,16 +1,14 @@
 #pragma once
 
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/physics/PhysicsObjects.h"
 #include "quoll/physics/PhysicsBackend.h"
-
+#include "quoll/physics/PhysicsObjects.h"
+#include "PhysxInstance.h"
+#include "PhysxSimulationEventCallback.h"
 #include <PxConfig.h>
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
 #include <extensions/PxDefaultErrorCallback.h>
-
-#include "PhysxInstance.h"
-#include "PhysxSimulationEventCallback.h"
 
 namespace quoll {
 

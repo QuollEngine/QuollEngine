@@ -2,9 +2,8 @@
 
 #include "quoll/rhi/DeviceStats.h"
 #include "quoll/rhi/NativeRenderCommandListInterface.h"
-
-#include "VulkanResourceRegistry.h"
 #include "VulkanDescriptorPool.h"
+#include "VulkanResourceRegistry.h"
 
 namespace quoll::rhi {
 

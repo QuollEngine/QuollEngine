@@ -1,13 +1,12 @@
 #include "quoll/core/Base.h"
-#include "quoll/core/Uuid.h"
-#include "AssetData.h"
-#include "MeshAsset.h"
-#include "MaterialAsset.h"
-#include "FontAsset.h"
-#include "DefaultObjects.h"
-
-#include "quoll/text/MsdfLoader.h"
 #include "quoll/core/Engine.h"
+#include "quoll/core/Uuid.h"
+#include "quoll/text/MsdfLoader.h"
+#include "AssetData.h"
+#include "DefaultObjects.h"
+#include "FontAsset.h"
+#include "MaterialAsset.h"
+#include "MeshAsset.h"
 
 namespace quoll::default_objects {
 

@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-#include "quoll/scene/LocalTransform.h"
-
 #include "quoll/entity/EntityDatabase.h"
-
+#include "quoll/scene/LocalTransform.h"
 #include "TransformLuaTable.h"
 
 namespace quoll {

@@ -1,8 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll/rhi-mock/MockRenderDevice.h"
-
 #include "quoll/renderer/RenderGraph.h"
-
+#include "quoll/rhi-mock/MockRenderDevice.h"
 #include "quoll-tests/Testing.h"
 
 using namespace quoll::rhi;

@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
-
-#include "PerspectiveLens.h"
 #include "AutoAspectRatio.h"
 #include "CameraAspectRatioUpdater.h"
+#include "PerspectiveLens.h"
 
 namespace quoll {
 

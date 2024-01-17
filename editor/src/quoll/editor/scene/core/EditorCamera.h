@@ -1,8 +1,8 @@
 #pragma once
 
+#include "quoll/entity/EntityDatabase.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/window/Window.h"
-#include "quoll/entity/EntityDatabase.h"
 #include "quoll/editor/core/CameraLookAt.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
 

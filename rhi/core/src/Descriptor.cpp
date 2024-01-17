@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "Descriptor.h"
 
 namespace quoll::rhi {

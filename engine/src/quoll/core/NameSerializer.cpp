@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "Id.h"
 #include "Name.h"
 #include "NameSerializer.h"

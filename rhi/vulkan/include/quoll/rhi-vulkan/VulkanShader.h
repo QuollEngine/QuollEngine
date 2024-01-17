@@ -1,8 +1,7 @@
 #pragma once
 
-#include "quoll/rhi/ShaderDescription.h"
 #include "quoll/rhi/DescriptorLayoutDescription.h"
-
+#include "quoll/rhi/ShaderDescription.h"
 #include "VulkanDeviceObject.h"
 
 namespace quoll::rhi {

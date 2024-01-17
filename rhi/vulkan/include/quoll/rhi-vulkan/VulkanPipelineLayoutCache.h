@@ -2,7 +2,6 @@
 
 #include "quoll/rhi/DescriptorLayoutDescription.h"
 #include "quoll/rhi/RenderHandle.h"
-
 #include "VulkanDeviceObject.h"
 #include "VulkanShader.h"
 

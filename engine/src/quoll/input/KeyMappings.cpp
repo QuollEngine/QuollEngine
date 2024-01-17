@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "KeyMappings.h"
-
 #include <GLFW/glfw3.h>
 
 namespace quoll::input {

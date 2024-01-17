@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
-
 #include "EntityDatabase.h"
 #include "EntityQuery.h"
 

@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/asset/AssetCache.h"
-
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
 

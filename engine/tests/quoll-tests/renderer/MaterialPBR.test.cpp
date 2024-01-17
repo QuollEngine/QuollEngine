@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/renderer/MaterialPBR.h"
 #include "quoll/rhi-mock/MockRenderDevice.h"
-
 #include "quoll-tests/Testing.h"
 
 class MaterialPBRTest : public ::testing::Test {

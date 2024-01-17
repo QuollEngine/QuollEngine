@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/loaders/KtxError.h"
-
 #include "quoll-tests/Testing.h"
 
 TEST(KtxErrorTest, ShowsErrorMessageWithoutCodeIfSuccess) {

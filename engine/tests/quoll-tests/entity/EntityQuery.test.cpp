@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
 #include "quoll/entity/EntityQuery.h"
-
 #include "quoll-tests/Testing.h"
 
 class EntityQueryTest : public ::testing::Test {

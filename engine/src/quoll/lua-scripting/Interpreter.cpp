@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
-#include "LuaHeaders.h"
 #include "Interpreter.h"
+#include "LuaHeaders.h"
 
 namespace quoll::lua {
 

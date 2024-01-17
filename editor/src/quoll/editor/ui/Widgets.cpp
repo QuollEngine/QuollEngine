@@ -1,9 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/Imgui.h"
 #include "quoll/imgui/ImguiUtils.h"
-
-#include "Widgets.h"
 #include "Theme.h"
+#include "Widgets.h"
 
 namespace quoll::editor::widgets {
 

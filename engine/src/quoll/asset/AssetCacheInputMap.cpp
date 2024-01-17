@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/input/KeyMappings.h"
-
 #include "AssetCache.h"
 
 namespace quoll {

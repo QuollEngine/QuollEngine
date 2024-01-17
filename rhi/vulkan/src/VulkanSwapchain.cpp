@@ -1,9 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
-
-#include "VulkanSwapchain.h"
 #include "VulkanError.h"
 #include "VulkanLog.h"
+#include "VulkanSwapchain.h"
 
 namespace quoll::rhi {
 

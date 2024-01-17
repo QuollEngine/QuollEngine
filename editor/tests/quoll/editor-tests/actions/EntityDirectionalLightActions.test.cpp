@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
-#include "quoll/scene/DirectionalLight.h"
 #include "quoll/scene/CascadedShadowMap.h"
-
+#include "quoll/scene/DirectionalLight.h"
 #include "quoll/editor/actions/EntityLightActions.h"
-
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
 #include "DefaultEntityTests.h"

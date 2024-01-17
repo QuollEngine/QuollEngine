@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/entity/EntityLuaTable.h"
-
-#include "PhysicsSystemLuaTable.h"
 #include "CollisionEvent.h"
+#include "PhysicsSystemLuaTable.h"
 
 namespace quoll {
 

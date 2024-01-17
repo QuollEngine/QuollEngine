@@ -1,15 +1,13 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Id.h"
+#include "quoll/entity/EntityDatabase.h"
+#include "quoll/io/EntitySerializer.h"
+#include "quoll/io/SceneIO.h"
+#include "quoll/scene/Camera.h"
 #include "quoll/scene/EnvironmentLighting.h"
 #include "quoll/scene/EnvironmentSkybox.h"
-#include "quoll/scene/PerspectiveLens.h"
-#include "quoll/scene/Camera.h"
 #include "quoll/scene/Parent.h"
-
-#include "quoll/entity/EntityDatabase.h"
-#include "quoll/io/SceneIO.h"
-#include "quoll/io/EntitySerializer.h"
-
+#include "quoll/scene/PerspectiveLens.h"
 #include "quoll-tests/Testing.h"
 
 const quoll::Path ScenePath =

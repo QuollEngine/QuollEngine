@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "ScriptSerializer.h"
 #include "LuaScript.h"
+#include "ScriptSerializer.h"
 
 namespace quoll {
 

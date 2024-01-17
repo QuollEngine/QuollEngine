@@ -1,11 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/window/Window.h"
-
+#include "VulkanError.h"
 #include "VulkanHeaders.h"
 #include <GLFW/glfw3.h>
-
-#include "VulkanError.h"
 
 namespace quoll::rhi {
 

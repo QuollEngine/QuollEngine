@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll-tests/Testing.h"
-
 #include "AssetCacheTestBase.h"
 
 const quoll::Path AssetCacheTestBase::CachePath =

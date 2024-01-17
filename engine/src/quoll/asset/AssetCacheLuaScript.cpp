@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "quoll/lua-scripting/Interpreter.h"
 #include "quoll/lua-scripting/NoopMetatable.h"
 #include "AssetCache.h"

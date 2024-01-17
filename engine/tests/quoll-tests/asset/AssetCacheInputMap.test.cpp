@@ -1,15 +1,12 @@
 #include "quoll/core/Base.h"
-#include <random>
-#include <GLFW/glfw3.h>
-
 #include "quoll/core/Version.h"
 #include "quoll/asset/AssetCache.h"
-#include "quoll/yaml/Yaml.h"
-
 #include "quoll/input/KeyMappings.h"
-
+#include "quoll/yaml/Yaml.h"
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
+#include <GLFW/glfw3.h>
+#include <random>
 
 static const quoll::Path FilePath =
     AssetCacheTestBase::CachePath / "test.inputmap";

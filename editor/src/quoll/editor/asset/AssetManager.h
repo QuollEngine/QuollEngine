@@ -2,8 +2,8 @@
 
 #include "quoll/asset/AssetCache.h"
 #include "quoll/asset/AssetRevision.h"
-#include "ImageLoader.h"
 #include "HDRIImporter.h"
+#include "ImageLoader.h"
 #include "UUIDMap.h"
 
 namespace quoll::editor {

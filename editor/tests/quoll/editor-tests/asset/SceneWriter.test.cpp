@@ -2,14 +2,11 @@
 #include "quoll/core/Engine.h"
 #include "quoll/core/Id.h"
 #include "quoll/core/Name.h"
-#include "quoll/scene/Parent.h"
 #include "quoll/scene/Children.h"
+#include "quoll/scene/Parent.h"
 #include "quoll/scene/PerspectiveLens.h"
-
 #include "quoll/yaml/Yaml.h"
-
 #include "quoll/editor/scene/asset/SceneWriter.h"
-
 #include "quoll/editor-tests/Testing.h"
 
 static quoll::Path TmpPath = std::filesystem::current_path() / "tmp";

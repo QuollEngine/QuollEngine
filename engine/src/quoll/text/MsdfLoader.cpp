@@ -1,11 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/rhi/RenderHandle.h"
-
 #include "MsdfAtlas.h"
 #include "MsdfLoader.h"
-
-#include <ft2build.h>
 #include <freetype/freetype.h>
+#include <ft2build.h>
 
 namespace quoll {
 

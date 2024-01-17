@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "MeshSerializer.h"
 #include "Mesh.h"
+#include "MeshSerializer.h"
 #include "SkinnedMesh.h"
 
 namespace quoll {

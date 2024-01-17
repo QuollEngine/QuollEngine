@@ -32,5 +32,5 @@ static void PrintTo(Entity entity, std::ostream *out) {
 
 } // namespace quoll
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>

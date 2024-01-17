@@ -1,8 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/imgui/Imgui.h"
 #include "ConfirmationDialog.h"
 #include "Widgets.h"
-
-#include "quoll/imgui/Imgui.h"
 
 namespace quoll::editor {
 

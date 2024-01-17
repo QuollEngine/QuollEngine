@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/SwappableVector.h"
-
 #include "quoll-tests/Testing.h"
 
 struct Data {

@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "EnvironmentSkyboxSerializer.h"
 #include "EnvironmentSkybox.h"
+#include "EnvironmentSkyboxSerializer.h"
 
 namespace quoll {
 

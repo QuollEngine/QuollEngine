@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/asset/AssetCache.h"
+#include "quoll-tests/Testing.h"
 
 class AssetCacheTestBase : public ::testing::Test {
 public:

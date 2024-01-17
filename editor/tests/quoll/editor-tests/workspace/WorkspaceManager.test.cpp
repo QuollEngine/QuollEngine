@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "quoll/editor-tests/Testing.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"
+#include "quoll/editor-tests/Testing.h"
 
 class WorkspaceManagerTest : public ::testing::Test {
 public:

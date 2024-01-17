@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-#include "quoll/yaml/Yaml.h"
 #include "quoll/platform/tools/FileDialog.h"
-
+#include "quoll/yaml/Yaml.h"
 #include "ProjectManager.h"
 
 namespace quoll::editor {

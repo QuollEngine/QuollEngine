@@ -3,7 +3,6 @@
 #include "quoll/asset/AssetCache.h"
 #include "quoll/asset/AssetFileHeader.h"
 #include "quoll/asset/InputBinaryStream.h"
-
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
 

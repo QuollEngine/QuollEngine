@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/platform/tools/FileDialog.h"
 #include "quoll/editor/core/GameExporter.h"
-
 #include "ProjectActions.h"
 
 namespace quoll::editor {

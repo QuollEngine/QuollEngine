@@ -1,9 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/editor/ui/StyleStack.h"
 #include "quoll/editor/ui/Theme.h"
-
 #include "WorkspaceTabs.h"
-
 #include <imgui.h>
 
 namespace quoll::editor {

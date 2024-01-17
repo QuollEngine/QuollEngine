@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Debug.h"
 #include "quoll/core/Engine.h"
-
 #include "VulkanDescriptorPool.h"
 #include "VulkanDescriptorSet.h"
 #include "VulkanError.h"

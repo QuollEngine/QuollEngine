@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
-
-#include "EnvironmentLightingSerializer.h"
 #include "EnvironmentLighting.h"
+#include "EnvironmentLightingSerializer.h"
 
 namespace quoll {
 

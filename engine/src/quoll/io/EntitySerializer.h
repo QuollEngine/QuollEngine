@@ -2,8 +2,8 @@
 
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/asset/Result.h"
-#include "quoll/yaml/Yaml.h"
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/yaml/Yaml.h"
 
 namespace quoll::detail {
 

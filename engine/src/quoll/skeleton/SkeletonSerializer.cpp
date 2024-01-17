@@ -1,5 +1,4 @@
 #include "quoll/core/Base.h"
-
 #include "Skeleton.h"
 #include "SkeletonSerializer.h"
 

@@ -3,7 +3,6 @@
 #include "quoll/animation/AnimatorEvent.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/skeleton/Skeleton.h"
-
 #include "quoll-tests/Testing.h"
 
 class AnimationSystemTest : public ::testing::Test {
