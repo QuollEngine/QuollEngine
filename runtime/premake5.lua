@@ -22,7 +22,7 @@ project "QuollRuntime"
     loadSourceFiles{}
     linkDependenciesWith{"QuollEngine"}
     linkVulkanRHI{}
-    linkOptick{}
+    linkTracy{}
     linkPlatform()
 
     -- This is for development only since runtime

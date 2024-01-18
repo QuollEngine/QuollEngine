@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/core/Profiler.h"
 #include "quoll/rhi/RenderCommandList.h"
 #include "RenderGraph.h"
 #include "RenderGraphSyncDependency.h"

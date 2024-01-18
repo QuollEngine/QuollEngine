@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Profiler.h"
 #include "Skeleton.h"
 #include "SkeletonUpdater.h"
 

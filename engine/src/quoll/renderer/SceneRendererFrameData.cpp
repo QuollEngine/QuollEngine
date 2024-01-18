@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Profiler.h"
 #include "quoll/rhi/RenderHandle.h"
 #include "quoll/scene/DirectionalLight.h"
 #include "quoll/scene/PointLight.h"

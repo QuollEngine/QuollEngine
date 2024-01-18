@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/core/Profiler.h"
 #include "quoll/physics/Collidable.h"
 #include "quoll/physics/Force.h"
 #include "quoll/physics/Impulse.h"

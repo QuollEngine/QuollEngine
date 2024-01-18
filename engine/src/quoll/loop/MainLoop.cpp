@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Profiler.h"
 #include "quoll/profiler/FPSCounter.h"
 #include "quoll/window/Window.h"
 #include "MainLoop.h"
@@ -37,7 +38,6 @@ void MainLoop::run() {
   auto prevGameTime = std::chrono::high_resolution_clock::now();
   auto prevFrameTime = prevGameTime;
   while (mRunning) {
-    QUOLL_PROFILE_FRAME("MainLoop");
     auto currentTime = std::chrono::high_resolution_clock::now();
 
     if (mWindow.shouldClose()) {
@@ -76,6 +76,8 @@ void MainLoop::run() {
     } else {
       frames++;
     }
+
+    QUOLL_PROFILE_FRAME("MainLoop");
   }
 }
 

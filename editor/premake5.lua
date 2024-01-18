@@ -8,7 +8,7 @@ project "QuollEditor"
     }
 
     loadSourceFiles{}
-    linkOptick{}
+    linkTracy{}
     linkDependenciesWith{"QuollEngine", "imguizmo", "meshoptimizer"}
     linkSuffixed { "mikktspace" }
 

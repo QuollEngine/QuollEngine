@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/core/Profiler.h"
 #include "quoll/asset/AssetRevision.h"
 #include "quoll/yaml/Yaml.h"
 #include "AssetManager.h"

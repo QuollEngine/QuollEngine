@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/core/Profiler.h"
 #include "VulkanBuffer.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanDeviceObject.h"
@@ -39,9 +40,6 @@ VulkanRenderDevice::VulkanRenderDevice(
   VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
   VkQueue graphicsQueue = mGraphicsQueue.getVulkanHandle();
   u32 queueIndex = mGraphicsQueue.getQueueIndex();
-
-  QUOLL_PROFILE_GPU_INIT_VULKAN(&device, &physicalDeviceHandle, &graphicsQueue,
-                                &queueIndex, 1, nullptr);
 }
 
 RenderCommandList VulkanRenderDevice::requestImmediateCommandList() {
@@ -109,7 +107,6 @@ void VulkanRenderDevice::endFrame(const RenderFrame &renderFrame) {
   mRenderContext.endRendering(mFrameManager);
 
   VkSwapchainKHR swapchainHandle = mSwapchain.getVulkanHandle();
-  QUOLL_PROFILE_GPU_FLIP(&mSwapchain);
 
   auto queuePresentResult = mRenderContext.present(
       mFrameManager, mSwapchain, renderFrame.swapchainImageIndex);
