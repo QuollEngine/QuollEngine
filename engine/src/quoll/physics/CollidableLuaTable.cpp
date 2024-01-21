@@ -3,6 +3,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/lua-scripting/Messages.h"
 #include "quoll/physics/Collidable.h"
+#include "quoll/physics/PhysicsSystem.h"
 #include "CollidableLuaTable.h"
 
 namespace quoll {

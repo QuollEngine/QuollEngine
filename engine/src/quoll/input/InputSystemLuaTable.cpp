@@ -1,5 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "quoll/window/KeyboardEvent.h"
+#include "quoll/window/WindowSignals.h"
 #include "InputSystemLuaTable.h"
 
 namespace quoll {

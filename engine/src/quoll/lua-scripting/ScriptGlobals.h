@@ -1,12 +1,13 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
-#include "quoll/entity/EntityDatabase.h"
-#include "quoll/physics/PhysicsSystem.h"
-#include "quoll/window/WindowSignals.h"
 #include "ScriptLoop.h"
 
 namespace quoll {
+
+class WindowSignals;
+class EntityDatabase;
+class PhysicsSystem;
+class AssetRegistry;
 
 struct ScriptGlobals {
   WindowSignals &windowSignals;

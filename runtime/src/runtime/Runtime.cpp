@@ -10,8 +10,10 @@
 #include "quoll/profiler/FPSCounter.h"
 #include "quoll/profiler/MetricsCollector.h"
 #include "quoll/renderer/Presenter.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
+#include "quoll/scene/Scene.h"
 #include "quoll/window/Window.h"
 
 // Render hardware interfaces

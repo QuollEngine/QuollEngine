@@ -1,8 +1,10 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/animation/AnimatorEvent.h"
+#include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/lua-scripting/Messages.h"
+#include "Animator.h"
 #include "AnimatorLuaTable.h"
 
 namespace quoll {

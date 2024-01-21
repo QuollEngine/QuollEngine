@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "quoll/skeleton/Skeleton.h"
 #include "quoll/skeleton/SkeletonUpdater.h"
 #include "quoll-tests/Testing.h"

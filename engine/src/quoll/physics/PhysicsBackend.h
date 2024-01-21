@@ -6,6 +6,8 @@
 
 namespace quoll {
 
+class PhysicsSignals;
+
 class PhysicsBackend {
 public:
   PhysicsBackend() = default;

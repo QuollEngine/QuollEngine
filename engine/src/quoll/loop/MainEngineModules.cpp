@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/physx/PhysxBackend.h"
+#include "quoll/scene/Scene.h"
 #include "MainEngineModules.h"
 
 namespace quoll {

@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/core/Profiler.h"
+#include "quoll/asset/AssetRegistry.h"
 #include "quoll/scene/EnvironmentLighting.h"
 #include "quoll/scene/EnvironmentSkybox.h"
 #include "quoll/scene/Sprite.h"

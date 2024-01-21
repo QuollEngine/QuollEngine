@@ -2,6 +2,8 @@
 #include "quoll/asset/AssetCache.h"
 #include "quoll/entity/EntityLuaTable.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"
+#include "quoll/physics/PhysicsSystem.h"
+#include "quoll/window/WindowSignals.h"
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
 #include "quoll-tests/test-utils/TestPhysicsBackend.h"

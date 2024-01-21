@@ -1,9 +1,10 @@
 #pragma once
 
-#include "quoll/asset/AnimatorAsset.h"
 #include "quoll/lua-scripting/LuaUserTypeBase.h"
 
 namespace quoll {
+
+struct AnimationState;
 
 class AnimationStateLuaTable {
 public:

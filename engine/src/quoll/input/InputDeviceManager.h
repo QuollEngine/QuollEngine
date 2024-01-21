@@ -1,7 +1,5 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
-#include "quoll/entity/EntityDatabase.h"
 #include "InputDevice.h"
 
 namespace quoll {

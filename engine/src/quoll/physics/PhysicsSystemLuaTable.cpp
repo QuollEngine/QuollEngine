@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/entity/EntityLuaTable.h"
+#include "quoll/physics/PhysicsSystem.h"
 #include "CollisionEvent.h"
 #include "PhysicsSystemLuaTable.h"
 

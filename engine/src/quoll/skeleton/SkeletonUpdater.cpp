@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Profiler.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "Skeleton.h"
 #include "SkeletonUpdater.h"
 

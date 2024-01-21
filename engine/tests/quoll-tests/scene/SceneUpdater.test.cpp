@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/Camera.h"
 #include "quoll/scene/DirectionalLight.h"
 #include "quoll/scene/LocalTransform.h"

@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "LuaScript.h"
 #include "ScriptLuaTable.h"
 
