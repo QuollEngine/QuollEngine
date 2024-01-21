@@ -1,8 +1,9 @@
 #pragma once
 
-#include "quoll/profiler/FPSCounter.h"
 #include "quoll/rhi/DeviceStats.h"
 #include "quoll/rhi/PhysicalDeviceInformation.h"
+#include "FPSCounter.h"
+#include "MetricsCollector.h"
 
 namespace quoll {
 
@@ -10,7 +11,8 @@ class ImguiDebugLayer {
 public:
   ImguiDebugLayer(const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
                   const rhi::DeviceStats &deviceStats,
-                  const FPSCounter &fpsCounter);
+                  const FPSCounter &fpsCounter,
+                  MetricsCollector &metricsCollector);
 
   void renderMenu();
 
@@ -31,6 +33,7 @@ private:
   rhi::PhysicalDeviceInformation mPhysicalDeviceInfo;
   const FPSCounter &mFpsCounter;
   const rhi::DeviceStats &mDeviceStats;
+  MetricsCollector &mMetricsCollector;
 
   bool mUsageMetricsVisible = false;
   bool mPhysicalDeviceInfoVisible = false;

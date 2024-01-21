@@ -1,7 +1,5 @@
 #pragma once
 
-#include "quoll/renderer/RenderStorage.h"
-#include "quoll/rhi/RenderDevice.h"
 #include "AnimationAsset.h"
 #include "AnimatorAsset.h"
 #include "Asset.h"
@@ -19,6 +17,8 @@
 #include "TextureAsset.h"
 
 namespace quoll {
+
+class RenderStorage;
 
 /**
  * Registry of all the loaded assets

@@ -3,6 +3,7 @@
 #include "quoll/rhi/Descriptor.h"
 #include "quoll/rhi/RenderDevice.h"
 #include "Presenter.h"
+#include "RenderStorage.h"
 
 namespace quoll {
 

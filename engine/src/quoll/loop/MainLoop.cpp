@@ -9,20 +9,24 @@ namespace quoll {
 MainLoop::MainLoop(Window &window, FPSCounter &fpsCounter)
     : mWindow(window), mFpsCounter(fpsCounter) {}
 
-void MainLoop::setUpdateFn(const std::function<void(f32)> &updateFn) {
+void MainLoop::setUpdateFn(std::function<void(f32)> &&updateFn) {
   mUpdateFn = updateFn;
 }
 
-void MainLoop::setFixedUpdateFn(const std::function<void(f32)> &fixedUpdateFn) {
+void MainLoop::setFixedUpdateFn(std::function<void(f32)> &&fixedUpdateFn) {
   mFixedUpdateFn = fixedUpdateFn;
 }
 
-void MainLoop::setRenderFn(const std::function<void()> &renderFn) {
+void MainLoop::setRenderFn(std::function<void()> &&renderFn) {
   mRenderFn = renderFn;
 }
 
-void MainLoop::setPrepareFn(const std::function<void()> &prepareFn) {
+void MainLoop::setPrepareFn(std::function<void()> &&prepareFn) {
   mPrepareFn = prepareFn;
+}
+
+void MainLoop::setStatsFn(std::function<void(u32)> &&statsFn) {
+  mStatsFn = statsFn;
 }
 
 void MainLoop::stop() { mRunning = false; }
@@ -72,6 +76,7 @@ void MainLoop::run() {
             .count() >= OneSecondInMs) {
       prevFrameTime = currentTime;
       mFpsCounter.collectFPS(frames);
+      mStatsFn(frames);
       frames = 0;
     } else {
       frames++;

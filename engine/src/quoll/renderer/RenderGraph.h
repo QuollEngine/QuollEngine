@@ -1,12 +1,16 @@
 #pragma once
 
+#include "quoll/profiler/GpuSpan.h"
 #include "quoll/rhi/RenderDevice.h"
 #include "RenderGraphPass.h"
 #include "RenderGraphRegistry.h"
 #include "RenderGraphResource.h"
-#include "RenderStorage.h"
 
 namespace quoll {
+
+class RenderStorage;
+class GpuSpan;
+class MetricsCollector;
 
 enum class GraphDirty { None, PassChanges, SizeUpdate };
 
@@ -62,12 +66,15 @@ private:
 
   void buildComputePass(RenderGraphPass &pass, RenderStorage &storage);
 
+  void buildTimestamps(MetricsCollector &peformanceCollector);
+
 private:
   RenderGraphRegistry mRegistry;
   String mName;
 
   std::vector<RenderGraphPass> mPasses;
   std::vector<RenderGraphPass> mCompiledPasses;
+  std::vector<GpuSpan> mCompiledPassSpans;
 };
 
 } // namespace quoll

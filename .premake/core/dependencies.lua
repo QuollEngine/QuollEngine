@@ -42,7 +42,7 @@ function linkDependenciesWith(...)
     }
 
     linkSuffixed {
-        "yaml-cpp", "imgui", "freetype", "bz2"
+        "yaml-cpp", "imgui", "implot", "freetype", "bz2"
     }
 
     links {

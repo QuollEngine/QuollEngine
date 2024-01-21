@@ -13,6 +13,7 @@
 #include "VulkanResourceAllocator.h"
 #include "VulkanResourceRegistry.h"
 #include "VulkanSwapchain.h"
+#include "VulkanTimestampManager.h"
 #include "VulkanUploadContext.h"
 
 namespace quoll::rhi {
@@ -29,6 +30,8 @@ public:
   RenderFrame beginFrame() override;
 
   void endFrame(const RenderFrame &renderFrame) override;
+
+  void collectTimestamps(std::vector<u64> &timestamps) override;
 
   void waitForIdle() override;
 
@@ -100,6 +103,7 @@ private:
   VulkanQueue mGraphicsQueue;
 
   VulkanFrameManager mFrameManager;
+  VulkanTimestampManager mTimestampManager;
   VulkanResourceAllocator mAllocator;
   VulkanResourceRegistry mRegistry;
   VulkanPipelineLayoutCache mPipelineLayoutCache;

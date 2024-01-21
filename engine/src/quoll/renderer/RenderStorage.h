@@ -6,6 +6,8 @@
 
 namespace quoll {
 
+class MetricsCollector;
+
 /**
  * @brief Render storage
  *
@@ -14,7 +16,7 @@ namespace quoll {
  */
 class RenderStorage {
 public:
-  RenderStorage(rhi::RenderDevice *device);
+  RenderStorage(rhi::RenderDevice *device, MetricsCollector &metricsCollector);
 
   RenderStorage(const RenderStorage &) = delete;
   RenderStorage &operator=(const RenderStorage &) = delete;
@@ -81,6 +83,8 @@ public:
         mPipelineDescriptions.at(static_cast<usize>(handle) - 1));
   }
 
+  inline MetricsCollector &getMetricsCollector() { return mMetricsCollector; }
+
 private:
   rhi::RenderDevice *mDevice = nullptr;
 
@@ -102,6 +106,8 @@ private:
   rhi::SamplerHandle mDefaultSampler = rhi::SamplerHandle::Null;
 
   std::unordered_map<String, rhi::ShaderHandle> mShaderMap;
+
+  MetricsCollector &mMetricsCollector;
 };
 
 } // namespace quoll

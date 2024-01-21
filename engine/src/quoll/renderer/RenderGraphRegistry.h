@@ -1,9 +1,12 @@
 #pragma once
 
+#include "quoll/rhi/BufferDescription.h"
 #include "quoll/rhi/RenderHandle.h"
-#include "RenderStorage.h"
+#include "quoll/rhi/TextureDescription.h"
 
 namespace quoll {
+
+class RenderStorage;
 
 struct RGTextureViewDescription {
   usize textureIndex = 0;

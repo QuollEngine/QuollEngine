@@ -23,7 +23,8 @@ ProjectSelectorScreen::ProjectSelectorScreen(Window &window,
 std::optional<Project> ProjectSelectorScreen::start() {
   EntityDatabase entityDatabase;
   AssetRegistry assetRegistry;
-  RenderStorage renderStorage(mDevice);
+  MetricsCollector metricsCollector;
+  RenderStorage renderStorage(mDevice, metricsCollector);
 
   quoll::RendererOptions initialOptions{};
   initialOptions.framebufferSize = mWindow.getFramebufferSize();
@@ -62,7 +63,8 @@ std::optional<Project> ProjectSelectorScreen::start() {
   mainLoop.setUpdateFn([&project, this](f32 dt) {});
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
-                             mDevice->getDeviceStats(), fpsCounter);
+                             mDevice->getDeviceStats(), fpsCounter,
+                             metricsCollector);
 
   mainLoop.setRenderFn([&]() mutable {
     if (presenter.requiresFramebufferUpdate()) {
@@ -137,9 +139,14 @@ std::optional<Project> ProjectSelectorScreen::start() {
       presenter.present(renderFrame.commandList, renderer.getFinalTexture(),
                         renderFrame.swapchainImageIndex);
       mDevice->endFrame(renderFrame);
+      metricsCollector.getResults(mDevice);
     } else {
       presenter.updateFramebuffers(mDevice->getSwapchain());
     }
+  });
+
+  mainLoop.setStatsFn([this, &metricsCollector](u32 frames) {
+    metricsCollector.markForCollection();
   });
 
   mainLoop.run();

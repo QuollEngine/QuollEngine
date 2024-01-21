@@ -1,9 +1,11 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/core/Profiler.h"
+#include "quoll/profiler/MetricsCollector.h"
 #include "quoll/rhi/RenderCommandList.h"
 #include "RenderGraph.h"
 #include "RenderGraphSyncDependency.h"
+#include "RenderStorage.h"
 
 namespace quoll {
 
@@ -472,10 +474,23 @@ void RenderGraph::buildComputePass(RenderGraphPass &pass,
   }
 }
 
+void RenderGraph::buildTimestamps(MetricsCollector &peformanceCollector) {
+  mCompiledPassSpans.reserve(mCompiledPasses.size());
+
+  for (auto &pass : mCompiledPasses) {
+    mCompiledPassSpans.push_back(
+        peformanceCollector.createGpuSpan(pass.getName()));
+  }
+}
+
 void RenderGraph::execute(rhi::RenderCommandList &commandList, u32 frameIndex) {
   QUOLL_PROFILE_EVENT("RenderGraph::execute");
 
-  for (auto &pass : mCompiledPasses) {
+  for (size_t i = 0; i < mCompiledPasses.size(); ++i) {
+    auto &pass = mCompiledPasses.at(i);
+
+    mCompiledPassSpans.at(i).begin(commandList);
+
     commandList.pipelineBarrier(pass.mDependencies.memoryBarriers,
                                 pass.mDependencies.imageBarriers,
                                 pass.mDependencies.bufferBarriers);
@@ -491,6 +506,8 @@ void RenderGraph::execute(rhi::RenderCommandList &commandList, u32 frameIndex) {
       pass.execute(commandList, frameIndex);
       commandList.endRenderPass();
     }
+
+    mCompiledPassSpans.at(i).end(commandList);
   }
 }
 
@@ -500,6 +517,7 @@ void RenderGraph::build(RenderStorage &storage) {
   compile();
   buildBarriers();
   buildPasses(storage);
+  buildTimestamps(storage.getMetricsCollector());
 
   LOG_DEBUG("Render graph built: " << mName);
 }
@@ -526,6 +544,10 @@ void RenderGraph::destroy(RenderStorage &storage) {
         RGResourceState::Transient) {
       storage.destroyTexture(mRegistry.get<rhi::TextureHandle>(index));
     }
+  }
+
+  for (const auto &span : mCompiledPassSpans) {
+    storage.getMetricsCollector().deleteGpuSpan(span);
   }
 }
 

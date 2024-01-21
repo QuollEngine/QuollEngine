@@ -18,6 +18,10 @@
       "features": ["docking-experimental", "glfw-binding"]
     },
     {
+      "name": "implot",
+      "default-features": false
+    },
+    {
       "name": "imguizmo",
       "default-features": false
     },

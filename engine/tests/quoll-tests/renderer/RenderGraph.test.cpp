@@ -1,5 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/profiler/MetricsCollector.h"
 #include "quoll/renderer/RenderGraph.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/rhi-mock/MockRenderDevice.h"
 #include "quoll-tests/Testing.h"
 
@@ -7,7 +9,7 @@ using namespace quoll::rhi;
 
 class RenderGraphTest : public ::testing::Test {
 public:
-  RenderGraphTest() : graph("TestGraph"), storage(&device) {}
+  RenderGraphTest() : graph("TestGraph"), storage(&device, metricsCollector) {}
 
   quoll::RenderGraphResource<TextureHandle>
   createTexture(quoll::rhi::TextureDescription desc) {
@@ -15,6 +17,7 @@ public:
   }
 
   MockRenderDevice device;
+  quoll::MetricsCollector metricsCollector;
   quoll::RenderStorage storage;
   quoll::RenderGraph graph;
 

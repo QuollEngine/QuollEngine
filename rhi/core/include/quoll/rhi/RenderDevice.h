@@ -39,6 +39,8 @@ public:
 
   virtual void endFrame(const RenderFrame &renderFrame) = 0;
 
+  virtual void collectTimestamps(std::vector<u64> &timestamps) = 0;
+
   virtual void waitForIdle() = 0;
 
   virtual const PhysicalDeviceInformation getDeviceInformation() = 0;

@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Profiler.h"
 #include "quoll/renderer/MaterialPBR.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/TextureUtils.h"
 #include "AssetRegistry.h"
 #include "DefaultObjects.h"

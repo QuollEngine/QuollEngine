@@ -74,6 +74,8 @@ public:
 
   virtual void blitTexture(TextureHandle source, TextureHandle destination,
                            std::span<BlitRegion> regions, Filter filter) = 0;
+
+  virtual void writeTimestamp(u32 timestamp, PipelineStage stage) = 0;
 };
 
 } // namespace quoll::rhi

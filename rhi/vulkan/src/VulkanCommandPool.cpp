@@ -7,13 +7,14 @@
 
 namespace quoll::rhi {
 
-VulkanCommandPool::VulkanCommandPool(VulkanDeviceObject &device,
-                                     u32 queueFamilyIndex,
-                                     const VulkanResourceRegistry &registry,
-                                     const VulkanDescriptorPool &descriptorPool,
-                                     DeviceStats &stats)
+VulkanCommandPool::VulkanCommandPool(
+    VulkanDeviceObject &device, u32 queueFamilyIndex,
+    const VulkanResourceRegistry &registry,
+    const VulkanDescriptorPool &descriptorPool,
+    const VulkanTimestampManager &timestampManager, DeviceStats &stats)
     : mDevice(device), mRegistry(registry), mDescriptorPool(descriptorPool),
-      mStats(stats), mQueueFamilyIndex(queueFamilyIndex) {
+      mStats(stats), mQueueFamilyIndex(queueFamilyIndex),
+      mTimestampManager(timestampManager) {
   VkCommandPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
@@ -50,9 +51,9 @@ VulkanCommandPool::createCommandLists(u32 count) {
       "Failed to allocate command buffers");
 
   for (usize i = 0; i < count; ++i) {
-    renderCommandLists.at(i) =
-        std::move(RenderCommandList(new VulkanCommandBuffer(
-            commandBuffers.at(i), mRegistry, mDescriptorPool, mStats)));
+    renderCommandLists.at(i) = std::move(RenderCommandList(
+        new VulkanCommandBuffer(commandBuffers.at(i), mRegistry,
+                                mDescriptorPool, mTimestampManager, mStats)));
   }
 
   LOG_DEBUG_VK("Command buffers allocated for queue family "

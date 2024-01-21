@@ -35,6 +35,10 @@ void MockRenderDevice::endFrame(const RenderFrame &renderFrame) {
   mockCommandList->clear();
 }
 
+void MockRenderDevice::collectTimestamps(std::vector<u64> &timestamps) {
+  mTimestampCollectorFn(timestamps);
+}
+
 void MockRenderDevice::waitForIdle() {
   // Do nothing
 }
