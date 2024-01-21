@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/asset/Asset.h"
 #include "quoll/asset/MeshAsset.h"
 #include "quoll/entity/Entity.h"
 #include "quoll/entity/EntityDatabase.h"

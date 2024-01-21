@@ -1,11 +1,12 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
-#include "quoll/entity/EntityDatabase.h"
 #include "quoll/input/InputMap.h"
-#include "InputDeviceManager.h"
 
 namespace quoll {
+
+class AssetRegistry;
+class InputDeviceManager;
+class EntityDatabase;
 
 class InputMapSystem {
 public:

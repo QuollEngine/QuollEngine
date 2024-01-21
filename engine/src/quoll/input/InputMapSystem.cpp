@@ -1,4 +1,7 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetRegistry.h"
+#include "quoll/entity/EntityDatabase.h"
+#include "InputDeviceManager.h"
 #include "InputMapSystem.h"
 
 namespace quoll {

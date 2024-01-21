@@ -1,5 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/asset/AssetRegistry.h"
+#include "quoll/entity/EntityDatabase.h"
+#include "quoll/input/InputDeviceManager.h"
 #include "quoll/input/InputMapSystem.h"
 #include "quoll/input/KeyMappings.h"
 #include "quoll-tests/Testing.h"

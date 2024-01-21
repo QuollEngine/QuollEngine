@@ -1,8 +1,10 @@
 #pragma once
 
-#include "quoll/renderer/RenderStorage.h"
+#include "quoll/rhi/RenderHandle.h"
 
 namespace quoll {
+
+class RenderStorage;
 
 class ImageTextureLoader {
 public:

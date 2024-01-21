@@ -6,6 +6,7 @@
 #include "quoll/profiler/FPSCounter.h"
 #include "quoll/profiler/ImguiDebugLayer.h"
 #include "quoll/renderer/Presenter.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/editor/ui/FontAwesome.h"
 #include "quoll/editor/ui/MainMenuBar.h"

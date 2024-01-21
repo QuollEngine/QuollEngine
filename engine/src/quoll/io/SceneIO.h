@@ -1,12 +1,14 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/Asset.h"
 #include "quoll/asset/Result.h"
-#include "quoll/entity/EntityDatabase.h"
-#include "quoll/scene/Scene.h"
+#include "quoll/entity/Entity.h"
 #include "quoll/yaml/Yaml.h"
 
 namespace quoll {
+
+class AssetRegistry;
+struct Scene;
 
 class SceneIO {
 public:

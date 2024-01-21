@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AnimatorAsset.h"
 #include "AnimationStateLuaTable.h"
 
 namespace quoll {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "quoll/renderer/Material.h"
-
 namespace quoll {
+
+class Material;
 
 struct MaterialAsset {
   TextureAssetHandle baseColorTexture = TextureAssetHandle::Null;

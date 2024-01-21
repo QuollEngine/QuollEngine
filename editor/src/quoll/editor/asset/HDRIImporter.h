@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/asset/AssetCache.h"
+#include "quoll/rhi/Descriptor.h"
 #include "UUIDMap.h"
 
 namespace quoll::editor {

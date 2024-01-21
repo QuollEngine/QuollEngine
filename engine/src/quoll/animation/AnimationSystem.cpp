@@ -1,5 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Profiler.h"
+#include "quoll/asset/AssetRegistry.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/skeleton/Skeleton.h"
 #include "AnimationSystem.h"

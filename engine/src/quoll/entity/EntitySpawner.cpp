@@ -4,6 +4,7 @@
 #include "quoll/core/Name.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/animation/AnimatorEvent.h"
+#include "quoll/asset/AssetRegistry.h"
 #include "quoll/audio/AudioSource.h"
 #include "quoll/audio/AudioStart.h"
 #include "quoll/audio/AudioStatus.h"
@@ -37,6 +38,7 @@
 #include "quoll/text/Text.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
+#include "EntityDatabase.h"
 #include "EntitySpawner.h"
 
 namespace quoll {

@@ -1,10 +1,11 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
-#include "quoll/entity/EntityDatabase.h"
 #include "KeyframeInterpolator.h"
 
 namespace quoll {
+
+class AssetRegistry;
+class EntityDatabase;
 
 class AnimationSystem {
 public:

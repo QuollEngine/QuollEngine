@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/entity/Entity.h"
 #include "LuaHeaders.h"
 #include "ScriptGlobals.h"
 

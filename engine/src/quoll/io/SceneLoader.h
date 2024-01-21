@@ -1,9 +1,14 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
 #include "quoll/asset/Result.h"
-#include "quoll/entity/EntityDatabase.h"
 #include "quoll/yaml/Yaml.h"
+
+namespace quoll {
+
+class EntityDatabase;
+class AssetRegistry;
+
+} // namespace quoll
 
 namespace quoll::detail {
 

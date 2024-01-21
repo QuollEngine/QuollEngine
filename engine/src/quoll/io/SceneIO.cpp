@@ -1,7 +1,9 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Id.h"
+#include "quoll/asset/AssetRegistry.h"
 #include "quoll/scene/Camera.h"
 #include "quoll/scene/PerspectiveLens.h"
+#include "quoll/scene/Scene.h"
 #include "SceneIO.h"
 #include "SceneLoader.h"
 

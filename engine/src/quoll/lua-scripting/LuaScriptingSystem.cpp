@@ -1,6 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/core/Profiler.h"
+#include "quoll/asset/AssetRegistry.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "LuaScriptingSystem.h"
 #include "ScriptDecorator.h"
 

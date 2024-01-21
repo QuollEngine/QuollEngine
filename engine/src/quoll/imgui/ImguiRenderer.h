@@ -2,13 +2,14 @@
 
 #include "quoll/imgui/Imgui.h"
 #include "quoll/renderer/RenderGraph.h"
-#include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/RendererOptions.h"
 #include "quoll/rhi/RenderCommandList.h"
 #include "quoll/rhi/RenderDevice.h"
 #include "quoll/window/Window.h"
 
 namespace quoll {
+
+class RenderStorage;
 
 struct ImguiRenderPassData {
   RenderGraphPass &pass;

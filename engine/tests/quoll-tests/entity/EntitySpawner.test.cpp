@@ -1,5 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
+#include "quoll/asset/AssetRegistry.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "quoll/entity/EntitySpawner.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/SkinnedMesh.h"

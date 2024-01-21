@@ -4,6 +4,7 @@
 #include "quoll/core/Name.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/animation/AnimatorEvent.h"
+#include "quoll/asset/AssetRegistry.h"
 #include "quoll/audio/AudioSource.h"
 #include "quoll/audio/AudioStart.h"
 #include "quoll/audio/AudioStatus.h"

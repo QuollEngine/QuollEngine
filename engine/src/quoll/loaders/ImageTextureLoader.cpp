@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/TextureUtils.h"
 
 #define STB_IMAGE_IMPLEMENTATION

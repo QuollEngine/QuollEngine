@@ -1,9 +1,10 @@
 #pragma once
 
 #include "quoll/entity/Entity.h"
-#include "quoll/entity/EntityDatabase.h"
 
 namespace quoll {
+
+class EntityDatabase;
 
 class SceneUpdater {
 public:

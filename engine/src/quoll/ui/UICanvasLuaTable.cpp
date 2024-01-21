@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "UICanvas.h"
 #include "UICanvasLuaTable.h"
 #include "UICanvasRenderRequest.h"

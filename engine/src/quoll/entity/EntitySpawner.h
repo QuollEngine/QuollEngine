@@ -1,10 +1,13 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/Asset.h"
 #include "quoll/scene/LocalTransform.h"
-#include "EntityDatabase.h"
+#include "Entity.h"
 
 namespace quoll {
+
+class AssetRegistry;
+class EntityDatabase;
 
 class EntitySpawner {
 public:

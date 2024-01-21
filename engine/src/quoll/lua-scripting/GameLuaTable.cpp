@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "quoll/entity/EntityQueryLuaTable.h"
 #include "quoll/entity/EntitySpawnerLuaTable.h"
 #include "quoll/input/InputSystemLuaTable.h"

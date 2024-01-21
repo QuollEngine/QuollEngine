@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/entity/EntityDatabase.h"
 #include "Children.h"
 #include "EntityRelationUtils.h"
 #include "Parent.h"

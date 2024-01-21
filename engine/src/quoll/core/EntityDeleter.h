@@ -1,8 +1,8 @@
 #pragma once
 
-#include "quoll/scene/Scene.h"
-
 namespace quoll {
+
+struct Scene;
 
 class EntityDeleter {
 public:

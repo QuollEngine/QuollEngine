@@ -1,8 +1,6 @@
 #pragma once
 
-#include "quoll/rhi/Buffer.h"
 #include "quoll/rhi/RenderHandle.h"
-#include "Asset.h"
 
 namespace quoll {
 

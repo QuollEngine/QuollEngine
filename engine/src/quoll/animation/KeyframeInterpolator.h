@@ -1,8 +1,8 @@
 #pragma once
 
-#include "quoll/asset/AnimationAsset.h"
-
 namespace quoll {
+
+struct KeyframeSequenceAsset;
 
 class KeyframeInterpolator {
 public:

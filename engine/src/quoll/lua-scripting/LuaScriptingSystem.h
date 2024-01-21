@@ -1,14 +1,16 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
-#include "quoll/physics/PhysicsSystem.h"
-#include "quoll/window/Window.h"
 #include "Interpreter.h"
 #include "LuaScript.h"
 #include "ScriptLoop.h"
 
 namespace quoll {
+
+class AssetRegistry;
+class WindowSignals;
+class PhysicsSystem;
+class EntityDatabase;
 
 class LuaScriptingSystem {
 public:

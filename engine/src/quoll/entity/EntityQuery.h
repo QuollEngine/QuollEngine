@@ -1,8 +1,8 @@
 #pragma once
 
-#include "EntityDatabase.h"
-
 namespace quoll {
+
+class EntityDatabase;
 
 class EntityQuery {
 public:
