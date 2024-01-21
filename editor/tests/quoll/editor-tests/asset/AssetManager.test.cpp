@@ -1,5 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
+#include "quoll/profiler/MetricsCollector.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/rhi-mock/MockRenderDevice.h"
 #include "quoll/yaml/Yaml.h"
 #include "quoll/editor/asset/AssetManager.h"
@@ -19,7 +21,7 @@ static const quoll::Path InnerPathInAssets = AssetsPath / "inner-1" / "inner-2";
 class AssetManagerTest : public ::testing::Test {
 public:
   AssetManagerTest()
-      : renderStorage(&device),
+      : renderStorage(&device, metricsCollector),
         manager(AssetsPath, CachePath, renderStorage, false, false) {}
 
   void SetUp() override {
@@ -41,6 +43,7 @@ public:
 
 public:
   quoll::rhi::MockRenderDevice device;
+  quoll::MetricsCollector metricsCollector;
   quoll::RenderStorage renderStorage;
   quoll::editor::AssetManager manager;
 };
@@ -122,9 +125,6 @@ TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
 TEST_F(
     AssetManagerTest,
     ValidateAndPreloadDoesNotCreateFileWithNewUUIDIfFileContentsHaveChanged) {
-  quoll::rhi::MockRenderDevice device;
-  quoll::RenderStorage renderStorage(&device);
-
   fs::create_directories(InnerPathInAssets);
 
   auto animatorPath = InnerPathInAssets / "test.animator";
@@ -148,9 +148,6 @@ TEST_F(
 TEST_F(AssetManagerTest,
        ValidateAndPreloadDeletesCacheFileIfAssetFileDoesNotExist) {
   auto texturePath = CachePath / "test.asset";
-
-  quoll::rhi::MockRenderDevice device;
-  quoll::RenderStorage renderStorage(&device);
 
   createEmptyFile(texturePath);
 

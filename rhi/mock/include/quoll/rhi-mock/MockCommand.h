@@ -18,7 +18,8 @@ enum class MockCommandType {
   PipelineBarrier,
   CopyTextureToBuffer,
   CopyBufferToTexture,
-  BlitTexture
+  BlitTexture,
+  Timestamp
 };
 
 struct MockCommand {};
@@ -172,6 +173,12 @@ struct MockCommandBlitTexture
   std::vector<BlitRegion> regions;
 
   Filter filter;
+};
+
+struct MockCommandTimestamp
+    : public MockCommandTyped<MockCommandType::Timestamp> {
+  u32 queryIndex = std::numeric_limits<u32>::max();
+  PipelineStage stage;
 };
 
 } // namespace quoll::rhi

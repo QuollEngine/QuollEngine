@@ -5,7 +5,9 @@ namespace quoll {
 
 static constexpr u32 Hundred = 100;
 
-RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
+RenderStorage::RenderStorage(rhi::RenderDevice *device,
+                             MetricsCollector &metricsCollector)
+    : mDevice(device), mMetricsCollector(metricsCollector) {
   static constexpr u32 NumSamplers = 1000;
   static constexpr u32 MaxBuffers = 1000;
 

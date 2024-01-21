@@ -11,9 +11,11 @@ namespace quoll::rhi {
 
 VulkanCommandBuffer::VulkanCommandBuffer(
     VkCommandBuffer commandBuffer, const VulkanResourceRegistry &registry,
-    const VulkanDescriptorPool &descriptorPool, DeviceStats &stats)
+    const VulkanDescriptorPool &descriptorPool,
+    const VulkanTimestampManager &timestampManager, DeviceStats &stats)
     : mCommandBuffer(commandBuffer), mRegistry(registry),
-      mDescriptorPool(descriptorPool), mStats(stats) {}
+      mDescriptorPool(descriptorPool), mTimestampManager(timestampManager),
+      mStats(stats) {}
 
 void VulkanCommandBuffer::beginRenderPass(rhi::RenderPassHandle renderPass,
                                           FramebufferHandle framebuffer,
@@ -327,6 +329,12 @@ void VulkanCommandBuffer::blitTexture(TextureHandle source,
                  dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                  static_cast<u32>(regions.size()), vkRegions.data(),
                  VulkanMapping::getFilter(filter));
+}
+
+void VulkanCommandBuffer::writeTimestamp(u32 queryIndex, PipelineStage stage) {
+  vkCmdWriteTimestamp2KHR(mCommandBuffer,
+                          VulkanMapping::getPipelineStageFlags(stage),
+                          mTimestampManager.getQueryPool(), queryIndex);
 }
 
 } // namespace quoll::rhi

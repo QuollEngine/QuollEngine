@@ -4,6 +4,7 @@
 #include "quoll/rhi/NativeRenderCommandListInterface.h"
 #include "VulkanDescriptorPool.h"
 #include "VulkanResourceRegistry.h"
+#include "VulkanTimestampManager.h"
 
 namespace quoll::rhi {
 
@@ -12,6 +13,7 @@ public:
   VulkanCommandBuffer(VkCommandBuffer commandBuffer,
                       const VulkanResourceRegistry &registry,
                       const VulkanDescriptorPool &descriptorPool,
+                      const VulkanTimestampManager &timestampManager,
                       DeviceStats &stats);
 
   ~VulkanCommandBuffer() = default;
@@ -72,11 +74,14 @@ public:
   void blitTexture(TextureHandle source, TextureHandle destination,
                    std::span<BlitRegion> regions, Filter filter) override;
 
+  void writeTimestamp(u32 queryIndex, PipelineStage stage) override;
+
 private:
   VkCommandBuffer mCommandBuffer = VK_NULL_HANDLE;
 
   const VulkanResourceRegistry &mRegistry;
   const VulkanDescriptorPool &mDescriptorPool;
+  const VulkanTimestampManager &mTimestampManager;
   DeviceStats &mStats;
 };
 

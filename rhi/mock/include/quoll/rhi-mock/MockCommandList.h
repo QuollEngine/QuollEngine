@@ -73,6 +73,8 @@ public:
 
   void clear();
 
+  void writeTimestamp(u32 queryIndex, PipelineStage stage);
+
 private:
   MockBindings mBindings;
 

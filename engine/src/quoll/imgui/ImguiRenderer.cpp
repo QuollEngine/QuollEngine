@@ -3,6 +3,7 @@
 #include "quoll/renderer/TextureUtils.h"
 #include "ImguiRenderer.h"
 #include <imgui_impl_glfw.h>
+#include <implot.h>
 
 static constexpr u64 BufferMemoryAlignment = 256;
 
@@ -55,9 +56,13 @@ ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage)
 
     x.indexBuffer = renderStorage.createBuffer(indexDesc);
   }
+
+  ImPlot::CreateContext();
 }
 
 ImguiRenderer::~ImguiRenderer() {
+  ImPlot::DestroyContext();
+
   for (auto &x : mFrameData) {
     mDevice->destroyBuffer(x.vertexBuffer.getHandle());
     mDevice->destroyBuffer(x.indexBuffer.getHandle());

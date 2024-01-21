@@ -2,6 +2,8 @@
 
 #include "quoll/asset/AssetCache.h"
 #include "quoll/asset/DefaultObjects.h"
+#include "quoll/profiler/MetricsCollector.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/rhi-mock/MockRenderDevice.h"
 
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE
@@ -314,7 +316,7 @@ static quoll::Path saveSceneGLTF(GLTFTestScene &scene) {
 class GLTFImporterTestBase : public ::testing::Test {
 public:
   GLTFImporterTestBase()
-      : renderStorage(&device), assetCache(CachePath, false),
+      : renderStorage(&device, metricsCollector), assetCache(CachePath, false),
         imageLoader(assetCache, renderStorage),
         importer(assetCache, imageLoader, false) {}
 
@@ -329,6 +331,7 @@ public:
   }
 
   quoll::rhi::MockRenderDevice device;
+  quoll::MetricsCollector metricsCollector;
   quoll::RenderStorage renderStorage;
   quoll::AssetCache assetCache;
   quoll::editor::ImageLoader imageLoader;

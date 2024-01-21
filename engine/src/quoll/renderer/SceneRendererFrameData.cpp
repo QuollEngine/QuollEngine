@@ -3,6 +3,7 @@
 #include "quoll/rhi/RenderHandle.h"
 #include "quoll/scene/DirectionalLight.h"
 #include "quoll/scene/PointLight.h"
+#include "RenderStorage.h"
 #include "SceneRendererFrameData.h"
 
 namespace quoll {

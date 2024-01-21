@@ -27,6 +27,8 @@ public:
     return frameIndex == mFrameIndex;
   }
 
+  void recreateIfResized();
+
 private:
   void createRenderGraph();
 

@@ -1,11 +1,14 @@
 #pragma once
 
 #include "quoll/core/Property.h"
-#include "quoll/renderer/RenderStorage.h"
+#include "quoll/rhi/Buffer.h"
 #include "quoll/rhi/Descriptor.h"
+#include "quoll/rhi/DeviceAddress.h"
 #include "quoll/rhi/RenderHandle.h"
 
 namespace quoll {
+
+class RenderStorage;
 
 class Material {
 public:

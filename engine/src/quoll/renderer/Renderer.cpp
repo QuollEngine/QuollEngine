@@ -35,7 +35,6 @@ void Renderer::rebuildIfSettingsChanged() {
 }
 
 void Renderer::execute(rhi::RenderCommandList &commandList, u32 frameIndex) {
-
   mGraph.execute(commandList, frameIndex);
 }
 

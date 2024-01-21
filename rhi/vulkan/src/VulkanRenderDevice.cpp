@@ -22,7 +22,7 @@ VulkanRenderDevice::VulkanRenderDevice(
     : mPhysicalDevice(physicalDevice), mBackend(backend),
       mCommandPool(mDevice,
                    mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily(),
-                   mRegistry, mDescriptorPool, mStats),
+                   mRegistry, mDescriptorPool, mTimestampManager, mStats),
       mDevice(mPhysicalDevice), mPipelineLayoutCache(mDevice),
       mDescriptorPool(mDevice, mRegistry, mPipelineLayoutCache),
       mGraphicsQueue(
@@ -34,7 +34,8 @@ VulkanRenderDevice::VulkanRenderDevice(
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
       mSwapchain(mBackend, mPhysicalDevice, mDevice, mRegistry, mAllocator),
       mAllocator(mBackend, mPhysicalDevice, mDevice),
-      mStats(new VulkanResourceMetrics(mRegistry, mDescriptorPool)) {
+      mStats(new VulkanResourceMetrics(mRegistry, mDescriptorPool)),
+      mTimestampManager(mDevice) {
 
   VkDevice device = mDevice.getVulkanHandle();
   VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
@@ -98,6 +99,8 @@ RenderFrame VulkanRenderDevice::beginFrame() {
   }
 
   auto &commandBuffer = mRenderContext.beginRendering(mFrameManager);
+  mTimestampManager.setCurrentFrame(mFrameManager.getCurrentFrameIndex());
+  mTimestampManager.reset();
 
   return {mFrameManager.getCurrentFrameIndex(), imageIndex, commandBuffer};
 }
@@ -116,6 +119,14 @@ void VulkanRenderDevice::endFrame(const RenderFrame &renderFrame) {
     recreateSwapchain();
   }
   mFrameManager.nextFrame();
+}
+
+void VulkanRenderDevice::collectTimestamps(std::vector<u64> &timestamps) {
+  vkGetQueryPoolResults(mDevice, mTimestampManager.getQueryPool(), 0,
+                        static_cast<u32>(timestamps.size()),
+                        timestamps.size() * sizeof(u64), timestamps.data(),
+                        sizeof(u64),
+                        VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
 }
 
 void VulkanRenderDevice::waitForIdle() { vkDeviceWaitIdle(mDevice); }

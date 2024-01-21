@@ -117,6 +117,10 @@ public:
     mNativeRenderCommandList->blitTexture(source, destination, regions, filter);
   }
 
+  inline void writeTimestamp(u32 queryIndex, PipelineStage stage) {
+    mNativeRenderCommandList->writeTimestamp(queryIndex, stage);
+  }
+
 private:
   std::unique_ptr<NativeRenderCommandListInterface> mNativeRenderCommandList;
 };

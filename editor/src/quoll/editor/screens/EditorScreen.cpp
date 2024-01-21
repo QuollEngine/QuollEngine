@@ -43,7 +43,9 @@ void EditorScreen::start(const Project &rawProject) {
 
   FPSCounter fpsCounter;
 
-  RenderStorage renderStorage(mDevice);
+  quoll::MetricsCollector metricsCollector;
+
+  RenderStorage renderStorage(mDevice, metricsCollector);
 
   quoll::RendererOptions initialOptions{};
   initialOptions.framebufferSize = mWindow.getFramebufferSize();
@@ -96,7 +98,8 @@ void EditorScreen::start(const Project &rawProject) {
   MainLoop mainLoop(mWindow, fpsCounter);
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
-                             mDevice->getDeviceStats(), fpsCounter);
+                             mDevice->getDeviceStats(), fpsCounter,
+                             metricsCollector);
 
   IconRegistry::loadIcons(renderStorage,
                           std::filesystem::current_path() / "assets" / "icons");
@@ -240,9 +243,15 @@ void EditorScreen::start(const Project &rawProject) {
                         renderFrame.swapchainImageIndex);
 
       mDevice->endFrame(renderFrame);
+
+      metricsCollector.getResults(mDevice);
     } else {
       presenter.updateFramebuffers(mDevice->getSwapchain());
     }
+  });
+
+  mainLoop.setStatsFn([this, &metricsCollector](u32 frames) {
+    metricsCollector.markForCollection();
   });
 
   mainLoop.run();

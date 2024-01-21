@@ -1,13 +1,17 @@
 #include "quoll/core/Base.h"
+#include "quoll/profiler/MetricsCollector.h"
 #include "quoll/renderer/Material.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/rhi-mock/MockRenderDevice.h"
 #include "quoll-tests/Testing.h"
 
 class MaterialTest : public ::testing::Test {
 public:
-  MaterialTest() : renderStorage(&device) {}
+  MaterialTest() : renderStorage(&device, metricsCollector) {}
 
   quoll::rhi::MockRenderDevice device;
+  quoll::MetricsCollector metricsCollector;
+
   quoll::RenderStorage renderStorage;
 };
 

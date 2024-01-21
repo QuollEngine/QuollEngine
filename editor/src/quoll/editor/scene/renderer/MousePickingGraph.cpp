@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/renderer/MeshRenderUtils.h"
 #include "quoll/renderer/MeshVertexLayout.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "MousePickingGraph.h"
 
 namespace quoll::editor {
@@ -126,16 +127,7 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
 
   mMousePos = mousePos;
 
-  if (mResized) {
-    mRenderGraph.destroy(mRenderStorage);
-    mRenderGraph = RenderGraph("Mouse picking");
-
-    createRenderGraph();
-
-    mRenderGraph.build(mRenderStorage);
-
-    mResized = false;
-  }
+  recreateIfResized();
 
   mRenderGraph.execute(commandList, frameIndex);
 }
@@ -158,6 +150,20 @@ Entity MousePickingGraph::getSelectedEntity() {
 void MousePickingGraph::setFramebufferSize(glm::uvec2 size) {
   mFramebufferSize = size;
   mResized = true;
+}
+
+void MousePickingGraph::recreateIfResized() {
+  if (!mResized)
+    return;
+
+  mRenderGraph.destroy(mRenderStorage);
+  mRenderGraph = RenderGraph("Mouse picking");
+
+  createRenderGraph();
+
+  mRenderGraph.build(mRenderStorage);
+
+  mResized = false;
 }
 
 void MousePickingGraph::createRenderGraph() {

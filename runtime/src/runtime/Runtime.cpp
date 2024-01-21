@@ -8,6 +8,7 @@
 #include "quoll/loop/MainEngineModules.h"
 #include "quoll/loop/MainLoop.h"
 #include "quoll/profiler/FPSCounter.h"
+#include "quoll/profiler/MetricsCollector.h"
 #include "quoll/renderer/Presenter.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
@@ -38,7 +39,9 @@ void Runtime::start() {
 
   rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
-  RenderStorage renderStorage(device);
+  MetricsCollector metricsCollector;
+
+  RenderStorage renderStorage(device, metricsCollector);
 
   RendererOptions initialOptions{};
   initialOptions.framebufferSize = {Width, Height};
@@ -159,9 +162,15 @@ void Runtime::start() {
                         renderFrame.swapchainImageIndex);
 
       device->endFrame(renderFrame);
+
+      metricsCollector.getResults(device);
     } else {
       presenter.updateFramebuffers(device->getSwapchain());
     }
+  });
+
+  mainLoop.setStatsFn([this, &metricsCollector](u32 frames) {
+    metricsCollector.markForCollection();
   });
 
   mainLoop.run();

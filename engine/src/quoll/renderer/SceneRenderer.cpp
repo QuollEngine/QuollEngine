@@ -10,6 +10,7 @@
 #include "Mesh.h"
 #include "MeshRenderUtils.h"
 #include "MeshVertexLayout.h"
+#include "RenderStorage.h"
 #include "SceneRenderer.h"
 #include "SkinnedMesh.h"
 #include "StandardPushConstants.h"

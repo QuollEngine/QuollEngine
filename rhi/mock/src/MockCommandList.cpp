@@ -202,4 +202,12 @@ void MockCommandList::clear() {
   mCommands.clear();
 }
 
+void MockCommandList::writeTimestamp(u32 queryIndex, rhi::PipelineStage stage) {
+  auto *command = new MockCommandTimestamp;
+  command->queryIndex = queryIndex;
+  command->stage = stage;
+
+  mCommands.push_back(std::unique_ptr<MockCommand>(command));
+}
+
 } // namespace quoll::rhi

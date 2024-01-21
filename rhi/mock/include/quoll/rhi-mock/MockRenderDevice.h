@@ -18,6 +18,11 @@ public:
     return mBuffers.at(handle).get();
   }
 
+  inline void
+  setTimestampCollectorFn(std::function<void(std::vector<u64> &)> &&fn) {
+    mTimestampCollectorFn = fn;
+  }
+
 public:
   RenderCommandList requestImmediateCommandList() override;
 
@@ -26,6 +31,8 @@ public:
   RenderFrame beginFrame() override;
 
   void endFrame(const RenderFrame &renderFrame) override;
+
+  void collectTimestamps(std::vector<u64> &timestamps) override;
 
   void waitForIdle() override;
 
@@ -133,6 +140,8 @@ private:
   u32 mFrameIndex = 0;
 
   DeviceStats mDeviceStats;
+
+  std::function<void(std::vector<u64> &)> mTimestampCollectorFn = [](auto &) {};
 };
 
 } // namespace quoll::rhi

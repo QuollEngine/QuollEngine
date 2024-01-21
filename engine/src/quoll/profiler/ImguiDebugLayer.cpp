@@ -7,9 +7,10 @@ namespace quoll {
 
 ImguiDebugLayer::ImguiDebugLayer(
     const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
-    const rhi::DeviceStats &deviceStats, const FPSCounter &fpsCounter)
+    const rhi::DeviceStats &deviceStats, const FPSCounter &fpsCounter,
+    MetricsCollector &metricsCollector)
     : mPhysicalDeviceInfo(physicalDeviceInfo), mFpsCounter(fpsCounter),
-      mDeviceStats(deviceStats) {}
+      mMetricsCollector(metricsCollector), mDeviceStats(deviceStats) {}
 
 void ImguiDebugLayer::renderMenu() {
   if (ImGui::BeginMenu("Debug")) {
@@ -32,7 +33,7 @@ void ImguiDebugLayer::render() {
 }
 
 void ImguiDebugLayer::renderPerformanceMetrics() {
-  const u32 ONE_SECOND_IN_MS = 1000;
+  static constexpr u32 OneSecondInMs = 1000;
   if (!mPerformanceMetricsVisible)
     return;
 
@@ -40,15 +41,32 @@ void ImguiDebugLayer::renderPerformanceMetrics() {
 
   if (ImGui::Begin("Performance Metrics", &mPerformanceMetricsVisible,
                    ImGuiWindowFlags_NoDocking)) {
-    if (ImGui::BeginTable("Table", 2,
+    if (ImGui::BeginTable("Overview", 2,
                           ImGuiTableFlags_Borders |
                               ImGuiTableFlags_SizingStretchSame |
                               ImGuiTableFlags_RowBg)) {
 
       renderTableRow("FPS", std::to_string(fps));
       renderTableRow("Frame time",
-                     std::to_string(fps > 0 ? ONE_SECOND_IN_MS / fps : 0) +
-                         "ms");
+                     std::to_string(fps > 0 ? OneSecondInMs / fps : 0) + "ms");
+      ImGui::EndTable();
+    }
+
+    if (ImGui::BeginTable("GPU Timings", 2,
+                          ImGuiTableFlags_Borders |
+                              ImGuiTableFlags_SizingStretchSame |
+                              ImGuiTableFlags_RowBg)) {
+      const auto period =
+          mPhysicalDeviceInfo.getLimits().timestampPeriod / 1000000.0f;
+
+      for (const auto &metric : mMetricsCollector.measure(period)) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("%s", metric.label.c_str());
+        ImGui::TableSetColumnIndex(1);
+        ImGui::Text("%.2f ms", metric.value);
+      }
+
       ImGui::EndTable();
     }
     ImGui::End();
