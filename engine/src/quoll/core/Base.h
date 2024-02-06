@@ -43,6 +43,7 @@
 #include <vector>
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -65,6 +66,7 @@ template <class T> using SharedPtr = std::shared_ptr<T>;
 #include "Assert.h"
 #include "BitwiseEnum.h"
 #include "DataTypes.h"
+#include "NoCopyMove.h"
 #include "Uuid.h"
 
 #endif

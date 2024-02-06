@@ -6,14 +6,9 @@
 
 namespace quoll {
 
-class InputBinaryStream {
+class InputBinaryStream : NoCopyMove {
 public:
   InputBinaryStream(const Path &path);
-
-  InputBinaryStream(const InputBinaryStream &) = delete;
-  InputBinaryStream(InputBinaryStream &&) = delete;
-  InputBinaryStream &operator=(const InputBinaryStream &) = delete;
-  InputBinaryStream &operator=(InputBinaryStream &&) = delete;
 
   ~InputBinaryStream();
 

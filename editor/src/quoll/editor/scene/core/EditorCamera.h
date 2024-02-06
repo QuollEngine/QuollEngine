@@ -7,7 +7,7 @@
 
 namespace quoll::editor {
 
-class EditorCamera {
+class EditorCamera : NoCopyMove {
 public:
   enum class InputState {
     None = 0,
@@ -38,11 +38,6 @@ public:
 
 public:
   EditorCamera(Window &window);
-
-  EditorCamera(const EditorCamera &) = delete;
-  EditorCamera &operator=(const EditorCamera &) = delete;
-  EditorCamera(EditorCamera &&) = delete;
-  EditorCamera &operator=(EditorCamera &&) = delete;
 
   ~EditorCamera();
 

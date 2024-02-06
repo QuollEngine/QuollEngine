@@ -8,7 +8,7 @@
 
 namespace quoll::rhi {
 
-class VulkanPipeline {
+class VulkanPipeline : NoCopyMove {
 public:
   VulkanPipeline(const GraphicsPipelineDescription &description,
                  VulkanDeviceObject &device,
@@ -21,11 +21,6 @@ public:
                  VulkanPipelineLayoutCache &pipelineLayoutCache);
 
   ~VulkanPipeline();
-
-  VulkanPipeline(const VulkanPipeline &) = delete;
-  VulkanPipeline(VulkanPipeline &&) = delete;
-  VulkanPipeline &operator=(const VulkanPipeline &) = delete;
-  VulkanPipeline &operator=(VulkanPipeline &&) = delete;
 
   inline VkPipeline getPipeline() const { return mPipeline; }
 

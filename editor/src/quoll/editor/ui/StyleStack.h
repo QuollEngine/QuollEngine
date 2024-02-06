@@ -4,16 +4,11 @@
 
 namespace quoll::editor {
 
-class StyleStack {
+class StyleStack : NoCopyMove {
 public:
   StyleStack() = default;
 
   ~StyleStack();
-
-  StyleStack(const StyleStack &) = delete;
-  StyleStack(StyleStack &&) = delete;
-  StyleStack &operator=(const StyleStack &) = delete;
-  StyleStack &operator=(StyleStack &&) = delete;
 
   void pushColor(u32 colorIndex, const glm::vec4 &color);
 

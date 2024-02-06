@@ -11,7 +11,7 @@
 
 namespace quoll::rhi {
 
-class VulkanTexture {
+class VulkanTexture : NoCopyMove {
 public:
   VulkanTexture(VkImage image, VkImageView imageView, VkSampler sampler,
                 VkFormat format, VulkanResourceAllocator &allocator,
@@ -25,11 +25,6 @@ public:
                 VulkanResourceAllocator &allocator, VulkanDeviceObject &device);
 
   ~VulkanTexture();
-
-  VulkanTexture(const VulkanTexture &) = delete;
-  VulkanTexture &operator=(const VulkanTexture &) = delete;
-  VulkanTexture(VulkanTexture &&) = delete;
-  VulkanTexture &operator=(VulkanTexture &&) = delete;
 
   inline VkImage getImage() const { return mImage; }
 

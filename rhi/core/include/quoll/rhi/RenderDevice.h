@@ -17,16 +17,11 @@
 
 namespace quoll::rhi {
 
-class RenderDevice {
+class RenderDevice : NoCopyMove {
 public:
   static constexpr usize NumFrames = 2;
 
 public:
-  RenderDevice(const RenderDevice &) = delete;
-  RenderDevice &operator=(const RenderDevice &) = delete;
-  RenderDevice(RenderDevice &&) = delete;
-  RenderDevice &operator=(RenderDevice &&) = delete;
-
   RenderDevice() = default;
 
   virtual ~RenderDevice() = default;

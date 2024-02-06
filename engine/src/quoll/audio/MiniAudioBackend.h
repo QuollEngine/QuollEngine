@@ -4,18 +4,13 @@
 
 namespace quoll {
 
-class MiniAudioBackend {
+class MiniAudioBackend : NoCopyMove {
   class BackendImpl;
 
 public:
   MiniAudioBackend();
 
   ~MiniAudioBackend();
-
-  MiniAudioBackend(const MiniAudioBackend &) = delete;
-  MiniAudioBackend(MiniAudioBackend &&) = delete;
-  MiniAudioBackend &operator=(const MiniAudioBackend &) = delete;
-  MiniAudioBackend &operator=(MiniAudioBackend &&) = delete;
 
   void *playSound(const AudioAsset &asset);
 

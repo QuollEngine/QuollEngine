@@ -12,16 +12,11 @@ class WindowSignals;
 class PhysicsSystem;
 class EntityDatabase;
 
-class LuaScriptingSystem {
+class LuaScriptingSystem : NoCopyMove {
 public:
   LuaScriptingSystem(AssetRegistry &assetRegistry);
 
   ~LuaScriptingSystem() = default;
-
-  LuaScriptingSystem(const LuaScriptingSystem &) = delete;
-  LuaScriptingSystem &operator=(const LuaScriptingSystem &) = delete;
-  LuaScriptingSystem(LuaScriptingSystem &&) = delete;
-  LuaScriptingSystem &operator=(LuaScriptingSystem &&) = delete;
 
   void start(EntityDatabase &entityDatabase, PhysicsSystem &physicsSystem,
              WindowSignals &windowSignals);

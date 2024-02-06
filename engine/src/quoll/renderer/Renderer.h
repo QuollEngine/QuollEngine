@@ -25,7 +25,7 @@ struct RendererTextures {
   RenderGraphResource<rhi::TextureHandle> sceneTexture;
 };
 
-class Renderer {
+class Renderer : NoCopyMove {
 public:
   using GraphBuilderFn =
       std::function<RendererTextures(RenderGraph &, const RendererOptions &)>;
@@ -34,10 +34,6 @@ public:
   Renderer(RenderStorage &storage, const RendererOptions &options);
 
   ~Renderer() = default;
-  Renderer(const Renderer &rhs) = delete;
-  Renderer(Renderer &&rhs) = delete;
-  Renderer &operator=(const Renderer &rhs) = delete;
-  Renderer &operator=(Renderer &&rhs) = delete;
 
   void setGraphBuilder(GraphBuilderFn &&builderFn);
 

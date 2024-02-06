@@ -7,18 +7,13 @@
 
 namespace quoll::rhi {
 
-class VulkanResourceAllocator {
+class VulkanResourceAllocator : NoCopyMove {
 public:
   VulkanResourceAllocator(VulkanRenderBackend &backend,
                           VulkanPhysicalDevice &physicalDevice,
                           VulkanDeviceObject &device);
 
   ~VulkanResourceAllocator();
-
-  VulkanResourceAllocator(const VulkanResourceAllocator &) = delete;
-  VulkanResourceAllocator &operator=(const VulkanResourceAllocator &) = delete;
-  VulkanResourceAllocator(VulkanResourceAllocator &&) = delete;
-  VulkanResourceAllocator &operator=(VulkanResourceAllocator &&) = delete;
 
   inline operator VmaAllocator() { return mAllocator; }
 

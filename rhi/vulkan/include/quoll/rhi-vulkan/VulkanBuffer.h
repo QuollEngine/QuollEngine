@@ -7,17 +7,12 @@
 
 namespace quoll::rhi {
 
-class VulkanBuffer : public NativeBuffer {
+class VulkanBuffer : public NativeBuffer, NoCopyMove {
 public:
   VulkanBuffer(const BufferDescription &description,
                VulkanResourceAllocator &allocator, VulkanDeviceObject &device);
 
   ~VulkanBuffer();
-
-  VulkanBuffer(const VulkanBuffer &) = delete;
-  VulkanBuffer &operator=(const VulkanBuffer &) = delete;
-  VulkanBuffer(VulkanBuffer &&) = delete;
-  VulkanBuffer &operator=(VulkanBuffer &&) = delete;
 
   void *map() override;
 

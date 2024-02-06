@@ -18,11 +18,6 @@ public:
 
   ~VulkanCommandBuffer() = default;
 
-  VulkanCommandBuffer(const VulkanCommandBuffer &) = delete;
-  VulkanCommandBuffer &operator=(const VulkanCommandBuffer &) = delete;
-  VulkanCommandBuffer(VulkanCommandBuffer &&) = delete;
-  VulkanCommandBuffer &operator=(VulkanCommandBuffer &&) = delete;
-
   inline VkCommandBuffer getVulkanCommandBuffer() const {
     return mCommandBuffer;
   }

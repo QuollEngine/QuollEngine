@@ -4,16 +4,11 @@
 
 namespace quoll::editor {
 
-class SceneView {
+class SceneView : NoCopyMove {
 public:
   SceneView(rhi::TextureHandle texture);
 
   ~SceneView();
-
-  SceneView(const SceneView &) = delete;
-  SceneView(SceneView &&) = delete;
-  SceneView &operator=(const SceneView &) = delete;
-  SceneView &operator=(SceneView &&) = delete;
 
   inline operator bool() const { return mExpanded; }
 

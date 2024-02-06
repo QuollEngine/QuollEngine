@@ -6,7 +6,7 @@
 
 namespace quoll::rhi {
 
-class VulkanShader {
+class VulkanShader : NoCopyMove {
 public:
   struct ReflectionData {
     std::vector<VkPushConstantRange> pushConstantRanges;
@@ -19,11 +19,6 @@ public:
                VulkanDeviceObject &device);
 
   ~VulkanShader();
-
-  VulkanShader(const VulkanShader &rhs) = delete;
-  VulkanShader(VulkanShader &&rhs) = delete;
-  VulkanShader &operator=(const VulkanShader &rhs) = delete;
-  VulkanShader &operator=(VulkanShader &&rhs) = delete;
 
   inline const VkShaderModule &getShaderModule() const { return mShaderModule; }
 

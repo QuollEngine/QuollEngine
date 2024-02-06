@@ -26,11 +26,6 @@ public:
                           MainEngineModules &engineModules,
                           EditorCamera &editorCamera);
 
-  SceneSimulatorWorkspace(const SceneSimulatorWorkspace &) = delete;
-  SceneSimulatorWorkspace &operator=(const SceneSimulatorWorkspace &) = delete;
-  SceneSimulatorWorkspace(SceneSimulatorWorkspace &&) = delete;
-  SceneSimulatorWorkspace &operator=(SceneSimulatorWorkspace &&) = delete;
-
   virtual ~SceneSimulatorWorkspace();
 
   void prepare() override;

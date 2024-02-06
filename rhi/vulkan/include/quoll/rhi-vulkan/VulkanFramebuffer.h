@@ -6,18 +6,13 @@
 
 namespace quoll::rhi {
 
-class VulkanFramebuffer {
+class VulkanFramebuffer : NoCopyMove {
 public:
   VulkanFramebuffer(const FramebufferDescription &description,
                     VulkanDeviceObject &device,
                     const VulkanResourceRegistry &registry);
 
   ~VulkanFramebuffer();
-
-  VulkanFramebuffer(const VulkanFramebuffer &) = delete;
-  VulkanFramebuffer &operator=(const VulkanFramebuffer &) = delete;
-  VulkanFramebuffer(VulkanFramebuffer &&) = delete;
-  VulkanFramebuffer &operator=(VulkanFramebuffer &&) = delete;
 
   inline VkFramebuffer getFramebuffer() const { return mFramebuffer; }
 

@@ -8,16 +8,11 @@ namespace quoll {
 
 class PhysicsSignals;
 
-class PhysicsBackend {
+class PhysicsBackend : NoCopyMove {
 public:
   PhysicsBackend() = default;
 
   virtual ~PhysicsBackend() = default;
-
-  PhysicsBackend(const PhysicsBackend &) = delete;
-  PhysicsBackend &operator=(const PhysicsBackend &) = delete;
-  PhysicsBackend(PhysicsBackend &&) = delete;
-  PhysicsBackend &operator=(PhysicsBackend &&) = delete;
 
   virtual void update(f32 dt, EntityDatabase &entityDatabase) = 0;
 

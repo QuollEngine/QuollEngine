@@ -12,16 +12,11 @@ namespace quoll::rhi {
  * for all frames in flight and advances
  * the frame
  */
-class VulkanFrameManager {
+class VulkanFrameManager : NoCopyMove {
 public:
   VulkanFrameManager(VulkanDeviceObject &device);
 
   ~VulkanFrameManager();
-
-  VulkanFrameManager(const VulkanFrameManager &) = delete;
-  VulkanFrameManager &operator=(const VulkanFrameManager &) = delete;
-  VulkanFrameManager(VulkanFrameManager &&) = delete;
-  VulkanFrameManager &operator=(VulkanFrameManager &&) = delete;
 
   inline VkFence getFrameFence() const { return mFrameFences.at(mFrameIndex); }
 

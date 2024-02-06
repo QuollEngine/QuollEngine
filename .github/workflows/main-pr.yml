@@ -15,7 +15,8 @@ jobs:
         uses: ./.github/actions/setup-compiler
 
       - name: Verify Clang Format
-        run: ./scripts/clang-format-all.sh 16 verify
+        shell: pwsh
+        run: ./scripts/clang-format-all.ps1 -Op verify
 
   build-dependencies:
     name: Build dependencies
@@ -77,8 +78,9 @@ jobs:
           python3 project.py
 
       - name: Static Analysis
+        shell: pwsh
         run: |
-          ./scripts/clang-tidy-all.sh 16
+          ./scripts/clang-tidy-all.ps1 -Threads 1
 
   build-and-test:
     name: Build and test
@@ -150,8 +152,9 @@ jobs:
 
       - name: Coverage
         if: runner.os == 'Linux'
+        shell: pwsh
         run: |
-          ./scripts/generate-coverage-report.sh
+          ./scripts/generate-coverage-report.ps1
 
       - name: Upload to Codecov
         if: runner.os == 'Linux'
