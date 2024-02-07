@@ -19,10 +19,10 @@ public:
 
   ~BackendImpl() { ma_engine_uninit(&mEngine); }
 
-  BackendImpl(const BackendImpl &) = delete;
   BackendImpl(BackendImpl &&) = delete;
-  BackendImpl &operator=(const BackendImpl &) = delete;
   BackendImpl &operator=(BackendImpl &&) = delete;
+  BackendImpl(const BackendImpl &) = delete;
+  BackendImpl &operator=(const BackendImpl &) = delete;
 
   ma_encoding_format getEncodingFormat(AudioAssetFormat format) {
     switch (format) {

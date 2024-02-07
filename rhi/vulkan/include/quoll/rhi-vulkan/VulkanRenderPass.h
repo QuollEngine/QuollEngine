@@ -6,18 +6,13 @@
 
 namespace quoll::rhi {
 
-class VulkanRenderPass {
+class VulkanRenderPass : NoCopyMove {
 public:
   VulkanRenderPass(const RenderPassDescription &description,
                    VulkanDeviceObject &device,
                    const VulkanResourceRegistry &registry);
 
   ~VulkanRenderPass();
-
-  VulkanRenderPass(const VulkanRenderPass &) = delete;
-  VulkanRenderPass &operator=(const VulkanRenderPass &) = delete;
-  VulkanRenderPass(VulkanRenderPass &&) = delete;
-  VulkanRenderPass &operator=(VulkanRenderPass &&) = delete;
 
   inline VkRenderPass getRenderPass() const { return mRenderPass; }
 

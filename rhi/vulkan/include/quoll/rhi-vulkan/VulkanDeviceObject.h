@@ -5,16 +5,11 @@
 
 namespace quoll::rhi {
 
-class VulkanDeviceObject {
+class VulkanDeviceObject : NoCopyMove {
 public:
   VulkanDeviceObject(const VulkanPhysicalDevice &physicalDevice);
 
   ~VulkanDeviceObject();
-
-  VulkanDeviceObject(const VulkanDeviceObject &) = delete;
-  VulkanDeviceObject &operator=(const VulkanDeviceObject &) = delete;
-  VulkanDeviceObject(VulkanDeviceObject &&) = delete;
-  VulkanDeviceObject &operator=(VulkanDeviceObject &&) = delete;
 
   inline operator VkDevice() const { return mDevice; }
 

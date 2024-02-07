@@ -7,17 +7,12 @@ struct GLFWwindow;
 
 namespace quoll {
 
-class Window {
+class Window : NoCopyMove {
 public:
   Window(StringView title, u32 width, u32 height,
          InputDeviceManager &deviceManager);
 
   ~Window();
-
-  Window(const Window &rhs) = delete;
-  Window(Window &&rhs) = delete;
-  Window &operator=(const Window &rhs) = delete;
-  Window &operator=(Window &&rhs) = delete;
 
   inline ::GLFWwindow *getInstance() { return mWindowInstance; }
 

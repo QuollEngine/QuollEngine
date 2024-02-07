@@ -18,11 +18,6 @@ public:
 
   virtual ~PhysxBackend();
 
-  PhysxBackend(const PhysxBackend &) = delete;
-  PhysxBackend &operator=(const PhysxBackend &) = delete;
-  PhysxBackend(PhysxBackend &&) = delete;
-  PhysxBackend &operator=(PhysxBackend &&) = delete;
-
   void update(f32 dt, EntityDatabase &entityDatabase) override;
 
   void cleanup(EntityDatabase &entityDatabase) override;

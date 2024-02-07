@@ -4,17 +4,12 @@
 
 namespace quoll::rhi {
 
-class VulkanSampler {
+class VulkanSampler : NoCopyMove {
 public:
   VulkanSampler(const SamplerDescription &description,
                 VulkanDeviceObject &device);
 
   ~VulkanSampler();
-
-  VulkanSampler(const VulkanSampler &) = delete;
-  VulkanSampler &operator=(const VulkanSampler &) = delete;
-  VulkanSampler(VulkanSampler &&) = delete;
-  VulkanSampler &operator=(VulkanSampler &&) = delete;
 
   inline VkSampler getSampler() const { return mSampler; }
 

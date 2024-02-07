@@ -5,16 +5,11 @@
 
 namespace quoll {
 
-class OutputBinaryStream {
+class OutputBinaryStream : NoCopyMove {
 public:
   OutputBinaryStream(Path path);
 
   ~OutputBinaryStream();
-
-  OutputBinaryStream(const OutputBinaryStream &) = delete;
-  OutputBinaryStream(OutputBinaryStream &&) = delete;
-  OutputBinaryStream &operator=(const OutputBinaryStream &) = delete;
-  OutputBinaryStream &operator=(OutputBinaryStream &&) = delete;
 
   inline bool good() const { return mStream.good(); }
 

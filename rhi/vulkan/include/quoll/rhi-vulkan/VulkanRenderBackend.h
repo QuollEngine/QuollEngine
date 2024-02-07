@@ -14,11 +14,6 @@ class VulkanRenderBackend : public RenderBackend {
 public:
   VulkanRenderBackend(Window &window, bool enableValidations = true);
 
-  VulkanRenderBackend(const VulkanRenderBackend &) = delete;
-  VulkanRenderBackend &operator=(const VulkanRenderBackend &) = delete;
-  VulkanRenderBackend(VulkanRenderBackend &&) = delete;
-  VulkanRenderBackend &operator=(VulkanRenderBackend &&) = delete;
-
   ~VulkanRenderBackend();
 
   RenderDevice *createDefaultDevice() override;

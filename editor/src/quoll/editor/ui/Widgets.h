@@ -15,16 +15,11 @@ bool Button(const char *label, ImVec2 size = ImVec2{0.0f, 0.0f});
  * Automatically applies styles based on
  * the theme values
  */
-class Section {
+class Section : NoCopyMove {
 public:
   Section(const char *title);
 
   ~Section();
-
-  Section(const Section &) = delete;
-  Section(Section &&) = delete;
-  Section &operator=(const Section &) = delete;
-  Section &operator=(Section &&) = delete;
 
   inline operator bool() const { return mExpanded; }
 
@@ -38,67 +33,47 @@ private:
   ImVec2 mPadding;
 };
 
-class Window {
+class Window : NoCopyMove {
 public:
   Window(const char *title);
 
   ~Window();
 
-  Window(const Window &) = delete;
-  Window(Window &&) = delete;
-  Window &operator=(const Window &) = delete;
-  Window &operator=(Window &&) = delete;
-
   inline operator bool() const { return mExpanded; }
 
 private:
   bool mExpanded = false;
 };
 
-class FixedWindow {
+class FixedWindow : NoCopyMove {
 public:
   FixedWindow(const char *title, bool &open);
 
   ~FixedWindow();
 
-  FixedWindow(const FixedWindow &) = delete;
-  FixedWindow(FixedWindow &&) = delete;
-  FixedWindow &operator=(const FixedWindow &) = delete;
-  FixedWindow &operator=(FixedWindow &&) = delete;
-
   inline operator bool() const { return mExpanded; }
 
 private:
   bool mExpanded = false;
 };
 
-class ContextMenu {
+class ContextMenu : NoCopyMove {
 public:
   ContextMenu();
 
   ~ContextMenu();
 
-  ContextMenu(const ContextMenu &) = delete;
-  ContextMenu(ContextMenu &&) = delete;
-  ContextMenu &operator=(const ContextMenu &) = delete;
-  ContextMenu &operator=(ContextMenu &&) = delete;
-
   inline operator bool() const { return mExpanded; }
 
 private:
   bool mExpanded = false;
 };
 
-class Table {
+class Table : NoCopyMove {
 public:
   Table(const char *id, u32 numColumns);
 
   ~Table();
-
-  Table(const Table &) = delete;
-  Table(Table &&) = delete;
-  Table &operator=(const Table &) = delete;
-  Table &operator=(Table &&) = delete;
 
   inline operator bool() const { return mExpanded; }
 

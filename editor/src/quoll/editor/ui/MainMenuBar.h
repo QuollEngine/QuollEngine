@@ -2,16 +2,11 @@
 
 namespace quoll::editor {
 
-class MainMenuBar {
+class MainMenuBar : NoCopyMove {
 public:
   MainMenuBar();
 
   ~MainMenuBar();
-
-  MainMenuBar(const MainMenuBar &) = delete;
-  MainMenuBar(MainMenuBar &&) = delete;
-  MainMenuBar &operator=(const MainMenuBar &) = delete;
-  MainMenuBar &operator=(MainMenuBar &&) = delete;
 
   inline operator bool() const { return mExpanded; }
 

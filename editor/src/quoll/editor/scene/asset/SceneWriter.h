@@ -7,14 +7,9 @@
 
 namespace quoll::editor {
 
-class SceneWriter : public AssetSyncer {
+class SceneWriter : public AssetSyncer, NoCopyMove {
 public:
   SceneWriter(Scene &scene, AssetRegistry &assetRegistry);
-
-  SceneWriter(const SceneWriter &) = delete;
-  SceneWriter &operator=(const SceneWriter &) = delete;
-  SceneWriter(SceneWriter &&) = delete;
-  SceneWriter &operator=(SceneWriter &&) = delete;
 
   virtual ~SceneWriter() = default;
 

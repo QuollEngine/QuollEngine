@@ -16,7 +16,7 @@
     {
       "kind": "git",
       "repository": "https://github.com/Microsoft/vcpkg",
-      "baseline": "307ac18b08e4125d3c521a86b7d7b317629be277",
+      "baseline": "02344c986bcf5a1ade8d05c09f08ba1cba76e024",
       "packages": ["glm"]
     },
     {

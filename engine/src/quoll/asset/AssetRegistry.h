@@ -26,7 +26,7 @@ class RenderStorage;
  * All engine modules **directly** work with the registry since
  * the registry already has all the processed data in memory.
  */
-class AssetRegistry {
+class AssetRegistry : NoCopyMove {
   using TextureMap = AssetMap<TextureAssetHandle, TextureAsset>;
   using FontMap = AssetMap<FontAssetHandle, FontAsset>;
   using MaterialMap = AssetMap<MaterialAssetHandle, MaterialAsset>;
@@ -51,11 +51,6 @@ public:
   AssetRegistry() = default;
 
   ~AssetRegistry() = default;
-
-  AssetRegistry(const AssetRegistry &) = delete;
-  AssetRegistry &operator=(const AssetRegistry &) = delete;
-  AssetRegistry(AssetRegistry &&) = delete;
-  AssetRegistry &operator=(AssetRegistry &&) = delete;
 
   void createDefaultObjects();
 

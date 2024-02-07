@@ -1,53 +1,79 @@
-param($p1, $p2, $p3, $p4, $p5, $p6)
+<#
+.SYNOPSIS
+    Lint Quoll engine using clang-tidy
 
-$LintRHICore = $true
-$LintRHIVulkan = $true
-$LintRHIMock = $true
-$LintEngine = $true
-$LintEditor = $true
-$LintRuntime = $true
+.PARAMETER Projects
+    Define which projects to lint
 
-if ($PSBoundParameters.Count -gt 0) {
-    $LintRHICore = $false
-    $LintRHIVulkan = $false
-    $LintRHIMock = $false
-    $LintEngine = $false
-    $LintEditor = $false
-    $LintRuntime = $false
+    Valid options are: rhi-core, rhi-vulkan, rhi-mock, engine, editor, runtime
 
-    $PSBoundParameters.Values | ForEach-Object {
-        if ($_ -eq 'rhi-core') {
-            $LintRHICore = $true
-        }
+.PARAMETER Filter
+    File filter. Useful for linting single file during development
 
-        if ($_ -eq 'rhi-vulkan') {
-            $LintRHIVulkan = $true
-        }
+.PARAMETER Threads
+    Number of threads to use for linting. Default value is all available cores.
 
-        if ($_ -eq 'rhi-mock') {
-            $LintRHIMock = $true
-        }
+.PARAMETER LLVMVersion
+    LLVM Version to use for clang-tidy. Default value: $LLVMVersion
 
-        if ($_ -eq 'engine') {
-            $LintEngine = $true
-        }
+.EXAMPLE
+    clang-tidy-app.ps1 -Projects engine, editor -Threads 4
+#>
 
-        if ($_ -eq 'editor') {
-            $LintEditor = $true
-        }
+param(
+    [string[]] [ValidateSet('rhi-core', 'rhi-vulkan', 'rhi-mock', 'engine', 'editor', 'runtime')]
+    $Projects = @('rhi-core', 'rhi-vulkan', 'rhi-mock', 'engine', 'editor', 'runtime'),
+    [string] $Filter = '*.cpp',
+    [uint] $Threads,
+    [uint] $LLVMVersion = 16
+)
 
-        if ($_ -eq 'runtime') {
-            $LintRuntime = $true
-        }
+$LintRHICore = $false
+$LintRHIVulkan = $false
+$LintRHIMock = $false
+$LintEngine = $false
+$LintEditor = $false
+$LintRuntime = $false
+
+foreach ($project in $Projects) {
+    if ($project -eq 'rhi-core') {
+        $LintRHICore = $true
+    }
+    
+    if ($project -eq 'rhi-vulkan') {
+        $LintRHIVulkan = $true
+    }
+    
+    if ($project -eq 'rhi-mock') {
+        $LintRHIMock = $true
+    }
+    
+    if ($project -eq 'engine') {
+        $LintEngine = $true
+    }
+    
+    if ($project -eq 'editor') {
+        $LintEditor = $true
+    }
+    
+    if ($project -eq 'runtime') {
+        $LintRuntime = $true
     }
 }
 
-$VulkanSDK = Join-Path -Path $Env:VULKAN_SDK -ChildPath "Include"
+& "$PSScriptRoot/vars.ps1"
 
-$VendorIncludes = @(
-    $VulkanSDK
-    './vcpkg_installed/x64-windows-static/include',
-    './vcpkg_installed/x64-windows-static/include/msdfgen',
+if (!$Threads) {
+    $Threads = $AvailableNumThreads
+}
+
+Write-Output "LLVM Version: $LLVMVersion"
+Write-Output "Number of threads: $Threads"
+Write-Output "---"
+
+$VendorIncludes = $PlatformHeaders + @(
+    # TODO: Remove this after msdf-atlas-gen is
+    # migrated
     './vendor/Debug/include'
 )
 
@@ -69,10 +95,27 @@ function Start-Clang-Tidy {
 
     $HeaderArgs = Build-Header-Args ($VendorIncludes + $Headers)
 
-    Get-ChildItem -Recurse -Path $Path -Filter "*.cpp" | ForEach-Object -Parallel {
-        clang-tidy '-header-filter'=.* --p=file --quiet $_.FullName -- --std=c++20 `
-            Create-Header-Paths $using:HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS
-    } -ThrottleLimit $env:NUMBER_OF_PROCESSORS
+    if ($Threads -gt 1) {
+        Get-ChildItem -Recurse -Path $Path -Filter $Filter | ForEach-Object -Parallel {
+            if ($IsLinux) {
+                Set-Alias -Name clang-tidy -Value clang-tidy-$using:LLVMVersion
+            }
+    
+            clang-tidy --p=file --quiet $_.FullName -- --std=c++20 `
+                Create-Header-Paths $using:HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS
+        } -ThrottleLimit $Threads
+    }
+    else {
+        if ($IsLinux) {
+            Set-Alias -Name clang-tidy -Value clang-tidy-$LLVMVersion
+        }
+
+        Get-ChildItem -Recurse -Path $Path -Filter $Filter | ForEach-Object {
+            clang-tidy --p=file --quiet $_.FullName -- --std=c++20 `
+                Create-Header-Paths $HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS
+        } 
+    }
+
 }
 
 if ($LintRHICore) {

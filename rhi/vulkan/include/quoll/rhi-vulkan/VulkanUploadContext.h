@@ -6,7 +6,7 @@
 
 namespace quoll::rhi {
 
-class VulkanUploadContext {
+class VulkanUploadContext : NoCopyMove {
   using SubmitFn = std::function<void(VkCommandBuffer)>;
 
 public:
@@ -14,11 +14,6 @@ public:
                       VulkanQueue &queue);
 
   ~VulkanUploadContext();
-
-  VulkanUploadContext(const VulkanUploadContext &) = delete;
-  VulkanUploadContext(VulkanUploadContext &&) = delete;
-  VulkanUploadContext &operator=(const VulkanUploadContext &) = delete;
-  VulkanUploadContext &operator=(VulkanUploadContext &&) = delete;
 
   void submit(const SubmitFn &submitFn) const;
 

@@ -16,15 +16,9 @@ namespace quoll::rhi {
  * create information matches what's
  * already in the cache
  */
-class VulkanPipelineLayoutCache {
+class VulkanPipelineLayoutCache : NoCopyMove {
 public:
   VulkanPipelineLayoutCache(VulkanDeviceObject &device);
-
-  VulkanPipelineLayoutCache(const VulkanPipelineLayoutCache &) = delete;
-  VulkanPipelineLayoutCache(VulkanPipelineLayoutCache &&) = delete;
-  VulkanPipelineLayoutCache &
-  operator=(const VulkanPipelineLayoutCache &) = delete;
-  VulkanPipelineLayoutCache &operator=(VulkanPipelineLayoutCache &&) = delete;
 
   ~VulkanPipelineLayoutCache();
 

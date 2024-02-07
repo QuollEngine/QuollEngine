@@ -5,16 +5,11 @@
 
 namespace quoll::rhi {
 
-class VulkanTimestampManager {
+class VulkanTimestampManager : NoCopyMove {
 public:
   VulkanTimestampManager(VulkanDeviceObject &device);
 
   ~VulkanTimestampManager();
-
-  VulkanTimestampManager(const VulkanTimestampManager &) = delete;
-  VulkanTimestampManager &operator=(const VulkanTimestampManager &) = delete;
-  VulkanTimestampManager(VulkanTimestampManager &&) = delete;
-  VulkanTimestampManager &operator=(VulkanTimestampManager &&) = delete;
 
   inline VkQueryPool getQueryPool() const {
     return mQueryPools.at(mCurrentFrame);

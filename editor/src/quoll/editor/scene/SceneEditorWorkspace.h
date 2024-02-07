@@ -29,11 +29,6 @@ public:
                        EditorCamera &editorCamera,
                        WorkspaceManager &workspaceManager);
 
-  SceneEditorWorkspace(const SceneEditorWorkspace &) = delete;
-  SceneEditorWorkspace &operator=(const SceneEditorWorkspace &) = delete;
-  SceneEditorWorkspace(SceneEditorWorkspace &&) = delete;
-  SceneEditorWorkspace &operator=(SceneEditorWorkspace &&) = delete;
-
   virtual ~SceneEditorWorkspace();
 
   void prepare() override;

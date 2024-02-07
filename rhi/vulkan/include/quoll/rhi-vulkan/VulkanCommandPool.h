@@ -8,7 +8,7 @@
 
 namespace quoll::rhi {
 
-class VulkanCommandPool {
+class VulkanCommandPool : NoCopyMove {
 public:
   VulkanCommandPool(VulkanDeviceObject &device, u32 queueFamilyIndex,
                     const VulkanResourceRegistry &registry,
@@ -17,11 +17,6 @@ public:
                     DeviceStats &stats);
 
   ~VulkanCommandPool();
-
-  VulkanCommandPool(const VulkanCommandPool &) = delete;
-  VulkanCommandPool &operator=(const VulkanCommandPool &) = delete;
-  VulkanCommandPool(VulkanCommandPool &&) = delete;
-  VulkanCommandPool &operator=(VulkanCommandPool &&) = delete;
 
   std::vector<RenderCommandList> createCommandLists(u32 count);
 

@@ -14,14 +14,9 @@ class MetricsCollector;
  * Abstracts away low level render device
  * implementations from the codebase
  */
-class RenderStorage {
+class RenderStorage : NoCopyMove {
 public:
   RenderStorage(rhi::RenderDevice *device, MetricsCollector &metricsCollector);
-
-  RenderStorage(const RenderStorage &) = delete;
-  RenderStorage &operator=(const RenderStorage &) = delete;
-  RenderStorage(RenderStorage &&) = delete;
-  RenderStorage &operator=(RenderStorage &&) = delete;
 
   ~RenderStorage() = default;
 

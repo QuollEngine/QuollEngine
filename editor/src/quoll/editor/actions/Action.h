@@ -15,15 +15,9 @@ struct ActionExecutorResult {
   bool addToHistory = false;
 };
 
-class Action {
+class Action : NoCopyMove {
 public:
   virtual ~Action() = default;
-
-  Action() = default;
-  Action(const Action &) = delete;
-  Action(Action &&) = delete;
-  Action &operator=(const Action &) = delete;
-  Action &operator=(Action &&) = delete;
 
   virtual ActionExecutorResult onExecute(WorkspaceState &state,
                                          AssetRegistry &assetRegistry) = 0;

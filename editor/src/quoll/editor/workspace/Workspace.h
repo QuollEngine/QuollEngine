@@ -5,16 +5,11 @@
 
 namespace quoll::editor {
 
-class Workspace {
+class Workspace : NoCopyMove {
 public:
   Workspace() = default;
 
   virtual ~Workspace() = default;
-
-  Workspace(const Workspace &) = delete;
-  Workspace &operator=(const Workspace &) = delete;
-  Workspace(Workspace &&) = delete;
-  Workspace &operator=(Workspace &&) = delete;
 
   virtual void prepare() = 0;
 

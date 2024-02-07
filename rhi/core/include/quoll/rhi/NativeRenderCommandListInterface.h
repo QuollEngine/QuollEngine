@@ -11,20 +11,11 @@
 
 namespace quoll::rhi {
 
-class NativeRenderCommandListInterface {
+class NativeRenderCommandListInterface : NoCopyMove {
 public:
   NativeRenderCommandListInterface() = default;
 
   virtual ~NativeRenderCommandListInterface() = default;
-
-  NativeRenderCommandListInterface(const NativeRenderCommandListInterface &) =
-      delete;
-  NativeRenderCommandListInterface &
-  operator=(const NativeRenderCommandListInterface &) = delete;
-  NativeRenderCommandListInterface(NativeRenderCommandListInterface &&) =
-      delete;
-  NativeRenderCommandListInterface &
-  operator=(NativeRenderCommandListInterface &&) = delete;
 
   virtual void beginRenderPass(rhi::RenderPassHandle renderPass,
                                FramebufferHandle framebuffer,

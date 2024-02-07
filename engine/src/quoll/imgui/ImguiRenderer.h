@@ -17,7 +17,7 @@ struct ImguiRenderPassData {
   RenderGraphResource<rhi::TextureHandle> imguiColor;
 };
 
-class ImguiRenderer {
+class ImguiRenderer : NoCopyMove {
   struct FrameData {
     rhi::Buffer vertexBuffer;
 
@@ -38,11 +38,6 @@ public:
   ImguiRenderer(Window &window, RenderStorage &renderStorage);
 
   ~ImguiRenderer();
-
-  ImguiRenderer(const ImguiRenderer &rhs) = delete;
-  ImguiRenderer(ImguiRenderer &&rhs) = delete;
-  ImguiRenderer &operator=(const ImguiRenderer &rhs) = delete;
-  ImguiRenderer &operator=(ImguiRenderer &&rhs) = delete;
 
   ImguiRenderPassData attach(RenderGraph &graph,
                              const RendererOptions &options);

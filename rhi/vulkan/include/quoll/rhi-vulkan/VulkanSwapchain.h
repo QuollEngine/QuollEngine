@@ -9,7 +9,7 @@
 
 namespace quoll::rhi {
 
-class VulkanSwapchain {
+class VulkanSwapchain : NoCopyMove {
 public:
   VulkanSwapchain(VulkanRenderBackend &backend,
                   const VulkanPhysicalDevice &physicalDevice,
@@ -17,11 +17,6 @@ public:
                   VulkanResourceAllocator &allocator);
 
   ~VulkanSwapchain();
-
-  VulkanSwapchain &operator=(const VulkanSwapchain &) = delete;
-  VulkanSwapchain(const VulkanSwapchain &) = delete;
-  VulkanSwapchain &operator=(VulkanSwapchain &&rhs) = delete;
-  VulkanSwapchain(VulkanSwapchain &&rhs) = delete;
 
   void recreate(VulkanRenderBackend &backend,
                 const VulkanPhysicalDevice &physicalDevice,

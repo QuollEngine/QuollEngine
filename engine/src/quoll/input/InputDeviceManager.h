@@ -4,15 +4,10 @@
 
 namespace quoll {
 
-class InputDeviceManager {
+class InputDeviceManager : NoCopyMove {
 public:
   InputDeviceManager() = default;
   ~InputDeviceManager() = default;
-
-  InputDeviceManager(const InputDeviceManager &) = delete;
-  InputDeviceManager &operator=(const InputDeviceManager &) = delete;
-  InputDeviceManager(InputDeviceManager &&) = delete;
-  InputDeviceManager &operator=(InputDeviceManager &&) = delete;
 
   void addDevice(InputDevice device);
 

@@ -11,17 +11,13 @@ namespace quoll {
 /**
  * Sparse set based entity storage
  */
-class EntityStorageSparseSet {
+class EntityStorageSparseSet : NoCopyMove {
   static constexpr usize DeadIndex = std::numeric_limits<usize>::max();
 
   static constexpr usize MaxObserverPoolSizePerComponent = 100;
 
 public:
   EntityStorageSparseSet() = default;
-  EntityStorageSparseSet(const EntityStorageSparseSet &) = delete;
-  EntityStorageSparseSet(EntityStorageSparseSet &&) = delete;
-  EntityStorageSparseSet &operator=(const EntityStorageSparseSet &) = delete;
-  EntityStorageSparseSet &operator=(EntityStorageSparseSet &&) = delete;
 
   /**
    * @brief Destroy storage
