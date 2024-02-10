@@ -50,9 +50,6 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
       physicalDevice.getPresentModes(backend.getSurface()));
   calculateExtent(surfaceCapabilities, backend.getFramebufferSize());
 
-  u32 imageCount = std::min(surfaceCapabilities.minImageCount + 1,
-                            surfaceCapabilities.maxImageCount);
-
   bool sameQueueFamily =
       physicalDevice.getQueueFamilyIndices().getGraphicsFamily() ==
       physicalDevice.getQueueFamilyIndices().getPresentFamily();
@@ -62,7 +59,7 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
   createInfo.pNext = nullptr;
   createInfo.flags = 0;
   createInfo.surface = backend.getSurface();
-  createInfo.minImageCount = imageCount;
+  createInfo.minImageCount = surfaceCapabilities.minImageCount;
   createInfo.imageFormat = mSurfaceFormat.format;
   createInfo.imageColorSpace = mSurfaceFormat.colorSpace;
   createInfo.imageExtent = VkExtent2D{mExtent.x, mExtent.y};
@@ -92,6 +89,7 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
       vkCreateSwapchainKHR(mDevice, &createInfo, nullptr, &mSwapchain),
       "Failed to create swapchain");
 
+  u32 imageCount = 0;
   vkGetSwapchainImagesKHR(mDevice, mSwapchain, &imageCount, nullptr);
   std::vector<VkImage> images(imageCount, VK_NULL_HANDLE);
   vkGetSwapchainImagesKHR(mDevice, mSwapchain, &imageCount, images.data());

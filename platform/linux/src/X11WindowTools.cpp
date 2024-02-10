@@ -4,7 +4,7 @@
 namespace quoll::platform {
 
 void WindowUtils::enableDarkMode(GLFWwindow *window) {
-  QuollAssert(false, "Not implemented");
+  // Dark mode is ignored for X11 windows
 }
 
 } // namespace quoll::platform

@@ -10,7 +10,8 @@ const std::vector<String> vulkanWindowExtensions{"VK_KHR_surface",
 const std::vector<String> vulkanWindowExtensions{
     "VK_EXT_metal_surface", "VK_MVK_macos_surface", "VK_KHR_surface"};
 #elif defined(QUOLL_PLATFORM_LINUX)
-const std::vector<String> vulkanWindowExtensions{};
+const std::vector<String> vulkanWindowExtensions{
+    "VK_KHR_xcb_surface", "VK_KHR_xlib_surface", "VK_KHR_surface"};
 #else
 const std::vector<String> vulkanWindowExtensions{};
 #endif
