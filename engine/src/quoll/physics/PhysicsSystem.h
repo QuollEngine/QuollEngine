@@ -8,16 +8,12 @@ class PhysicsSystem {
 public:
   PhysicsSystem(PhysicsBackend *backend);
 
-  inline void update(f32 dt, EntityDatabase &entityDatabase) {
-    mBackend->update(dt, entityDatabase);
-  }
+  inline void update(f32 dt, SystemView &view) { mBackend->update(dt, view); }
 
-  inline void cleanup(EntityDatabase &entityDatabase) {
-    mBackend->cleanup(entityDatabase);
-  }
+  inline void cleanup(SystemView &view) { mBackend->cleanup(view); }
 
-  inline void observeChanges(EntityDatabase &entityDatabase) {
-    mBackend->observeChanges(entityDatabase);
+  inline void createSystemViewData(SystemView &view) {
+    mBackend->createSystemViewData(view);
   }
 
   inline bool sweep(EntityDatabase &entityDatabase, Entity entity,

@@ -2,12 +2,15 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/skeleton/Skeleton.h"
 #include "quoll/skeleton/SkeletonUpdater.h"
+#include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
 
 struct SkeletonUpdaterTest : public ::testing::Test {
   quoll::SkeletonAssetHandle handle{2};
-  quoll::EntityDatabase entityDatabase;
+  quoll::Scene scene;
+  quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
   quoll::SkeletonUpdater skeletonUpdater;
+  quoll::SystemView view{&scene};
 
   std::tuple<quoll::Skeleton &, quoll::SkeletonDebug &, quoll::Entity>
   createSkeleton(u32 numJoints) {
@@ -77,7 +80,7 @@ TEST_F(SkeletonUpdaterTest, UpdatesWorldTransformsOnUpdate) {
   EXPECT_EQ(skeleton.jointWorldTransforms.at(1), glm::mat4(1.0f));
   EXPECT_EQ(skeleton.jointWorldTransforms.at(2), glm::mat4(1.0f));
 
-  skeletonUpdater.update(entityDatabase);
+  skeletonUpdater.update(view);
 
   EXPECT_EQ(skeleton.jointWorldTransforms.at(0),
             getLocalTransform(skeleton, 0));
@@ -96,7 +99,7 @@ TEST_F(SkeletonUpdaterTest, UpdatesFinalTransformOnUpdate) {
   EXPECT_EQ(skeleton.jointFinalTransforms.at(1), glm::mat4(1.0f));
   EXPECT_EQ(skeleton.jointFinalTransforms.at(2), glm::mat4(1.0f));
 
-  skeletonUpdater.update(entityDatabase);
+  skeletonUpdater.update(view);
 
   EXPECT_EQ(skeleton.jointFinalTransforms.at(0),
             skeleton.jointWorldTransforms.at(0) *
@@ -116,7 +119,7 @@ TEST_F(SkeletonUpdaterTest, UpdatesDebugBonesOnUpdate) {
     EXPECT_EQ(transform, glm::mat4{1.0f});
   }
 
-  skeletonUpdater.update(entityDatabase);
+  skeletonUpdater.update(view);
 
   for (usize i = 0; i < skeletonDebug.bones.size(); ++i) {
     EXPECT_EQ(skeletonDebug.boneTransforms.at(i),
@@ -130,5 +133,5 @@ TEST_F(SkeletonUpdaterDeathTest,
 
   entityDatabase.set<quoll::SkeletonDebug>(entity, {});
 
-  EXPECT_DEATH(skeletonUpdater.update(entityDatabase), ".*");
+  EXPECT_DEATH(skeletonUpdater.update(view), ".*");
 }

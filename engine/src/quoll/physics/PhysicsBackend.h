@@ -7,6 +7,7 @@
 namespace quoll {
 
 class PhysicsSignals;
+struct SystemView;
 
 class PhysicsBackend : NoCopyMove {
 public:
@@ -14,11 +15,11 @@ public:
 
   virtual ~PhysicsBackend() = default;
 
-  virtual void update(f32 dt, EntityDatabase &entityDatabase) = 0;
+  virtual void update(f32 dt, SystemView &view) = 0;
 
-  virtual void cleanup(EntityDatabase &entityDatabase) = 0;
+  virtual void cleanup(SystemView &view) = 0;
 
-  virtual void observeChanges(EntityDatabase &entityDatabase) = 0;
+  virtual void createSystemViewData(SystemView &view) = 0;
 
   virtual bool sweep(EntityDatabase &entityDatabase, Entity entity,
                      const glm::vec3 &direction, f32 distance,

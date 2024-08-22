@@ -16,7 +16,7 @@ TEST_F(ScriptLuaTableTest, GetReturnsScriptVariableIfExistsInScript) {
   auto source = entityDatabase.create();
   entityDatabase.set<quoll::LuaScript>(source, {handleSource});
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
 
   sol::state_view state(entityDatabase.get<quoll::LuaScript>(source).state);
 
@@ -34,7 +34,7 @@ TEST_F(ScriptLuaTableTest, GetReturnsNilIfVariableDoesNotExistInScript) {
   auto source = entityDatabase.create();
   entityDatabase.set<quoll::LuaScript>(source, {handleSource});
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
 
   sol::state_view state(entityDatabase.get<quoll::LuaScript>(source).state);
 
@@ -52,7 +52,7 @@ TEST_F(ScriptLuaTableTest, SetAssignsValueToTargetScript) {
   auto source = entityDatabase.create();
   entityDatabase.set<quoll::LuaScript>(source, {handleSource});
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
 
   sol::state_view state(entityDatabase.get<quoll::LuaScript>(target).state);
 
@@ -72,7 +72,7 @@ TEST_F(ScriptLuaTableTest,
   entityDatabase.set<quoll::Name>(target, {"target"});
   entityDatabase.set<quoll::LuaScript>(target, {handleTarget});
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
 
   sol::state_view sourceState(
       entityDatabase.get<quoll::LuaScript>(source).state);

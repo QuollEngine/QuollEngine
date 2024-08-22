@@ -5,15 +5,15 @@
 namespace quoll {
 
 class AssetRegistry;
-class EntityDatabase;
+struct SystemView;
 
 class AnimationSystem {
 public:
   AnimationSystem(AssetRegistry &assetRegistry);
 
-  void prepare(EntityDatabase &entityDatabase);
+  void prepare(SystemView &view);
 
-  void update(f32 dt, EntityDatabase &entityDatabase);
+  void update(f32 dt, SystemView &view);
 
 private:
   AssetRegistry &mAssetRegistry;

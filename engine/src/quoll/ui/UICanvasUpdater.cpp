@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/imgui/Imgui.h"
 #include "quoll/imgui/ImguiUtils.h"
+#include "quoll/system/SystemView.h"
 #include "UICanvas.h"
 #include "UICanvasRenderRequest.h"
 #include "UICanvasUpdater.h"
@@ -104,8 +105,8 @@ void updateLayout(EntityDatabase &entityDatabase, const glm::vec2 &size) {
   entityDatabase.destroyComponents<UICanvasRenderRequest>();
 }
 
-void UICanvasUpdater::render(EntityDatabase &entityDatabase,
-                             AssetRegistry &assetRegistry) {
+void UICanvasUpdater::render(SystemView &view, AssetRegistry &assetRegistry) {
+  auto &entityDatabase = view.scene->entityDatabase;
   updateLayout(entityDatabase, mSize);
 
   for (auto [entity, canvas] : entityDatabase.view<UICanvas>()) {

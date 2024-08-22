@@ -45,24 +45,22 @@ SceneSimulatorWorkspace::SceneSimulatorWorkspace(
   ImGuiIO &io = ImGui::GetIO();
   io.IniFilename = nullptr;
 
-  mEngineModules.observeChanges(mState.scene.entityDatabase);
+  mSystemView = std::move(mEngineModules.createSystemView(mState.scene));
 }
 
 SceneSimulatorWorkspace::~SceneSimulatorWorkspace() {
-  mEngineModules.cleanupObservers(mState.scene.entityDatabase);
+  mEngineModules.cleanup(mSystemView);
 }
 
-void SceneSimulatorWorkspace::prepare() {
-  mEngineModules.prepare(mState.scene);
-}
+void SceneSimulatorWorkspace::prepare() { mEngineModules.prepare(mSystemView); }
 
 void SceneSimulatorWorkspace::fixedUpdate(f32 dt) {
-  mEngineModules.fixedUpdate(dt, mState.scene);
+  mEngineModules.fixedUpdate(dt, mSystemView);
 }
 
 void SceneSimulatorWorkspace::update(f32 dt) {
   mActionExecutor.process();
-  mEngineModules.update(dt, mState.scene);
+  mEngineModules.update(dt, mSystemView);
 }
 
 void SceneSimulatorWorkspace::renderLayout() {
@@ -87,7 +85,7 @@ void SceneSimulatorWorkspace::render() {
       mState, mAssetManager, mActionExecutor, mRenderer.getSceneTexture(),
       mEngineModules, mEditorCamera);
 
-  mEngineModules.render(mState.scene);
+  mEngineModules.render(mSystemView);
 }
 
 void SceneSimulatorWorkspace::processShortcuts(int key, int mods) {}

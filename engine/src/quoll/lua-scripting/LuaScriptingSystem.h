@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/system/SystemView.h"
 #include "Interpreter.h"
 #include "LuaScript.h"
 #include "ScriptLoop.h"
@@ -11,6 +12,7 @@ class AssetRegistry;
 class WindowSignals;
 class PhysicsSystem;
 class EntityDatabase;
+struct SystemView;
 
 class LuaScriptingSystem : NoCopyMove {
 public:
@@ -18,26 +20,22 @@ public:
 
   ~LuaScriptingSystem() = default;
 
-  void start(EntityDatabase &entityDatabase, PhysicsSystem &physicsSystem,
+  void createSystemViewData(SystemView &view);
+
+  void start(SystemView &view, PhysicsSystem &physicsSystem,
              WindowSignals &windowSignals);
 
-  void update(f32 dt, EntityDatabase &entityDatabase);
+  void update(f32 dt, SystemView &view);
 
-  void cleanup(EntityDatabase &entityDatabase);
-
-  void observeChanges(EntityDatabase &entityDatabase);
+  void cleanup(SystemView &view);
 
 private:
   void destroyScriptingData(LuaScript &component);
-
-  void createScriptingData(LuaScript &component, Entity event);
 
 private:
   AssetRegistry &mAssetRegistry;
   lua::Interpreter mLuaInterpreter;
   lua::ScriptLoop mScriptLoop;
-
-  EntityDatabaseObserver<LuaScript> mScriptRemoveObserver;
 };
 
 } // namespace quoll

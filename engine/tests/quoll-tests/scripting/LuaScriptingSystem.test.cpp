@@ -3,6 +3,7 @@
 #include "quoll/entity/EntityLuaTable.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"
 #include "quoll/physics/PhysicsSystem.h"
+#include "quoll/system/SystemView.h"
 #include "quoll/window/WindowSignals.h"
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
@@ -11,7 +12,7 @@
 class LuaScriptingSystemTest : public AssetCacheTestBase {
 public:
   LuaScriptingSystemTest() : scriptingSystem(cache.getRegistry()) {
-    scriptingSystem.observeChanges(entityDatabase);
+    scriptingSystem.createSystemViewData(view);
   }
 
   quoll::LuaScriptAssetHandle loadLuaScript(quoll::String filename) {
@@ -20,7 +21,9 @@ public:
     return cache.loadLuaScript(uuid).getData();
   }
 
-  quoll::EntityDatabase entityDatabase;
+  quoll::Scene scene;
+  quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
+  quoll::SystemView view{&scene};
   quoll::LuaScriptingSystem scriptingSystem;
   quoll::PhysicsSystem physicsSystem{new TestPhysicsBackend};
   quoll::WindowSignals windowSignals;
@@ -39,10 +42,10 @@ TEST_F(LuaScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   EXPECT_EQ(component.state, nullptr);
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
   EXPECT_NE(component.state, nullptr);
 
-  scriptingSystem.update(TimeDelta, entityDatabase);
+  scriptingSystem.update(TimeDelta, view);
 
   sol::state_view state(component.state);
   EXPECT_EQ(state["value"].get<i32>(), 0);
@@ -62,7 +65,7 @@ TEST_F(LuaScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
     entityDatabase.set<quoll::LuaScript>(entity, {handle});
   }
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
 
   std::vector<quoll::LuaScript> scripts(entities.size());
   for (usize i = 0; i < entities.size(); ++i) {
@@ -74,7 +77,7 @@ TEST_F(LuaScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
     }
   }
 
-  scriptingSystem.update(TimeDelta, entityDatabase);
+  scriptingSystem.update(TimeDelta, view);
   for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
     bool deleted = (i % 2) == 0;
@@ -91,14 +94,14 @@ TEST_F(LuaScriptingSystemTest, DoesNothingIfScriptHasNoUpdater) {
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   EXPECT_EQ(component.state, nullptr);
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
   EXPECT_NE(component.state, nullptr);
 
   sol::state_view state(component.state);
   state["disconnect_updater"]();
 
   for (usize i = 0; i < 10; ++i) {
-    scriptingSystem.update(TimeDelta, entityDatabase);
+    scriptingSystem.update(TimeDelta, view);
   }
 
   EXPECT_EQ(state["value"].get<i32>(), -1);
@@ -113,11 +116,11 @@ TEST_F(LuaScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   EXPECT_EQ(component.state, nullptr);
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
   EXPECT_NE(component.state, nullptr);
 
   for (usize i = 0; i < 10; ++i) {
-    scriptingSystem.update(TimeDelta, entityDatabase);
+    scriptingSystem.update(TimeDelta, view);
   }
 
   sol::state_view state(component.state);
@@ -133,7 +136,7 @@ TEST_F(LuaScriptingSystemTest, LoadsScriptOnStart) {
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   EXPECT_EQ(component.state, nullptr);
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
   EXPECT_NE(component.state, nullptr);
 
   sol::state_view state(component.state);
@@ -151,7 +154,7 @@ TEST_F(LuaScriptingSystemTest, LoadsScriptOnlyOnceOnStart) {
 
   // Call 10 times
   for (usize i = 0; i < 10; ++i) {
-    scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+    scriptingSystem.start(view, physicsSystem, windowSignals);
   }
   EXPECT_NE(component.state, nullptr);
 
@@ -167,7 +170,7 @@ TEST_F(LuaScriptingSystemTest, RemovesScriptComponentIfInputVarsAreNotSet) {
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
   EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
 }
 
@@ -187,7 +190,7 @@ TEST_F(LuaScriptingSystemTest,
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
   EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
 }
 
@@ -206,7 +209,7 @@ TEST_F(LuaScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
   ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
 
   auto state = sol::state_view(component.state);
@@ -231,7 +234,7 @@ TEST_F(LuaScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
   auto state = sol::state_view(component.state);
 
   EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");

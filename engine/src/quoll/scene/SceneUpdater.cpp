@@ -9,20 +9,22 @@
 #include "quoll/scene/WorldTransform.h"
 #include "quoll/skeleton/JointAttachment.h"
 #include "quoll/skeleton/Skeleton.h"
+#include "quoll/system/SystemView.h"
 #include "SceneUpdater.h"
 
 namespace quoll {
 
-void SceneUpdater::update(EntityDatabase &entityDatabase) {
+void SceneUpdater::update(SystemView &view) {
   QUOLL_PROFILE_EVENT("SceneUpdater::update");
-  updateTransforms(entityDatabase);
-  updateCameras(entityDatabase);
-  updateLights(entityDatabase);
+  updateTransforms(view);
+  updateCameras(view);
+  updateLights(view);
 }
 
-void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
+void SceneUpdater::updateTransforms(SystemView &view) {
   QUOLL_PROFILE_EVENT("SceneUpdater::updateTransforms");
 
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, local, world] :
        entityDatabase.view<LocalTransform, WorldTransform>()) {
     // TODO: Add exclusive loop
@@ -65,9 +67,10 @@ void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
   }
 }
 
-void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
+void SceneUpdater::updateCameras(SystemView &view) {
   QUOLL_PROFILE_EVENT("SceneUpdater::updateCameras");
 
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, lens, world, camera] :
        entityDatabase.view<PerspectiveLens, WorldTransform, Camera>()) {
 
@@ -86,9 +89,10 @@ void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
   }
 }
 
-void SceneUpdater::updateLights(EntityDatabase &entityDatabase) {
+void SceneUpdater::updateLights(SystemView &view) {
   QUOLL_PROFILE_EVENT("SceneUpdater::updateLights");
 
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, world, light] :
        entityDatabase.view<WorldTransform, DirectionalLight>()) {
     glm::quat rotation;

@@ -3,6 +3,7 @@
 #include "quoll/asset/AssetCache.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"
 #include "quoll/physics/PhysicsSystem.h"
+#include "quoll/system/SystemView.h"
 #include "quoll/window/WindowSignals.h"
 #include "quoll-tests/Testing.h"
 #include "TestPhysicsBackend.h"
@@ -24,7 +25,9 @@ public:
   void TearDown() override;
 
 protected:
-  quoll::EntityDatabase entityDatabase;
+  quoll::Scene scene;
+  quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
+  quoll::SystemView view{&scene};
   quoll::AssetCache assetCache;
   quoll::LuaScriptingSystem scriptingSystem;
   TestPhysicsBackend *physicsBackend = new TestPhysicsBackend;

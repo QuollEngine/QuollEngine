@@ -4,18 +4,18 @@
 
 namespace quoll {
 
-class EntityDatabase;
+struct SystemView;
 
 class SceneUpdater {
 public:
-  void update(EntityDatabase &entityDatabase);
+  void update(SystemView &view);
 
 private:
-  void updateTransforms(EntityDatabase &entityDatabase);
+  void updateTransforms(SystemView &view);
 
-  void updateCameras(EntityDatabase &entityDatabase);
+  void updateCameras(SystemView &view);
 
-  void updateLights(EntityDatabase &entityDatabase);
+  void updateLights(SystemView &view);
 };
 
 } // namespace quoll

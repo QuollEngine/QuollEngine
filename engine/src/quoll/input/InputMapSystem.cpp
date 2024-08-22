@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/system/SystemView.h"
 #include "InputDeviceManager.h"
 #include "InputMapSystem.h"
 
@@ -10,7 +11,8 @@ InputMapSystem::InputMapSystem(InputDeviceManager &deviceManager,
                                AssetRegistry &assetRegistry)
     : mDeviceManager(deviceManager), mAssetRegistry(assetRegistry) {}
 
-void InputMapSystem::update(EntityDatabase &entityDatabase) {
+void InputMapSystem::update(SystemView &view) {
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, ref] : entityDatabase.view<InputMapAssetRef>()) {
     if (mAssetRegistry.getInputMaps().hasAsset(ref.handle) &&
         !entityDatabase.has<InputMap>(entity)) {

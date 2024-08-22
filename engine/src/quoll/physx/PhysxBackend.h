@@ -18,11 +18,11 @@ public:
 
   virtual ~PhysxBackend();
 
-  void update(f32 dt, EntityDatabase &entityDatabase) override;
+  void update(f32 dt, SystemView &view) override;
 
-  void cleanup(EntityDatabase &entityDatabase) override;
+  void cleanup(SystemView &view) override;
 
-  void observeChanges(EntityDatabase &entityDatabase) override;
+  void createSystemViewData(SystemView &view) override;
 
   bool sweep(EntityDatabase &entityDatabase, Entity entity,
              const glm::vec3 &direction, f32 maxDistance,
@@ -31,9 +31,9 @@ public:
   inline PhysicsSignals &getSignals() override { return mSignals; }
 
 private:
-  void synchronizeComponents(EntityDatabase &entityDatabase);
+  void synchronizeComponents(SystemView &view);
 
-  void synchronizeTransforms(EntityDatabase &entityDatabase);
+  void synchronizeTransforms(SystemView &view);
 
 private:
   physx::PxShape *createShape(Entity entity,
@@ -54,8 +54,6 @@ private:
   physx::PxDefaultCpuDispatcher *mDispatcher = nullptr;
 
   physx::PxScene *mScene = nullptr;
-
-  EntityDatabaseObserver<PhysxInstance> mPhysxInstanceRemoveObserver;
 };
 
 } // namespace quoll

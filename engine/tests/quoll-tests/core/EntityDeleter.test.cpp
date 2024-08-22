@@ -5,12 +5,14 @@
 #include "quoll/scene/Children.h"
 #include "quoll/scene/Parent.h"
 #include "quoll/scene/Scene.h"
+#include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
 
 class EntityDeleterTest : public ::testing::Test {
 public:
   quoll::Scene scene;
   quoll::EntityDeleter entityDeleter;
+  quoll::SystemView view{&scene};
 };
 
 TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
@@ -30,7 +32,7 @@ TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
     EXPECT_TRUE(scene.entityDatabase.exists(entity));
   }
 
-  entityDeleter.update(scene);
+  entityDeleter.update(view);
 
   for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
@@ -60,7 +62,7 @@ TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
     EXPECT_TRUE(scene.entityDatabase.exists(entity));
   }
 
-  entityDeleter.update(scene);
+  entityDeleter.update(view);
 
   for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
@@ -100,7 +102,7 @@ TEST_F(EntityDeleterTest, RemoveDeletedEntityFromChildrenOfAParent) {
     EXPECT_TRUE(scene.entityDatabase.exists(entity));
   }
 
-  entityDeleter.update(scene);
+  entityDeleter.update(view);
 
   for (usize i = 0; i < entities.size(); ++i) {
     if (!scene.entityDatabase.has<quoll::Children>(entities.at(i))) {
@@ -120,7 +122,7 @@ TEST_F(EntityDeleterTest, SetsSceneActiveCameraToDummyIfActiveCameraIsDeleted) {
   scene.entityDatabase.set<quoll::Delete>(scene.activeCamera, {});
   scene.entityDatabase.set<quoll::Delete>(entityThatComesAfter, {});
 
-  entityDeleter.update(scene);
+  entityDeleter.update(view);
 
   EXPECT_EQ(scene.activeCamera, scene.dummyCamera);
 }

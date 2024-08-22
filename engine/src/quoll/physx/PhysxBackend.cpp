@@ -12,6 +12,7 @@
 #include "quoll/scene/WorldTransform.h"
 #include "quoll/skeleton/JointAttachment.h"
 #include "quoll/skeleton/Skeleton.h"
+#include "quoll/system/SystemView.h"
 #include "PhysxBackend.h"
 #include "PhysxMapping.h"
 #include "PhysxQueryFilterCallback.h"
@@ -141,18 +142,19 @@ PhysxBackend::~PhysxBackend() {
   mFoundation->release();
 }
 
-void PhysxBackend::update(f32 dt, EntityDatabase &entityDatabase) {
+void PhysxBackend::update(f32 dt, SystemView &view) {
   QUOLL_PROFILE_EVENT("PhysicsSystem::update");
 
-  synchronizeComponents(entityDatabase);
+  synchronizeComponents(view);
 
   mScene->simulate(dt);
   mScene->fetchResults(true);
 
-  synchronizeTransforms(entityDatabase);
+  synchronizeTransforms(view);
 }
 
-void PhysxBackend::cleanup(EntityDatabase &entityDatabase) {
+void PhysxBackend::cleanup(SystemView &view) {
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, physx] : entityDatabase.view<PhysxInstance>()) {
     if (physx.rigidStatic) {
       if (physx.shape) {
@@ -172,11 +174,14 @@ void PhysxBackend::cleanup(EntityDatabase &entityDatabase) {
   }
 
   entityDatabase.destroyComponents<PhysxInstance>();
-  mPhysxInstanceRemoveObserver.clear();
+  view.physx.instanceRemoveObserver.clear();
 }
 
-void PhysxBackend::observeChanges(EntityDatabase &entityDatabase) {
-  mPhysxInstanceRemoveObserver = entityDatabase.observeRemove<PhysxInstance>();
+void PhysxBackend::createSystemViewData(SystemView &view) {
+  auto &entityDatabase = view.scene->entityDatabase;
+
+  view.physx.instanceRemoveObserver =
+      entityDatabase.observeRemove<PhysxInstance>();
 }
 
 bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
@@ -213,12 +218,12 @@ bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
   return result;
 }
 
-void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
+void PhysxBackend::synchronizeComponents(SystemView &view) {
   QUOLL_PROFILE_EVENT("PhysicsSystem::synchronizeEntitiesWithPhysx");
 
   {
     QUOLL_PROFILE_EVENT("Cleanup dangling physx objects in scene");
-    for (auto [entity, physx] : mPhysxInstanceRemoveObserver) {
+    for (auto [entity, physx] : view.physx.instanceRemoveObserver) {
       if (physx.rigidDynamic) {
         mScene->removeActor(*physx.rigidDynamic);
         physx.rigidDynamic->release();
@@ -234,11 +239,12 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
       }
     }
 
-    mPhysxInstanceRemoveObserver.clear();
+    view.physx.instanceRemoveObserver.clear();
   }
 
   {
     QUOLL_PROFILE_EVENT("Synchronize collidable components");
+    auto &entityDatabase = view.scene->entityDatabase;
     for (auto [entity, collidable, world] :
          entityDatabase.view<Collidable, WorldTransform>()) {
       if (!entityDatabase.has<PhysxInstance>(entity)) {
@@ -320,6 +326,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
 
   {
     QUOLL_PROFILE_EVENT("Synchronize rigid body components");
+    auto &entityDatabase = view.scene->entityDatabase;
     for (auto [entity, rigidBody, world] :
          entityDatabase.view<RigidBody, WorldTransform>()) {
       if (!entityDatabase.has<PhysxInstance>(entity)) {
@@ -371,6 +378,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
 
   {
     QUOLL_PROFILE_EVENT("Clear rigid body velocities");
+    auto &entityDatabase = view.scene->entityDatabase;
     for (auto [entity, _, _2, physx] :
          entityDatabase.view<RigidBodyClear, RigidBody, PhysxInstance>()) {
       physx.rigidDynamic->setLinearVelocity(PxVec3(0.0f));
@@ -382,7 +390,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
 
   {
     QUOLL_PROFILE_EVENT("Apply forces");
-
+    auto &entityDatabase = view.scene->entityDatabase;
     for (auto [entity, force, _, physx] :
          entityDatabase.view<Force, RigidBody, PhysxInstance>()) {
       physx.rigidDynamic->addForce(
@@ -395,7 +403,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
 
   {
     QUOLL_PROFILE_EVENT("Apply impulses");
-
+    auto &entityDatabase = view.scene->entityDatabase;
     for (auto [entity, impulse, _, physx] :
          entityDatabase.view<Impulse, RigidBody, PhysxInstance>()) {
       physx.rigidDynamic->addForce(
@@ -408,7 +416,7 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
 
   {
     QUOLL_PROFILE_EVENT("Apply torques");
-
+    auto &entityDatabase = view.scene->entityDatabase;
     for (auto [entity, torque, _, physx] :
          entityDatabase.view<Torque, RigidBody, PhysxInstance>()) {
       physx.rigidDynamic->addTorque(
@@ -419,8 +427,9 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
   }
 }
 
-void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
+void PhysxBackend::synchronizeTransforms(SystemView &view) {
   QUOLL_PROFILE_EVENT("PhysicsSystem::synchronizeTransforms");
+  auto &entityDatabase = view.scene->entityDatabase;
   u32 count = 0;
   auto **actors = mScene->getActiveActors(count);
 

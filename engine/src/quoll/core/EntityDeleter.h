@@ -2,11 +2,11 @@
 
 namespace quoll {
 
-struct Scene;
+struct SystemView;
 
 class EntityDeleter {
 public:
-  void update(Scene &scene);
+  void update(SystemView &view);
 };
 
 } // namespace quoll

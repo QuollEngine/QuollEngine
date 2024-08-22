@@ -4,6 +4,7 @@
 #include "quoll/input/InputDeviceManager.h"
 #include "quoll/input/InputMapSystem.h"
 #include "quoll/input/KeyMappings.h"
+#include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
 #include <GLFW/glfw3.h>
 
@@ -105,14 +106,16 @@ public:
   quoll::AssetRegistry registry;
   quoll::InputDeviceManager deviceManager;
   quoll::InputMapSystem inputMapSystem{deviceManager, registry};
-  quoll::EntityDatabase db;
+  quoll::Scene scene;
+  quoll::EntityDatabase &db = scene.entityDatabase;
+  quoll::SystemView view{&scene};
 };
 
 TEST_F(InputMapSystemTest,
        CreateInputMapComponentFromAssetRefIfInputMapComponentDoesNotExist) {
   auto entity = createInputMap();
 
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   EXPECT_TRUE(db.has<quoll::InputMap>(entity));
   auto inputMap = db.get<quoll::InputMap>(entity);
@@ -212,7 +215,7 @@ TEST_F(InputMapSystemTest, DeleteInputMapComponentIfAssetRefIsDeleted) {
   auto entity = db.create();
   db.set<quoll::InputMap>(entity, {});
 
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   EXPECT_FALSE(db.has<quoll::InputMap>(entity));
 }
@@ -222,7 +225,7 @@ TEST_F(InputMapSystemTest,
   auto key = quoll::input::get("MOUSE_LEFT");
 
   auto entity = createInputMap();
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
   setInputState(key, true);
 
   auto &inputMap = db.get<quoll::InputMap>(entity);
@@ -232,13 +235,13 @@ TEST_F(InputMapSystemTest,
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), false);
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), false);
 
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), true);
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), false);
 
   inputMap.activeScheme = 1;
 
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), false);
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), true);
 }
@@ -251,7 +254,7 @@ TEST_F(InputMapSystemBooleanValueTest,
   auto entity = createInputMap();
 
   setInputState(key, true);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -265,7 +268,7 @@ TEST_F(InputMapSystemBooleanValueTest,
   auto key = quoll::input::get("KEY_SPACE");
   auto entity = createInputMap();
 
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -280,7 +283,7 @@ TEST_F(InputMapSystemBooleanValueTest,
   auto entity = createInputMap();
 
   setInputState(key, -1.0f);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -294,7 +297,7 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToFalseIfFloatKeyStateIsZero) {
   auto entity = createInputMap();
 
   setInputState(key, 0.0f);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -308,7 +311,7 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToTrueIfVec2StateIsNotZero) {
   auto entity = createInputMap();
 
   setInputState(key, glm::vec2{0.0f, 0.2f});
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -322,7 +325,7 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToFalseIfVec2StateIsZero) {
   auto entity = createInputMap();
 
   setInputState(key, glm::vec2{0.0f, 0.0f});
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -338,7 +341,7 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsValueToIncomingAxis2dInput) {
   auto entity = createInputMap();
 
   setInputState(key, glm::vec2{-0.4f, 0.2f});
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -353,7 +356,7 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsXValueToIncomingFloatInput) {
   auto entity = createInputMap();
 
   setInputState(key, 0.5f);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -368,7 +371,7 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToIncomingFloatInput) {
   auto entity = createInputMap();
 
   setInputState(key, -0.8f);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -384,7 +387,7 @@ TEST_F(InputMapSystemAxis2dValueTest,
   auto entity = createInputMap();
 
   setInputState(key, true);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -399,7 +402,7 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsXValueToOneIfIncomingBooleanIsX1) {
   auto entity = createInputMap();
 
   setInputState(key, true);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -415,7 +418,7 @@ TEST_F(InputMapSystemAxis2dValueTest,
   auto entity = createInputMap();
 
   setInputState(key, true);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -430,7 +433,7 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToOneIfIncomingBooleanIsY1) {
   auto entity = createInputMap();
 
   setInputState(key, true);
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -449,7 +452,7 @@ TEST_F(InputMapSystemAxis2dValueTest, ClampsPositiveValueToOne) {
   setInputState(keyX, 2.5f);
   setInputState(keyY, 2.5f);
 
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -468,7 +471,7 @@ TEST_F(InputMapSystemAxis2dValueTest, ClampsNegativeValueToNegativeOne) {
   setInputState(keyX, -2.5f);
   setInputState(keyY, -2.5f);
 
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);
@@ -487,7 +490,7 @@ TEST_F(InputMapSystemAxis2dValueTest, AddsMultipleInputValuesTogether) {
   setInputState(keyX, -0.2f);
   setInputState(keyY, 0.4f);
 
-  inputMapSystem.update(db);
+  inputMapSystem.update(view);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
   auto &scheme = inputMap.schemes.at(0);

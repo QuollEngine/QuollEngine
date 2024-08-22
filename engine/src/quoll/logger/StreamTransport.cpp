@@ -7,7 +7,7 @@ String formatLogHeaders(
     LogSeverity severity,
     std::chrono::time_point<std::chrono::system_clock> &&timestamp) {
 
-  auto time = std::chrono::system_clock::to_time_t(timestamp);
+  auto time = std::chrono::system_clock::to_time_t(std::move(timestamp));
 
   std::stringstream str;
   str << std::put_time(std::localtime(&time), "%X") << " ["

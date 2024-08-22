@@ -3,6 +3,8 @@
 #include "quoll/core/Profiler.h"
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/scene/Scene.h"
+#include "quoll/system/SystemView.h"
 #include "LuaScriptingSystem.h"
 #include "ScriptDecorator.h"
 
@@ -11,9 +13,10 @@ namespace quoll {
 LuaScriptingSystem::LuaScriptingSystem(AssetRegistry &assetRegistry)
     : mAssetRegistry(assetRegistry) {}
 
-void LuaScriptingSystem::start(EntityDatabase &entityDatabase,
-                               PhysicsSystem &physicsSystem,
+void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
                                WindowSignals &windowSignals) {
+  auto &entityDatabase = view.scene->entityDatabase;
+
   ScriptGlobals scriptGlobals{windowSignals, entityDatabase, physicsSystem,
                               mAssetRegistry, mScriptLoop};
   QUOLL_PROFILE_EVENT("LuaScriptingSystem::start");
@@ -71,18 +74,19 @@ void LuaScriptingSystem::start(EntityDatabase &entityDatabase,
   }
 }
 
-void LuaScriptingSystem::update(f32 dt, EntityDatabase &entityDatabase) {
+void LuaScriptingSystem::update(f32 dt, SystemView &view) {
   QUOLL_PROFILE_EVENT("LuaScriptingSystem::update");
 
-  for (auto [entity, script] : mScriptRemoveObserver) {
+  for (auto [entity, script] : view.luaScripting.scriptRemoveObserver) {
     destroyScriptingData(script);
   }
-  mScriptRemoveObserver.clear();
+  view.luaScripting.scriptRemoveObserver.clear();
 
   mScriptLoop.onUpdate().notify(dt);
 }
 
-void LuaScriptingSystem::cleanup(EntityDatabase &entityDatabase) {
+void LuaScriptingSystem::cleanup(SystemView &view) {
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, script] : entityDatabase.view<LuaScript>()) {
     destroyScriptingData(script);
   }
@@ -90,8 +94,9 @@ void LuaScriptingSystem::cleanup(EntityDatabase &entityDatabase) {
   entityDatabase.destroyComponents<LuaScript>();
 }
 
-void LuaScriptingSystem::observeChanges(EntityDatabase &entityDatabase) {
-  mScriptRemoveObserver = entityDatabase.observeRemove<LuaScript>();
+void LuaScriptingSystem::createSystemViewData(SystemView &view) {
+  view.luaScripting.scriptRemoveObserver =
+      view.scene->entityDatabase.observeRemove<LuaScript>();
 }
 
 void LuaScriptingSystem::destroyScriptingData(LuaScript &component) {

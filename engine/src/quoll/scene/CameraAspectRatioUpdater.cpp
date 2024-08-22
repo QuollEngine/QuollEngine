@@ -1,13 +1,15 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Profiler.h"
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/system/SystemView.h"
 #include "AutoAspectRatio.h"
 #include "CameraAspectRatioUpdater.h"
 #include "PerspectiveLens.h"
 
 namespace quoll {
 
-void CameraAspectRatioUpdater::update(EntityDatabase &entityDatabase) {
+void CameraAspectRatioUpdater::update(SystemView &view) {
+  auto &entityDatabase = view.scene->entityDatabase;
   QUOLL_PROFILE_EVENT("CameraAspectRatioUpdater::update");
 
   if (mSize.x <= 0 || mSize.y <= 0)

@@ -1,13 +1,11 @@
 #include "quoll/core/Base.h"
 #include "TestPhysicsBackend.h"
 
-void TestPhysicsBackend::update(f32 dt, quoll::EntityDatabase &entityDatabase) {
-}
+void TestPhysicsBackend::update(f32 dt, quoll::SystemView &view) {}
 
-void TestPhysicsBackend::cleanup(quoll::EntityDatabase &entityDatabase) {}
+void TestPhysicsBackend::cleanup(quoll::SystemView &view) {}
 
-void TestPhysicsBackend::observeChanges(quoll::EntityDatabase &entityDatabase) {
-}
+void TestPhysicsBackend::createSystemViewData(quoll::SystemView &view) {}
 
 bool TestPhysicsBackend::sweep(quoll::EntityDatabase &entityDatabase,
                                quoll::Entity entity, const glm::vec3 &direction,

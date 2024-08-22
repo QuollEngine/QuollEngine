@@ -111,6 +111,10 @@
     {
       "name": "tracy",
       "default-features": false
+    },
+    {
+      "name": "flecs",
+      "default-features": false
     }
   ]
 }

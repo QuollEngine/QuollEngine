@@ -27,17 +27,13 @@ public:
   MainEngineModules(InputDeviceManager &deviceManager, Window &window,
                     AssetRegistry &assetRegistry);
 
-  void observeChanges(EntityDatabase &entityDatabase);
+  void prepare(SystemView &view);
+  void cleanup(SystemView &view);
+  void fixedUpdate(f32 dt, SystemView &view);
+  void update(f32 dt, SystemView &view);
+  void render(SystemView &view);
 
-  void cleanupObservers(EntityDatabase &entityDatabase);
-
-  void prepare(Scene &scene);
-
-  void fixedUpdate(f32 dt, Scene &scene);
-
-  void update(f32 dt, Scene &scene);
-
-  void render(Scene &scene);
+  SystemView createSystemView(Scene &scene);
 
   inline CameraAspectRatioUpdater &getCameraAspectRatioUpdater() {
     return mCameraAspectRatioUpdater;

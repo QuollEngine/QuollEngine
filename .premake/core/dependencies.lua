@@ -53,6 +53,7 @@ function linkDependenciesWith(...)
         "ktx",
         "zstd",
         "yogacore",
+        "flecs_static",
         "brotlidec-static",
         "brotlicommon-static",
         "PhysX_static_64",

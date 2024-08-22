@@ -5,14 +5,18 @@
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/Scene.h"
 #include "quoll/skeleton/Skeleton.h"
+#include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
 
 class AnimationSystemTest : public ::testing::Test {
 public:
-  quoll::EntityDatabase entityDatabase;
+  quoll::Scene scene;
+  quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
   quoll::AnimationSystem system;
   quoll::AssetRegistry assetRegistry;
+  quoll::SystemView view{&scene};
 
   AnimationSystemTest() : system(assetRegistry) {}
 
@@ -136,8 +140,8 @@ TEST_F(
     entityDatabase.set<quoll::LocalTransform>(entity, {});
   }
 
-  system.prepare(entityDatabase);
-  system.update(0.0f, entityDatabase);
+  system.prepare(view);
+  system.update(0.0f, view);
 
   {
     const auto &animator = entityDatabase.get<quoll::Animator>(entity);
@@ -146,8 +150,8 @@ TEST_F(
   }
 
   entityDatabase.set<quoll::AnimatorEvent>(entity, {"Move"});
-  system.prepare(entityDatabase);
-  system.update(0.0f, entityDatabase);
+  system.prepare(view);
+  system.update(0.0f, view);
 
   {
     const auto &animator = entityDatabase.get<quoll::Animator>(entity);
@@ -194,8 +198,8 @@ TEST_F(
     entityDatabase.set<quoll::LocalTransform>(entity, {});
   }
 
-  system.prepare(entityDatabase);
-  system.update(0.0f, entityDatabase);
+  system.prepare(view);
+  system.update(0.0f, view);
 
   {
     const auto &animator = entityDatabase.get<quoll::Animator>(entity);
@@ -205,8 +209,8 @@ TEST_F(
 
   entityDatabase.set<quoll::AnimatorEvent>(entity, {"NotMove"});
 
-  system.prepare(entityDatabase);
-  system.update(0.0f, entityDatabase);
+  system.prepare(view);
+  system.update(0.0f, view);
 
   {
     const auto &animator = entityDatabase.get<quoll::Animator>(entity);
@@ -223,8 +227,8 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
 
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
 }
 
@@ -234,8 +238,8 @@ TEST_F(AnimationSystemTest, AdvancesAnimatorNormalizedTimeByDeltaTime) {
 
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
   EXPECT_EQ(animator.normalizedTime, 0.25f);
 }
 
@@ -247,8 +251,8 @@ TEST_F(AnimationSystemTest,
 
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
   EXPECT_EQ(animator.normalizedTime, 0.125f);
 }
 
@@ -258,8 +262,8 @@ TEST_F(AnimationSystemTest,
   auto entity = create();
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
-  system.prepare(entityDatabase);
-  system.update(1.0f, entityDatabase);
+  system.prepare(view);
+  system.update(1.0f, view);
   EXPECT_EQ(animator.normalizedTime, 1.0f);
 }
 
@@ -270,8 +274,8 @@ TEST_F(AnimationSystemTest,
   auto entity = create(animation, true, 1.0f, quoll::AnimationLoopMode::Linear);
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
-  system.prepare(entityDatabase);
-  system.update(1.0f, entityDatabase);
+  system.prepare(view);
+  system.update(1.0f, view);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
 }
 
@@ -284,8 +288,8 @@ TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.5f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -301,8 +305,8 @@ TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
@@ -318,8 +322,8 @@ TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -338,8 +342,8 @@ TEST_F(AnimationSystemTest,
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
   EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.5f));
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -362,8 +366,8 @@ TEST_F(AnimationSystemTest,
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
   EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
@@ -386,8 +390,8 @@ TEST_F(AnimationSystemTest,
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
   EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -400,6 +404,6 @@ TEST_F(AnimationSystemTest,
 
 TEST_F(AnimationSystemTest, DoesNothingIfAnimationDoesNotExist) {
   auto entity = create(quoll::AnimationAssetHandle::Null);
-  system.prepare(entityDatabase);
-  system.update(0.5f, entityDatabase);
+  system.prepare(view);
+  system.update(0.5f, view);
 }

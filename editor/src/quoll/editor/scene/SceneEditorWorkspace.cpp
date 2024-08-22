@@ -53,6 +53,8 @@ SceneEditorWorkspace::SceneEditorWorkspace(
                         TypedActionCreator::create<Redo>(mActionExecutor));
   mShortcutsManager.add(Shortcut().control().key('Z'),
                         TypedActionCreator::create<Undo>(mActionExecutor));
+
+  mSystemView = std::move(engineModules.createSystemView(mState.scene));
 }
 
 SceneEditorWorkspace::~SceneEditorWorkspace() {
@@ -76,7 +78,7 @@ void SceneEditorWorkspace::renderLayout() {
   WorkspaceLayoutRenderer::end();
 }
 
-void SceneEditorWorkspace::prepare() { mEngineModules.prepare(mState.scene); }
+void SceneEditorWorkspace::prepare() { mEngineModules.prepare(mSystemView); }
 
 void SceneEditorWorkspace::fixedUpdate(f32 dt) {}
 

@@ -2,7 +2,7 @@
 
 namespace quoll {
 
-class EntityDatabase;
+struct SystemView;
 
 /**
  * Updates camera with auto aspect ratio
@@ -10,7 +10,7 @@ class EntityDatabase;
  */
 class CameraAspectRatioUpdater {
 public:
-  void update(EntityDatabase &entityDatabase);
+  void update(SystemView &view);
 
   void setViewportSize(glm::uvec2 size);
 
