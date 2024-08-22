@@ -4,6 +4,7 @@
 #include "quoll/loop/MainEngineModules.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
+#include "quoll/system/SystemView.h"
 #include "quoll/editor/actions/ActionExecutor.h"
 #include "quoll/editor/asset/AssetManager.h"
 #include "quoll/editor/ui/ShortcutsManager.h"
@@ -55,6 +56,7 @@ private:
   ActionExecutor mActionExecutor;
   SceneIO mSceneIO;
   ShortcutsManager mShortcutsManager;
+  SystemView mSystemView;
 
   MainEngineModules &mEngineModules;
   EditorCamera &mEditorCamera;

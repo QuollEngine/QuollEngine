@@ -83,8 +83,6 @@ void Runtime::start() {
       0.0f, 0.0f, static_cast<f32>(window.getFramebufferSize().x),
       static_cast<f32>(window.getFramebufferSize().y));
 
-  engineModules.observeChanges(scene.entityDatabase);
-
   window.getSignals().onFramebufferResize().connect(
       [&](auto width, auto height) {
         renderer.setFramebufferSize({width, height});
@@ -106,14 +104,16 @@ void Runtime::start() {
   SceneIO sceneIO(assetCache.getRegistry(), scene);
   sceneIO.loadScene(handle);
 
+  auto systemView = engineModules.createSystemView(scene);
+
   presenter.updateFramebuffers(device->getSwapchain());
 
-  mainLoop.setPrepareFn([&]() { engineModules.prepare(scene); });
+  mainLoop.setPrepareFn([&]() { engineModules.prepare(systemView); });
 
   mainLoop.setFixedUpdateFn(
-      [&](f32 dt) { engineModules.fixedUpdate(dt, scene); });
+      [&](f32 dt) { engineModules.fixedUpdate(dt, systemView); });
 
-  mainLoop.setUpdateFn([&](f32 dt) { engineModules.update(dt, scene); });
+  mainLoop.setUpdateFn([&](f32 dt) { engineModules.update(dt, systemView); });
 
   mainLoop.setRenderFn([&]() {
     if (presenter.requiresFramebufferUpdate()) {
@@ -147,7 +147,7 @@ void Runtime::start() {
 
     ImGui::PopStyleVar();
 
-    engineModules.render(scene);
+    engineModules.render(systemView);
 
     imguiRenderer.endRendering();
 

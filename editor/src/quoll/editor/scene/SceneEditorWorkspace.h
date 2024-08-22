@@ -76,6 +76,8 @@ private:
   bool mRequiresDockspaceInit = false;
 
   String mLayoutPath;
+
+  SystemView mSystemView;
 };
 
 } // namespace quoll::editor

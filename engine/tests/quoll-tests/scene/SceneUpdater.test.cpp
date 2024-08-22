@@ -6,15 +6,20 @@
 #include "quoll/scene/Parent.h"
 #include "quoll/scene/PerspectiveLens.h"
 #include "quoll/scene/PointLight.h"
+#include "quoll/scene/Scene.h"
 #include "quoll/scene/SceneUpdater.h"
 #include "quoll/scene/WorldTransform.h"
 #include "quoll/skeleton/JointAttachment.h"
 #include "quoll/skeleton/Skeleton.h"
+#include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
 
 class SceneUpdaterTest : public ::testing::Test {
 public:
-  quoll::EntityDatabase entityDatabase;
+  quoll::Scene scene;
+  quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
+  quoll::SystemView view{&scene};
+
   quoll::SceneUpdater sceneUpdater;
 };
 
@@ -34,7 +39,7 @@ TEST_F(SceneUpdaterTest, SetsLocalTransformToWorldTransformIfNoParent) {
   entityDatabase.set<quoll::WorldTransform>(entity, {});
   entityDatabase.set(entity, transform);
 
-  sceneUpdater.update(entityDatabase);
+  sceneUpdater.update(view);
 
   EXPECT_EQ(entityDatabase.get<quoll::WorldTransform>(entity).worldTransform,
             getLocalTransform(transform));
@@ -70,7 +75,7 @@ TEST_F(SceneUpdaterTest, CalculatesWorldTransformFromParentWorldTransform) {
   entityDatabase.set<quoll::Parent>(child2, {child1});
   entityDatabase.set<quoll::WorldTransform>(child2, {});
 
-  sceneUpdater.update(entityDatabase);
+  sceneUpdater.update(view);
 
   EXPECT_EQ(entityDatabase.get<quoll::WorldTransform>(parent).worldTransform,
             getLocalTransform(parentTransform));
@@ -140,7 +145,7 @@ TEST_F(SceneUpdaterTest,
   entityDatabase.set<quoll::WorldTransform>(child3, {});
   entityDatabase.set<quoll::JointAttachment>(child3, {1});
 
-  sceneUpdater.update(entityDatabase);
+  sceneUpdater.update(view);
 
   EXPECT_EQ(entityDatabase.get<quoll::WorldTransform>(parent).worldTransform,
             getLocalTransform(parentTransform));
@@ -197,7 +202,7 @@ TEST_F(SceneUpdaterTest,
   // Set second joint as attachment
   entityDatabase.set<quoll::JointAttachment>(child2, {1});
 
-  sceneUpdater.update(entityDatabase);
+  sceneUpdater.update(view);
 
   EXPECT_EQ(entityDatabase.get<quoll::WorldTransform>(parent).worldTransform,
             getLocalTransform(parentTransform));
@@ -228,7 +233,7 @@ TEST_F(SceneUpdaterTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
     quoll::Camera camera{};
     entityDatabase.set(entity, camera);
   }
-  sceneUpdater.update(entityDatabase);
+  sceneUpdater.update(view);
 
   auto &transform = entityDatabase.get<quoll::WorldTransform>(entity);
   auto &lens = entityDatabase.get<quoll::PerspectiveLens>(entity);
@@ -258,7 +263,7 @@ TEST_F(SceneUpdaterTest, UpdateDirectionalLightsBasedOnTransforms) {
     quoll::DirectionalLight light{};
     entityDatabase.set(entity, light);
   }
-  sceneUpdater.update(entityDatabase);
+  sceneUpdater.update(view);
 
   auto &transform = entityDatabase.get<quoll::WorldTransform>(entity);
   auto &light = entityDatabase.get<quoll::DirectionalLight>(entity);

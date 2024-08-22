@@ -12,7 +12,7 @@ Renderer::Renderer(RenderStorage &storage, const RendererOptions &options)
     : mRenderStorage(storage), mGraph("Main"), mOptions(options) {}
 
 void Renderer::setGraphBuilder(GraphBuilderFn &&builderFn) {
-  mBuilderFn = builderFn;
+  mBuilderFn = std::move(builderFn);
 }
 
 void Renderer::setFramebufferSize(glm::uvec2 size) {

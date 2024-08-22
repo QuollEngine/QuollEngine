@@ -5,9 +5,11 @@
 
 namespace quoll {
 
+struct SystemView;
+
 class UICanvasUpdater {
 public:
-  void render(EntityDatabase &entityDatabase, AssetRegistry &assetRegistry);
+  void render(SystemView &view, AssetRegistry &assetRegistry);
 
   void setViewport(f32 x, f32 y, f32 width, f32 height);
 

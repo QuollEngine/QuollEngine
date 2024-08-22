@@ -6,14 +6,14 @@ namespace quoll {
 
 class AssetRegistry;
 class InputDeviceManager;
-class EntityDatabase;
+struct SystemView;
 
 class InputMapSystem {
 public:
   InputMapSystem(InputDeviceManager &deviceManager,
                  AssetRegistry &assetRegistry);
 
-  void update(EntityDatabase &entityDatabase);
+  void update(SystemView &view);
 
 private:
   InputMap createInputMap(InputMapAsset &asset, usize defaultScheme);

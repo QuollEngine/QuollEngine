@@ -16,7 +16,7 @@ sol::state_view LuaScriptingInterfaceTestBase::start(quoll::Entity entity) {
   auto handle = loadScript(mScriptName);
   entityDatabase.set<quoll::LuaScript>(entity, {handle});
 
-  scriptingSystem.start(entityDatabase, physicsSystem, windowSignals);
+  scriptingSystem.start(view, physicsSystem, windowSignals);
 
   auto &script = entityDatabase.get<quoll::LuaScript>(entity);
   sol::state_view state(script.state);

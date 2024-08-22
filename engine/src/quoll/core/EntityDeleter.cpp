@@ -2,6 +2,7 @@
 #include "quoll/scene/Children.h"
 #include "quoll/scene/Parent.h"
 #include "quoll/scene/Scene.h"
+#include "quoll/system/SystemView.h"
 #include "Delete.h"
 #include "EntityDeleter.h"
 
@@ -18,9 +19,10 @@ void addToDeleteList(Entity entity, EntityDatabase &entityDatabase,
   deleteList.push_back(entity);
 }
 
-void EntityDeleter::update(Scene &scene) {
-  auto &entityDatabase = scene.entityDatabase;
-  auto activeCamera = scene.activeCamera;
+void EntityDeleter::update(SystemView &view) {
+  auto *scene = view.scene;
+  auto &entityDatabase = scene->entityDatabase;
+  auto activeCamera = scene->activeCamera;
 
   auto count = entityDatabase.getEntityCountForComponent<Delete>();
   if (count == 0) {
@@ -52,7 +54,7 @@ void EntityDeleter::update(Scene &scene) {
   }
 
   if (cameraDeleted) {
-    scene.activeCamera = scene.dummyCamera;
+    scene->activeCamera = scene->dummyCamera;
   }
 
   for (auto entity : deleteList) {

@@ -4,6 +4,6 @@
 namespace quoll {
 
 SignalSlot::SignalSlot(std::function<void()> &&disconnect)
-    : mDisconnect(disconnect) {}
+    : mDisconnect(std::move(disconnect)) {}
 
 } // namespace quoll

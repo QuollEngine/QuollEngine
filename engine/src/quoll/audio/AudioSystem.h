@@ -3,6 +3,7 @@
 #include "quoll/core/Profiler.h"
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/system/SystemView.h"
 #include "AudioSource.h"
 #include "AudioStart.h"
 #include "AudioStatus.h"
@@ -14,13 +15,21 @@ template <class AudioBackend = DefaultAudioBackend> class AudioSystem {
 public:
   AudioSystem(AssetRegistry &assetRegistry) : mAssetRegistry(assetRegistry) {}
 
-  void output(EntityDatabase &entityDatabase) {
+  void createSystemViewData(SystemView &view) {
+    view.audio.audioSourceRemoveObserver =
+        view.scene->entityDatabase.observeRemove<AudioSource>();
+    view.audio.audioStatusRemoveObserver =
+        view.scene->entityDatabase.observeRemove<AudioStatus>();
+  }
+
+  void output(SystemView &view) {
     QUOLL_PROFILE_EVENT("AudioSystem::output");
+    auto &entityDatabase = view.scene->entityDatabase;
 
     {
       QUOLL_PROFILE_EVENT("Cleanup audio data for delete components");
 
-      for (auto [entity, source] : mAudioSourceRemoveObserver) {
+      for (auto [entity, source] : view.audio.audioSourceRemoveObserver) {
         if (entityDatabase.has<AudioStart>(entity)) {
           entityDatabase.remove<AudioStart>(entity);
         }
@@ -30,12 +39,12 @@ public:
         }
       }
 
-      for (auto [entity, status] : mAudioStatusRemoveObserver) {
+      for (auto [entity, status] : view.audio.audioStatusRemoveObserver) {
         mBackend.destroySound(status.instance);
       }
 
-      mAudioSourceRemoveObserver.clear();
-      mAudioStatusRemoveObserver.clear();
+      view.audio.audioSourceRemoveObserver.clear();
+      view.audio.audioStatusRemoveObserver.clear();
     }
 
     {
@@ -71,7 +80,8 @@ public:
     }
   }
 
-  void cleanup(EntityDatabase &entityDatabase) {
+  void cleanup(SystemView &view) {
+    auto &entityDatabase = view.scene->entityDatabase;
     for (auto [entity, status] : entityDatabase.view<AudioStatus>()) {
       mBackend.destroySound(status.instance);
     }
@@ -80,19 +90,11 @@ public:
     entityDatabase.destroyComponents<AudioStart>();
   }
 
-  void observeChanges(EntityDatabase &entityDatabase) {
-    mAudioSourceRemoveObserver = entityDatabase.observeRemove<AudioSource>();
-    mAudioStatusRemoveObserver = entityDatabase.observeRemove<AudioStatus>();
-  }
-
   inline AudioBackend &getBackend() { return mBackend; }
 
 private:
   AudioBackend mBackend;
   AssetRegistry &mAssetRegistry;
-
-  EntityDatabaseObserver<AudioSource> mAudioSourceRemoveObserver;
-  EntityDatabaseObserver<AudioStatus> mAudioStatusRemoveObserver;
 };
 
 } // namespace quoll

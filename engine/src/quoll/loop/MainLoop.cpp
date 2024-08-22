@@ -10,23 +10,23 @@ MainLoop::MainLoop(Window &window, FPSCounter &fpsCounter)
     : mWindow(window), mFpsCounter(fpsCounter) {}
 
 void MainLoop::setUpdateFn(std::function<void(f32)> &&updateFn) {
-  mUpdateFn = updateFn;
+  mUpdateFn = std::move(updateFn);
 }
 
 void MainLoop::setFixedUpdateFn(std::function<void(f32)> &&fixedUpdateFn) {
-  mFixedUpdateFn = fixedUpdateFn;
+  mFixedUpdateFn = std::move(fixedUpdateFn);
 }
 
 void MainLoop::setRenderFn(std::function<void()> &&renderFn) {
-  mRenderFn = renderFn;
+  mRenderFn = std::move(renderFn);
 }
 
 void MainLoop::setPrepareFn(std::function<void()> &&prepareFn) {
-  mPrepareFn = prepareFn;
+  mPrepareFn = std::move(prepareFn);
 }
 
 void MainLoop::setStatsFn(std::function<void(u32)> &&statsFn) {
-  mStatsFn = statsFn;
+  mStatsFn = std::move(statsFn);
 }
 
 void MainLoop::stop() { mRunning = false; }

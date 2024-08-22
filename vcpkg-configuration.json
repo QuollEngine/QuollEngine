@@ -10,6 +10,12 @@
     {
       "kind": "git",
       "repository": "https://github.com/Microsoft/vcpkg",
+      "baseline": "2145fbe4f0a08de4547f391de47d88c18a01f1ba",
+      "packages": ["flecs"]
+    },
+    {
+      "kind": "git",
+      "repository": "https://github.com/Microsoft/vcpkg",
       "baseline": "59ea102312180ae2972e0bb47cef2cfce407b407",
       "packages": ["physx"]
     },

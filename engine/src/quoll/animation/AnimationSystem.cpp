@@ -4,6 +4,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/skeleton/Skeleton.h"
+#include "quoll/system/SystemView.h"
 #include "AnimationSystem.h"
 #include "AnimatorEvent.h"
 
@@ -12,9 +13,10 @@ namespace quoll {
 AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
     : mAssetRegistry(assetRegistry) {}
 
-void AnimationSystem::prepare(EntityDatabase &entityDatabase) {
+void AnimationSystem::prepare(SystemView &view) {
   QUOLL_PROFILE_EVENT("AnimationSystem::prepare");
 
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, animator] : entityDatabase.view<Animator>()) {
     const auto &animatorAsset =
         mAssetRegistry.getAnimators().getAsset(animator.asset);
@@ -25,10 +27,11 @@ void AnimationSystem::prepare(EntityDatabase &entityDatabase) {
   }
 }
 
-void AnimationSystem::update(f32 dt, EntityDatabase &entityDatabase) {
+void AnimationSystem::update(f32 dt, SystemView &view) {
   QUOLL_PROFILE_EVENT("AnimationSystem::update");
   const auto &animMap = mAssetRegistry.getAnimations();
 
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, animator, animatorEvent] :
        entityDatabase.view<Animator, AnimatorEvent>()) {
     const auto &state = mAssetRegistry.getAnimators()

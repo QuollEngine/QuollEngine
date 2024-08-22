@@ -1,20 +1,23 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Profiler.h"
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/system/SystemView.h"
 #include "Skeleton.h"
 #include "SkeletonUpdater.h"
 
 namespace quoll {
 
-void SkeletonUpdater::update(EntityDatabase &entityDatabase) {
+void SkeletonUpdater::update(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
 
-  updateSkeletons(entityDatabase);
-  updateDebugBones(entityDatabase);
+  updateSkeletons(view);
+  updateDebugBones(view);
 }
 
-void SkeletonUpdater::updateSkeletons(EntityDatabase &entityDatabase) {
+void SkeletonUpdater::updateSkeletons(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
+
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, skeleton] : entityDatabase.view<Skeleton>()) {
 
     {
@@ -45,8 +48,10 @@ void SkeletonUpdater::updateSkeletons(EntityDatabase &entityDatabase) {
   }
 }
 
-void SkeletonUpdater::updateDebugBones(EntityDatabase &entityDatabase) {
+void SkeletonUpdater::updateDebugBones(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::updateDebug");
+
+  auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, skeleton, debug] :
        entityDatabase.view<Skeleton, SkeletonDebug>()) {
     QuollAssert(static_cast<u32>(debug.bones.size()) == skeleton.numJoints * 2,

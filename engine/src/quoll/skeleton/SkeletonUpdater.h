@@ -2,16 +2,16 @@
 
 namespace quoll {
 
-class EntityDatabase;
+struct SystemView;
 
 class SkeletonUpdater {
 public:
-  void update(EntityDatabase &entityDatabase);
+  void update(SystemView &view);
 
 private:
-  void updateSkeletons(EntityDatabase &entityDatabase);
+  void updateSkeletons(SystemView &view);
 
-  void updateDebugBones(EntityDatabase &entityDatabase);
+  void updateDebugBones(SystemView &view);
 };
 
 } // namespace quoll

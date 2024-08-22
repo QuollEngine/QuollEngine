@@ -13,42 +13,45 @@ MainEngineModules::MainEngineModules(InputDeviceManager &deviceManager,
       mPhysicsSystem(new PhysxBackend), mAudioSystem(assetRegistry),
       mAssetRegistry(assetRegistry) {}
 
-void MainEngineModules::observeChanges(EntityDatabase &entityDatabase) {
-  mPhysicsSystem.observeChanges(entityDatabase);
-  mScriptingSystem.observeChanges(entityDatabase);
-  mAudioSystem.observeChanges(entityDatabase);
+void MainEngineModules::prepare(SystemView &view) {
+  mEntityDeleter.update(view);
+  mCameraAspectRatioUpdater.update(view);
+  mSkeletonUpdater.update(view);
+  mSceneUpdater.update(view);
+  mAnimationSystem.prepare(view);
 }
 
-void MainEngineModules::cleanupObservers(EntityDatabase &entityDatabase) {
-  mPhysicsSystem.cleanup(entityDatabase);
-  mScriptingSystem.cleanup(entityDatabase);
-  mAudioSystem.cleanup(entityDatabase);
+void MainEngineModules::cleanup(SystemView &view) {
+  mPhysicsSystem.cleanup(view);
+  mScriptingSystem.cleanup(view);
+  mAudioSystem.cleanup(view);
 }
 
-void MainEngineModules::prepare(Scene &scene) {
-  mEntityDeleter.update(scene);
-  mCameraAspectRatioUpdater.update(scene.entityDatabase);
-  mSkeletonUpdater.update(scene.entityDatabase);
-  mSceneUpdater.update(scene.entityDatabase);
-  mAnimationSystem.prepare(scene.entityDatabase);
+void MainEngineModules::fixedUpdate(f32 dt, SystemView &view) {
+  mPhysicsSystem.update(dt, view);
+
+  mInputMapSystem.update(view);
+  mScriptingSystem.start(view, mPhysicsSystem, mWindow.getSignals());
+  mScriptingSystem.update(dt, view);
+  mAnimationSystem.update(dt, view);
 }
 
-void MainEngineModules::fixedUpdate(f32 dt, Scene &scene) {
-  mPhysicsSystem.update(dt, scene.entityDatabase);
-
-  mInputMapSystem.update(scene.entityDatabase);
-  mScriptingSystem.start(scene.entityDatabase, mPhysicsSystem,
-                         mWindow.getSignals());
-  mScriptingSystem.update(dt, scene.entityDatabase);
-  mAnimationSystem.update(dt, scene.entityDatabase);
+void MainEngineModules::update(f32 dt, SystemView &view) {
+  mAudioSystem.output(view);
 }
 
-void MainEngineModules::update(f32 dt, Scene &scene) {
-  mAudioSystem.output(scene.entityDatabase);
+void MainEngineModules::render(SystemView &view) {
+  mUICanvasUpdater.render(view, mAssetRegistry);
 }
 
-void MainEngineModules::render(Scene &scene) {
-  mUICanvasUpdater.render(scene.entityDatabase, mAssetRegistry);
+SystemView MainEngineModules::createSystemView(Scene &scene) {
+  SystemView view{&scene};
+
+  mScriptingSystem.createSystemViewData(view);
+  mAudioSystem.createSystemViewData(view);
+  mPhysicsSystem.createSystemViewData(view);
+
+  return std::move(view);
 }
 
 } // namespace quoll

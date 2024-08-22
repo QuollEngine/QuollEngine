@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/audio/AudioSystem.h"
+#include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
 
 struct FakeAudioData {};
@@ -48,7 +49,7 @@ private:
 class AudioSystemTest : public ::testing::Test {
 public:
   AudioSystemTest() : audioSystem(assetRegistry) {
-    audioSystem.observeChanges(entityDatabase);
+    audioSystem.createSystemViewData(view);
   }
 
   quoll::AudioAssetHandle createFakeAudio() {
@@ -61,18 +62,20 @@ public:
 
   quoll::AssetRegistry assetRegistry;
   quoll::AudioSystem<TestAudioBackend> audioSystem;
-  quoll::EntityDatabase entityDatabase;
+  quoll::Scene scene;
+  quoll::SystemView view{&scene};
+  quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
 };
 
 TEST_F(AudioSystemTest,
        DoesNothingIfThereAreNoEntitiesWithAudioSourceComponents) {
   auto e1 = entityDatabase.create();
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
 
   entityDatabase.set<quoll::AudioStart>(e1, {});
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
 }
@@ -84,7 +87,7 @@ TEST_F(AudioSystemTest,
   auto e1 = entityDatabase.create();
 
   entityDatabase.set<quoll::AudioSource>(e1, {handle});
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
 }
@@ -100,7 +103,7 @@ TEST_F(
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_TRUE(entityDatabase.has<quoll::AudioStatus>(e1));
 }
@@ -112,7 +115,7 @@ TEST_F(AudioSystemTest, DoesNotPlaySoundIfAudioStatusComponentExistsForEntity) {
   entityDatabase.set<quoll::AudioStart>(e1, {});
   entityDatabase.set<quoll::AudioSource>(e1, {handle});
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(e1));
   EXPECT_TRUE(entityDatabase.has<quoll::AudioStatus>(e1));
@@ -120,7 +123,7 @@ TEST_F(AudioSystemTest, DoesNotPlaySoundIfAudioStatusComponentExistsForEntity) {
   auto *prevInstance = entityDatabase.get<quoll::AudioStatus>(e1).instance;
 
   entityDatabase.set<quoll::AudioStart>(e1, {});
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(e1));
 
@@ -137,7 +140,7 @@ TEST_F(AudioSystemTest,
   entityDatabase.set<quoll::AudioStart>(e1, {});
   entityDatabase.set<quoll::AudioSource>(e1, {handle});
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(e1));
 }
@@ -151,16 +154,16 @@ TEST_F(AudioSystemTest, DeletesAudioStatusComponentFromFinishedAudios) {
   entityDatabase.set<quoll::AudioStart>(e1, {});
   entityDatabase.set<quoll::AudioSource>(e1, {handle});
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   auto *sound = entityDatabase.get<quoll::AudioStatus>(e1).instance;
   EXPECT_TRUE(backend.hasSound(sound));
 
   backend.setStatus(sound, false);
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
   EXPECT_TRUE(backend.hasSound(sound));
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
   EXPECT_FALSE(backend.hasSound(sound));
 }
 
@@ -173,7 +176,7 @@ TEST_F(AudioSystemTest, CleanupDeletesAllAudioStatuses) {
   entityDatabase.set<quoll::AudioStart>(e1, {});
   entityDatabase.set<quoll::AudioSource>(e1, {handle});
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   auto *sound = entityDatabase.get<quoll::AudioStatus>(e1).instance;
   EXPECT_TRUE(backend.hasSound(sound));
@@ -181,7 +184,7 @@ TEST_F(AudioSystemTest, CleanupDeletesAllAudioStatuses) {
   entityDatabase.set<quoll::AudioStart>(e1, {});
   EXPECT_TRUE(entityDatabase.has<quoll::AudioStart>(e1));
 
-  audioSystem.cleanup(entityDatabase);
+  audioSystem.cleanup(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(e1));
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
@@ -203,7 +206,7 @@ TEST_F(AudioSystemTest, DeletesAudioComponentsWhenAudioSourceIsDeleted) {
   entityDatabase.set<quoll::AudioSource>(e2, {handle});
   entityDatabase.deleteEntity(e2);
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(e1));
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
@@ -222,14 +225,14 @@ TEST_F(AudioSystemTest, DeletesAudioDataWhenAudioSourceComponentsAreDeleted) {
   entityDatabase.set<quoll::AudioStart>(e2, {});
   entityDatabase.set<quoll::AudioSource>(e2, {handle});
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
   auto *sound1 = entityDatabase.get<quoll::AudioStatus>(e1).instance;
   auto *sound2 = entityDatabase.get<quoll::AudioStatus>(e2).instance;
 
   entityDatabase.remove<quoll::AudioSource>(e1);
   entityDatabase.deleteEntity(e2);
 
-  audioSystem.output(entityDatabase);
+  audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(e1));
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));

@@ -4,11 +4,11 @@
 
 class TestPhysicsBackend : public quoll::PhysicsBackend {
 public:
-  void update(f32 dt, quoll::EntityDatabase &entityDatabase) override;
+  void update(f32 dt, quoll::SystemView &view) override;
 
-  void cleanup(quoll::EntityDatabase &entityDatabase) override;
+  void cleanup(quoll::SystemView &view) override;
 
-  void observeChanges(quoll::EntityDatabase &entityDatabase) override;
+  void createSystemViewData(quoll::SystemView &view) override;
 
   bool sweep(quoll::EntityDatabase &entityDatabase, quoll::Entity entity,
              const glm::vec3 &direction, f32 distance,
