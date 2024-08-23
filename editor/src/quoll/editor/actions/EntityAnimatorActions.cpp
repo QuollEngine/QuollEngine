@@ -25,7 +25,7 @@ EntityCreateAnimator::onUndo(WorkspaceState &state,
 bool EntityCreateAnimator::predicate(WorkspaceState &state,
                                      AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
-  return !scene.entityDatabase.has<Animator>(mEntity) &&
+  return !mEntity.has<Animator>() &&
          assetRegistry.getAnimators().hasAsset(mHandle);
 }
 
@@ -37,9 +37,9 @@ EntitySetAnimator::onExecute(WorkspaceState &state,
                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldAnimator = scene.entityDatabase.get<Animator>(mEntity).asset;
+  mOldAnimator = mEntity.get_ref<Animator>()->asset;
 
-  scene.entityDatabase.set<Animator>(mEntity, {mAnimator});
+  mEntity.set<Animator>({mAnimator});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -51,7 +51,7 @@ ActionExecutorResult EntitySetAnimator::onUndo(WorkspaceState &state,
                                                AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set<Animator>(mEntity, {mOldAnimator});
+  mEntity.set<Animator>({mOldAnimator});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);

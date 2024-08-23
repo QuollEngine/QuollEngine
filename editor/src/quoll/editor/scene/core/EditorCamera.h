@@ -55,13 +55,13 @@ public:
   inline const InputState &getInputState() const { return mInputState; }
 
 private:
-  void pan(CameraLookAt &lookAt);
+  void pan(flecs::ref<CameraLookAt> lookAt);
 
-  void rotate(CameraLookAt &lookAt);
+  void rotate(flecs::ref<CameraLookAt> lookAt);
 
-  void zoom(CameraLookAt &lookAt);
+  void zoom(flecs::ref<CameraLookAt> lookAt);
 
-  void zoomWheel(CameraLookAt &lookAt);
+  void zoomWheel(flecs::ref<CameraLookAt> lookAt);
 
 private:
   f32 mX = 0.0f;

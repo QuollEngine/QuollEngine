@@ -28,13 +28,11 @@ EntitySetCollidableType::onExecute(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  auto &collidable = scene.entityDatabase.get<Collidable>(mEntity);
-  mOldCollidable = collidable;
+  auto collidable = mEntity.get_ref<Collidable>();
+  mOldCollidable = *collidable.get();
 
-  collidable.geometryDesc.type = mType;
-  collidable.geometryDesc.params = getDefaultGeometryFromType(mType);
-
-  scene.entityDatabase.set(mEntity, collidable);
+  collidable->geometryDesc.type = mType;
+  collidable->geometryDesc.params = getDefaultGeometryFromType(mType);
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -47,7 +45,7 @@ EntitySetCollidableType::onUndo(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set(mEntity, mOldCollidable);
+  mEntity.set(mOldCollidable);
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -58,9 +56,8 @@ bool EntitySetCollidableType::predicate(WorkspaceState &state,
                                         AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  return scene.entityDatabase.has<Collidable>(mEntity) &&
-         scene.entityDatabase.get<Collidable>(mEntity).geometryDesc.type !=
-             mType;
+  return mEntity.has<Collidable>() &&
+         mEntity.get_ref<Collidable>()->geometryDesc.type != mType;
 }
 
 } // namespace quoll::editor

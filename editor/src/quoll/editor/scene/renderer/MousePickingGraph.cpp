@@ -35,14 +35,14 @@ MousePickingGraph::MousePickingGraph(
       "mouse-picking.selector.fragment",
       {"assets/shaders/mouse-picking-selector.frag.spv"});
 
-  Entity nullEntity{0};
+  u32 nullEntity = 0;
   mSelectedEntityBuffer = renderStorage.createBuffer(
-      {rhi::BufferUsage::Storage, sizeof(Entity), &nullEntity,
+      {rhi::BufferUsage::Storage, sizeof(u32), &nullEntity,
        rhi::BufferAllocationUsage::HostRead});
 
   rhi::BufferDescription defaultDesc{};
   defaultDesc.usage = rhi::BufferUsage::Storage;
-  defaultDesc.size = sizeof(Entity) * mFrameData.at(0).getReservedSpace();
+  defaultDesc.size = sizeof(u32) * mFrameData.at(0).getReservedSpace();
   defaultDesc.mapped = true;
 
   {
@@ -133,13 +133,13 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
 }
 
 Entity MousePickingGraph::getSelectedEntity() {
-  auto selectedEntity = Entity::Null;
+  flecs::entity selectedEntity;
 
   auto *data = mSelectedEntityBuffer.map();
   memcpy(&selectedEntity, data, sizeof(Entity));
   mSelectedEntityBuffer.unmap();
 
-  Entity nullEntity = Entity::Null;
+  flecs::entity nullEntity;
   mSelectedEntityBuffer.update(&nullEntity, sizeof(Entity));
 
   mFrameIndex = std::numeric_limits<u32>::max();

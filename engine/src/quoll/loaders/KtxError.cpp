@@ -42,6 +42,6 @@ static String createErrorMessage(const String &what,
 }
 
 KtxError::KtxError(const String &what, ktx_error_code_e resultCode)
-    : std::runtime_error(createErrorMessage(what, resultCode)){};
+    : std::runtime_error(createErrorMessage(what, resultCode)) {};
 
 } // namespace quoll

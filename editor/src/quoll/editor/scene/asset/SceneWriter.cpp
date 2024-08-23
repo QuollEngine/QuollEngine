@@ -25,15 +25,18 @@ void SceneWriter::open(Path sourcePath) {
   mRoot = YAML::Load(mStream);
   mStream.close();
 
-  for (auto [entity, id] : mScene.entityDatabase.view<Id>()) {
+  auto query = mScene.entityDatabase.query<Id>();
+
+  query.each([this](flecs::entity entity, auto &id) {
     mEntityIdCache.insert_or_assign(id.id, entity);
     mLastId = std::max(id.id, mLastId);
-  }
+  });
+
   mLastId++;
 }
 
 void SceneWriter::syncEntities(const std::vector<Entity> &entities) {
-  std::unordered_map<Entity, bool> updateCache;
+  std::unordered_map<flecs::id_t, bool> updateCache;
 
   for (auto entity : entities) {
     updateSceneYaml(entity, mRoot, updateCache);
@@ -44,25 +47,25 @@ void SceneWriter::syncEntities(const std::vector<Entity> &entities) {
 
 void SceneWriter::updateSceneYaml(
     Entity entity, YAML::Node &node,
-    std::unordered_map<Entity, bool> &updateCache) {
+    std::unordered_map<flecs::id_t, bool> &updateCache) {
   if (updateCache.contains(entity)) {
     return;
   }
 
   detail::EntitySerializer serializer(mAssetRegistry, mScene.entityDatabase);
 
-  if (mScene.entityDatabase.has<Parent>(entity)) {
-    auto parent = mScene.entityDatabase.get<Parent>(entity).parent;
-    if (!mScene.entityDatabase.has<Id>(parent)) {
+  if (entity.has<Parent>()) {
+    auto parent = entity.get_ref<Parent>()->parent;
+    if (!parent.has<Id>()) {
       updateSceneYaml(parent, node, updateCache);
     }
   }
 
-  if (!mScene.entityDatabase.has<Id>(entity)) {
-    mScene.entityDatabase.set<Id>(entity, {generateId()});
+  if (!entity.has<Id>()) {
+    entity.set(Id{generateId()});
   }
 
-  auto id = mScene.entityDatabase.get<Id>(entity).id;
+  auto id = entity.get_ref<Id>()->id;
 
   auto updatedNode = serializer.serialize(entity);
   if (updatedNode.hasData()) {
@@ -80,12 +83,12 @@ void SceneWriter::updateSceneYaml(
       }
     }
   }
-  updateCache.insert_or_assign(entity, true);
+  updateCache.insert_or_assign(entity.raw_id(), true);
   mEntityIdCache.insert_or_assign(id, entity);
 }
 
 void SceneWriter::deleteEntities(const std::vector<Entity> &entities) {
-  std::unordered_map<Entity, bool> deleteCache;
+  std::unordered_map<flecs::id_t, bool> deleteCache;
 
   for (auto entity : entities) {
     removeEntityFromSceneYaml(entity, mRoot, deleteCache);
@@ -102,23 +105,23 @@ void SceneWriter::syncScene() {
 
 void SceneWriter::removeEntityFromSceneYaml(
     Entity entity, YAML::Node &node,
-    std::unordered_map<Entity, bool> &deleteCache) {
+    std::unordered_map<flecs::id_t, bool> &deleteCache) {
   if (deleteCache.contains(entity)) {
     return;
   }
 
-  if (mScene.entityDatabase.has<Children>(entity)) {
-    const auto &children = mScene.entityDatabase.get<Children>(entity);
-    for (auto entity : children.children) {
+  if (entity.has<Children>()) {
+    auto &children = entity.get_ref<Children>()->children;
+    for (auto entity : children) {
       removeEntityFromSceneYaml(entity, node, deleteCache);
     }
   }
 
-  if (!mScene.entityDatabase.has<Id>(entity)) {
+  if (!entity.has<Id>()) {
     return;
   }
 
-  auto id = mScene.entityDatabase.get<Id>(entity).id;
+  auto id = entity.get_ref<Id>()->id;
 
   usize i = 0;
   for (; i < node["entities"].size() &&
@@ -137,26 +140,25 @@ void SceneWriter::removeEntityFromSceneYaml(
   }
 
   mEntityIdCache.erase(id);
-  deleteCache.insert_or_assign(entity, true);
+  deleteCache.insert_or_assign(entity.raw_id(), true);
 }
 
 void SceneWriter::updateStartingCamera() {
-  if (!mScene.entityDatabase.has<Id>(mScene.activeCamera) ||
-      !mScene.entityDatabase.has<PerspectiveLens>(mScene.activeCamera)) {
+  if (!mScene.activeCamera.is_valid() || !mScene.activeCamera.has<Id>() ||
+      !mScene.activeCamera.has<PerspectiveLens>()) {
     return;
   }
 
-  mRoot["zones"][0]["startingCamera"] =
-      mScene.entityDatabase.get<Id>(mScene.activeCamera).id;
+  mRoot["zones"][0]["startingCamera"] = mScene.activeCamera.get<Id>()->id;
 }
 
 void SceneWriter::updateEnvironment() {
-  if (!mScene.entityDatabase.has<Id>(mScene.activeEnvironment)) {
+  if (!mScene.activeEnvironment.is_valid() ||
+      !mScene.activeEnvironment.has<Id>()) {
     return;
   }
 
-  mRoot["zones"][0]["environment"] =
-      mScene.entityDatabase.get<Id>(mScene.activeEnvironment).id;
+  mRoot["zones"][0]["environment"] = mScene.activeEnvironment.get<Id>()->id;
 }
 
 void SceneWriter::save() {

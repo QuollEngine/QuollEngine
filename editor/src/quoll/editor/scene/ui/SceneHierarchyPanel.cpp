@@ -30,39 +30,39 @@ static String getNameAndIcon(const String &name, const char *icon) {
 
 static String getNodeName(const String &name, Entity entity,
                           EntityDatabase &entityDatabase) {
-  if (entityDatabase.has<EnvironmentSkybox>(entity)) {
+  if (entity.has<EnvironmentSkybox>()) {
     return getNameAndIcon(name, fa::Cloud);
   }
 
-  if (entityDatabase.has<Camera>(entity)) {
+  if (entity.has<Camera>()) {
     return getNameAndIcon(name, fa::Video);
   }
 
-  if (entityDatabase.has<DirectionalLight>(entity)) {
+  if (entity.has<DirectionalLight>()) {
     return getNameAndIcon(name, fa::Sun);
   }
 
-  if (entityDatabase.has<PointLight>(entity)) {
+  if (entity.has<PointLight>()) {
     return getNameAndIcon(name, fa::Lightbulb);
   }
 
-  if (entityDatabase.has<Text>(entity)) {
+  if (entity.has<Text>()) {
     return getNameAndIcon(name, fa::Font);
   }
 
-  if (entityDatabase.has<Skeleton>(entity)) {
+  if (entity.has<Skeleton>()) {
     return getNameAndIcon(name, fa::Bone);
   }
 
-  if (entityDatabase.has<AudioSource>(entity)) {
+  if (entity.has<AudioSource>()) {
     return getNameAndIcon(name, fa::Music);
   }
 
-  if (entityDatabase.has<Mesh>(entity)) {
+  if (entity.has<Mesh>()) {
     return getNameAndIcon(name, fa::Cubes);
   }
 
-  if (entityDatabase.has<Sprite>(entity)) {
+  if (entity.has<Sprite>()) {
     return getNameAndIcon(name, fa::Image);
   }
 
@@ -115,15 +115,14 @@ void SceneHierarchyPanel::renderRoot(WorkspaceState &state,
 
   if (open) {
     u32 index = 0;
-    for (auto [entity, transform] :
-         scene.entityDatabase.view<LocalTransform>()) {
-      if (scene.entityDatabase.has<Parent>(entity)) {
-        continue;
-      }
+    auto query = scene.entityDatabase.query_builder<LocalTransform>()
+                     .without<Parent>()
+                     .build();
 
+    query.each([&](flecs::entity entity, LocalTransform &transform) {
       index = renderEntity(entity, index + 1, ImGuiTreeNodeFlags_DefaultOpen,
                            state, actionExecutor);
-    }
+    });
 
     ImGui::TreePop();
   }
@@ -135,11 +134,11 @@ u32 SceneHierarchyPanel::renderEntity(Entity entity, u32 index, int flags,
   u32 innerIndex = index;
   auto &scene = state.scene;
 
-  String name = scene.entityDatabase.has<Name>(entity)
-                    ? scene.entityDatabase.get<Name>(entity).name
+  String name = entity.has<Name>()
+                    ? entity.get_ref<Name>()->name
                     : "Entity #" + std::to_string(static_cast<u32>(entity));
 
-  bool isLeaf = !scene.entityDatabase.has<Children>(entity);
+  bool isLeaf = !entity.has<Children>();
 
   int treeNodeFlags = flags;
   if (isLeaf) {
@@ -218,9 +217,8 @@ u32 SceneHierarchyPanel::renderEntity(Entity entity, u32 index, int flags,
   }
 
   if (open) {
-    if (scene.entityDatabase.has<Children>(entity)) {
-      for (auto childEntity :
-           scene.entityDatabase.get<Children>(entity).children) {
+    if (entity.has<Children>()) {
+      for (auto childEntity : entity.get_ref<Children>()->children) {
         innerIndex =
             renderEntity(childEntity, innerIndex + 1, 0, state, actionExecutor);
       }

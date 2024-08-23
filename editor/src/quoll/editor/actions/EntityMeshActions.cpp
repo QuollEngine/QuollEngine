@@ -8,16 +8,16 @@ namespace quoll::editor {
 static void replaceMesh(AssetType type, MeshAssetHandle mesh, Entity entity,
                         EntityDatabase &db) {
   if (type == AssetType::Mesh) {
-    db.set<Mesh>(entity, {mesh});
+    entity.set<Mesh>({mesh});
 
-    if (db.has<SkinnedMesh>(entity)) {
-      db.remove<SkinnedMesh>(entity);
+    if (entity.has<SkinnedMesh>()) {
+      entity.remove<SkinnedMesh>();
     }
   } else if (type == AssetType::SkinnedMesh) {
-    db.set<SkinnedMesh>(entity, {mesh});
+    entity.set<SkinnedMesh>({mesh});
 
-    if (db.has<Mesh>(entity)) {
-      db.remove<Mesh>(entity);
+    if (entity.has<Mesh>()) {
+      entity.remove<Mesh>();
     }
   }
 }
@@ -31,10 +31,10 @@ ActionExecutorResult EntitySetMesh::onExecute(WorkspaceState &state,
 
   auto &db = scene.entityDatabase;
 
-  if (db.has<Mesh>(mEntity)) {
-    mOldMesh = db.get<Mesh>(mEntity).handle;
-  } else if (db.has<SkinnedMesh>(mEntity)) {
-    mOldMesh = db.get<SkinnedMesh>(mEntity).handle;
+  if (mEntity.has<Mesh>()) {
+    mOldMesh = mEntity.get_ref<Mesh>()->handle;
+  } else if (mEntity.has<SkinnedMesh>()) {
+    mOldMesh = mEntity.get_ref<SkinnedMesh>()->handle;
   }
 
   auto type = assetRegistry.getMeshes().getAsset(mMesh).type;
@@ -56,10 +56,10 @@ ActionExecutorResult EntitySetMesh::onUndo(WorkspaceState &state,
     auto type = assetRegistry.getMeshes().getAsset(mOldMesh).type;
     replaceMesh(type, mOldMesh, mEntity, db);
   } else {
-    if (db.has<Mesh>(mEntity)) {
-      db.remove<Mesh>(mEntity);
-    } else if (db.has<SkinnedMesh>(mEntity)) {
-      db.remove<SkinnedMesh>(mEntity);
+    if (mEntity.has<Mesh>()) {
+      mEntity.remove<Mesh>();
+    } else if (mEntity.has<SkinnedMesh>()) {
+      mEntity.remove<SkinnedMesh>();
     }
   }
 
@@ -81,12 +81,12 @@ ActionExecutorResult EntityDeleteMesh::onExecute(WorkspaceState &state,
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
-  if (db.has<Mesh>(mEntity)) {
-    mOldMesh = db.get<Mesh>(mEntity).handle;
-    db.remove<Mesh>(mEntity);
-  } else if (db.has<SkinnedMesh>(mEntity)) {
-    mOldMesh = db.get<SkinnedMesh>(mEntity).handle;
-    db.remove<SkinnedMesh>(mEntity);
+  if (mEntity.has<Mesh>()) {
+    mOldMesh = mEntity.get_ref<Mesh>()->handle;
+    mEntity.remove<Mesh>();
+  } else if (mEntity.has<SkinnedMesh>()) {
+    mOldMesh = mEntity.get_ref<SkinnedMesh>()->handle;
+    mEntity.remove<SkinnedMesh>();
   }
 
   ActionExecutorResult res;
@@ -112,10 +112,7 @@ ActionExecutorResult EntityDeleteMesh::onUndo(WorkspaceState &state,
 
 bool EntityDeleteMesh::predicate(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) {
-  auto &scene = state.scene;
-
-  return scene.entityDatabase.has<quoll::Mesh>(mEntity) ||
-         scene.entityDatabase.has<quoll::SkinnedMesh>(mEntity);
+  return mEntity.has<quoll::Mesh>() || mEntity.has<quoll::SkinnedMesh>();
 }
 
 } // namespace quoll::editor

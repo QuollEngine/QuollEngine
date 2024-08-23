@@ -24,13 +24,14 @@ SceneSimulatorWorkspace::SceneSimulatorWorkspace(
       mEditorRenderer(editorRenderer), mMousePickingGraph(mousePickingGraph),
       mEngineModules(engineModules), mEditorCamera(editorCamera) {
 
-  sourceScene.entityDatabase.duplicate(mState.scene.entityDatabase);
+  auto json = mState.scene.entityDatabase.to_json();
+  sourceScene.entityDatabase.from_json(json);
   mState.scene.dummyCamera = sourceScene.dummyCamera;
   mState.scene.activeEnvironment = sourceScene.activeEnvironment;
   mState.scene.dummyEnvironment = sourceScene.dummyEnvironment;
   mState.mode = WorkspaceMode::Simulation;
 
-  if (sourceScene.entityDatabase.has<Camera>(sourceScene.activeCamera)) {
+  if (sourceScene.activeCamera.has<Camera>()) {
     mState.scene.activeCamera = sourceScene.activeCamera;
     mState.activeCamera = sourceScene.activeCamera;
   } else {
@@ -93,8 +94,7 @@ void SceneSimulatorWorkspace::processShortcuts(int key, int mods) {}
 void SceneSimulatorWorkspace::updateFrameData(
     rhi::RenderCommandList &commandList, u32 frameIndex) {
 
-  mSceneRenderer.updateFrameData(mState.scene.entityDatabase,
-                                 mState.activeCamera, frameIndex);
+  mSceneRenderer.updateFrameData(mSystemView, mState.activeCamera, frameIndex);
   mEditorRenderer.updateFrameData(mState.scene.entityDatabase,
                                   mState.activeCamera, mState,
                                   mAssetManager.getAssetRegistry(), frameIndex);

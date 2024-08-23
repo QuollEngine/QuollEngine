@@ -37,7 +37,7 @@ public:
 private:
   Entity mEntity;
   PerspectiveLens mOldPerspectiveLens;
-  std::optional<AutoAspectRatio> mOldAspectRatio;
+  bool mHasAspectRatio = false;
 
   bool mIsActiveCamera = false;
   bool mIsStartingCamera = false;

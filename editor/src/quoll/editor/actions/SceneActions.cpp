@@ -37,8 +37,7 @@ bool SceneSetStartingCamera::predicate(WorkspaceState &state,
                                        AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  return scene.activeCamera != mEntity &&
-         scene.entityDatabase.has<PerspectiveLens>(mEntity);
+  return scene.activeCamera != mEntity && mEntity.has<PerspectiveLens>();
 }
 
 SceneSetStartingEnvironment::SceneSetStartingEnvironment(Entity entity)

@@ -18,7 +18,10 @@ const quoll::Path ScenePath =
 class SceneIOTest : public ::testing::Test {
 
 public:
-  SceneIOTest() : sceneIO(assetRegistry, scene) {}
+  SceneIOTest() : sceneIO(assetRegistry, scene) {
+    quoll::EntityDatabase db;
+    totalBuiltins = ecs_get_entities(db).alive_count;
+  }
 
   void SetUp() override {
     TearDown();
@@ -82,10 +85,15 @@ public:
     return assetRegistry.getScenes().getAsset(handle).data.data;
   }
 
+  inline i32 getCreatedEntities() const {
+    return ecs_get_entities(scene.entityDatabase).alive_count - totalBuiltins;
+  }
+
 public:
   quoll::AssetRegistry assetRegistry;
   quoll::Scene scene;
   quoll::SceneIO sceneIO;
+  i32 totalBuiltins = 0;
 };
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfNodeDoesNotHaveId) {
@@ -94,7 +102,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfNodeDoesNotHaveId) {
   auto handle = createSceneAsset({node});
   sceneIO.loadScene(handle);
 
-  EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 2);
+  EXPECT_EQ(getCreatedEntities(), 2);
 }
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsInvalid) {
@@ -113,7 +121,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsInvalid) {
     auto handle = createSceneAsset({node});
     sceneIO.loadScene(handle);
 
-    EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 2);
+    EXPECT_EQ(getCreatedEntities(), 2);
   }
 }
 
@@ -124,7 +132,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsZero) {
   auto handle = createSceneAsset({node});
   sceneIO.loadScene(handle);
 
-  EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 2);
+  EXPECT_EQ(getCreatedEntities(), 2);
 }
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsNegative) {
@@ -134,7 +142,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsNegative) {
   auto handle = createSceneAsset({node});
   sceneIO.loadScene(handle);
 
-  EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 2);
+  EXPECT_EQ(getCreatedEntities(), 2);
 }
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdAlreadyExists) {
@@ -144,7 +152,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdAlreadyExists) {
   auto handle = createSceneAsset({node, node});
   sceneIO.loadScene(handle);
 
-  EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 3);
+  EXPECT_EQ(getCreatedEntities(), 3);
 }
 
 TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
@@ -161,8 +169,9 @@ TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
   auto handle = createSceneAsset(nodes);
   const auto &entities = sceneIO.loadScene(handle);
 
-  EXPECT_GT(ecs_get_entities(scene.entityDatabase).alive_count, NumEntities);
-  EXPECT_GT(ecs_get_entities(scene.entityDatabase).alive_count,
+  EXPECT_GT(ecs_get_entities(scene.entityDatabase).alive_count - totalBuiltins,
+            NumEntities);
+  EXPECT_GT(ecs_get_entities(scene.entityDatabase).alive_count - totalBuiltins,
             entities.size() + 1);
 
   for (auto entity : entities) {

@@ -154,7 +154,7 @@ void Runtime::start() {
     const auto &renderFrame = device->beginFrame();
 
     if (renderFrame.frameIndex < std::numeric_limits<u32>::max()) {
-      sceneRenderer.updateFrameData(scene.entityDatabase, scene.activeCamera,
+      sceneRenderer.updateFrameData(systemView, scene.activeCamera,
                                     renderFrame.frameIndex);
       imguiRenderer.updateFrameData(renderFrame.frameIndex);
 

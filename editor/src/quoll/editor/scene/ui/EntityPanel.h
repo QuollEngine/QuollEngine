@@ -96,7 +96,7 @@ private:
   bool shouldDelete(const char *component);
 
 private:
-  Entity mSelectedEntity = Entity::Null;
+  Entity mSelectedEntity;
   bool mIsNameActivated = false;
 
 private:

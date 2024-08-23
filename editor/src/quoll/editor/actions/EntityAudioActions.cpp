@@ -12,8 +12,8 @@ ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state,
                                                AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldAudio = scene.entityDatabase.get<AudioSource>(mEntity).source;
-  scene.entityDatabase.set<AudioSource>(mEntity, {mAudio});
+  mOldAudio = mEntity.get_ref<AudioSource>()->source;
+  mEntity.set<AudioSource>({mAudio});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -24,7 +24,7 @@ ActionExecutorResult EntitySetAudio::onUndo(WorkspaceState &state,
                                             AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set<AudioSource>(mEntity, {mOldAudio});
+  mEntity.set<AudioSource>({mOldAudio});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -55,7 +55,7 @@ ActionExecutorResult EntityCreateAudio::onUndo(WorkspaceState &state,
 bool EntityCreateAudio::predicate(WorkspaceState &state,
                                   AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
-  return !scene.entityDatabase.has<AudioSource>(mEntity) &&
+  return !mEntity.has<AudioSource>() &&
          assetRegistry.getAudios().hasAsset(mHandle);
 }
 

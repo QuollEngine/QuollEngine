@@ -57,9 +57,7 @@ std::vector<std::tuple<quoll::String, quoll::String>>
 mapExtensions(const std::vector<quoll::String> &extensions, T &&fn) {
   std::vector<std::tuple<quoll::String, quoll::String>> temp(extensions.size());
   std::transform(extensions.begin(), extensions.end(), temp.begin(),
-                 [&fn](auto str) {
-                   return std::tuple{str, fn(str)};
-                 });
+                 [&fn](auto str) { return std::tuple{str, fn(str)}; });
   return temp;
 }
 

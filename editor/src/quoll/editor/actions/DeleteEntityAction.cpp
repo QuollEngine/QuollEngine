@@ -11,23 +11,23 @@ ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set<Delete>(mEntity, {});
+  mEntity.add<Delete>();
 
   bool preserveSelectedEntity = true;
   {
     auto current = state.selectedEntity;
 
     preserveSelectedEntity = current != mEntity;
-    while (preserveSelectedEntity &&
-           scene.entityDatabase.has<Parent>(current)) {
-      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+    while (preserveSelectedEntity && current.is_valid() &&
+           current.has<Parent>()) {
+      auto parent = current.get_ref<Parent>()->parent;
       preserveSelectedEntity = parent != mEntity;
       current = parent;
     }
   }
 
   if (!preserveSelectedEntity) {
-    state.selectedEntity = Entity::Null;
+    state.selectedEntity = flecs::entity::null();
   }
 
   bool preserveStartingCamera = true;
@@ -35,9 +35,9 @@ ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
     auto current = scene.activeCamera;
 
     preserveStartingCamera = current != mEntity;
-    while (preserveStartingCamera &&
-           scene.entityDatabase.has<Parent>(current)) {
-      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+    while (preserveStartingCamera && current.is_valid() &&
+           current.has<Parent>()) {
+      auto parent = current.get_ref<Parent>()->parent;
       preserveStartingCamera = parent != mEntity;
       current = parent;
     }
@@ -48,8 +48,9 @@ ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
     auto current = state.activeCamera;
 
     preserveActiveCamera = current != mEntity;
-    while (preserveActiveCamera && scene.entityDatabase.has<Parent>(current)) {
-      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+    while (preserveActiveCamera && current.is_valid() &&
+           current.has<Parent>()) {
+      auto parent = current.get_ref<Parent>()->parent;
       preserveActiveCamera = parent != mEntity;
       current = parent;
     }
@@ -60,9 +61,9 @@ ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
     auto current = scene.activeEnvironment;
 
     preserveActiveEnvironment = current != mEntity;
-    while (preserveActiveEnvironment &&
-           scene.entityDatabase.has<Parent>(current)) {
-      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+    while (preserveActiveEnvironment && current.is_valid() &&
+           current.has<Parent>()) {
+      auto parent = current.get_ref<Parent>()->parent;
       preserveActiveEnvironment = parent != mEntity;
       current = parent;
     }

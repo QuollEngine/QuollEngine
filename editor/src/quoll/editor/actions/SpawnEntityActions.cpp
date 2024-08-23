@@ -44,15 +44,14 @@ ActionExecutorResult
 SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
                                   AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
-  const auto &viewMatrix =
-      scene.entityDatabase.get<Camera>(state.camera).viewMatrix;
+  const auto &viewMatrix = state.camera.get_ref<Camera>()->viewMatrix;
 
   auto transform = getTransformFromView(viewMatrix);
 
   mSpawnedEntity =
       EntitySpawner(scene.entityDatabase, assetRegistry).spawnEmpty(transform);
 
-  EntityUpdateComponent<Name>(mSpawnedEntity, {}, Name{"New entity"})
+  EntityUpdateComponent<Name>(mSpawnedEntity, Name{}, Name{"New entity"})
       .onExecute(state, assetRegistry);
 
   ActionExecutorResult res{};
@@ -72,19 +71,19 @@ SpawnEmptyEntityAtView::onUndo(WorkspaceState &state,
     auto current = state.selectedEntity;
 
     preserveSelectedEntity = current != mSpawnedEntity;
-    while (preserveSelectedEntity &&
-           scene.entityDatabase.has<Parent>(current)) {
-      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+    while (preserveSelectedEntity && current.is_valid() &&
+           current.has<Parent>()) {
+      auto parent = current.get_ref<Parent>()->parent;
       preserveSelectedEntity = parent != mSpawnedEntity;
       current = parent;
     }
   }
 
   if (!preserveSelectedEntity) {
-    state.selectedEntity = Entity::Null;
+    state.selectedEntity = flecs::entity::null();
   }
 
-  scene.entityDatabase.set<Delete>(mSpawnedEntity, {});
+  mSpawnedEntity.add<Delete>();
   ActionExecutorResult res{};
   res.entitiesToDelete.push_back(mSpawnedEntity);
   return res;
@@ -94,7 +93,7 @@ bool SpawnEmptyEntityAtView::predicate(WorkspaceState &state,
                                        AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  return scene.entityDatabase.has<Camera>(state.camera);
+  return state.camera.has<Camera>();
 }
 
 SpawnPrefabAtView::SpawnPrefabAtView(PrefabAssetHandle handle, Entity camera)
@@ -105,7 +104,7 @@ SpawnPrefabAtView::onExecute(WorkspaceState &state,
                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
+  const auto &viewMatrix = mCamera.get_ref<Camera>()->viewMatrix;
 
   ActionExecutorResult res{};
   res.entitiesToSave =
@@ -127,19 +126,19 @@ ActionExecutorResult SpawnPrefabAtView::onUndo(WorkspaceState &state,
     auto current = state.selectedEntity;
 
     preserveSelectedEntity = current != mSpawnedRootEntity;
-    while (preserveSelectedEntity &&
-           scene.entityDatabase.has<Parent>(current)) {
-      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+    while (preserveSelectedEntity && current.is_valid() &&
+           current.has<Parent>()) {
+      auto parent = current.get_ref<Parent>()->parent;
       preserveSelectedEntity = parent != mSpawnedRootEntity;
       current = parent;
     }
   }
 
   if (!preserveSelectedEntity) {
-    state.selectedEntity = Entity::Null;
+    state.selectedEntity = flecs::entity::null();
   }
 
-  scene.entityDatabase.set<Delete>(mSpawnedRootEntity, {});
+  mSpawnedRootEntity.add<Delete>();
   ActionExecutorResult res{};
   res.entitiesToDelete.push_back(mSpawnedRootEntity);
   return res;
@@ -149,8 +148,7 @@ bool SpawnPrefabAtView::predicate(WorkspaceState &state,
                                   AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  return isPrefabValid(assetRegistry, mHandle) &&
-         scene.entityDatabase.has<Camera>(mCamera);
+  return isPrefabValid(assetRegistry, mHandle) && mCamera.has<Camera>();
 }
 
 SpawnSpriteAtView::SpawnSpriteAtView(TextureAssetHandle handle, Entity camera)
@@ -161,7 +159,7 @@ SpawnSpriteAtView::onExecute(WorkspaceState &state,
                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
+  const auto &viewMatrix = mCamera.get_ref<Camera>()->viewMatrix;
 
   ActionExecutorResult res{};
   mSpawnedEntity = EntitySpawner(scene.entityDatabase, assetRegistry)
@@ -182,19 +180,19 @@ ActionExecutorResult SpawnSpriteAtView::onUndo(WorkspaceState &state,
     auto current = state.selectedEntity;
 
     preserveSelectedEntity = current != mSpawnedEntity;
-    while (preserveSelectedEntity &&
-           scene.entityDatabase.has<Parent>(current)) {
-      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+    while (preserveSelectedEntity && current.is_valid() &&
+           current.has<Parent>()) {
+      auto parent = current.get_ref<Parent>()->parent;
       preserveSelectedEntity = parent != mSpawnedEntity;
       current = parent;
     }
   }
 
   if (!preserveSelectedEntity) {
-    state.selectedEntity = Entity::Null;
+    state.selectedEntity = flecs::entity::null();
   }
 
-  scene.entityDatabase.set<Delete>(mSpawnedEntity, {});
+  mSpawnedEntity.add<Delete>();
   ActionExecutorResult res{};
   res.entitiesToDelete.push_back(mSpawnedEntity);
   return res;
@@ -202,10 +200,7 @@ ActionExecutorResult SpawnSpriteAtView::onUndo(WorkspaceState &state,
 
 bool SpawnSpriteAtView::predicate(WorkspaceState &state,
                                   AssetRegistry &assetRegistry) {
-  auto &scene = state.scene;
-
-  return assetRegistry.getTextures().hasAsset(mHandle) &&
-         scene.entityDatabase.has<Camera>(mCamera);
+  return assetRegistry.getTextures().hasAsset(mHandle) && mCamera.has<Camera>();
 }
 
 } // namespace quoll::editor

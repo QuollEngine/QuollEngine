@@ -23,10 +23,11 @@ public:
 
 private:
   void updateSceneYaml(Entity entity, YAML::Node &node,
-                       std::unordered_map<Entity, bool> &updateCache);
+                       std::unordered_map<flecs::id_t, bool> &updateCache);
 
-  void removeEntityFromSceneYaml(Entity entity, YAML::Node &node,
-                                 std::unordered_map<Entity, bool> &deleteCache);
+  void
+  removeEntityFromSceneYaml(Entity entity, YAML::Node &node,
+                            std::unordered_map<flecs::id_t, bool> &deleteCache);
 
   void updateStartingCamera();
 

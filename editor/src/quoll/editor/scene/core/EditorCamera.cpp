@@ -8,7 +8,7 @@
 namespace quoll::editor {
 
 Entity EditorCamera::createDefaultCamera(EntityDatabase &entityDatabase) {
-  auto camera = entityDatabase.create();
+  auto camera = entityDatabase.entity();
 
   PerspectiveLens lens{};
   lens.near = DefaultNear;
@@ -16,10 +16,9 @@ Entity EditorCamera::createDefaultCamera(EntityDatabase &entityDatabase) {
   lens.sensorSize = DefaultSensorSize;
   lens.focalLength = DefaultFocalLength;
 
-  entityDatabase.set(camera, lens);
-  entityDatabase.set<Camera>(camera, {});
-  entityDatabase.set<CameraLookAt>(camera,
-                                   {DefaultEye, DefaultCenter, DefaultUp});
+  camera.set(lens);
+  camera.set<Camera>({});
+  camera.set<CameraLookAt>({DefaultEye, DefaultCenter, DefaultUp});
 
   return camera;
 }
@@ -120,7 +119,7 @@ EditorCamera::~EditorCamera() {
 void EditorCamera::update(WorkspaceState &state) {
   auto &scene = state.scene;
 
-  auto &lookAt = scene.entityDatabase.get<CameraLookAt>(state.camera);
+  auto lookAt = state.camera.get_ref<CameraLookAt>();
 
   if (mInputState == InputState::Pan) {
     pan(lookAt);
@@ -132,21 +131,22 @@ void EditorCamera::update(WorkspaceState &state) {
     zoomWheel(lookAt);
   }
 
-  auto &camera = scene.entityDatabase.get<Camera>(state.camera);
-  auto &lens = scene.entityDatabase.get<PerspectiveLens>(state.camera);
+  auto camera = state.camera.get_ref<Camera>();
+  auto lens = state.camera.get_ref<PerspectiveLens>();
 
-  lens.aspectRatio = mWidth / mHeight;
+  lens->aspectRatio = mWidth / mHeight;
 
-  const f32 fovY = 2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
+  const f32 fovY =
+      2.0f * atanf(lens->sensorSize.y / (2.0f * lens->focalLength));
 
-  camera.projectionMatrix =
-      glm::perspective(fovY, lens.aspectRatio, lens.near, lens.far);
+  camera->projectionMatrix =
+      glm::perspective(fovY, lens->aspectRatio, lens->near, lens->far);
 
-  camera.viewMatrix = glm::lookAt(lookAt.eye, lookAt.center, lookAt.up);
-  camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
+  camera->viewMatrix = glm::lookAt(lookAt->eye, lookAt->center, lookAt->up);
+  camera->projectionViewMatrix = camera->projectionMatrix * camera->viewMatrix;
 
   static constexpr f32 Ev100ForOneExposure = -0.263034f;
-  camera.exposure.x = Ev100ForOneExposure;
+  camera->exposure.x = Ev100ForOneExposure;
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
@@ -159,23 +159,23 @@ glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
   return glm::vec2(rX * scaleX, rY * scaleY);
 }
 
-void EditorCamera::pan(CameraLookAt &lookAt) {
+void EditorCamera::pan(flecs::ref<CameraLookAt> lookAt) {
   static constexpr f32 PanSpeed = 0.03f;
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   glm::vec3 right = glm::normalize(
-      glm::cross(glm::vec3(lookAt.eye - lookAt.center), lookAt.up));
+      glm::cross(glm::vec3(lookAt->eye - lookAt->center), lookAt->up));
 
   glm::vec2 mousePosDiff =
       glm::vec4((mousePos - mPrevMousePos) * PanSpeed, 0.0f, 0.0f);
 
-  glm::vec3 change = lookAt.up * mousePosDiff.y + right * mousePosDiff.x;
-  lookAt.eye += change;
-  lookAt.center += change;
+  glm::vec3 change = lookAt->up * mousePosDiff.y + right * mousePosDiff.x;
+  lookAt->eye += change;
+  lookAt->center += change;
   mPrevMousePos = mousePos;
 }
 
-void EditorCamera::rotate(CameraLookAt &lookAt) {
+void EditorCamera::rotate(flecs::ref<CameraLookAt> lookAt) {
   static constexpr f32 TwoPi = 2.0f * glm::pi<f32>();
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
@@ -189,34 +189,35 @@ void EditorCamera::rotate(CameraLookAt &lookAt) {
   // Convert mouse position difference to angle
   // difference for arcball
   glm::vec2 angleDiff = (mousePos - mPrevMousePos) * screenToSphere;
-  glm::vec3 direction = glm::vec3(lookAt.eye - lookAt.center);
-  glm::vec3 right = glm::normalize(glm::cross(direction, lookAt.up));
-  lookAt.up = glm::normalize(glm::cross(right, direction));
+  glm::vec3 direction = glm::vec3(lookAt->eye - lookAt->center);
+  glm::vec3 right = glm::normalize(glm::cross(direction, lookAt->up));
+  lookAt->up = glm::normalize(glm::cross(right, direction));
 
-  glm::mat4 rotationX = glm::rotate(glm::mat4{1.0f}, -angleDiff.x, lookAt.up);
+  glm::mat4 rotationX = glm::rotate(glm::mat4{1.0f}, -angleDiff.x, lookAt->up);
   glm::mat4 rotationY = glm::rotate(glm::mat4{1.0f}, angleDiff.y, right);
 
-  lookAt.eye = glm::vec3(rotationY * (rotationX * glm::vec4(direction, 0.0f))) +
-               lookAt.center;
+  lookAt->eye =
+      glm::vec3(rotationY * (rotationX * glm::vec4(direction, 0.0f))) +
+      lookAt->center;
 
   mPrevMousePos = mousePos;
 }
 
-void EditorCamera::zoom(CameraLookAt &lookAt) {
+void EditorCamera::zoom(flecs::ref<CameraLookAt> lookAt) {
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   f32 zoomFactor = (mousePos.y - mPrevMousePos.y) * ZoomSpeed;
 
-  glm::vec3 change = glm::vec3(lookAt.eye - lookAt.center) * zoomFactor;
-  lookAt.center += change;
-  lookAt.eye += change;
+  glm::vec3 change = glm::vec3(lookAt->eye - lookAt->center) * zoomFactor;
+  lookAt->center += change;
+  lookAt->eye += change;
   mPrevMousePos = mousePos;
 }
 
-void EditorCamera::zoomWheel(CameraLookAt &lookAt) {
+void EditorCamera::zoomWheel(flecs::ref<CameraLookAt> lookAt) {
   glm::vec3 change =
-      glm::vec3(lookAt.eye - lookAt.center) * mWheelOffset * ZoomSpeed;
-  lookAt.center += change;
-  lookAt.eye += change;
+      glm::vec3(lookAt->eye - lookAt->center) * mWheelOffset * ZoomSpeed;
+  lookAt->center += change;
+  lookAt->eye += change;
 
   mWheelOffset = 0.0f;
   mInputState = InputState::None;

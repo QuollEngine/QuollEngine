@@ -20,7 +20,7 @@ private:
                    ActionExecutor &actionExecutor);
 
 private:
-  Entity mRightClickedEntity = Entity::Null;
+  Entity mRightClickedEntity;
 };
 
 } // namespace quoll::editor

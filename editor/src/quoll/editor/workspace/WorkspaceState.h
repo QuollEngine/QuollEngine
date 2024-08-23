@@ -19,7 +19,7 @@ struct WorkspaceState {
 
   TransformOperation activeTransform = TransformOperation::Move;
 
-  Entity camera{Entity::Null};
+  Entity camera;
 
   /**
    * Active camera
@@ -28,12 +28,12 @@ struct WorkspaceState {
    * and can point to either workspace camera,
    * scene's active camera, or any other camera.
    */
-  Entity activeCamera{Entity::Null};
+  Entity activeCamera;
 
   /**
    * Selected entity
    */
-  Entity selectedEntity{Entity::Null};
+  Entity selectedEntity;
 
   /**
    * Grid in workspace

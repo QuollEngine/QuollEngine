@@ -12,9 +12,9 @@ EntityCreatePerspectiveLens::onExecute(WorkspaceState &state,
                                        AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set<PerspectiveLens>(mEntity, {});
-  scene.entityDatabase.set<AutoAspectRatio>(mEntity, {});
-  scene.entityDatabase.set<Camera>(mEntity, {});
+  mEntity.set<PerspectiveLens>({});
+  mEntity.add<AutoAspectRatio>();
+  mEntity.set<Camera>({});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -27,9 +27,9 @@ EntityCreatePerspectiveLens::onUndo(WorkspaceState &state,
                                     AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.remove<PerspectiveLens>(mEntity);
-  scene.entityDatabase.remove<AutoAspectRatio>(mEntity);
-  scene.entityDatabase.remove<Camera>(mEntity);
+  mEntity.remove<PerspectiveLens>();
+  mEntity.remove<AutoAspectRatio>();
+  mEntity.remove<Camera>();
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -40,7 +40,7 @@ bool EntityCreatePerspectiveLens::predicate(WorkspaceState &state,
                                             AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  return !scene.entityDatabase.has<PerspectiveLens>(mEntity);
+  return !mEntity.has<PerspectiveLens>();
 }
 
 EntityDeletePerspectiveLens::EntityDeletePerspectiveLens(Entity entity)
@@ -51,16 +51,16 @@ EntityDeletePerspectiveLens::onExecute(WorkspaceState &state,
                                        AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldPerspectiveLens = scene.entityDatabase.get<PerspectiveLens>(mEntity);
-  scene.entityDatabase.remove<PerspectiveLens>(mEntity);
+  mOldPerspectiveLens = *mEntity.get_ref<PerspectiveLens>().get();
+  mEntity.remove<PerspectiveLens>();
 
-  if (scene.entityDatabase.has<AutoAspectRatio>(mEntity)) {
-    mOldAspectRatio = scene.entityDatabase.get<AutoAspectRatio>(mEntity);
-    scene.entityDatabase.remove<AutoAspectRatio>(mEntity);
+  if (mEntity.has<AutoAspectRatio>()) {
+    mHasAspectRatio = true;
+    mEntity.remove<AutoAspectRatio>();
   }
 
-  if (scene.entityDatabase.has<Camera>(mEntity)) {
-    scene.entityDatabase.remove<Camera>(mEntity);
+  if (mEntity.has<Camera>()) {
+    mEntity.remove<Camera>();
   }
 
   mIsActiveCamera = state.activeCamera == mEntity;
@@ -85,15 +85,15 @@ EntityDeletePerspectiveLens::onUndo(WorkspaceState &state,
                                     AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set(mEntity, mOldPerspectiveLens);
+  mEntity.set(mOldPerspectiveLens);
 
-  if (mOldAspectRatio.has_value()) {
-    scene.entityDatabase.set(mEntity, mOldAspectRatio.value());
+  if (mHasAspectRatio) {
+    mEntity.add<AutoAspectRatio>();
   }
 
   // Camera will be created regardless
   // if it existed before
-  scene.entityDatabase.set<Camera>(mEntity, {});
+  mEntity.set<Camera>({});
 
   if (mIsActiveCamera) {
     state.activeCamera = mEntity;
@@ -114,7 +114,7 @@ bool EntityDeletePerspectiveLens::predicate(WorkspaceState &state,
                                             AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  return scene.entityDatabase.has<PerspectiveLens>(mEntity);
+  return mEntity.has<PerspectiveLens>();
 }
 
 } // namespace quoll::editor

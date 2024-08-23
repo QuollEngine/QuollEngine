@@ -130,14 +130,14 @@ static String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
 void EntityPanel::renderContent(WorkspaceState &state,
                                 AssetRegistry &assetRegistry,
                                 ActionExecutor &actionExecutor) {
-  if (state.selectedEntity == Entity::Null) {
+  if (state.selectedEntity.is_valid()) {
     ImGui::Text("Select an entity in the scene to see properties");
     return;
   }
 
   auto &scene = state.scene;
   setSelectedEntity(scene, state.selectedEntity);
-  if (scene.entityDatabase.exists(mSelectedEntity)) {
+  if (mSelectedEntity.is_alive()) {
     renderName(scene, actionExecutor);
     renderTransform(scene, actionExecutor);
     renderText(scene, assetRegistry, actionExecutor);
@@ -178,22 +178,22 @@ void EntityPanel::renderName(Scene &scene, ActionExecutor &actionExecutor) {
   static const String SectionName = String(fa::Circle) + "  Name";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &name = scene.entityDatabase.get<Name>(mSelectedEntity);
+    auto name = mSelectedEntity.get_ref<Name>();
 
-    auto tmpName = name.name;
+    auto tmpName = name->name;
     if (widgets::Input("", tmpName)) {
       if (!tmpName.empty()) {
         if (!mNameAction) {
           mNameAction = std::make_unique<EntityUpdateComponent<Name>>(
-              mSelectedEntity, name);
+              mSelectedEntity, *name.get());
         }
 
-        name.name = tmpName;
+        name->name = tmpName;
       }
     }
 
     if (mNameAction) {
-      mNameAction->setNewComponent(name);
+      mNameAction->setNewComponent(*name.get());
       actionExecutor.execute(std::move(mNameAction));
     }
   }
@@ -201,22 +201,21 @@ void EntityPanel::renderName(Scene &scene, ActionExecutor &actionExecutor) {
 
 void EntityPanel::renderDirectionalLight(Scene &scene,
                                          ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<DirectionalLight>()) {
     return;
   }
 
   static const String SectionName = String(fa::Sun) + "  Directional light";
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &component =
-        scene.entityDatabase.get<DirectionalLight>(mSelectedEntity);
+    auto component = mSelectedEntity.get_ref<DirectionalLight>();
 
     ImGui::Text("Direction");
-    ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
-                component.direction.z);
+    ImGui::Text("%.3f %.3f %.3f", component->direction.x,
+                component->direction.y, component->direction.z);
 
     bool sendAction = false;
 
-    glm::vec4 color = component.color;
+    glm::vec4 color = component->color;
     if (widgets::InputColor("Color", color)) {
       if (!mDirectionalLightAction) {
         mDirectionalLightAction =
@@ -224,12 +223,12 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
                 mSelectedEntity, component);
       }
 
-      component.color = color;
+      component->color = color;
     }
 
     sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
-    f32 intensity = component.intensity;
+    f32 intensity = component->intensity;
     if (widgets::Input("Intensity", intensity, false)) {
       if (!mDirectionalLightAction) {
         mDirectionalLightAction =
@@ -237,7 +236,7 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
                 mSelectedEntity, component);
       }
 
-      component.intensity = intensity;
+      component->intensity = intensity;
       sendAction = true;
     }
 
@@ -246,8 +245,7 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
       actionExecutor.execute(std::move(mDirectionalLightAction));
     }
 
-    bool castShadows =
-        scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
+    bool castShadows = mSelectedEntity.has<CascadedShadowMap>();
     if (ImGui::Checkbox("Cast shadows", &castShadows)) {
       if (castShadows) {
         actionExecutor.execute<EntityCreateComponent<CascadedShadowMap>>(
@@ -258,14 +256,13 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
       }
     }
 
-    castShadows = scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
+    castShadows = mSelectedEntity.has<CascadedShadowMap>();
 
     if (castShadows) {
       bool sendAction = false;
-      auto &component =
-          scene.entityDatabase.get<CascadedShadowMap>(mSelectedEntity);
+      auto component = mSelectedEntity.get_ref<CascadedShadowMap>();
 
-      bool softShadows = component.softShadows;
+      bool softShadows = component->softShadows;
       if (ImGui::Checkbox("Soft shadows", &softShadows)) {
         if (!mCascadedShadowMapAction) {
           mCascadedShadowMapAction =
@@ -273,11 +270,11 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
                   mSelectedEntity, component);
         }
 
-        component.softShadows = softShadows;
+        component->softShadows = softShadows;
         sendAction = true;
       }
 
-      f32 splitLambda = component.splitLambda;
+      f32 splitLambda = component->splitLambda;
       if (widgets::Input("Split lambda", splitLambda, false)) {
         splitLambda = glm::clamp(splitLambda, 0.0f, 1.0f);
 
@@ -285,19 +282,19 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
             std::make_unique<EntityUpdateComponent<CascadedShadowMap>>(
                 mSelectedEntity, component);
 
-        component.splitLambda = splitLambda;
+        component->splitLambda = splitLambda;
         sendAction = true;
       }
 
-      i32 numCascades = static_cast<i32>(component.numCascades);
+      i32 numCascades = static_cast<i32>(component->numCascades);
       ImGui::Text("Number of cascades");
       if (ImGui::DragInt("###NumberOfCascades", &numCascades, 0.5f, 1,
-                         static_cast<i32>(component.MaxCascades))) {
+                         static_cast<i32>(component->MaxCascades))) {
         mCascadedShadowMapAction =
             std::make_unique<EntityUpdateComponent<CascadedShadowMap>>(
                 mSelectedEntity, component);
 
-        component.numCascades = static_cast<u32>(numCascades);
+        component->numCascades = static_cast<u32>(numCascades);
       }
 
       sendAction |= ImGui::IsItemDeactivatedAfterEdit();
@@ -316,7 +313,7 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
 
 void EntityPanel::renderPointLight(Scene &scene,
                                    ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<PointLight>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<PointLight>()) {
     return;
   }
 
@@ -324,45 +321,45 @@ void EntityPanel::renderPointLight(Scene &scene,
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
 
-    auto &component = scene.entityDatabase.get<PointLight>(mSelectedEntity);
+    auto component = mSelectedEntity.get_ref<PointLight>();
 
     bool sendAction = false;
 
-    glm::vec4 color = component.color;
+    glm::vec4 color = component->color;
     if (widgets::InputColor("Color", color)) {
       if (!mPointLightAction) {
         mPointLightAction = std::make_unique<EntityUpdateComponent<PointLight>>(
             mSelectedEntity, component);
       }
 
-      component.color = color;
+      component->color = color;
     }
 
     sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
-    f32 intensity = component.intensity;
+    f32 intensity = component->intensity;
     if (widgets::Input("Intensity (in candelas)", intensity, false)) {
       mPointLightAction = std::make_unique<EntityUpdateComponent<PointLight>>(
           mSelectedEntity, component);
 
-      component.intensity = intensity;
+      component->intensity = intensity;
 
       sendAction = true;
     }
 
-    f32 range = component.range;
+    f32 range = component->range;
     if (widgets::Input("Range", range, false)) {
       if (!mPointLightAction) {
         mPointLightAction = std::make_unique<EntityUpdateComponent<PointLight>>(
             mSelectedEntity, component);
       }
-      component.range = range;
+      component->range = range;
 
       sendAction = true;
     }
 
     if (mPointLightAction && sendAction) {
-      mPointLightAction->setNewComponent(component);
+      mPointLightAction->setNewComponent(*component.get());
       actionExecutor.execute(std::move(mPointLightAction));
     }
   }
@@ -374,19 +371,18 @@ void EntityPanel::renderPointLight(Scene &scene,
 
 void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
                                ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<PerspectiveLens>()) {
     return;
   }
 
   static const String SectionName = String(fa::Video) + " Perpective camera";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &component =
-        scene.entityDatabase.get<PerspectiveLens>(mSelectedEntity);
+    auto component = mSelectedEntity.get_ref<PerspectiveLens>();
 
     bool sendAction = false;
 
-    f32 near = component.near;
+    f32 near = component->near;
     if (widgets::Input("Near", near, false)) {
       if (near < 0.0f) {
         near = 0.0f;
@@ -398,12 +394,12 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
                 mSelectedEntity, component);
       }
 
-      component.near = near;
+      component->near = near;
 
       sendAction = true;
     }
 
-    f32 far = component.far;
+    f32 far = component->far;
     if (widgets::Input("Far", far, false)) {
       if (far < 0.0f) {
         far = 0.0f;
@@ -414,12 +410,12 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
             std::make_unique<EntityUpdateComponent<PerspectiveLens>>(
                 mSelectedEntity, component);
       }
-      component.far = far;
+      component->far = far;
 
       sendAction = true;
     }
 
-    glm::vec2 sensorSize = component.sensorSize;
+    glm::vec2 sensorSize = component->sensorSize;
     if (widgets::Input("Sensor size (mm)", sensorSize, false)) {
       sensorSize = glm::max(sensorSize, glm::vec2(0.0f));
 
@@ -428,12 +424,12 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
             std::make_unique<EntityUpdateComponent<PerspectiveLens>>(
                 mSelectedEntity, component);
       }
-      component.sensorSize = sensorSize;
+      component->sensorSize = sensorSize;
 
       sendAction = true;
     }
 
-    f32 focalLength = component.focalLength;
+    f32 focalLength = component->focalLength;
     if (widgets::Input("Focal length (mm)", focalLength, false)) {
       focalLength = std::max(focalLength, 0.0f);
 
@@ -442,12 +438,12 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
             std::make_unique<EntityUpdateComponent<PerspectiveLens>>(
                 mSelectedEntity, component);
       }
-      component.focalLength = focalLength;
+      component->focalLength = focalLength;
 
       sendAction = true;
     }
 
-    f32 aperture = component.aperture;
+    f32 aperture = component->aperture;
     if (widgets::Input("Aperture", aperture, false)) {
       if (aperture < 0.0f) {
         aperture = 0.0f;
@@ -458,12 +454,12 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
             std::make_unique<EntityUpdateComponent<PerspectiveLens>>(
                 mSelectedEntity, component);
       }
-      component.aperture = aperture;
+      component->aperture = aperture;
 
       sendAction = true;
     }
 
-    f32 shutterSpeed = 1.0f / component.shutterSpeed;
+    f32 shutterSpeed = 1.0f / component->shutterSpeed;
     if (widgets::Input("Shutter speed (1/s)", shutterSpeed, false)) {
       if (shutterSpeed < 0.0f) {
         shutterSpeed = 0.0f;
@@ -474,25 +470,25 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
             std::make_unique<EntityUpdateComponent<PerspectiveLens>>(
                 mSelectedEntity, component);
       }
-      component.shutterSpeed = 1.0f / shutterSpeed;
+      component->shutterSpeed = 1.0f / shutterSpeed;
 
       sendAction = true;
     }
 
-    u32 sensitivity = component.sensitivity;
+    u32 sensitivity = component->sensitivity;
     if (widgets::Input("Sensitivity (ISO)", sensitivity, false)) {
       if (!mPerspectiveLensAction) {
         mPerspectiveLensAction =
             std::make_unique<EntityUpdateComponent<PerspectiveLens>>(
                 mSelectedEntity, component);
       }
-      component.sensitivity = sensitivity;
+      component->sensitivity = sensitivity;
 
       sendAction = true;
     }
 
     if (sendAction && mPerspectiveLensAction) {
-      mPerspectiveLensAction->setNewComponent(component);
+      mPerspectiveLensAction->setNewComponent(*component.get());
       actionExecutor.execute(std::move(mPerspectiveLensAction));
     }
 
@@ -500,8 +496,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     static constexpr f32 MinCustomAspectRatio = 0.01f;
     static constexpr f32 MaxCustomAspectRatio = 1000.0f;
 
-    bool hasViewportAspectRatio =
-        scene.entityDatabase.has<AutoAspectRatio>(mSelectedEntity);
+    bool hasViewportAspectRatio = mSelectedEntity.has<AutoAspectRatio>();
 
     if (ImGui::BeginCombo("###AspectRatioType",
                           hasViewportAspectRatio ? "Viewport ratio" : "Custom",
@@ -522,7 +517,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
 
     if (!hasViewportAspectRatio) {
       ImGui::Text("Custom aspect ratio");
-      f32 aspectRatio = component.aspectRatio;
+      f32 aspectRatio = component->aspectRatio;
       if (ImGui::DragFloat("###CustomAspectRatio", &aspectRatio,
                            MinCustomAspectRatio, MinCustomAspectRatio,
                            MaxCustomAspectRatio, "%.2f")) {
@@ -533,11 +528,11 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
                   mSelectedEntity, component);
         }
 
-        component.aspectRatio = aspectRatio;
+        component->aspectRatio = aspectRatio;
       }
 
       if (ImGui::IsItemDeactivatedAfterEdit() && mPerspectiveLensAction) {
-        mPerspectiveLensAction->setNewComponent(component);
+        mPerspectiveLensAction->setNewComponent(*component.get());
         actionExecutor.execute(std::move(mPerspectiveLensAction));
       }
     }
@@ -558,66 +553,66 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
 
 void EntityPanel::renderTransform(Scene &scene,
                                   ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<LocalTransform>(mSelectedEntity) ||
-      !scene.entityDatabase.has<WorldTransform>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<LocalTransform>() ||
+      !mSelectedEntity.has<WorldTransform>()) {
     return;
   }
 
   static const String SectionName = String(fa::Circle) + "  Transform";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &component = scene.entityDatabase.get<LocalTransform>(mSelectedEntity);
-    auto &world = scene.entityDatabase.get<WorldTransform>(mSelectedEntity);
+    auto component = mSelectedEntity.get_ref<LocalTransform>();
+    auto world = mSelectedEntity.get_ref<WorldTransform>();
 
-    auto localPosition = component.localPosition;
+    auto localPosition = component->localPosition;
     if (widgets::Input("Position", localPosition, false)) {
       if (!mLocalTransformAction) {
         mLocalTransformAction =
-            std::make_unique<EntitySetLocalTransformContinuous>(mSelectedEntity,
-                                                                component);
+            std::make_unique<EntitySetLocalTransformContinuous>(
+                mSelectedEntity, *component.get());
       }
 
-      component.localPosition = localPosition;
+      component->localPosition = localPosition;
     }
 
     glm::vec3 euler{};
-    glm::extractEulerAngleXYZ(glm::toMat4(component.localRotation), euler.x,
+    glm::extractEulerAngleXYZ(glm::toMat4(component->localRotation), euler.x,
                               euler.y, euler.z);
     euler = glm::degrees(euler);
 
     if (widgets::Input("Rotation", euler, false)) {
       if (!mLocalTransformAction) {
         mLocalTransformAction =
-            std::make_unique<EntitySetLocalTransformContinuous>(mSelectedEntity,
-                                                                component);
+            std::make_unique<EntitySetLocalTransformContinuous>(
+                mSelectedEntity, *component.get());
       }
 
       auto eulerRadians = glm::radians(euler);
-      component.localRotation = glm::toQuat(
+      component->localRotation = glm::toQuat(
           glm::eulerAngleXYZ(eulerRadians.x, eulerRadians.y, eulerRadians.z));
     }
 
-    auto localScale = component.localScale;
+    auto localScale = component->localScale;
     if (widgets::Input("Scale", localScale, false)) {
       if (!mLocalTransformAction) {
         mLocalTransformAction =
-            std::make_unique<EntitySetLocalTransformContinuous>(mSelectedEntity,
-                                                                component);
+            std::make_unique<EntitySetLocalTransformContinuous>(
+                mSelectedEntity, *component.get());
       }
 
-      component.localScale = localScale;
+      component->localScale = localScale;
     }
 
     if (mLocalTransformAction) {
-      mLocalTransformAction->setNewComponent(component);
+      mLocalTransformAction->setNewComponent(*component.get());
       actionExecutor.execute(std::move(mLocalTransformAction));
     }
 
     ImGui::Text("World Transform");
     if (auto table = widgets::Table("TableTransformWorld", 4)) {
       for (glm::mat4::length_type i = 0; i < 4; ++i) {
-        table.row(world.worldTransform[i].x, world.worldTransform[i].y,
-                  world.worldTransform[i].z, world.worldTransform[i].w);
+        table.row(world->worldTransform[i].x, world->worldTransform[i].y,
+                  world->worldTransform[i].z, world->worldTransform[i].w);
       }
     }
   }
@@ -627,10 +622,10 @@ void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
                                ActionExecutor &actionExecutor) {
   static const String SectionName = String(fa::Image) + "  Sprite";
 
-  if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
+  if (mSelectedEntity.has<Sprite>()) {
 
     if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto handle = scene.entityDatabase.get<Sprite>(mSelectedEntity).handle;
+      auto handle = mSelectedEntity.get_ref<Sprite>()->handle;
 
       const auto &asset = assetRegistry.getTextures().getAsset(handle);
       static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
@@ -651,7 +646,7 @@ void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
 void EntityPanel::renderUICanvas(Scene &scene, ActionExecutor &actionExecutor) {
   static const String SectionName = String(fa::Table) + "  UI Canvas";
 
-  if (!scene.entityDatabase.has<UICanvas>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<UICanvas>()) {
     return;
   }
 
@@ -668,9 +663,9 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
                              ActionExecutor &actionExecutor) {
   static const String SectionName = String(fa::Cubes) + "  Mesh";
 
-  if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
+  if (mSelectedEntity.has<Mesh>()) {
     if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto handle = scene.entityDatabase.get<Mesh>(mSelectedEntity).handle;
+      auto handle = mSelectedEntity.get_ref<Mesh>()->handle;
 
       const auto &asset = assetRegistry.getMeshes().getAsset(handle);
 
@@ -685,10 +680,9 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
     }
   }
 
-  if (scene.entityDatabase.has<SkinnedMesh>(mSelectedEntity)) {
+  if (mSelectedEntity.has<SkinnedMesh>()) {
     if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto handle =
-          scene.entityDatabase.get<SkinnedMesh>(mSelectedEntity).handle;
+      auto handle = mSelectedEntity.get_ref<SkinnedMesh>()->handle;
 
       const auto &asset = assetRegistry.getMeshes().getAsset(handle);
 
@@ -706,20 +700,19 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
 
 void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
                                      ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<MeshRenderer>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<MeshRenderer>()) {
     return;
   }
 
   static const String SectionName = String(fa::Desktop) + "  Mesh renderer";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    const auto &renderer =
-        scene.entityDatabase.get<MeshRenderer>(mSelectedEntity);
+    auto renderer = mSelectedEntity.get_ref<MeshRenderer>();
 
     if (auto table = widgets::Table("TableMaterials", 2)) {
-      for (usize i = 0; i < renderer.materials.size(); ++i) {
+      for (usize i = 0; i < renderer->materials.size(); ++i) {
         const auto &asset =
-            assetRegistry.getMaterials().getAsset(renderer.materials.at(i));
+            assetRegistry.getMaterials().getAsset(renderer->materials.at(i));
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::Text("Slot %d", static_cast<u32>(i));
@@ -748,7 +741,7 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
         ImGui::EndDragDropTarget();
       }
 
-      if (renderer.materials.size() > 0) {
+      if (renderer->materials.size() > 0) {
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         if (widgets::Button("Delete last row")) {
@@ -768,7 +761,7 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
 void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
                                             AssetRegistry &assetRegistry,
                                             ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<SkinnedMeshRenderer>()) {
     return;
   }
 
@@ -776,13 +769,12 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
       String(fa::Desktop) + " Skinned mesh renderer";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    const auto &renderer =
-        scene.entityDatabase.get<SkinnedMeshRenderer>(mSelectedEntity);
+    auto renderer = mSelectedEntity.get_ref<SkinnedMeshRenderer>();
 
     if (auto table = widgets::Table("TableMaterials", 2)) {
-      for (usize i = 0; i < renderer.materials.size(); ++i) {
+      for (usize i = 0; i < renderer->materials.size(); ++i) {
         const auto &asset =
-            assetRegistry.getMaterials().getAsset(renderer.materials.at(i));
+            assetRegistry.getMaterials().getAsset(renderer->materials.at(i));
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::Text("Slot %d", static_cast<u32>(i));
@@ -811,7 +803,7 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
         ImGui::EndDragDropTarget();
       }
 
-      if (renderer.materials.size() > 0) {
+      if (renderer->materials.size() > 0) {
         ImGui::TableNextColumn();
         if (widgets::Button("Delete last row")) {
           actionExecutor
@@ -830,25 +822,25 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
 
 void EntityPanel::renderSkeleton(Scene &scene, AssetRegistry &assetRegistry,
                                  ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<Skeleton>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<Skeleton>()) {
     return;
   }
 
   static const String SectionName = String(fa::Bone) + "  Skeleton";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    bool showBones = scene.entityDatabase.has<SkeletonDebug>(mSelectedEntity);
+    bool showBones = mSelectedEntity.has<SkeletonDebug>();
 
-    const auto &skeleton = scene.entityDatabase.get<Skeleton>(mSelectedEntity);
+    auto skeleton = mSelectedEntity.get_ref<Skeleton>();
 
-    auto handle = skeleton.assetHandle;
+    auto handle = skeleton->assetHandle;
 
     const auto &asset = assetRegistry.getSkeletons().getAsset(handle);
 
     if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
       table.row("Name", asset.name);
       table.row("Number of joints",
-                static_cast<u32>(skeleton.jointNames.size()));
+                static_cast<u32>(skeleton->jointNames.size()));
     }
 
     if (ImGui::Checkbox("Show bones", &showBones)) {
@@ -863,30 +855,27 @@ void EntityPanel::renderSkeleton(Scene &scene, AssetRegistry &assetRegistry,
 
 void EntityPanel::renderJointAttachment(Scene &scene,
                                         ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<JointAttachment>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<JointAttachment>()) {
     return;
   }
 
   static const String SectionName = String(fa::Bone) + " Joint attachment";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    if (!scene.entityDatabase.has<Parent>(mSelectedEntity) ||
-        !scene.entityDatabase.has<Skeleton>(
-            scene.entityDatabase.get<Parent>(mSelectedEntity).parent)) {
+    if (!mSelectedEntity.has<Parent>() ||
+        !mSelectedEntity.get_ref<Parent>()->parent.has<Skeleton>()) {
       ImGui::Text("Entity must be an immediate child of a skeleton");
     } else {
-      auto parentEntity =
-          scene.entityDatabase.get<Parent>(mSelectedEntity).parent;
+      auto parentEntity = mSelectedEntity.get_ref<Parent>()->parent;
 
-      const auto &skeleton = scene.entityDatabase.get<Skeleton>(parentEntity);
+      auto skeleton = parentEntity.get_ref<Skeleton>();
 
-      auto &attachment =
-          scene.entityDatabase.get<JointAttachment>(mSelectedEntity);
+      auto attachment = mSelectedEntity.get_ref<JointAttachment>();
 
-      auto label = attachment.joint >= 0 &&
-                           attachment.joint <
-                               static_cast<i16>(skeleton.jointNames.size())
-                       ? skeleton.jointNames.at(attachment.joint)
+      auto label = attachment->joint >= 0 &&
+                           attachment->joint <
+                               static_cast<i16>(skeleton->jointNames.size())
+                       ? skeleton->jointNames.at(attachment->joint)
                        : "Select joint";
 
       if (widgets::Button(label.c_str())) {
@@ -894,9 +883,9 @@ void EntityPanel::renderJointAttachment(Scene &scene,
       }
 
       if (ImGui::BeginPopup("SetJointAttachment")) {
-        for (usize i = 0; i < skeleton.jointNames.size(); ++i) {
-          if (ImGui::Selectable(skeleton.jointNames.at(i).c_str())) {
-            auto newAttachment = attachment;
+        for (usize i = 0; i < skeleton->jointNames.size(); ++i) {
+          if (ImGui::Selectable(skeleton->jointNames.at(i).c_str())) {
+            auto newAttachment = *attachment.get();
             newAttachment.joint = static_cast<i16>(i);
 
             actionExecutor.execute<EntityUpdateComponent<JointAttachment>>(
@@ -918,20 +907,20 @@ void EntityPanel::renderJointAttachment(Scene &scene,
 void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
                                   AssetRegistry &assetRegistry,
                                   ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<Animator>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<Animator>()) {
     return;
   }
 
   static const String SectionName = String(fa::Circle) + " Animator";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &component = scene.entityDatabase.get<Animator>(mSelectedEntity);
+    auto component = mSelectedEntity.get_ref<Animator>();
     const auto &animatorAsset =
-        assetRegistry.getAnimators().getAsset(component.asset).data;
+        assetRegistry.getAnimators().getAsset(component->asset).data;
 
     auto currentStateIndex =
-        component.currentState < animatorAsset.states.size()
-            ? component.currentState
+        component->currentState < animatorAsset.states.size()
+            ? component->currentState
             : animatorAsset.initialState;
 
     const auto &currentState = animatorAsset.states.at(currentStateIndex);
@@ -949,8 +938,7 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
           ImGui::TableNextColumn();
           ImGui::PushID(transition.eventName.c_str());
           if (widgets::Button("Toggle")) {
-            scene.entityDatabase.set<AnimatorEvent>(mSelectedEntity,
-                                                    {transition.eventName});
+            mSelectedEntity.set<AnimatorEvent>({transition.eventName});
           }
           ImGui::PopID();
         }
@@ -963,26 +951,26 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
             assetRegistry.getAnimations().getAsset(currentState.animation).data;
 
         ImGui::Text("Time");
-        f32 animationTime = component.normalizedTime * animationAsset.time;
+        f32 animationTime = component->normalizedTime * animationAsset.time;
         if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
                                animationAsset.time)) {
-          component.normalizedTime = animationTime / animationAsset.time;
+          component->normalizedTime = animationTime / animationAsset.time;
         }
 
-        if (!component.playing) {
+        if (!component->playing) {
           if (widgets::Button("Play")) {
-            component.playing = true;
+            component->playing = true;
           }
         } else {
           if (widgets::Button("Pause")) {
-            component.playing = false;
+            component->playing = false;
           }
         }
 
         ImGui::SameLine();
 
         if (widgets::Button("Reset")) {
-          component.normalizedTime = 0.0f;
+          component->normalizedTime = 0.0f;
         }
       }
     }
@@ -1010,7 +998,7 @@ static String getGeometryName(const PhysicsGeometryType &type) {
 
 void EntityPanel::renderCollidable(Scene &scene,
                                    ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<Collidable>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<Collidable>()) {
     return;
   }
 
@@ -1024,14 +1012,14 @@ void EntityPanel::renderCollidable(Scene &scene,
         PhysicsGeometryType::Plane,
     };
 
-    auto &collidable = scene.entityDatabase.get<Collidable>(mSelectedEntity);
+    auto collidable = mSelectedEntity.get_ref<Collidable>();
 
     if (ImGui::BeginCombo(
             "###SelectGeometryType",
-            getGeometryName(collidable.geometryDesc.type).c_str())) {
+            getGeometryName(collidable->geometryDesc.type).c_str())) {
 
       for (auto type : types) {
-        if (type != collidable.geometryDesc.type &&
+        if (type != collidable->geometryDesc.type &&
             ImGui::Selectable(getGeometryName(type).c_str())) {
           actionExecutor.execute<EntitySetCollidableType>(mSelectedEntity,
                                                           type);
@@ -1042,46 +1030,46 @@ void EntityPanel::renderCollidable(Scene &scene,
 
     bool sendAction = false;
 
-    auto center = collidable.geometryDesc.center;
+    auto center = collidable->geometryDesc.center;
     if (widgets::Input("Center", center, false)) {
       if (!mCollidableAction) {
         mCollidableAction = std::make_unique<EntityUpdateComponent<Collidable>>(
-            mSelectedEntity, collidable);
+            mSelectedEntity, *collidable.get());
       }
 
-      collidable.geometryDesc.center = center;
+      collidable->geometryDesc.center = center;
     }
 
-    if (collidable.geometryDesc.type == PhysicsGeometryType::Box) {
-      auto &box = std::get<PhysicsGeometryBox>(collidable.geometryDesc.params);
+    if (collidable->geometryDesc.type == PhysicsGeometryType::Box) {
+      auto &box = std::get<PhysicsGeometryBox>(collidable->geometryDesc.params);
       auto halfExtents = box.halfExtents;
 
       if (widgets::Input("Half extents", halfExtents, false)) {
         if (!mCollidableAction) {
           mCollidableAction =
               std::make_unique<EntityUpdateComponent<Collidable>>(
-                  mSelectedEntity, collidable);
+                  mSelectedEntity, *collidable.get());
         }
 
         box.halfExtents = halfExtents;
       }
-    } else if (collidable.geometryDesc.type == PhysicsGeometryType::Sphere) {
+    } else if (collidable->geometryDesc.type == PhysicsGeometryType::Sphere) {
       auto &sphere =
-          std::get<PhysicsGeometrySphere>(collidable.geometryDesc.params);
+          std::get<PhysicsGeometrySphere>(collidable->geometryDesc.params);
       f32 radius = sphere.radius;
 
       if (widgets::Input("Radius", radius, false)) {
         if (!mCollidableAction) {
           mCollidableAction =
               std::make_unique<EntityUpdateComponent<Collidable>>(
-                  mSelectedEntity, collidable);
+                  mSelectedEntity, *collidable.get());
         }
 
         sphere.radius = radius;
       }
-    } else if (collidable.geometryDesc.type == PhysicsGeometryType::Capsule) {
+    } else if (collidable->geometryDesc.type == PhysicsGeometryType::Capsule) {
       auto &capsule =
-          std::get<PhysicsGeometryCapsule>(collidable.geometryDesc.params);
+          std::get<PhysicsGeometryCapsule>(collidable->geometryDesc.params);
       f32 radius = capsule.radius;
       f32 halfHeight = capsule.halfHeight;
 
@@ -1089,7 +1077,7 @@ void EntityPanel::renderCollidable(Scene &scene,
         if (!mCollidableAction) {
           mCollidableAction =
               std::make_unique<EntityUpdateComponent<Collidable>>(
-                  mSelectedEntity, collidable);
+                  mSelectedEntity, *collidable.get());
         }
 
         capsule.radius = radius;
@@ -1099,35 +1087,35 @@ void EntityPanel::renderCollidable(Scene &scene,
         if (!mCollidableAction) {
           mCollidableAction =
               std::make_unique<EntityUpdateComponent<Collidable>>(
-                  mSelectedEntity, collidable);
+                  mSelectedEntity, *collidable.get());
         }
 
         capsule.halfHeight = halfHeight;
       }
     }
 
-    bool useInSimulation = collidable.useInSimulation;
+    bool useInSimulation = collidable->useInSimulation;
     ImGui::Text("Use in simulation");
 
     if (ImGui::Checkbox("##UseInSimulation", &useInSimulation)) {
-      auto newCollidable = collidable;
+      auto newCollidable = *collidable.get();
       newCollidable.useInSimulation = useInSimulation;
       actionExecutor.execute<EntityUpdateComponent<Collidable>>(
-          mSelectedEntity, collidable, newCollidable);
+          mSelectedEntity, *collidable.get(), newCollidable);
     }
 
-    bool useInQueries = collidable.useInQueries;
+    bool useInQueries = collidable->useInQueries;
     ImGui::Text("Use in queries");
 
     if (ImGui::Checkbox("##Use in queries", &useInQueries)) {
-      auto newCollidable = collidable;
+      auto newCollidable = *collidable.get();
       newCollidable.useInQueries = useInQueries;
       actionExecutor.execute<EntityUpdateComponent<Collidable>>(
-          mSelectedEntity, collidable, newCollidable);
+          mSelectedEntity, *collidable.get(), newCollidable);
     }
 
     {
-      auto &material = collidable.materialDesc;
+      auto &material = collidable->materialDesc;
 
       f32 dynamicFriction = material.dynamicFriction;
 
@@ -1135,7 +1123,7 @@ void EntityPanel::renderCollidable(Scene &scene,
         if (!mCollidableAction) {
           mCollidableAction =
               std::make_unique<EntityUpdateComponent<Collidable>>(
-                  mSelectedEntity, collidable);
+                  mSelectedEntity, *collidable.get());
         }
 
         material.dynamicFriction = dynamicFriction;
@@ -1150,7 +1138,7 @@ void EntityPanel::renderCollidable(Scene &scene,
         if (!mCollidableAction) {
           mCollidableAction =
               std::make_unique<EntityUpdateComponent<Collidable>>(
-                  mSelectedEntity, collidable);
+                  mSelectedEntity, *collidable.get());
         }
 
         material.restitution = restitution;
@@ -1161,7 +1149,7 @@ void EntityPanel::renderCollidable(Scene &scene,
         if (!mCollidableAction) {
           mCollidableAction =
               std::make_unique<EntityUpdateComponent<Collidable>>(
-                  mSelectedEntity, collidable);
+                  mSelectedEntity, *collidable.get());
         }
 
         material.staticFriction = staticFriction;
@@ -1169,7 +1157,7 @@ void EntityPanel::renderCollidable(Scene &scene,
     }
 
     if (mCollidableAction) {
-      mCollidableAction->setNewComponent(collidable);
+      mCollidableAction->setNewComponent(*collidable.get());
 
       actionExecutor.execute(std::move(mCollidableAction));
     }
@@ -1182,70 +1170,70 @@ void EntityPanel::renderCollidable(Scene &scene,
 
 void EntityPanel::renderRigidBody(Scene &scene,
                                   ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<RigidBody>()) {
     return;
   }
 
   static const String SectionName = String(fa::Circle) + "  Rigid body";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &rigidBody = scene.entityDatabase.get<RigidBody>(mSelectedEntity);
+    auto rigidBody = mSelectedEntity.get_ref<RigidBody>();
 
     if (ImGui::BeginCombo("###RigidBodyType",
-                          rigidBody.type == RigidBodyType::Kinematic
+                          rigidBody->type == RigidBodyType::Kinematic
                               ? "Kinematic"
                               : "Dynamic",
                           0)) {
       if (ImGui::Selectable("Dynamic")) {
         mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
-            mSelectedEntity, rigidBody);
-        rigidBody.type = RigidBodyType::Dynamic;
+            mSelectedEntity, *rigidBody.get());
+        rigidBody->type = RigidBodyType::Dynamic;
       }
 
       if (ImGui::Selectable("Kinematic")) {
         mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
-            mSelectedEntity, rigidBody);
-        rigidBody.type = RigidBodyType::Kinematic;
+            mSelectedEntity, *rigidBody.get());
+        rigidBody->type = RigidBodyType::Kinematic;
       }
 
       ImGui::EndCombo();
     }
 
-    if (rigidBody.type == RigidBodyType::Dynamic) {
-      f32 mass = rigidBody.dynamicDesc.mass;
+    if (rigidBody->type == RigidBodyType::Dynamic) {
+      f32 mass = rigidBody->dynamicDesc.mass;
       if (widgets::Input("Mass", mass, false)) {
         if (!mRigidBodyAction) {
           mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
-              mSelectedEntity, rigidBody);
+              mSelectedEntity, *rigidBody.get());
         }
 
-        rigidBody.dynamicDesc.mass = mass;
+        rigidBody->dynamicDesc.mass = mass;
       }
 
-      glm::vec3 inertia = rigidBody.dynamicDesc.inertia;
+      glm::vec3 inertia = rigidBody->dynamicDesc.inertia;
       if (widgets::Input("Inertia", inertia, false)) {
         if (!mRigidBodyAction) {
           mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
-              mSelectedEntity, rigidBody);
+              mSelectedEntity, *rigidBody.get());
         }
 
-        rigidBody.dynamicDesc.inertia = inertia;
+        rigidBody->dynamicDesc.inertia = inertia;
       }
 
       ImGui::Text("Apply gravity");
-      bool applyGravity = rigidBody.dynamicDesc.applyGravity;
+      bool applyGravity = rigidBody->dynamicDesc.applyGravity;
       if (ImGui::Checkbox("Apply gravity###ApplyGravity", &applyGravity)) {
         if (!mRigidBodyAction) {
           mRigidBodyAction = std::make_unique<EntityUpdateComponent<RigidBody>>(
-              mSelectedEntity, rigidBody);
+              mSelectedEntity, *rigidBody.get());
         }
 
-        rigidBody.dynamicDesc.applyGravity = applyGravity;
+        rigidBody->dynamicDesc.applyGravity = applyGravity;
       }
     }
 
     if (mRigidBodyAction) {
-      mRigidBodyAction->setNewComponent(rigidBody);
+      mRigidBodyAction->setNewComponent(*rigidBody.get());
       actionExecutor.execute(std::move(mRigidBodyAction));
     }
   }
@@ -1257,14 +1245,14 @@ void EntityPanel::renderRigidBody(Scene &scene,
 
 void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
                              ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<Text>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<Text>()) {
     return;
   }
 
   static const String SectionName = String(fa::Font) + "  Text";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &text = scene.entityDatabase.get<Text>(mSelectedEntity);
+    auto text = mSelectedEntity.get_ref<Text>();
 
     const auto &fonts = assetRegistry.getFonts().getAssets();
 
@@ -1272,54 +1260,54 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
     bool sendAction = false;
 
     ImGui::Text("Content");
-    String tmpText = text.content;
+    String tmpText = text->content;
     if (ImguiMultilineInputText(
             "###InputContent", tmpText,
             ImVec2(ImGui::GetWindowWidth(), ContentInputHeight), 0)) {
       if (!mTextAction) {
         mTextAction = std::make_unique<EntityUpdateComponent<Text>>(
-            mSelectedEntity, text);
+            mSelectedEntity, *text.get());
       }
 
-      text.content = tmpText;
+      text->content = tmpText;
     }
 
     if (ImGui::IsItemDeactivatedAfterEdit()) {
       sendAction = true;
     }
 
-    f32 lineHeight = text.lineHeight;
+    f32 lineHeight = text->lineHeight;
     if (widgets::Input("Line height", lineHeight, false)) {
       if (!mTextAction) {
         mTextAction = std::make_unique<EntityUpdateComponent<Text>>(
-            mSelectedEntity, text);
+            mSelectedEntity, *text.get());
       }
 
-      text.lineHeight = lineHeight;
+      text->lineHeight = lineHeight;
     }
 
     ImGui::Text("Select font");
-    if (ImGui::BeginCombo("###SelectFont", fonts.at(text.font).name.c_str(),
+    if (ImGui::BeginCombo("###SelectFont", fonts.at(text->font).name.c_str(),
                           0)) {
       for (const auto &[handle, data] : fonts) {
-        bool selectable = handle == text.font;
+        bool selectable = handle == text->font;
 
         const auto &fontName = data.name;
 
         if (ImGui::Selectable(fontName.c_str(), &selectable)) {
           if (!mTextAction) {
             mTextAction = std::make_unique<EntityUpdateComponent<Text>>(
-                mSelectedEntity, text);
+                mSelectedEntity, *text.get());
           }
 
-          text.font = handle;
+          text->font = handle;
         }
       }
       ImGui::EndCombo();
     }
 
     if (mTextAction) {
-      mTextAction->setNewComponent(text);
+      mTextAction->setNewComponent(*text.get());
 
       actionExecutor.execute(std::move(mTextAction));
     }
@@ -1332,15 +1320,15 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
 
 void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
                               ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<AudioSource>()) {
     return;
   }
 
   static const String SectionName = String(fa::Music) + "  Audio";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    const auto &audio = scene.entityDatabase.get<AudioSource>(mSelectedEntity);
-    const auto &asset = assetRegistry.getAudios().getAsset(audio.source);
+    auto audio = mSelectedEntity.get_ref<AudioSource>();
+    const auto &asset = assetRegistry.getAudios().getAsset(audio->source);
 
     ImGui::Text("Name: %s", asset.name.c_str());
   }
@@ -1352,22 +1340,22 @@ void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
 
 void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
                                   ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<LuaScript>()) {
     return;
   }
 
   static const String SectionName = String(fa::Scroll) + " Lua script";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &script = scene.entityDatabase.get<LuaScript>(mSelectedEntity);
-    const auto &asset = assetRegistry.getLuaScripts().getAsset(script.handle);
+    auto script = mSelectedEntity.get_ref<LuaScript>();
+    const auto &asset = assetRegistry.getLuaScripts().getAsset(script->handle);
 
     ImGui::Text("Name: %s", asset.name.c_str());
 
     if (!asset.data.variables.empty()) {
       ImGui::Text("Variables");
 
-      if (script.started) {
+      if (script->started) {
         widgets::Table table("scriptVariables", 3);
         table.row("Name", "Type", "Value");
         for (const auto &[name, variable] : asset.data.variables) {
@@ -1382,19 +1370,19 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
           }
 
           String value;
-          if (!script.variables.contains(name) ||
-              !script.variables.at(name).isType(variable.type)) {
+          if (!script->variables.contains(name) ||
+              !script->variables.at(name).isType(variable.type)) {
             // Do nothing
-          } else if (script.variables.at(name).isType(
+          } else if (script->variables.at(name).isType(
                          LuaScriptVariableType::String)) {
-            value = script.variables.at(name).get<String>();
-          } else if (script.variables.at(name).isType(
+            value = script->variables.at(name).get<String>();
+          } else if (script->variables.at(name).isType(
                          LuaScriptVariableType::AssetPrefab)) {
-            auto handle = script.variables.at(name).get<PrefabAssetHandle>();
+            auto handle = script->variables.at(name).get<PrefabAssetHandle>();
             value = assetRegistry.getPrefabs().getAsset(handle).name;
-          } else if (script.variables.at(name).isType(
+          } else if (script->variables.at(name).isType(
                          LuaScriptVariableType::AssetTexture)) {
-            auto handle = script.variables.at(name).get<TextureAssetHandle>();
+            auto handle = script->variables.at(name).get<TextureAssetHandle>();
             value = assetRegistry.getTextures().getAsset(handle).name;
           }
 
@@ -1407,13 +1395,13 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
               mSetScriptVariable->getValue().isType(variable.type) &&
               mSetScriptVariable->getName() == name) {
             existingVariable = mSetScriptVariable->getValue();
-          } else if (script.variables.contains(name) &&
-                     script.variables.at(name).isType(variable.type)) {
-            existingVariable = script.variables.at(name);
+          } else if (script->variables.contains(name) &&
+                     script->variables.at(name).isType(variable.type)) {
+            existingVariable = script->variables.at(name);
           }
 
           if (variable.type == LuaScriptVariableType::String) {
-            auto it = script.variables.find(name);
+            auto it = script->variables.find(name);
 
             auto value = existingVariable.isType(LuaScriptVariableType::String)
                              ? existingVariable.get<String>()
@@ -1497,7 +1485,7 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
 
 void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
                               ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<InputMapAssetRef>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<InputMapAssetRef>()) {
     return;
   }
 
@@ -1507,12 +1495,11 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
     f32 width = section.getClipRect().GetWidth();
     const f32 height = width * 0.2f;
 
-    auto &component =
-        scene.entityDatabase.get<InputMapAssetRef>(mSelectedEntity);
+    auto component = mSelectedEntity.get_ref<InputMapAssetRef>();
 
-    if (assetRegistry.getInputMaps().hasAsset(component.handle)) {
+    if (assetRegistry.getInputMaps().hasAsset(component->handle)) {
       const auto &asset =
-          assetRegistry.getInputMaps().getAsset(component.handle);
+          assetRegistry.getInputMaps().getAsset(component->handle);
 
       widgets::Button(asset.name.c_str(), ImVec2(width, height));
     } else {
@@ -1531,30 +1518,30 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
       if (auto *payload = ImGui::AcceptDragDropPayload(
               getAssetTypeString(AssetType::InputMap).c_str())) {
         auto newHandle = *static_cast<InputMapAssetHandle *>(payload->Data);
-        auto newComponent = component;
+        auto newComponent = *component.get();
         newComponent.handle = newHandle;
         actionExecutor.execute<EntityUpdateComponent<InputMapAssetRef>>(
             mSelectedEntity, component, newComponent);
       }
     }
 
-    if (assetRegistry.getInputMaps().hasAsset(component.handle)) {
+    if (assetRegistry.getInputMaps().hasAsset(component->handle)) {
       const auto &asset =
-          assetRegistry.getInputMaps().getAsset(component.handle);
+          assetRegistry.getInputMaps().getAsset(component->handle);
 
       const auto *schemeName =
-          component.defaultScheme < asset.data.schemes.size()
-              ? asset.data.schemes.at(component.defaultScheme).name.c_str()
+          component->defaultScheme < asset.data.schemes.size()
+              ? asset.data.schemes.at(component->defaultScheme).name.c_str()
               : "Select scheme";
 
       ImGui::Text("Default scheme");
       if (ImGui::BeginCombo("##DefaultScheme", schemeName)) {
         for (usize i = 0; i < asset.data.schemes.size(); ++i) {
           const auto *name = asset.data.schemes.at(i).name.c_str();
-          bool selectable = i == component.defaultScheme;
+          bool selectable = i == component->defaultScheme;
 
           if (ImGui::Selectable(name, &selectable)) {
-            auto newComponent = component;
+            auto newComponent = *component.get();
             newComponent.defaultScheme = i;
 
             actionExecutor.execute<EntityUpdateComponent<InputMapAssetRef>>(
@@ -1565,27 +1552,26 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
       }
     }
 
-    if (scene.entityDatabase.has<InputMap>(mSelectedEntity)) {
-      const auto &inputMap =
-          scene.entityDatabase.get<InputMap>(mSelectedEntity);
+    if (mSelectedEntity.has<InputMap>()) {
+      auto inputMap = mSelectedEntity.get_ref<InputMap>();
 
       const auto *schemeName = assetRegistry.getInputMaps()
-                                   .getAsset(component.handle)
-                                   .data.schemes.at(inputMap.activeScheme)
+                                   .getAsset(component->handle)
+                                   .data.schemes.at(inputMap->activeScheme)
                                    .name.c_str();
 
       ImGui::Text("Debug");
       ImGui::Text("Active scheme: %s", schemeName);
 
       if (auto table = widgets::Table("InputMapValues", 2)) {
-        for (auto [key, command] : inputMap.commandNameMap) {
-          auto type = inputMap.commandDataTypes.at(command);
+        for (auto [key, command] : inputMap->commandNameMap) {
+          auto type = inputMap->commandDataTypes.at(command);
           if (type == InputDataType::Boolean) {
-            auto value = std::get<bool>(inputMap.commandValues.at(command));
+            auto value = std::get<bool>(inputMap->commandValues.at(command));
             table.row(key, value ? "true" : "false");
           } else if (type == InputDataType::Axis2d) {
             auto value =
-                std::get<glm::vec2>(inputMap.commandValues.at(command));
+                std::get<glm::vec2>(inputMap->commandValues.at(command));
             table.row(key, value);
           }
         }
@@ -1601,7 +1587,7 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
 
 void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
                                ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<EnvironmentSkybox>(mSelectedEntity)) {
+  if (!mSelectedEntity.has<EnvironmentSkybox>()) {
     return;
   }
 
@@ -1611,69 +1597,71 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
     f32 width = section.getClipRect().GetWidth();
     const f32 height = width * 0.5f;
 
-    auto &skybox = scene.entityDatabase.get<EnvironmentSkybox>(mSelectedEntity);
+    auto skybox = mSelectedEntity.get_ref<EnvironmentSkybox>();
 
     ImGui::Text("Type");
     if (ImGui::BeginCombo("###SkyboxType",
-                          getSkyboxTypeLabel(skybox.type).c_str())) {
+                          getSkyboxTypeLabel(skybox->type).c_str())) {
       if (ImGui::Selectable("Color")) {
-        auto newSkybox = skybox;
+        auto newSkybox = *skybox.get();
         newSkybox.type = EnvironmentSkyboxType::Color;
 
         actionExecutor.execute<EntityUpdateComponent<EnvironmentSkybox>>(
-            mSelectedEntity, skybox, newSkybox);
+            mSelectedEntity, *skybox.get(), newSkybox);
       } else if (ImGui::Selectable("Texture")) {
-        auto newSkybox = skybox;
+        auto newSkybox = *skybox.get();
         newSkybox.type = EnvironmentSkyboxType::Texture;
 
         actionExecutor.execute<EntityUpdateComponent<EnvironmentSkybox>>(
-            mSelectedEntity, skybox, newSkybox);
+            mSelectedEntity, *skybox.get(), newSkybox);
       }
 
       ImGui::EndCombo();
     }
 
-    if (skybox.type == EnvironmentSkyboxType::Color) {
+    if (skybox->type == EnvironmentSkyboxType::Color) {
       bool sendAction = false;
 
-      glm::vec4 color = skybox.color;
+      glm::vec4 color = skybox->color;
       if (widgets::InputColor("Color", color)) {
         if (!mEnvironmentSkyboxAction) {
           mEnvironmentSkyboxAction =
               std::make_unique<EntityUpdateComponent<EnvironmentSkybox>>(
-                  mSelectedEntity, skybox);
+                  mSelectedEntity, *skybox.get());
         }
 
-        skybox.color = color;
+        skybox->color = color;
       }
 
       sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
       if (sendAction && mEnvironmentSkyboxAction) {
-        mEnvironmentSkyboxAction->setNewComponent(skybox);
+        mEnvironmentSkyboxAction->setNewComponent(*skybox.get());
         actionExecutor.execute(std::move(mEnvironmentSkyboxAction));
       }
 
-    } else if (skybox.type == EnvironmentSkyboxType::Texture) {
-      if (assetRegistry.getEnvironments().hasAsset(skybox.texture)) {
+    } else if (skybox->type == EnvironmentSkyboxType::Texture) {
+      if (assetRegistry.getEnvironments().hasAsset(skybox->texture)) {
         const auto &envAsset =
-            assetRegistry.getEnvironments().getAsset(skybox.texture);
+            assetRegistry.getEnvironments().getAsset(skybox->texture);
 
         imgui::image(envAsset.preview, ImVec2(width, height), ImVec2(0, 0),
                      ImVec2(1, 1), ImGui::GetID("environment-texture-drop"));
 
-        dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);
+        dndEnvironmentAsset(section, mSelectedEntity, *skybox.get(),
+                            actionExecutor);
 
         if (widgets::Button(fa::Times)) {
-          auto newSkybox = skybox;
+          auto newSkybox = *skybox.get();
           newSkybox.texture = EnvironmentAssetHandle::Null;
           actionExecutor.execute<EntityUpdateComponent<EnvironmentSkybox>>(
-              mSelectedEntity, skybox, newSkybox);
+              mSelectedEntity, *skybox.get(), newSkybox);
         }
 
       } else {
         widgets::Button("Drag environment asset here", ImVec2(width, height));
-        dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);
+        dndEnvironmentAsset(section, mSelectedEntity, *skybox.get(),
+                            actionExecutor);
       }
     }
 
@@ -1695,8 +1683,7 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
 void EntityPanel::renderEnvironmentLighting(Scene &scene,
                                             AssetRegistry &assetRegistry,
                                             ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<EnvironmentLightingSkyboxSource>(
-          mSelectedEntity)) {
+  if (!mSelectedEntity.has<EnvironmentLightingSkyboxSource>()) {
     return;
   }
 
@@ -1726,16 +1713,15 @@ void EntityPanel::renderDebug() {
 
 void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
                                      ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.exists(mSelectedEntity)) {
+  if (!mSelectedEntity.is_valid()) {
     return;
   }
 
-  bool hasAllComponents =
-      scene.entityDatabase.has<LocalTransform>(mSelectedEntity) &&
-      scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
-      scene.entityDatabase.has<Collidable>(mSelectedEntity) &&
-      scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
-      scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity);
+  bool hasAllComponents = mSelectedEntity.has<LocalTransform>() &&
+                          mSelectedEntity.has<RigidBody>() &&
+                          mSelectedEntity.has<Collidable>() &&
+                          mSelectedEntity.has<DirectionalLight>() &&
+                          mSelectedEntity.has<PerspectiveLens>();
 
   if (hasAllComponents)
     return;
@@ -1745,37 +1731,35 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
   }
 
   if (ImGui::BeginPopup("AddComponentPopup")) {
-    if (!scene.entityDatabase.has<LocalTransform>(mSelectedEntity) &&
+    if (!mSelectedEntity.has<LocalTransform>() &&
         ImGui::Selectable("Transform")) {
       actionExecutor.execute<EntitySetLocalTransformContinuous>(
           mSelectedEntity, quoll::LocalTransform{}, quoll::LocalTransform{});
     }
 
-    if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
-        ImGui::Selectable("Rigid body")) {
+    if (!mSelectedEntity.has<RigidBody>() && ImGui::Selectable("Rigid body")) {
       actionExecutor.execute<EntityCreateComponent<RigidBody>>(mSelectedEntity);
     }
 
-    if (!scene.entityDatabase.has<Collidable>(mSelectedEntity) &&
-        ImGui::Selectable("Collidable")) {
+    if (!mSelectedEntity.has<Collidable>() && ImGui::Selectable("Collidable")) {
       actionExecutor.execute<EntityCreateComponent<Collidable>>(
           mSelectedEntity);
     }
 
-    if (!scene.entityDatabase.has<MeshRenderer>(mSelectedEntity) &&
+    if (!mSelectedEntity.has<MeshRenderer>() &&
         ImGui::Selectable("Mesh renderer")) {
       actionExecutor.execute<EntityCreateComponent<MeshRenderer>>(
           mSelectedEntity);
     }
 
-    if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mSelectedEntity) &&
+    if (!mSelectedEntity.has<SkinnedMeshRenderer>() &&
         ImGui::Selectable("Skinned mesh renderer")) {
       actionExecutor.execute<EntityCreateComponent<SkinnedMeshRenderer>>(
           mSelectedEntity);
     }
 
-    if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
-        !scene.entityDatabase.has<PointLight>(mSelectedEntity)) {
+    if (!mSelectedEntity.has<DirectionalLight>() &&
+        !mSelectedEntity.has<PointLight>()) {
       if (ImGui::Selectable("Directional light")) {
         actionExecutor.execute<EntityCreateComponent<DirectionalLight>>(
             mSelectedEntity);
@@ -1787,47 +1771,44 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
       }
     }
 
-    if (!scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity) &&
+    if (!mSelectedEntity.has<PerspectiveLens>() &&
         ImGui::Selectable("Perspective camera")) {
       actionExecutor.execute<EntityCreatePerspectiveLens>(mSelectedEntity);
     }
 
-    if (!scene.entityDatabase.has<Text>(mSelectedEntity) &&
-        ImGui::Selectable("Text")) {
+    if (!mSelectedEntity.has<Text>() && ImGui::Selectable("Text")) {
       Text text{"Hello world"};
       text.font = assetRegistry.getDefaultObjects().defaultFont;
       actionExecutor.execute<EntityCreateComponent<Text>>(mSelectedEntity,
                                                           text);
     }
 
-    if (!scene.entityDatabase.has<JointAttachment>(mSelectedEntity) &&
+    if (!mSelectedEntity.has<JointAttachment>() &&
         ImGui::Selectable("Joint attachment")) {
       actionExecutor.execute<EntityCreateComponent<JointAttachment>>(
           mSelectedEntity, JointAttachment{});
     }
 
-    if (!scene.entityDatabase.has<InputMapAssetRef>(mSelectedEntity) &&
+    if (!mSelectedEntity.has<InputMapAssetRef>() &&
         ImGui::Selectable("Input map")) {
       actionExecutor.execute<EntityCreateComponent<InputMapAssetRef>>(
           mSelectedEntity, InputMapAssetRef{});
     }
 
-    if (!scene.entityDatabase.has<EnvironmentSkybox>(mSelectedEntity) &&
+    if (!mSelectedEntity.has<EnvironmentSkybox>() &&
         ImGui::Selectable("Skybox")) {
       actionExecutor.execute<EntityCreateComponent<EnvironmentSkybox>>(
           mSelectedEntity, EnvironmentSkybox{});
     }
 
-    if (!scene.entityDatabase.has<EnvironmentLightingSkyboxSource>(
-            mSelectedEntity) &&
+    if (!mSelectedEntity.has<EnvironmentLightingSkyboxSource>() &&
         ImGui::Selectable("Environment lighting")) {
       actionExecutor
           .execute<EntityCreateComponent<EnvironmentLightingSkyboxSource>>(
               mSelectedEntity, EnvironmentLightingSkyboxSource{});
     }
 
-    if (!scene.entityDatabase.has<UICanvas>(mSelectedEntity) &&
-        ImGui::Selectable("UI Canvas")) {
+    if (!mSelectedEntity.has<UICanvas>() && ImGui::Selectable("UI Canvas")) {
       actionExecutor.execute<EntityCreateComponent<UICanvas>>(mSelectedEntity,
                                                               UICanvas{});
     }
@@ -1860,7 +1841,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
             getAssetTypeString(AssetType::Audio).c_str())) {
       auto asset = *static_cast<AudioAssetHandle *>(payload->Data);
 
-      if (scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
+      if (mSelectedEntity.has<AudioSource>()) {
         actionExecutor.execute<EntitySetAudio>(mSelectedEntity, asset);
       } else {
         actionExecutor.execute<EntityCreateAudio>(mSelectedEntity, asset);
@@ -1871,7 +1852,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
             getAssetTypeString(AssetType::LuaScript).c_str())) {
       auto asset = *static_cast<LuaScriptAssetHandle *>(payload->Data);
 
-      if (scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
+      if (mSelectedEntity.has<LuaScript>()) {
         actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
       } else {
         actionExecutor.execute<EntityCreateScript>(mSelectedEntity, asset);
@@ -1882,7 +1863,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
             getAssetTypeString(AssetType::Animator).c_str())) {
       auto asset = *static_cast<AnimatorAssetHandle *>(payload->Data);
 
-      if (scene.entityDatabase.has<Animator>(mSelectedEntity)) {
+      if (mSelectedEntity.has<Animator>()) {
         actionExecutor.execute<EntitySetAnimator>(mSelectedEntity, asset);
       } else {
         actionExecutor.execute<EntityCreateAnimator>(mSelectedEntity, asset);
@@ -1893,7 +1874,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
             getAssetTypeString(AssetType::Texture).c_str())) {
       auto asset = *static_cast<TextureAssetHandle *>(payload->Data);
 
-      if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
+      if (mSelectedEntity.has<Sprite>()) {
         actionExecutor.execute<EntitySetSprite>(mSelectedEntity, asset);
       } else {
         actionExecutor.execute<EntityCreateSprite>(mSelectedEntity, asset);

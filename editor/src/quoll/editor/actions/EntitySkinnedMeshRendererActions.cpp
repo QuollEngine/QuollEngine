@@ -12,11 +12,8 @@ EntitySetSkinnedMeshRendererMaterial::onExecute(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldMaterial =
-      scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(
-          mSlot);
-  scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(mSlot) =
-      mNewMaterial;
+  mOldMaterial = mEntity.get_ref<SkinnedMeshRenderer>()->materials.at(mSlot);
+  mEntity.get_ref<SkinnedMeshRenderer>()->materials.at(mSlot) = mNewMaterial;
 
   ActionExecutorResult result{};
   result.addToHistory = true;
@@ -29,8 +26,7 @@ EntitySetSkinnedMeshRendererMaterial::onUndo(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(mSlot) =
-      mOldMaterial;
+  mEntity.get_ref<SkinnedMeshRenderer>()->materials.at(mSlot) = mOldMaterial;
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -41,12 +37,11 @@ bool EntitySetSkinnedMeshRendererMaterial::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {
+  if (!mEntity.has<SkinnedMeshRenderer>()) {
     return false;
   }
 
-  if (mSlot >=
-      scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.size()) {
+  if (mSlot >= mEntity.get_ref<SkinnedMeshRenderer>()->materials.size()) {
     return false;
   }
 
@@ -62,8 +57,7 @@ ActionExecutorResult EntityAddSkinnedMeshRendererMaterialSlot::onExecute(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.push_back(
-      mNewMaterial);
+  mEntity.get_ref<SkinnedMeshRenderer>()->materials.push_back(mNewMaterial);
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -77,7 +71,7 @@ EntityAddSkinnedMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
 
   auto &scene = state.scene;
 
-  scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.pop_back();
+  mEntity.get_ref<SkinnedMeshRenderer>()->materials.pop_back();
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -88,7 +82,7 @@ bool EntityAddSkinnedMeshRendererMaterialSlot::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {
+  if (!mEntity.has<SkinnedMeshRenderer>()) {
     return false;
   }
 
@@ -103,10 +97,9 @@ ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onExecute(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldMaterial =
-      scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.back();
+  mOldMaterial = mEntity.get_ref<SkinnedMeshRenderer>()->materials.back();
 
-  scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.pop_back();
+  mEntity.get_ref<SkinnedMeshRenderer>()->materials.pop_back();
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -118,8 +111,7 @@ ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onUndo(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.push_back(
-      mOldMaterial);
+  mEntity.get_ref<SkinnedMeshRenderer>()->materials.push_back(mOldMaterial);
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -130,12 +122,11 @@ bool EntityRemoveLastSkinnedMeshRendererMaterialSlot::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {
+  if (!mEntity.has<SkinnedMeshRenderer>()) {
     return false;
   }
 
-  return scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity)
-             .materials.size() > 0;
+  return mEntity.get_ref<SkinnedMeshRenderer>()->materials.size() > 0;
 }
 
 } // namespace quoll::editor

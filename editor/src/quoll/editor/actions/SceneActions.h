@@ -18,7 +18,7 @@ public:
 
 private:
   Entity mEntity;
-  Entity mPreviousCamera = Entity::Null;
+  Entity mPreviousCamera;
 };
 
 class SceneSetStartingEnvironment : public Action {
@@ -35,7 +35,7 @@ public:
 
 private:
   Entity mEntity;
-  Entity mPreviousEnvironment = Entity::Null;
+  Entity mPreviousEnvironment;
 };
 
 class SceneRemoveStartingEnvironment : public Action {
@@ -49,7 +49,7 @@ public:
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
-  Entity mPreviousEnvironment = Entity::Null;
+  Entity mPreviousEnvironment;
 };
 
 } // namespace quoll::editor

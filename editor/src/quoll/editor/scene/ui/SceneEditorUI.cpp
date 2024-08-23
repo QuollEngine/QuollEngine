@@ -122,7 +122,7 @@ bool SceneEditorUI::renderSceneView(WorkspaceState &state,
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 
-    if (state.selectedEntity != Entity::Null) {
+    if (state.selectedEntity.is_valid()) {
       isItemClicked &= !mSceneGizmos.render(state, actionExecutor);
     }
 

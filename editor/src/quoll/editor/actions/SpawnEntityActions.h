@@ -15,7 +15,7 @@ public:
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
-  Entity mSpawnedEntity = Entity::Null;
+  Entity mSpawnedEntity;
 };
 
 class SpawnPrefabAtView : public Action {
@@ -33,7 +33,7 @@ public:
 private:
   PrefabAssetHandle mHandle;
   Entity mCamera;
-  Entity mSpawnedRootEntity = Entity::Null;
+  Entity mSpawnedRootEntity;
 };
 
 class SpawnSpriteAtView : public Action {
@@ -51,7 +51,7 @@ public:
 private:
   TextureAssetHandle mHandle;
   Entity mCamera;
-  Entity mSpawnedEntity = Entity::Null;
+  Entity mSpawnedEntity;
 };
 
 } // namespace quoll::editor

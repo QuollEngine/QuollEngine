@@ -18,7 +18,7 @@ public:
 
 private:
   Entity mEntity;
-  Entity mPreviousParent = Entity::Null;
+  Entity mPreviousParent;
   std::ptrdiff_t mChildIndex = 0;
 };
 
@@ -37,7 +37,7 @@ public:
 private:
   Entity mEntity;
   Entity mParent;
-  Entity mPreviousParent = Entity::Null;
+  Entity mPreviousParent;
 };
 
 } // namespace quoll::editor

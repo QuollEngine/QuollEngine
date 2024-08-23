@@ -13,17 +13,17 @@ void WorkspaceIO::saveWorkspaceState(WorkspaceState &state,
                                      const std::filesystem::path &path) {
   auto &scene = state.scene;
 
-  const auto &lens = scene.entityDatabase.get<PerspectiveLens>(state.camera);
-  const auto &lookAt = scene.entityDatabase.get<CameraLookAt>(state.camera);
+  auto lens = state.camera.get_ref<PerspectiveLens>();
+  auto lookAt = state.camera.get_ref<CameraLookAt>();
 
   YAML::Node node;
-  node["camera"]["near"] = lens.near;
-  node["camera"]["far"] = lens.far;
-  node["camera"]["sensorSize"] = lens.sensorSize;
-  node["camera"]["focalLength"] = lens.focalLength;
-  node["camera"]["eye"] = lookAt.eye;
-  node["camera"]["center"] = lookAt.center;
-  node["camera"]["up"] = lookAt.up;
+  node["camera"]["near"] = lens->near;
+  node["camera"]["far"] = lens->far;
+  node["camera"]["sensorSize"] = lens->sensorSize;
+  node["camera"]["focalLength"] = lens->focalLength;
+  node["camera"]["eye"] = lookAt->eye;
+  node["camera"]["center"] = lookAt->center;
+  node["camera"]["up"] = lookAt->up;
 
   node["grid"]["gridLines"] = state.grid.x == 1;
   node["grid"]["axisLines"] = state.grid.y == 1;
@@ -98,8 +98,8 @@ void WorkspaceIO::loadWorkspaceState(WorkspaceState &state,
     lens.sensorSize = sensorSize;
     lens.focalLength = focalLength;
 
-    scene.entityDatabase.set<PerspectiveLens>(state.camera, lens);
-    scene.entityDatabase.set<CameraLookAt>(state.camera, {eye, center, up});
+    state.camera.set<PerspectiveLens>(lens);
+    state.camera.set<CameraLookAt>({eye, center, up});
   }
 
   if (node["grid"].IsMap()) {

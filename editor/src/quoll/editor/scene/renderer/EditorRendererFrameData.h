@@ -126,7 +126,7 @@ public:
   }
 
   inline bool isCollidableEntitySelected() const {
-    return mCollidableEntity != Entity::Null;
+    return mCollidableEntity.is_valid();
   }
 
   inline PhysicsGeometryType getCollidableShapeType() const {
@@ -182,7 +182,7 @@ private:
   rhi::Buffer mGizmoTransformsBuffer;
 
   // Collidable shape
-  Entity mCollidableEntity = Entity::Null;
+  Entity mCollidableEntity;
   CollidableEntity mCollidableEntityParams{};
 
   rhi::Buffer mCollidableEntityBuffer;

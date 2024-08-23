@@ -15,10 +15,10 @@ ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
-  if (db.has<Parent>(mEntity)) {
-    mPreviousParent = db.get<Parent>(mEntity).parent;
+  if (mEntity.has<Parent>()) {
+    mPreviousParent = mEntity.get_ref<Parent>()->parent;
   } else {
-    mPreviousParent = Entity::Null;
+    mPreviousParent = flecs::entity::null();
   }
 
   EntityRelationUtils::setEntityParent(db, mEntity, mParent);
@@ -26,7 +26,7 @@ ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
   res.addToHistory = true;
 
   res.entitiesToSave = {mEntity, mParent};
-  if (mPreviousParent != Entity::Null) {
+  if (mPreviousParent.is_valid()) {
     res.entitiesToSave.push_back(mPreviousParent);
   }
 
@@ -38,7 +38,7 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
-  if (mPreviousParent != Entity::Null) {
+  if (mPreviousParent.is_valid()) {
     EntityRelationUtils::setEntityParent(db, mEntity, mPreviousParent);
   } else {
     EntityRelationUtils::removeEntityParent(db, mEntity);
@@ -47,7 +47,7 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
   ActionExecutorResult res;
 
   res.entitiesToSave = {mEntity, mParent};
-  if (mPreviousParent != Entity::Null) {
+  if (mPreviousParent.is_valid()) {
     res.entitiesToSave.push_back(mPreviousParent);
   }
 
@@ -57,10 +57,9 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
 bool EntitySetParent::predicate(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
 
-  return state.scene.entityDatabase.exists(mParent) &&
-         EntityRelationUtils::isValidParentForEntity(state.scene.entityDatabase,
-                                                     mEntity, mParent) ==
-             EntityReparentStatus::Ok;
+  return mParent.is_valid() && EntityRelationUtils::isValidParentForEntity(
+                                   state.scene.entityDatabase, mEntity,
+                                   mParent) == EntityReparentStatus::Ok;
 }
 
 EntityRemoveParent::EntityRemoveParent(Entity entity) : mEntity(entity) {}
@@ -70,18 +69,18 @@ EntityRemoveParent::onExecute(WorkspaceState &state,
                               AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  auto parent = scene.entityDatabase.get<Parent>(mEntity).parent;
+  auto parent = mEntity.get_ref<Parent>()->parent;
 
-  scene.entityDatabase.remove<Parent>(mEntity);
+  mEntity.remove<Parent>();
 
-  auto &children = scene.entityDatabase.get<Children>(parent).children;
+  auto &children = parent.get_ref<Children>()->children;
   if (children.size() > 1) {
     auto it = std::find(children.begin(), children.end(), mEntity);
 
     mChildIndex = std::distance(children.begin(), it);
     children.erase(it);
   } else {
-    scene.entityDatabase.remove<Children>(parent);
+    parent.remove<Children>();
   }
 
   mPreviousParent = parent;
@@ -97,13 +96,12 @@ ActionExecutorResult EntityRemoveParent::onUndo(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set<Parent>(mEntity, {mPreviousParent});
-  if (scene.entityDatabase.has<Children>(mPreviousParent)) {
-    auto &children =
-        scene.entityDatabase.get<Children>(mPreviousParent).children;
+  mEntity.set<Parent>({mPreviousParent});
+  if (mPreviousParent.has<Children>()) {
+    auto &children = mPreviousParent.get_ref<Children>()->children;
     children.insert(children.begin() + mChildIndex, mEntity);
   } else {
-    scene.entityDatabase.set<Children>(mPreviousParent, {{mEntity}});
+    mPreviousParent.set<Children>({{mEntity}});
   }
 
   ActionExecutorResult res{};
@@ -114,9 +112,7 @@ ActionExecutorResult EntityRemoveParent::onUndo(WorkspaceState &state,
 
 bool EntityRemoveParent::predicate(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
-  auto &scene = state.scene;
-
-  return scene.entityDatabase.has<Parent>(mEntity);
+  return mEntity.has<Parent>();
 }
 
 } // namespace quoll::editor

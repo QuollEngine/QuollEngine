@@ -494,48 +494,43 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
   QUOLL_PROFILE_EVENT("EditorRenderer::update");
   frameData.clear();
 
-  if (entityDatabase.exists(state.selectedEntity)) {
-    if (entityDatabase.has<Sprite>(state.selectedEntity)) {
-      const auto &world =
-          entityDatabase.get<WorldTransform>(state.selectedEntity);
-      frameData.addSpriteOutline(world.worldTransform);
-    } else if (entityDatabase.has<Mesh>(state.selectedEntity)) {
-      auto handle = entityDatabase.get<Mesh>(state.selectedEntity).handle;
+  if (state.selectedEntity.is_alive()) {
+    if (state.selectedEntity.has<Sprite>()) {
+      auto world = state.selectedEntity.get_ref<WorldTransform>();
+      frameData.addSpriteOutline(world->worldTransform);
+    } else if (state.selectedEntity.has<Mesh>()) {
+      auto handle = state.selectedEntity.get_ref<Mesh>()->handle;
 
-      const auto &world =
-          entityDatabase.get<WorldTransform>(state.selectedEntity);
+      auto world = state.selectedEntity.get_ref<WorldTransform>();
 
       const auto &data = assetRegistry.getMeshes().getAsset(handle).data;
-      frameData.addMeshOutline(data, world.worldTransform);
-    } else if (entityDatabase.has<SkinnedMesh>(state.selectedEntity) &&
-               entityDatabase.has<Skeleton>(state.selectedEntity)) {
-      auto handle =
-          entityDatabase.get<SkinnedMesh>(state.selectedEntity).handle;
+      frameData.addMeshOutline(data, world->worldTransform);
+    } else if (state.selectedEntity.has<SkinnedMesh>() &&
+               state.selectedEntity.has<Skeleton>()) {
+      auto handle = state.selectedEntity.get_ref<SkinnedMesh>()->handle;
 
-      const auto &world =
-          entityDatabase.get<WorldTransform>(state.selectedEntity);
+      auto world = state.selectedEntity.get_ref<WorldTransform>();
       const auto &data = assetRegistry.getMeshes().getAsset(handle).data;
 
-      const auto &skeleton = entityDatabase.get<Skeleton>(state.selectedEntity)
-                                 .jointFinalTransforms;
+      const auto &skeleton =
+          state.selectedEntity.get_ref<Skeleton>()->jointFinalTransforms;
 
-      frameData.addSkinnedMeshOutline(data, skeleton, world.worldTransform);
-    } else if (entityDatabase.has<Text>(state.selectedEntity)) {
-      const auto &text = entityDatabase.get<Text>(state.selectedEntity);
-      const auto &font = assetRegistry.getFonts().getAsset(text.font).data;
-      const auto &world =
-          entityDatabase.get<WorldTransform>(state.selectedEntity);
+      frameData.addSkinnedMeshOutline(data, skeleton, world->worldTransform);
+    } else if (state.selectedEntity.has<Text>()) {
+      auto text = state.selectedEntity.get_ref<Text>();
+      const auto &font = assetRegistry.getFonts().getAsset(text->font).data;
+      auto world = state.selectedEntity.get_ref<WorldTransform>();
 
       std::vector<SceneRendererFrameData::GlyphData> glyphs(
-          text.content.length());
+          text->content.length());
       f32 advanceX = 0;
       f32 advanceY = 0;
-      for (usize i = 0; i < text.content.length(); ++i) {
-        char c = text.content.at(i);
+      for (usize i = 0; i < text->content.length(); ++i) {
+        char c = text->content.at(i);
 
         if (c == '\n') {
           advanceX = 0.0f;
-          advanceY += text.lineHeight * font.fontScale;
+          advanceY += text->lineHeight * font.fontScale;
           continue;
         }
 
@@ -551,47 +546,42 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
         advanceX += fontGlyph.advanceX;
       }
 
-      frameData.addTextOutline(font.deviceHandle, glyphs, world.worldTransform);
+      frameData.addTextOutline(font.deviceHandle, glyphs,
+                               world->worldTransform);
     }
   }
 
-  if (entityDatabase.has<Collidable>(state.selectedEntity)) {
+  if (state.selectedEntity.has<Collidable>()) {
     frameData.setCollidable(
-        state.selectedEntity,
-        entityDatabase.get<Collidable>(state.selectedEntity),
-        entityDatabase.get<WorldTransform>(state.selectedEntity));
+        state.selectedEntity, *state.selectedEntity.get_ref<Collidable>().get(),
+        *state.selectedEntity.get_ref<WorldTransform>().get());
   }
 
-  frameData.setActiveCamera(entityDatabase.get<Camera>(camera));
+  frameData.setActiveCamera(*camera.get_ref<Camera>().get());
 
   frameData.setEditorGrid(state.grid);
 
-  for (auto [entity, worldTransform, skeleton] :
-       entityDatabase.view<WorldTransform, SkeletonDebug>()) {
-    frameData.addSkeleton(worldTransform.worldTransform,
-                          skeleton.boneTransforms);
-  }
+  entityDatabase.each([&](WorldTransform &world, SkeletonDebug &skeleton) {
+    frameData.addSkeleton(world.worldTransform, skeleton.boneTransforms);
+  });
 
-  for (auto [entity, world, light] :
-       entityDatabase.view<WorldTransform, DirectionalLight>()) {
+  entityDatabase.each([&](WorldTransform &world, DirectionalLight &) {
     frameData.addGizmo(IconRegistry::getIcon(EditorIcon::Sun),
                        world.worldTransform);
-  }
+  });
 
-  for (auto [entity, world, light] :
-       entityDatabase.view<WorldTransform, PointLight>()) {
+  entityDatabase.each([&](WorldTransform &world, PointLight &) {
     frameData.addGizmo(IconRegistry::getIcon(EditorIcon::Light),
                        world.worldTransform);
-  }
+  });
 
-  for (auto [entity, world, camera] :
-       entityDatabase.view<WorldTransform, PerspectiveLens>()) {
+  entityDatabase.each([&](WorldTransform &world, PerspectiveLens &) {
     static constexpr f32 NinetyDegreesInRadians = glm::pi<f32>() / 2.0f;
 
     frameData.addGizmo(IconRegistry::getIcon(EditorIcon::Camera),
                        glm::rotate(world.worldTransform, NinetyDegreesInRadians,
                                    glm::vec3(0, 1, 0)));
-  }
+  });
 
   frameData.updateBuffers();
 }

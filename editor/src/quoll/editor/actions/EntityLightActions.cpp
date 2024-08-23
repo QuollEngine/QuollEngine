@@ -12,13 +12,12 @@ EntityDeleteDirectionalLight::onExecute(WorkspaceState &state,
                                         AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldDirectionalLight = scene.entityDatabase.get<DirectionalLight>(mEntity);
-  scene.entityDatabase.remove<DirectionalLight>(mEntity);
+  mOldDirectionalLight = *mEntity.get_ref<DirectionalLight>().get();
+  mEntity.remove<DirectionalLight>();
 
-  if (scene.entityDatabase.has<CascadedShadowMap>(mEntity)) {
-    mOldCascadedShadowMap =
-        scene.entityDatabase.get<CascadedShadowMap>(mEntity);
-    scene.entityDatabase.remove<CascadedShadowMap>(mEntity);
+  if (mEntity.has<CascadedShadowMap>()) {
+    mOldCascadedShadowMap = *mEntity.get_ref<CascadedShadowMap>().get();
+    mEntity.remove<CascadedShadowMap>();
   }
 
   ActionExecutorResult res{};
@@ -32,10 +31,10 @@ EntityDeleteDirectionalLight::onUndo(WorkspaceState &state,
                                      AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set(mEntity, mOldDirectionalLight);
+  mEntity.set(mOldDirectionalLight);
 
   if (mOldCascadedShadowMap) {
-    scene.entityDatabase.set(mEntity, mOldCascadedShadowMap.value());
+    mEntity.set(mOldCascadedShadowMap.value());
   }
 
   ActionExecutorResult res{};
@@ -47,7 +46,7 @@ bool EntityDeleteDirectionalLight::predicate(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  return scene.entityDatabase.has<DirectionalLight>(mEntity);
+  return mEntity.has<DirectionalLight>();
 }
 
 } // namespace quoll::editor

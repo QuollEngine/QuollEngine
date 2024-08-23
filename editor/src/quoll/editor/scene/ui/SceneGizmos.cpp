@@ -24,30 +24,27 @@ calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
   glm::vec3 noopSkew;
   glm::vec4 noopPerspective;
 
-  if (!entityDatabase.has<Parent>(entity)) {
+  if (!entity.has<Parent>()) {
     glm::decompose(worldTransform, localScale, localRotation, localPosition,
                    noopSkew, noopPerspective);
     return LocalTransform{localPosition, localRotation, localScale};
   }
 
-  Entity parent = entityDatabase.get<Parent>(entity).parent;
+  auto parent = entity.get_ref<Parent>()->parent;
 
-  QuollAssert(entityDatabase.exists(parent) &&
-                  entityDatabase.has<WorldTransform>(parent),
+  QuollAssert(parent.is_valid() && parent.has<WorldTransform>(),
               "Parent entity does not exist or has no transform");
 
-  const auto &parentWorld =
-      entityDatabase.get<WorldTransform>(parent).worldTransform;
+  const auto &parentWorld = parent.get_ref<WorldTransform>()->worldTransform;
 
   i16 jointId = -1;
-  if (entityDatabase.has<JointAttachment>(entity) &&
-      entityDatabase.has<Skeleton>(parent)) {
-    jointId = entityDatabase.get<JointAttachment>(entity).joint;
+  if (entity.has<JointAttachment>() && parent.has<Skeleton>()) {
+    jointId = entity.get_ref<JointAttachment>()->joint;
   }
 
   if (jointId >= 0 && jointId < std::numeric_limits<u8>::max()) {
     const auto &jointTransform =
-        entityDatabase.get<Skeleton>(parent).jointWorldTransforms.at(jointId);
+        parent.get_ref<Skeleton>()->jointWorldTransforms.at(jointId);
 
     auto localTransform =
         glm::inverse(parentWorld * jointTransform) * worldTransform;
@@ -87,19 +84,18 @@ bool SceneGizmos::render(WorkspaceState &state,
   ImGuizmo::SetDrawlist();
   ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 
-  const auto &camera = scene.entityDatabase.get<Camera>(state.activeCamera);
-  auto gizmoPerspective = camera.projectionMatrix;
+  auto camera = state.activeCamera.get_ref<Camera>();
+  auto gizmoPerspective = camera->projectionMatrix;
 
   auto selected = state.selectedEntity;
-  const auto &world = scene.entityDatabase.get<WorldTransform>(selected);
-  auto worldTransform = world.worldTransform;
+  auto world = selected.get_ref<WorldTransform>();
+  auto worldTransform = world->worldTransform;
   if (ImGuizmo::Manipulate(
-          glm::value_ptr(camera.viewMatrix), glm::value_ptr(gizmoPerspective),
+          glm::value_ptr(camera->viewMatrix), glm::value_ptr(gizmoPerspective),
           getImguizmoOperation(state.activeTransform), ImGuizmo::WORLD,
           glm::value_ptr(worldTransform), nullptr, nullptr, nullptr)) {
     if (!mAction) {
-      const auto &localTransform =
-          scene.entityDatabase.get<LocalTransform>(selected);
+      auto localTransform = *selected.get_ref<LocalTransform>().get();
       mAction.reset(
           new EntitySetLocalTransformContinuous(selected, localTransform));
     }
@@ -108,7 +104,7 @@ bool SceneGizmos::render(WorkspaceState &state,
         calculateLocalTransformFromWorld(state, selected, worldTransform);
     mAction->setNewComponent(localTransform);
 
-    scene.entityDatabase.set(selected, localTransform);
+    selected.set(localTransform);
   }
 
   if (!ImGuizmo::IsUsing() && mAction) {

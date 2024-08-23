@@ -279,7 +279,7 @@ void EditorRendererFrameData::clear() {
   mOutlineTransforms.clear();
   mLastOutlineSkeleton = 0;
 
-  mCollidableEntity = Entity::Null;
+  mCollidableEntity = flecs::entity::null();
 }
 
 void EditorRendererFrameData::setCollidable(

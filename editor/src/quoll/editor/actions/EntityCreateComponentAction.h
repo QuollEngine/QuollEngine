@@ -13,7 +13,7 @@ public:
                                  AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
 
-    scene.entityDatabase.set<TComponent>(mEntity, mComponent);
+    mEntity.set<TComponent>(mComponent);
 
     ActionExecutorResult res{};
     res.entitiesToSave.push_back(mEntity);
@@ -25,7 +25,7 @@ public:
                               AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
 
-    scene.entityDatabase.remove<TComponent>(mEntity);
+    mEntity.remove<TComponent>();
 
     ActionExecutorResult res{};
     res.entitiesToSave.push_back(mEntity);
@@ -36,7 +36,7 @@ public:
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
 
-    return !scene.entityDatabase.has<TComponent>(mEntity);
+    return !mEntity.has<TComponent>();
   }
 
 private:

@@ -12,10 +12,8 @@ EntitySetMeshRendererMaterial::onExecute(WorkspaceState &state,
                                          AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldMaterial =
-      scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot);
-  scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot) =
-      mNewMaterial;
+  mOldMaterial = mEntity.get_ref<MeshRenderer>()->materials.at(mSlot);
+  mEntity.get_ref<MeshRenderer>()->materials.at(mSlot) = mNewMaterial;
 
   ActionExecutorResult result{};
   result.addToHistory = true;
@@ -28,8 +26,7 @@ EntitySetMeshRendererMaterial::onUndo(WorkspaceState &state,
                                       AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot) =
-      mOldMaterial;
+  mEntity.get_ref<MeshRenderer>()->materials.at(mSlot) = mOldMaterial;
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -40,12 +37,11 @@ bool EntitySetMeshRendererMaterial::predicate(WorkspaceState &state,
                                               AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {
+  if (!mEntity.has<MeshRenderer>()) {
     return false;
   }
 
-  if (mSlot >=
-      scene.entityDatabase.get<MeshRenderer>(mEntity).materials.size()) {
+  if (mSlot >= mEntity.get_ref<MeshRenderer>()->materials.size()) {
     return false;
   }
 
@@ -61,8 +57,7 @@ EntityAddMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.get<MeshRenderer>(mEntity).materials.push_back(
-      mNewMaterial);
+  mEntity.get_ref<MeshRenderer>()->materials.push_back(mNewMaterial);
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -76,7 +71,7 @@ EntityAddMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
 
   auto &scene = state.scene;
 
-  scene.entityDatabase.get<MeshRenderer>(mEntity).materials.pop_back();
+  mEntity.get_ref<MeshRenderer>()->materials.pop_back();
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -87,7 +82,7 @@ bool EntityAddMeshRendererMaterialSlot::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {
+  if (!mEntity.has<MeshRenderer>()) {
     return false;
   }
 
@@ -102,10 +97,9 @@ ActionExecutorResult EntityRemoveLastMeshRendererMaterialSlot::onExecute(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldMaterial =
-      scene.entityDatabase.get<MeshRenderer>(mEntity).materials.back();
+  mOldMaterial = mEntity.get_ref<MeshRenderer>()->materials.back();
 
-  scene.entityDatabase.get<MeshRenderer>(mEntity).materials.pop_back();
+  mEntity.get_ref<MeshRenderer>()->materials.pop_back();
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -118,8 +112,7 @@ EntityRemoveLastMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
                                                  AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.get<MeshRenderer>(mEntity).materials.push_back(
-      mOldMaterial);
+  mEntity.get_ref<MeshRenderer>()->materials.push_back(mOldMaterial);
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -130,11 +123,11 @@ bool EntityRemoveLastMeshRendererMaterialSlot::predicate(
     WorkspaceState &state, AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {
+  if (!mEntity.has<MeshRenderer>()) {
     return false;
   }
 
-  return scene.entityDatabase.get<MeshRenderer>(mEntity).materials.size() > 0;
+  return mEntity.get_ref<MeshRenderer>()->materials.size() > 0;
 }
 
 } // namespace quoll::editor

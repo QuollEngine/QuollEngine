@@ -25,7 +25,7 @@ ActionExecutorResult EntityCreateScript::onUndo(WorkspaceState &state,
 bool EntityCreateScript::predicate(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
-  return !scene.entityDatabase.has<LuaScript>(mEntity) &&
+  return !mEntity.has<LuaScript>() &&
          assetRegistry.getLuaScripts().hasAsset(mHandle);
 }
 
@@ -36,9 +36,9 @@ ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state,
                                                 AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  mOldScript = scene.entityDatabase.get<LuaScript>(mEntity).handle;
+  mOldScript = mEntity.get_ref<LuaScript>()->handle;
 
-  scene.entityDatabase.set<LuaScript>(mEntity, {mScript});
+  mEntity.set<LuaScript>({mScript});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -50,7 +50,7 @@ ActionExecutorResult EntitySetScript::onUndo(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set<LuaScript>(mEntity, {mOldScript});
+  mEntity.set<LuaScript>({mOldScript});
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -71,10 +71,10 @@ EntitySetScriptVariable::onExecute(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  auto &script = scene.entityDatabase.get<LuaScript>(mEntity);
-  mOldScript = script;
+  auto script = mEntity.get_ref<LuaScript>();
+  mOldScript = *script.get();
 
-  script.variables.insert_or_assign(mName, mValue);
+  script->variables.insert_or_assign(mName, mValue);
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -87,7 +87,7 @@ EntitySetScriptVariable::onUndo(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  scene.entityDatabase.set(mEntity, mOldScript);
+  mEntity.set(mOldScript);
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -98,11 +98,11 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state,
                                         AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  if (!scene.entityDatabase.has<LuaScript>(mEntity)) {
+  if (!mEntity.has<LuaScript>()) {
     return false;
   }
 
-  auto scriptHandle = scene.entityDatabase.get<LuaScript>(mEntity).handle;
+  auto scriptHandle = mEntity.get_ref<LuaScript>()->handle;
   if (!assetRegistry.getLuaScripts().hasAsset(scriptHandle)) {
     return false;
   }

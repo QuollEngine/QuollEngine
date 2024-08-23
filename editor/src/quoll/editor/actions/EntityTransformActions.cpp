@@ -19,9 +19,9 @@ ActionExecutorResult
 EntitySetLocalTransformContinuous::onExecute(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
-  scene.entityDatabase.set(mEntity, mNewLocalTransform.value());
-  if (!scene.entityDatabase.has<WorldTransform>(mEntity)) {
-    scene.entityDatabase.set<WorldTransform>(mEntity, {});
+  mEntity.set(mNewLocalTransform.value());
+  if (!mEntity.has<WorldTransform>()) {
+    mEntity.set<WorldTransform>({});
   }
 
   ActionExecutorResult res{};
@@ -36,14 +36,14 @@ EntitySetLocalTransformContinuous::onUndo(WorkspaceState &state,
   auto &scene = state.scene;
 
   if (mOldLocalTransform.has_value()) {
-    scene.entityDatabase.set(mEntity, mOldLocalTransform.value());
-    if (!scene.entityDatabase.has<WorldTransform>(mEntity)) {
-      scene.entityDatabase.set<WorldTransform>(mEntity, {});
+    mEntity.set(mOldLocalTransform.value());
+    if (!mEntity.has<WorldTransform>()) {
+      mEntity.set<WorldTransform>({});
     }
   } else {
-    scene.entityDatabase.remove<LocalTransform>(mEntity);
-    if (scene.entityDatabase.has<WorldTransform>(mEntity)) {
-      scene.entityDatabase.remove<WorldTransform>(mEntity);
+    mEntity.remove<LocalTransform>();
+    if (mEntity.has<WorldTransform>()) {
+      mEntity.remove<WorldTransform>();
     }
   }
 

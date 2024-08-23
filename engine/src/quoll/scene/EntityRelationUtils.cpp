@@ -58,7 +58,8 @@ EntityRelationUtils::isValidParentForEntity(EntityDatabase &entityDatabase,
 
   auto parentInner = parent;
   bool parentIsNotDescendant = parentInner != entity;
-  while (parentIsNotDescendant && parentInner.has<Parent>()) {
+  while (parentIsNotDescendant && parentInner.is_valid() &&
+         parentInner.has<Parent>()) {
     auto p = parentInner.get_ref<Parent>()->parent;
     parentIsNotDescendant = p != entity;
     parentInner = p;

@@ -45,7 +45,7 @@ private:
 
 private:
   rhi::RenderDevice *mDevice;
-  Entity mSelectedEntity = Entity::Null;
+  Entity mSelectedEntity;
 
   CollidableShapeDraw mCollidableCube;
   CollidableShapeDraw mCollidableSphere;

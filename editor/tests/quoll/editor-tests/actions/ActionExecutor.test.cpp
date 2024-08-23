@@ -148,8 +148,8 @@ TEST_F(ActionExecutorTest, ProcessDoesNotBreakIfNoAssetSyncer) {
 
 TEST_F(ActionExecutorTest,
        ExecuteSyncsEntitiesWithSyncerIfActionReturnsEntitiesToSave) {
-  auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
+  auto entity = state.scene.entityDatabase.entity();
+  entity.set<quoll::Name>({"My name"});
 
   auto *actionPtr = new TestAction;
   actionPtr->saveEntityOnExecute(entity);
@@ -167,9 +167,9 @@ TEST_F(ActionExecutorTest,
 
 TEST_F(ActionExecutorTest,
        ExecuteDeletesEntitiesWithSyncerIfActionReturnsEntitiesToDelete) {
-  auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
-  state.scene.entityDatabase.set<quoll::Id>(entity, {15});
+  auto entity = state.scene.entityDatabase.entity();
+  entity.set<quoll::Name>({"My name"});
+  entity.set<quoll::Id>({15});
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
@@ -187,9 +187,9 @@ TEST_F(ActionExecutorTest,
 
 TEST_F(ActionExecutorTest,
        ExecuteSyncsSceneWithSyncerIfActionReturnsSaveScene) {
-  auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
-  state.scene.entityDatabase.set<quoll::Id>(entity, {15});
+  auto entity = state.scene.entityDatabase.entity();
+  entity.set<quoll::PerspectiveLens>({});
+  entity.set<quoll::Id>({15});
   state.scene.activeCamera = entity;
 
   auto *actionPtr = new TestAction;

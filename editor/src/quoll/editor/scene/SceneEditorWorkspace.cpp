@@ -38,7 +38,7 @@ SceneEditorWorkspace::SceneEditorWorkspace(
 
   auto statePath = project.settingsPath / "default.state";
 
-  mState.scene.entityDatabase.reg<CameraLookAt>();
+  mState.scene.entityDatabase.component<CameraLookAt>();
   mState.camera =
       EditorCamera::createDefaultCamera(mState.scene.entityDatabase);
   mState.activeCamera = mState.camera;
@@ -106,8 +106,7 @@ void SceneEditorWorkspace::updateFrameData(rhi::RenderCommandList &commandList,
                                            u32 frameIndex) {
   auto &scene = mState.scene;
 
-  mSceneRenderer.updateFrameData(scene.entityDatabase, mState.activeCamera,
-                                 frameIndex);
+  mSceneRenderer.updateFrameData(mSystemView, mState.activeCamera, frameIndex);
   mEditorRenderer.updateFrameData(scene.entityDatabase, mState.activeCamera,
                                   mState, mAssetManager.getAssetRegistry(),
                                   frameIndex);
