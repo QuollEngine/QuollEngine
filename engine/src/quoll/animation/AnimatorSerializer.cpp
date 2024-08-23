@@ -7,8 +7,8 @@ void AnimatorSerializer::serialize(YAML::Node &node,
                                    EntityDatabase &entityDatabase,
                                    Entity entity,
                                    AssetRegistry &assetRegistry) {
-  if (entityDatabase.has<Animator>(entity)) {
-    auto handle = entityDatabase.get<Animator>(entity).asset;
+  if (entity.has<Animator>()) {
+    auto handle = entity.get_ref<Animator>()->asset;
 
     if (assetRegistry.getAnimators().hasAsset(handle)) {
       auto uuid = assetRegistry.getAnimators().getAsset(handle).uuid;
@@ -31,7 +31,7 @@ void AnimatorSerializer::deserialize(const YAML::Node &node,
       const auto &asset = assetRegistry.getAnimators().getAsset(handle);
       Animator animator;
       animator.asset = handle;
-      entityDatabase.set(entity, animator);
+      entity.set(animator);
     }
   }
 }

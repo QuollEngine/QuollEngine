@@ -7,7 +7,7 @@ class InputMapLuaTableTest : public LuaScriptingInterfaceTestBase {
 public:
   quoll::Entity createEntityWithInputMap(bool value = false,
                                          usize defaultScheme = 0) {
-    auto entity = entityDatabase.create();
+    auto entity = entityDatabase.entity();
 
     quoll::InputMap map{};
     map.commandDataTypes.push_back(quoll::InputDataType::Boolean);
@@ -20,12 +20,12 @@ public:
     map.schemeNameMap.insert_or_assign("Test scheme", 1);
     map.activeScheme = defaultScheme;
 
-    entityDatabase.set(entity, map);
+    entity.set(map);
     return entity;
   }
 
   quoll::Entity createEntityWithInputMap(glm::vec2 value) {
-    auto entity = entityDatabase.create();
+    auto entity = entityDatabase.entity();
 
     quoll::InputMap map{};
     map.commandDataTypes.push_back(quoll::InputDataType::Axis2d);
@@ -33,7 +33,7 @@ public:
     map.commandValues.resize(2, value);
     map.commandNameMap["Test"] = 1;
 
-    entityDatabase.set(entity, map);
+    entity.set(map);
     return entity;
   }
 };
@@ -48,19 +48,19 @@ TEST_F(InputMapLuaTableTest, GetCommandReturnsCommandIndex) {
 }
 
 TEST_F(InputMapLuaTableTest, GetCommandReturnsNilIfEntityHasNoInputMap) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto state = call(entity, "inputGetCommand");
   EXPECT_TRUE(state["inputCommand"].is<sol::nil_t>());
 }
 
 TEST_F(InputMapLuaTableTest, GetCommandReturnsNilIfCommandDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::InputMap map{};
   map.commandDataTypes.push_back(quoll::InputDataType::Boolean);
   map.commandValues.resize(1);
   map.commandNameMap["SomethingElse"] = 0;
-  entityDatabase.set(entity, map);
+  entity.set(map);
 
   auto state = call(entity, "inputGetCommand");
   EXPECT_TRUE(state["inputCommand"].is<sol::nil_t>());
@@ -95,7 +95,7 @@ TEST_F(InputMapLuaTableTest,
 
 TEST_F(InputMapLuaTableTest,
        GetCommandValueBooleanReturnsNilIfInputMapNotFound) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto state = call(entity, "inputGetValueBooleanNonExistentCommand");
 
   EXPECT_TRUE(state["inputCommandValue"].is<sol::nil_t>());
@@ -147,7 +147,7 @@ TEST_F(InputMapLuaTableTest,
 
 TEST_F(InputMapLuaTableTest,
        GetCommandValueAxis2dReturnsZeroVec2IfInputMapNotFound) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto state = call(entity, "inputGetValueAxis2dNonExistentCommand");
 
   EXPECT_TRUE(state["inputCommandValueX"].is<sol::nil_t>());
@@ -167,24 +167,23 @@ TEST_F(InputMapLuaTableTest,
 TEST_F(InputMapLuaTableTest, SetSchemeSetsSchemeToProvidedValue) {
   auto entity = createEntityWithInputMap();
 
-  EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 0);
+  EXPECT_EQ(entity.get_ref<quoll::InputMap>()->activeScheme, 0);
   call(entity, "inputSetScheme");
-  EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 1);
+  EXPECT_EQ(entity.get_ref<quoll::InputMap>()->activeScheme, 1);
 }
 
 TEST_F(InputMapLuaTableTest,
        SetSchemeDoesNothingIfInputMapComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   call(entity, "inputSetScheme");
-  EXPECT_FALSE(entityDatabase.has<quoll::InputMap>(entity));
+  EXPECT_FALSE(entity.has<quoll::InputMap>());
 }
 
 TEST_F(InputMapLuaTableTest, SetSchemeDoesNothingIfSchemeNotFound) {
   auto entity = createEntityWithInputMap(false, 0);
-  entityDatabase.get<quoll::InputMap>(entity).schemeNameMap.erase(
-      "Test scheme");
+  entity.get_ref<quoll::InputMap>()->schemeNameMap.erase("Test scheme");
 
   call(entity, "inputSetScheme");
-  EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 0);
+  EXPECT_EQ(entity.get_ref<quoll::InputMap>()->activeScheme, 0);
 }

@@ -11,8 +11,8 @@ namespace quoll {
 static sol_maybe<EntityLuaTable> getParent(EntityLuaTable &entityTable) {
   auto entity = entityTable.getEntity();
   auto &scriptGlobals = entityTable.getScriptGlobals();
-  if (scriptGlobals.entityDatabase.has<Parent>(entity)) {
-    auto parent = scriptGlobals.entityDatabase.get<Parent>(entity).parent;
+  if (entity.has<Parent>()) {
+    auto parent = entity.get_ref<Parent>()->parent;
 
     return EntityLuaTable(parent, entityTable.getScriptGlobals());
   }

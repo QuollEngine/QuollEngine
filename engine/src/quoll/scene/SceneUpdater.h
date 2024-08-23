@@ -8,6 +8,8 @@ struct SystemView;
 
 class SceneUpdater {
 public:
+  void createSystemViewData(SystemView &view);
+
   void update(SystemView &view);
 
 private:

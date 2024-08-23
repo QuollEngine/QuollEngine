@@ -155,7 +155,9 @@ void PhysxBackend::update(f32 dt, SystemView &view) {
 
 void PhysxBackend::cleanup(SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, physx] : entityDatabase.view<PhysxInstance>()) {
+
+  entityDatabase.defer_begin();
+  entityDatabase.each([this](flecs::entity entity, PhysxInstance &physx) {
     if (physx.rigidStatic) {
       if (physx.shape) {
         physx.rigidStatic->detachShape(*physx.shape);
@@ -171,39 +173,72 @@ void PhysxBackend::cleanup(SystemView &view) {
       mScene->removeActor(*physx.rigidDynamic);
       physx.rigidDynamic->release();
     }
-  }
 
-  entityDatabase.destroyComponents<PhysxInstance>();
-  view.physx.instanceRemoveObserver.clear();
+    entity.remove<PhysxInstance>();
+  });
+  entityDatabase.defer_end();
 }
 
 void PhysxBackend::createSystemViewData(SystemView &view) {
-  auto &entityDatabase = view.scene->entityDatabase;
+  auto &db = view.scene->entityDatabase;
 
-  view.physx.instanceRemoveObserver =
-      entityDatabase.observeRemove<PhysxInstance>();
+  view.physx.queryNoPhysxInstances = db.query_builder()
+                                         .with<Collidable>()
+                                         .or_()
+                                         .with<RigidBody>()
+                                         .without<PhysxInstance>()
+                                         .build();
+
+  view.physx.queryCollidables =
+      db.query<Collidable, WorldTransform, PhysxInstance>();
+
+  view.physx.queryRigidBodies =
+      db.query<RigidBody, WorldTransform, PhysxInstance>();
+
+  view.physx.queryRigidBodyAppliedForces = db.query<Force, PhysxInstance>();
+  view.physx.queryRigidBodyAppliedImpulses = db.query<Impulse, PhysxInstance>();
+  view.physx.queryRigidBodyAppliedTorques = db.query<Torque, PhysxInstance>();
+  view.physx.queryRigidBodyClears =
+      db.query_builder<PhysxInstance>().with<RigidBodyClear>().build();
+
+  db.observer<PhysxInstance>()
+      .event(flecs::OnRemove)
+      .each([this](PhysxInstance &physx) {
+        if (physx.rigidDynamic) {
+          mScene->removeActor(*physx.rigidDynamic);
+          physx.rigidDynamic->release();
+        }
+
+        if (physx.rigidStatic) {
+          mScene->removeActor(*physx.rigidStatic);
+          physx.rigidStatic->release();
+        }
+
+        if (physx.material) {
+          physx.material->release();
+        }
+      });
 }
 
 bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
                          const glm::vec3 &direction, f32 maxDistance,
                          CollisionHit &hit) {
-  QuollAssert(entityDatabase.has<PhysxInstance>(entity),
-              "Physx instance not found");
+  QuollAssert(entity.has<PhysxInstance>(), "Physx instance not found");
 
-  const auto &physx = entityDatabase.get<PhysxInstance>(entity);
-  const auto &transform = entityDatabase.get<WorldTransform>(entity);
-  const auto &collidable = entityDatabase.get<Collidable>(entity);
+  auto physx = entity.get_ref<PhysxInstance>();
+  auto transform = entity.get_ref<WorldTransform>();
+  auto collidable = entity.get_ref<Collidable>();
 
   PxSweepBuffer buffer;
 
   PxQueryFilterData filterData(PxQueryFlag::eDYNAMIC | PxQueryFlag::eSTATIC |
                                PxQueryFlag::ePREFILTER);
-  PhysxQueryFilterCallback filterCallback(physx.shape);
+  PhysxQueryFilterCallback filterCallback(physx->shape);
 
   bool result =
-      mScene->sweep(physx.shape->getGeometry().any(),
-                    PhysxMapping::getPhysxTransform(transform.worldTransform) *
-                        physx.shape->getLocalPose(),
+      mScene->sweep(physx->shape->getGeometry().any(),
+                    PhysxMapping::getPhysxTransform(transform->worldTransform) *
+                        physx->shape->getLocalPose(),
                     PhysxMapping::getPhysxVec3(direction), maxDistance, buffer,
                     PxHitFlag::eDEFAULT, filterData, &filterCallback);
 
@@ -220,210 +255,194 @@ bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
 
 void PhysxBackend::synchronizeComponents(SystemView &view) {
   QUOLL_PROFILE_EVENT("PhysicsSystem::synchronizeEntitiesWithPhysx");
+  auto &entityDatabase = view.scene->entityDatabase;
 
   {
-    QUOLL_PROFILE_EVENT("Cleanup dangling physx objects in scene");
-    for (auto [entity, physx] : view.physx.instanceRemoveObserver) {
-      if (physx.rigidDynamic) {
-        mScene->removeActor(*physx.rigidDynamic);
-        physx.rigidDynamic->release();
-      }
-
-      if (physx.rigidStatic) {
-        mScene->removeActor(*physx.rigidStatic);
-        physx.rigidStatic->release();
-      }
-
-      if (physx.material) {
-        physx.material->release();
-      }
-    }
-
-    view.physx.instanceRemoveObserver.clear();
+    QUOLL_PROFILE_EVENT("Create physx instances");
+    entityDatabase.defer_begin();
+    view.physx.queryNoPhysxInstances.each(
+        [](flecs::entity entity) { entity.set<PhysxInstance>({}); });
+    entityDatabase.defer_end();
   }
 
   {
     QUOLL_PROFILE_EVENT("Synchronize collidable components");
-    auto &entityDatabase = view.scene->entityDatabase;
-    for (auto [entity, collidable, world] :
-         entityDatabase.view<Collidable, WorldTransform>()) {
-      if (!entityDatabase.has<PhysxInstance>(entity)) {
-        entityDatabase.set<PhysxInstance>(entity, {});
-      }
-      auto &physx = entityDatabase.get<PhysxInstance>(entity);
 
-      // Create or set material
-      if (!physx.material) {
-        physx.material =
-            mPhysics->createMaterial(collidable.materialDesc.staticFriction,
-                                     collidable.materialDesc.dynamicFriction,
-                                     collidable.materialDesc.restitution);
-      } else {
-        physx.material->setRestitution(collidable.materialDesc.restitution);
-        physx.material->setStaticFriction(
-            collidable.materialDesc.staticFriction);
-        physx.material->setDynamicFriction(
-            collidable.materialDesc.dynamicFriction);
-      }
+    view.physx.queryCollidables.each(
+        [this](flecs::entity entity, Collidable &collidable,
+               WorldTransform &world, PhysxInstance &physx) {
+          // Create or set material
+          if (!physx.material) {
+            physx.material = mPhysics->createMaterial(
+                collidable.materialDesc.staticFriction,
+                collidable.materialDesc.dynamicFriction,
+                collidable.materialDesc.restitution);
+          } else {
+            physx.material->setRestitution(collidable.materialDesc.restitution);
+            physx.material->setStaticFriction(
+                collidable.materialDesc.staticFriction);
+            physx.material->setDynamicFriction(
+                collidable.materialDesc.dynamicFriction);
+          }
 
-      // Create or set shape
-      if (!physx.shape) {
-        physx.shape = createShape(entity, collidable.geometryDesc,
-                                  *physx.material, world.worldTransform);
-        physx.material->release();
-      } else if (PhysxMapping::getPhysxGeometryType(
-                     collidable.geometryDesc.type) ==
-                 physx.shape->getGeometryType()) {
-        updateShapeWithGeometryData(collidable.geometryDesc, physx.shape,
-                                    world.worldTransform);
-      } else {
-        auto *newShape = createShape(entity, collidable.geometryDesc,
-                                     *physx.material, world.worldTransform);
+          // Create or set shape
+          if (!physx.shape) {
+            physx.shape = createShape(entity, collidable.geometryDesc,
+                                      *physx.material, world.worldTransform);
+            physx.material->release();
+          } else if (PhysxMapping::getPhysxGeometryType(
+                         collidable.geometryDesc.type) ==
+                     physx.shape->getGeometryType()) {
+            updateShapeWithGeometryData(collidable.geometryDesc, physx.shape,
+                                        world.worldTransform);
+          } else {
+            auto *newShape = createShape(entity, collidable.geometryDesc,
+                                         *physx.material, world.worldTransform);
 
-        if (entityDatabase.has<RigidBody>(entity)) {
-          physx.rigidDynamic->detachShape(*physx.shape);
-          physx.rigidDynamic->attachShape(*newShape);
-        } else {
-          physx.rigidStatic->detachShape(*physx.shape);
-          physx.rigidStatic->attachShape(*newShape);
-        }
+            if (entity.has<RigidBody>()) {
+              physx.rigidDynamic->detachShape(*physx.shape);
+              physx.rigidDynamic->attachShape(*newShape);
+            } else {
+              physx.rigidStatic->detachShape(*physx.shape);
+              physx.rigidStatic->attachShape(*newShape);
+            }
 
-        physx.shape->release();
-        physx.shape = newShape;
-      }
+            physx.shape->release();
+            physx.shape = newShape;
+          }
 
-      if (physx.useShapeInSimulation != collidable.useInSimulation) {
-        physx.shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE,
-                             collidable.useInSimulation);
-      }
-      physx.useShapeInSimulation = collidable.useInSimulation;
+          if (physx.useShapeInSimulation != collidable.useInSimulation) {
+            physx.shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE,
+                                 collidable.useInSimulation);
+          }
+          physx.useShapeInSimulation = collidable.useInSimulation;
 
-      if (physx.useShapeInQueries != collidable.useInQueries) {
-        physx.shape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE,
-                             collidable.useInQueries);
-      }
+          if (physx.useShapeInQueries != collidable.useInQueries) {
+            physx.shape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE,
+                                 collidable.useInQueries);
+          }
 
-      physx.useShapeInQueries = collidable.useInQueries;
-      physx.shape->setLocalPose(getShapeLocalTransform(
-          collidable.geometryDesc.center, collidable.geometryDesc.type));
+          physx.useShapeInQueries = collidable.useInQueries;
+          physx.shape->setLocalPose(getShapeLocalTransform(
+              collidable.geometryDesc.center, collidable.geometryDesc.type));
 
-      // Create rigid static if no rigid body
-      if (!entityDatabase.has<RigidBody>(entity) && !physx.rigidStatic) {
-        physx.rigidStatic = mPhysics->createRigidStatic(
-            PhysxMapping::getPhysxTransform(world.worldTransform));
-        physx.rigidStatic->attachShape(*physx.shape);
-        physx.rigidStatic->userData =
-            reinterpret_cast<void *>(static_cast<uptr>(entity));
+          // Create rigid static if no rigid body
+          if (!entity.has<RigidBody>() && !physx.rigidStatic) {
+            physx.rigidStatic = mPhysics->createRigidStatic(
+                PhysxMapping::getPhysxTransform(world.worldTransform));
+            physx.rigidStatic->attachShape(*physx.shape);
+            physx.rigidStatic->userData =
+                reinterpret_cast<void *>(static_cast<uptr>(entity));
 
-        mScene->addActor(*physx.rigidStatic);
-      } else if (physx.rigidStatic) {
-        // Update transform of rigid static if exists
-        physx.rigidStatic->setGlobalPose(
-            PhysxMapping::getPhysxTransform(world.worldTransform));
-      }
-    }
+            mScene->addActor(*physx.rigidStatic);
+          } else if (physx.rigidStatic) {
+            // Update transform of rigid static if exists
+            physx.rigidStatic->setGlobalPose(
+                PhysxMapping::getPhysxTransform(world.worldTransform));
+          }
+        });
   }
 
   {
     QUOLL_PROFILE_EVENT("Synchronize rigid body components");
-    auto &entityDatabase = view.scene->entityDatabase;
-    for (auto [entity, rigidBody, world] :
-         entityDatabase.view<RigidBody, WorldTransform>()) {
-      if (!entityDatabase.has<PhysxInstance>(entity)) {
-        entityDatabase.set<PhysxInstance>(entity, {});
-      }
 
-      auto &physx = entityDatabase.get<PhysxInstance>(entity);
+    view.physx.queryRigidBodies.each(
+        [this](flecs::entity entity, RigidBody &rigidBody,
+               WorldTransform &world, PhysxInstance &physx) {
+          if (!physx.rigidDynamic) {
+            physx.rigidDynamic = mPhysics->createRigidDynamic(
+                PhysxMapping::getPhysxTransform(world.worldTransform));
+            physx.rigidDynamic->userData =
+                reinterpret_cast<void *>(static_cast<uptr>(entity.id()));
 
-      if (!physx.rigidDynamic) {
-        physx.rigidDynamic = mPhysics->createRigidDynamic(
-            PhysxMapping::getPhysxTransform(world.worldTransform));
-        physx.rigidDynamic->userData =
-            reinterpret_cast<void *>(static_cast<uptr>(entity));
+            mScene->addActor(*physx.rigidDynamic);
 
-        mScene->addActor(*physx.rigidDynamic);
+            // Remove rigid static if exists
+            if (physx.rigidStatic) {
+              physx.rigidStatic->detachShape(*physx.shape);
+              mScene->removeActor(*physx.rigidStatic, false);
+              physx.rigidStatic->release();
+              physx.rigidStatic = nullptr;
+            }
+          }
 
-        // Remove rigid static if exists
-        if (physx.rigidStatic) {
-          physx.rigidStatic->detachShape(*physx.shape);
-          mScene->removeActor(*physx.rigidStatic, false);
-          physx.rigidStatic->release();
-          physx.rigidStatic = nullptr;
-        }
-      }
+          if (physx.shape && physx.rigidDynamic->getNbShapes() == 0) {
+            physx.rigidDynamic->attachShape(*physx.shape);
+          }
 
-      if (physx.shape && physx.rigidDynamic->getNbShapes() == 0) {
-        physx.rigidDynamic->attachShape(*physx.shape);
-      }
+          physx.rigidDynamic->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC,
+                                               rigidBody.type ==
+                                                   RigidBodyType::Kinematic);
+          physx.rigidDynamic->setActorFlag(PxActorFlag::eDISABLE_GRAVITY,
+                                           !rigidBody.dynamicDesc.applyGravity);
+          if (rigidBody.type == RigidBodyType::Kinematic) {
+            physx.rigidDynamic->setKinematicTarget(
+                PhysxMapping::getPhysxTransform(world.worldTransform));
+          } else {
+            physx.rigidDynamic->setGlobalPose(
+                PhysxMapping::getPhysxTransform(world.worldTransform));
+          }
 
-      physx.rigidDynamic->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC,
-                                           rigidBody.type ==
-                                               RigidBodyType::Kinematic);
-      physx.rigidDynamic->setActorFlag(PxActorFlag::eDISABLE_GRAVITY,
-                                       !rigidBody.dynamicDesc.applyGravity);
-      if (rigidBody.type == RigidBodyType::Kinematic) {
-        physx.rigidDynamic->setKinematicTarget(
-            PhysxMapping::getPhysxTransform(world.worldTransform));
-      } else {
-        physx.rigidDynamic->setGlobalPose(
-            PhysxMapping::getPhysxTransform(world.worldTransform));
-      }
-
-      physx.rigidDynamic->setMass(rigidBody.dynamicDesc.mass);
-      physx.rigidDynamic->setMassSpaceInertiaTensor(
-          {rigidBody.dynamicDesc.inertia.x, rigidBody.dynamicDesc.inertia.y,
-           rigidBody.dynamicDesc.inertia.z});
-    };
+          physx.rigidDynamic->setMass(rigidBody.dynamicDesc.mass);
+          physx.rigidDynamic->setMassSpaceInertiaTensor(
+              {rigidBody.dynamicDesc.inertia.x, rigidBody.dynamicDesc.inertia.y,
+               rigidBody.dynamicDesc.inertia.z});
+        });
   }
 
   {
     QUOLL_PROFILE_EVENT("Clear rigid body velocities");
-    auto &entityDatabase = view.scene->entityDatabase;
-    for (auto [entity, _, _2, physx] :
-         entityDatabase.view<RigidBodyClear, RigidBody, PhysxInstance>()) {
-      physx.rigidDynamic->setLinearVelocity(PxVec3(0.0f));
-      physx.rigidDynamic->setAngularVelocity(PxVec3(0.0f));
-    }
 
-    entityDatabase.destroyComponents<RigidBodyClear>();
+    entityDatabase.defer_begin();
+    view.physx.queryRigidBodyClears.each(
+        [](flecs::entity entity, PhysxInstance &physx) {
+          physx.rigidDynamic->setLinearVelocity(PxVec3(0.0f));
+          physx.rigidDynamic->setAngularVelocity(PxVec3(0.0f));
+
+          entity.remove<RigidBodyClear>();
+        });
+    entityDatabase.defer_end();
   }
 
   {
     QUOLL_PROFILE_EVENT("Apply forces");
-    auto &entityDatabase = view.scene->entityDatabase;
-    for (auto [entity, force, _, physx] :
-         entityDatabase.view<Force, RigidBody, PhysxInstance>()) {
-      physx.rigidDynamic->addForce(
-          PxVec3(force.force.x, force.force.y, force.force.z),
-          physx::PxForceMode::eFORCE);
-    };
 
-    entityDatabase.destroyComponents<Force>();
+    entityDatabase.defer_begin();
+    view.physx.queryRigidBodyAppliedForces.each(
+        [](flecs::entity entity, Force &force, PhysxInstance &physx) {
+          physx.rigidDynamic->addForce(
+              PxVec3(force.force.x, force.force.y, force.force.z),
+              physx::PxForceMode::eFORCE);
+
+          entity.remove<Force>();
+        });
+    entityDatabase.defer_end();
   }
 
   {
     QUOLL_PROFILE_EVENT("Apply impulses");
-    auto &entityDatabase = view.scene->entityDatabase;
-    for (auto [entity, impulse, _, physx] :
-         entityDatabase.view<Impulse, RigidBody, PhysxInstance>()) {
-      physx.rigidDynamic->addForce(
-          PxVec3(impulse.impulse.x, impulse.impulse.y, impulse.impulse.z),
-          physx::PxForceMode::eIMPULSE);
-    };
 
-    entityDatabase.destroyComponents<Impulse>();
+    entityDatabase.defer_begin();
+    view.physx.queryRigidBodyAppliedImpulses.each(
+        [](flecs::entity entity, Impulse &impulse, PhysxInstance &physx) {
+          physx.rigidDynamic->addForce(
+              PxVec3(impulse.impulse.x, impulse.impulse.y, impulse.impulse.z),
+              physx::PxForceMode::eIMPULSE);
+          entity.remove<Impulse>();
+        });
+    entityDatabase.defer_end();
   }
 
   {
     QUOLL_PROFILE_EVENT("Apply torques");
-    auto &entityDatabase = view.scene->entityDatabase;
-    for (auto [entity, torque, _, physx] :
-         entityDatabase.view<Torque, RigidBody, PhysxInstance>()) {
-      physx.rigidDynamic->addTorque(
-          PxVec3(torque.torque.x, torque.torque.y, torque.torque.z));
-    };
-
-    entityDatabase.destroyComponents<Torque>();
+    entityDatabase.defer_begin();
+    view.physx.queryRigidBodyAppliedTorques.each(
+        [](flecs::entity entity, Torque &torque, PhysxInstance &physx) {
+          physx.rigidDynamic->addTorque(
+              PxVec3(torque.torque.x, torque.torque.y, torque.torque.z));
+          entity.remove<Torque>();
+        });
+    entityDatabase.defer_end();
   }
 }
 
@@ -453,20 +472,20 @@ void PhysxBackend::synchronizeTransforms(SystemView &view) {
       glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
                          globalTransform.q.y, globalTransform.q.z);
 
-      if (entityDatabase.has<WorldTransform>(entity)) {
-        auto &world = entityDatabase.get<WorldTransform>(entity);
+      if (entity.has<WorldTransform>()) {
+        auto world = entity.get_ref<WorldTransform>();
 
         glm::quat emptyQuat;
         glm::vec3 scale;
         glm::vec3 empty3;
         glm::vec4 empty4;
 
-        glm::decompose(world.worldTransform, scale, emptyQuat, empty3, empty3,
+        glm::decompose(world->worldTransform, scale, emptyQuat, empty3, empty3,
                        empty4);
 
-        world.worldTransform = glm::translate(glm::mat4{1.0f}, position) *
-                               glm::toMat4(rotation) *
-                               glm::scale(glm::mat4{1.0f}, scale);
+        world->worldTransform = glm::translate(glm::mat4{1.0f}, position) *
+                                glm::toMat4(rotation) *
+                                glm::scale(glm::mat4{1.0f}, scale);
       }
     }
   }
@@ -489,37 +508,34 @@ void PhysxBackend::synchronizeTransforms(SystemView &view) {
       glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
                          globalTransform.q.y, globalTransform.q.z);
 
-      if (entityDatabase.has<LocalTransform>(entity)) {
-        auto &transform = entityDatabase.get<LocalTransform>(entity);
+      if (entity.has<LocalTransform>()) {
+        auto transform = entity.get_ref<LocalTransform>();
 
-        if (entityDatabase.has<Parent>(entity)) {
-          auto parent = entityDatabase.get<Parent>(entity).parent;
-          const auto &parentTransform =
-              entityDatabase.get<WorldTransform>(parent);
+        if (entity.has<Parent>()) {
+          auto &parent = entity.get_ref<Parent>()->parent;
+          auto parentTransform = parent.get_ref<WorldTransform>();
 
           glm::mat4 invParentTransform{1.0f};
           i16 jointId = -1;
-          if (entityDatabase.has<JointAttachment>(entity) &&
-              entityDatabase.has<Skeleton>(parent)) {
-            jointId = entityDatabase.get<JointAttachment>(entity).joint;
+          if (entity.has<JointAttachment>() && parent.has<Skeleton>()) {
+            jointId = entity.get_ref<JointAttachment>()->joint;
 
             const auto &jointTransform =
-                entityDatabase.get<Skeleton>(parent).jointWorldTransforms.at(
-                    jointId);
+                parent.get_ref<Skeleton>()->jointWorldTransforms.at(jointId);
 
             invParentTransform =
-                glm::inverse(parentTransform.worldTransform * jointTransform);
+                glm::inverse(parentTransform->worldTransform * jointTransform);
           } else {
-            invParentTransform = glm::inverse(parentTransform.worldTransform);
+            invParentTransform = glm::inverse(parentTransform->worldTransform);
           }
 
-          transform.localPosition =
+          transform->localPosition =
               glm::vec3(invParentTransform * glm::vec4(position, 1.0));
-          transform.localRotation =
+          transform->localRotation =
               glm::toQuat(invParentTransform * glm::toMat4(rotation));
         } else {
-          transform.localPosition = position;
-          transform.localRotation = rotation;
+          transform->localPosition = position;
+          transform->localRotation = rotation;
         }
       }
     }

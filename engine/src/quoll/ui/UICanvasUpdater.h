@@ -9,6 +9,8 @@ struct SystemView;
 
 class UICanvasUpdater {
 public:
+  void createSystemViewData(SystemView &view);
+
   void render(SystemView &view, AssetRegistry &assetRegistry);
 
   void setViewport(f32 x, f32 y, f32 width, f32 height);

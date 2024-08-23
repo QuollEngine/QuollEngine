@@ -12,8 +12,8 @@ public:
 };
 
 TEST_F(PhysicsSystemLuaTable, RegistersCollisionStartSignal) {
-  auto entity = entityDatabase.create();
-  auto other = entityDatabase.create();
+  auto entity = entityDatabase.entity();
+  auto other = entityDatabase.entity();
 
   auto state = start(entity);
 
@@ -30,10 +30,10 @@ TEST_F(PhysicsSystemLuaTable, RegistersCollisionStartSignal) {
 }
 
 TEST_F(PhysicsSystemLuaTable, RegistersCollisionEndSignal) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity, {"A"});
-  auto other = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity, {"B"});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Name>({"A"});
+  auto other = entityDatabase.entity();
+  entity.set<quoll::Name>({"B"});
 
   auto state = start(entity);
 

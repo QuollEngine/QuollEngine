@@ -7,13 +7,13 @@ void SkinnedMeshRendererSerializer::serialize(YAML::Node &node,
                                               EntityDatabase &entityDatabase,
                                               Entity entity,
                                               AssetRegistry &assetRegistry) {
-  if (entityDatabase.has<SkinnedMeshRenderer>(entity)) {
-    const auto &renderer = entityDatabase.get<SkinnedMeshRenderer>(entity);
+  if (entity.has<SkinnedMeshRenderer>()) {
+    auto renderer = entity.get_ref<SkinnedMeshRenderer>();
 
     node["skinnedMeshRenderer"]["materials"] =
         YAML::Node(YAML::NodeType::Sequence);
 
-    for (auto material : renderer.materials) {
+    for (auto material : renderer->materials) {
       if (assetRegistry.getMaterials().hasAsset(material)) {
         auto uuid = assetRegistry.getMaterials().getAsset(material).uuid;
         node["skinnedMeshRenderer"]["materials"].push_back(uuid);
@@ -42,7 +42,7 @@ void SkinnedMeshRendererSerializer::deserialize(const YAML::Node &node,
       }
     }
 
-    entityDatabase.set(entity, renderer);
+    entity.set(renderer);
   }
 }
 

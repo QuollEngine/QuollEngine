@@ -12,9 +12,11 @@ struct SkeletonUpdaterTest : public ::testing::Test {
   quoll::SkeletonUpdater skeletonUpdater;
   quoll::SystemView view{&scene};
 
+  SkeletonUpdaterTest() { skeletonUpdater.createSystemViewData(view); }
+
   std::tuple<quoll::Skeleton &, quoll::SkeletonDebug &, quoll::Entity>
   createSkeleton(u32 numJoints) {
-    auto entity = entityDatabase.create();
+    auto entity = entityDatabase.entity();
 
     quoll::Skeleton skeleton;
 
@@ -33,8 +35,6 @@ struct SkeletonUpdaterTest : public ::testing::Test {
       skeleton.jointNames.push_back("Joint " + std::to_string(i));
     }
 
-    entityDatabase.set(entity, skeleton);
-
     quoll::SkeletonDebug skeletonDebug{};
     auto numBones = skeleton.numJoints * 2;
     skeletonDebug.bones.reserve(numBones);
@@ -46,17 +46,18 @@ struct SkeletonUpdaterTest : public ::testing::Test {
 
     skeletonDebug.boneTransforms.resize(numBones, glm::mat4{1.0f});
 
-    entityDatabase.set(entity, skeletonDebug);
+    entity.set(skeleton);
+    entity.set(skeletonDebug);
 
     return {getSkeleton(entity), getDebugSkeleton(entity), entity};
   }
 
   quoll::Skeleton &getSkeleton(quoll::Entity entity) {
-    return entityDatabase.get<quoll::Skeleton>(entity);
+    return *entity.get_ref<quoll::Skeleton>().get();
   }
 
   quoll::SkeletonDebug &getDebugSkeleton(quoll::Entity entity) {
-    return entityDatabase.get<quoll::SkeletonDebug>(entity);
+    return *entity.get_ref<quoll::SkeletonDebug>().get();
   }
 
   glm::mat4 getLocalTransform(quoll::Skeleton &skeleton, u32 i) {
@@ -131,7 +132,7 @@ TEST_F(SkeletonUpdaterDeathTest,
        FailsIfDebugBoneSizeIsNotTwiceTheNumberOfJoints) {
   const auto &[skeleton, _, entity] = createSkeleton(2);
 
-  entityDatabase.set<quoll::SkeletonDebug>(entity, {});
+  entity.set<quoll::SkeletonDebug>({});
 
   EXPECT_DEATH(skeletonUpdater.update(view), ".*");
 }

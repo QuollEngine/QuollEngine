@@ -12,27 +12,27 @@ public:
   quoll::EntityQuery entityQuery;
 };
 
-TEST_F(EntityQueryTest, ReturnsNullEntityIfEntityWithNameIsNotFound) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity, {"test"});
+TEST_F(EntityQueryTest, ReturnsNullIfEntityWithNameIsNotFound) {
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Name>({"test"});
 
-  EXPECT_EQ(entityQuery.getFirstEntityByName("hello"), quoll::Entity::Null);
+  EXPECT_FALSE(entityQuery.getFirstEntityByName("hello").is_valid());
 }
 
 TEST_F(EntityQueryTest, ReturnsEntityIfEntityWithNameIsFound) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity, {"test"});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Name>({"test"});
 
   EXPECT_EQ(entityQuery.getFirstEntityByName("test"), entity);
 }
 
 TEST_F(EntityQueryTest,
        ReturnsFirstFoundEntityIfMultipleEntitiesHaveTheSameName) {
-  auto entity1 = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity1, {"test"});
+  auto entity1 = entityDatabase.entity();
+  entity1.set<quoll::Name>({"test"});
 
-  auto entity2 = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity2, {"test"});
+  auto entity2 = entityDatabase.entity();
+  entity2.set<quoll::Name>({"test"});
 
   EXPECT_EQ(entityQuery.getFirstEntityByName("test"), entity1);
 }

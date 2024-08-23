@@ -5,9 +5,9 @@
 namespace quoll {
 
 struct CollisionEvent {
-  Entity a = Entity::Null;
+  Entity a;
 
-  Entity b = Entity::Null;
+  Entity b;
 };
 
 } // namespace quoll

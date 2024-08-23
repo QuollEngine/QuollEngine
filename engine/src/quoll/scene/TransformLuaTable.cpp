@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/entity/EntityDatabase.h"
+#include "quoll/lua-scripting/Messages.h"
 #include "quoll/scene/LocalTransform.h"
 #include "TransformLuaTable.h"
 
@@ -9,37 +10,63 @@ namespace quoll {
 TransformLuaTable::TransformLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-std::reference_wrapper<glm::vec3> TransformLuaTable::getPosition() {
-  return mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity)
-      .localPosition;
+sol_maybe<std::reference_wrapper<glm::vec3>> TransformLuaTable::getPosition() {
+  if (!mEntity.has<LocalTransform>()) {
+    Engine::getUserLogger().error()
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
+    return sol::nil;
+  }
+
+  return mEntity.get_ref<LocalTransform>()->localPosition;
 }
 
 void TransformLuaTable::setPosition(glm::vec3 position) {
-  mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localPosition =
-      position;
+  if (!mEntity.has<LocalTransform>()) {
+    mEntity.set<LocalTransform>({.localPosition = position});
+  } else {
+    mEntity.get_ref<LocalTransform>()->localPosition = position;
+  }
 }
 
-std::reference_wrapper<glm::quat> TransformLuaTable::getRotation() {
-  return mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity)
-      .localRotation;
+sol_maybe<std::reference_wrapper<glm::quat>> TransformLuaTable::getRotation() {
+  if (!mEntity.has<LocalTransform>()) {
+    Engine::getUserLogger().error()
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
+    return sol::nil;
+  }
+
+  return mEntity.get_ref<LocalTransform>()->localRotation;
 }
 
 void TransformLuaTable::setRotation(glm::quat rotation) {
-  mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localRotation =
-      rotation;
+  if (!mEntity.has<LocalTransform>()) {
+    mEntity.set<LocalTransform>({.localRotation = rotation});
+  } else {
+    mEntity.get_ref<LocalTransform>()->localRotation = rotation;
+  }
 }
 
-std::reference_wrapper<glm::vec3> TransformLuaTable::getScale() {
-  return mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localScale;
+sol_maybe<std::reference_wrapper<glm::vec3>> TransformLuaTable::getScale() {
+  if (!mEntity.has<LocalTransform>()) {
+    Engine::getUserLogger().error()
+        << lua::Messages::componentDoesNotExist(getName(), mEntity);
+    return sol::nil;
+  }
+
+  return mEntity.get_ref<LocalTransform>()->localScale;
 }
 
 void TransformLuaTable::setScale(glm::vec3 scale) {
-  mScriptGlobals.entityDatabase.get<LocalTransform>(mEntity).localScale = scale;
+  if (!mEntity.has<LocalTransform>()) {
+    mEntity.set<LocalTransform>({.localScale = scale});
+  } else {
+    mEntity.get_ref<LocalTransform>()->localScale = scale;
+  }
 }
 
 void TransformLuaTable::deleteThis() {
-  if (mScriptGlobals.entityDatabase.has<LocalTransform>(mEntity)) {
-    mScriptGlobals.entityDatabase.remove<LocalTransform>(mEntity);
+  if (mEntity.has<LocalTransform>()) {
+    mEntity.remove<LocalTransform>();
   }
 }
 

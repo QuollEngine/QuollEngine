@@ -14,107 +14,97 @@ namespace quoll {
 RigidBodyLuaTable::RigidBodyLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-void RigidBodyLuaTable::setDefaultParams() {
-  mScriptGlobals.entityDatabase.set<RigidBody>(mEntity, {});
-}
+void RigidBodyLuaTable::setDefaultParams() { mEntity.set<RigidBody>({}); }
 
 sol_maybe<u32> RigidBodyLuaTable::getType() {
-  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+  if (!mEntity.has<RigidBody>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  return static_cast<u32>(
-      mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).type);
+  return static_cast<u32>(mEntity.get_ref<RigidBody>()->type);
 }
 
 sol_maybe<f32> RigidBodyLuaTable::getMass() {
-  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+  if (!mEntity.has<RigidBody>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  return mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.mass;
+  return mEntity.get_ref<RigidBody>()->dynamicDesc.mass;
 }
 
 void RigidBodyLuaTable::setMass(f32 mass) {
-  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+  if (!mEntity.has<RigidBody>()) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.mass = mass;
-    mScriptGlobals.entityDatabase.set(mEntity, rigidBody);
+    mEntity.set(rigidBody);
   } else {
-    mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.mass =
-        mass;
+    mEntity.get_ref<RigidBody>()->dynamicDesc.mass = mass;
   }
 }
 sol_maybe<std::reference_wrapper<glm::vec3>> RigidBodyLuaTable::getInertia() {
-  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+  if (!mEntity.has<RigidBody>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  return mScriptGlobals.entityDatabase.get<RigidBody>(mEntity)
-      .dynamicDesc.inertia;
+  return mEntity.get_ref<RigidBody>()->dynamicDesc.inertia;
 }
 
 void RigidBodyLuaTable::setInertia(glm::vec3 inertia) {
-  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+  if (!mEntity.has<RigidBody>()) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.inertia = inertia;
-    mScriptGlobals.entityDatabase.set(mEntity, rigidBody);
+    mEntity.set(rigidBody);
   } else {
-    mScriptGlobals.entityDatabase.get<RigidBody>(mEntity).dynamicDesc.inertia =
-        inertia;
+    mEntity.get_ref<RigidBody>()->dynamicDesc.inertia = inertia;
   }
 }
 
 sol_maybe<bool> RigidBodyLuaTable::isGravityApplied() {
-  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+  if (!mEntity.has<RigidBody>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  return mScriptGlobals.entityDatabase.get<RigidBody>(mEntity)
-      .dynamicDesc.applyGravity;
+  return mEntity.get_ref<RigidBody>()->dynamicDesc.applyGravity;
 }
 
 void RigidBodyLuaTable::applyGravity(bool apply) {
-  if (!mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
+  if (!mEntity.has<RigidBody>()) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.applyGravity = apply;
-    mScriptGlobals.entityDatabase.set(mEntity, rigidBody);
+    mEntity.set(rigidBody);
   } else {
-    mScriptGlobals.entityDatabase.get<RigidBody>(mEntity)
-        .dynamicDesc.applyGravity = apply;
+    mEntity.get_ref<RigidBody>()->dynamicDesc.applyGravity = apply;
   }
 }
 
 void RigidBodyLuaTable::applyForce(f32 x, f32 y, f32 z) {
   glm::vec3 force{x, y, z};
-  mScriptGlobals.entityDatabase.set<Force>(mEntity, {force});
+  mEntity.set<Force>({force});
 }
 
 void RigidBodyLuaTable::applyImpulse(f32 x, f32 y, f32 z) {
   glm::vec3 impulse{x, y, z};
-  mScriptGlobals.entityDatabase.set<Impulse>(mEntity, {impulse});
+  mEntity.set<Impulse>({impulse});
 }
 
 void RigidBodyLuaTable::applyTorque(f32 x, f32 y, f32 z) {
   glm::vec3 torque{x, y, z};
-  mScriptGlobals.entityDatabase.set<Torque>(mEntity, {torque});
+  mEntity.set<Torque>({torque});
 }
 
-void RigidBodyLuaTable::clear() {
-  mScriptGlobals.entityDatabase.set<RigidBodyClear>(mEntity, {});
-}
+void RigidBodyLuaTable::clear() { mEntity.add<RigidBodyClear>(); }
 
 void RigidBodyLuaTable::deleteThis() {
-  if (mScriptGlobals.entityDatabase.has<RigidBody>(mEntity)) {
-    mScriptGlobals.entityDatabase.remove<RigidBody>(mEntity);
+  if (mEntity.has<RigidBody>()) {
+    mEntity.remove<RigidBody>();
   }
 }
 

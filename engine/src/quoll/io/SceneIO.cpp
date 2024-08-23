@@ -64,16 +64,12 @@ std::vector<Entity> SceneIO::loadScene(SceneAssetHandle scene) {
 }
 
 void SceneIO::reset() {
-  mScene.entityDatabase.destroy();
   mEntityIdCache.clear();
-  auto dummyCamera = mScene.entityDatabase.create();
-  mScene.entityDatabase.set<Camera>(dummyCamera, {});
-  mScene.entityDatabase.set<PerspectiveLens>(dummyCamera, {});
-
-  mScene.dummyCamera = dummyCamera;
-  mScene.activeCamera = dummyCamera;
-
-  mScene.dummyEnvironment = mScene.entityDatabase.create();
+  mScene.dummyCamera = mScene.entityDatabase.entity();
+  mScene.dummyCamera.set<Camera>({});
+  mScene.dummyCamera.set<PerspectiveLens>({});
+  mScene.activeCamera = mScene.dummyCamera;
+  mScene.dummyEnvironment = mScene.entityDatabase.entity();
 }
 
 Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {
@@ -81,8 +77,8 @@ Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {
     auto id = node["id"].as<u64>(0);
 
     if (id > 0 && mEntityIdCache.find(id) == mEntityIdCache.end()) {
-      auto entity = mScene.entityDatabase.create();
-      mScene.entityDatabase.set<Id>(entity, {id});
+      auto entity = mScene.entityDatabase.entity();
+      entity.set<Id>({id});
 
       mEntityIdCache.insert({id, entity});
       return Result<Entity>::Ok(entity);

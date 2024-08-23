@@ -6,26 +6,26 @@ namespace quoll {
 
 void LightSerializer::serialize(YAML::Node &node,
                                 EntityDatabase &entityDatabase, Entity entity) {
-  if (entityDatabase.has<DirectionalLight>(entity)) {
-    const auto &light = entityDatabase.get<DirectionalLight>(entity);
+  if (entity.has<DirectionalLight>()) {
+    auto light = entity.get_ref<DirectionalLight>();
 
     node["light"]["type"] = 0;
-    node["light"]["color"] = light.color;
-    node["light"]["intensity"] = light.intensity;
+    node["light"]["color"] = light->color;
+    node["light"]["intensity"] = light->intensity;
 
-    if (entityDatabase.has<CascadedShadowMap>(entity)) {
-      const auto &shadow = entityDatabase.get<CascadedShadowMap>(entity);
-      node["light"]["shadow"]["softShadows"] = shadow.softShadows;
-      node["light"]["shadow"]["splitLambda"] = shadow.splitLambda;
-      node["light"]["shadow"]["numCascades"] = shadow.numCascades;
+    if (entity.has<CascadedShadowMap>()) {
+      auto shadow = entity.get_ref<CascadedShadowMap>();
+      node["light"]["shadow"]["softShadows"] = shadow->softShadows;
+      node["light"]["shadow"]["splitLambda"] = shadow->splitLambda;
+      node["light"]["shadow"]["numCascades"] = shadow->numCascades;
     }
-  } else if (entityDatabase.has<PointLight>(entity)) {
-    const auto &light = entityDatabase.get<PointLight>(entity);
+  } else if (entity.has<PointLight>()) {
+    auto light = entity.get_ref<PointLight>();
 
     node["light"]["type"] = 1;
-    node["light"]["color"] = light.color;
-    node["light"]["intensity"] = light.intensity;
-    node["light"]["range"] = light.range;
+    node["light"]["color"] = light->color;
+    node["light"]["intensity"] = light->intensity;
+    node["light"]["range"] = light->range;
   }
 }
 
@@ -41,7 +41,7 @@ void LightSerializer::deserialize(const YAML::Node &node,
       component.intensity = light["intensity"].as<f32>(component.intensity);
       component.color = light["color"].as<glm::vec4>(component.color);
 
-      entityDatabase.set(entity, component);
+      entity.set(component);
 
       if (light["shadow"] && light["shadow"].IsMap()) {
         CascadedShadowMap shadowComponent{};
@@ -58,7 +58,7 @@ void LightSerializer::deserialize(const YAML::Node &node,
         shadowComponent.splitLambda =
             glm::clamp(shadowComponent.splitLambda, 0.0f, 1.0f);
 
-        entityDatabase.set(entity, shadowComponent);
+        entity.set(shadowComponent);
       }
     } else if (type == 1) {
       PointLight component{};
@@ -66,7 +66,7 @@ void LightSerializer::deserialize(const YAML::Node &node,
       component.color = light["color"].as<glm::vec4>(component.color);
       component.range = light["range"].as<glm::float32>(component.range);
 
-      entityDatabase.set(entity, component);
+      entity.set(component);
     }
   }
 }

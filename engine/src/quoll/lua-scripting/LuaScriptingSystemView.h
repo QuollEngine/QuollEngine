@@ -6,7 +6,7 @@
 namespace quoll {
 
 struct LuaScriptingSystemView {
-  EntityDatabaseObserver<LuaScript> scriptRemoveObserver;
+  flecs::query<LuaScript> queryScripts;
 };
 
 } // namespace quoll

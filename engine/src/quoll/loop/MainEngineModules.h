@@ -54,7 +54,7 @@ private:
   AnimationSystem mAnimationSystem;
   LuaScriptingSystem mScriptingSystem;
   PhysicsSystem mPhysicsSystem;
-  AudioSystem<DefaultAudioBackend> mAudioSystem;
+  AudioSystem mAudioSystem;
   InputMapSystem mInputMapSystem;
   UICanvasUpdater mUICanvasUpdater;
 };

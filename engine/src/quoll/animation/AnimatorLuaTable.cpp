@@ -13,37 +13,37 @@ AnimatorLuaTable::AnimatorLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
 sol_maybe<f32> AnimatorLuaTable::getNormalizedTime() {
-  if (!mScriptGlobals.entityDatabase.has<Animator>(mEntity)) {
+  if (!mEntity.has<Animator>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  return mScriptGlobals.entityDatabase.get<Animator>(mEntity).normalizedTime;
+  return mEntity.get_ref<Animator>()->normalizedTime;
 }
 
 sol_maybe<AnimationStateLuaTable> AnimatorLuaTable::getCurrentState() {
-  if (!mScriptGlobals.entityDatabase.has<Animator>(mEntity)) {
+  if (!mEntity.has<Animator>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  const auto &animator = mScriptGlobals.entityDatabase.get<Animator>(mEntity);
+  auto animator = mEntity.get_ref<Animator>();
   auto &state = mScriptGlobals.assetRegistry.getAnimators()
-                    .getAsset(animator.asset)
-                    .data.states.at(animator.currentState);
+                    .getAsset(animator->asset)
+                    .data.states.at(animator->currentState);
 
   return AnimationStateLuaTable(state);
 }
 
 void AnimatorLuaTable::trigger(String event) {
-  mScriptGlobals.entityDatabase.set<AnimatorEvent>(mEntity, {event});
+  mEntity.set<AnimatorEvent>({event});
 }
 
 void AnimatorLuaTable::deleteThis() {
-  if (mScriptGlobals.entityDatabase.has<Animator>(mEntity)) {
-    mScriptGlobals.entityDatabase.remove<Animator>(mEntity);
+  if (mEntity.has<Animator>()) {
+    mEntity.remove<Animator>();
   }
 }
 

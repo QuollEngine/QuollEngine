@@ -11,30 +11,35 @@ InputMapSystem::InputMapSystem(InputDeviceManager &deviceManager,
                                AssetRegistry &assetRegistry)
     : mDeviceManager(deviceManager), mAssetRegistry(assetRegistry) {}
 
+void InputMapSystem::createSystemViewData(SystemView &view) {
+  auto &db = view.scene->entityDatabase;
+  view.inputMap.queryAssets = db.query<InputMapAssetRef>();
+  view.inputMap.queryInputMaps = db.query<InputMap>();
+  view.inputMap.queryInputMapsWithoutAssets =
+      db.query_builder().with<InputMap>().without<InputMapAssetRef>().build();
+}
+
 void InputMapSystem::update(SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, ref] : entityDatabase.view<InputMapAssetRef>()) {
-    if (mAssetRegistry.getInputMaps().hasAsset(ref.handle) &&
-        !entityDatabase.has<InputMap>(entity)) {
-      entityDatabase.set(
-          entity, createInputMap(
-                      mAssetRegistry.getInputMaps().getAsset(ref.handle).data,
-                      ref.defaultScheme));
-    }
-  }
 
-  std::vector<Entity> componentsToDelete(0);
-  for (auto [entity, ref] : entityDatabase.view<InputMap>()) {
-    if (!entityDatabase.has<InputMapAssetRef>(entity)) {
-      componentsToDelete.push_back(entity);
-    }
-  }
+  entityDatabase.defer_begin();
+  view.inputMap.queryAssets.each(
+      [this](flecs::entity entity, InputMapAssetRef &ref) {
+        if (mAssetRegistry.getInputMaps().hasAsset(ref.handle) &&
+            !entity.has<InputMap>()) {
+          entity.set(createInputMap(
+              mAssetRegistry.getInputMaps().getAsset(ref.handle).data,
+              ref.defaultScheme));
+        }
+      });
+  entityDatabase.defer_end();
 
-  for (auto entity : componentsToDelete) {
-    entityDatabase.remove<InputMap>(entity);
-  }
+  entityDatabase.defer_begin();
+  view.inputMap.queryInputMapsWithoutAssets.each(
+      [](flecs::entity entity) { entity.remove<InputMap>(); });
+  entityDatabase.defer_end();
 
-  for (auto [_, inputMap] : entityDatabase.view<InputMap>()) {
+  view.inputMap.queryInputMaps.each([](InputMap &inputMap) {
     for (usize i = 0; i < inputMap.commandValues.size(); ++i) {
       auto type = inputMap.commandDataTypes.at(i);
       if (type == InputDataType::Boolean) {
@@ -43,9 +48,9 @@ void InputMapSystem::update(SystemView &view) {
         inputMap.commandValues.at(i) = glm::vec2{0.0f, 0.0f};
       }
     }
-  }
+  });
 
-  for (auto [entity, inputMap] : entityDatabase.view<InputMap>()) {
+  view.inputMap.queryInputMaps.each([this](InputMap &inputMap) {
     auto &scheme = inputMap.schemes.at(inputMap.activeScheme);
 
     for (auto &device : mDeviceManager.getDevices()) {
@@ -110,7 +115,7 @@ void InputMapSystem::update(SystemView &view) {
         }
       }
     }
-  }
+  });
 }
 
 InputMap InputMapSystem::createInputMap(InputMapAsset &asset,

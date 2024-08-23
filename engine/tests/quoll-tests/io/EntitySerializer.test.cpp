@@ -56,54 +56,54 @@ public:
 TEST_F(EntitySerializerTest,
        SetsNameToDefaultNameWithoutIdComponentIfNameIsEmpty) {
   {
-    auto entity = entityDatabase.create();
+    auto entity = entityDatabase.entity();
     auto node = entitySerializer.createComponentsNode(entity);
 
     EXPECT_TRUE(node["name"]);
     EXPECT_EQ(node["name"].as<quoll::String>(""), "Untitled");
-    EXPECT_TRUE(entityDatabase.has<quoll::Name>(entity));
+    EXPECT_TRUE(entity.has<quoll::Name>());
   }
 
   {
-    auto entity = entityDatabase.create();
-    entityDatabase.set<quoll::Name>(entity, {""});
+    auto entity = entityDatabase.entity();
+    entity.set<quoll::Name>({""});
 
     auto node = entitySerializer.createComponentsNode(entity);
 
     EXPECT_TRUE(node["name"]);
     EXPECT_EQ(node["name"].as<quoll::String>(""), "Untitled");
-    EXPECT_TRUE(entityDatabase.has<quoll::Name>(entity));
+    EXPECT_TRUE(entity.has<quoll::Name>());
   }
 }
 
 TEST_F(EntitySerializerTest,
        SetsNameToDefaultNameWithIdComponentIfNameIsEmpty) {
   {
-    auto entity = entityDatabase.create();
-    entityDatabase.set<quoll::Id>(entity, {15});
+    auto entity = entityDatabase.entity();
+    entity.set<quoll::Id>({15});
     auto node = entitySerializer.createComponentsNode(entity);
 
     EXPECT_TRUE(node["name"]);
     EXPECT_EQ(node["name"].as<quoll::String>(""), "Untitled 15");
-    EXPECT_TRUE(entityDatabase.has<quoll::Name>(entity));
+    EXPECT_TRUE(entity.has<quoll::Name>());
   }
 
   {
-    auto entity = entityDatabase.create();
-    entityDatabase.set<quoll::Id>(entity, {15});
-    entityDatabase.set<quoll::Name>(entity, {""});
+    auto entity = entityDatabase.entity();
+    entity.set<quoll::Id>({15});
+    entity.set<quoll::Name>({""});
 
     auto node = entitySerializer.createComponentsNode(entity);
 
     EXPECT_TRUE(node["name"]);
     EXPECT_EQ(node["name"].as<quoll::String>(""), "Untitled 15");
-    EXPECT_TRUE(entityDatabase.has<quoll::Name>(entity));
+    EXPECT_TRUE(entity.has<quoll::Name>());
   }
 }
 
 TEST_F(EntitySerializerTest, CreatesNameFieldUsingNameComponentIfExists) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(entity, {"Test entity"});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Name>({"Test entity"});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -114,32 +114,32 @@ TEST_F(EntitySerializerTest, CreatesNameFieldUsingNameComponentIfExists) {
 // Transform
 TEST_F(EntitySerializerTest,
        CreatesTransformFieldWithDefaultsIfTransformComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
 
-  EXPECT_TRUE(entityDatabase.has<quoll::LocalTransform>(entity));
-  const auto &defaults = entityDatabase.get<quoll::LocalTransform>(entity);
+  EXPECT_TRUE(entity.has<quoll::LocalTransform>());
+  auto defaults = entity.get_ref<quoll::LocalTransform>();
 
   EXPECT_TRUE(node["transform"]);
   EXPECT_EQ(node["transform"]["position"].as<glm::vec3>(glm::vec3(5.0f)),
-            defaults.localPosition);
+            defaults->localPosition);
   EXPECT_EQ(node["transform"]["rotation"].as<glm::quat>(
                 glm::quat(0.0f, 0.0f, 0.0f, 0.0f)),
-            defaults.localRotation);
+            defaults->localRotation);
   EXPECT_EQ(node["transform"]["scale"].as<glm::vec3>(glm::vec3(5.0f)),
-            defaults.localScale);
+            defaults->localScale);
 }
 
 TEST_F(EntitySerializerTest,
        CreatesTransformFieldFromTransformComponentIfExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::LocalTransform transform{};
   transform.localPosition = glm::vec3{2.0f};
   transform.localRotation = glm::quat{0.5f, 0.5f, 0.5f, 0.5f};
   transform.localScale = glm::vec3{0.2f};
 
-  entityDatabase.set(entity, transform);
+  entity.set(transform);
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -156,7 +156,7 @@ TEST_F(EntitySerializerTest,
 // Sprite
 TEST_F(EntitySerializerTest,
        DoesNotCreateSpriteFieldIfMeshComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["sprite"]);
 }
@@ -165,8 +165,8 @@ TEST_F(EntitySerializerTest,
        DoesNotCreateSpriteFieldIfTextureAssetIsNotInRegistry) {
   static constexpr quoll::TextureAssetHandle NonExistentMeshHandle{45};
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Sprite>(entity, {NonExistentMeshHandle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Sprite>({NonExistentMeshHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["sprite"]);
@@ -177,8 +177,8 @@ TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
   texture.uuid = quoll::Uuid("texture.tex");
   auto handle = assetRegistry.getTextures().addAsset(texture);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Sprite>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Sprite>({handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["sprite"]);
@@ -188,7 +188,7 @@ TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
 // Mesh
 TEST_F(EntitySerializerTest,
        DoesNotCreateMeshFieldIfMeshComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["mesh"]);
 }
@@ -196,8 +196,8 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
   static constexpr quoll::MeshAssetHandle NonExistentMeshHandle{45};
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Mesh>(entity, {NonExistentMeshHandle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Mesh>({NonExistentMeshHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["mesh"]);
@@ -209,8 +209,8 @@ TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
 
   auto handle = assetRegistry.getMeshes().addAsset(mesh);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Mesh>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Mesh>({handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["mesh"]);
@@ -220,7 +220,7 @@ TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
 // Mesh renderer
 TEST_F(EntitySerializerTest,
        DoesNotCreateMeshRendererFieldIfMeshRendererComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["meshRenderer"]);
 }
@@ -235,8 +235,8 @@ TEST_F(EntitySerializerTest, CreatesMeshRendererFieldWithMaterials) {
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
   auto handle2 = assetRegistry.getMaterials().addAsset(material2);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::MeshRenderer>(entity, {{handle1, handle2}});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::MeshRenderer>({{handle1, handle2}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["meshRenderer"]);
@@ -254,9 +254,8 @@ TEST_F(EntitySerializerTest,
   material1.uuid = quoll::Uuid("material1.asset");
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::MeshRenderer>(
-      entity, {{handle1, quoll::MaterialAssetHandle{25}}});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::MeshRenderer>({{handle1, quoll::MaterialAssetHandle{25}}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["meshRenderer"]);
@@ -267,8 +266,8 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesMeshRendererWithNoMaterials) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::MeshRenderer>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::MeshRenderer>({});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["meshRenderer"]);
@@ -279,7 +278,7 @@ TEST_F(EntitySerializerTest, CreatesMeshRendererWithNoMaterials) {
 // Skinned mesh
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkinnedMeshFieldIfSkinnedMeshComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skinnedMesh"]);
 }
@@ -288,8 +287,8 @@ TEST_F(EntitySerializerTest,
        DoesNotCreateSkinnedMeshFieldIfSkinnedMeshAssetIsNotInRegistry) {
   static constexpr quoll::MeshAssetHandle NonExistentMeshHandle{45};
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::SkinnedMesh>(entity, {NonExistentMeshHandle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::SkinnedMesh>({NonExistentMeshHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skinnedMesh"]);
@@ -301,8 +300,8 @@ TEST_F(EntitySerializerTest,
   mesh.uuid = quoll::Uuid("skinnedMesh.mesh");
   auto handle = assetRegistry.getMeshes().addAsset(mesh);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::SkinnedMesh>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::SkinnedMesh>({handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["mesh"]);
@@ -313,7 +312,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(
     EntitySerializerTest,
     DoesNotCreateSkinnedMeshRendererFieldIfSkinnedMeshRendererComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skinnedMeshRenderer"]);
 }
@@ -328,8 +327,8 @@ TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererFieldWithMaterials) {
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
   auto handle2 = assetRegistry.getMaterials().addAsset(material2);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::SkinnedMeshRenderer>(entity, {{handle1, handle2}});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::SkinnedMeshRenderer>({{handle1, handle2}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMeshRenderer"]);
@@ -347,9 +346,9 @@ TEST_F(EntitySerializerTest,
   material1.uuid = quoll::Uuid("material1.asset");
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::SkinnedMeshRenderer>(
-      entity, {{handle1, quoll::MaterialAssetHandle{25}}});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::SkinnedMeshRenderer>(
+      {{handle1, quoll::MaterialAssetHandle{25}}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMeshRenderer"]);
@@ -360,8 +359,8 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererWithNoMaterials) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::SkinnedMeshRenderer>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::SkinnedMeshRenderer>({});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMeshRenderer"]);
@@ -372,7 +371,7 @@ TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererWithNoMaterials) {
 // Skeleton
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkeletonFieldIfSkeletonComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skeleton"]);
 }
@@ -381,10 +380,10 @@ TEST_F(EntitySerializerTest,
        DoesNotCreateSkeletonFieldIfSkeletonAssetIsNotInRegistry) {
   static constexpr quoll::SkeletonAssetHandle NonExistentSkeletonHandle{45};
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::Skeleton component{};
   component.assetHandle = NonExistentSkeletonHandle;
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skeleton"]);
@@ -395,11 +394,11 @@ TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
   skeleton.uuid = quoll::Uuid("skeleton.skel");
   auto handle = assetRegistry.getSkeletons().addAsset(skeleton);
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::Skeleton component{};
   component.assetHandle = handle;
 
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skeleton"]);
@@ -410,23 +409,23 @@ TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
 TEST_F(
     EntitySerializerTest,
     DoesNotCreateJointAttachmentFieldIfJointAttachmentComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["jointAttachment"]);
 }
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateJointAttachmentFieldIfJointAttachmentIdIsNonZero) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::JointAttachment>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::JointAttachment>({});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["jointAttachment"]);
 }
 
 TEST_F(EntitySerializerTest, CreatesJointAttachmentFieldWithJointId) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::JointAttachment>(entity, {10});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::JointAttachment>({10});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["jointAttachment"]);
@@ -438,10 +437,10 @@ TEST_F(EntitySerializerTest,
        DoesNotCreateAnimatorFieldIfAnimatorAssetIsNotInRegistry) {
   static constexpr quoll::AnimatorAssetHandle NonExistentAnimatorHandle{45};
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::Animator component{};
   component.asset = NonExistentAnimatorHandle;
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["animator"]);
@@ -456,8 +455,8 @@ TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
   component.asset = handle;
   component.currentState = 0;
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set(entity, component);
+  auto entity = entityDatabase.entity();
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["animator"]);
@@ -467,19 +466,19 @@ TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
 // Directional light
 TEST_F(EntitySerializerTest,
        DoesNotCreateLightFieldIfNoDirectionalLightComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["light"]);
 }
 
 TEST_F(EntitySerializerTest,
        CreatesLightFieldIfDirectionalLightComponentExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::DirectionalLight light{};
   light.intensity = 5.5f;
   light.color = glm::vec4{0.5f};
-  entityDatabase.set(entity, light);
+  entity.set(light);
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -495,16 +494,16 @@ TEST_F(EntitySerializerTest,
 // Directional light - Cascaded shadow map
 TEST_F(EntitySerializerTest,
        DoesNotCreateShadowFieldInLightIfNoDirectionalLightComponent) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::CascadedShadowMap>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::CascadedShadowMap>({});
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["light"]);
 }
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateShadowFieldInLightIfNoCascadedShadowComponent) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::DirectionalLight>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::DirectionalLight>({});
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["light"]);
   EXPECT_FALSE(node["light"]["shadow"]);
@@ -513,16 +512,16 @@ TEST_F(EntitySerializerTest,
 TEST_F(
     EntitySerializerTest,
     CreatesShadowFieldInLightIfDirectionalLightComponentAndCascadedShadowMapComponentsExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::DirectionalLight light{};
-  entityDatabase.set(entity, light);
+  entity.set(light);
 
   quoll::CascadedShadowMap shadow{};
   shadow.softShadows = false;
   shadow.splitLambda = 0.2f;
   shadow.numCascades = 4;
-  entityDatabase.set(entity, shadow);
+  entity.set(shadow);
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -539,19 +538,19 @@ TEST_F(
 
 // Point light
 TEST_F(EntitySerializerTest, DoesNotCreateLightFieldIfNoPointLight) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["light"]);
 }
 
 TEST_F(EntitySerializerTest, CreatesLightFieldIfPointLightComponentExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PointLight light{};
   light.intensity = 5.5f;
   light.color = glm::vec4{0.5f};
   light.range = 25.0f;
-  entityDatabase.set(entity, light);
+  entity.set(light);
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -567,13 +566,13 @@ TEST_F(EntitySerializerTest, CreatesLightFieldIfPointLightComponentExists) {
 // Camera
 TEST_F(EntitySerializerTest,
        DoesNotCreateCameraFieldIfLensComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["camera"]);
 }
 
 TEST_F(EntitySerializerTest, CreatesCameraFieldIfLensComponentExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PerspectiveLens lens{};
   lens.aspectRatio = 2.5f;
@@ -584,7 +583,7 @@ TEST_F(EntitySerializerTest, CreatesCameraFieldIfLensComponentExists) {
   lens.aperture = 1.5f;
   lens.shutterSpeed = 2.5f;
   lens.sensitivity = 2500;
-  entityDatabase.set(entity, lens);
+  entity.set(lens);
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -604,9 +603,9 @@ TEST_F(EntitySerializerTest, CreatesCameraFieldIfLensComponentExists) {
 
 TEST_F(EntitySerializerTest,
        SetsCameraAspectRatioToAutoIfAutoAspectRatioComponentExists) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::PerspectiveLens>(entity, {});
-  entityDatabase.set<quoll::AutoAspectRatio>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::PerspectiveLens>({});
+  entity.add<quoll::AutoAspectRatio>();
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -618,7 +617,7 @@ TEST_F(EntitySerializerTest,
 // Audio
 TEST_F(EntitySerializerTest,
        DoesNotCreateAudioFieldIfAudioComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["audio"]);
 }
@@ -627,8 +626,8 @@ TEST_F(EntitySerializerTest,
        DoesNotCreateAudioFieldIfAudioAssetIsNotInRegistry) {
   static constexpr quoll::AudioAssetHandle NonExistentHandle{45};
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {NonExistentHandle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::AudioSource>({NonExistentHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["audio"]);
@@ -639,8 +638,8 @@ TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
   audio.uuid = quoll::Uuid("bark.wav");
   auto handle = assetRegistry.getAudios().addAsset(audio);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::AudioSource>({handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["audio"]);
@@ -651,7 +650,7 @@ TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
 // Script
 TEST_F(EntitySerializerTest,
        DoesNotCreateScriptFieldIfScriptComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["script"]);
 }
@@ -660,8 +659,8 @@ TEST_F(EntitySerializerTest,
        DoesNotCreateScriptFieldIfScriptAssetIsNotInRegistry) {
   static constexpr quoll::LuaScriptAssetHandle NonExistentHandle{45};
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {NonExistentHandle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::LuaScript>({NonExistentHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["script"]);
@@ -689,7 +688,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   texture.uuid = quoll::Uuid("test.ktx2");
   auto textureHandle = assetRegistry.getTextures().addAsset(texture);
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::LuaScript component{handle};
   component.variables.insert_or_assign("test_str",
@@ -698,7 +697,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
                                        quoll::String("hello world"));
   component.variables.insert_or_assign("test_prefab", prefabHandle);
   component.variables.insert_or_assign("test_texture", textureHandle);
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["script"]);
@@ -732,7 +731,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
 // Text
 TEST_F(EntitySerializerTest,
        DoesNotCreateTextFieldIfTextComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["text"]);
 }
@@ -742,7 +741,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
   font.uuid = quoll::Uuid("Roboto.ttf");
   auto handle = assetRegistry.getFonts().addAsset(font);
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::Text component{};
   component.content = "";
   component.font = handle;
@@ -754,12 +753,12 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
 TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
   static constexpr quoll::FontAssetHandle NonExistentHandle{45};
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::Text component{};
   component.content = "Hello world";
   component.font = NonExistentHandle;
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["text"]);
@@ -771,13 +770,13 @@ TEST_F(EntitySerializerTest,
   font.uuid = quoll::Uuid("Roboto.ttf");
   auto handle = assetRegistry.getFonts().addAsset(font);
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::Text component{};
   component.content = "Hello world";
   component.lineHeight = 2.0f;
   component.font = handle;
 
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["text"]);
@@ -790,22 +789,21 @@ TEST_F(EntitySerializerTest,
 // Rigid body
 TEST_F(EntitySerializerTest,
        DoesNotCreateRigidBodyFieldIfRigidBodyComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["rigidBody"]);
 }
 
 TEST_F(EntitySerializerTest,
        CreatesDynamicRigidBodyFieldIfRigidBodyComponentWithDynamicTypeExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PhysicsDynamicRigidBodyDesc rigidBodyDesc{};
   rigidBodyDesc.applyGravity = true;
   rigidBodyDesc.inertia = glm::vec3(2.5f, 2.5f, 2.5f);
   rigidBodyDesc.mass = 4.5f;
 
-  entityDatabase.set<quoll::RigidBody>(
-      entity, {quoll::RigidBodyType::Dynamic, rigidBodyDesc});
+  entity.set<quoll::RigidBody>({quoll::RigidBodyType::Dynamic, rigidBodyDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -821,15 +819,15 @@ TEST_F(EntitySerializerTest,
 TEST_F(
     EntitySerializerTest,
     CreatesKinematicRigidBodyFieldIfRigidBodyComponentWithKinematicTypeExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PhysicsDynamicRigidBodyDesc rigidBodyDesc{};
   rigidBodyDesc.applyGravity = true;
   rigidBodyDesc.inertia = glm::vec3(2.5f, 2.5f, 2.5f);
   rigidBodyDesc.mass = 4.5f;
 
-  entityDatabase.set<quoll::RigidBody>(
-      entity, {quoll::RigidBodyType::Kinematic, rigidBodyDesc});
+  entity.set<quoll::RigidBody>(
+      {quoll::RigidBodyType::Kinematic, rigidBodyDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -843,13 +841,13 @@ TEST_F(
 // Collidable
 TEST_F(EntitySerializerTest,
        DoesNotCreateCollidableFieldIfCollidableComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["collidable"]);
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldForBoxGeometry) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PhysicsGeometryBox boxGeometry{{2.5f, 3.5f, 4.5f}};
 
@@ -858,7 +856,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForBoxGeometry) {
   geometryDesc.params = boxGeometry;
   geometryDesc.center = glm::vec3{2.5f, 3.5f, 4.5f};
 
-  entityDatabase.set<quoll::Collidable>(entity, {geometryDesc});
+  entity.set<quoll::Collidable>({geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -873,7 +871,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForBoxGeometry) {
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PhysicsGeometrySphere sphereParams{3.5f};
 
@@ -882,7 +880,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
   geometryDesc.params = sphereParams;
   geometryDesc.center = glm::vec3{2.5f, 3.5f, 4.5f};
 
-  entityDatabase.set<quoll::Collidable>(entity, {geometryDesc});
+  entity.set<quoll::Collidable>({geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -896,7 +894,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PhysicsGeometryCapsule capsuleParams{2.5f, 4.5f};
 
@@ -905,7 +903,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
   geometryDesc.params = capsuleParams;
   geometryDesc.center = glm::vec3{2.5f, 3.5f, 4.5f};
 
-  entityDatabase.set<quoll::Collidable>(entity, {geometryDesc});
+  entity.set<quoll::Collidable>({geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -921,13 +919,13 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldForPlaneGeometry) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PhysicsGeometryDesc geometryDesc{};
   geometryDesc.type = quoll::PhysicsGeometryType::Plane;
   geometryDesc.center = glm::vec3{2.5f, 3.5f, 4.5f};
 
-  entityDatabase.set<quoll::Collidable>(entity, {geometryDesc});
+  entity.set<quoll::Collidable>({geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -940,14 +938,14 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForPlaneGeometry) {
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldMaterialData) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::PhysicsMaterialDesc materialDesc{};
   materialDesc.dynamicFriction = 2.5f;
   materialDesc.restitution = 4.5f;
   materialDesc.staticFriction = 3.5f;
 
-  entityDatabase.set<quoll::Collidable>(entity, {{}, materialDesc});
+  entity.set<quoll::Collidable>({{}, materialDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -963,9 +961,9 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldMaterialData) {
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableWithDifferentSimulationMode) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
-  entityDatabase.set<quoll::Collidable>(entity, {{}, {}, false});
+  entity.set<quoll::Collidable>({{}, {}, false});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -975,9 +973,9 @@ TEST_F(EntitySerializerTest, CreatesCollidableWithDifferentSimulationMode) {
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableWithDifferentQueryMode) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
-  entityDatabase.set<quoll::Collidable>(entity, {{}, {}, true, false});
+  entity.set<quoll::Collidable>({{}, {}, true, false});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -988,18 +986,18 @@ TEST_F(EntitySerializerTest, CreatesCollidableWithDifferentQueryMode) {
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateParentFieldIfParentComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["transform"]["parent"]);
 }
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateParentComponentIfParentEntityDoesNotExist) {
-  static constexpr quoll::Entity NonExistentEntity{50};
+  static quoll::Entity NonExistentEntity{50};
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
-  entityDatabase.set<quoll::Parent>(entity, {NonExistentEntity});
+  entity.set<quoll::Parent>({NonExistentEntity});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["transform"]["parent"]);
@@ -1007,10 +1005,10 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateParentComponentIfParentEntityDoesNotHaveAnId) {
-  auto parent = entityDatabase.create();
-  auto entity = entityDatabase.create();
+  auto parent = entityDatabase.entity();
+  auto entity = entityDatabase.entity();
 
-  entityDatabase.set<quoll::Parent>(entity, {parent});
+  entity.set<quoll::Parent>({parent});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["transform"]["parent"]);
@@ -1019,11 +1017,11 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest, CreatesEntityComponentIfParentIdExists) {
   static constexpr u64 ParentId{50};
 
-  auto parent = entityDatabase.create();
-  entityDatabase.set<quoll::Id>(parent, {ParentId});
-  auto entity = entityDatabase.create();
+  auto parent = entityDatabase.entity();
+  parent.set<quoll::Id>({ParentId});
+  auto entity = entityDatabase.entity();
 
-  entityDatabase.set<quoll::Parent>(entity, {parent});
+  entity.set<quoll::Parent>({parent});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_EQ(node["transform"]["parent"].as<u64>(0), ParentId);
@@ -1032,7 +1030,7 @@ TEST_F(EntitySerializerTest, CreatesEntityComponentIfParentIdExists) {
 // Skybox
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkyboxFieldIfEnvironmentSkyboxDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skybox"]);
 }
@@ -1041,11 +1039,11 @@ TEST_F(EntitySerializerTest,
        DoesNotCreateEnvironmentIfSkyboxIsTextureButAssetDoesNotExist) {
   static constexpr quoll::EnvironmentAssetHandle NonExistentHandle{45};
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Texture,
                                      NonExistentHandle};
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skybox"]);
@@ -1057,11 +1055,11 @@ TEST_F(EntitySerializerTest,
   data.uuid = quoll::Uuid("uuid.env");
   auto handle = assetRegistry.getEnvironments().addAsset(data);
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Texture,
                                      handle};
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skybox"]);
@@ -1072,12 +1070,12 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        CreatesSkyboxWithColorTypeIfTypeIsColorAndAssetExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Color,
                                      quoll::EnvironmentAssetHandle::Null,
                                      glm::vec4(0.2f, 0.3f, 0.4f, 0.5f)};
-  entityDatabase.set(entity, component);
+  entity.set(component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skybox"]);
@@ -1090,17 +1088,16 @@ TEST_F(EntitySerializerTest,
 // Environment lighting
 TEST_F(EntitySerializerTest,
        DoesNotCreateEnvironmentLightingFieldIfNoEnvironmentLightingComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["environmentLighting"]);
 }
 
 TEST_F(EntitySerializerTest,
        CreateEnvironmentLightingWithSkyboxSourceIfComponentExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
-  quoll::EnvironmentLightingSkyboxSource component{};
-  entityDatabase.set(entity, component);
+  entity.add<quoll::EnvironmentLightingSkyboxSource>();
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["environmentLighting"]);
@@ -1110,16 +1107,15 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateInputMapFieldIfNoInputMapRefComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["inputMap"]);
 }
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateInputMapFieldIfInputMapAssetDoesNotExist) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::InputMapAssetRef>(entity,
-                                              {quoll::InputMapAssetHandle{25}});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::InputMapAssetRef>({quoll::InputMapAssetHandle{25}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["inputMap"]);
@@ -1132,8 +1128,8 @@ TEST_F(EntitySerializerTest,
 
   auto handle = assetRegistry.getInputMaps().addAsset(asset);
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::InputMapAssetRef>(entity, {handle, 0});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::InputMapAssetRef>({handle, 0});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["inputMap"]);
@@ -1143,14 +1139,14 @@ TEST_F(EntitySerializerTest,
 
 // UI Canvas
 TEST_F(EntitySerializerTest, DoesNotCreateUiCanvasFieldIfNoUICanvasComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["uiCanvas"]);
 }
 
 TEST_F(EntitySerializerTest, CreatesEmptyUICanvasMapIfUICanvasComponentExists) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::UICanvas>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::UICanvas>({});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["uiCanvas"]);

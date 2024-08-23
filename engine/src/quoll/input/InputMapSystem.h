@@ -13,6 +13,8 @@ public:
   InputMapSystem(InputDeviceManager &deviceManager,
                  AssetRegistry &assetRegistry);
 
+  void createSystemViewData(SystemView &view);
+
   void update(SystemView &view);
 
 private:

@@ -249,7 +249,7 @@ public:
 
   void setEnvironmentColor(const glm::vec4 &color);
 
-  void setCameraData(const Camera &camera, const PerspectiveLens &lens);
+  void setCameraData(const Camera *camera, const PerspectiveLens *lens);
 
   void setShadowMapTexture(rhi::TextureHandle shadowmap);
 

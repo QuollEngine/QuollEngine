@@ -14,6 +14,24 @@
 
 namespace quoll {
 
+void SceneUpdater::createSystemViewData(SystemView &view) {
+  auto &db = view.scene->entityDatabase;
+
+  view.sceneUpdater.queryTransformsWithoutParent =
+      db.query_builder<LocalTransform, WorldTransform>()
+          .without<Parent>()
+          .build();
+
+  view.sceneUpdater.queryTransformsWithParent =
+      db.query<LocalTransform, WorldTransform, Parent>();
+
+  view.sceneUpdater.queryCameras =
+      db.query<PerspectiveLens, WorldTransform, Camera>();
+
+  view.sceneUpdater.queryDirectionalLights =
+      db.query<DirectionalLight, WorldTransform>();
+}
+
 void SceneUpdater::update(SystemView &view) {
   QUOLL_PROFILE_EVENT("SceneUpdater::update");
   updateTransforms(view);
@@ -24,24 +42,23 @@ void SceneUpdater::update(SystemView &view) {
 void SceneUpdater::updateTransforms(SystemView &view) {
   QUOLL_PROFILE_EVENT("SceneUpdater::updateTransforms");
 
-  auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, local, world] :
-       entityDatabase.view<LocalTransform, WorldTransform>()) {
-    // TODO: Add exclusive loop
-    if (entityDatabase.has<Parent>(entity))
-      continue;
+  view.sceneUpdater.queryTransformsWithoutParent.each(
+      [](LocalTransform &local, WorldTransform &world) {
+        glm::mat4 identity{1.0f};
+        glm::mat4 localTransform =
+            glm::translate(identity, local.localPosition) *
+            glm::toMat4(local.localRotation) *
+            glm::scale(identity, local.localScale);
 
-    glm::mat4 identity{1.0f};
-    glm::mat4 localTransform = glm::translate(identity, local.localPosition) *
-                               glm::toMat4(local.localRotation) *
-                               glm::scale(identity, local.localScale);
+        world.worldTransform = localTransform;
+      });
 
-    world.worldTransform = localTransform;
-  }
-
-  for (auto [entity, local, world, parent] :
-       entityDatabase.view<LocalTransform, WorldTransform, Parent>()) {
-    auto &parentTransform = entityDatabase.get<WorldTransform>(parent.parent);
+  view.sceneUpdater.queryTransformsWithParent.each([](flecs::entity entity,
+                                                      LocalTransform &local,
+                                                      WorldTransform &world,
+                                                      Parent &cparent) {
+    auto &parent = cparent.parent;
+    auto parentTransform = parent.get_ref<WorldTransform>();
 
     glm::mat4 identity{1.0f};
     glm::mat4 localTransform = glm::translate(identity, local.localPosition) *
@@ -49,31 +66,29 @@ void SceneUpdater::updateTransforms(SystemView &view) {
                                glm::scale(identity, local.localScale);
 
     i16 jointId = -1;
-    if (entityDatabase.has<JointAttachment>(entity) &&
-        entityDatabase.has<Skeleton>(parent.parent)) {
-      jointId = entityDatabase.get<JointAttachment>(entity).joint;
+    if (entity.has<JointAttachment>() && parent.has<Skeleton>()) {
+      jointId = entity.get_ref<JointAttachment>()->joint;
     }
 
-    if (jointId >= 0 && static_cast<usize>(jointId) <
-                            entityDatabase.get<Skeleton>(parent.parent)
-                                .jointWorldTransforms.size()) {
-      const auto &jointTransform = entityDatabase.get<Skeleton>(parent.parent)
-                                       .jointWorldTransforms.at(jointId);
+    if (jointId >= 0 &&
+        static_cast<usize>(jointId) <
+            parent.get_ref<Skeleton>()->jointWorldTransforms.size()) {
+      const auto &jointTransform =
+          parent.get_ref<Skeleton>()->jointWorldTransforms.at(jointId);
       world.worldTransform =
-          parentTransform.worldTransform * jointTransform * localTransform;
+          parentTransform->worldTransform * jointTransform * localTransform;
     } else {
-      world.worldTransform = parentTransform.worldTransform * localTransform;
+      world.worldTransform = parentTransform->worldTransform * localTransform;
     }
-  }
+  });
 }
 
 void SceneUpdater::updateCameras(SystemView &view) {
   QUOLL_PROFILE_EVENT("SceneUpdater::updateCameras");
 
-  auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, lens, world, camera] :
-       entityDatabase.view<PerspectiveLens, WorldTransform, Camera>()) {
-
+  view.sceneUpdater.queryCameras.each([](PerspectiveLens &lens,
+                                         WorldTransform &world,
+                                         Camera &camera) {
     const f32 fovY =
         2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
 
@@ -86,15 +101,14 @@ void SceneUpdater::updateCameras(SystemView &view) {
     const f32 ev100 = std::log2f(powf(lens.aperture, 2.0f) * lens.shutterSpeed *
                                  100.0f / static_cast<f32>(lens.sensitivity));
     camera.exposure.x = ev100;
-  }
+  });
 }
 
 void SceneUpdater::updateLights(SystemView &view) {
   QUOLL_PROFILE_EVENT("SceneUpdater::updateLights");
 
-  auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, world, light] :
-       entityDatabase.view<WorldTransform, DirectionalLight>()) {
+  view.sceneUpdater.queryDirectionalLights.each([](DirectionalLight &light,
+                                                   WorldTransform &world) {
     glm::quat rotation;
     glm::vec3 empty3;
     glm::vec4 empty4;
@@ -105,7 +119,7 @@ void SceneUpdater::updateLights(SystemView &view) {
 
     light.direction =
         glm::normalize(glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
-  }
+  });
 }
 
 } // namespace quoll

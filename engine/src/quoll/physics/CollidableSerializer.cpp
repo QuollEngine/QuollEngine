@@ -7,35 +7,36 @@ namespace quoll {
 void CollidableSerializer::serialize(YAML::Node &node,
                                      EntityDatabase &entityDatabase,
                                      Entity entity) {
-  if (entityDatabase.has<Collidable>(entity)) {
-    const auto &component = entityDatabase.get<Collidable>(entity);
+  if (entity.has<Collidable>()) {
+    auto component = entity.get_ref<Collidable>();
 
-    auto type = component.geometryDesc.type;
+    auto type = component->geometryDesc.type;
 
     node["collidable"]["shape"] = getPhysicsGeometryTypeString(type);
-    node["collidable"]["center"] = component.geometryDesc.center;
-    node["collidable"]["useInSimulation"] = component.useInSimulation;
-    node["collidable"]["useInQueries"] = component.useInQueries;
+    node["collidable"]["center"] = component->geometryDesc.center;
+    node["collidable"]["useInSimulation"] = component->useInSimulation;
+    node["collidable"]["useInQueries"] = component->useInQueries;
 
     if (type == PhysicsGeometryType::Box) {
       node["collidable"]["halfExtents"] =
-          std::get<PhysicsGeometryBox>(component.geometryDesc.params)
+          std::get<PhysicsGeometryBox>(component->geometryDesc.params)
               .halfExtents;
     } else if (type == PhysicsGeometryType::Sphere) {
       node["collidable"]["radius"] =
-          std::get<PhysicsGeometrySphere>(component.geometryDesc.params).radius;
+          std::get<PhysicsGeometrySphere>(component->geometryDesc.params)
+              .radius;
     } else if (type == PhysicsGeometryType::Capsule) {
       const auto &capsule =
-          std::get<PhysicsGeometryCapsule>(component.geometryDesc.params);
+          std::get<PhysicsGeometryCapsule>(component->geometryDesc.params);
       node["collidable"]["radius"] = capsule.radius;
       node["collidable"]["halfHeight"] = capsule.halfHeight;
     }
 
     node["collidable"]["dynamicFriction"] =
-        component.materialDesc.dynamicFriction;
-    node["collidable"]["restitution"] = component.materialDesc.restitution;
+        component->materialDesc.dynamicFriction;
+    node["collidable"]["restitution"] = component->materialDesc.restitution;
     node["collidable"]["staticFriction"] =
-        component.materialDesc.staticFriction;
+        component->materialDesc.staticFriction;
   }
 }
 
@@ -93,7 +94,7 @@ void CollidableSerializer::deserialize(const YAML::Node &node,
         node["collidable"]["staticFriction"].as<f32>(
             collidable.materialDesc.staticFriction);
 
-    entityDatabase.set(entity, collidable);
+    entity.set(collidable);
   }
 }
 

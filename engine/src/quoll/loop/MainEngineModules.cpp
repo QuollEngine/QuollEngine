@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/audio/MiniAudioBackend.h"
 #include "quoll/physx/PhysxBackend.h"
 #include "quoll/scene/Scene.h"
 #include "MainEngineModules.h"
@@ -10,7 +11,8 @@ MainEngineModules::MainEngineModules(InputDeviceManager &deviceManager,
                                      AssetRegistry &assetRegistry)
     : mWindow(window), mInputMapSystem(deviceManager, assetRegistry),
       mScriptingSystem(assetRegistry), mAnimationSystem(assetRegistry),
-      mPhysicsSystem(new PhysxBackend), mAudioSystem(assetRegistry),
+      mPhysicsSystem(new PhysxBackend),
+      mAudioSystem(new MiniAudioBackend, assetRegistry),
       mAssetRegistry(assetRegistry) {}
 
 void MainEngineModules::prepare(SystemView &view) {

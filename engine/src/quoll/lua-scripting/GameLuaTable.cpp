@@ -14,9 +14,9 @@ GameLuaTable::GameLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
 sol::object GameLuaTable::getService(String name) {
-  auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
+  auto script = mEntity.get_ref<LuaScript>();
 
-  sol::state_view state(script.state);
+  sol::state_view state(script->state);
   if (name == "EntityQuery") {
     EntityQueryLuaTable::create(state);
     return sol::make_object(state, EntityQueryLuaTable(mScriptGlobals));
@@ -49,8 +49,7 @@ sol::object GameLuaTable::getService(String name) {
 }
 
 SignalLuaTable GameLuaTable::onUpdate() {
-  auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return SignalLuaTable(mScriptGlobals.scriptLoop.onUpdate(), script);
+  return SignalLuaTable(mScriptGlobals.scriptLoop.onUpdate(), mEntity);
 }
 
 void GameLuaTable::create(sol::state_view state) {

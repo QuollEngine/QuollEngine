@@ -6,78 +6,78 @@
 class TextLuaTableTest : public LuaScriptingInterfaceTestBase {};
 
 TEST_F(TextLuaTableTest, GetTextReturnsEmptyStringIfTextDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   auto state = call(entity, "textGetTextNil");
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
+  EXPECT_FALSE(entity.has<quoll::Text>());
   EXPECT_TRUE(state["text"].is<sol::nil_t>());
 }
 
 TEST_F(TextLuaTableTest, GetTextReturnsTextDataIfComponentExists) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Text>(entity, {"Test content"});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Text>({"Test content"});
 
   call(entity, "textGetText");
 }
 
 TEST_F(TextLuaTableTest, SetTextDoesNothingIfComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
+  EXPECT_FALSE(entity.has<quoll::Text>());
   call(entity, "textSetText");
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
+  EXPECT_FALSE(entity.has<quoll::Text>());
 }
 
 TEST_F(TextLuaTableTest, SetTextUpdatesExistingTextIfValid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Text>(entity, {"Test name"});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Text>({"Test name"});
 
   call(entity, "textSetText");
 }
 
 TEST_F(TextLuaTableTest, GetLineHeightReturnsZeroIfTextDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "textGetLineHeightNil");
 }
 
 TEST_F(TextLuaTableTest, GetLineHeightReturnsLineHeightIfComponentExists) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Text>(entity, {"Test name", 25.0f});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Text>({"Test name", 25.0f});
 
   call(entity, "textGetLineHeight");
 }
 
 TEST_F(TextLuaTableTest, SetLineHeightDoesNothingIfComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
+  EXPECT_FALSE(entity.has<quoll::Text>());
   call(entity, "textSetLineHeight");
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
+  EXPECT_FALSE(entity.has<quoll::Text>());
 }
 
 TEST_F(TextLuaTableTest, SetLineHeightUpdatesExistingLineHeightIfValid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Text>(entity, {"Test name"});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Text>({"Test name"});
 
   call(entity, "textSetLineHeight");
 
-  EXPECT_EQ(entityDatabase.get<quoll::Text>(entity).lineHeight, 12.0f);
+  EXPECT_EQ(entity.get_ref<quoll::Text>()->lineHeight, 12.0f);
 }
 
 TEST_F(TextLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   call(entity, "textDelete");
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
+  EXPECT_FALSE(entity.has<quoll::Text>());
 }
 
 TEST_F(TextLuaTableTest, DeleteRemovesTextComponentFromEntity) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Text>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Text>({});
 
   call(entity, "textDelete");
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
+  EXPECT_FALSE(entity.has<quoll::Text>());
 }

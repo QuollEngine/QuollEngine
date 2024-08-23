@@ -6,6 +6,7 @@
 #include "quoll/scene/EnvironmentSkybox.h"
 #include "quoll/scene/Sprite.h"
 #include "quoll/skeleton/Skeleton.h"
+#include "quoll/system/SystemView.h"
 #include "quoll/text/Text.h"
 #include "BindlessDrawParameters.h"
 #include "Mesh.h"
@@ -764,34 +765,37 @@ void SceneRenderer::attachText(RenderGraph &graph,
   }
 }
 
-void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
-                                    Entity camera, u32 frameIndex) {
-  QuollAssert(entityDatabase.has<Camera>(camera),
-              "Entity does not have a camera");
+void SceneRenderer::createSystemViewData(SystemView &view) {}
+
+void SceneRenderer::updateFrameData(SystemView &view, Entity camera,
+                                    u32 frameIndex) {
+  QuollAssert(camera.has<Camera>(), "Entity does not have a camera");
+
+  auto &entityDatabase = view.scene->entityDatabase;
 
   auto &frameData = mFrameData.at(frameIndex);
 
   QUOLL_PROFILE_EVENT("SceneRenderer::updateFrameData");
   frameData.clear();
 
-  frameData.setCameraData(entityDatabase.get<Camera>(camera),
-                          entityDatabase.get<PerspectiveLens>(camera));
+  frameData.setCameraData(camera.get_ref<Camera>().get(),
+                          camera.get_ref<PerspectiveLens>().get());
 
   frameData.setDefaultMaterial(
       mAssetRegistry.getMaterials()
           .getAsset(mAssetRegistry.getDefaultObjects().defaultMaterial)
           .data.deviceHandle->getAddress());
 
-  for (auto [entity, sprite, world] :
-       entityDatabase.view<Sprite, WorldTransform>()) {
+  entityDatabase.each([&](flecs::entity entity, Sprite &sprite,
+                          WorldTransform &world) {
     auto handle =
         mAssetRegistry.getTextures().getAsset(sprite.handle).data.deviceHandle;
     frameData.addSprite(entity, handle, world.worldTransform);
-  }
+  });
 
   // Meshes
-  for (auto [entity, world, mesh, renderer] :
-       entityDatabase.view<WorldTransform, Mesh, MeshRenderer>()) {
+  entityDatabase.each([&](flecs::entity entity, Mesh &mesh,
+                          MeshRenderer &renderer, WorldTransform &world) {
     const auto &asset = mAssetRegistry.getMeshes().getAsset(mesh.handle);
 
     std::vector<rhi::DeviceAddress> materials;
@@ -802,12 +806,12 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
     }
 
     frameData.addMesh(mesh.handle, entity, world.worldTransform, materials);
-  }
+  });
 
   // Skinned Meshes
-  for (auto [entity, skeleton, world, mesh, renderer] :
-       entityDatabase.view<Skeleton, WorldTransform, SkinnedMesh,
-                           SkinnedMeshRenderer>()) {
+  entityDatabase.each([&](flecs::entity entity, SkinnedMesh &mesh,
+                          SkinnedMeshRenderer &renderer, Skeleton &skeleton,
+                          WorldTransform &world) {
     const auto &asset = mAssetRegistry.getMeshes().getAsset(mesh.handle);
 
     std::vector<rhi::DeviceAddress> materials;
@@ -819,11 +823,11 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
     frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
                              skeleton.jointFinalTransforms, materials);
-  }
+  });
 
   // Texts
-  for (auto [entity, text, world] :
-       entityDatabase.view<Text, WorldTransform>()) {
+  entityDatabase.each([&](flecs::entity entity, Text &text,
+                          WorldTransform &world) {
     const auto &font = mAssetRegistry.getFonts().getAsset(text.font).data;
 
     std::vector<SceneRendererFrameData::GlyphData> glyphs(
@@ -852,26 +856,28 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
     }
 
     frameData.addText(entity, font.deviceHandle, glyphs, world.worldTransform);
-  }
+  });
 
   // Directional lights
-  for (auto [entity, light] : entityDatabase.view<DirectionalLight>()) {
-    if (entityDatabase.has<CascadedShadowMap>(entity)) {
-      frameData.addLight(light, entityDatabase.get<CascadedShadowMap>(entity));
+  entityDatabase.each([&](flecs::entity entity, DirectionalLight &light) {
+    if (entity.has<CascadedShadowMap>()) {
+      frameData.addLight(light, *entity.get_ref<CascadedShadowMap>().get());
     } else {
       frameData.addLight(light);
     }
-  };
+  });
 
   // Point lights
-  for (auto [entity, light, world] :
-       entityDatabase.view<PointLight, WorldTransform>()) {
-    frameData.addLight(light, world);
-  };
+  entityDatabase.each(
+      [&](flecs::entity entity, PointLight &light, WorldTransform &world) {
+        frameData.addLight(light, world);
+      });
 
   // Environments
   const auto &textures = mAssetRegistry.getTextures();
-  for (auto [entity, environment] : entityDatabase.view<EnvironmentSkybox>()) {
+
+  entityDatabase.each([&](flecs::entity entity,
+                          EnvironmentSkybox &environment) {
     rhi::TextureHandle irradianceMap{0};
     rhi::TextureHandle specularMap{0};
 
@@ -888,7 +894,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       specularMap = textures.getAsset(asset.specularMap).data.deviceHandle;
     }
 
-    if (entityDatabase.has<EnvironmentLightingSkyboxSource>(entity)) {
+    if (entity.has<EnvironmentLightingSkyboxSource>()) {
       if (environment.type == EnvironmentSkyboxType::Color) {
         frameData.setEnvironmentColor(environment.color);
       } else if (environment.type == EnvironmentSkyboxType::Texture &&
@@ -896,7 +902,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
         frameData.setEnvironmentTextures(irradianceMap, specularMap);
       }
     }
-  }
+  });
 
   frameData.updateBuffers();
 }

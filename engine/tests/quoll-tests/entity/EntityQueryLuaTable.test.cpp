@@ -9,7 +9,7 @@ using EntityQueryLuaTableTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(EntityQueryLuaTableTest,
        GetEntityByNameReturnsNulllIfEntityDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   auto state = call(entity, "entityQueryGetFirstByName");
   EXPECT_TRUE(state["foundEntity"].is<sol::nil_t>());
@@ -17,10 +17,10 @@ TEST_F(EntityQueryLuaTableTest,
 
 TEST_F(EntityQueryLuaTableTest,
        GetEntityByNameReturnsEntityTableIfEntityExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
-  auto e1 = entityDatabase.create();
-  entityDatabase.set<quoll::Name>(e1, {"Test"});
+  auto e1 = entityDatabase.entity();
+  e1.set<quoll::Name>({"Test"});
 
   auto state = call(entity, "entityQueryGetFirstByName");
 
@@ -30,8 +30,8 @@ TEST_F(EntityQueryLuaTableTest,
 
 TEST_F(EntityQueryLuaTableTest,
        DeleteEntityAddsDeleteComponentToExistingEntity) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   call(entity, "entityQueryDeleteEntity");
-  EXPECT_TRUE(entityDatabase.has<quoll::Delete>(entity));
+  EXPECT_TRUE(entity.has<quoll::Delete>());
 }

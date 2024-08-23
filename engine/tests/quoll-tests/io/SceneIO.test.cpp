@@ -94,7 +94,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfNodeDoesNotHaveId) {
   auto handle = createSceneAsset({node});
   sceneIO.loadScene(handle);
 
-  EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
+  EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 2);
 }
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsInvalid) {
@@ -113,7 +113,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsInvalid) {
     auto handle = createSceneAsset({node});
     sceneIO.loadScene(handle);
 
-    EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
+    EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 2);
   }
 }
 
@@ -124,7 +124,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsZero) {
   auto handle = createSceneAsset({node});
   sceneIO.loadScene(handle);
 
-  EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
+  EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 2);
 }
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsNegative) {
@@ -134,7 +134,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsNegative) {
   auto handle = createSceneAsset({node});
   sceneIO.loadScene(handle);
 
-  EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
+  EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 2);
 }
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdAlreadyExists) {
@@ -144,7 +144,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdAlreadyExists) {
   auto handle = createSceneAsset({node, node});
   sceneIO.loadScene(handle);
 
-  EXPECT_EQ(scene.entityDatabase.getEntityCount(), 3);
+  EXPECT_EQ(ecs_get_entities(scene.entityDatabase).alive_count, 3);
 }
 
 TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
@@ -161,10 +161,12 @@ TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
   auto handle = createSceneAsset(nodes);
   const auto &entities = sceneIO.loadScene(handle);
 
-  EXPECT_GT(scene.entityDatabase.getEntityCount(), NumEntities);
-  EXPECT_GT(scene.entityDatabase.getEntityCount(), entities.size() + 1);
+  EXPECT_GT(ecs_get_entities(scene.entityDatabase).alive_count, NumEntities);
+  EXPECT_GT(ecs_get_entities(scene.entityDatabase).alive_count,
+            entities.size() + 1);
+
   for (auto entity : entities) {
-    EXPECT_TRUE(scene.entityDatabase.has<quoll::Id>(entity));
+    EXPECT_TRUE(entity.has<quoll::Id>());
   }
 }
 
@@ -187,25 +189,26 @@ TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
   auto handle = createSceneAsset(nodes);
   const auto &entities = sceneIO.loadScene(handle);
 
-  EXPECT_GT(scene.entityDatabase.getEntityCount(), entities.size() + 1);
-  EXPECT_EQ(scene.entityDatabase.getEntityCountForComponent<quoll::Parent>(),
-            entities.size() - 1);
+  EXPECT_GT(ecs_get_entities(scene.entityDatabase).alive_count,
+            entities.size() + 1);
+  EXPECT_EQ(scene.entityDatabase.count<quoll::Parent>(), entities.size() - 1);
 }
 
 TEST_F(SceneIOTest, CreatesDummyCameraComponentOnConstruct) {
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.dummyCamera));
-  EXPECT_TRUE(scene.entityDatabase.has<quoll::Camera>(scene.dummyCamera));
-  EXPECT_TRUE(
-      scene.entityDatabase.has<quoll::PerspectiveLens>(scene.dummyCamera));
+  auto dummyCamera = scene.dummyCamera;
+
+  EXPECT_TRUE(dummyCamera.is_valid());
+  EXPECT_TRUE(dummyCamera.has<quoll::Camera>());
+  EXPECT_TRUE(dummyCamera.has<quoll::PerspectiveLens>());
 }
 
 TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
   auto handle = createSceneAsset();
 
   {
-    auto entity = scene.entityDatabase.create();
-    scene.entityDatabase.set<quoll::Id>(entity, {3});
-    scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
+    auto entity = scene.entityDatabase.entity();
+    entity.set<quoll::Id>({3});
+    entity.set<quoll::PerspectiveLens>({});
 
     quoll::detail::EntitySerializer serializer(assetRegistry,
                                                scene.entityDatabase);
@@ -217,9 +220,9 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
 
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeCamera));
-  EXPECT_TRUE(
-      scene.entityDatabase.has<quoll::PerspectiveLens>(scene.activeCamera));
+  auto activeCamera = scene.activeCamera;
+  EXPECT_TRUE(activeCamera.is_valid());
+  EXPECT_TRUE(activeCamera.has<quoll::PerspectiveLens>());
 }
 
 TEST_F(SceneIOTest,
@@ -234,11 +237,10 @@ TEST_F(SceneIOTest,
   auto handle = createSceneAsset();
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
-      scene.activeEnvironment));
-  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
-      scene.activeEnvironment));
+  auto environment = scene.activeEnvironment;
+  EXPECT_TRUE(environment.is_valid());
+  EXPECT_FALSE(environment.has<quoll::EnvironmentSkybox>());
+  EXPECT_FALSE(environment.has<quoll::EnvironmentLightingSkyboxSource>());
 }
 
 TEST_F(SceneIOTest,
@@ -255,12 +257,10 @@ TEST_F(SceneIOTest,
     zoneNode["environment"] = invalidNode;
     sceneIO.loadScene(handle);
 
-    EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-    EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
-        scene.activeEnvironment));
-    EXPECT_FALSE(
-        scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
-            scene.activeEnvironment));
+    auto environment = scene.activeEnvironment;
+    EXPECT_TRUE(environment.is_valid());
+    EXPECT_FALSE(environment.has<quoll::EnvironmentSkybox>());
+    EXPECT_FALSE(environment.has<quoll::EnvironmentLightingSkyboxSource>());
   }
 }
 
@@ -273,11 +273,10 @@ TEST_F(
 
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
-      scene.activeEnvironment));
-  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
-      scene.activeEnvironment));
+  auto environment = scene.activeEnvironment;
+  EXPECT_TRUE(scene.activeEnvironment.is_valid());
+  EXPECT_FALSE(environment.has<quoll::EnvironmentSkybox>());
+  EXPECT_FALSE(environment.has<quoll::EnvironmentLightingSkyboxSource>());
 }
 
 TEST_F(
@@ -294,11 +293,11 @@ TEST_F(
   zoneNode["environment"] = 125;
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
-            125);
-  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
-      scene.activeEnvironment));
+  auto environment = scene.activeEnvironment;
+
+  EXPECT_TRUE(environment.is_valid());
+  EXPECT_EQ(environment.get_ref<quoll::Id>()->id, 125);
+  EXPECT_FALSE(environment.has<quoll::EnvironmentSkybox>());
 }
 
 TEST_F(
@@ -315,11 +314,11 @@ TEST_F(
   zoneNode["environment"] = 125;
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
-            125);
-  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
-      scene.activeEnvironment));
+  auto environment = scene.activeEnvironment;
+
+  EXPECT_TRUE(environment.is_valid());
+  EXPECT_EQ(environment.get_ref<quoll::Id>()->id, 125);
+  EXPECT_FALSE(environment.has<quoll::EnvironmentLightingSkyboxSource>());
 }
 
 TEST_F(
@@ -337,9 +336,9 @@ TEST_F(
   zoneNode["environment"] = 125;
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
-            125);
-  EXPECT_TRUE(scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
-      scene.activeEnvironment));
+  auto environment = scene.activeEnvironment;
+
+  EXPECT_TRUE(environment.is_valid());
+  EXPECT_EQ(environment.get_ref<quoll::Id>()->id, 125);
+  EXPECT_TRUE(environment.has<quoll::EnvironmentLightingSkyboxSource>());
 }

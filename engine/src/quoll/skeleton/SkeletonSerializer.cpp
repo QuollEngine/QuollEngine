@@ -8,8 +8,8 @@ void SkeletonSerializer::serialize(YAML::Node &node,
                                    EntityDatabase &entityDatabase,
                                    Entity entity,
                                    AssetRegistry &assetRegistry) {
-  if (entityDatabase.has<Skeleton>(entity)) {
-    auto handle = entityDatabase.get<Skeleton>(entity).assetHandle;
+  if (entity.has<Skeleton>()) {
+    auto handle = entity.get_ref<Skeleton>()->assetHandle;
     if (assetRegistry.getSkeletons().hasAsset(handle)) {
       auto uuid = assetRegistry.getSkeletons().getAsset(handle).uuid;
 
@@ -45,7 +45,7 @@ void SkeletonSerializer::deserialize(const YAML::Node &node,
       skeletonComponent.jointWorldTransforms.resize(skeletonComponent.numJoints,
                                                     glm::mat4{1.0f});
 
-      entityDatabase.set(entity, skeletonComponent);
+      entity.set(skeletonComponent);
     }
   }
 }

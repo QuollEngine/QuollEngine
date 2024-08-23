@@ -10,8 +10,8 @@ TextLuaTable::TextLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
 sol_maybe<String> TextLuaTable::getContent() {
-  if (mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
-    return mScriptGlobals.entityDatabase.get<Text>(mEntity).content;
+  if (mEntity.has<Text>()) {
+    return mEntity.get_ref<Text>()->content;
   }
 
   return sol::nil;
@@ -19,16 +19,16 @@ sol_maybe<String> TextLuaTable::getContent() {
 
 void TextLuaTable::setContent(String content) {
   // Text needs to exist in order to change it
-  if (!mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
+  if (!mEntity.has<Text>()) {
     return;
   }
 
-  mScriptGlobals.entityDatabase.get<Text>(mEntity).content = content;
+  mEntity.get_ref<Text>()->content = content;
 }
 
 sol_maybe<f32> TextLuaTable::getLineHeight() {
-  if (mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
-    return mScriptGlobals.entityDatabase.get<Text>(mEntity).lineHeight;
+  if (mEntity.has<Text>()) {
+    return mEntity.get_ref<Text>()->lineHeight;
   }
 
   return sol::nil;
@@ -36,16 +36,16 @@ sol_maybe<f32> TextLuaTable::getLineHeight() {
 
 void TextLuaTable::setLineHeight(f32 lineHeight) {
   // Text needs to exist in order to change it
-  if (!mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
+  if (!mEntity.has<Text>()) {
     return;
   }
 
-  mScriptGlobals.entityDatabase.get<Text>(mEntity).lineHeight = lineHeight;
+  mEntity.get_ref<Text>()->lineHeight = lineHeight;
 };
 
 void TextLuaTable::deleteThis() {
-  if (mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
-    mScriptGlobals.entityDatabase.remove<Text>(mEntity);
+  if (mEntity.has<Text>()) {
+    mEntity.remove<Text>();
   }
 }
 

@@ -18,48 +18,48 @@ public:
 TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
   static constexpr usize NumEntities = 20;
 
-  std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
+  std::vector<quoll::Entity> entities(NumEntities);
   for (usize i = 0; i < entities.size(); ++i) {
-    auto entity = scene.entityDatabase.create();
+    auto entity = scene.entityDatabase.entity();
     entities.at(i) = entity;
 
     if ((i % 2) == 0) {
-      scene.entityDatabase.set<quoll::Delete>(entity, {});
+      entity.add<quoll::Delete>();
     }
   }
 
   for (auto entity : entities) {
-    EXPECT_TRUE(scene.entityDatabase.exists(entity));
+    EXPECT_TRUE(entity.is_valid());
   }
 
   entityDeleter.update(view);
 
   for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
-    EXPECT_NE(scene.entityDatabase.exists(entity), (i % 2) == 0);
+    EXPECT_NE(entity.is_valid(), (i % 2) == 0);
   }
 }
 
 TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
   static constexpr usize NumEntities = 20;
 
-  std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
+  std::vector<quoll::Entity> entities(NumEntities);
 
   for (usize i = 0; i < entities.size(); ++i) {
-    auto entity = scene.entityDatabase.create();
+    auto entity = scene.entityDatabase.entity();
     entities.at(i) = entity;
 
     if ((i % 2) == 0) {
-      scene.entityDatabase.set<quoll::Delete>(entity, {});
+      entity.add<quoll::Delete>();
     }
 
     if (i > 0 && (i % 4) == 0) {
-      scene.entityDatabase.set<quoll::Children>(entity, {{entities.at(i - 1)}});
+      entity.set<quoll::Children>({{entities.at(i - 1)}});
     }
   }
 
   for (auto entity : entities) {
-    EXPECT_TRUE(scene.entityDatabase.exists(entity));
+    EXPECT_TRUE(entity.is_valid());
   }
 
   entityDeleter.update(view);
@@ -72,55 +72,55 @@ TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
 
     // Every value before the fourth item is removed
     bool isChild = (i + 1) < entities.size() && (i + 1) % 4 == 0;
-    EXPECT_NE(scene.entityDatabase.exists(entity), isEven || isChild);
+    EXPECT_NE(entity.is_valid(), isEven || isChild);
   }
 }
 
 TEST_F(EntityDeleterTest, RemoveDeletedEntityFromChildrenOfAParent) {
   static constexpr usize NumEntities = 20;
 
-  std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
+  std::vector<quoll::Entity> entities(NumEntities);
 
   for (usize i = 0; i < entities.size(); ++i) {
-    auto entity = scene.entityDatabase.create();
+    auto entity = scene.entityDatabase.entity();
     entities.at(i) = entity;
 
     if ((i % 2) == 0) {
-      scene.entityDatabase.set<quoll::Delete>(entity, {});
+      entity.add<quoll::Delete>();
     }
 
     if (i > 0) {
       // Set previous entity as parent of this entity
-      scene.entityDatabase.set<quoll::Parent>(entity, {entities.at(i - 1)});
+      entity.set<quoll::Parent>({entities.at(i - 1)});
 
       // Set this entity as a child of previous entity
-      scene.entityDatabase.set<quoll::Children>(entities.at(i - 1), {{entity}});
+      entities.at(i - 1).set<quoll::Children>({{entity}});
     }
   }
 
   for (auto entity : entities) {
-    EXPECT_TRUE(scene.entityDatabase.exists(entity));
+    EXPECT_TRUE(entity.is_valid());
   }
 
   entityDeleter.update(view);
 
   for (usize i = 0; i < entities.size(); ++i) {
-    if (!scene.entityDatabase.has<quoll::Children>(entities.at(i))) {
+    auto entity = entities.at(i);
+    if (!entity.is_valid() || entity.has<quoll::Children>()) {
       continue;
     }
-    auto &children =
-        scene.entityDatabase.get<quoll::Children>(entities.at(i)).children;
 
+    auto &children = entity.get_ref<quoll::Children>()->children;
     EXPECT_EQ(children.empty(), (i + 1) % 2 == 0);
   }
 }
 
 TEST_F(EntityDeleterTest, SetsSceneActiveCameraToDummyIfActiveCameraIsDeleted) {
-  scene.activeCamera = scene.entityDatabase.create();
+  scene.activeCamera = scene.entityDatabase.entity();
 
-  auto entityThatComesAfter = scene.entityDatabase.create();
-  scene.entityDatabase.set<quoll::Delete>(scene.activeCamera, {});
-  scene.entityDatabase.set<quoll::Delete>(entityThatComesAfter, {});
+  auto entityThatComesAfter = scene.entityDatabase.entity();
+  scene.activeCamera.add<quoll::Delete>();
+  entityThatComesAfter.add<quoll::Delete>();
 
   entityDeleter.update(view);
 

@@ -17,7 +17,7 @@ EntityQueryLuaTable::getFirstEntityByName(String name) {
   EntityQuery query(mScriptGlobals.entityDatabase);
 
   auto entity = query.getFirstEntityByName(name);
-  if (entity == Entity::Null) {
+  if (!entity) {
     return sol::nil;
   }
 
@@ -25,13 +25,13 @@ EntityQueryLuaTable::getFirstEntityByName(String name) {
 }
 
 void EntityQueryLuaTable::deleteEntity(EntityLuaTable entity) {
-  if (!mScriptGlobals.entityDatabase.exists(entity.getEntity())) {
+  if (!entity.getEntity().is_valid()) {
     Engine::getUserLogger().error() << lua::Messages::entityDoesNotExist(
         "EntityQuery", "deleteEntity", entity.getEntity());
     return;
   }
 
-  mScriptGlobals.entityDatabase.set<Delete>(entity.getEntity(), {});
+  entity.getEntity().add<Delete>();
 }
 
 void EntityQueryLuaTable::create(sol::state_view state) {

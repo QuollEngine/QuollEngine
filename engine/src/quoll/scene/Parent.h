@@ -5,7 +5,7 @@
 namespace quoll {
 
 struct Parent {
-  Entity parent = Entity::Null;
+  Entity parent;
 };
 
 } // namespace quoll

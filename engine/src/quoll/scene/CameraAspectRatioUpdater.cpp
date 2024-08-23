@@ -9,16 +9,18 @@
 namespace quoll {
 
 void CameraAspectRatioUpdater::update(SystemView &view) {
-  auto &entityDatabase = view.scene->entityDatabase;
   QUOLL_PROFILE_EVENT("CameraAspectRatioUpdater::update");
 
   if (mSize.x <= 0 || mSize.y <= 0)
     return;
 
-  for (auto [_, lens, _1] :
-       entityDatabase.view<PerspectiveLens, AutoAspectRatio>()) {
+  auto query = view.scene->entityDatabase.query_builder<PerspectiveLens>()
+                   .with<AutoAspectRatio>()
+                   .build();
+
+  query.each([this](PerspectiveLens &lens) {
     lens.aspectRatio = static_cast<f32>(mSize.x) / static_cast<f32>(mSize.y);
-  }
+  });
 }
 
 void CameraAspectRatioUpdater::setViewportSize(glm::uvec2 size) {

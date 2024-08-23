@@ -10,8 +10,8 @@ namespace quoll {
 
 void addToDeleteList(Entity entity, EntityDatabase &entityDatabase,
                      std::vector<Entity> &deleteList) {
-  if (entityDatabase.has<Children>(entity)) {
-    for (auto &child : entityDatabase.get<Children>(entity).children) {
+  if (entity.has<Children>()) {
+    for (auto &child : entity.get_ref<Children>()->children) {
       addToDeleteList(child, entityDatabase, deleteList);
     }
   }
@@ -24,7 +24,7 @@ void EntityDeleter::update(SystemView &view) {
   auto &entityDatabase = scene->entityDatabase;
   auto activeCamera = scene->activeCamera;
 
-  auto count = entityDatabase.getEntityCountForComponent<Delete>();
+  auto count = entityDatabase.count<Delete>();
   if (count == 0) {
     return;
   }
@@ -34,14 +34,17 @@ void EntityDeleter::update(SystemView &view) {
 
   bool cameraDeleted = false;
 
-  for (auto [entity, _] : entityDatabase.view<Delete>()) {
+  auto query =
+      view.scene->entityDatabase.query_builder().with<Delete>().build();
+
+  query.each([&](flecs::entity entity) {
     cameraDeleted = cameraDeleted || (activeCamera == entity);
 
-    if (entityDatabase.has<Parent>(entity)) {
-      auto parent = entityDatabase.get<Parent>(entity).parent;
+    if (entity.has<Parent>()) {
+      auto parent = entity.get_ref<Parent>()->parent;
 
-      if (entityDatabase.has<Children>(parent)) {
-        auto &children = entityDatabase.get<Children>(parent).children;
+      if (parent.has<Children>()) {
+        auto &children = parent.get_ref<Children>()->children;
 
         auto it = std::find(children.begin(), children.end(), entity);
         if (it != children.end()) {
@@ -51,14 +54,14 @@ void EntityDeleter::update(SystemView &view) {
     }
 
     addToDeleteList(entity, entityDatabase, deleteList);
-  }
+  });
 
   if (cameraDeleted) {
     scene->activeCamera = scene->dummyCamera;
   }
 
   for (auto entity : deleteList) {
-    entityDatabase.deleteEntity(entity);
+    entity.destruct();
   }
 }
 

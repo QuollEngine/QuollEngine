@@ -19,6 +19,8 @@ public:
                                           ? inputStates.at(key)
                                           : false;
                              }});
+
+    inputMapSystem.createSystemViewData(view);
   }
 
   void setInputState(int key, bool value) {
@@ -97,8 +99,8 @@ public:
     asset.uuid = quoll::Uuid::generate();
     auto handle = registry.getInputMaps().addAsset(asset);
 
-    auto entity = db.create();
-    db.set<quoll::InputMapAssetRef>(entity, {handle});
+    auto entity = db.entity();
+    entity.set<quoll::InputMapAssetRef>({handle});
 
     return entity;
   }
@@ -117,33 +119,33 @@ TEST_F(InputMapSystemTest,
 
   inputMapSystem.update(view);
 
-  EXPECT_TRUE(db.has<quoll::InputMap>(entity));
-  auto inputMap = db.get<quoll::InputMap>(entity);
+  EXPECT_TRUE(entity.has<quoll::InputMap>());
+  auto inputMap = entity.get_ref<quoll::InputMap>();
 
-  EXPECT_EQ(inputMap.schemes.size(), 2);
-  EXPECT_EQ(inputMap.schemeNameMap.size(), 2);
-  EXPECT_EQ(inputMap.schemeNameMap.at("Explore"), 0);
-  EXPECT_EQ(inputMap.schemeNameMap.at("Combat"), 1);
+  EXPECT_EQ(inputMap->schemes.size(), 2);
+  EXPECT_EQ(inputMap->schemeNameMap.size(), 2);
+  EXPECT_EQ(inputMap->schemeNameMap.at("Explore"), 0);
+  EXPECT_EQ(inputMap->schemeNameMap.at("Combat"), 1);
 
-  EXPECT_EQ(inputMap.commandNameMap.size(), 6);
-  EXPECT_EQ(inputMap.commandNameMap.at("Jump"), 0);
-  EXPECT_EQ(inputMap.commandNameMap.at("Move"), 1);
-  EXPECT_EQ(inputMap.commandNameMap.at("Look"), 2);
-  EXPECT_EQ(inputMap.commandNameMap.at("Aim"), 3);
-  EXPECT_EQ(inputMap.commandNameMap.at("Shoot"), 4);
-  EXPECT_EQ(inputMap.commandNameMap.at("Pick"), 5);
+  EXPECT_EQ(inputMap->commandNameMap.size(), 6);
+  EXPECT_EQ(inputMap->commandNameMap.at("Jump"), 0);
+  EXPECT_EQ(inputMap->commandNameMap.at("Move"), 1);
+  EXPECT_EQ(inputMap->commandNameMap.at("Look"), 2);
+  EXPECT_EQ(inputMap->commandNameMap.at("Aim"), 3);
+  EXPECT_EQ(inputMap->commandNameMap.at("Shoot"), 4);
+  EXPECT_EQ(inputMap->commandNameMap.at("Pick"), 5);
 
-  EXPECT_EQ(inputMap.commandDataTypes.size(), 6);
-  EXPECT_EQ(inputMap.commandDataTypes.at(0), quoll::InputDataType::Boolean);
-  EXPECT_EQ(inputMap.commandDataTypes.at(1), quoll::InputDataType::Axis2d);
-  EXPECT_EQ(inputMap.commandDataTypes.at(2), quoll::InputDataType::Axis2d);
-  EXPECT_EQ(inputMap.commandDataTypes.at(3), quoll::InputDataType::Axis2d);
-  EXPECT_EQ(inputMap.commandDataTypes.at(4), quoll::InputDataType::Boolean);
-  EXPECT_EQ(inputMap.commandDataTypes.at(5), quoll::InputDataType::Boolean);
+  EXPECT_EQ(inputMap->commandDataTypes.size(), 6);
+  EXPECT_EQ(inputMap->commandDataTypes.at(0), quoll::InputDataType::Boolean);
+  EXPECT_EQ(inputMap->commandDataTypes.at(1), quoll::InputDataType::Axis2d);
+  EXPECT_EQ(inputMap->commandDataTypes.at(2), quoll::InputDataType::Axis2d);
+  EXPECT_EQ(inputMap->commandDataTypes.at(3), quoll::InputDataType::Axis2d);
+  EXPECT_EQ(inputMap->commandDataTypes.at(4), quoll::InputDataType::Boolean);
+  EXPECT_EQ(inputMap->commandDataTypes.at(5), quoll::InputDataType::Boolean);
 
   // Explore
   {
-    auto &layout = inputMap.schemes.at(0);
+    auto &layout = inputMap->schemes.at(0);
 
     auto &bindings = layout.inputKeyToCommandMap;
     EXPECT_EQ(bindings.size(), 11);
@@ -180,7 +182,7 @@ TEST_F(InputMapSystemTest,
 
   // Combat
   {
-    auto &layout = inputMap.schemes.at(1);
+    auto &layout = inputMap->schemes.at(1);
 
     auto &bindings = layout.inputKeyToCommandMap;
     EXPECT_EQ(bindings.size(), 8);
@@ -212,12 +214,12 @@ TEST_F(InputMapSystemTest,
 }
 
 TEST_F(InputMapSystemTest, DeleteInputMapComponentIfAssetRefIsDeleted) {
-  auto entity = db.create();
-  db.set<quoll::InputMap>(entity, {});
+  auto entity = db.entity();
+  entity.set<quoll::InputMap>({});
 
   inputMapSystem.update(view);
 
-  EXPECT_FALSE(db.has<quoll::InputMap>(entity));
+  EXPECT_FALSE(entity.has<quoll::InputMap>());
 }
 
 TEST_F(InputMapSystemTest,
@@ -228,22 +230,22 @@ TEST_F(InputMapSystemTest,
   inputMapSystem.update(view);
   setInputState(key, true);
 
-  auto &inputMap = db.get<quoll::InputMap>(entity);
-  auto pick = inputMap.commandNameMap.at("Pick");
-  auto shoot = inputMap.commandNameMap.at("Shoot");
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto pick = inputMap->commandNameMap.at("Pick");
+  auto shoot = inputMap->commandNameMap.at("Shoot");
 
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), false);
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), false);
-
-  inputMapSystem.update(view);
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), true);
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), false);
-
-  inputMap.activeScheme = 1;
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(pick)), false);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(shoot)), false);
 
   inputMapSystem.update(view);
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), false);
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), true);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(pick)), true);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(shoot)), false);
+
+  inputMap->activeScheme = 1;
+
+  inputMapSystem.update(view);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(pick)), false);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(shoot)), true);
 }
 
 using InputMapSystemBooleanValueTest = InputMapSystemTest;
@@ -256,11 +258,11 @@ TEST_F(InputMapSystemBooleanValueTest,
   setInputState(key, true);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), true);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(command)), true);
 }
 
 TEST_F(InputMapSystemBooleanValueTest,
@@ -270,11 +272,11 @@ TEST_F(InputMapSystemBooleanValueTest,
 
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), false);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(command)), false);
 }
 
 TEST_F(InputMapSystemBooleanValueTest,
@@ -285,11 +287,11 @@ TEST_F(InputMapSystemBooleanValueTest,
   setInputState(key, -1.0f);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), true);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(command)), true);
 }
 
 TEST_F(InputMapSystemBooleanValueTest, SetsValueToFalseIfFloatKeyStateIsZero) {
@@ -299,11 +301,11 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToFalseIfFloatKeyStateIsZero) {
   setInputState(key, 0.0f);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), false);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(command)), false);
 }
 
 TEST_F(InputMapSystemBooleanValueTest, SetsValueToTrueIfVec2StateIsNotZero) {
@@ -313,11 +315,11 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToTrueIfVec2StateIsNotZero) {
   setInputState(key, glm::vec2{0.0f, 0.2f});
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), true);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(command)), true);
 }
 
 TEST_F(InputMapSystemBooleanValueTest, SetsValueToFalseIfVec2StateIsZero) {
@@ -327,11 +329,11 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToFalseIfVec2StateIsZero) {
   setInputState(key, glm::vec2{0.0f, 0.0f});
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), false);
+  EXPECT_EQ(std::get<bool>(inputMap->commandValues.at(command)), false);
 }
 
 using InputMapSystemAxis2dValueTest = InputMapSystemTest;
@@ -343,11 +345,11 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsValueToIncomingAxis2dInput) {
   setInputState(key, glm::vec2{-0.4f, 0.2f});
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(-0.4f, 0.2f));
 }
 
@@ -358,11 +360,11 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsXValueToIncomingFloatInput) {
   setInputState(key, 0.5f);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(0.5f, 0.0f));
 }
 
@@ -373,11 +375,11 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToIncomingFloatInput) {
   setInputState(key, -0.8f);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(0.0f, -0.8f));
 }
 
@@ -389,11 +391,11 @@ TEST_F(InputMapSystemAxis2dValueTest,
   setInputState(key, true);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(-1.0f, 0.0f));
 }
 
@@ -404,11 +406,11 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsXValueToOneIfIncomingBooleanIsX1) {
   setInputState(key, true);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(1.0f, 0.0f));
 }
 
@@ -420,11 +422,11 @@ TEST_F(InputMapSystemAxis2dValueTest,
   setInputState(key, true);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(0.0f, -1.0f));
 }
 
@@ -435,11 +437,11 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToOneIfIncomingBooleanIsY1) {
   setInputState(key, true);
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(key);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(0.0f, 1.0f));
 }
 
@@ -454,11 +456,11 @@ TEST_F(InputMapSystemAxis2dValueTest, ClampsPositiveValueToOne) {
 
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(keyX);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(1.0f, 1.0f));
 }
 
@@ -473,11 +475,11 @@ TEST_F(InputMapSystemAxis2dValueTest, ClampsNegativeValueToNegativeOne) {
 
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(keyX);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(-1.0f, -1.0f));
 }
 
@@ -492,10 +494,10 @@ TEST_F(InputMapSystemAxis2dValueTest, AddsMultipleInputValuesTogether) {
 
   inputMapSystem.update(view);
 
-  auto inputMap = db.get<quoll::InputMap>(entity);
-  auto &scheme = inputMap.schemes.at(0);
+  auto inputMap = entity.get_ref<quoll::InputMap>();
+  auto &scheme = inputMap->schemes.at(0);
   auto command = scheme.inputKeyToCommandMap.at(keyX);
 
-  EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
+  EXPECT_EQ(std::get<glm::vec2>(inputMap->commandValues.at(command)),
             glm::vec2(-0.2f, 0.4f));
 }

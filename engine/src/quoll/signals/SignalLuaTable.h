@@ -10,8 +10,8 @@ namespace quoll {
 class SignalLuaTable {
 public:
   template <class... TArgs>
-  SignalLuaTable(Signal<TArgs...> &signal, LuaScript &script) {
-    mConnector = [&signal, &script](sol::protected_function fn) {
+  SignalLuaTable(Signal<TArgs...> &signal, flecs::entity entity) {
+    mConnector = [&signal, entity](sol::protected_function fn) {
       auto slot = signal.connect([fn](TArgs &...args) {
         auto res = fn(args...);
         if (!res.valid()) {
@@ -19,7 +19,7 @@ public:
           Engine::getUserLogger().error() << error.what();
         }
       });
-      script.signalSlots.push_back(slot);
+      entity.get_ref<LuaScript>()->signalSlots.push_back(slot);
       return slot;
     };
   }

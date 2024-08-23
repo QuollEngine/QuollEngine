@@ -43,7 +43,7 @@ public:
 TEST_P(UserLoggerLuaTableTest, LogsMessageOnCall) {
   auto [value, severity] = GetParam();
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, value);
 
   EXPECT_THAT(output.message,

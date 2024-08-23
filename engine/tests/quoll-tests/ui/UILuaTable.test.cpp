@@ -6,17 +6,17 @@
 using UILuaTableTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(UILuaTableTest, ImageReturnsTableForImageComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "uiElementImage");
 }
 
 TEST_F(UILuaTableTest, TextReturnsTableForTextComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "uiElementText");
 }
 
 TEST_F(UILuaTableTest, ViewReturnsTableForViewComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "uiElementView");
 }
 
@@ -34,7 +34,7 @@ public:
 };
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedDirection) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto c = [this, entity](quoll::String value) {
     return callWithArgs<quoll::UIView>(entity, "uiElementViewDirection", value)
         .style;
@@ -56,7 +56,7 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedDirection) {
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedAlignItems) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto c = [this, entity](quoll::String value) {
     return callWithArgs<quoll::UIView>(entity, "uiElementViewAlignItems", value)
         .style;
@@ -81,7 +81,7 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedAlignItems) {
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedAlignContent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto c = [this, entity](quoll::String value) {
     return callWithArgs<quoll::UIView>(entity, "uiElementViewAlignContent",
                                        value)
@@ -107,7 +107,7 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedAlignContent) {
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedJustifyContent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto c = [this, entity](quoll::String value) {
     return callWithArgs<quoll::UIView>(entity, "uiElementViewJustifyContent",
                                        value)
@@ -133,7 +133,7 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedJustifyContent) {
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexGrow) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto c = [this, entity](float value) {
     return callWithArgs<quoll::UIView>(entity, "uiElementViewFlexGrow", value)
         .style;
@@ -154,7 +154,7 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexGrow) {
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexShrink) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto c = [this, entity](float value) {
     return callWithArgs<quoll::UIView>(entity, "uiElementViewFlexShrink", value)
         .style;
@@ -176,7 +176,7 @@ TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedFlexShrink) {
 }
 
 TEST_F(UIViewStylesLuaTableTest, ReturnsViewWithProvidedBackgroundColor) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto c = [this, entity](std::array<f32, 4> value) {
     return callWithArgs<quoll::UIView>(entity, "uiElementViewBackgroundColor",
                                        value)

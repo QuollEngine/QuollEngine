@@ -5,17 +5,13 @@
 
 namespace quoll {
 
-EntityQuery::EntityQuery(EntityDatabase &entityDatabase)
-    : mEntityDatabase(entityDatabase) {}
+EntityQuery::EntityQuery(EntityDatabase &entityDatabase) {
+  mQuery = entityDatabase.query<Name>();
+}
 
 Entity EntityQuery::getFirstEntityByName(StringView name) {
-  for (auto [entity, component] : mEntityDatabase.view<Name>()) {
-    if (component.name == name) {
-      return entity;
-    }
-  }
-
-  return Entity::Null;
+  return mQuery.find(
+      [&name](const auto &component) { return name == component.name; });
 }
 
 } // namespace quoll

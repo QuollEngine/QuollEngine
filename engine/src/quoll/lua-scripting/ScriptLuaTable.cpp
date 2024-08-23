@@ -9,15 +9,15 @@ ScriptLuaTable::ScriptLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
 sol::object ScriptLuaTable::get(const String &name) {
-  if (!mScriptGlobals.entityDatabase.has<LuaScript>(mEntity)) {
+  if (!mEntity.has<LuaScript>()) {
     return sol::nil;
   }
 
-  auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
+  auto script = mEntity.get_ref<LuaScript>();
 
-  script.loader.wait();
+  script->loader.wait();
 
-  sol::state_view state(script.state);
+  sol::state_view state(script->state);
 
   if (state[name].valid()) {
     return state[name];
@@ -27,14 +27,14 @@ sol::object ScriptLuaTable::get(const String &name) {
 }
 
 void ScriptLuaTable::set(const String &name, sol::object value) {
-  if (!mScriptGlobals.entityDatabase.has<LuaScript>(mEntity)) {
+  if (!mEntity.has<LuaScript>()) {
     return;
   }
 
-  auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  script.loader.wait();
+  auto script = mEntity.get_ref<LuaScript>();
+  script->loader.wait();
 
-  sol::state_view state(script.state);
+  sol::state_view state(script->state);
   if (state[name].valid()) {
     state[name] = value;
   }

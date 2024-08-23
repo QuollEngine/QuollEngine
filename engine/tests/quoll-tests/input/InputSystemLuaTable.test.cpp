@@ -10,7 +10,7 @@ public:
 };
 
 TEST_F(InputSystemLuaTableTest, RegistersKeyPressEvent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto state = start(entity);
 
   windowSignals.onKeyPress().notify(
@@ -26,7 +26,7 @@ TEST_F(InputSystemLuaTableTest, RegistersKeyPressEvent) {
 }
 
 TEST_F(InputSystemLuaTableTest, RegistersKeyReleaseEvent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto state = start(entity);
 
   windowSignals.onKeyRelease().notify(

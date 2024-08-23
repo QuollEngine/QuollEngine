@@ -7,7 +7,7 @@ namespace quoll {
 struct Scene {
   EntityDatabase entityDatabase;
 
-  Entity activeCamera = Entity::Null;
+  Entity activeCamera;
 
   /**
    * Dummy camera
@@ -15,9 +15,9 @@ struct Scene {
    * Used as a fallback if there
    * are no cameras in the scene
    */
-  Entity dummyCamera = Entity::Null;
+  Entity dummyCamera;
 
-  Entity activeEnvironment = Entity::Null;
+  Entity activeEnvironment;
 
   /**
    * Dummy environment
@@ -25,7 +25,7 @@ struct Scene {
    * Used as a fallback if there are no
    * environments in the scene
    */
-  Entity dummyEnvironment = Entity::Null;
+  Entity dummyEnvironment;
 };
 
 } // namespace quoll

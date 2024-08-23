@@ -8,18 +8,18 @@
 using UICanvasLuaTableTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(UICanvasLuaTableTest, DoesNothingIfNoUICanvasComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "uiCanvasRender");
-  EXPECT_FALSE(entityDatabase.has<quoll::UICanvasRenderRequest>(entity));
+  EXPECT_FALSE(entity.has<quoll::UICanvasRenderRequest>());
 }
 
 TEST_F(UICanvasLuaTableTest, CreatesCanvasUIRenderRequestOnRender) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::UICanvas>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::UICanvas>({});
   call(entity, "uiCanvasRender");
-  EXPECT_TRUE(entityDatabase.has<quoll::UICanvasRenderRequest>(entity));
+  EXPECT_TRUE(entity.has<quoll::UICanvasRenderRequest>());
 
-  auto view = entityDatabase.get<quoll::UICanvasRenderRequest>(entity).view;
+  auto view = entity.get_ref<quoll::UICanvasRenderRequest>()->view;
 
   EXPECT_EQ(view.children.size(), 6);
   EXPECT_EQ(std::get<quoll::UIImage>(view.children.at(0)).texture,

@@ -8,13 +8,13 @@ void InputMapSerializer::serialize(YAML::Node &node,
                                    EntityDatabase &entityDatabase,
                                    Entity entity,
                                    AssetRegistry &assetRegistry) {
-  if (entityDatabase.has<InputMapAssetRef>(entity)) {
-    const auto &component = entityDatabase.get<InputMapAssetRef>(entity);
+  if (entity.has<InputMapAssetRef>()) {
+    auto component = entity.get_ref<InputMapAssetRef>();
 
-    if (assetRegistry.getInputMaps().hasAsset(component.handle)) {
+    if (assetRegistry.getInputMaps().hasAsset(component->handle)) {
       node["inputMap"]["asset"] =
-          assetRegistry.getInputMaps().getAsset(component.handle).uuid;
-      node["inputMap"]["defaultScheme"] = component.defaultScheme;
+          assetRegistry.getInputMaps().getAsset(component->handle).uuid;
+      node["inputMap"]["defaultScheme"] = component->defaultScheme;
     }
   }
 }
@@ -32,7 +32,7 @@ void InputMapSerializer::deserialize(const YAML::Node &node,
     if (handle != InputMapAssetHandle::Null) {
       auto type = assetRegistry.getInputMaps().getAsset(handle).type;
 
-      entityDatabase.set<InputMapAssetRef>(entity, {handle, defaultScheme});
+      entity.set<InputMapAssetRef>({handle, defaultScheme});
     }
   }
 }

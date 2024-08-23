@@ -7,6 +7,11 @@
 
 namespace quoll {
 
+void SkeletonUpdater::createSystemViewData(SystemView &view) {
+  view.skeletonUpdater.querySkeletons =
+      view.scene->entityDatabase.query<Skeleton>();
+}
+
 void SkeletonUpdater::update(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
 
@@ -18,8 +23,8 @@ void SkeletonUpdater::updateSkeletons(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
 
   auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, skeleton] : entityDatabase.view<Skeleton>()) {
 
+  view.skeletonUpdater.querySkeletons.each([](Skeleton &skeleton) {
     {
       glm::mat4 identity{1.0f};
       skeleton.jointWorldTransforms.at(0) =
@@ -45,15 +50,14 @@ void SkeletonUpdater::updateSkeletons(SystemView &view) {
           skeleton.jointWorldTransforms.at(i) *
           skeleton.jointInverseBindMatrices.at(i);
     }
-  }
+  });
 }
 
 void SkeletonUpdater::updateDebugBones(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::updateDebug");
 
-  auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, skeleton, debug] :
-       entityDatabase.view<Skeleton, SkeletonDebug>()) {
+  auto query = view.scene->entityDatabase.query<Skeleton, SkeletonDebug>();
+  query.each([](Skeleton &skeleton, SkeletonDebug &debug) {
     QuollAssert(static_cast<u32>(debug.bones.size()) == skeleton.numJoints * 2,
                 "Debug bones must be twice the size skeleton joint size");
 
@@ -61,7 +65,7 @@ void SkeletonUpdater::updateDebugBones(SystemView &view) {
       debug.boneTransforms.at(i) =
           skeleton.jointWorldTransforms.at(debug.bones.at(i));
     }
-  }
+  });
 }
 
 } // namespace quoll

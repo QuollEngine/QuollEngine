@@ -7,16 +7,17 @@ namespace quoll {
 void ScriptSerializer::serialize(YAML::Node &node,
                                  EntityDatabase &entityDatabase, Entity entity,
                                  AssetRegistry &assetRegistry) {
-  if (entityDatabase.has<LuaScript>(entity)) {
-    const auto &script = entityDatabase.get<LuaScript>(entity);
-    if (assetRegistry.getLuaScripts().hasAsset(script.handle)) {
-      const auto &asset = assetRegistry.getLuaScripts().getAsset(script.handle);
+  if (entity.has<LuaScript>()) {
+    auto script = entity.get_ref<LuaScript>();
+    if (assetRegistry.getLuaScripts().hasAsset(script->handle)) {
+      const auto &asset =
+          assetRegistry.getLuaScripts().getAsset(script->handle);
 
       auto uuid = asset.uuid;
 
       node["script"]["asset"] = uuid;
 
-      for (auto &[name, value] : script.variables) {
+      for (auto &[name, value] : script->variables) {
         auto it = asset.data.variables.find(name);
         if (it == asset.data.variables.end() ||
             !value.isType(it->second.type)) {
@@ -91,7 +92,7 @@ void ScriptSerializer::deserialize(const YAML::Node &node,
     script.handle = assetRegistry.getLuaScripts().findHandleByUuid(uuid);
 
     if (script.handle != LuaScriptAssetHandle::Null) {
-      entityDatabase.set(entity, script);
+      entity.set(script);
     }
   }
 }

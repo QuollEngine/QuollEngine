@@ -70,20 +70,20 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
 Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
                                                EntityIdCache &entityIdCache) {
-  Entity entity = Entity::Null;
+  Entity entity;
   if (node && node.IsScalar()) {
     auto entityId = node.as<u64>(0);
 
     if (entityId > 0 && entityIdCache.find(entityId) != entityIdCache.end()) {
       auto foundEntity = entityIdCache.at(entityId);
 
-      if (mEntityDatabase.has<PerspectiveLens>(foundEntity)) {
+      if (foundEntity.has<PerspectiveLens>()) {
         entity = foundEntity;
       }
     }
   }
 
-  if (entity == Entity::Null) {
+  if (!entity) {
     return Result<Entity>::Error("Camera entity not found");
   }
 

@@ -1,10 +1,11 @@
 #pragma once
 
 #include "AudioAsset.h"
+#include "AudioBackend.h"
 
 namespace quoll {
 
-class MiniAudioBackend : NoCopyMove {
+class MiniAudioBackend : public AudioBackend {
   class BackendImpl;
 
 public:
@@ -12,11 +13,11 @@ public:
 
   ~MiniAudioBackend();
 
-  void *playSound(const AudioAsset &asset);
+  void *playSound(const AudioAsset &asset) override;
 
-  void destroySound(void *instance);
+  void destroySound(void *instance) override;
 
-  bool isPlaying(void *instance);
+  bool isPlaying(void *instance) override;
 
 private:
   BackendImpl *mImpl = nullptr;

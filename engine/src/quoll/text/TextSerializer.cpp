@@ -6,14 +6,15 @@ namespace quoll {
 
 void TextSerializer::serialize(YAML::Node &node, EntityDatabase &entityDatabase,
                                Entity entity, AssetRegistry &assetRegistry) {
-  if (entityDatabase.has<Text>(entity)) {
-    const auto &text = entityDatabase.get<Text>(entity);
+  if (entity.has<Text>()) {
+    auto text = entity.get_ref<Text>();
 
-    if (!text.content.empty() && assetRegistry.getFonts().hasAsset(text.font)) {
-      auto font = assetRegistry.getFonts().getAsset(text.font).uuid;
+    if (!text->content.empty() &&
+        assetRegistry.getFonts().hasAsset(text->font)) {
+      auto font = assetRegistry.getFonts().getAsset(text->font).uuid;
 
-      node["text"]["content"] = text.content;
-      node["text"]["lineHeight"] = text.lineHeight;
+      node["text"]["content"] = text->content;
+      node["text"]["lineHeight"] = text->lineHeight;
       node["text"]["font"] = font;
     }
   }
@@ -38,7 +39,7 @@ void TextSerializer::deserialize(const YAML::Node &node,
       textComponent.lineHeight =
           node["text"]["lineHeight"].as<f32>(textComponent.lineHeight);
 
-      entityDatabase.set(entity, textComponent);
+      entity.set(textComponent);
     }
   }
 }

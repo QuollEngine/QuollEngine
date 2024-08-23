@@ -23,9 +23,11 @@ void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
   lua::ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
   std::vector<lua::DeferredLoader *> loaders;
-  for (auto [entity, component] : entityDatabase.view<LuaScript>()) {
+
+  view.luaScripting.queryScripts.each([&](flecs::entity entity,
+                                          LuaScript &component) {
     if (component.started) {
-      continue;
+      return;
     }
 
     bool valid = true;
@@ -41,62 +43,64 @@ void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
 
     if (!valid) {
       deleteList.push_back(entity);
-      continue;
+      return;
     }
 
     component.loader = [this, scriptGlobals, &scriptDecorator, &script,
                         entity]() {
-      auto &component = scriptGlobals.entityDatabase.get<LuaScript>(entity);
-      component.started = true;
+      auto component = entity.get_ref<LuaScript>();
+      component->started = true;
 
-      if (component.state) {
-        mLuaInterpreter.destroyState(component.state);
+      if (component->state) {
+        mLuaInterpreter.destroyState(component->state);
       }
-      component.state = mLuaInterpreter.createState();
-      auto state = sol::state_view(component.state);
+      component->state = mLuaInterpreter.createState();
+      auto state = sol::state_view(component->state);
 
       scriptDecorator.attachToScope(state, entity, scriptGlobals);
-      scriptDecorator.attachVariableInjectors(state, component.variables);
+      scriptDecorator.attachVariableInjectors(state, component->variables);
 
-      mLuaInterpreter.evaluate(script.data.bytes, component.state);
+      mLuaInterpreter.evaluate(script.data.bytes, component->state);
       scriptDecorator.removeVariableInjectors(state);
     };
 
     loaders.push_back(&component.loader);
-  }
+  });
 
   for (auto *loader : loaders) {
     loader->wait();
   }
 
   for (auto entity : deleteList) {
-    entityDatabase.remove<LuaScript>(entity);
+    entity.remove<LuaScript>();
   }
 }
 
 void LuaScriptingSystem::update(f32 dt, SystemView &view) {
   QUOLL_PROFILE_EVENT("LuaScriptingSystem::update");
 
-  for (auto [entity, script] : view.luaScripting.scriptRemoveObserver) {
-    destroyScriptingData(script);
-  }
-  view.luaScripting.scriptRemoveObserver.clear();
-
   mScriptLoop.onUpdate().notify(dt);
 }
 
 void LuaScriptingSystem::cleanup(SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, script] : entityDatabase.view<LuaScript>()) {
-    destroyScriptingData(script);
-  }
 
-  entityDatabase.destroyComponents<LuaScript>();
+  entityDatabase.defer_begin();
+  view.luaScripting.queryScripts.each(
+      [this](flecs::entity entity, LuaScript &script) {
+        destroyScriptingData(script);
+        entity.remove<LuaScript>();
+      });
+  entityDatabase.defer_end();
 }
 
 void LuaScriptingSystem::createSystemViewData(SystemView &view) {
-  view.luaScripting.scriptRemoveObserver =
-      view.scene->entityDatabase.observeRemove<LuaScript>();
+  view.scene->entityDatabase.observer<LuaScript>()
+      .event(flecs::OnRemove)
+      .each([this](auto &script) { destroyScriptingData(script); });
+
+  view.luaScripting.queryScripts =
+      view.scene->entityDatabase.query<LuaScript>();
 }
 
 void LuaScriptingSystem::destroyScriptingData(LuaScript &component) {

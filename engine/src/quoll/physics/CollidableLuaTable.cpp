@@ -13,138 +13,133 @@ CollidableLuaTable::CollidableLuaTable(Entity entity,
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
 void CollidableLuaTable::setDefaultMaterial() {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
-    mScriptGlobals.entityDatabase.set(mEntity, Collidable{});
+  if (!mEntity.has<Collidable>()) {
+    mEntity.set(Collidable{});
   } else {
-    mScriptGlobals.entityDatabase.get<Collidable>(mEntity).materialDesc =
-        quoll::PhysicsMaterialDesc{};
+    mEntity.get_ref<Collidable>()->materialDesc = quoll::PhysicsMaterialDesc{};
   }
 }
 
 sol_maybe<f32> CollidableLuaTable::getStaticFriction() {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  return mScriptGlobals.entityDatabase.get<Collidable>(mEntity)
-      .materialDesc.staticFriction;
+  return mEntity.get_ref<Collidable>()->materialDesc.staticFriction;
 }
 
 void CollidableLuaTable::setStaticFriction(f32 staticFriction) {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Collidable collidable{};
     collidable.materialDesc.staticFriction = staticFriction;
-    mScriptGlobals.entityDatabase.set(mEntity, collidable);
+    mEntity.set(collidable);
   } else {
-    mScriptGlobals.entityDatabase.get<Collidable>(mEntity)
-        .materialDesc.staticFriction = staticFriction;
+    mEntity.get_ref<Collidable>()->materialDesc.staticFriction = staticFriction;
   }
 }
 
 sol_maybe<f32> CollidableLuaTable::getDynamicFriction() {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  return mScriptGlobals.entityDatabase.get<Collidable>(mEntity)
-      .materialDesc.dynamicFriction;
+  return mEntity.get_ref<Collidable>()->materialDesc.dynamicFriction;
 }
 
 void CollidableLuaTable::setDynamicFriction(f32 dynamicFriction) {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Collidable collidable{};
     collidable.materialDesc.dynamicFriction = dynamicFriction;
-    mScriptGlobals.entityDatabase.set(mEntity, collidable);
+    mEntity.set(collidable);
   } else {
-    mScriptGlobals.entityDatabase.get<Collidable>(mEntity)
-        .materialDesc.dynamicFriction = dynamicFriction;
+    mEntity.get_ref<Collidable>()->materialDesc.dynamicFriction =
+        dynamicFriction;
   }
 }
 
 sol_maybe<f32> CollidableLuaTable::getRestitution() {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Engine::getUserLogger().error()
         << lua::Messages::componentDoesNotExist(getName(), mEntity);
     return sol::nil;
   }
 
-  return mScriptGlobals.entityDatabase.get<Collidable>(mEntity)
-      .materialDesc.restitution;
+  return mEntity.get_ref<Collidable>()->materialDesc.restitution;
 }
 
 void CollidableLuaTable::setRestitution(f32 restitution) {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Collidable collidable{};
     collidable.materialDesc.restitution = restitution;
-    mScriptGlobals.entityDatabase.set(mEntity, collidable);
+    mEntity.set(collidable);
   } else {
-    mScriptGlobals.entityDatabase.get<Collidable>(mEntity)
-        .materialDesc.restitution = restitution;
+    mEntity.get_ref<Collidable>()->materialDesc.restitution = restitution;
   }
 }
 
 void CollidableLuaTable::setBoxGeometry(f32 hx, f32 hy, f32 hz) {
   glm::vec3 halfExtents{hx, hy, hz};
 
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Collidable collidable{};
     collidable.geometryDesc.type = PhysicsGeometryType::Box;
     collidable.geometryDesc.params = PhysicsGeometryBox{halfExtents};
-    mScriptGlobals.entityDatabase.set(mEntity, collidable);
+    mEntity.set(collidable);
   } else {
-    auto &collidable = mScriptGlobals.entityDatabase.get<Collidable>(mEntity);
-    collidable.geometryDesc.type = PhysicsGeometryType::Box;
-    collidable.geometryDesc.params = PhysicsGeometryBox{halfExtents};
+    auto collidable = mEntity.get_ref<Collidable>();
+    collidable->geometryDesc.type = PhysicsGeometryType::Box;
+    collidable->geometryDesc.params = PhysicsGeometryBox{halfExtents};
   }
 }
 
 void CollidableLuaTable::setSphereGeometry(f32 radius) {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Collidable collidable{};
     collidable.geometryDesc.type = PhysicsGeometryType::Sphere;
     collidable.geometryDesc.params = PhysicsGeometrySphere{radius};
-    mScriptGlobals.entityDatabase.set(mEntity, collidable);
+    mEntity.set(collidable);
   } else {
-    auto &collidable = mScriptGlobals.entityDatabase.get<Collidable>(mEntity);
-    collidable.geometryDesc.type = PhysicsGeometryType::Sphere;
-    collidable.geometryDesc.params = PhysicsGeometrySphere{radius};
+    auto collidable = mEntity.get_ref<Collidable>();
+    collidable->geometryDesc.type = PhysicsGeometryType::Sphere;
+    collidable->geometryDesc.params = PhysicsGeometrySphere{radius};
   }
 }
 
 void CollidableLuaTable::setCapsuleGeometry(f32 radius, f32 halfHeight) {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Collidable collidable{};
     collidable.geometryDesc.type = PhysicsGeometryType::Capsule;
     collidable.geometryDesc.params = PhysicsGeometryCapsule{radius, halfHeight};
-    mScriptGlobals.entityDatabase.set(mEntity, collidable);
+    mEntity.set(collidable);
   } else {
-    auto &collidable = mScriptGlobals.entityDatabase.get<Collidable>(mEntity);
-    collidable.geometryDesc.type = PhysicsGeometryType::Capsule;
-    collidable.geometryDesc.params = PhysicsGeometryCapsule{radius, halfHeight};
+    auto collidable = mEntity.get_ref<Collidable>();
+    collidable->geometryDesc.type = PhysicsGeometryType::Capsule;
+    collidable->geometryDesc.params =
+        PhysicsGeometryCapsule{radius, halfHeight};
   }
 }
 
 void CollidableLuaTable::setPlaneGeometry() {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     Collidable collidable{};
     collidable.geometryDesc.type = PhysicsGeometryType::Plane;
     collidable.geometryDesc.params = PhysicsGeometryPlane{};
 
-    mScriptGlobals.entityDatabase.set(mEntity, collidable);
+    mEntity.set(collidable);
   } else {
-    auto &collidable = mScriptGlobals.entityDatabase.get<Collidable>(mEntity);
-    collidable.geometryDesc.type = PhysicsGeometryType::Plane;
-    collidable.geometryDesc.params = PhysicsGeometryPlane{};
+    auto collidable = mEntity.get_ref<Collidable>();
+    collidable->geometryDesc.type = PhysicsGeometryType::Plane;
+    collidable->geometryDesc.params = PhysicsGeometryPlane{};
   }
 }
 
 std::tuple<bool, sol_maybe<CollisionHit>>
 CollidableLuaTable::sweep(f32 dx, f32 dy, f32 dz, f32 maxDistance) {
-  if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
+  if (!mEntity.has<Collidable>()) {
     return {false, sol::nil};
   }
 
@@ -160,8 +155,8 @@ CollidableLuaTable::sweep(f32 dx, f32 dy, f32 dz, f32 maxDistance) {
 }
 
 void CollidableLuaTable::deleteThis() {
-  if (mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
-    mScriptGlobals.entityDatabase.remove<Collidable>(mEntity);
+  if (mEntity.has<Collidable>()) {
+    mEntity.remove<Collidable>();
   }
 }
 

@@ -7,7 +7,7 @@ namespace quoll {
 void EnvironmentLightingSerializer::serialize(YAML::Node &node,
                                               EntityDatabase &entityDatabase,
                                               Entity entity) {
-  if (entityDatabase.has<EnvironmentLightingSkyboxSource>(entity)) {
+  if (entity.has<EnvironmentLightingSkyboxSource>()) {
     node["environmentLighting"]["source"] = "skybox";
   }
 }
@@ -18,7 +18,7 @@ void EnvironmentLightingSerializer::deserialize(const YAML::Node &node,
   if (node["environmentLighting"] && node["environmentLighting"].IsMap()) {
     auto source = node["environmentLighting"]["source"].as<String>("");
     if (source == "skybox") {
-      entityDatabase.set<EnvironmentLightingSkyboxSource>(entity, {});
+      entity.add<EnvironmentLightingSkyboxSource>();
     }
   }
 }

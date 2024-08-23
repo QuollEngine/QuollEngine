@@ -6,6 +6,8 @@ struct SystemView;
 
 class SkeletonUpdater {
 public:
+  void createSystemViewData(SystemView &view);
+
   void update(SystemView &view);
 
 private:

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "quoll/core/Name.h"
+
 namespace quoll {
 
 class EntityDatabase;
@@ -11,7 +13,7 @@ public:
   Entity getFirstEntityByName(StringView name);
 
 private:
-  EntityDatabase &mEntityDatabase;
+  flecs::query<Name> mQuery;
 };
 
 } // namespace quoll

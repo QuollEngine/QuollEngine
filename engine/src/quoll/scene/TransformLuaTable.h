@@ -8,15 +8,15 @@ class TransformLuaTable {
 public:
   TransformLuaTable(Entity entity, ScriptGlobals scriptGlobals);
 
-  std::reference_wrapper<glm::vec3> getPosition();
+  sol_maybe<std::reference_wrapper<glm::vec3>> getPosition();
 
   void setPosition(glm::vec3 position);
 
-  std::reference_wrapper<glm::quat> getRotation();
+  sol_maybe<std::reference_wrapper<glm::quat>> getRotation();
 
   void setRotation(glm::quat rotation);
 
-  std::reference_wrapper<glm::vec3> getScale();
+  sol_maybe<std::reference_wrapper<glm::vec3>> getScale();
 
   void setScale(glm::vec3 scale);
 

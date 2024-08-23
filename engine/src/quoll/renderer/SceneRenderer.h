@@ -9,6 +9,7 @@ namespace quoll {
 
 class AssetRegistry;
 class RenderStorage;
+struct SystemView;
 
 struct SceneRenderPassData {
   RenderGraphResource<rhi::TextureHandle> sceneColor;
@@ -35,8 +36,9 @@ public:
 
   void attachText(RenderGraph &graph, const SceneRenderPassData &passData);
 
-  void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
-                       u32 frameIndex);
+  void updateFrameData(SystemView &view, Entity camera, u32 frameIndex);
+
+  void createSystemViewData(SystemView &view);
 
   inline const std::array<SceneRendererFrameData, 2> &getFrameData() {
     return mFrameData;

@@ -7,15 +7,15 @@ namespace quoll {
 
 void MeshSerializer::serialize(YAML::Node &node, EntityDatabase &entityDatabase,
                                Entity entity, AssetRegistry &assetRegistry) {
-  if (entityDatabase.has<Mesh>(entity)) {
-    auto handle = entityDatabase.get<Mesh>(entity).handle;
+  if (entity.has<Mesh>()) {
+    auto handle = entity.get_ref<Mesh>()->handle;
     if (assetRegistry.getMeshes().hasAsset(handle)) {
       auto uuid = assetRegistry.getMeshes().getAsset(handle).uuid;
 
       node["mesh"] = uuid;
     }
-  } else if (entityDatabase.has<SkinnedMesh>(entity)) {
-    auto handle = entityDatabase.get<SkinnedMesh>(entity).handle;
+  } else if (entity.has<SkinnedMesh>()) {
+    auto handle = entity.get_ref<SkinnedMesh>()->handle;
     if (assetRegistry.getMeshes().hasAsset(handle)) {
       auto uuid = assetRegistry.getMeshes().getAsset(handle).uuid;
 
@@ -35,9 +35,9 @@ void MeshSerializer::deserialize(const YAML::Node &node,
       auto type = assetRegistry.getMeshes().getAsset(handle).type;
 
       if (type == AssetType::Mesh) {
-        entityDatabase.set<Mesh>(entity, {handle});
+        entity.set<Mesh>({handle});
       } else if (type == AssetType::SkinnedMesh) {
-        entityDatabase.set<SkinnedMesh>(entity, {handle});
+        entity.set<SkinnedMesh>({handle});
       }
     }
   }

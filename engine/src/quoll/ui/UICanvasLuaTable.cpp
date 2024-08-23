@@ -10,8 +10,8 @@ UICanvasLuaTable::UICanvasLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
 void UICanvasLuaTable::render(UIView view) {
-  if (mScriptGlobals.entityDatabase.has<UICanvas>(mEntity)) {
-    mScriptGlobals.entityDatabase.set<UICanvasRenderRequest>(mEntity, {view});
+  if (mEntity.has<UICanvas>()) {
+    mEntity.set<UICanvasRenderRequest>({view});
   }
 }
 

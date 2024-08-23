@@ -12,18 +12,16 @@ AudioLuaTable::AudioLuaTable(Entity entity, ScriptGlobals scriptGlobals)
     : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
 void AudioLuaTable::play() {
-  if (mScriptGlobals.entityDatabase.has<AudioSource>(mEntity)) {
-    mScriptGlobals.entityDatabase.set<AudioStart>(mEntity, {});
+  if (mEntity.has<AudioSource>()) {
+    mEntity.add<AudioStart>();
   }
 }
 
-bool AudioLuaTable::isPlaying() {
-  return mScriptGlobals.entityDatabase.has<AudioStatus>(mEntity);
-}
+bool AudioLuaTable::isPlaying() { return mEntity.has<AudioStatus>(); }
 
 void AudioLuaTable::deleteThis() {
-  if (mScriptGlobals.entityDatabase.has<AudioSource>(mEntity)) {
-    mScriptGlobals.entityDatabase.remove<AudioSource>(mEntity);
+  if (mEntity.has<AudioSource>()) {
+    mEntity.remove<AudioSource>();
   }
 }
 

@@ -26,13 +26,11 @@ InputSystemLuaTable InputSystemLuaTable::create(sol::state_view state,
 }
 
 SignalLuaTable InputSystemLuaTable::onKeyPress() {
-  auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return SignalLuaTable(mScriptGlobals.windowSignals.onKeyPress(), script);
+  return SignalLuaTable(mScriptGlobals.windowSignals.onKeyPress(), mEntity);
 }
 
 SignalLuaTable InputSystemLuaTable::onKeyRelease() {
-  auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
-  return SignalLuaTable(mScriptGlobals.windowSignals.onKeyRelease(), script);
+  return SignalLuaTable(mScriptGlobals.windowSignals.onKeyRelease(), mEntity);
 }
 
 } // namespace quoll

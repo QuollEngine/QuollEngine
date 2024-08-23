@@ -36,18 +36,18 @@ static constexpr f32 TimeDelta = 0.2f;
 TEST_F(LuaScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   auto handle = loadLuaScript("scripting-system-tester.lua");
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::LuaScript>({handle});
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-  EXPECT_EQ(component.state, nullptr);
+  auto component = entity.get_ref<quoll::LuaScript>();
+  EXPECT_EQ(component->state, nullptr);
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
-  EXPECT_NE(component.state, nullptr);
+  EXPECT_NE(component->state, nullptr);
 
   scriptingSystem.update(TimeDelta, view);
 
-  sol::state_view state(component.state);
+  sol::state_view state(component->state);
   EXPECT_EQ(state["value"].get<i32>(), 0);
   EXPECT_EQ(state["global_dt"].get<f32>(), TimeDelta);
 }
@@ -57,23 +57,23 @@ TEST_F(LuaScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
 
   static constexpr usize NumEntities = 20;
 
-  std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
+  std::vector<quoll::Entity> entities(NumEntities);
   for (usize i = 0; i < entities.size(); ++i) {
-    auto entity = entityDatabase.create();
+    auto entity = entityDatabase.entity();
     entities.at(i) = entity;
 
-    entityDatabase.set<quoll::LuaScript>(entity, {handle});
+    entity.set<quoll::LuaScript>({handle});
   }
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
 
-  std::vector<quoll::LuaScript> scripts(entities.size());
+  std::vector<flecs::ref<quoll::LuaScript>> scripts(entities.size());
   for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
-    scripts.at(i) = entityDatabase.get<quoll::LuaScript>(entity);
+    scripts.at(i) = entity.get_ref<quoll::LuaScript>();
 
     if ((i % 2) == 0) {
-      entityDatabase.remove<quoll::LuaScript>(entity);
+      entity.remove<quoll::LuaScript>();
     }
   }
 
@@ -81,23 +81,23 @@ TEST_F(LuaScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
   for (usize i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
     bool deleted = (i % 2) == 0;
-    EXPECT_NE(entityDatabase.has<quoll::LuaScript>(entity), deleted);
+    EXPECT_NE(entity.has<quoll::LuaScript>(), deleted);
   }
 }
 
 TEST_F(LuaScriptingSystemTest, DoesNothingIfScriptHasNoUpdater) {
   auto handle = loadLuaScript("scripting-system-tester.lua");
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::LuaScript>({handle});
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-  EXPECT_EQ(component.state, nullptr);
+  auto component = entity.get_ref<quoll::LuaScript>();
+  EXPECT_EQ(component->state, nullptr);
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
-  EXPECT_NE(component.state, nullptr);
+  EXPECT_NE(component->state, nullptr);
 
-  sol::state_view state(component.state);
+  sol::state_view state(component->state);
   state["disconnect_updater"]();
 
   for (usize i = 0; i < 10; ++i) {
@@ -110,75 +110,75 @@ TEST_F(LuaScriptingSystemTest, DoesNothingIfScriptHasNoUpdater) {
 TEST_F(LuaScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   auto handle = loadLuaScript("scripting-system-tester.lua");
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::LuaScript>({handle});
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-  EXPECT_EQ(component.state, nullptr);
+  auto component = entity.get_ref<quoll::LuaScript>();
+  EXPECT_EQ(component->state, nullptr);
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
-  EXPECT_NE(component.state, nullptr);
+  EXPECT_NE(component->state, nullptr);
 
   for (usize i = 0; i < 10; ++i) {
     scriptingSystem.update(TimeDelta, view);
   }
 
-  sol::state_view state(component.state);
+  sol::state_view state(component->state);
   EXPECT_EQ(state["value"].get<i32>(), 9);
 }
 
 TEST_F(LuaScriptingSystemTest, LoadsScriptOnStart) {
   auto handle = loadLuaScript("scripting-system-tester.lua");
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::LuaScript>({handle});
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-  EXPECT_EQ(component.state, nullptr);
+  auto component = entity.get_ref<quoll::LuaScript>();
+  EXPECT_EQ(component->state, nullptr);
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
-  EXPECT_NE(component.state, nullptr);
+  EXPECT_NE(component->state, nullptr);
 
-  sol::state_view state(component.state);
+  sol::state_view state(component->state);
   EXPECT_EQ(state["value"].get<i32>(), -1);
 }
 
 TEST_F(LuaScriptingSystemTest, LoadsScriptOnlyOnceOnStart) {
   auto handle = loadLuaScript("scripting-system-tester.lua");
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::LuaScript>({handle});
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-  EXPECT_EQ(component.state, nullptr);
+  auto component = entity.get_ref<quoll::LuaScript>();
+  EXPECT_EQ(component->state, nullptr);
 
   // Call 10 times
   for (usize i = 0; i < 10; ++i) {
     scriptingSystem.start(view, physicsSystem, windowSignals);
   }
-  EXPECT_NE(component.state, nullptr);
+  EXPECT_NE(component->state, nullptr);
 
-  auto state = sol::state_view(component.state);
+  auto state = sol::state_view(component->state);
   EXPECT_EQ(state["value"].get<i32>(), -1);
 }
 
 TEST_F(LuaScriptingSystemTest, RemovesScriptComponentIfInputVarsAreNotSet) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::LuaScript>({handle});
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
+  auto component = entity.get_ref<quoll::LuaScript>();
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
-  EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
+  EXPECT_FALSE(entity.has<quoll::LuaScript>());
 }
 
 TEST_F(LuaScriptingSystemTest,
        RemovesScriptComponentIfInputVarTypesAreInvalid) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::LuaScript script{handle};
   script.variables.insert_or_assign("string_value",
                                     quoll::PrefabAssetHandle{15});
@@ -186,18 +186,18 @@ TEST_F(LuaScriptingSystemTest,
                                     quoll::PrefabAssetHandle{15});
   script.variables.insert_or_assign("texture_value",
                                     quoll::TextureAssetHandle{25});
-  entityDatabase.set(entity, script);
+  entity.set(script);
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
+  auto component = entity.get_ref<quoll::LuaScript>();
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
-  EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
+  EXPECT_FALSE(entity.has<quoll::LuaScript>());
 }
 
 TEST_F(LuaScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::LuaScript script{handle};
   script.variables.insert_or_assign("string_value",
                                     quoll::String("Hello world"));
@@ -205,14 +205,14 @@ TEST_F(LuaScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
                                     quoll::PrefabAssetHandle{15});
   script.variables.insert_or_assign("texture_value",
                                     quoll::TextureAssetHandle{25});
-  entityDatabase.set(entity, script);
+  entity.set(script);
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
+  auto component = entity.get_ref<quoll::LuaScript>();
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
-  ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
+  ASSERT_TRUE(entity.has<quoll::LuaScript>());
 
-  auto state = sol::state_view(component.state);
+  auto state = sol::state_view(component->state);
 
   EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
   EXPECT_EQ(state["var_prefab"].get<u32>(), 15);
@@ -222,7 +222,7 @@ TEST_F(LuaScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
 TEST_F(LuaScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::LuaScript script{handle};
   script.variables.insert_or_assign("string_value",
                                     quoll::String("Hello world"));
@@ -230,12 +230,12 @@ TEST_F(LuaScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
                                     quoll::PrefabAssetHandle{15});
   script.variables.insert_or_assign("texture_value",
                                     quoll::TextureAssetHandle{25});
-  entityDatabase.set(entity, script);
+  entity.set(script);
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
+  auto component = entity.get_ref<quoll::LuaScript>();
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
-  auto state = sol::state_view(component.state);
+  auto state = sol::state_view(component->state);
 
   EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
   EXPECT_EQ(state["var_prefab"].get<u32>(), 15);

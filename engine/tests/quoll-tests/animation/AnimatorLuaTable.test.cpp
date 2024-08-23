@@ -9,11 +9,11 @@ public:
 };
 
 TEST_F(AnimatorLuaTableTest, TriggerAddsAnimatorEventComponent) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "animatorTrigger");
 
-  EXPECT_TRUE(entityDatabase.has<quoll::AnimatorEvent>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::AnimatorEvent>(entity).eventName, "Move");
+  EXPECT_TRUE(entity.has<quoll::AnimatorEvent>());
+  EXPECT_EQ(entity.get_ref<quoll::AnimatorEvent>()->eventName, "Move");
 }
 
 TEST_F(AnimatorLuaTableTest, PropertiesReturnAnimatorDataIfAnimatorExists) {
@@ -24,33 +24,33 @@ TEST_F(AnimatorLuaTableTest, PropertiesReturnAnimatorDataIfAnimatorExists) {
   auto handle =
       assetCache.getRegistry().getAnimators().addAsset({.data = animatorAsset});
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   quoll::Animator animator{};
   animator.asset = handle;
   animator.normalizedTime = 0.4f;
   animator.currentState = 1;
-  entityDatabase.set(entity, animator);
+  entity.set(animator);
 
   call(entity, "animatorPropertiesValid");
 }
 
 TEST_F(AnimatorLuaTableTest, PropertiesReturnNilIfAnimatorDoesNotExists) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   call(entity, "animatorPropertiesInvalid");
 }
 
 TEST_F(AnimatorLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   call(entity, "animatorDelete");
-  EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
+  EXPECT_FALSE(entity.has<quoll::Animator>());
 }
 
 TEST_F(AnimatorLuaTableTest, DeleteRemovesAnimatorSourceComponentFromEntity) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Animator>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::Animator>({});
 
   call(entity, "animatorDelete");
-  EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
+  EXPECT_FALSE(entity.has<quoll::Animator>());
 }

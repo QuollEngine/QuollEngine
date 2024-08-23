@@ -10,8 +10,8 @@ namespace quoll {
 
 static constexpr f32 ImageSize = 50.0f;
 
-void renderView(UIComponent component, YGNodeRef node,
-                AssetRegistry &assetRegistry) {
+static void renderView(UIComponent component, YGNodeRef node,
+                       AssetRegistry &assetRegistry) {
   f32 left = YGNodeLayoutGetLeft(node);
   f32 top = YGNodeLayoutGetTop(node);
 
@@ -69,7 +69,7 @@ void updateLayout(UIComponent component, YGNodeRef node) {
   }
 }
 
-void generateIds(UIView *component, u32 &id) {
+static void generateIds(UIView *component, u32 &id) {
   component->id = std::to_string(id);
   for (auto &child : component->children) {
     id++;
@@ -83,60 +83,71 @@ void generateIds(UIView *component, u32 &id) {
   }
 }
 
-void updateLayout(EntityDatabase &entityDatabase, const glm::vec2 &size) {
-  for (auto [entity, canvas, request] :
-       entityDatabase.view<UICanvas, UICanvasRenderRequest>()) {
-    canvas.rootView = request.view;
+static void updateLayout(SystemView &view, const glm::vec2 &size) {
+  view.scene->entityDatabase.defer_begin();
+  view.uiCanvasUpdater.queryRenderRequests.each(
+      [&size](flecs::entity entity, UICanvas &canvas,
+              UICanvasRenderRequest &request) {
+        canvas.rootView = request.view;
 
-    if (canvas.flexRoot) {
-      YGNodeFreeRecursive(canvas.flexRoot);
-      canvas.flexRoot = nullptr;
-    }
-    canvas.flexRoot = YGNodeNew();
-    updateLayout(canvas.rootView, canvas.flexRoot);
+        if (canvas.flexRoot) {
+          YGNodeFreeRecursive(canvas.flexRoot);
+          canvas.flexRoot = nullptr;
+        }
+        canvas.flexRoot = YGNodeNew();
+        updateLayout(canvas.rootView, canvas.flexRoot);
 
-    u32 id = 0;
-    generateIds(&canvas.rootView, id);
+        u32 id = 0;
+        generateIds(&canvas.rootView, id);
 
-    YGNodeCalculateLayout(canvas.flexRoot, size.x, size.y,
-                          YGDirection::YGDirectionLTR);
-  }
+        YGNodeCalculateLayout(canvas.flexRoot, size.x, size.y,
+                              YGDirection::YGDirectionLTR);
 
-  entityDatabase.destroyComponents<UICanvasRenderRequest>();
+        entity.remove<UICanvasRenderRequest>();
+      });
+
+  view.scene->entityDatabase.defer_end();
+}
+
+void UICanvasUpdater::createSystemViewData(SystemView &view) {
+  view.uiCanvasUpdater.queryCanvases =
+      view.scene->entityDatabase.query<UICanvas>();
+  view.uiCanvasUpdater.queryRenderRequests =
+      view.scene->entityDatabase.query<UICanvas, UICanvasRenderRequest>();
 }
 
 void UICanvasUpdater::render(SystemView &view, AssetRegistry &assetRegistry) {
-  auto &entityDatabase = view.scene->entityDatabase;
-  updateLayout(entityDatabase, mSize);
+  updateLayout(view, mSize);
 
-  for (auto [entity, canvas] : entityDatabase.view<UICanvas>()) {
-    if (!canvas.flexRoot)
-      continue;
+  view.uiCanvasUpdater.queryCanvases.each(
+      [this, &assetRegistry](flecs::entity entity, UICanvas &canvas) {
+        if (!canvas.flexRoot)
+          return;
 
-    if (mViewportChanged) {
-      YGNodeCalculateLayout(canvas.flexRoot, mSize.x, mSize.y,
-                            YGDirection::YGDirectionLTR);
-      mViewportChanged = false;
-    }
+        if (mViewportChanged) {
+          YGNodeCalculateLayout(canvas.flexRoot, mSize.x, mSize.y,
+                                YGDirection::YGDirectionLTR);
+          mViewportChanged = false;
+        }
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::SetNextWindowPos(ImVec2(mPosition.x, mPosition.y));
-    ImGui::SetNextWindowSize(ImVec2(mSize.x, mSize.y));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2(mPosition.x, mPosition.y));
+        ImGui::SetNextWindowSize(ImVec2(mSize.x, mSize.y));
 
-    ImGuiWindowFlags WindowFlags =
-        ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration |
-        ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings |
-        ImGuiWindowFlags_NoScrollWithMouse;
+        ImGuiWindowFlags WindowFlags =
+            ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration |
+            ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground |
+            ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_NoScrollWithMouse;
 
-    if (ImGui::Begin(std::to_string(static_cast<u32>(entity)).c_str(), nullptr,
-                     WindowFlags)) {
-      renderView(canvas.rootView, canvas.flexRoot, assetRegistry);
-      ImGui::End();
-    }
+        if (ImGui::Begin(std::to_string(static_cast<u32>(entity.id())).c_str(),
+                         nullptr, WindowFlags)) {
+          renderView(canvas.rootView, canvas.flexRoot, assetRegistry);
+          ImGui::End();
+        }
 
-    ImGui::PopStyleVar();
-  }
+        ImGui::PopStyleVar();
+      });
 }
 
 void UICanvasUpdater::setViewport(f32 x, f32 y, f32 width, f32 height) {

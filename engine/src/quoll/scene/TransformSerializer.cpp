@@ -11,20 +11,20 @@ namespace quoll {
 void TransformSerializer::serialize(YAML::Node &components,
                                     EntityDatabase &entityDatabase,
                                     Entity entity) {
-  if (!entityDatabase.has<LocalTransform>(entity)) {
-    entityDatabase.set<LocalTransform>(entity, {});
+  if (!entity.has<LocalTransform>()) {
+    entity.set<LocalTransform>({});
   }
-  const auto &component = entityDatabase.get<LocalTransform>(entity);
+  auto component = entity.get_ref<LocalTransform>();
 
-  components["transform"]["position"] = component.localPosition;
-  components["transform"]["rotation"] = component.localRotation;
-  components["transform"]["scale"] = component.localScale;
+  components["transform"]["position"] = component->localPosition;
+  components["transform"]["rotation"] = component->localRotation;
+  components["transform"]["scale"] = component->localScale;
 
-  if (entityDatabase.has<Parent>(entity)) {
-    auto parent = entityDatabase.get<Parent>(entity).parent;
+  if (entity.has<Parent>()) {
+    auto parent = entity.get_ref<Parent>()->parent;
 
-    if (entityDatabase.exists(parent) && entityDatabase.has<Id>(parent)) {
-      components["transform"]["parent"] = entityDatabase.get<Id>(parent).id;
+    if (parent.is_valid() && parent.has<Id>()) {
+      components["transform"]["parent"] = parent.get_ref<Id>()->id;
     }
   }
 }
@@ -49,23 +49,26 @@ void TransformSerializer::deserialize(const YAML::Node &node,
       auto parentId = node["transform"]["parent"].as<u64>(0);
 
       auto it = entityIdCache.find(parentId);
-      Entity parentEntity =
-          it != entityIdCache.end() ? it->second : Entity::Null;
+      Entity parentEntity;
 
-      if (parentEntity != Entity::Null) {
-        entityDatabase.set<Parent>(entity, {parentEntity});
+      if (it != entityIdCache.end()) {
+        parentEntity = it->second;
+      }
 
-        if (entityDatabase.has<Children>(parentEntity)) {
-          entityDatabase.get<Children>(parentEntity).children.push_back(entity);
+      if (parentEntity) {
+        entity.set<Parent>({parentEntity});
+
+        if (parentEntity.has<Children>()) {
+          parentEntity.get_ref<Children>()->children.push_back(entity);
         } else {
-          entityDatabase.set<Children>(parentEntity, {{entity}});
+          parentEntity.set<Children>({{entity}});
         }
       }
     }
   }
 
-  entityDatabase.set(entity, transform);
-  entityDatabase.set<WorldTransform>(entity, {});
+  entity.set(transform);
+  entity.set<WorldTransform>({});
 }
 
 } // namespace quoll

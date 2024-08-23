@@ -7,7 +7,7 @@ struct CollisionHit {
 
   f32 distance = 0.0f;
 
-  Entity entity = Entity::Null;
+  Entity entity;
 };
 
 } // namespace quoll

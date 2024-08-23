@@ -18,14 +18,16 @@ public:
   quoll::AssetRegistry assetRegistry;
   quoll::SystemView view{&scene};
 
-  AnimationSystemTest() : system(assetRegistry) {}
+  AnimationSystemTest() : system(assetRegistry) {
+    system.createSystemViewData(view);
+  }
 
   quoll::Entity
   create(quoll::AnimationAssetHandle animIndex = quoll::AnimationAssetHandle{1},
          bool playing = true, f32 speed = 1.0f,
          quoll::AnimationLoopMode loopMode = quoll::AnimationLoopMode::None) {
-    auto entity = entityDatabase.create();
-    entityDatabase.set<quoll::LocalTransform>(entity, {});
+    auto entity = entityDatabase.entity();
+    entity.set<quoll::LocalTransform>({});
 
     quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
     animatorAsset.data.initialState = 0;
@@ -39,7 +41,7 @@ public:
     quoll::Animator animator{};
     animator.playing = playing;
     animator.asset = animatorHandle;
-    entityDatabase.set(entity, animator);
+    entity.set(animator);
 
     return entity;
   }
@@ -57,7 +59,7 @@ public:
     skeleton.jointLocalScales = {glm::vec3{1.0f}};
     skeleton.jointNames = {"Joint0"};
 
-    entityDatabase.set(entity, skeleton);
+    entity.set(skeleton);
 
     return entity;
   }
@@ -129,35 +131,35 @@ TEST_F(
 
   auto animatorHandle = assetRegistry.getAnimators().addAsset(animatorAsset);
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   {
     quoll::Animator animator{};
     animator.normalizedTime = 0.5f;
     animator.asset = animatorHandle;
     animator.currentState = 0;
-    entityDatabase.set(entity, animator);
-    entityDatabase.set<quoll::LocalTransform>(entity, {});
+    entity.set(animator);
+    entity.set<quoll::LocalTransform>({});
   }
 
   system.prepare(view);
   system.update(0.0f, view);
 
   {
-    const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-    EXPECT_EQ(animator.currentState, 0);
-    EXPECT_EQ(animator.normalizedTime, 0.5f);
+    auto animator = entity.get_ref<quoll::Animator>();
+    EXPECT_EQ(animator->currentState, 0);
+    EXPECT_EQ(animator->normalizedTime, 0.5f);
   }
 
-  entityDatabase.set<quoll::AnimatorEvent>(entity, {"Move"});
+  entity.set<quoll::AnimatorEvent>({"Move"});
   system.prepare(view);
   system.update(0.0f, view);
 
   {
-    const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-    EXPECT_EQ(animator.currentState, 1);
-    EXPECT_EQ(animator.normalizedTime, 0.0f);
-    EXPECT_FALSE(entityDatabase.has<quoll::AnimatorEvent>(entity));
+    auto animator = entity.get_ref<quoll::Animator>();
+    EXPECT_EQ(animator->currentState, 1);
+    EXPECT_EQ(animator->normalizedTime, 0.0f);
+    EXPECT_FALSE(entity.has<quoll::AnimatorEvent>());
   }
 }
 
@@ -187,36 +189,36 @@ TEST_F(
 
   auto animatorHandle = assetRegistry.getAnimators().addAsset(animatorAsset);
 
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   {
     quoll::Animator animator{};
     animator.normalizedTime = 0.5f;
     animator.asset = animatorHandle;
     animator.currentState = 0;
-    entityDatabase.set(entity, animator);
-    entityDatabase.set<quoll::LocalTransform>(entity, {});
+    entity.set(animator);
+    entity.set<quoll::LocalTransform>({});
   }
 
   system.prepare(view);
   system.update(0.0f, view);
 
   {
-    const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-    EXPECT_EQ(animator.currentState, 0);
-    EXPECT_EQ(animator.normalizedTime, 0.5f);
+    auto animator = entity.get_ref<quoll::Animator>();
+    EXPECT_EQ(animator->currentState, 0);
+    EXPECT_EQ(animator->normalizedTime, 0.5f);
   }
 
-  entityDatabase.set<quoll::AnimatorEvent>(entity, {"NotMove"});
+  entity.set<quoll::AnimatorEvent>({"NotMove"});
 
   system.prepare(view);
   system.update(0.0f, view);
 
   {
-    const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-    EXPECT_EQ(animator.currentState, 0);
-    EXPECT_EQ(animator.normalizedTime, 0.5f);
-    EXPECT_FALSE(entityDatabase.has<quoll::AnimatorEvent>(entity));
+    auto animator = entity.get_ref<quoll::Animator>();
+    EXPECT_EQ(animator->currentState, 0);
+    EXPECT_EQ(animator->normalizedTime, 0.5f);
+    EXPECT_FALSE(entity.has<quoll::AnimatorEvent>());
   }
 }
 
@@ -225,22 +227,22 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = create(animIndex, false);
 
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  auto animator = entity.get_ref<quoll::Animator>();
+  EXPECT_EQ(animator->normalizedTime, 0.0f);
   system.prepare(view);
   system.update(0.5f, view);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  EXPECT_EQ(animator->normalizedTime, 0.0f);
 }
 
 TEST_F(AnimationSystemTest, AdvancesAnimatorNormalizedTimeByDeltaTime) {
   createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = create();
 
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  auto animator = entity.get_ref<quoll::Animator>();
+  EXPECT_EQ(animator->normalizedTime, 0.0f);
   system.prepare(view);
   system.update(0.5f, view);
-  EXPECT_EQ(animator.normalizedTime, 0.25f);
+  EXPECT_EQ(animator->normalizedTime, 0.25f);
 }
 
 TEST_F(AnimationSystemTest,
@@ -249,22 +251,22 @@ TEST_F(AnimationSystemTest,
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = create(anim0, true, 0.5f);
 
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  auto animator = entity.get_ref<quoll::Animator>();
+  EXPECT_EQ(animator->normalizedTime, 0.0f);
   system.prepare(view);
   system.update(0.5f, view);
-  EXPECT_EQ(animator.normalizedTime, 0.125f);
+  EXPECT_EQ(animator->normalizedTime, 0.125f);
 }
 
 TEST_F(AnimationSystemTest,
        StaysAtTheEndIfEndOfAnimationIsReachedAndLoopModeIsNone) {
   createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = create();
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  auto animator = entity.get_ref<quoll::Animator>();
+  EXPECT_EQ(animator->normalizedTime, 0.0f);
   system.prepare(view);
   system.update(1.0f, view);
-  EXPECT_EQ(animator.normalizedTime, 1.0f);
+  EXPECT_EQ(animator->normalizedTime, 1.0f);
 }
 
 TEST_F(AnimationSystemTest,
@@ -272,62 +274,62 @@ TEST_F(AnimationSystemTest,
   auto animation =
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = create(animation, true, 1.0f, quoll::AnimationLoopMode::Linear);
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  auto animator = entity.get_ref<quoll::Animator>();
+  EXPECT_EQ(animator->normalizedTime, 0.0f);
   system.prepare(view);
   system.update(1.0f, view);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  EXPECT_EQ(animator->normalizedTime, 0.0f);
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
   createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = create();
 
-  const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
+  auto transform = entity.get_ref<quoll::LocalTransform>();
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
-  EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.0f));
+  EXPECT_EQ(transform->localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+  EXPECT_EQ(transform->localScale, glm::vec3(1.0f));
   system.prepare(view);
   system.update(0.5f, view);
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.5f));
-  EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.5f));
+  EXPECT_EQ(transform->localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+  EXPECT_EQ(transform->localScale, glm::vec3(1.0f));
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
   createAnimation(quoll::KeyframeSequenceAssetTarget::Rotation, 1.0f);
   auto entity = create();
 
-  const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
+  auto transform = entity.get_ref<quoll::LocalTransform>();
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
-  EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.0f));
+  EXPECT_EQ(transform->localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+  EXPECT_EQ(transform->localScale, glm::vec3(1.0f));
   system.prepare(view);
   system.update(0.5f, view);
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
-  EXPECT_EQ(transform.localRotation, glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
-  EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.0f));
+  EXPECT_EQ(transform->localRotation, glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
+  EXPECT_EQ(transform->localScale, glm::vec3(1.0f));
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
   createAnimation(quoll::KeyframeSequenceAssetTarget::Scale, 1.0f);
   auto entity = create();
 
-  const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
+  auto transform = entity.get_ref<quoll::LocalTransform>();
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
-  EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.0f));
+  EXPECT_EQ(transform->localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+  EXPECT_EQ(transform->localScale, glm::vec3(1.0f));
   system.prepare(view);
   system.update(0.5f, view);
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
-  EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(transform.localScale, glm::vec3(0.5f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.0f));
+  EXPECT_EQ(transform->localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+  EXPECT_EQ(transform->localScale, glm::vec3(0.5f));
 }
 
 TEST_F(AnimationSystemTest,
@@ -335,23 +337,23 @@ TEST_F(AnimationSystemTest,
   createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = createEntityWithSkeleton();
 
-  const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
+  auto transform = entity.get_ref<quoll::LocalTransform>();
 
-  const auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
-  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
+  auto skeleton = entity.get_ref<quoll::Skeleton>();
+  EXPECT_EQ(skeleton->jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton->jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton->jointLocalScales.at(0), glm::vec3(1.0f));
   system.prepare(view);
   system.update(0.5f, view);
-  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.5f));
-  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
+  EXPECT_EQ(skeleton->jointLocalPositions.at(0), glm::vec3(0.5f));
+  EXPECT_EQ(skeleton->jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton->jointLocalScales.at(0), glm::vec3(1.0f));
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
-  EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.0f));
+  EXPECT_EQ(transform->localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+  EXPECT_EQ(transform->localScale, glm::vec3(1.0f));
 }
 
 TEST_F(AnimationSystemTest,
@@ -359,23 +361,23 @@ TEST_F(AnimationSystemTest,
   createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget::Rotation, 1.0f);
   auto entity = createEntityWithSkeleton();
 
-  const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
+  auto transform = entity.get_ref<quoll::LocalTransform>();
 
-  const auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
-  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
+  auto skeleton = entity.get_ref<quoll::Skeleton>();
+  EXPECT_EQ(skeleton->jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton->jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton->jointLocalScales.at(0), glm::vec3(1.0f));
   system.prepare(view);
   system.update(0.5f, view);
-  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
+  EXPECT_EQ(skeleton->jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton->jointLocalRotations.at(0),
             glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
-  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton->jointLocalScales.at(0), glm::vec3(1.0f));
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
-  EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.0f));
+  EXPECT_EQ(transform->localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+  EXPECT_EQ(transform->localScale, glm::vec3(1.0f));
 }
 
 TEST_F(AnimationSystemTest,
@@ -383,23 +385,23 @@ TEST_F(AnimationSystemTest,
   createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget::Scale, 1.0f);
   auto entity = createEntityWithSkeleton();
 
-  const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
+  auto transform = entity.get_ref<quoll::LocalTransform>();
 
-  const auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
-  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
+  auto skeleton = entity.get_ref<quoll::Skeleton>();
+  EXPECT_EQ(skeleton->jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton->jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton->jointLocalScales.at(0), glm::vec3(1.0f));
   system.prepare(view);
   system.update(0.5f, view);
-  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
+  EXPECT_EQ(skeleton->jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton->jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(0.5f));
+  EXPECT_EQ(skeleton->jointLocalScales.at(0), glm::vec3(0.5f));
 
-  EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
-  EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
+  EXPECT_EQ(transform->localPosition, glm::vec3(0.0f));
+  EXPECT_EQ(transform->localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+  EXPECT_EQ(transform->localScale, glm::vec3(1.0f));
 }
 
 TEST_F(AnimationSystemTest, DoesNothingIfAnimationDoesNotExist) {

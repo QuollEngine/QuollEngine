@@ -476,10 +476,10 @@ void SceneRendererFrameData::setEnvironmentColor(const glm::vec4 &color) {
   mSceneData.color = color;
 }
 
-void SceneRendererFrameData::setCameraData(const Camera &data,
-                                           const PerspectiveLens &lens) {
-  mCameraData = data;
-  mCameraLens = lens;
+void SceneRendererFrameData::setCameraData(const Camera *data,
+                                           const PerspectiveLens *lens) {
+  mCameraData = *data;
+  mCameraLens = *lens;
 }
 
 void SceneRendererFrameData::setShadowMapTexture(rhi::TextureHandle shadowmap) {

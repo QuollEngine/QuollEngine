@@ -7,8 +7,8 @@
 namespace quoll {
 
 struct AudioSystemView {
-  EntityDatabaseObserver<AudioSource> audioSourceRemoveObserver;
-  EntityDatabaseObserver<AudioStatus> audioStatusRemoveObserver;
+  flecs::query<AudioSource> queryAudioSources;
+  flecs::query<AudioStatus> queryAudioStatuses;
 };
 
 } // namespace quoll

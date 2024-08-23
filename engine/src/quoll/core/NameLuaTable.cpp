@@ -10,8 +10,8 @@ String NameLuaTable::get(EntityLuaTable &entityTable) {
   auto &scriptGlobals = entityTable.getScriptGlobals();
   auto entity = entityTable.getEntity();
 
-  if (scriptGlobals.entityDatabase.has<Name>(entity)) {
-    return scriptGlobals.entityDatabase.get<Name>(entity).name;
+  if (entity.has<Name>()) {
+    return entity.get_ref<Name>()->name;
   }
 
   return "";
@@ -21,7 +21,7 @@ void NameLuaTable::set(EntityLuaTable &entityTable, String name) {
   auto &scriptGlobals = entityTable.getScriptGlobals();
   auto entity = entityTable.getEntity();
 
-  return scriptGlobals.entityDatabase.set<Name>(entity, {name});
+  entity.set<Name>({name});
 }
 
 void NameLuaTable::create(sol::usertype<EntityLuaTable> entityUsertype,

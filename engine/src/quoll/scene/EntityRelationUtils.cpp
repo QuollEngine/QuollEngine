@@ -9,24 +9,23 @@ namespace quoll {
 
 void EntityRelationUtils::removeEntityParent(EntityDatabase &entityDatabase,
                                              Entity entity) {
-  if (entityDatabase.has<Parent>(entity)) {
-    auto parent = entityDatabase.get<Parent>(entity).parent;
+  if (entity.has<Parent>()) {
+    auto parent = entity.get_ref<Parent>()->parent;
 
-    QuollAssert(entityDatabase.has<Children>(parent),
-                "Parent entity must have children");
+    QuollAssert(parent.has<Children>(), "Parent entity must have children");
 
-    auto &children = entityDatabase.get<Children>(parent).children;
+    auto &children = parent.get_ref<Children>()->children;
     auto it = std::find(children.begin(), children.end(), entity);
 
     QuollAssert(it != children.end(),
                 "Entity must exist in children of parent");
 
     if (children.size() == 1) {
-      entityDatabase.remove<Children>(parent);
+      parent.remove<Children>();
     } else {
       children.erase(it);
     }
-    entityDatabase.remove<Parent>(entity);
+    entity.remove<Parent>();
   }
 }
 
@@ -40,12 +39,12 @@ EntityRelationUtils::setEntityParent(EntityDatabase &entityDatabase,
 
   removeEntityParent(entityDatabase, entity);
 
-  if (!entityDatabase.has<Children>(parent)) {
-    entityDatabase.set<Children>(parent, {});
+  if (!parent.has<Children>()) {
+    parent.set<Children>({});
   }
 
-  entityDatabase.get<Children>(parent).children.push_back(entity);
-  entityDatabase.set<Parent>(entity, {parent});
+  parent.get_ref<Children>()->children.push_back(entity);
+  entity.set<Parent>({parent});
 
   return status;
 }
@@ -53,15 +52,14 @@ EntityRelationUtils::setEntityParent(EntityDatabase &entityDatabase,
 EntityReparentStatus
 EntityRelationUtils::isValidParentForEntity(EntityDatabase &entityDatabase,
                                             Entity entity, Entity parent) {
-  if (entityDatabase.has<Parent>(entity) &&
-      entityDatabase.get<Parent>(entity).parent == parent) {
+  if (entity.has<Parent>() && entity.get_ref<Parent>()->parent == parent) {
     return EntityReparentStatus::ParentHasNotChanged;
   }
 
   auto parentInner = parent;
   bool parentIsNotDescendant = parentInner != entity;
-  while (parentIsNotDescendant && entityDatabase.has<Parent>(parentInner)) {
-    auto p = entityDatabase.get<Parent>(parentInner).parent;
+  while (parentIsNotDescendant && parentInner.has<Parent>()) {
+    auto p = parentInner.get_ref<Parent>()->parent;
     parentIsNotDescendant = p != entity;
     parentInner = p;
   }

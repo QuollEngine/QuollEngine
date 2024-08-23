@@ -7,15 +7,15 @@ namespace quoll {
 void RigidBodySerializer::serialize(YAML::Node &node,
                                     EntityDatabase &entityDatabase,
                                     Entity entity) {
-  if (entityDatabase.has<RigidBody>(entity)) {
-    const auto &rigidBody = entityDatabase.get<RigidBody>(entity);
+  if (entity.has<RigidBody>()) {
+    auto rigidBody = entity.get_ref<RigidBody>();
 
-    if (rigidBody.type == RigidBodyType::Dynamic) {
+    if (rigidBody->type == RigidBodyType::Dynamic) {
       node["rigidBody"]["type"] = "dynamic";
-      node["rigidBody"]["applyGravity"] = rigidBody.dynamicDesc.applyGravity;
-      node["rigidBody"]["inertia"] = rigidBody.dynamicDesc.inertia;
-      node["rigidBody"]["mass"] = rigidBody.dynamicDesc.mass;
-    } else if (rigidBody.type == RigidBodyType::Kinematic) {
+      node["rigidBody"]["applyGravity"] = rigidBody->dynamicDesc.applyGravity;
+      node["rigidBody"]["inertia"] = rigidBody->dynamicDesc.inertia;
+      node["rigidBody"]["mass"] = rigidBody->dynamicDesc.mass;
+    } else if (rigidBody->type == RigidBodyType::Kinematic) {
       node["rigidBody"]["type"] = "kinematic";
     }
   }
@@ -42,7 +42,7 @@ void RigidBodySerializer::deserialize(const YAML::Node &node,
               rigidBody.dynamicDesc.applyGravity);
     }
 
-    entityDatabase.set(entity, rigidBody);
+    entity.set(rigidBody);
   }
 }
 

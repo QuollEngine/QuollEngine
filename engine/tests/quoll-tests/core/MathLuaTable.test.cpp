@@ -12,7 +12,7 @@ public:
 using Vector3LuaTableTest = MathLuaTableTestBase;
 
 TEST_F(Vector3LuaTableTest, NewCreatesVector3) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "vector3New");
 }
 
@@ -20,17 +20,17 @@ TEST_F(Vector3LuaTableTest, NewCreatesVector3) {
 using QuaternionLuaTableTest = MathLuaTableTestBase;
 
 TEST_F(QuaternionLuaTableTest, NewCreatesQuaternion) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "quaternionNew");
 }
 
 TEST_F(QuaternionLuaTableTest,
        FromEulerAngleCreatesQuaternionFromEulerAngleXYZ) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "quaternionFromEulerAngles");
 }
 
 TEST_F(QuaternionLuaTableTest, ToEulerAngleReturnsEulerAnglesInXYZ) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "quaternionToEulerAngles");
 }

@@ -9,22 +9,22 @@ namespace quoll {
 void CameraSerializer::serialize(YAML::Node &node,
                                  EntityDatabase &entityDatabase,
                                  Entity entity) {
-  if (entityDatabase.has<PerspectiveLens>(entity)) {
-    const auto &camera = entityDatabase.get<PerspectiveLens>(entity);
+  if (entity.has<PerspectiveLens>()) {
+    auto camera = entity.get_ref<PerspectiveLens>();
 
     node["camera"]["type"] = 0;
-    node["camera"]["near"] = camera.near;
-    node["camera"]["far"] = camera.far;
-    node["camera"]["aperture"] = camera.aperture;
-    node["camera"]["sensorSize"] = camera.sensorSize;
-    node["camera"]["focalLength"] = camera.focalLength;
-    node["camera"]["shutterSpeed"] = camera.shutterSpeed;
-    node["camera"]["sensitivity"] = camera.sensitivity;
+    node["camera"]["near"] = camera->near;
+    node["camera"]["far"] = camera->far;
+    node["camera"]["aperture"] = camera->aperture;
+    node["camera"]["sensorSize"] = camera->sensorSize;
+    node["camera"]["focalLength"] = camera->focalLength;
+    node["camera"]["shutterSpeed"] = camera->shutterSpeed;
+    node["camera"]["sensitivity"] = camera->sensitivity;
 
-    if (entityDatabase.has<AutoAspectRatio>(entity)) {
+    if (entity.has<AutoAspectRatio>()) {
       node["camera"]["aspectRatio"] = "auto";
     } else {
-      node["camera"]["aspectRatio"] = camera.aspectRatio;
+      node["camera"]["aspectRatio"] = camera->aspectRatio;
     }
   }
 }
@@ -80,7 +80,7 @@ void CameraSerializer::deserialize(const YAML::Node &node,
     }
 
     if (autoRatio) {
-      entityDatabase.set<AutoAspectRatio>(entity, {});
+      entity.add<AutoAspectRatio>();
     } else {
       f32 aspectRatio = node["camera"]["aspectRatio"].as<f32>(lens.aspectRatio);
       if (aspectRatio >= 0.0f) {
@@ -88,8 +88,8 @@ void CameraSerializer::deserialize(const YAML::Node &node,
       }
     }
 
-    entityDatabase.set<Camera>(entity, {});
-    entityDatabase.set(entity, lens);
+    entity.set<Camera>({});
+    entity.set(lens);
   }
 }
 

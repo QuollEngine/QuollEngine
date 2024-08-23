@@ -10,47 +10,47 @@ public:
 };
 
 TEST_F(AudioLuaTableTest, PlayDoesNothingIfAudioSourceComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   call(entity, "audioPlay");
 
-  EXPECT_FALSE(entityDatabase.has<quoll::AudioStart>(entity));
+  EXPECT_FALSE(entity.has<quoll::AudioStart>());
 }
 
 TEST_F(AudioLuaTableTest, PlayAddsAudioStartComponentIfAudioSourceExists) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::AudioSource>({});
   call(entity, "audioPlay");
 
-  EXPECT_TRUE(entityDatabase.has<quoll::AudioStart>(entity));
+  EXPECT_TRUE(entity.has<quoll::AudioStart>());
 }
 
 TEST_F(AudioLuaTableTest,
        IsPlayingReturnsFalseIfAudioStatusComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
   auto state = call(entity, "audioIsPlaying");
 
   EXPECT_FALSE(state["audioIsPlayingFlag"].get<bool>());
 }
 
 TEST_F(AudioLuaTableTest, IsPlayingReturnsTrueIfAudioStatusComponentExists) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioStatus>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::AudioStatus>({});
   auto state = call(entity, "audioIsPlaying");
 
   EXPECT_TRUE(state["audioIsPlayingFlag"].get<bool>());
 }
 
 TEST_F(AudioLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
+  auto entity = entityDatabase.entity();
 
   call(entity, "audioDelete");
-  EXPECT_FALSE(entityDatabase.has<quoll::AudioSource>(entity));
+  EXPECT_FALSE(entity.has<quoll::AudioSource>());
 }
 
 TEST_F(AudioLuaTableTest, DeleteRemovesAudioSourceComponentFromEntity) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {});
+  auto entity = entityDatabase.entity();
+  entity.set<quoll::AudioSource>({});
 
   call(entity, "audioDelete");
-  EXPECT_FALSE(entityDatabase.has<quoll::AudioSource>(entity));
+  EXPECT_FALSE(entity.has<quoll::AudioSource>());
 }
