@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Asset.h"
+#include "quoll/asset/Asset.h"
 
 namespace quoll {
 

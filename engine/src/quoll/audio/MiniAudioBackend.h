@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/AudioAsset.h"
+#include "AudioAsset.h"
 
 namespace quoll {
 

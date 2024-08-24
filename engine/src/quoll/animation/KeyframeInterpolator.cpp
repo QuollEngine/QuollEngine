@@ -1,5 +1,5 @@
 #include "quoll/core/Base.h"
-#include "quoll/asset/AnimationAsset.h"
+#include "AnimationAsset.h"
 #include "KeyframeInterpolator.h"
 
 namespace quoll {

@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
+#include "quoll/skeleton/SkeletonAsset.h"
 #include "AssetCache.h"
 #include "AssetFileHeader.h"
 #include "InputBinaryStream.h"
