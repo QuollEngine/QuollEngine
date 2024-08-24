@@ -1,9 +1,9 @@
 #pragma once
 
+#include "quoll/renderer/MaterialAsset.h"
+#include "quoll/renderer/MeshAsset.h"
+#include "quoll/text/FontAsset.h"
 #include "AssetData.h"
-#include "FontAsset.h"
-#include "MaterialAsset.h"
-#include "MeshAsset.h"
 
 namespace quoll::default_objects {
 

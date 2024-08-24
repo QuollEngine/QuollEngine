@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "quoll/asset/MeshAsset.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/physics/Collidable.h"
 #include "quoll/renderer/BindlessDrawParameters.h"

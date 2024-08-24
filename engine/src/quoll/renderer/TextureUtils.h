@@ -1,7 +1,7 @@
 #pragma once
 
-#include "quoll/asset/TextureAsset.h"
 #include "quoll/rhi/RenderDevice.h"
+#include "TextureAsset.h"
 
 namespace quoll {
 

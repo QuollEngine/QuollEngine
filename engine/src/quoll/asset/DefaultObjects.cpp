@@ -4,9 +4,6 @@
 #include "quoll/text/MsdfLoader.h"
 #include "AssetData.h"
 #include "DefaultObjects.h"
-#include "FontAsset.h"
-#include "MaterialAsset.h"
-#include "MeshAsset.h"
 
 namespace quoll::default_objects {
 

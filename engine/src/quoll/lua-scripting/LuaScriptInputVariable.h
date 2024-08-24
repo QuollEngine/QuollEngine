@@ -1,7 +1,7 @@
 #pragma once
 
 #include "quoll/asset/Asset.h"
-#include "quoll/asset/LuaScriptAsset.h"
+#include "LuaScriptAsset.h"
 
 namespace quoll {
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "quoll/asset/Asset.h"
-#include "quoll/asset/MeshAsset.h"
 #include "quoll/entity/Entity.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/renderer/BindlessDrawParameters.h"
@@ -13,6 +12,7 @@
 #include "quoll/scene/PerspectiveLens.h"
 #include "quoll/scene/PointLight.h"
 #include "quoll/scene/WorldTransform.h"
+#include "MeshAsset.h"
 
 namespace quoll {
 
