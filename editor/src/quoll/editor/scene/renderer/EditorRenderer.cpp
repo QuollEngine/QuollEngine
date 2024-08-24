@@ -494,7 +494,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
   QUOLL_PROFILE_EVENT("EditorRenderer::update");
   frameData.clear();
 
-  if (state.selectedEntity.is_alive()) {
+  if (state.selectedEntity.is_valid()) {
     if (state.selectedEntity.has<Sprite>()) {
       auto world = state.selectedEntity.get_ref<WorldTransform>();
       frameData.addSpriteOutline(world->worldTransform);
@@ -548,13 +548,12 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
       frameData.addTextOutline(font.deviceHandle, glyphs,
                                world->worldTransform);
+    } else if (state.selectedEntity.has<Collidable>()) {
+      frameData.setCollidable(
+          state.selectedEntity,
+          *state.selectedEntity.get_ref<Collidable>().get(),
+          *state.selectedEntity.get_ref<WorldTransform>().get());
     }
-  }
-
-  if (state.selectedEntity.has<Collidable>()) {
-    frameData.setCollidable(
-        state.selectedEntity, *state.selectedEntity.get_ref<Collidable>().get(),
-        *state.selectedEntity.get_ref<WorldTransform>().get());
   }
 
   frameData.setActiveCamera(*camera.get_ref<Camera>().get());

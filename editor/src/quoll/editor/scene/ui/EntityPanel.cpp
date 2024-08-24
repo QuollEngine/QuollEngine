@@ -130,49 +130,43 @@ static String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
 void EntityPanel::renderContent(WorkspaceState &state,
                                 AssetRegistry &assetRegistry,
                                 ActionExecutor &actionExecutor) {
-  if (state.selectedEntity.is_valid()) {
+  setSelectedEntity(state.selectedEntity);
+  if (!state.selectedEntity.is_valid()) {
     ImGui::Text("Select an entity in the scene to see properties");
     return;
   }
 
   auto &scene = state.scene;
-  setSelectedEntity(scene, state.selectedEntity);
-  if (mSelectedEntity.is_alive()) {
-    renderName(scene, actionExecutor);
-    renderTransform(scene, actionExecutor);
-    renderText(scene, assetRegistry, actionExecutor);
-    renderSprite(scene, assetRegistry, actionExecutor);
-    renderMesh(scene, assetRegistry, actionExecutor);
-    renderMeshRenderer(scene, assetRegistry, actionExecutor);
-    renderSkinnedMeshRenderer(scene, assetRegistry, actionExecutor);
-    renderDirectionalLight(scene, actionExecutor);
-    renderPointLight(scene, actionExecutor);
-    renderCamera(state, scene, actionExecutor);
-    renderAnimation(state, scene, assetRegistry, actionExecutor);
-    renderSkeleton(scene, assetRegistry, actionExecutor);
-    renderJointAttachment(scene, actionExecutor);
-    renderCollidable(scene, actionExecutor);
-    renderRigidBody(scene, actionExecutor);
-    renderAudio(scene, assetRegistry, actionExecutor);
-    renderScripting(scene, assetRegistry, actionExecutor);
-    renderInput(scene, assetRegistry, actionExecutor);
-    renderUICanvas(scene, actionExecutor);
-    renderSkybox(scene, assetRegistry, actionExecutor);
-    renderEnvironmentLighting(scene, assetRegistry, actionExecutor);
+  renderName(scene, actionExecutor);
+  renderTransform(scene, actionExecutor);
+  renderText(scene, assetRegistry, actionExecutor);
+  renderSprite(scene, assetRegistry, actionExecutor);
+  renderMesh(scene, assetRegistry, actionExecutor);
+  renderMeshRenderer(scene, assetRegistry, actionExecutor);
+  renderSkinnedMeshRenderer(scene, assetRegistry, actionExecutor);
+  renderDirectionalLight(scene, actionExecutor);
+  renderPointLight(scene, actionExecutor);
+  renderCamera(state, scene, actionExecutor);
+  renderAnimation(state, scene, assetRegistry, actionExecutor);
+  renderSkeleton(scene, assetRegistry, actionExecutor);
+  renderJointAttachment(scene, actionExecutor);
+  renderCollidable(scene, actionExecutor);
+  renderRigidBody(scene, actionExecutor);
+  renderAudio(scene, assetRegistry, actionExecutor);
+  renderScripting(scene, assetRegistry, actionExecutor);
+  renderInput(scene, assetRegistry, actionExecutor);
+  renderUICanvas(scene, actionExecutor);
+  renderSkybox(scene, assetRegistry, actionExecutor);
+  renderEnvironmentLighting(scene, assetRegistry, actionExecutor);
 
 #ifdef QUOLL_DEBUG
-    renderDebug();
+  renderDebug();
 #endif
-    renderAddComponent(scene, assetRegistry, actionExecutor);
-    handleDragAndDrop(scene, assetRegistry, actionExecutor);
-  }
+  renderAddComponent(scene, assetRegistry, actionExecutor);
+  handleDragAndDrop(scene, assetRegistry, actionExecutor);
 }
 
-void EntityPanel::setSelectedEntity(Scene &scene, Entity entity) {
-  if (mSelectedEntity != entity) {
-    mSelectedEntity = entity;
-  }
-}
+void EntityPanel::setSelectedEntity(Entity entity) { mSelectedEntity = entity; }
 
 void EntityPanel::renderName(Scene &scene, ActionExecutor &actionExecutor) {
   static const String SectionName = String(fa::Circle) + "  Name";
@@ -1707,7 +1701,7 @@ void EntityPanel::renderDebug() {
   static const String SectionName = String(fa::MagnifyingGlass) + " Debug";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    ImGui::Text("Entity: %d", mSelectedEntity);
+    ImGui::Text("Entity: %d", mSelectedEntity.id());
   }
 }
 

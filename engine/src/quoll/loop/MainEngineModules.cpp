@@ -52,6 +52,12 @@ SystemView MainEngineModules::createSystemView(Scene &scene) {
   mScriptingSystem.createSystemViewData(view);
   mAudioSystem.createSystemViewData(view);
   mPhysicsSystem.createSystemViewData(view);
+  mInputMapSystem.createSystemViewData(view);
+  mAudioSystem.createSystemViewData(view);
+  mAnimationSystem.createSystemViewData(view);
+  mSceneUpdater.createSystemViewData(view);
+  mSkeletonUpdater.createSystemViewData(view);
+  mUICanvasUpdater.createSystemViewData(view);
 
   return std::move(view);
 }

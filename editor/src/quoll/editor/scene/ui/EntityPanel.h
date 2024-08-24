@@ -27,7 +27,7 @@ public:
                      ActionExecutor &actionExecutor);
 
 private:
-  void setSelectedEntity(Scene &scene, Entity entity);
+  void setSelectedEntity(Entity entity);
 
   void renderName(Scene &scene, ActionExecutor &actionExecutor);
 
