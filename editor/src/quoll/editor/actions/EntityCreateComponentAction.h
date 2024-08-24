@@ -13,7 +13,11 @@ public:
                                  AssetRegistry &assetRegistry) override {
     auto &scene = state.scene;
 
-    mEntity.set<TComponent>(mComponent);
+    if constexpr (std::is_empty_v<TComponent>) {
+      mEntity.add<TComponent>();
+    } else {
+      mEntity.set<TComponent>(mComponent);
+    }
 
     ActionExecutorResult res{};
     res.entitiesToSave.push_back(mEntity);

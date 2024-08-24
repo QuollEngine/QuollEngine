@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
+#include "quoll/scene/AutoAspectRatio.h"
 #include "quoll/editor/actions/EntityCreateComponentAction.h"
 #include "quoll/editor-tests/Testing.h"
 #include "ActionTestBase.h"
@@ -35,6 +36,19 @@ TEST_F(EntityCreateComponentActionTest, ExecutorCreatesComponentForEntity) {
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(entity.has<quoll::Name>());
   EXPECT_EQ(entity.get_ref<quoll::Name>()->name, "Hello");
+}
+
+TEST_F(EntityCreateComponentActionTest, ExecutorCreatesTagForEntity) {
+  state.scene.entityDatabase.entity();
+
+  auto entity = state.scene.entityDatabase.entity();
+  quoll::editor::EntityCreateComponent<quoll::AutoAspectRatio> action(entity);
+
+  auto res = action.onExecute(state, assetRegistry);
+  EXPECT_TRUE(res.addToHistory);
+  EXPECT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+  EXPECT_TRUE(entity.has<quoll::AutoAspectRatio>());
 }
 
 TEST_F(EntityCreateComponentActionTest, UndoDeletesComponentFromEntity) {
