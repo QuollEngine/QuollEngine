@@ -154,7 +154,7 @@ public:
 
     std::vector<MaterialRange> materialRanges;
 
-    std::vector<Entity> entities;
+    std::vector<u64> entities;
   };
 
   struct SkinnedMeshData : public MeshData {
@@ -185,7 +185,7 @@ public:
 
   void updateBuffers();
 
-  inline const std::vector<Entity> &getSpriteEntities() const {
+  inline const std::vector<u64> &getSpriteEntities() const {
     return mSpriteEntities;
   }
 
@@ -205,7 +205,7 @@ public:
     return mTextGlyphs;
   }
 
-  inline const std::vector<Entity> &getTextEntities() const {
+  inline const std::vector<u64> &getTextEntities() const {
     return mTextEntities;
   }
 
@@ -362,13 +362,13 @@ private:
 
   std::vector<glm::mat4> mSpriteTransforms;
   std::vector<rhi::TextureHandle> mSpriteTextures;
-  std::vector<Entity> mSpriteEntities;
+  std::vector<u64> mSpriteEntities;
   rhi::Buffer mSpriteTransformsBuffer;
   rhi::Buffer mSpriteTexturesBuffer;
 
   std::vector<TextItem> mTexts;
   std::vector<glm::mat4> mTextTransforms;
-  std::vector<Entity> mTextEntities;
+  std::vector<u64> mTextEntities;
   std::vector<GlyphData> mTextGlyphs;
 
   rhi::Buffer mTextTransformsBuffer;

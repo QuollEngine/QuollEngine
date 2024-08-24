@@ -3,6 +3,7 @@
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/renderer/RenderGraph.h"
 #include "quoll/renderer/SceneRendererFrameData.h"
+#include "quoll/scene/Scene.h"
 #include "quoll/window/Window.h"
 
 namespace quoll::editor {
@@ -19,7 +20,7 @@ public:
   void execute(rhi::RenderCommandList &commandList, const glm::vec2 &mousePos,
                u32 frameIndex);
 
-  Entity getSelectedEntity();
+  Entity getSelectedEntity(Scene &scene);
 
   void setFramebufferSize(glm::uvec2 size);
 

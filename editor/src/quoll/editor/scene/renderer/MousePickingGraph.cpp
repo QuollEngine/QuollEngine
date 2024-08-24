@@ -35,14 +35,14 @@ MousePickingGraph::MousePickingGraph(
       "mouse-picking.selector.fragment",
       {"assets/shaders/mouse-picking-selector.frag.spv"});
 
-  u32 nullEntity = 0;
+  u64 nullEntity = 0;
   mSelectedEntityBuffer = renderStorage.createBuffer(
-      {rhi::BufferUsage::Storage, sizeof(u32), &nullEntity,
+      {rhi::BufferUsage::Storage, sizeof(u64), &nullEntity,
        rhi::BufferAllocationUsage::HostRead});
 
   rhi::BufferDescription defaultDesc{};
   defaultDesc.usage = rhi::BufferUsage::Storage;
-  defaultDesc.size = sizeof(u32) * mFrameData.at(0).getReservedSpace();
+  defaultDesc.size = sizeof(u64) * mFrameData.at(0).getReservedSpace();
   defaultDesc.mapped = true;
 
   {
@@ -98,17 +98,16 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
 
   mSpriteEntitiesBuffer.update(frameData.getSpriteEntities().data(),
                                frameData.getSpriteEntities().size() *
-                                   sizeof(Entity));
+                                   sizeof(u64));
   mTextEntitiesBuffer.update(frameData.getTextEntities().data(),
-                             frameData.getTextEntities().size() *
-                                 sizeof(Entity));
+                             frameData.getTextEntities().size() * sizeof(u64));
 
   {
     usize offset = 0;
-    auto *bufferData = static_cast<Entity *>(mMeshEntitiesBuffer.map());
+    auto *bufferData = static_cast<u64 *>(mMeshEntitiesBuffer.map());
     for (auto &[_, meshData] : frameData.getMeshGroups()) {
       memcpy(bufferData + offset, meshData.entities.data(),
-             sizeof(Entity) * meshData.entities.size());
+             sizeof(u64) * meshData.entities.size());
       offset += meshData.entities.size();
     }
     mMeshEntitiesBuffer.unmap();
@@ -116,10 +115,10 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
 
   {
     usize offset = 0;
-    auto *bufferData = static_cast<Entity *>(mSkinnedMeshEntitiesBuffer.map());
+    auto *bufferData = static_cast<u64 *>(mSkinnedMeshEntitiesBuffer.map());
     for (auto &[_, meshData] : frameData.getSkinnedMeshGroups()) {
       memcpy(bufferData + offset, meshData.entities.data(),
-             sizeof(Entity) * meshData.entities.size());
+             sizeof(u64) * meshData.entities.size());
       offset += meshData.entities.size();
     }
     mSkinnedMeshEntitiesBuffer.unmap();
@@ -132,19 +131,19 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
   mRenderGraph.execute(commandList, frameIndex);
 }
 
-Entity MousePickingGraph::getSelectedEntity() {
-  flecs::entity selectedEntity;
+Entity MousePickingGraph::getSelectedEntity(Scene &scene) {
+  u64 selectedEntity = 0;
 
   auto *data = mSelectedEntityBuffer.map();
-  memcpy(&selectedEntity, data, sizeof(Entity));
+  memcpy(&selectedEntity, data, sizeof(u64));
   mSelectedEntityBuffer.unmap();
 
-  flecs::entity nullEntity;
-  mSelectedEntityBuffer.update(&nullEntity, sizeof(Entity));
+  u64 null = 0;
+  mSelectedEntityBuffer.update(&null, sizeof(Entity));
 
   mFrameIndex = std::numeric_limits<u32>::max();
 
-  return selectedEntity;
+  return scene.entityDatabase.entity(selectedEntity);
 }
 
 void MousePickingGraph::setFramebufferSize(glm::uvec2 size) {

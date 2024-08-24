@@ -243,7 +243,7 @@ void SceneRendererFrameData::addMesh(
     mMeshGroups.insert_or_assign(handle, data);
   }
 
-  mMeshGroups.at(handle).entities.push_back(entity);
+  mMeshGroups.at(handle).entities.push_back(entity.id());
   mMeshGroups.at(handle).transforms.push_back(transform);
   mMeshGroups.at(handle).materialRanges.push_back({start, end});
 }
@@ -265,7 +265,7 @@ void SceneRendererFrameData::addSkinnedMesh(
 
   auto &group = mSkinnedMeshGroups.at(handle);
 
-  group.entities.push_back(entity);
+  group.entities.push_back(entity.id());
   group.transforms.push_back(transform);
   group.materialRanges.push_back({start, end});
 
@@ -432,7 +432,7 @@ void SceneRendererFrameData::addLight(const PointLight &light,
 void SceneRendererFrameData::addSprite(Entity entity,
                                        rhi::TextureHandle texture,
                                        const glm::mat4 &worldTransform) {
-  mSpriteEntities.push_back(entity);
+  mSpriteEntities.push_back(entity.id());
   mSpriteTransforms.push_back(worldTransform);
   mSpriteTextures.push_back(texture);
 }
@@ -442,7 +442,7 @@ void SceneRendererFrameData::addText(Entity entity,
                                      const std::vector<GlyphData> &glyphs,
                                      const glm::mat4 &transform) {
   mTextTransforms.push_back(transform);
-  mTextEntities.push_back(entity);
+  mTextEntities.push_back(entity.id());
 
   TextItem textData{};
   textData.fontTexture = fontTexture;
