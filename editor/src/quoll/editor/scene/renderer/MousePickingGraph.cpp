@@ -205,7 +205,7 @@ void MousePickingGraph::createRenderGraph() {
       mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
           mRenderStorage.getShader("mouse-picking.mesh.vertex"),
           mRenderStorage.getShader("mouse-picking.selector.fragment"),
-          createMeshVertexLayout(),
+          createMeshPositionLayout(),
           rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
           rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
                                   rhi::FrontFace::CounterClockwise},
