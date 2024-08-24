@@ -1,8 +1,8 @@
 #include "bindless-editor.glsl"
 
-Buffer(16) SelectedEntity { uint selectedEntity; };
+Buffer(16) SelectedEntity { uint64_t selectedEntity; };
 
-Buffer(16) EntitiesArray { uint entities[]; };
+Buffer(16) EntitiesArray { uint64_t entities[]; };
 
 layout(set = 0, binding = 0) uniform DrawParams {
   SelectedEntity selectedEntity;

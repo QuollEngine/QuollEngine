@@ -1,9 +1,10 @@
 #version 460
+#extension GL_ARB_gpu_shader_int64 : require
 #extension GL_EXT_scalar_block_layout : require
 
 layout(location = 0) in vec3 inPosition;
 
-layout(location = 0) out uint outEntity;
+layout(location = 0) out uint64_t outEntity;
 
 #include "mouse-picking-base.glsl"
 
