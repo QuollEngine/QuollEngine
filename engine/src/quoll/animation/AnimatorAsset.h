@@ -1,6 +1,7 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
+#include "AnimationAsset.h"
 
 namespace quoll {
 
@@ -15,7 +16,7 @@ struct AnimationStateTransition {
 struct AnimationState {
   String name;
 
-  AnimationAssetHandle animation = AnimationAssetHandle::Null;
+  AssetHandle<AnimationAsset> animation;
 
   f32 speed = 1.0f;
 

@@ -29,7 +29,7 @@ void InputMapSerializer::deserialize(const YAML::Node &node,
     auto defaultScheme = node["inputMap"]["defaultScheme"].as<usize>(0);
     auto handle = assetRegistry.getInputMaps().findHandleByUuid(uuid);
 
-    if (handle != InputMapAssetHandle::Null) {
+    if (handle) {
       auto type = assetRegistry.getInputMaps().getAsset(handle).type;
 
       entityDatabase.set<InputMapAssetRef>(entity, {handle, defaultScheme});

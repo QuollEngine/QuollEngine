@@ -14,7 +14,7 @@ SceneIO::SceneIO(AssetRegistry &assetRegistry, Scene &scene)
   reset();
 }
 
-std::vector<Entity> SceneIO::loadScene(SceneAssetHandle scene) {
+std::vector<Entity> SceneIO::loadScene(AssetHandle<SceneAsset> scene) {
   detail::SceneLoader sceneLoader(mAssetRegistry, mScene.entityDatabase);
 
   const auto &root = mAssetRegistry.getScenes().getAsset(scene).data.data;

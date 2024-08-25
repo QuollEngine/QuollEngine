@@ -192,7 +192,7 @@ TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto handleRes = cache.loadMesh(asset.uuid);
 
   auto handle = handleRes.getData();
-  EXPECT_NE(handle, quoll::MeshAssetHandle::Null);
+  EXPECT_NE(handle, quoll::AssetHandle<quoll::MeshAsset>());
   auto &mesh = cache.getRegistry().getMeshes().getAsset(handle);
   EXPECT_EQ(mesh.name, asset.name);
 
@@ -341,7 +341,7 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
 
   auto filePath = cache.createMeshFromAsset(asset);
   auto handle = cache.loadMesh(asset.uuid);
-  EXPECT_NE(handle.getData(), quoll::MeshAssetHandle::Null);
+  EXPECT_NE(handle.getData(), quoll::AssetHandle<quoll::MeshAsset>());
   auto &mesh = cache.getRegistry().getMeshes().getAsset(handle.getData());
   EXPECT_EQ(mesh.name, asset.name);
 

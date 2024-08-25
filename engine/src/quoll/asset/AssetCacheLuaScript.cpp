@@ -74,13 +74,14 @@ quoll::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
   return Result<Path>::Ok(assetPath);
 }
 
-Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
+Result<AssetHandle<LuaScriptAsset>>
+AssetCache::loadLuaScript(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
 
   if (!stream.good()) {
-    return Result<LuaScriptAssetHandle>::Error(
+    return Result<AssetHandle<LuaScriptAsset>>::Error(
         "File cannot be opened for reading: " + filePath.string());
   }
 
@@ -111,19 +112,19 @@ Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
 
   if (!success) {
     const auto *message = lua_tostring(luaState, -1);
-    return Result<LuaScriptAssetHandle>::Error(message);
+    return Result<AssetHandle<LuaScriptAsset>>::Error(message);
   }
 
   auto handle = mRegistry.getLuaScripts().findHandleByUuid(uuid);
 
-  if (handle == LuaScriptAssetHandle::Null) {
+  if (!handle) {
     auto newHandle = mRegistry.getLuaScripts().addAsset(asset);
-    return Result<LuaScriptAssetHandle>::Ok(newHandle);
+    return Result<AssetHandle<LuaScriptAsset>>::Ok(newHandle);
   }
 
   mRegistry.getLuaScripts().updateAsset(handle, asset);
 
-  return Result<LuaScriptAssetHandle>::Ok(handle);
+  return Result<AssetHandle<LuaScriptAsset>>::Ok(handle);
 }
 
 } // namespace quoll

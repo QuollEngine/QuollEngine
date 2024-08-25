@@ -40,9 +40,8 @@ void ScriptDecorator::attachVariableInjectors(
     sol::state_view state,
     std::unordered_map<String, LuaScriptInputVariable> &variables) {
   auto inputVars = state.create_named_table("inputVars");
-  inputVars["register"] =
-      [&variables](String name,
-                   u32 type) -> std::variant<String, u32, sol::nil_t> {
+  inputVars["register"] = [&variables](String name, u32 type)
+      -> std::variant<String, AssetHandleType, sol::nil_t> {
     if (type >= static_cast<u32>(LuaScriptVariableType::Invalid)) {
       //     scope.error("Variable \"" + name + "\" has invalid type");
       return sol::nil;
@@ -54,11 +53,11 @@ void ScriptDecorator::attachVariableInjectors(
     }
 
     if (value.isType(LuaScriptVariableType::AssetPrefab)) {
-      return static_cast<u32>(value.get<PrefabAssetHandle>());
+      return value.get<AssetHandle<PrefabAsset>>().getRawId();
     }
 
     if (value.isType(LuaScriptVariableType::AssetTexture)) {
-      return static_cast<u32>(value.get<TextureAssetHandle>());
+      return value.get<AssetHandle<TextureAsset>>().getRawId();
     }
 
     return sol::nil;

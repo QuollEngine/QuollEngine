@@ -1,8 +1,9 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
 #include "quoll/asset/Result.h"
 #include "quoll/entity/Entity.h"
+#include "quoll/scene/SceneAsset.h"
 #include "quoll/yaml/Yaml.h"
 
 namespace quoll {
@@ -14,7 +15,7 @@ class SceneIO {
 public:
   SceneIO(AssetRegistry &assetRegistry, Scene &scene);
 
-  std::vector<Entity> loadScene(SceneAssetHandle scene);
+  std::vector<Entity> loadScene(AssetHandle<SceneAsset> scene);
 
   void reset();
 

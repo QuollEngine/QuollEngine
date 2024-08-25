@@ -39,7 +39,7 @@ void EnvironmentSkyboxSerializer::deserialize(const YAML::Node &node,
     } else if (type == "texture") {
       auto uuid = node["skybox"]["texture"].as<Uuid>(Uuid{});
       auto handle = assetRegistry.getEnvironments().findHandleByUuid(uuid);
-      if (handle != EnvironmentAssetHandle::Null) {
+      if (handle) {
         skybox.type = EnvironmentSkyboxType::Texture;
         skybox.texture = handle;
         entityDatabase.set(entity, skybox);

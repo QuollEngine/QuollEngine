@@ -41,7 +41,7 @@ Result<Path> AssetCache::createAudioFromSource(const Path &sourcePath,
   return Result<Path>::Ok(assetPath);
 }
 
-Result<AudioAssetHandle> AssetCache::loadAudio(const Uuid &uuid) {
+Result<AssetHandle<AudioAsset>> AssetCache::loadAudio(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   auto ext = filePath.extension().string();
@@ -52,14 +52,14 @@ Result<AudioAssetHandle> AssetCache::loadAudio(const Uuid &uuid) {
   std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
 
   if (stream.bad()) {
-    return Result<AudioAssetHandle>::Error("Cannot load audio file: " +
-                                           filePath.string());
+    return Result<AssetHandle<AudioAsset>>::Error("Cannot load audio file: " +
+                                                  filePath.string());
   }
 
   std::ifstream::pos_type pos = stream.tellg();
 
   if (pos <= 0) {
-    return Result<AudioAssetHandle>::Error(
+    return Result<AssetHandle<AudioAsset>>::Error(
         "Could not open file: File is empty");
   }
 
@@ -76,7 +76,8 @@ Result<AudioAssetHandle> AssetCache::loadAudio(const Uuid &uuid) {
   asset.type = AssetType::Audio;
   asset.data.bytes = bytes;
 
-  return Result<AudioAssetHandle>::Ok(mRegistry.getAudios().addAsset(asset));
+  return Result<AssetHandle<AudioAsset>>::Ok(
+      mRegistry.getAudios().addAsset(asset));
 }
 
 } // namespace quoll

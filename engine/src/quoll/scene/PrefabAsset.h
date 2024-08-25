@@ -1,10 +1,14 @@
 #pragma once
 
+#include "quoll/animation/AnimationAsset.h"
 #include "quoll/animation/Animator.h"
+#include "quoll/asset/AssetHandle.h"
+#include "quoll/renderer/MeshAsset.h"
 #include "quoll/renderer/MeshRenderer.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/scene/DirectionalLight.h"
 #include "quoll/scene/PointLight.h"
+#include "quoll/skeleton/SkeletonAsset.h"
 
 namespace quoll {
 
@@ -27,13 +31,13 @@ struct PrefabTransformData {
 struct PrefabAsset {
   std::vector<PrefabComponent<PrefabTransformData>> transforms;
 
-  std::vector<PrefabComponent<MeshAssetHandle>> meshes;
+  std::vector<PrefabComponent<AssetHandle<MeshAsset>>> meshes;
 
-  std::vector<PrefabComponent<SkeletonAssetHandle>> skeletons;
+  std::vector<PrefabComponent<AssetHandle<SkeletonAsset>>> skeletons;
 
-  std::vector<AnimationAssetHandle> animations;
+  std::vector<AssetHandle<AnimationAsset>> animations;
 
-  std::vector<PrefabComponent<AnimatorAssetHandle>> animators;
+  std::vector<PrefabComponent<AssetHandle<AnimatorAsset>>> animators;
 
   std::vector<PrefabComponent<PointLight>> pointLights;
 

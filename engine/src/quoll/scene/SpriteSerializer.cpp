@@ -27,7 +27,7 @@ void SpriteSerializer::deserialize(const YAML::Node &node,
 
     auto handle = assetRegistry.getTextures().findHandleByUuid(uuid);
 
-    if (handle != TextureAssetHandle::Null) {
+    if (handle) {
       entityDatabase.set<Sprite>(entity, {handle});
     }
   }

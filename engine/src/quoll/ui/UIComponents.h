@@ -1,12 +1,15 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
+#include "quoll/asset/AssetType.h"
+#include "quoll/renderer/TextureAsset.h"
 #include "Yoga.h"
+
 
 namespace quoll {
 
 struct UIImage {
-  TextureAssetHandle texture;
+  AssetHandle<TextureAsset> texture;
 
   String id;
 };

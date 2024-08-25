@@ -1,7 +1,8 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
 #include "Joint.h"
+#include "SkeletonAsset.h"
 
 namespace quoll {
 
@@ -24,7 +25,7 @@ struct Skeleton {
 
   std::vector<String> jointNames;
 
-  SkeletonAssetHandle assetHandle;
+  AssetHandle<SkeletonAsset> assetHandle;
 };
 
 struct SkeletonDebug {

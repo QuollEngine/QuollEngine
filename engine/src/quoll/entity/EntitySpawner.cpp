@@ -55,7 +55,7 @@ Entity EntitySpawner::spawnEmpty(LocalTransform transform) {
   return entity;
 }
 
-std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
+std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
                                                LocalTransform transform) {
   QuollAssert(mAssetRegistry.getPrefabs().hasAsset(handle), "Prefab not found");
 
@@ -216,7 +216,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
   return entities;
 }
 
-Entity EntitySpawner::spawnSprite(TextureAssetHandle handle,
+Entity EntitySpawner::spawnSprite(AssetHandle<TextureAsset> handle,
                                   LocalTransform transform) {
   auto entity = mEntityDatabase.create();
 

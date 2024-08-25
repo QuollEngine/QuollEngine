@@ -6,7 +6,7 @@ namespace quoll::editor {
 
 class EntitySetAudio : public Action {
 public:
-  EntitySetAudio(Entity entity, AudioAssetHandle audio);
+  EntitySetAudio(Entity entity, AssetHandle<AudioAsset> audio);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -18,13 +18,13 @@ public:
 
 private:
   Entity mEntity;
-  AudioAssetHandle mAudio;
-  AudioAssetHandle mOldAudio = AudioAssetHandle::Null;
+  AssetHandle<AudioAsset> mAudio;
+  AssetHandle<AudioAsset> mOldAudio;
 };
 
 class EntityCreateAudio : public Action {
 public:
-  EntityCreateAudio(Entity entity, AudioAssetHandle handle);
+  EntityCreateAudio(Entity entity, AssetHandle<AudioAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -36,7 +36,7 @@ public:
 
 private:
   Entity mEntity;
-  AudioAssetHandle mHandle;
+  AssetHandle<AudioAsset> mHandle;
 };
 
 } // namespace quoll::editor

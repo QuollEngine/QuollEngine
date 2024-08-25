@@ -1,8 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
-#include "quoll/asset/AssetCache.h"
 #include "quoll/asset/AssetFileHeader.h"
 #include "quoll/asset/InputBinaryStream.h"
+#include "quoll/renderer/MaterialAsset.h"
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
 #include <random>
@@ -248,7 +248,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
 
   auto handle = res.getData();
 
-  EXPECT_NE(handle, quoll::MaterialAssetHandle::Null);
+  EXPECT_NE(handle, quoll::AssetHandle<quoll::MaterialAsset>());
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, asset.name);
@@ -298,7 +298,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
 
   auto handle = res.getData();
 
-  EXPECT_NE(handle, quoll::MaterialAssetHandle::Null);
+  EXPECT_NE(handle, quoll::AssetHandle<quoll::MaterialAsset>());
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_TRUE(material.uuid.isValid());
@@ -346,7 +346,8 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
   auto &newMaterial =
       cache.getRegistry().getMaterials().getAsset(handle.getData());
 
-  EXPECT_NE(newMaterial.data.baseColorTexture, quoll::TextureAssetHandle::Null);
+  EXPECT_NE(newMaterial.data.baseColorTexture,
+            quoll::AssetHandle<quoll::TextureAsset>());
 
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);

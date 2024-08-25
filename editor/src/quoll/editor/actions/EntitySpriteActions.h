@@ -6,7 +6,7 @@ namespace quoll::editor {
 
 class EntitySetSprite : public Action {
 public:
-  EntitySetSprite(Entity entity, TextureAssetHandle handle);
+  EntitySetSprite(Entity entity, AssetHandle<TextureAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -18,13 +18,13 @@ public:
 
 private:
   Entity mEntity;
-  TextureAssetHandle mSprite;
-  TextureAssetHandle mOldSprite = TextureAssetHandle::Null;
+  AssetHandle<TextureAsset> mSprite;
+  AssetHandle<TextureAsset> mOldSprite;
 };
 
 class EntityCreateSprite : public Action {
 public:
-  EntityCreateSprite(Entity entity, TextureAssetHandle handle);
+  EntityCreateSprite(Entity entity, AssetHandle<TextureAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -36,7 +36,7 @@ public:
 
 private:
   Entity mEntity;
-  TextureAssetHandle mHandle;
+  AssetHandle<TextureAsset> mHandle;
 };
 
 } // namespace quoll::editor

@@ -3,9 +3,9 @@
 
 namespace quoll::editor {
 
-TextureAssetHandle loadTexture(GLTFImportData &importData, usize index,
-                               GLTFTextureColorSpace colorSpace,
-                               bool generateMipMaps) {
+AssetHandle<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
+                                      GLTFTextureColorSpace colorSpace,
+                                      bool generateMipMaps) {
   if (importData.textures.map.find(index) != importData.textures.map.end()) {
     return importData.textures.map.at(index);
   }
@@ -29,7 +29,7 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, usize index,
   if (format == rhi::Format::Undefined) {
     importData.warnings.push_back(assetName +
                                   " has 16-bit channels and cannot be loaded");
-    return TextureAssetHandle::Null;
+    return AssetHandle<TextureAsset>();
   }
 
   auto prevUuid = getOrCreateUuidFromMap(importData.uuids, assetName);
@@ -42,7 +42,7 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, usize index,
 
   if (uuid.hasError()) {
     importData.warnings.push_back(assetName + " could not be loaded");
-    return TextureAssetHandle::Null;
+    return AssetHandle<TextureAsset>();
   }
 
   auto handle =

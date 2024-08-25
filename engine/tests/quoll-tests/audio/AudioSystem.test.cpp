@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/audio/AudioAsset.h"
 #include "quoll/audio/AudioSystem.h"
 #include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
@@ -52,7 +53,7 @@ public:
     audioSystem.createSystemViewData(view);
   }
 
-  quoll::AudioAssetHandle createFakeAudio() {
+  quoll::AssetHandle<quoll::AudioAsset> createFakeAudio() {
     std::vector<char> bytes;
     quoll::AssetData<quoll::AudioAsset> asset{};
     asset.data.bytes = bytes;

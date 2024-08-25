@@ -68,7 +68,8 @@ public:
       asset.data.pointLights.push_back({i, light});
     }
 
-    std::vector<quoll::MaterialAssetHandle> materials(numMaterials);
+    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials(
+        numMaterials);
     for (u32 i = 0; i < numMaterials; ++i) {
       quoll::AssetData<quoll::MaterialAsset> material;
       material.uuid = quoll::Uuid("material-" + std::to_string(i));
@@ -183,7 +184,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto handle = map.findHandleByUuid(actual.at(i));
-      EXPECT_NE(handle, quoll::MaterialAssetHandle::Null);
+      EXPECT_NE(handle, quoll::AssetHandle<quoll::MaterialAsset>());
     }
   }
 
@@ -495,7 +496,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
   auto filePath = cache.createPrefabFromAsset(asset);
   auto handle = cache.loadPrefab(asset.uuid);
-  EXPECT_NE(handle.getData(), quoll::PrefabAssetHandle::Null);
+  EXPECT_NE(handle.getData(), quoll::AssetHandle<quoll::PrefabAsset>());
   EXPECT_FALSE(handle.hasWarnings());
 
   auto &prefab = cache.getRegistry().getPrefabs().getAsset(handle.getData());
@@ -669,34 +670,35 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   cache.getRegistry().getAnimators().deleteAsset(animatorHandle.getData());
 
   auto prefabHandle = cache.loadPrefab(prefabData.uuid);
-  EXPECT_NE(prefabHandle.getData(), quoll::PrefabAssetHandle::Null);
+  EXPECT_NE(prefabHandle.getData(), quoll::AssetHandle<quoll::PrefabAsset>());
 
   auto &newPrefab =
       cache.getRegistry().getPrefabs().getAsset(prefabHandle.getData());
 
   // Validate mesh
-  EXPECT_NE(newPrefab.data.meshes.at(0).value, quoll::MeshAssetHandle::Null);
+  EXPECT_NE(newPrefab.data.meshes.at(0).value,
+            quoll::AssetHandle<quoll::MeshAsset>());
   auto &newMesh = cache.getRegistry().getMeshes().getAsset(
       newPrefab.data.meshes.at(0).value);
   EXPECT_EQ(newMesh.path, meshPath);
 
   // Validate skeleton
   EXPECT_NE(newPrefab.data.skeletons.at(0).value,
-            quoll::SkeletonAssetHandle::Null);
+            quoll::AssetHandle<quoll::SkeletonAsset>());
   auto &newSkeleton = cache.getRegistry().getSkeletons().getAsset(
       newPrefab.data.skeletons.at(0).value);
   EXPECT_EQ(newSkeleton.path, skeletonPath);
 
   // Validate animation
   auto newAnimationHandle = newPrefab.data.animations.at(0);
-  EXPECT_NE(newAnimationHandle, quoll::AnimationAssetHandle::Null);
+  EXPECT_NE(newAnimationHandle, quoll::AssetHandle<quoll::AnimationAsset>());
   auto &newAnimation =
       cache.getRegistry().getAnimations().getAsset(newAnimationHandle);
   EXPECT_EQ(newAnimation.path, animationPath);
 
   // Validate animator
   auto newAnimatorHandle = newPrefab.data.animators.at(0).value;
-  EXPECT_NE(newAnimatorHandle, quoll::AnimatorAssetHandle::Null);
+  EXPECT_NE(newAnimatorHandle, quoll::AssetHandle<quoll::AnimatorAsset>());
   auto &newAnimator =
       cache.getRegistry().getAnimators().getAsset(newAnimatorHandle);
   EXPECT_EQ(newAnimator.path, animatorPath);

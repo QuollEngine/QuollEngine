@@ -62,16 +62,15 @@ void EditorScreen::start(const Project &rawProject) {
 
   auto res = assetManager.validateAndPreloadAssets(renderStorage);
 
-  SceneAssetHandle sceneAsset = SceneAssetHandle::Null;
+  AssetHandle<SceneAsset> sceneAsset;
   for (auto [handle, data] :
        assetManager.getAssetRegistry().getScenes().getAssets()) {
     sceneAsset = handle;
     project.startingScene = data.uuid;
   }
 
-  QuollAssert(sceneAsset != SceneAssetHandle::Null,
-              "Scene asset does not exist");
-  if (sceneAsset == SceneAssetHandle::Null) {
+  QuollAssert(sceneAsset, "Scene asset does not exist");
+  if (!sceneAsset) {
     return;
   }
 

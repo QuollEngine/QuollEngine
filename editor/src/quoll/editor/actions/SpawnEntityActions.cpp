@@ -26,7 +26,7 @@ static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
 }
 
 static bool isPrefabValid(AssetRegistry &assetRegistry,
-                          PrefabAssetHandle handle) {
+                          AssetHandle<PrefabAsset> handle) {
   const auto &prefabs = assetRegistry.getPrefabs();
   if (!prefabs.hasAsset(handle)) {
     return false;
@@ -97,7 +97,8 @@ bool SpawnEmptyEntityAtView::predicate(WorkspaceState &state,
   return scene.entityDatabase.has<Camera>(state.camera);
 }
 
-SpawnPrefabAtView::SpawnPrefabAtView(PrefabAssetHandle handle, Entity camera)
+SpawnPrefabAtView::SpawnPrefabAtView(AssetHandle<PrefabAsset> handle,
+                                     Entity camera)
     : mHandle(handle), mCamera(camera) {}
 
 ActionExecutorResult
@@ -153,7 +154,8 @@ bool SpawnPrefabAtView::predicate(WorkspaceState &state,
          scene.entityDatabase.has<Camera>(mCamera);
 }
 
-SpawnSpriteAtView::SpawnSpriteAtView(TextureAssetHandle handle, Entity camera)
+SpawnSpriteAtView::SpawnSpriteAtView(AssetHandle<TextureAsset> handle,
+                                     Entity camera)
     : mHandle(handle), mCamera(camera) {}
 
 ActionExecutorResult

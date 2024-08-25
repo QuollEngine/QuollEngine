@@ -13,7 +13,7 @@ static const quoll::Path FilePath =
 
 class AssetCacheInputMapTest : public AssetCacheTestBase {
 public:
-  quoll::Result<quoll::InputMapAssetHandle>
+  quoll::Result<quoll::AssetHandle<quoll::InputMapAsset>>
   loadInputMap(std::function<void(YAML::Node &)> fn,
                quoll::Uuid uuid = quoll::Uuid::generate()) {
     auto filePath = cache.getPathFromUuid(uuid);

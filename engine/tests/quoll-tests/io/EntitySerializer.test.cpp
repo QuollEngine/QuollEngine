@@ -22,6 +22,7 @@
 #include "quoll/renderer/MeshRenderer.h"
 #include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
+#include "quoll/renderer/TextureAsset.h"
 #include "quoll/scene/AutoAspectRatio.h"
 #include "quoll/scene/Camera.h"
 #include "quoll/scene/CascadedShadowMap.h"
@@ -163,7 +164,8 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSpriteFieldIfTextureAssetIsNotInRegistry) {
-  static constexpr quoll::TextureAssetHandle NonExistentMeshHandle{45};
+  static constexpr quoll::AssetHandle<quoll::TextureAsset>
+      NonExistentMeshHandle(45);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Sprite>(entity, {NonExistentMeshHandle});
@@ -194,7 +196,8 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
-  static constexpr quoll::MeshAssetHandle NonExistentMeshHandle{45};
+  static constexpr quoll::AssetHandle<quoll::MeshAsset> NonExistentMeshHandle{
+      45};
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Mesh>(entity, {NonExistentMeshHandle});
@@ -256,7 +259,7 @@ TEST_F(EntitySerializerTest,
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::MeshRenderer>(
-      entity, {{handle1, quoll::MaterialAssetHandle{25}}});
+      entity, {{handle1, quoll::AssetHandle<quoll::MaterialAsset>{25}}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["meshRenderer"]);
@@ -286,7 +289,8 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkinnedMeshFieldIfSkinnedMeshAssetIsNotInRegistry) {
-  static constexpr quoll::MeshAssetHandle NonExistentMeshHandle{45};
+  static constexpr quoll::AssetHandle<quoll::MeshAsset> NonExistentMeshHandle{
+      45};
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::SkinnedMesh>(entity, {NonExistentMeshHandle});
@@ -349,7 +353,7 @@ TEST_F(EntitySerializerTest,
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::SkinnedMeshRenderer>(
-      entity, {{handle1, quoll::MaterialAssetHandle{25}}});
+      entity, {{handle1, quoll::AssetHandle<quoll::MaterialAsset>{25}}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMeshRenderer"]);
@@ -379,7 +383,8 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkeletonFieldIfSkeletonAssetIsNotInRegistry) {
-  static constexpr quoll::SkeletonAssetHandle NonExistentSkeletonHandle{45};
+  static constexpr quoll::AssetHandle<quoll::SkeletonAsset>
+      NonExistentSkeletonHandle{45};
 
   auto entity = entityDatabase.create();
   quoll::Skeleton component{};
@@ -436,7 +441,8 @@ TEST_F(EntitySerializerTest, CreatesJointAttachmentFieldWithJointId) {
 // Animator
 TEST_F(EntitySerializerTest,
        DoesNotCreateAnimatorFieldIfAnimatorAssetIsNotInRegistry) {
-  static constexpr quoll::AnimatorAssetHandle NonExistentAnimatorHandle{45};
+  static constexpr quoll::AssetHandle<quoll::AnimatorAsset>
+      NonExistentAnimatorHandle{45};
 
   auto entity = entityDatabase.create();
   quoll::Animator component{};
@@ -625,7 +631,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateAudioFieldIfAudioAssetIsNotInRegistry) {
-  static constexpr quoll::AudioAssetHandle NonExistentHandle{45};
+  static constexpr quoll::AssetHandle<quoll::AudioAsset> NonExistentHandle{45};
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::AudioSource>(entity, {NonExistentHandle});
@@ -658,7 +664,8 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateScriptFieldIfScriptAssetIsNotInRegistry) {
-  static constexpr quoll::LuaScriptAssetHandle NonExistentHandle{45};
+  static constexpr quoll::AssetHandle<quoll::LuaScriptAsset> NonExistentHandle{
+      45};
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::LuaScript>(entity, {NonExistentHandle});
@@ -752,7 +759,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
 }
 
 TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
-  static constexpr quoll::FontAssetHandle NonExistentHandle{45};
+  static constexpr quoll::AssetHandle<quoll::FontAsset> NonExistentHandle{45};
 
   auto entity = entityDatabase.create();
 
@@ -1039,7 +1046,8 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateEnvironmentIfSkyboxIsTextureButAssetDoesNotExist) {
-  static constexpr quoll::EnvironmentAssetHandle NonExistentHandle{45};
+  static constexpr quoll::AssetHandle<quoll::EnvironmentAsset>
+      NonExistentHandle{45};
 
   auto entity = entityDatabase.create();
 
@@ -1074,9 +1082,10 @@ TEST_F(EntitySerializerTest,
        CreatesSkyboxWithColorTypeIfTypeIsColorAndAssetExists) {
   auto entity = entityDatabase.create();
 
-  quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Color,
-                                     quoll::EnvironmentAssetHandle::Null,
-                                     glm::vec4(0.2f, 0.3f, 0.4f, 0.5f)};
+  quoll::EnvironmentSkybox component{
+      quoll::EnvironmentSkyboxType::Color,
+      quoll::AssetHandle<quoll::EnvironmentAsset>(),
+      glm::vec4(0.2f, 0.3f, 0.4f, 0.5f)};
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -1118,8 +1127,8 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest,
        DoesNotCreateInputMapFieldIfInputMapAssetDoesNotExist) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::InputMapAssetRef>(entity,
-                                              {quoll::InputMapAssetHandle{25}});
+  entityDatabase.set<quoll::InputMapAssetRef>(
+      entity, {quoll::AssetHandle<quoll::InputMapAsset>{25}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["inputMap"]);

@@ -122,14 +122,14 @@ void AssetManager::generatePreview(const Path &sourceAssetPath,
 
   if (res.first == AssetType::Environment) {
     auto &asset = mAssetCache.getRegistry().getEnvironments().getAsset(
-        static_cast<quoll::EnvironmentAssetHandle>(handle));
+        static_cast<quoll::AssetHandle<quoll::EnvironmentAsset>>(handle));
     if (!rhi::isHandleValid(asset.preview)) {
       asset.preview =
           mHDRIImporter.loadFromPathToDevice(sourceAssetPath, renderStorage);
     }
   } else if (res.first == AssetType::Texture) {
     auto &asset = mAssetCache.getRegistry().getTextures().getAsset(
-        static_cast<quoll::TextureAssetHandle>(handle));
+        static_cast<quoll::AssetHandle<quoll::TextureAsset>>(handle));
 
     if (!rhi::isHandleValid(asset.preview)) {
       asset.preview = asset.data.deviceHandle;

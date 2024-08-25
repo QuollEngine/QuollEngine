@@ -15,7 +15,8 @@ public:
     scriptingSystem.createSystemViewData(view);
   }
 
-  quoll::LuaScriptAssetHandle loadLuaScript(quoll::String filename) {
+  quoll::AssetHandle<quoll::LuaScriptAsset>
+  loadLuaScript(quoll::String filename) {
     auto uuid = quoll::Uuid::generate();
     cache.createLuaScriptFromSource(FixturesPath / filename, uuid);
     return cache.loadLuaScript(uuid).getData();
@@ -181,11 +182,11 @@ TEST_F(LuaScriptingSystemTest,
   auto entity = entityDatabase.create();
   quoll::LuaScript script{handle};
   script.variables.insert_or_assign("string_value",
-                                    quoll::PrefabAssetHandle{15});
+                                    quoll::AssetHandle<quoll::PrefabAsset>{15});
   script.variables.insert_or_assign("prefab_value",
-                                    quoll::PrefabAssetHandle{15});
-  script.variables.insert_or_assign("texture_value",
-                                    quoll::TextureAssetHandle{25});
+                                    quoll::AssetHandle<quoll::PrefabAsset>{15});
+  script.variables.insert_or_assign(
+      "texture_value", quoll::AssetHandle<quoll::TextureAsset>{25});
   entityDatabase.set(entity, script);
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
@@ -202,9 +203,9 @@ TEST_F(LuaScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
   script.variables.insert_or_assign("string_value",
                                     quoll::String("Hello world"));
   script.variables.insert_or_assign("prefab_value",
-                                    quoll::PrefabAssetHandle{15});
-  script.variables.insert_or_assign("texture_value",
-                                    quoll::TextureAssetHandle{25});
+                                    quoll::AssetHandle<quoll::PrefabAsset>{15});
+  script.variables.insert_or_assign(
+      "texture_value", quoll::AssetHandle<quoll::TextureAsset>{25});
   entityDatabase.set(entity, script);
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
@@ -227,9 +228,9 @@ TEST_F(LuaScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
   script.variables.insert_or_assign("string_value",
                                     quoll::String("Hello world"));
   script.variables.insert_or_assign("prefab_value",
-                                    quoll::PrefabAssetHandle{15});
-  script.variables.insert_or_assign("texture_value",
-                                    quoll::TextureAssetHandle{25});
+                                    quoll::AssetHandle<quoll::PrefabAsset>{15});
+  script.variables.insert_or_assign(
+      "texture_value", quoll::AssetHandle<quoll::TextureAsset>{25});
   entityDatabase.set(entity, script);
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);

@@ -25,9 +25,9 @@ namespace quoll::editor {
 class SceneEditorUI {
 public:
   void render(WorkspaceState &state, AssetManager &assetManager,
-              ActionExecutor &actionExecutor, SceneAssetHandle sceneHandle,
-              Renderer &renderer, SceneRenderer &sceneRenderer,
-              EditorRenderer &editorRenderer,
+              ActionExecutor &actionExecutor,
+              AssetHandle<SceneAsset> sceneHandle, Renderer &renderer,
+              SceneRenderer &sceneRenderer, EditorRenderer &editorRenderer,
               MousePickingGraph &mousePickingGraph,
               MainEngineModules &engineModules, EditorCamera &editorCamera,
               WorkspaceManager &workspaceManager);

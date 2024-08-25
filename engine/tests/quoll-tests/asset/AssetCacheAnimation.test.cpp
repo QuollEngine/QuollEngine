@@ -115,7 +115,7 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   auto filePath = cache.createAnimationFromAsset(asset);
   auto handle = cache.loadAnimation(asset.uuid);
   EXPECT_FALSE(handle.hasError());
-  EXPECT_NE(handle.getData(), quoll::AnimationAssetHandle::Null);
+  EXPECT_NE(handle.getData(), quoll::AssetHandle<quoll::AnimationAsset>());
 
   auto &actual = cache.getRegistry().getAnimations().getAsset(handle.getData());
   EXPECT_EQ(actual.name, asset.name);

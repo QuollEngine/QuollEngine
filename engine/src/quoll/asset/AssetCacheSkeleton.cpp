@@ -43,7 +43,7 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   return Result<Path>::Ok(assetPath);
 }
 
-Result<SkeletonAssetHandle>
+Result<AssetHandle<SkeletonAsset>>
 AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
                                             const Path &filePath,
                                             const AssetFileHeader &header) {
@@ -70,30 +70,31 @@ AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
   stream.read(skeleton.data.jointInverseBindMatrices);
   stream.read(skeleton.data.jointNames);
 
-  return Result<SkeletonAssetHandle>::Ok(
+  return Result<AssetHandle<SkeletonAsset>>::Ok(
       mRegistry.getSkeletons().addAsset(skeleton));
 }
 
-Result<SkeletonAssetHandle> AssetCache::loadSkeleton(const Uuid &uuid) {
+Result<AssetHandle<SkeletonAsset>> AssetCache::loadSkeleton(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Skeleton);
   if (header.hasError()) {
-    return Result<SkeletonAssetHandle>::Error(header.getError());
+    return Result<AssetHandle<SkeletonAsset>>::Error(header.getError());
   }
 
   return loadSkeletonDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<SkeletonAssetHandle> AssetCache::getOrLoadSkeleton(const Uuid &uuid) {
+Result<AssetHandle<SkeletonAsset>>
+AssetCache::getOrLoadSkeleton(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<SkeletonAssetHandle>::Ok(SkeletonAssetHandle::Null);
+    return Result<AssetHandle<SkeletonAsset>>::Ok(AssetHandle<SkeletonAsset>());
   }
 
   auto handle = mRegistry.getSkeletons().findHandleByUuid(uuid);
-  if (handle != SkeletonAssetHandle::Null) {
-    return Result<SkeletonAssetHandle>::Ok(handle);
+  if (handle) {
+    return Result<AssetHandle<SkeletonAsset>>::Ok(handle);
   }
 
   return loadSkeleton(uuid);

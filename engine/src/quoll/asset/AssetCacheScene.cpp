@@ -29,7 +29,7 @@ Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
   return Result<Path>::Ok(assetPath);
 }
 
-Result<SceneAssetHandle> AssetCache::loadScene(const Uuid &uuid) {
+Result<AssetHandle<SceneAsset>> AssetCache::loadScene(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -37,23 +37,24 @@ Result<SceneAssetHandle> AssetCache::loadScene(const Uuid &uuid) {
   stream.close();
 
   if (root["type"].as<String>("") != "scene") {
-    return Result<SceneAssetHandle>::Error("Type must be scene");
+    return Result<AssetHandle<SceneAsset>>::Error("Type must be scene");
   }
 
   if (root["version"].as<String>("") != "0.1") {
-    return Result<SceneAssetHandle>::Error("Version is not supported");
+    return Result<AssetHandle<SceneAsset>>::Error("Version is not supported");
   }
 
   if (root["name"].as<String>("").length() == 0) {
-    return Result<SceneAssetHandle>::Error("`name` cannot be empty");
+    return Result<AssetHandle<SceneAsset>>::Error("`name` cannot be empty");
   }
 
   if (root["zones"].Type() != YAML::NodeType::Sequence) {
-    return Result<SceneAssetHandle>::Error("`zones` field is invalid");
+    return Result<AssetHandle<SceneAsset>>::Error("`zones` field is invalid");
   }
 
   if (root["entities"].Type() != YAML::NodeType::Sequence) {
-    return Result<SceneAssetHandle>::Error("`entities` field is invalid");
+    return Result<AssetHandle<SceneAsset>>::Error(
+        "`entities` field is invalid");
   }
 
   auto meta = getAssetMeta(uuid);
@@ -66,7 +67,7 @@ Result<SceneAssetHandle> AssetCache::loadScene(const Uuid &uuid) {
   asset.data.data = root;
 
   auto handle = mRegistry.getScenes().addAsset(asset);
-  return Result<SceneAssetHandle>::Ok(handle);
+  return Result<AssetHandle<SceneAsset>>::Ok(handle);
 }
 
 } // namespace quoll

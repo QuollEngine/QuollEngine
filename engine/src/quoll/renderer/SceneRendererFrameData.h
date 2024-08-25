@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
 #include "quoll/entity/Entity.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/renderer/BindlessDrawParameters.h"
@@ -189,12 +189,12 @@ public:
     return mSpriteEntities;
   }
 
-  inline const std::unordered_map<MeshAssetHandle, MeshData> &
+  inline const std::unordered_map<AssetHandle<MeshAsset>, MeshData> &
   getMeshGroups() const {
     return mMeshGroups;
   }
 
-  inline const std::unordered_map<MeshAssetHandle, SkinnedMeshData> &
+  inline const std::unordered_map<AssetHandle<MeshAsset>, SkinnedMeshData> &
   getSkinnedMeshGroups() const {
     return mSkinnedMeshGroups;
   }
@@ -215,11 +215,11 @@ public:
 
   void setDefaultMaterial(rhi::DeviceAddress material);
 
-  void addMesh(MeshAssetHandle handle, quoll::Entity entity,
+  void addMesh(AssetHandle<MeshAsset> handle, quoll::Entity entity,
                const glm::mat4 &transform,
                const std::vector<rhi::DeviceAddress> &materials);
 
-  void addSkinnedMesh(MeshAssetHandle handle, Entity entity,
+  void addSkinnedMesh(AssetHandle<MeshAsset> handle, Entity entity,
                       const glm::mat4 &transform,
                       const std::vector<glm::mat4> &skeleton,
                       const std::vector<rhi::DeviceAddress> &materials);
@@ -350,8 +350,9 @@ private:
   rhi::Buffer mSkeletonsBuffer;
   rhi::Buffer mMeshMaterialsBuffer;
   rhi::Buffer mSkinnedMeshMaterialsBuffer;
-  std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
-  std::unordered_map<MeshAssetHandle, SkinnedMeshData> mSkinnedMeshGroups;
+  std::unordered_map<AssetHandle<MeshAsset>, MeshData> mMeshGroups;
+  std::unordered_map<AssetHandle<MeshAsset>, SkinnedMeshData>
+      mSkinnedMeshGroups;
 
   rhi::Buffer mSceneBuffer;
   rhi::Buffer mDirectionalLightsBuffer;

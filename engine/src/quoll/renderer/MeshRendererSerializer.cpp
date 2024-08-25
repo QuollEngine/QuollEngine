@@ -34,7 +34,7 @@ void MeshRendererSerializer::deserialize(const YAML::Node &node,
         auto uuid = material.as<Uuid>(Uuid{});
 
         auto handle = assetRegistry.getMaterials().findHandleByUuid(uuid);
-        if (handle == MaterialAssetHandle::Null) {
+        if (!handle) {
           continue;
         }
 

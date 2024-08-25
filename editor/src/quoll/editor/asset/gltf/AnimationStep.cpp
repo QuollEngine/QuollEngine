@@ -8,9 +8,9 @@ void loadAnimations(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
   const auto &model = importData.model;
 
-  std::map<u32, std::vector<std::pair<AnimationAssetHandle, String>>>
+  std::map<u32, std::vector<std::pair<AssetHandle<AnimationAsset>, String>>>
       nodeAnimationMap;
-  std::map<u32, std::vector<std::pair<AnimationAssetHandle, String>>>
+  std::map<u32, std::vector<std::pair<AssetHandle<AnimationAsset>, String>>>
       skinAnimationMap;
 
   for (usize i = 0; i < model.animations.size(); ++i) {

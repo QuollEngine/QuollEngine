@@ -58,7 +58,7 @@ public:
     stream.close();
   }
 
-  quoll::SceneAssetHandle
+  quoll::AssetHandle<quoll::SceneAsset>
   createSceneAsset(const std::vector<YAML::Node> &entities = {}) {
     YAML::Node root;
     root["name"] = "TestScene";
@@ -78,7 +78,7 @@ public:
     return assetRegistry.getScenes().addAsset(asset);
   }
 
-  YAML::Node getSceneYaml(quoll::SceneAssetHandle handle) {
+  YAML::Node getSceneYaml(quoll::AssetHandle<quoll::SceneAsset> handle) {
     return assetRegistry.getScenes().getAsset(handle).data.data;
   }
 

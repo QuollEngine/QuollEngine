@@ -12,7 +12,7 @@
 namespace quoll::editor {
 
 SceneEditorWorkspace::SceneEditorWorkspace(
-    Project project, AssetManager &assetManager, SceneAssetHandle scene,
+    Project project, AssetManager &assetManager, AssetHandle<SceneAsset> scene,
     Path scenePath, Renderer &renderer, SceneRenderer &sceneRenderer,
     EditorRenderer &editorRenderer, MousePickingGraph &mousePickingGraph,
     MainEngineModules &engineModules, EditorCamera &editorCamera,
@@ -130,7 +130,7 @@ void SceneEditorWorkspace::updateFrameData(rhi::RenderCommandList &commandList,
 
 WorkspaceMatchParams SceneEditorWorkspace::getMatchParams() const {
   return {.type = "SceneEditor",
-          .asset = static_cast<u32>(mSceneAssetHandle),
+          .asset = mSceneAssetHandle.getRawId(),
           .assetType = AssetType::Scene};
 }
 

@@ -96,8 +96,8 @@ void Runtime::start() {
   auto handle = assetCache.getRegistry().getScenes().findHandleByUuid(
       mConfig.startingScene);
 
-  QuollAssert(handle != SceneAssetHandle::Null, "Scene not found");
-  if (handle == SceneAssetHandle::Null) {
+  QuollAssert(handle, "Scene not found");
+  if (!handle) {
     return;
   }
 

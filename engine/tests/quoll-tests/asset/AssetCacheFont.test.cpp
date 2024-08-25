@@ -36,7 +36,7 @@ TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
   EXPECT_FALSE(result.hasWarnings());
 
   auto handle = result.getData();
-  EXPECT_NE(handle, quoll::FontAssetHandle::Null);
+  EXPECT_NE(handle, quoll::AssetHandle<quoll::FontAsset>());
   const auto &asset = cache.getRegistry().getFonts().getAsset(handle);
 
   EXPECT_EQ(asset.path, filePath.getData());
@@ -56,7 +56,7 @@ TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
   EXPECT_FALSE(result.hasWarnings());
 
   auto handle = result.getData();
-  EXPECT_NE(handle, quoll::FontAssetHandle::Null);
+  EXPECT_NE(handle, quoll::AssetHandle<quoll::FontAsset>());
   const auto &asset = cache.getRegistry().getFonts().getAsset(handle);
 
   EXPECT_EQ(asset.path, filePath.getData());

@@ -106,7 +106,7 @@ static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
                                        g.LastItemData.ID)) {
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Environment).c_str())) {
-      auto asset = *static_cast<EnvironmentAssetHandle *>(payload->Data);
+      auto asset = *static_cast<AssetHandle<EnvironmentAsset> *>(payload->Data);
       auto newSkybox = skybox;
       newSkybox.texture = asset;
       actionExecutor.execute<EntityUpdateComponent<EnvironmentSkybox>>(
@@ -728,7 +728,8 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
-            auto asset = *static_cast<MaterialAssetHandle *>(payload->Data);
+            auto asset =
+                *static_cast<AssetHandle<MaterialAsset> *>(payload->Data);
             actionExecutor.execute<EntitySetMeshRendererMaterial>(
                 mSelectedEntity, i, asset);
           }
@@ -741,7 +742,8 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
       if (ImGui::BeginDragDropTarget()) {
         if (auto *payload = ImGui::AcceptDragDropPayload(
                 getAssetTypeString(AssetType::Material).c_str())) {
-          auto asset = *static_cast<MaterialAssetHandle *>(payload->Data);
+          auto asset =
+              *static_cast<AssetHandle<MaterialAsset> *>(payload->Data);
           actionExecutor.execute<EntityAddMeshRendererMaterialSlot>(
               mSelectedEntity, asset);
         }
@@ -791,7 +793,8 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
-            auto asset = *static_cast<MaterialAssetHandle *>(payload->Data);
+            auto asset =
+                *static_cast<AssetHandle<MaterialAsset> *>(payload->Data);
             actionExecutor.execute<EntitySetSkinnedMeshRendererMaterial>(
                 mSelectedEntity, i, asset);
           }
@@ -804,7 +807,8 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
       if (ImGui::BeginDragDropTarget()) {
         if (auto *payload = ImGui::AcceptDragDropPayload(
                 getAssetTypeString(AssetType::Material).c_str())) {
-          auto asset = *static_cast<MaterialAssetHandle *>(payload->Data);
+          auto asset =
+              *static_cast<AssetHandle<MaterialAsset> *>(payload->Data);
           actionExecutor.execute<EntityAddSkinnedMeshRendererMaterialSlot>(
               mSelectedEntity, asset);
         }
@@ -1390,11 +1394,13 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             value = script.variables.at(name).get<String>();
           } else if (script.variables.at(name).isType(
                          LuaScriptVariableType::AssetPrefab)) {
-            auto handle = script.variables.at(name).get<PrefabAssetHandle>();
+            auto handle =
+                script.variables.at(name).get<AssetHandle<PrefabAsset>>();
             value = assetRegistry.getPrefabs().getAsset(handle).name;
           } else if (script.variables.at(name).isType(
                          LuaScriptVariableType::AssetTexture)) {
-            auto handle = script.variables.at(name).get<TextureAssetHandle>();
+            auto handle =
+                script.variables.at(name).get<AssetHandle<TextureAsset>>();
             value = assetRegistry.getTextures().getAsset(handle).name;
           }
 
@@ -1432,12 +1438,12 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             ImGui::Text("%s", name.c_str());
             auto value =
                 existingVariable.isType(LuaScriptVariableType::AssetPrefab)
-                    ? existingVariable.get<PrefabAssetHandle>()
-                    : PrefabAssetHandle::Null;
+                    ? existingVariable.get<AssetHandle<PrefabAsset>>()
+                    : AssetHandle<PrefabAsset>();
 
             const auto width = ImGui::GetWindowContentRegionWidth();
             const f32 halfWidth = width * 0.5f;
-            if (value == PrefabAssetHandle::Null) {
+            if (!value) {
               widgets::Button("Drag prefab here", ImVec2(width, halfWidth));
             } else {
               String buttonLabel =
@@ -1449,7 +1455,8 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             if (ImGui::BeginDragDropTarget()) {
               if (auto *payload = ImGui::AcceptDragDropPayload(
                       getAssetTypeString(AssetType::Prefab).c_str())) {
-                auto handle = *static_cast<PrefabAssetHandle *>(payload->Data);
+                auto handle =
+                    *static_cast<AssetHandle<PrefabAsset> *>(payload->Data);
                 mSetScriptVariable.reset(
                     new EntitySetScriptVariable(mSelectedEntity, name, handle));
               }
@@ -1458,12 +1465,12 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             ImGui::Text("%s", name.c_str());
             auto value =
                 existingVariable.isType(LuaScriptVariableType::AssetTexture)
-                    ? existingVariable.get<TextureAssetHandle>()
-                    : TextureAssetHandle::Null;
+                    ? existingVariable.get<AssetHandle<TextureAsset>>()
+                    : AssetHandle<TextureAsset>();
 
             const auto width = ImGui::GetWindowContentRegionWidth();
             const f32 halfWidth = width * 0.5f;
-            if (value == TextureAssetHandle::Null) {
+            if (!value) {
               widgets::Button("Drag texture here", ImVec2(width, halfWidth));
             } else {
               String buttonLabel =
@@ -1475,7 +1482,8 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             if (ImGui::BeginDragDropTarget()) {
               if (auto *payload = ImGui::AcceptDragDropPayload(
                       getAssetTypeString(AssetType::Texture).c_str())) {
-                auto handle = *static_cast<TextureAssetHandle *>(payload->Data);
+                auto handle =
+                    *static_cast<AssetHandle<TextureAsset> *>(payload->Data);
                 mSetScriptVariable.reset(
                     new EntitySetScriptVariable(mSelectedEntity, name, handle));
               }
@@ -1530,7 +1538,8 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
                                          g.LastItemData.ID)) {
       if (auto *payload = ImGui::AcceptDragDropPayload(
               getAssetTypeString(AssetType::InputMap).c_str())) {
-        auto newHandle = *static_cast<InputMapAssetHandle *>(payload->Data);
+        auto newHandle =
+            *static_cast<AssetHandle<InputMapAsset> *>(payload->Data);
         auto newComponent = component;
         newComponent.handle = newHandle;
         actionExecutor.execute<EntityUpdateComponent<InputMapAssetRef>>(
@@ -1666,7 +1675,7 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
 
         if (widgets::Button(fa::Times)) {
           auto newSkybox = skybox;
-          newSkybox.texture = EnvironmentAssetHandle::Null;
+          newSkybox.texture;
           actionExecutor.execute<EntityUpdateComponent<EnvironmentSkybox>>(
               mSelectedEntity, skybox, newSkybox);
         }
@@ -1846,19 +1855,19 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
   if (ImGui::BeginDragDropTarget()) {
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Mesh).c_str())) {
-      auto asset = *static_cast<MeshAssetHandle *>(payload->Data);
+      auto asset = *static_cast<AssetHandle<MeshAsset> *>(payload->Data);
       actionExecutor.execute<EntitySetMesh>(mSelectedEntity, asset);
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::SkinnedMesh).c_str())) {
-      auto asset = *static_cast<MeshAssetHandle *>(payload->Data);
+      auto asset = *static_cast<AssetHandle<MeshAsset> *>(payload->Data);
       actionExecutor.execute<EntitySetMesh>(mSelectedEntity, asset);
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Audio).c_str())) {
-      auto asset = *static_cast<AudioAssetHandle *>(payload->Data);
+      auto asset = *static_cast<AssetHandle<AudioAsset> *>(payload->Data);
 
       if (scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
         actionExecutor.execute<EntitySetAudio>(mSelectedEntity, asset);
@@ -1869,7 +1878,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::LuaScript).c_str())) {
-      auto asset = *static_cast<LuaScriptAssetHandle *>(payload->Data);
+      auto asset = *static_cast<AssetHandle<LuaScriptAsset> *>(payload->Data);
 
       if (scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
         actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
@@ -1880,7 +1889,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Animator).c_str())) {
-      auto asset = *static_cast<AnimatorAssetHandle *>(payload->Data);
+      auto asset = *static_cast<AssetHandle<AnimatorAsset> *>(payload->Data);
 
       if (scene.entityDatabase.has<Animator>(mSelectedEntity)) {
         actionExecutor.execute<EntitySetAnimator>(mSelectedEntity, asset);
@@ -1891,7 +1900,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Texture).c_str())) {
-      auto asset = *static_cast<TextureAssetHandle *>(payload->Data);
+      auto asset = *static_cast<AssetHandle<TextureAsset> *>(payload->Data);
 
       if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
         actionExecutor.execute<EntitySetSprite>(mSelectedEntity, asset);

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/renderer/TextureAsset.h"
+#include "quoll/scene/PrefabAsset.h"
 #include "LuaScriptAsset.h"
 
 namespace quoll {
@@ -11,9 +12,9 @@ public:
 
   LuaScriptInputVariable(String value);
 
-  LuaScriptInputVariable(PrefabAssetHandle value);
+  LuaScriptInputVariable(AssetHandle<PrefabAsset> value);
 
-  LuaScriptInputVariable(TextureAssetHandle value);
+  LuaScriptInputVariable(AssetHandle<TextureAsset> value);
 
   template <class TValue> inline const TValue &get() const {
     return std::get<TValue>(mValue);
@@ -23,7 +24,8 @@ public:
 
 private:
   LuaScriptVariableType mType = LuaScriptVariableType::Invalid;
-  std::variant<String, PrefabAssetHandle, TextureAssetHandle> mValue;
+  std::variant<String, AssetHandle<PrefabAsset>, AssetHandle<TextureAsset>>
+      mValue;
 };
 
 } // namespace quoll

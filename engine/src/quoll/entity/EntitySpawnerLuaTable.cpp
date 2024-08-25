@@ -26,7 +26,8 @@ EntityLuaTable EntitySpawnerLuaTable::spawnEmpty() {
 }
 
 sol_maybe<EntityLuaTable>
-EntitySpawnerLuaTable::spawnPrefab(PrefabAssetHandle prefab) {
+EntitySpawnerLuaTable::spawnPrefab(AssetHandleType handle) {
+  AssetHandle<PrefabAsset> prefab(handle);
   if (!mScriptGlobals.assetRegistry.getPrefabs().hasAsset(prefab)) {
     Engine::getUserLogger().error() << lua::Messages::assetNotFound(
         "EntitySpawner", "spawnPrefab", getAssetTypeString(AssetType::Prefab));
@@ -52,7 +53,8 @@ EntitySpawnerLuaTable::spawnPrefab(PrefabAssetHandle prefab) {
 }
 
 sol_maybe<EntityLuaTable>
-EntitySpawnerLuaTable::spawnSprite(TextureAssetHandle texture) {
+EntitySpawnerLuaTable::spawnSprite(AssetHandleType handle) {
+  AssetHandle<TextureAsset> texture(handle);
   if (!mScriptGlobals.assetRegistry.getTextures().hasAsset(texture)) {
     Engine::getUserLogger().error() << lua::Messages::assetNotFound(
         "EntitySpawner", "spawnSprite", getAssetTypeString(AssetType::Texture));

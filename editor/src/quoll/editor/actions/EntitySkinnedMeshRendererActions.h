@@ -8,7 +8,7 @@ namespace quoll::editor {
 class EntitySetSkinnedMeshRendererMaterial : public Action {
 public:
   EntitySetSkinnedMeshRendererMaterial(Entity entity, usize slot,
-                                       MaterialAssetHandle handle);
+                                       AssetHandle<MaterialAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -21,14 +21,14 @@ public:
 private:
   Entity mEntity;
   usize mSlot;
-  MaterialAssetHandle mOldMaterial = MaterialAssetHandle::Null;
-  MaterialAssetHandle mNewMaterial;
+  AssetHandle<MaterialAsset> mOldMaterial;
+  AssetHandle<MaterialAsset> mNewMaterial;
 };
 
 class EntityAddSkinnedMeshRendererMaterialSlot : public Action {
 public:
   EntityAddSkinnedMeshRendererMaterialSlot(Entity entity,
-                                           MaterialAssetHandle handle);
+                                           AssetHandle<MaterialAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -40,7 +40,7 @@ public:
 
 private:
   Entity mEntity;
-  MaterialAssetHandle mNewMaterial;
+  AssetHandle<MaterialAsset> mNewMaterial;
 };
 
 class EntityRemoveLastSkinnedMeshRendererMaterialSlot : public Action {
@@ -57,7 +57,7 @@ public:
 
 private:
   Entity mEntity;
-  MaterialAssetHandle mOldMaterial = MaterialAssetHandle::Null;
+  AssetHandle<MaterialAsset> mOldMaterial;
 };
 
 } // namespace quoll::editor

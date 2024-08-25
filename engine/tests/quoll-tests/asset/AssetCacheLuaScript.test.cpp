@@ -6,7 +6,7 @@
 
 class AssetCacheLuaScriptTest : public AssetCacheTestBase {
 public:
-  quoll::Result<quoll::LuaScriptAssetHandle>
+  quoll::Result<quoll::AssetHandle<quoll::LuaScriptAsset>>
   loadFromSource(quoll::Path sourcePath) {
     auto uuid = quoll::Uuid::generate();
     auto cachePath = cache.createLuaScriptFromSource(sourcePath, uuid);

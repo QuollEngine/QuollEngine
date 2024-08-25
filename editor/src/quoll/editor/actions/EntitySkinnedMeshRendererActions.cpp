@@ -4,7 +4,7 @@
 namespace quoll::editor {
 
 EntitySetSkinnedMeshRendererMaterial::EntitySetSkinnedMeshRendererMaterial(
-    Entity entity, usize slot, MaterialAssetHandle handle)
+    Entity entity, usize slot, AssetHandle<MaterialAsset> handle)
     : mEntity(entity), mSlot(slot), mNewMaterial(handle) {}
 
 ActionExecutorResult
@@ -55,7 +55,7 @@ bool EntitySetSkinnedMeshRendererMaterial::predicate(
 
 EntityAddSkinnedMeshRendererMaterialSlot::
     EntityAddSkinnedMeshRendererMaterialSlot(Entity entity,
-                                             MaterialAssetHandle handle)
+                                             AssetHandle<MaterialAsset> handle)
     : mEntity(entity), mNewMaterial(handle) {}
 
 ActionExecutorResult EntityAddSkinnedMeshRendererMaterialSlot::onExecute(

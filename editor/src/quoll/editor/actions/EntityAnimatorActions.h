@@ -6,7 +6,7 @@ namespace quoll::editor {
 
 class EntityCreateAnimator : public Action {
 public:
-  EntityCreateAnimator(Entity entity, AnimatorAssetHandle handle);
+  EntityCreateAnimator(Entity entity, AssetHandle<AnimatorAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -18,12 +18,12 @@ public:
 
 private:
   Entity mEntity;
-  AnimatorAssetHandle mHandle;
+  AssetHandle<AnimatorAsset> mHandle;
 };
 
 class EntitySetAnimator : public Action {
 public:
-  EntitySetAnimator(Entity entity, AnimatorAssetHandle script);
+  EntitySetAnimator(Entity entity, AssetHandle<AnimatorAsset> script);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -35,8 +35,8 @@ public:
 
 private:
   Entity mEntity;
-  AnimatorAssetHandle mAnimator;
-  AnimatorAssetHandle mOldAnimator{};
+  AssetHandle<AnimatorAsset> mAnimator;
+  AssetHandle<AnimatorAsset> mOldAnimator;
 };
 
 } // namespace quoll::editor

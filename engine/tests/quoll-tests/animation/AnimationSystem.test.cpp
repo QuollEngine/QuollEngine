@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/animation/AnimationAsset.h"
 #include "quoll/animation/AnimationSystem.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/animation/AnimatorEvent.h"
@@ -21,7 +22,8 @@ public:
   AnimationSystemTest() : system(assetRegistry) {}
 
   quoll::Entity
-  create(quoll::AnimationAssetHandle animIndex = quoll::AnimationAssetHandle{1},
+  create(quoll::AssetHandle<quoll::AnimationAsset> animIndex =
+             quoll::AssetHandle<quoll::AnimationAsset>{1},
          bool playing = true, f32 speed = 1.0f,
          quoll::AnimationLoopMode loopMode = quoll::AnimationLoopMode::None) {
     auto entity = entityDatabase.create();
@@ -44,9 +46,10 @@ public:
     return entity;
   }
 
-  quoll::Entity createEntityWithSkeleton(
-      quoll::AnimationAssetHandle animIndex = quoll::AnimationAssetHandle{1},
-      bool playing = true) {
+  quoll::Entity
+  createEntityWithSkeleton(quoll::AssetHandle<quoll::AnimationAsset> animIndex =
+                               quoll::AssetHandle<quoll::AnimationAsset>{1},
+                           bool playing = true) {
     auto entity = create(animIndex, playing);
 
     quoll::Skeleton skeleton{};
@@ -62,7 +65,7 @@ public:
     return entity;
   }
 
-  quoll::AnimationAssetHandle
+  quoll::AssetHandle<quoll::AnimationAsset>
   createAnimation(quoll::KeyframeSequenceAssetTarget target, f32 time) {
     quoll::AssetData<quoll::AnimationAsset> animation;
     animation.data.time = time;
@@ -80,7 +83,7 @@ public:
     return assetRegistry.getAnimations().addAsset(animation);
   }
 
-  quoll::AnimationAssetHandle
+  quoll::AssetHandle<quoll::AnimationAsset>
   createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget target, f32 time) {
     quoll::AssetData<quoll::AnimationAsset> animation;
     animation.data.time = time;
@@ -403,7 +406,7 @@ TEST_F(AnimationSystemTest,
 }
 
 TEST_F(AnimationSystemTest, DoesNothingIfAnimationDoesNotExist) {
-  auto entity = create(quoll::AnimationAssetHandle::Null);
+  auto entity = create(quoll::AssetHandle<quoll::AnimationAsset>());
   system.prepare(view);
   system.update(0.5f, view);
 }

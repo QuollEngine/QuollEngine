@@ -1,7 +1,7 @@
 #pragma once
 
 #include "quoll/rhi/RenderHandle.h"
-#include "Asset.h"
+#include "AssetType.h"
 
 namespace quoll {
 

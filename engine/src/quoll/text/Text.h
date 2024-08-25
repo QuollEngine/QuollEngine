@@ -1,6 +1,7 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
+#include "FontAsset.h"
 
 namespace quoll {
 
@@ -9,7 +10,7 @@ struct Text {
 
   f32 lineHeight = 1.0f;
 
-  FontAssetHandle font = FontAssetHandle::Null;
+  AssetHandle<FontAsset> font;
 };
 
 } // namespace quoll
