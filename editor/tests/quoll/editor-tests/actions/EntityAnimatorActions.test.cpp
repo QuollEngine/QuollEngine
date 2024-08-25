@@ -51,7 +51,7 @@ TEST_F(EntityCreateAnimatorActionTest,
 TEST_F(EntityCreateAnimatorActionTest,
        PredicateReturnsTrueIfAnimatorDoesNotExistAndAssetIsValid) {
   auto entity = state.scene.entityDatabase.create();
-  auto handle = assetRegistry.getAnimators().addAsset({});
+  auto handle = assetRegistry.add<quoll::AnimatorAsset>({});
 
   quoll::editor::EntityCreateAnimator action(entity, handle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
@@ -97,8 +97,8 @@ TEST_F(EntitySetAnimatorActionTest, PredicateReturnsFalseIfAnimatorIsInvalid) {
 
 TEST_F(EntitySetAnimatorActionTest, PredicateReturnsTrueIfAnimatorExists) {
   auto entity = state.scene.entityDatabase.create();
-  auto scriptHandle = assetRegistry.getAnimators().addAsset({});
+  auto handle = assetRegistry.add<quoll::AnimatorAsset>({});
 
-  quoll::editor::EntitySetAnimator action(entity, scriptHandle);
+  quoll::editor::EntitySetAnimator action(entity, handle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }

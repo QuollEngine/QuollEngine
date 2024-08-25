@@ -76,8 +76,7 @@ Result<AssetHandle<AudioAsset>> AssetCache::loadAudio(const Uuid &uuid) {
   asset.type = AssetType::Audio;
   asset.data.bytes = bytes;
 
-  return Result<AssetHandle<AudioAsset>>::Ok(
-      mRegistry.getAudios().addAsset(asset));
+  return Result<AssetHandle<AudioAsset>>::Ok(mRegistry.add(asset));
 }
 
 } // namespace quoll

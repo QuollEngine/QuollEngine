@@ -155,7 +155,7 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
 
   EXPECT_NE(handle.getData(), quoll::AssetHandle<quoll::SkeletonAsset>());
 
-  auto &actual = cache.getRegistry().getSkeletons().getAsset(handle.getData());
+  auto &actual = cache.getRegistry().get(handle.getData());
 
   EXPECT_EQ(actual.name, asset.name);
 

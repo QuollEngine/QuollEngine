@@ -11,13 +11,13 @@ public:
   quoll::AssetHandle<quoll::MeshAsset> createMesh() {
     quoll::AssetData<quoll::MeshAsset> asset{};
     asset.type = quoll::AssetType::Mesh;
-    return assetRegistry.getMeshes().addAsset(asset);
+    return assetRegistry.add(asset);
   }
 
   quoll::AssetHandle<quoll::MeshAsset> createSkinnedMesh() {
     quoll::AssetData<quoll::MeshAsset> asset{};
     asset.type = quoll::AssetType::SkinnedMesh;
-    return assetRegistry.getMeshes().addAsset(asset);
+    return assetRegistry.add(asset);
   }
 };
 

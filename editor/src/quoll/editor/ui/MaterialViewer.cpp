@@ -24,12 +24,12 @@ void MaterialViewer::render(AssetRegistry &assetRegistry) {
   if (!open)
     return;
 
-  if (!assetRegistry.getMaterials().hasAsset(mHandle)) {
+  if (!assetRegistry.has(mHandle)) {
     mHandle = AssetHandle<MaterialAsset>();
     return;
   }
 
-  const auto &material = assetRegistry.getMaterials().getAsset(mHandle);
+  const auto &material = assetRegistry.get(mHandle);
 
   String title = "Material: " + material.name + "###MaterialViewer";
 

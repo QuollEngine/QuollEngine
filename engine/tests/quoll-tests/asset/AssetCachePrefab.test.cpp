@@ -73,13 +73,13 @@ public:
     for (u32 i = 0; i < numMaterials; ++i) {
       quoll::AssetData<quoll::MaterialAsset> material;
       material.uuid = quoll::Uuid("material-" + std::to_string(i));
-      materials.at(i) = cache.getRegistry().getMaterials().addAsset(material);
+      materials.at(i) = cache.getRegistry().add(material);
     }
 
     for (u32 i = 0; i < numMeshes; ++i) {
       quoll::AssetData<quoll::MeshAsset> mesh;
       mesh.uuid = quoll::Uuid("mesh-" + std::to_string(i));
-      auto handle = cache.getRegistry().getMeshes().addAsset(mesh);
+      auto handle = cache.getRegistry().add(mesh);
       asset.data.meshes.push_back({i, handle});
     }
 
@@ -111,7 +111,7 @@ public:
     for (u32 i = 0; i < numSkeletons; ++i) {
       quoll::AssetData<quoll::SkeletonAsset> skeleton;
       skeleton.uuid = quoll::Uuid("skel-" + std::to_string(i));
-      auto handle = cache.getRegistry().getSkeletons().addAsset(skeleton);
+      auto handle = cache.getRegistry().add(skeleton);
       asset.data.skeletons.push_back({i, handle});
     }
 
@@ -127,14 +127,14 @@ public:
       quoll::AssetData<quoll::AnimationAsset> animation;
       animation.uuid = quoll::Uuid("animation-" + std::to_string(i));
 
-      auto handle = cache.getRegistry().getAnimations().addAsset(animation);
+      auto handle = cache.getRegistry().add(animation);
       asset.data.animations.push_back(handle);
     }
 
     for (u32 i = 0; i < numAnimators; ++i) {
       quoll::AssetData<quoll::AnimatorAsset> animator;
       animator.uuid = quoll::Uuid("animator-" + std::to_string(i));
-      auto handle = cache.getRegistry().getAnimators().addAsset(animator);
+      auto handle = cache.getRegistry().add(animator);
       asset.data.animators.push_back({i, handle});
     }
 
@@ -174,7 +174,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
 
   std::vector<quoll::Uuid> actualMaterials;
   {
-    auto &map = cache.getRegistry().getMaterials();
     auto &actual = actualMaterials;
     u32 numAssets = 0;
     file.read(numAssets);
@@ -183,7 +182,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actual);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto handle = map.findHandleByUuid(actual.at(i));
+      auto handle = cache.getRegistry().findHandleByUuid<quoll::MaterialAsset>(
+          actual.at(i));
       EXPECT_NE(handle, quoll::AssetHandle<quoll::MaterialAsset>());
     }
   }
@@ -191,7 +191,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   std::vector<quoll::Uuid> actualMeshes;
   {
     auto &expected = asset.data.meshes;
-    auto &map = cache.getRegistry().getMeshes();
     u32 numAssets = 0;
     file.read(numAssets);
     EXPECT_EQ(numAssets, static_cast<u32>(expected.size() - 2));
@@ -199,7 +198,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actualMeshes);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto expectedString = map.getAsset(expected.at(i).value).uuid;
+      auto expectedString = cache.getRegistry().get(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualMeshes.at(i));
     }
   }
@@ -207,7 +206,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   std::vector<quoll::Uuid> actualSkeletons;
   {
     auto &expected = asset.data.skeletons;
-    auto &map = cache.getRegistry().getSkeletons();
     u32 numAssets = 0;
     file.read(numAssets);
     EXPECT_EQ(numAssets, 3);
@@ -215,7 +213,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actualSkeletons);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto expectedString = map.getAsset(expected.at(i).value).uuid;
+      auto expectedString = cache.getRegistry().get(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualSkeletons.at(i));
     }
   }
@@ -223,7 +221,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   std::vector<quoll::Uuid> actualAnimations;
   {
     auto &expected = asset.data.animations;
-    auto &map = cache.getRegistry().getAnimations();
     auto &actual = actualAnimations;
     u32 numAssets = 0;
     file.read(numAssets);
@@ -232,7 +229,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actual);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto expectedString = map.getAsset(expected.at(i)).uuid;
+      auto expectedString = cache.getRegistry().get(expected.at(i)).uuid;
       EXPECT_EQ(expectedString, actual.at(i));
     }
   }
@@ -240,7 +237,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   std::vector<quoll::Uuid> actualAnimators;
   {
     auto &expected = asset.data.animators;
-    auto &map = cache.getRegistry().getAnimators();
     auto &actual = actualAnimators;
     u32 numAssets = 0;
     file.read(numAssets);
@@ -249,7 +245,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actual);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto expectedString = map.getAsset(expected.at(i).value).uuid;
+      auto expectedString = cache.getRegistry().get(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actual.at(i));
     }
   }
@@ -301,7 +297,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 7);
-    auto &map = cache.getRegistry().getMeshes();
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 999;
       file.read(entity);
@@ -311,7 +306,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       file.read(meshIndex);
       EXPECT_EQ(meshIndex, i % 5);
 
-      auto &expected = map.getAsset(asset.data.meshes.at(i).value);
+      auto &expected = cache.getRegistry().get(asset.data.meshes.at(i).value);
 
       EXPECT_EQ(expected.uuid, actualMeshes.at(meshIndex));
     }
@@ -321,7 +316,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     u32 numComponents = 999;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 4);
-    auto &map = cache.getRegistry().getMaterials();
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 999;
       file.read(entity);
@@ -342,7 +336,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
         auto handle = expected.materials.at(mi);
 
         auto uuid = actualMaterials.at(materialIndex);
-        EXPECT_EQ(uuid, map.getAsset(handle).uuid);
+        EXPECT_EQ(uuid, cache.getRegistry().get(handle).uuid);
       }
     }
   }
@@ -351,7 +345,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     u32 numComponents = 999;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 2);
-    auto &map = cache.getRegistry().getMaterials();
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 999;
       file.read(entity);
@@ -372,7 +365,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
         auto handle = expected.materials.at(mi);
 
         auto uuid = actualMaterials.at(materialIndex);
-        EXPECT_EQ(uuid, map.getAsset(handle).uuid);
+        EXPECT_EQ(uuid, cache.getRegistry().get(handle).uuid);
       }
     }
   }
@@ -381,7 +374,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 5);
-    auto &map = cache.getRegistry().getSkeletons();
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 999;
       file.read(entity);
@@ -391,7 +383,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       file.read(skeletonIndex);
       EXPECT_EQ(skeletonIndex, i % 3);
 
-      auto &expected = map.getAsset(asset.data.skeletons.at(i).value);
+      auto &expected =
+          cache.getRegistry().get(asset.data.skeletons.at(i).value);
 
       EXPECT_EQ(expected.uuid, actualSkeletons.at(skeletonIndex));
     }
@@ -401,13 +394,12 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 3);
-    auto &map = cache.getRegistry().getAnimations();
 
     for (u32 i = 0; i < numComponents; ++i) {
       u32 animatorIndex = 999;
       file.read(animatorIndex);
 
-      auto &expected = map.getAsset(asset.data.animations.at(i));
+      auto &expected = cache.getRegistry().get(asset.data.animations.at(i));
 
       EXPECT_EQ(expected.uuid, actualAnimations.at(animatorIndex));
     }
@@ -417,7 +409,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     u32 numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 6);
-    auto &map = cache.getRegistry().getAnimators();
 
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 999;
@@ -427,7 +418,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       u32 animatorIndex = 999;
       file.read(animatorIndex);
 
-      auto &expected = map.getAsset(asset.data.animators.at(i).value);
+      auto &expected =
+          cache.getRegistry().get(asset.data.animators.at(i).value);
 
       EXPECT_EQ(expected.uuid, actualAnimators.at(animatorIndex));
     }
@@ -499,7 +491,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   EXPECT_NE(handle.getData(), quoll::AssetHandle<quoll::PrefabAsset>());
   EXPECT_FALSE(handle.hasWarnings());
 
-  auto &prefab = cache.getRegistry().getPrefabs().getAsset(handle.getData());
+  auto &prefab = cache.getRegistry().get(handle.getData());
   EXPECT_EQ(prefab.name, asset.name);
 
   EXPECT_EQ(asset.data.transforms.size(), prefab.data.transforms.size());
@@ -671,34 +663,30 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   auto prefabHandle = cache.loadPrefab(prefabData.uuid);
   EXPECT_NE(prefabHandle.getData(), quoll::AssetHandle<quoll::PrefabAsset>());
 
-  auto &newPrefab =
-      cache.getRegistry().getPrefabs().getAsset(prefabHandle.getData());
+  auto &newPrefab = cache.getRegistry().get(prefabHandle.getData());
 
   // Validate mesh
   EXPECT_NE(newPrefab.data.meshes.at(0).value,
             quoll::AssetHandle<quoll::MeshAsset>());
-  auto &newMesh = cache.getRegistry().getMeshes().getAsset(
-      newPrefab.data.meshes.at(0).value);
+  auto &newMesh = cache.getRegistry().get(newPrefab.data.meshes.at(0).value);
   EXPECT_EQ(newMesh.path, meshPath);
 
   // Validate skeleton
   EXPECT_NE(newPrefab.data.skeletons.at(0).value,
             quoll::AssetHandle<quoll::SkeletonAsset>());
-  auto &newSkeleton = cache.getRegistry().getSkeletons().getAsset(
-      newPrefab.data.skeletons.at(0).value);
+  auto &newSkeleton =
+      cache.getRegistry().get(newPrefab.data.skeletons.at(0).value);
   EXPECT_EQ(newSkeleton.path, skeletonPath);
 
   // Validate animation
   auto newAnimationHandle = newPrefab.data.animations.at(0);
   EXPECT_NE(newAnimationHandle, quoll::AssetHandle<quoll::AnimationAsset>());
-  auto &newAnimation =
-      cache.getRegistry().getAnimations().getAsset(newAnimationHandle);
+  auto &newAnimation = cache.getRegistry().get(newAnimationHandle);
   EXPECT_EQ(newAnimation.path, animationPath);
 
   // Validate animator
   auto newAnimatorHandle = newPrefab.data.animators.at(0).value;
   EXPECT_NE(newAnimatorHandle, quoll::AssetHandle<quoll::AnimatorAsset>());
-  auto &newAnimator =
-      cache.getRegistry().getAnimators().getAsset(newAnimatorHandle);
+  auto &newAnimator = cache.getRegistry().get(newAnimatorHandle);
   EXPECT_EQ(newAnimator.path, animatorPath);
 }

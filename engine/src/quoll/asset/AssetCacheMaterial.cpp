@@ -153,8 +153,8 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
     stream.read(material.data.emissiveFactor);
   }
 
-  return Result<AssetHandle<MaterialAsset>>::Ok(
-      mRegistry.getMaterials().addAsset(material), warnings);
+  return Result<AssetHandle<MaterialAsset>>::Ok(mRegistry.add(material),
+                                                warnings);
 }
 
 Result<AssetHandle<MaterialAsset>> AssetCache::loadMaterial(const Uuid &uuid) {
@@ -180,7 +180,7 @@ AssetCache::getOrLoadMaterial(const Uuid &uuid) {
     return Result<AssetHandle<MaterialAsset>>::Ok(AssetHandle<MaterialAsset>());
   }
 
-  auto handle = mRegistry.getMaterials().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<MaterialAsset>(uuid);
   if (handle) {
     return Result<AssetHandle<MaterialAsset>>::Ok(handle);
   }

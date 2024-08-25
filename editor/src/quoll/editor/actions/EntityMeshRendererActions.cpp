@@ -49,7 +49,7 @@ bool EntitySetMeshRendererMaterial::predicate(WorkspaceState &state,
     return false;
   }
 
-  return assetRegistry.getMaterials().hasAsset(mNewMaterial);
+  return assetRegistry.has(mNewMaterial);
 }
 
 EntityAddMeshRendererMaterialSlot::EntityAddMeshRendererMaterialSlot(
@@ -91,7 +91,7 @@ bool EntityAddMeshRendererMaterialSlot::predicate(
     return false;
   }
 
-  return assetRegistry.getMaterials().hasAsset(mNewMaterial);
+  return assetRegistry.has(mNewMaterial);
 }
 
 EntityRemoveLastMeshRendererMaterialSlot::

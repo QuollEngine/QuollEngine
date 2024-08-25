@@ -27,12 +27,11 @@ static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
 
 static bool isPrefabValid(AssetRegistry &assetRegistry,
                           AssetHandle<PrefabAsset> handle) {
-  const auto &prefabs = assetRegistry.getPrefabs();
-  if (!prefabs.hasAsset(handle)) {
+  if (!assetRegistry.has(handle)) {
     return false;
   }
 
-  const auto &prefab = prefabs.getAsset(handle).data;
+  const auto &prefab = assetRegistry.get(handle).data;
 
   return !prefab.animators.empty() || !prefab.meshes.empty() ||
          !prefab.skeletons.empty() || !prefab.transforms.empty() ||

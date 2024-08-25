@@ -71,8 +71,7 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
   for (const auto &state : asset.data.states) {
     auto stateNode = statesNode[state.name];
     stateNode["output"]["type"] = "animation";
-    stateNode["output"]["animation"] =
-        getAssetUuid(mRegistry.getAnimations(), state.animation);
+    stateNode["output"]["animation"] = getAssetUuid(state.animation);
     stateNode["output"]["speed"] = state.speed;
     stateNode["output"]["loopMode"] = serializeLoopMode(state.loopMode);
 
@@ -267,14 +266,14 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
     }
   }
 
-  auto handle = mRegistry.getAnimators().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<AnimatorAsset>(uuid);
 
   if (!handle) {
-    auto newHandle = mRegistry.getAnimators().addAsset(asset);
+    auto newHandle = mRegistry.add(asset);
     return Result<AssetHandle<AnimatorAsset>>::Ok(newHandle, warnings);
   }
 
-  mRegistry.getAnimators().updateAsset(handle, asset);
+  mRegistry.update(handle, asset);
 
   return Result<AssetHandle<AnimatorAsset>>::Ok(handle, warnings);
 }
@@ -285,7 +284,7 @@ AssetCache::getOrLoadAnimator(const Uuid &uuid) {
     return Result<AssetHandle<AnimatorAsset>>::Ok(AssetHandle<AnimatorAsset>());
   }
 
-  auto handle = mRegistry.getAnimators().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<AnimatorAsset>(uuid);
   if (handle) {
     return Result<AssetHandle<AnimatorAsset>>::Ok(handle);
   }

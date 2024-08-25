@@ -63,7 +63,7 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
   environment.data.irradianceMap = irradianceMapRes.getData();
   environment.data.specularMap = specularMapRes.getData();
 
-  auto environmentHandle = mRegistry.getEnvironments().addAsset(environment);
+  auto environmentHandle = mRegistry.add(environment);
 
   return Result<AssetHandle<EnvironmentAsset>>::Ok(environmentHandle);
 }

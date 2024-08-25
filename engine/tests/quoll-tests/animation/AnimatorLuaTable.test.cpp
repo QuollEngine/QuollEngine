@@ -21,8 +21,8 @@ TEST_F(AnimatorLuaTableTest, PropertiesReturnAnimatorDataIfAnimatorExists) {
   animatorAsset.states.push_back({.name = "StateA"});
   animatorAsset.states.push_back({.name = "StateB"});
 
-  auto handle =
-      assetCache.getRegistry().getAnimators().addAsset({.data = animatorAsset});
+  auto handle = assetCache.getRegistry().add<quoll::AnimatorAsset>(
+      {.data = animatorAsset});
 
   auto entity = entityDatabase.create();
   quoll::Animator animator{};

@@ -28,19 +28,18 @@ EntityLuaTable EntitySpawnerLuaTable::spawnEmpty() {
 sol_maybe<EntityLuaTable>
 EntitySpawnerLuaTable::spawnPrefab(AssetHandleType handle) {
   AssetHandle<PrefabAsset> prefab(handle);
-  if (!mScriptGlobals.assetRegistry.getPrefabs().hasAsset(prefab)) {
+  if (!mScriptGlobals.assetRegistry.has(prefab)) {
     Engine::getUserLogger().error() << lua::Messages::assetNotFound(
         "EntitySpawner", "spawnPrefab", getAssetTypeString(AssetType::Prefab));
 
     return sol::nil;
   }
 
-  if (isPrefabEmpty(
-          mScriptGlobals.assetRegistry.getPrefabs().getAsset(prefab).data)) {
+  if (isPrefabEmpty(mScriptGlobals.assetRegistry.get(prefab).data)) {
     Engine::getUserLogger().warning()
         << lua::Messages::nothingSpawnedBecauseEmptyPrefab(
                "EntitySpawner", "spawnPrefab",
-               mScriptGlobals.assetRegistry.getPrefabs().getAsset(prefab).name);
+               mScriptGlobals.assetRegistry.get(prefab).name);
 
     return sol::nil;
   }

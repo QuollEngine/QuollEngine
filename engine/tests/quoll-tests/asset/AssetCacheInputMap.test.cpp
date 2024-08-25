@@ -648,8 +648,7 @@ TEST_F(AssetCacheInputMapTest,
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasWarnings());
 
-  const auto &inputMap =
-      cache.getRegistry().getInputMaps().getAsset(res.getData());
+  const auto &inputMap = cache.getRegistry().get(res.getData());
 
   EXPECT_EQ(inputMap.data.schemes.size(), 2);
   EXPECT_EQ(inputMap.data.schemes.at(0).name, "Gamepad");
@@ -735,7 +734,7 @@ TEST_F(AssetCacheInputMapTest,
   auto handle = result.getData();
 
   {
-    auto &inputMap = cache.getRegistry().getInputMaps().getAsset(handle);
+    auto &inputMap = cache.getRegistry().get(handle);
     EXPECT_EQ(inputMap.data.schemes.size(), 1);
   }
 
@@ -750,7 +749,7 @@ TEST_F(AssetCacheInputMapTest,
 
     EXPECT_EQ(result.getData(), handle);
 
-    auto &inputMap = cache.getRegistry().getInputMaps().getAsset(handle);
+    auto &inputMap = cache.getRegistry().get(handle);
     EXPECT_EQ(inputMap.data.schemes.size(), 2);
   }
 }

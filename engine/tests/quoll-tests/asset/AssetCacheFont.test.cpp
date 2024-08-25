@@ -37,7 +37,7 @@ TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
 
   auto handle = result.getData();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::FontAsset>());
-  const auto &asset = cache.getRegistry().getFonts().getAsset(handle);
+  const auto &asset = cache.getRegistry().get(handle);
 
   EXPECT_EQ(asset.path, filePath.getData());
   EXPECT_EQ(asset.name, "valid-font.ttf");
@@ -57,7 +57,7 @@ TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
 
   auto handle = result.getData();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::FontAsset>());
-  const auto &asset = cache.getRegistry().getFonts().getAsset(handle);
+  const auto &asset = cache.getRegistry().get(handle);
 
   EXPECT_EQ(asset.path, filePath.getData());
   EXPECT_EQ(asset.type, quoll::AssetType::Font);

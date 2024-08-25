@@ -224,11 +224,8 @@ void loadAnimations(GLTFImportData &importData) {
 
     auto filePath = assetCache.createAnimationFromAsset(animation);
     auto handle = assetCache.loadAnimation(animation.uuid);
-    importData.outputUuids.insert_or_assign(assetName,
-                                            assetCache.getRegistry()
-                                                .getAnimations()
-                                                .getAsset(handle.getData())
-                                                .uuid);
+    importData.outputUuids.insert_or_assign(
+        assetName, assetCache.getRegistry().get(handle.getData()).uuid);
 
     if (!animationValid) {
       continue;
@@ -283,11 +280,8 @@ void loadAnimations(GLTFImportData &importData) {
     importData.animations.skinAnimatorMap.insert_or_assign(skin,
                                                            handle.getData());
 
-    importData.outputUuids.insert_or_assign(animatorName,
-                                            assetCache.getRegistry()
-                                                .getAnimators()
-                                                .getAsset(handle.getData())
-                                                .uuid);
+    importData.outputUuids.insert_or_assign(
+        animatorName, assetCache.getRegistry().get(handle.getData()).uuid);
   }
 
   for (auto &[node, animations] : nodeAnimationMap) {
@@ -323,11 +317,8 @@ void loadAnimations(GLTFImportData &importData) {
     auto handle = assetCache.loadAnimator(asset.uuid);
     importData.animations.nodeAnimatorMap.insert_or_assign(node,
                                                            handle.getData());
-    importData.outputUuids.insert_or_assign(animatorName,
-                                            assetCache.getRegistry()
-                                                .getAnimators()
-                                                .getAsset(handle.getData())
-                                                .uuid);
+    importData.outputUuids.insert_or_assign(
+        animatorName, assetCache.getRegistry().get(handle.getData()).uuid);
   }
 }
 

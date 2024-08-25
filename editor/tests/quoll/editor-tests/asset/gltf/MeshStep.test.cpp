@@ -119,13 +119,13 @@ public:
 
   void validateAttributes(GLTFTestScene &scene,
                           AttributeTestFns fns = AttributeTestFns{}) {
-    EXPECT_EQ(assetCache.getRegistry().getMeshes().getAssets().size(), 1);
+    EXPECT_EQ(assetCache.getRegistry().count<quoll::MeshAsset>(), 1);
     EXPECT_EQ(scene.meshes.size(), 1);
 
     auto &gltfMesh = scene.meshes.at(0);
 
-    const auto &meshAsset = assetCache.getRegistry().getMeshes().getAsset(
-        quoll::AssetHandle<quoll::MeshAsset>{1});
+    const auto &meshAsset =
+        assetCache.getRegistry().get(quoll::AssetHandle<quoll::MeshAsset>{1});
 
     EXPECT_EQ(meshAsset.data.geometries.size(), gltfMesh.primitives.size());
     for (usize gi = 0; gi < meshAsset.data.geometries.size(); ++gi) {
@@ -180,7 +180,7 @@ TEST_F(MeshPositionAttributeTest, DoesNotCreateMeshIfNoPositions) {
   scene.meshes.at(0).primitives.at(0).positions.data.clear();
   loadScene(scene);
 
-  EXPECT_TRUE(assetCache.getRegistry().getMeshes().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::MeshAsset>(), 0);
 }
 
 TEST_F(MeshPositionAttributeTest,
@@ -190,7 +190,7 @@ TEST_F(MeshPositionAttributeTest,
           {TINYGLTF_TYPE_VEC3});
   loadScene(scene);
 
-  EXPECT_TRUE(assetCache.getRegistry().getMeshes().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::MeshAsset>(), 0);
 }
 
 TEST_F(MeshPositionAttributeTest,
@@ -198,7 +198,7 @@ TEST_F(MeshPositionAttributeTest,
   auto scene = createMeshWithInvalidPrimitiveComponentTypes<
       GLTFTestAttribute::Positions>({TINYGLTF_COMPONENT_TYPE_FLOAT});
 
-  EXPECT_TRUE(assetCache.getRegistry().getMeshes().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::MeshAsset>(), 0);
 }
 
 TEST_F(MeshPositionAttributeTest, LoadsIndicesFromGLTFPrimitiveIfValidIndices) {
@@ -409,7 +409,7 @@ TEST_F(MeshIndexAttributeTest, DoesNotCreateMeshIfInvalidIndicesAccessorType) {
       {TINYGLTF_TYPE_SCALAR});
   loadScene(scene);
 
-  EXPECT_TRUE(assetCache.getRegistry().getMeshes().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::MeshAsset>(), 0);
 }
 
 TEST_F(MeshIndexAttributeTest,
@@ -420,7 +420,7 @@ TEST_F(MeshIndexAttributeTest,
            TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT,
            TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT});
 
-  EXPECT_TRUE(assetCache.getRegistry().getMeshes().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::MeshAsset>(), 0);
 }
 
 TEST_F(MeshIndexAttributeTest, LoadsIndicesFromGLTFPrimitiveIfValidIndices) {

@@ -57,10 +57,10 @@ Entity EntitySpawner::spawnEmpty(LocalTransform transform) {
 
 std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
                                                LocalTransform transform) {
-  QuollAssert(mAssetRegistry.getPrefabs().hasAsset(handle), "Prefab not found");
+  QuollAssert(mAssetRegistry.has(handle), "Prefab not found");
 
-  const auto &assetName = mAssetRegistry.getPrefabs().getAsset(handle).name;
-  const auto &asset = mAssetRegistry.getPrefabs().getAsset(handle).data;
+  const auto &assetName = mAssetRegistry.get(handle).name;
+  const auto &asset = mAssetRegistry.get(handle).data;
 
   std::unordered_map<u32, usize> entityMap;
   std::vector<Entity> entities;
@@ -114,7 +114,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
   for (const auto &pMesh : asset.meshes) {
     auto entity = getOrCreateEntity(pMesh.entity);
 
-    auto type = mAssetRegistry.getMeshes().getAsset(pMesh.value).type;
+    auto type = mAssetRegistry.get(pMesh.value).type;
     if (type == AssetType::Mesh) {
       mEntityDatabase.set<Mesh>(entity, {pMesh.value});
     } else if (type == AssetType::SkinnedMesh) {
@@ -135,8 +135,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
   for (const auto &pSkeleton : asset.skeletons) {
     auto entity = getOrCreateEntity(pSkeleton.entity);
 
-    const auto &asset =
-        mAssetRegistry.getSkeletons().getAsset(pSkeleton.value).data;
+    const auto &asset = mAssetRegistry.get(pSkeleton.value).data;
 
     usize numJoints = asset.jointLocalPositions.size();
 
@@ -167,7 +166,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
 
   for (auto &item : asset.animators) {
     auto entity = getOrCreateEntity(item.entity);
-    const auto &asset = mAssetRegistry.getAnimators().getAsset(item.value);
+    const auto &asset = mAssetRegistry.get(item.value);
 
     Animator animator{};
     animator.asset = item.value;

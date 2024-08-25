@@ -404,7 +404,7 @@ void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
 void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
                                AssetManager &assetManager) {
   auto &assetRegistry = assetManager.getAssetRegistry();
-  const auto &prefab = assetRegistry.getPrefabs().getAsset(handle);
+  const auto &prefab = assetRegistry.get(handle);
   mPrefabDirectory = mCurrentDirectory / prefab.name;
 
   auto prefabName = prefab.name + "/";
@@ -454,7 +454,7 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
   std::unordered_map<AssetHandle<MaterialAsset>, bool> materialCache;
   auto addMaterialEntry = [&](AssetHandle<MaterialAsset> handle) {
     if (addPrefabEntry(handle, materialCache)) {
-      const auto &material = assetRegistry.getMaterials().getAsset(handle);
+      const auto &material = assetRegistry.get(handle);
 
       addTextureEntryIfExists(material.data.baseColorTexture);
       addTextureEntryIfExists(material.data.metallicRoughnessTexture);
@@ -493,7 +493,7 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
 
   std::unordered_map<AssetHandle<AnimationAsset>, bool> animationCache;
   for (const auto &ref : prefab.data.animators) {
-    const auto &animator = assetRegistry.getAnimators().getAsset(ref.value);
+    const auto &animator = assetRegistry.get(ref.value);
     for (const auto &state : animator.data.states) {
       addPrefabEntry(state.animation, animationCache);
     }

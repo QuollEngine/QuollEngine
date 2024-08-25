@@ -14,12 +14,11 @@ InputMapSystem::InputMapSystem(InputDeviceManager &deviceManager,
 void InputMapSystem::update(SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, ref] : entityDatabase.view<InputMapAssetRef>()) {
-    if (mAssetRegistry.getInputMaps().hasAsset(ref.handle) &&
+    if (mAssetRegistry.has(ref.handle) &&
         !entityDatabase.has<InputMap>(entity)) {
-      entityDatabase.set(
-          entity, createInputMap(
-                      mAssetRegistry.getInputMaps().getAsset(ref.handle).data,
-                      ref.defaultScheme));
+      entityDatabase.set(entity,
+                         createInputMap(mAssetRegistry.get(ref.handle).data,
+                                        ref.defaultScheme));
     }
   }
 

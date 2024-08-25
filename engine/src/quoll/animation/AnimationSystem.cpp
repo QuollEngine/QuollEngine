@@ -18,8 +18,7 @@ void AnimationSystem::prepare(SystemView &view) {
 
   auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, animator] : entityDatabase.view<Animator>()) {
-    const auto &animatorAsset =
-        mAssetRegistry.getAnimators().getAsset(animator.asset);
+    const auto &animatorAsset = mAssetRegistry.get(animator.asset);
 
     if (animator.currentState >= animatorAsset.data.states.size()) {
       animator.currentState = animatorAsset.data.initialState;
@@ -29,13 +28,11 @@ void AnimationSystem::prepare(SystemView &view) {
 
 void AnimationSystem::update(f32 dt, SystemView &view) {
   QUOLL_PROFILE_EVENT("AnimationSystem::update");
-  const auto &animMap = mAssetRegistry.getAnimations();
 
   auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, animator, animatorEvent] :
        entityDatabase.view<Animator, AnimatorEvent>()) {
-    const auto &state = mAssetRegistry.getAnimators()
-                            .getAsset(animator.asset)
+    const auto &state = mAssetRegistry.get(animator.asset)
                             .data.states.at(animator.currentState);
 
     for (auto &transition : state.transitions) {
@@ -52,18 +49,17 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
   for (auto [entity, transform, animator] :
        entityDatabase.view<LocalTransform, Animator>()) {
 
-    const auto &animatorAsset =
-        mAssetRegistry.getAnimators().getAsset(animator.asset);
+    const auto &animatorAsset = mAssetRegistry.get(animator.asset);
 
     const auto &state = animatorAsset.data.states.at(animator.currentState);
 
     auto handle = state.animation;
 
-    if (!animMap.hasAsset(handle)) {
+    if (!mAssetRegistry.has(handle)) {
       return;
     }
 
-    const auto &animation = animMap.getAsset(handle);
+    const auto &animation = mAssetRegistry.get(handle);
 
     if (animator.playing) {
       animator.normalizedTime = std::min(

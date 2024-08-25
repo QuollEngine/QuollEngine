@@ -26,7 +26,7 @@ bool EntityCreateAnimator::predicate(WorkspaceState &state,
                                      AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
   return !scene.entityDatabase.has<Animator>(mEntity) &&
-         assetRegistry.getAnimators().hasAsset(mHandle);
+         assetRegistry.has(mHandle);
 }
 
 EntitySetAnimator::EntitySetAnimator(Entity entity,
@@ -61,7 +61,7 @@ ActionExecutorResult EntitySetAnimator::onUndo(WorkspaceState &state,
 
 bool EntitySetAnimator::predicate(WorkspaceState &state,
                                   AssetRegistry &assetRegistry) {
-  return assetRegistry.getAnimators().hasAsset(mAnimator);
+  return assetRegistry.has(mAnimator);
 }
 
 } // namespace quoll::editor

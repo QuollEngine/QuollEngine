@@ -78,8 +78,7 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
     stream.read(keyframe.keyframeValues);
   }
 
-  return Result<AssetHandle<AnimationAsset>>::Ok(
-      mRegistry.getAnimations().addAsset(animation));
+  return Result<AssetHandle<AnimationAsset>>::Ok(mRegistry.add(animation));
 }
 
 Result<AssetHandle<AnimationAsset>>
@@ -103,7 +102,7 @@ AssetCache::getOrLoadAnimation(const Uuid &uuid) {
         AssetHandle<AnimationAsset>());
   }
 
-  auto handle = mRegistry.getAnimations().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<AnimationAsset>(uuid);
   if (handle) {
     return Result<AssetHandle<AnimationAsset>>::Ok(handle);
   }

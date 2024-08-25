@@ -443,8 +443,7 @@ void loadMeshes(GLTFImportData &importData) {
 
     importData.meshMaterials.insert_or_assign(handle.getData(), materials);
     importData.outputUuids.insert_or_assign(
-        assetName,
-        assetCache.getRegistry().getMeshes().getAsset(handle.getData()).uuid);
+        assetName, assetCache.getRegistry().get(handle.getData()).uuid);
   }
 }
 

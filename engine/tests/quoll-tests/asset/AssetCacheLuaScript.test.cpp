@@ -80,7 +80,7 @@ TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
 
   auto handle = result.getData();
 
-  auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
+  auto &script = cache.getRegistry().get(handle);
   script.name = "script-asset-valid.lua";
   EXPECT_EQ(script.name, "script-asset-valid.lua");
   EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
@@ -120,7 +120,7 @@ TEST_F(AssetCacheLuaScriptTest,
 
   auto handle = result.getData();
   {
-    auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
+    auto &script = cache.getRegistry().get(handle);
     EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
     EXPECT_EQ(script.name, "component-script.lua");
   }
@@ -131,7 +131,7 @@ TEST_F(AssetCacheLuaScriptTest,
   {
     auto result = cache.loadLuaScript(uuid1);
     EXPECT_EQ(result.getData(), handle);
-    const auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
+    const auto &script = cache.getRegistry().get(handle);
     EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
     EXPECT_EQ(script.name, "component-script-2.lua");
 

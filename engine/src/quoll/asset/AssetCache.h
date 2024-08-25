@@ -93,15 +93,6 @@ public:
   Path getPathFromUuid(const Uuid &uuid);
 
 private:
-  template <class TAssetMap>
-  Uuid getAssetUuid(TAssetMap &map, typename TAssetMap::Handle handle) {
-    if (handle) {
-      return map.getAsset(handle).uuid;
-    }
-
-    return Uuid{};
-  }
-
   template <typename TAssetData>
   Uuid getAssetUuid(AssetHandle<TAssetData> handle) {
     if (handle) {

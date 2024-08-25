@@ -83,8 +83,7 @@ void loadPrefabs(GLTFImportData &importData) {
 
     if (hasValidMesh) {
       auto handle = importData.meshes.map.at(node.mesh);
-      const auto &asset =
-          importData.assetCache.getRegistry().getMeshes().getAsset(handle);
+      const auto &asset = importData.assetCache.getRegistry().get(handle);
       const auto &materials = importData.meshMaterials.at(handle);
       prefab.data.meshes.push_back({localEntityId, handle});
 
@@ -137,11 +136,8 @@ void loadPrefabs(GLTFImportData &importData) {
     auto handle = assetCache.loadPrefab(prefab.uuid);
 
     if (handle.hasData()) {
-      importData.outputUuids.insert_or_assign("root",
-                                              assetCache.getRegistry()
-                                                  .getPrefabs()
-                                                  .getAsset(handle.getData())
-                                                  .uuid);
+      importData.outputUuids.insert_or_assign(
+          "root", assetCache.getRegistry().get(handle.getData()).uuid);
     }
   }
 }
