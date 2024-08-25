@@ -79,7 +79,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
   AssetData<TextureAsset> asset{};
   asset.name = name;
   asset.uuid = uuid;
-  asset.size = TextureUtils::getBufferSizeFromLevels(levels);
+  asset.data.size = TextureUtils::getBufferSizeFromLevels(levels);
   asset.data.data = std::move(assetData);
   asset.data.height = height;
   asset.data.width = width;

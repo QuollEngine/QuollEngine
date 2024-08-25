@@ -24,6 +24,8 @@ struct TextureAsset {
 
   u32 layers = 0;
 
+  usize size = 0;
+
   TextureAssetType type = TextureAssetType::Standard;
 
   rhi::Format format = rhi::Format::Rgba8Srgb;
