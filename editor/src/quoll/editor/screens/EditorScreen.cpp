@@ -172,7 +172,9 @@ void EditorScreen::start(const Project &rawProject) {
       }
     }
 
-    workspaceManager.getCurrentWorkspace()->reload();
+    if (changes.size() > 0) {
+      workspaceManager.getCurrentWorkspace()->reload();
+    }
 
     if (!messages.empty()) {
       loadStatusDialog.setMessages(messages);
