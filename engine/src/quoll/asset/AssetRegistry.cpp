@@ -61,7 +61,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       TextureUtils::copyDataToTexture(
           renderStorage.getDevice(), font.data.atlasBytes.data(),
           font.data.deviceHandle, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
-          {{0, font.size, font.data.atlasDimensions.x,
+          {{0, font.data.size, font.data.atlasDimensions.x,
             font.data.atlasDimensions.y}});
     }
   }

@@ -213,13 +213,12 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
 
   AssetData<TextureAsset> texture{};
-  // TODO: Remove size
-  texture.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
   texture.name = meta.name;
   texture.path = filePath;
   texture.uuid = Uuid(filePath.stem().string());
   texture.type = AssetType::Texture;
-  texture.data.data.resize(texture.size);
+  texture.data.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
+  texture.data.data.resize(texture.data.size);
   texture.data.width = ktxTextureData->baseWidth;
   texture.data.height = ktxTextureData->baseHeight;
   texture.data.layers = ktxTextureData->numLayers *

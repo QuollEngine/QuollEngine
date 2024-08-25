@@ -8,8 +8,6 @@ namespace quoll {
 template <class TData> struct AssetData {
   AssetType type = AssetType::None;
 
-  usize size = 0;
-
   TData data;
 
   Path path;

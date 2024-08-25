@@ -366,7 +366,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   AssetData<TextureAsset> asset{};
   asset.name = name;
   asset.uuid = uuid;
-  asset.size = TextureUtils::getBufferSizeFromLevels(levels);
+  asset.data.size = TextureUtils::getBufferSizeFromLevels(levels);
   asset.data.type = TextureAssetType::Cubemap;
   asset.data.width = unfilteredCubemap.levels.at(0).width;
   asset.data.height = unfilteredCubemap.levels.at(0).height;
@@ -374,7 +374,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   asset.data.format = TargetFormat;
   asset.data.levels = levels;
 
-  asset.data.data.resize(asset.size);
+  asset.data.data.resize(asset.data.size);
 
   TextureUtils::copyTextureToData(
       device, irradianceCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
@@ -459,7 +459,8 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   AssetData<TextureAsset> asset{};
   asset.name = name;
   asset.uuid = uuid;
-  asset.size = TextureUtils::getBufferSizeFromLevels(unfilteredCubemap.levels);
+  asset.data.size =
+      TextureUtils::getBufferSizeFromLevels(unfilteredCubemap.levels);
   asset.data.type = TextureAssetType::Cubemap;
   asset.data.width = unfilteredCubemap.levels.at(0).width;
   asset.data.height = unfilteredCubemap.levels.at(0).height;
@@ -467,7 +468,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   asset.data.format = TargetFormat;
   asset.data.levels = unfilteredCubemap.levels;
 
-  asset.data.data.resize(asset.size);
+  asset.data.data.resize(asset.data.size);
 
   TextureUtils::copyTextureToData(
       device, specularCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
