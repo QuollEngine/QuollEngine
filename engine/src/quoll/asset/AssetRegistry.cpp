@@ -188,79 +188,79 @@ std::pair<AssetType, u32> AssetRegistry::getAssetByUuid(const Uuid &uuid) {
   QUOLL_PROFILE_EVENT("AssetRegistry::getAssetByUUID");
   for (auto &[handle, asset] : mTextures.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Texture, static_cast<u32>(handle)};
+      return {AssetType::Texture, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mFonts.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Font, static_cast<u32>(handle)};
+      return {AssetType::Font, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mMaterials.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Material, static_cast<u32>(handle)};
+      return {AssetType::Material, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mMeshes.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Mesh, static_cast<u32>(handle)};
+      return {AssetType::Mesh, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mSkeletons.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Skeleton, static_cast<u32>(handle)};
+      return {AssetType::Skeleton, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mAnimations.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Animation, static_cast<u32>(handle)};
+      return {AssetType::Animation, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mAnimators.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Animator, static_cast<u32>(handle)};
+      return {AssetType::Animator, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mAudios.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Audio, static_cast<u32>(handle)};
+      return {AssetType::Audio, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mPrefabs.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Prefab, static_cast<u32>(handle)};
+      return {AssetType::Prefab, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mLuaScripts.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::LuaScript, static_cast<u32>(handle)};
+      return {AssetType::LuaScript, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mEnvironments.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Environment, static_cast<u32>(handle)};
+      return {AssetType::Environment, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mScenes.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::Scene, static_cast<u32>(handle)};
+      return {AssetType::Scene, handle.getRawId()};
     }
   }
 
   for (auto &[handle, asset] : mInputMaps.getAssets()) {
     if (asset.uuid == uuid) {
-      return {AssetType::InputMap, static_cast<u32>(handle)};
+      return {AssetType::InputMap, handle.getRawId()};
     }
   }
 
