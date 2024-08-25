@@ -632,7 +632,7 @@ void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
     if (auto _ = widgets::Section(SectionName.c_str())) {
       auto handle = scene.entityDatabase.get<Sprite>(mSelectedEntity).handle;
 
-      const auto &asset = assetRegistry.getTextures().getAsset(handle);
+      const auto &asset = assetRegistry.get(handle);
       static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
       if (auto table = widgets::Table("TableSprite", 2)) {
@@ -1401,7 +1401,7 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
                          LuaScriptVariableType::AssetTexture)) {
             auto handle =
                 script.variables.at(name).get<AssetHandle<TextureAsset>>();
-            value = assetRegistry.getTextures().getAsset(handle).name;
+            value = assetRegistry.get(handle).name;
           }
 
           table.row(name, type, value);
@@ -1474,8 +1474,7 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
               widgets::Button("Drag texture here", ImVec2(width, halfWidth));
             } else {
               String buttonLabel =
-                  "Replace current texture: " +
-                  assetRegistry.getTextures().getAsset(value).name;
+                  "Replace current texture: " + assetRegistry.get(value).name;
               widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
             }
 

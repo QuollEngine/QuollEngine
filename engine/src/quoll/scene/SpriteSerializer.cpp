@@ -10,8 +10,8 @@ void SpriteSerializer::serialize(YAML::Node &node,
                                  AssetRegistry &assetRegistry) {
   if (entityDatabase.has<Sprite>(entity)) {
     auto handle = entityDatabase.get<Sprite>(entity).handle;
-    if (assetRegistry.getTextures().hasAsset(handle)) {
-      auto uuid = assetRegistry.getTextures().getAsset(handle).uuid;
+    if (assetRegistry.has(handle)) {
+      auto uuid = assetRegistry.get(handle).uuid;
 
       node["sprite"] = uuid;
     }
@@ -25,7 +25,7 @@ void SpriteSerializer::deserialize(const YAML::Node &node,
   if (node["sprite"]) {
     auto uuid = node["sprite"].as<Uuid>(Uuid{});
 
-    auto handle = assetRegistry.getTextures().findHandleByUuid(uuid);
+    auto handle = assetRegistry.findHandleByUuid<TextureAsset>(uuid);
 
     if (handle) {
       entityDatabase.set<Sprite>(entity, {handle});

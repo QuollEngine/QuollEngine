@@ -605,9 +605,8 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
 TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   // Create texture
   auto tempTextureHandle = cache.loadTexture(textureUuid).getData();
-  auto tempTextureAsset =
-      cache.getRegistry().getTextures().getAsset(tempTextureHandle);
-  cache.getRegistry().getTextures().deleteAsset(tempTextureHandle);
+  auto tempTextureAsset = cache.getRegistry().get(tempTextureHandle);
+  cache.getRegistry().remove(tempTextureHandle);
 
   auto texturePath = cache.createTextureFromAsset(tempTextureAsset).getData();
   auto textureHandle = cache.loadTexture(textureUuid);
@@ -663,11 +662,11 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   auto prefabPath = cache.createPrefabFromAsset(prefabData);
 
   // Delete all existing assets
-  cache.getRegistry().getTextures().deleteAsset(textureHandle.getData());
-  cache.getRegistry().getMeshes().deleteAsset(meshHandle.getData());
-  cache.getRegistry().getSkeletons().deleteAsset(skeletonHandle.getData());
-  cache.getRegistry().getAnimations().deleteAsset(animationHandle.getData());
-  cache.getRegistry().getAnimators().deleteAsset(animatorHandle.getData());
+  cache.getRegistry().remove(textureHandle.getData());
+  cache.getRegistry().remove(meshHandle.getData());
+  cache.getRegistry().remove(skeletonHandle.getData());
+  cache.getRegistry().remove(animationHandle.getData());
+  cache.getRegistry().remove(animatorHandle.getData());
 
   auto prefabHandle = cache.loadPrefab(prefabData.uuid);
   EXPECT_NE(prefabHandle.getData(), quoll::AssetHandle<quoll::PrefabAsset>());

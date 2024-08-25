@@ -206,7 +206,7 @@ bool SpawnSpriteAtView::predicate(WorkspaceState &state,
                                   AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
-  return assetRegistry.getTextures().hasAsset(mHandle) &&
+  return assetRegistry.has(mHandle) &&
          scene.entityDatabase.has<Camera>(mCamera);
 }
 

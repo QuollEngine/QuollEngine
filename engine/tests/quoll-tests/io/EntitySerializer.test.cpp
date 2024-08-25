@@ -177,7 +177,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
   quoll::AssetData<quoll::TextureAsset> texture{};
   texture.uuid = quoll::Uuid("texture.tex");
-  auto handle = assetRegistry.getTextures().addAsset(texture);
+  auto handle = assetRegistry.add(texture);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Sprite>(entity, {handle});
@@ -694,7 +694,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
 
   quoll::AssetData<quoll::TextureAsset> texture{};
   texture.uuid = quoll::Uuid("test.ktx2");
-  auto textureHandle = assetRegistry.getTextures().addAsset(texture);
+  auto textureHandle = assetRegistry.add(texture);
 
   auto entity = entityDatabase.create();
 

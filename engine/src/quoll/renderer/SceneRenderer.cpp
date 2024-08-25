@@ -784,8 +784,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   for (auto [entity, sprite, world] :
        entityDatabase.view<Sprite, WorldTransform>()) {
-    auto handle =
-        mAssetRegistry.getTextures().getAsset(sprite.handle).data.deviceHandle;
+    auto handle = mAssetRegistry.get(sprite.handle).data.deviceHandle;
     frameData.addSprite(entity, handle, world.worldTransform);
   }
 
@@ -870,7 +869,6 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   };
 
   // Environments
-  const auto &textures = mAssetRegistry.getTextures();
   for (auto [entity, environment] : entityDatabase.view<EnvironmentSkybox>()) {
     rhi::TextureHandle irradianceMap{0};
     rhi::TextureHandle specularMap{0};
@@ -883,9 +881,9 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
           mAssetRegistry.getEnvironments().getAsset(environment.texture).data;
 
       frameData.setSkyboxTexture(
-          textures.getAsset(asset.specularMap).data.deviceHandle);
-      irradianceMap = textures.getAsset(asset.irradianceMap).data.deviceHandle;
-      specularMap = textures.getAsset(asset.specularMap).data.deviceHandle;
+          mAssetRegistry.get(asset.specularMap).data.deviceHandle);
+      irradianceMap = mAssetRegistry.get(asset.irradianceMap).data.deviceHandle;
+      specularMap = mAssetRegistry.get(asset.specularMap).data.deviceHandle;
     }
 
     if (entityDatabase.has<EnvironmentLightingSkyboxSource>(entity)) {

@@ -46,10 +46,10 @@ AssetHandle<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
   }
 
   auto handle =
-      assetCache.getRegistry().getTextures().findHandleByUuid(uuid.getData());
+      assetCache.getRegistry().findHandleByUuid<TextureAsset>(uuid.getData());
 
   importData.outputUuids.insert_or_assign(
-      assetName, assetCache.getRegistry().getTextures().getAsset(handle).uuid);
+      assetName, assetCache.getRegistry().get(handle).uuid);
 
   importData.textures.map.insert_or_assign(index, handle);
   return handle;

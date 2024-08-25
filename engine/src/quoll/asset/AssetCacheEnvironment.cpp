@@ -14,11 +14,9 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
     return Result<Path>::Error("Invalid uuid provided");
   }
 
-  auto irradianceMapUuid =
-      mRegistry.getTextures().getAsset(asset.data.irradianceMap).uuid;
+  auto irradianceMapUuid = mRegistry.get(asset.data.irradianceMap).uuid;
 
-  auto specularMapUuid =
-      mRegistry.getTextures().getAsset(asset.data.specularMap).uuid;
+  auto specularMapUuid = mRegistry.get(asset.data.specularMap).uuid;
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
@@ -53,7 +51,7 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
 
   auto specularMapRes = getOrLoadTexture(specularMapUuid);
   if (specularMapRes.hasError()) {
-    mRegistry.getTextures().deleteAsset(irradianceMapRes.getData());
+    mRegistry.remove(irradianceMapRes.getData());
     return Result<AssetHandle<EnvironmentAsset>>::Error(
         specularMapRes.getError());
   }

@@ -61,8 +61,6 @@ public:
 
   void syncWithDevice(RenderStorage &renderStorage);
 
-  inline TextureMap &getTextures() { return mTextures; }
-
   inline FontMap &getFonts() { return mFonts; }
 
   inline MaterialMap &getMaterials() { return mMaterials; }
@@ -88,6 +86,82 @@ public:
   inline InputMapMap &getInputMaps() { return mInputMaps; }
 
   std::pair<AssetType, u32> getAssetByUuid(const Uuid &uuid);
+
+  template <typename TAssetData>
+  const AssetData<TAssetData> &get(AssetHandle<TAssetData> handle) const {
+    auto &map = getMap<TAssetData>();
+    return map.getAsset(handle);
+  }
+
+  template <typename TAssetData>
+  AssetData<TAssetData> &get(AssetHandle<TAssetData> handle) {
+    auto &map = getMap<TAssetData>();
+    return map.getAsset(handle);
+  }
+
+  template <typename TAssetData> bool has(AssetHandle<TAssetData> handle) {
+    auto &map = getMap<TAssetData>();
+    return map.hasAsset(handle);
+  }
+
+  template <typename TAssetData> void remove(AssetHandle<TAssetData> handle) {
+    auto &map = getMap<TAssetData>();
+    map.removeAsset(handle);
+  }
+
+  template <typename TAssetData>
+  AssetHandle<TAssetData> add(const AssetData<TAssetData> &data) {
+    auto &map = getMap<TAssetData>();
+    return map.addAsset(data);
+  }
+
+  template <typename TAssetData>
+  void update(AssetHandle<TAssetData> handle,
+              const AssetData<TAssetData> &data) {
+    auto &map = getMap<TAssetData>();
+    map.updateAsset(handle, data);
+  }
+
+  template <typename TAssetData>
+  AssetHandle<TAssetData> findHandleByUuid(const Uuid &uuid) {
+    auto &map = getMap<TAssetData>();
+    return map.findHandleByUuid(uuid);
+  }
+
+  template <typename TAssetData> usize count() {
+    return getMap<TAssetData>().getAssets().size();
+  }
+
+private:
+  template <typename TAssetData> constexpr auto &getMap() {
+    if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
+      return mTextures;
+    } else if constexpr (std::is_same_v<TAssetData, FontAsset>) {
+      return mFonts;
+    } else if constexpr (std::is_same_v<TAssetData, MaterialAsset>) {
+      return mMaterials;
+    } else if constexpr (std::is_same_v<TAssetData, MeshAsset>) {
+      return mMeshes;
+    } else if constexpr (std::is_same_v<TAssetData, SkeletonAsset>) {
+      return mSkeletons;
+    } else if constexpr (std::is_same_v<TAssetData, AnimationAsset>) {
+      return mAnimations;
+    } else if constexpr (std::is_same_v<TAssetData, AnimatorAsset>) {
+      return mAnimators;
+    } else if constexpr (std::is_same_v<TAssetData, AudioAsset>) {
+      return mAudios;
+    } else if constexpr (std::is_same_v<TAssetData, PrefabAsset>) {
+      return mPrefabs;
+    } else if constexpr (std::is_same_v<TAssetData, LuaScriptAsset>) {
+      return mLuaScripts;
+    } else if constexpr (std::is_same_v<TAssetData, EnvironmentAsset>) {
+      return mEnvironments;
+    } else if constexpr (std::is_same_v<TAssetData, SceneAsset>) {
+      return mScenes;
+    } else if constexpr (std::is_same_v<TAssetData, InputMapAsset>) {
+      return mInputMaps;
+    }
+  }
 
 private:
   TextureMap mTextures;

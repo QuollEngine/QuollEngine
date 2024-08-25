@@ -99,7 +99,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
   }
 
   return Result<Uuid>::Ok(
-      mAssetCache.getRegistry().getTextures().getAsset(loadRes.getData()).uuid);
+      mAssetCache.getRegistry().get(loadRes.getData()).uuid);
 }
 
 std::vector<u8> ImageLoader::generateMipMapsFromTextureData(

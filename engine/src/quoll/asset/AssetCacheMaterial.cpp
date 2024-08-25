@@ -29,33 +29,29 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   header.name = asset.name;
   file.write(header);
 
-  auto baseColorTexture =
-      getAssetUuid(mRegistry.getTextures(), asset.data.baseColorTexture);
+  auto baseColorTexture = getAssetUuid(asset.data.baseColorTexture);
   file.write(baseColorTexture);
   file.write(asset.data.baseColorTextureCoord);
   file.write(asset.data.baseColorFactor);
 
-  auto metallicRoughnessTexture = getAssetUuid(
-      mRegistry.getTextures(), asset.data.metallicRoughnessTexture);
+  auto metallicRoughnessTexture =
+      getAssetUuid(asset.data.metallicRoughnessTexture);
   file.write(metallicRoughnessTexture);
   file.write(asset.data.metallicRoughnessTextureCoord);
   file.write(asset.data.metallicFactor);
   file.write(asset.data.roughnessFactor);
 
-  auto normalTexture =
-      getAssetUuid(mRegistry.getTextures(), asset.data.normalTexture);
+  auto normalTexture = getAssetUuid(asset.data.normalTexture);
   file.write(normalTexture);
   file.write(asset.data.normalTextureCoord);
   file.write(asset.data.normalScale);
 
-  auto occlusionTexture =
-      getAssetUuid(mRegistry.getTextures(), asset.data.occlusionTexture);
+  auto occlusionTexture = getAssetUuid(asset.data.occlusionTexture);
   file.write(occlusionTexture);
   file.write(asset.data.occlusionTextureCoord);
   file.write(asset.data.occlusionStrength);
 
-  auto emissiveTexture =
-      getAssetUuid(mRegistry.getTextures(), asset.data.emissiveTexture);
+  auto emissiveTexture = getAssetUuid(asset.data.emissiveTexture);
   file.write(emissiveTexture);
   file.write(asset.data.emissiveTextureCoord);
   file.write(asset.data.emissiveFactor);

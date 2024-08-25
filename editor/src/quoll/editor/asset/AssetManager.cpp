@@ -128,7 +128,7 @@ void AssetManager::generatePreview(const Path &sourceAssetPath,
           mHDRIImporter.loadFromPathToDevice(sourceAssetPath, renderStorage);
     }
   } else if (res.first == AssetType::Texture) {
-    auto &asset = mAssetCache.getRegistry().getTextures().getAsset(
+    auto &asset = mAssetCache.getRegistry().get(
         static_cast<quoll::AssetHandle<quoll::TextureAsset>>(handle));
 
     if (!rhi::isHandleValid(asset.preview)) {
@@ -354,8 +354,7 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
     auto res = mAssetCache.loadTexture(uuid);
 
     if (res.hasData()) {
-      auto uuid =
-          mAssetCache.getRegistry().getTextures().getAsset(res.getData()).uuid;
+      auto uuid = mAssetCache.getRegistry().get(res.getData()).uuid;
       return Result<UUIDMap>::Ok({{"root", uuid}});
     }
 

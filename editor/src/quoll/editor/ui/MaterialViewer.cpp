@@ -10,9 +10,8 @@ static void renderTextureIfExists(widgets::Table &table, const String &label,
                                   AssetRegistry &assetRegistry) {
   static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
-  if (assetRegistry.getTextures().hasAsset(handle)) {
-    auto texture =
-        assetRegistry.getTextures().getAsset(handle).data.deviceHandle;
+  if (assetRegistry.has(handle)) {
+    auto texture = assetRegistry.get<TextureAsset>(handle).data.deviceHandle;
 
     table.column(label);
     table.column(texture, TextureSize);
