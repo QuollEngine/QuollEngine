@@ -34,7 +34,7 @@ ActionExecutorResult EntitySetSprite::onUndo(WorkspaceState &state,
 
 bool EntitySetSprite::predicate(WorkspaceState &state,
                                 AssetRegistry &assetRegistry) {
-  return assetRegistry.getTextures().hasAsset(mSprite);
+  return assetRegistry.has(mSprite);
 }
 
 EntityCreateSprite::EntityCreateSprite(Entity entity,
@@ -58,7 +58,7 @@ bool EntityCreateSprite::predicate(WorkspaceState &state,
                                    AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
   return !scene.entityDatabase.has<Sprite>(mEntity) &&
-         assetRegistry.getTextures().hasAsset(mHandle);
+         assetRegistry.has(mHandle);
 }
 
 } // namespace quoll::editor

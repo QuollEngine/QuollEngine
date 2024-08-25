@@ -129,8 +129,7 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
 
   if (specularCubemap.hasError()) {
     device->destroyTexture(unfilteredCubemap.texture);
-    mAssetCache.getRegistry().getTextures().deleteAsset(
-        irradianceCubemap.getData());
+    mAssetCache.getRegistry().remove(irradianceCubemap.getData());
 
     return Result<UUIDMap>::Error(specularCubemap.getError());
   }
@@ -157,10 +156,8 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
 
   UUIDMap output{
       {"root", registry.getEnvironments().getAsset(loadRes.getData()).uuid},
-      {"irradiance",
-       registry.getTextures().getAsset(environment.data.irradianceMap).uuid},
-      {"specular",
-       registry.getTextures().getAsset(environment.data.specularMap).uuid}};
+      {"irradiance", registry.get(environment.data.irradianceMap).uuid},
+      {"specular", registry.get(environment.data.specularMap).uuid}};
 
   return Result<UUIDMap>::Ok(output);
 }

@@ -446,7 +446,7 @@ TEST_F(EntitySpawnerTest,
   asset.uuid = quoll::Uuid("121311231");
   asset.name = "my-sprite";
   asset.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto assetHandle = assetRegistry.getTextures().addAsset(asset);
+  auto assetHandle = assetRegistry.add(asset);
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
 

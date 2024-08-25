@@ -36,8 +36,8 @@ void ScriptSerializer::serialize(YAML::Node &node,
           }
         } else if (value.isType(LuaScriptVariableType::AssetTexture)) {
           auto handle = value.get<AssetHandle<TextureAsset>>();
-          if (assetRegistry.getTextures().hasAsset(handle)) {
-            auto uuid = assetRegistry.getTextures().getAsset(handle).uuid;
+          if (assetRegistry.has(handle)) {
+            auto uuid = assetRegistry.get(handle).uuid;
 
             node["script"]["variables"][name]["type"] = "texture";
             node["script"]["variables"][name]["value"] = uuid;
@@ -79,7 +79,7 @@ void ScriptSerializer::deserialize(const YAML::Node &node,
             }
           } else if (type == "texture") {
             auto handle =
-                assetRegistry.getTextures().findHandleByUuid(Uuid(value));
+                assetRegistry.findHandleByUuid<TextureAsset>(Uuid(value));
             if (handle) {
               script.variables.insert_or_assign(name, handle);
             }

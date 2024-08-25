@@ -220,7 +220,7 @@ Entity EntitySpawner::spawnSprite(AssetHandle<TextureAsset> handle,
                                   LocalTransform transform) {
   auto entity = mEntityDatabase.create();
 
-  auto name = mAssetRegistry.getTextures().getAsset(handle).name;
+  auto name = mAssetRegistry.get(handle).name;
 
   mEntityDatabase.set(entity, transform);
   mEntityDatabase.set<WorldTransform>(entity, {});

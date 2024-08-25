@@ -55,7 +55,7 @@ EntitySpawnerLuaTable::spawnPrefab(AssetHandleType handle) {
 sol_maybe<EntityLuaTable>
 EntitySpawnerLuaTable::spawnSprite(AssetHandleType handle) {
   AssetHandle<TextureAsset> texture(handle);
-  if (!mScriptGlobals.assetRegistry.getTextures().hasAsset(texture)) {
+  if (!mScriptGlobals.assetRegistry.has(texture)) {
     Engine::getUserLogger().error() << lua::Messages::assetNotFound(
         "EntitySpawner", "spawnSprite", getAssetTypeString(AssetType::Texture));
 

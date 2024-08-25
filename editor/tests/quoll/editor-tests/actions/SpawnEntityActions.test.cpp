@@ -310,7 +310,7 @@ TEST_F(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.name = "my-texture";
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.add(data);
 
   auto camera = state.scene.entityDatabase.create();
   glm::mat4 viewMatrix =
@@ -344,7 +344,7 @@ TEST_F(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
 TEST_F(SpawnSpriteAtViewActionTest, UndoRemovesSpawnedEntity) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.add(data);
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
@@ -365,7 +365,7 @@ TEST_F(SpawnSpriteAtViewActionTest,
        UndoSetsSelectedEntityToNullIfSpawnedEntityIsSelected) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.add(data);
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
@@ -386,7 +386,7 @@ TEST_F(
     UndoSetsSelectedEntityToNullIfSelectedEntityIsADescendantOfSpawnedEntity) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.add(data);
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
@@ -416,7 +416,7 @@ TEST_F(SpawnSpriteAtViewActionTest,
        UndoDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotSpawnedEntity) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.add(data);
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
@@ -433,7 +433,7 @@ TEST_F(SpawnSpriteAtViewActionTest,
 
 TEST_F(SpawnSpriteAtViewActionTest,
        PredicateReturnsTrueIfCameraEntityHasCameraAndAssetExists) {
-  auto textureAsset = assetRegistry.getTextures().addAsset({});
+  auto textureAsset = assetRegistry.add<quoll::TextureAsset>({});
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
@@ -446,7 +446,7 @@ TEST_F(SpawnSpriteAtViewActionTest,
 
 TEST_F(SpawnSpriteAtViewActionTest,
        PredicateReturnsFalseIfCameraEntityHasNoCamera) {
-  auto textureAsset = assetRegistry.getTextures().addAsset({});
+  auto textureAsset = assetRegistry.add<quoll::TextureAsset>({});
 
   auto camera = state.scene.entityDatabase.create();
   state.camera = camera;

@@ -33,9 +33,9 @@ TEST_F(AssetCacheTextureTest, CreatesTextureFromAsset) {
   auto texture = cache.loadTexture(uuid);
   auto handle = texture.getData();
 
-  auto asset = cache.getRegistry().getTextures().getAsset(handle);
+  auto asset = cache.getRegistry().get(handle);
 
-  cache.getRegistry().getTextures().deleteAsset(handle);
+  cache.getRegistry().remove(handle);
 
   auto filePath = cache.createTextureFromAsset(asset);
   EXPECT_TRUE(filePath.hasData());
@@ -57,7 +57,7 @@ TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
   auto texture = cache.loadTexture(uuid);
   auto handle = texture.getData();
 
-  auto asset = cache.getRegistry().getTextures().getAsset(handle);
+  auto asset = cache.getRegistry().get(handle);
 
   EXPECT_EQ(asset.path, filePath.getData());
   EXPECT_EQ(asset.name, "1x1-2d.ktx");
@@ -92,7 +92,7 @@ TEST_F(AssetCacheTextureTest, LoadsTexture2D) {
   auto texture = cache.loadTexture(uuid);
   EXPECT_TRUE(texture.hasData());
 
-  auto &asset = cache.getRegistry().getTextures().getAsset(texture.getData());
+  auto &asset = cache.getRegistry().get(texture.getData());
 
   EXPECT_EQ(asset.data.width, 1);
   EXPECT_EQ(asset.data.height, 1);
@@ -109,8 +109,7 @@ TEST_F(AssetCacheTextureTest, LoadsTextureCubemap) {
 
   EXPECT_TRUE(texture.hasData());
 
-  const auto &asset =
-      cache.getRegistry().getTextures().getAsset(texture.getData());
+  const auto &asset = cache.getRegistry().get(texture.getData());
 
   EXPECT_EQ(asset.data.width, 1);
   EXPECT_EQ(asset.data.height, 1);

@@ -76,7 +76,7 @@ TEST_F(EntitySpawnerLuaTableTest, SpawnSpriteReturnsNullIfTextureDoesNotExist) {
 
 TEST_F(EntitySpawnerLuaTableTest,
        SpawnSpriteCreatesSpriteEntityAndReturnsEntityTable) {
-  auto texture = assetCache.getRegistry().getTextures().addAsset({});
+  auto texture = assetCache.getRegistry().add<quoll::TextureAsset>({});
   ASSERT_EQ(texture, quoll::AssetHandle<quoll::TextureAsset>{1});
 
   auto entity = entityDatabase.create();

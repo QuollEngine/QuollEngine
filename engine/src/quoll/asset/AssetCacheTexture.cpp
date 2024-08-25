@@ -272,8 +272,7 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
 
   ktxTexture_Destroy(ktxTextureData);
 
-  return Result<AssetHandle<TextureAsset>>::Ok(
-      mRegistry.getTextures().addAsset(texture));
+  return Result<AssetHandle<TextureAsset>>::Ok(mRegistry.add(texture));
 }
 
 Result<AssetHandle<TextureAsset>>
@@ -282,7 +281,7 @@ AssetCache::getOrLoadTexture(const Uuid &uuid) {
     return Result<AssetHandle<TextureAsset>>::Ok(AssetHandle<TextureAsset>());
   }
 
-  auto handle = mRegistry.getTextures().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<TextureAsset>(uuid);
   if (handle) {
     return Result<AssetHandle<TextureAsset>>::Ok(handle);
   }

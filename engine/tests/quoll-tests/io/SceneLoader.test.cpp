@@ -255,7 +255,7 @@ TEST_F(SceneLoaderSpriteTest,
 TEST_F(SceneLoaderSpriteTest, CreatesSpriteComponentWithFileDataIfValidField) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getTextures().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["sprite"] = data.uuid;
@@ -1665,7 +1665,7 @@ TEST_F(SceneLoaderScriptTest,
 
   quoll::AssetData<quoll::TextureAsset> textureData{};
   textureData.uuid = quoll::Uuid("my-texture");
-  auto textureHandle = assetRegistry.getTextures().addAsset(textureData);
+  auto textureHandle = assetRegistry.add(textureData);
 
   auto [node, entity] = createNode();
   node["script"]["asset"] = data.uuid;

@@ -418,41 +418,42 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
     return name;
   };
 
-  auto createPrefabEntry = [&]<typename AssetHandle, typename AssetData>(
-                               AssetMap<AssetData> &map, AssetHandle handle) {
-    const auto &asset = map.getAsset(handle);
-    Entry entry;
-    entry.isDirectory = false;
-    entry.path = asset.path;
-    entry.name = removePrefabName(asset.name);
-    entry.assetType = asset.type;
-    entry.uuid = asset.uuid;
-    entry.asset = static_cast<u32>(handle);
-    setDefaultProps(entry, assetManager.getAssetRegistry());
+  auto createPrefabEntry =
+      [&]<typename AssetData>(AssetHandle<AssetData> handle) {
+        const auto &asset = assetRegistry.get<AssetData>(handle);
+        Entry entry;
+        entry.isDirectory = false;
+        entry.path = asset.path;
+        entry.name = removePrefabName(asset.name);
+        entry.assetType = asset.type;
+        entry.uuid = asset.uuid;
+        entry.asset = handle.getRawId();
+        setDefaultProps(entry, assetManager.getAssetRegistry());
 
-    return entry;
-  };
+        return entry;
+      };
 
-  auto addPrefabEntry = [&]<typename AssetHandle, typename AssetData>(
-                            AssetMap<AssetData> &map, AssetHandle handle,
-                            std::unordered_map<AssetHandle, bool> &cache) {
-    if (handle && !cache.contains(handle)) {
-      cache.insert_or_assign(handle, true);
-      mEntries.push_back(createPrefabEntry(map, handle));
-      return true;
-    }
+  auto addPrefabEntry =
+      [&]<typename AssetData>(
+          AssetHandle<AssetData> handle,
+          std::unordered_map<AssetHandle<AssetData>, bool> &cache) {
+        if (handle && !cache.contains(handle)) {
+          cache.insert_or_assign(handle, true);
+          mEntries.push_back(createPrefabEntry(handle));
+          return true;
+        }
 
-    return false;
-  };
+        return false;
+      };
 
   std::unordered_map<AssetHandle<TextureAsset>, bool> textureCache;
   auto addTextureEntryIfExists = [&](AssetHandle<TextureAsset> handle) {
-    addPrefabEntry(assetRegistry.getTextures(), handle, textureCache);
+    addPrefabEntry(handle, textureCache);
   };
 
   std::unordered_map<AssetHandle<MaterialAsset>, bool> materialCache;
   auto addMaterialEntry = [&](AssetHandle<MaterialAsset> handle) {
-    if (addPrefabEntry(assetRegistry.getMaterials(), handle, materialCache)) {
+    if (addPrefabEntry(handle, materialCache)) {
       const auto &material = assetRegistry.getMaterials().getAsset(handle);
 
       addTextureEntryIfExists(material.data.baseColorTexture);
@@ -465,7 +466,7 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
 
   std::unordered_map<AssetHandle<MeshAsset>, bool> meshCache;
   for (const auto &ref : prefab.data.meshes) {
-    addPrefabEntry(assetRegistry.getMeshes(), ref.value, meshCache);
+    addPrefabEntry(ref.value, meshCache);
   }
 
   for (const auto &renderer : prefab.data.meshRenderers) {
@@ -482,20 +483,19 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
 
   std::unordered_map<AssetHandle<SkeletonAsset>, bool> skeletonCache;
   for (const auto &ref : prefab.data.skeletons) {
-    addPrefabEntry(assetRegistry.getSkeletons(), ref.value, skeletonCache);
+    addPrefabEntry(ref.value, skeletonCache);
   }
 
   std::unordered_map<AssetHandle<AnimatorAsset>, bool> animatorCache;
   for (const auto &ref : prefab.data.animators) {
-    addPrefabEntry(assetRegistry.getAnimators(), ref.value, animatorCache);
+    addPrefabEntry(ref.value, animatorCache);
   }
 
   std::unordered_map<AssetHandle<AnimationAsset>, bool> animationCache;
   for (const auto &ref : prefab.data.animators) {
     const auto &animator = assetRegistry.getAnimators().getAsset(ref.value);
     for (const auto &state : animator.data.states) {
-      addPrefabEntry(assetRegistry.getAnimations(), state.animation,
-                     animationCache);
+      addPrefabEntry(state.animation, animationCache);
     }
   }
 }
@@ -527,13 +527,12 @@ void AssetBrowser::setDefaultProps(Entry &entry, AssetRegistry &assetRegistry) {
 
   if (entry.assetType == AssetType::Texture) {
     entry.preview =
-        assetRegistry.getTextures()
-            .getAsset(static_cast<AssetHandle<TextureAsset>>(entry.asset))
+        assetRegistry.get(static_cast<AssetHandle<TextureAsset>>(entry.asset))
             .data.deviceHandle;
   } else if (entry.assetType == AssetType::Environment) {
     entry.preview =
-        assetRegistry.getEnvironments()
-            .getAsset(static_cast<AssetHandle<EnvironmentAsset>>(entry.asset))
+        assetRegistry
+            .get(static_cast<AssetHandle<EnvironmentAsset>>(entry.asset))
             .preview;
   } else {
     entry.preview = IconRegistry::getIcon(entry.icon);

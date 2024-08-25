@@ -52,7 +52,7 @@ TEST_F(EntityCreateSpriteActionTest,
 TEST_F(EntityCreateSpriteActionTest,
        PredicateReturnsTrueIfSpriteDoesNotExistAndAssetIsValid) {
   auto entity = state.scene.entityDatabase.create();
-  auto handle = assetRegistry.getTextures().addAsset({});
+  auto handle = assetRegistry.add<quoll::TextureAsset>({});
 
   quoll::editor::EntityCreateSprite action(entity, handle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
@@ -97,7 +97,7 @@ TEST_F(EntitySetSpriteActionTest, PredicateReturnsFalseIfTextureIsInvalid) {
 
 TEST_F(EntitySetSpriteActionTest, PredicateReturnsTrueIfSpriteExists) {
   auto entity = state.scene.entityDatabase.create();
-  auto handle = assetRegistry.getTextures().addAsset({});
+  auto handle = assetRegistry.add<quoll::TextureAsset>({});
 
   quoll::editor::EntitySetSprite action(entity, handle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));

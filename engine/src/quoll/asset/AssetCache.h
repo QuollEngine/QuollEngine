@@ -102,6 +102,15 @@ private:
     return Uuid{};
   }
 
+  template <typename TAssetData>
+  Uuid getAssetUuid(AssetHandle<TAssetData> handle) {
+    if (handle) {
+      return mRegistry.get<TAssetData>(handle).uuid;
+    }
+
+    return Uuid{};
+  }
+
   Result<AssetFileHeader> checkAssetFile(InputBinaryStream &file,
                                          const Path &filePath,
                                          AssetType assetType);

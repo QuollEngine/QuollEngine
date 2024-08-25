@@ -22,8 +22,7 @@ public:
       quoll::AssetData<quoll::TextureAsset> texture;
       texture.uuid = quoll::Uuid("base");
 
-      asset.data.baseColorTexture =
-          cache.getRegistry().getTextures().addAsset(texture);
+      asset.data.baseColorTexture = cache.getRegistry().add(texture);
     }
 
     asset.data.metallicFactor = 1.0f;
@@ -33,8 +32,7 @@ public:
       quoll::AssetData<quoll::TextureAsset> texture;
       texture.uuid = quoll::Uuid("mr");
 
-      asset.data.metallicRoughnessTexture =
-          cache.getRegistry().getTextures().addAsset(texture);
+      asset.data.metallicRoughnessTexture = cache.getRegistry().add(texture);
     }
 
     asset.data.normalScale = 0.6f;
@@ -43,8 +41,7 @@ public:
       quoll::AssetData<quoll::TextureAsset> texture;
       texture.uuid = quoll::Uuid("normal");
 
-      asset.data.normalTexture =
-          cache.getRegistry().getTextures().addAsset(texture);
+      asset.data.normalTexture = cache.getRegistry().add(texture);
     }
 
     asset.data.occlusionStrength = 0.4f;
@@ -53,8 +50,7 @@ public:
       quoll::AssetData<quoll::TextureAsset> texture;
       texture.uuid = quoll::Uuid("occlusion");
 
-      asset.data.occlusionTexture =
-          cache.getRegistry().getTextures().addAsset(texture);
+      asset.data.occlusionTexture = cache.getRegistry().add(texture);
     }
 
     asset.data.emissiveFactor = glm::vec3(0.5f, 0.6f, 2.5f);
@@ -63,8 +59,7 @@ public:
       quoll::AssetData<quoll::TextureAsset> texture;
       texture.uuid = quoll::Uuid("emissive");
 
-      asset.data.emissiveTexture =
-          cache.getRegistry().getTextures().addAsset(texture);
+      asset.data.emissiveTexture = cache.getRegistry().add(texture);
     }
 
     return asset;
@@ -338,8 +333,8 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
   material.data.baseColorTexture = texture.getData();
   auto path = cache.createMaterialFromAsset(material);
 
-  cache.getRegistry().getTextures().deleteAsset(texture.getData());
-  EXPECT_FALSE(cache.getRegistry().getTextures().hasAsset(texture.getData()));
+  cache.getRegistry().remove(texture.getData());
+  EXPECT_FALSE(cache.getRegistry().has(texture.getData()));
 
   auto handle = cache.loadMaterial(material.uuid);
 
@@ -349,7 +344,6 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
   EXPECT_NE(newMaterial.data.baseColorTexture,
             quoll::AssetHandle<quoll::TextureAsset>());
 
-  auto &newTexture = cache.getRegistry().getTextures().getAsset(
-      newMaterial.data.baseColorTexture);
+  auto &newTexture = cache.getRegistry().get(newMaterial.data.baseColorTexture);
   EXPECT_EQ(newTexture.uuid, textureUuid);
 }

@@ -74,15 +74,15 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
 
-  cache.getRegistry().getTextures().deleteAsset(irradianceMap);
-  cache.getRegistry().getTextures().deleteAsset(specularMap);
+  cache.getRegistry().remove(irradianceMap);
+  cache.getRegistry().remove(specularMap);
 
   {
     std::filesystem::remove(cache.getPathFromUuid(irradianceUuid));
     auto res = cache.loadEnvironment(asset.uuid);
 
     EXPECT_TRUE(res.hasError());
-    EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
+    EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
   }
 
   {
@@ -93,7 +93,7 @@ TEST_F(AssetCacheEnvironmentTest,
     auto res = cache.loadEnvironment(asset.uuid);
 
     EXPECT_TRUE(res.hasError());
-    EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
+    EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
   }
 }
 
@@ -110,10 +110,10 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
 
-  cache.getRegistry().getTextures().deleteAsset(irradianceMap);
-  cache.getRegistry().getTextures().deleteAsset(specularMap);
+  cache.getRegistry().remove(irradianceMap);
+  cache.getRegistry().remove(specularMap);
 
-  EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
+  EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
 
   auto res = cache.loadEnvironment(asset.uuid);
 
@@ -121,7 +121,7 @@ TEST_F(AssetCacheEnvironmentTest,
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
 
-  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
+  EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 2);
   EXPECT_FALSE(cache.getRegistry().getEnvironments().getAssets().empty());
 
   const auto &environment =
@@ -145,7 +145,7 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
 
-  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
+  EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 2);
 
   auto res = cache.loadEnvironment(asset.uuid);
 
@@ -153,7 +153,7 @@ TEST_F(AssetCacheEnvironmentTest,
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
 
-  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
+  EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 2);
 
   EXPECT_FALSE(cache.getRegistry().getEnvironments().getAssets().empty());
 

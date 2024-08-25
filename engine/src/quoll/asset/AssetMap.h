@@ -50,7 +50,7 @@ public:
     return mAssets.find(handle) != mAssets.end();
   }
 
-  void deleteAsset(Handle handle) { mAssets.erase(handle); }
+  void removeAsset(Handle handle) { mAssets.erase(handle); }
 
 private:
   Handle getNewHandle() { return Handle(mLastHandle++); }

@@ -18,8 +18,7 @@ void renderView(UIComponent component, YGNodeRef node,
   ImGui::SetCursorPos({left, top});
 
   if (auto *image = std::get_if<UIImage>(&component)) {
-    auto texture =
-        assetRegistry.getTextures().getAsset(image->texture).data.deviceHandle;
+    auto texture = assetRegistry.get(image->texture).data.deviceHandle;
 
     imgui::image(texture, ImVec2(ImageSize, ImageSize));
   } else if (auto *text = std::get_if<UIText>(&component)) {
