@@ -93,7 +93,7 @@ void Runtime::start() {
             0.0f, 0.0f, static_cast<f32>(width), static_cast<f32>(height));
       });
 
-  auto handle = assetCache.getRegistry().getScenes().findHandleByUuid(
+  auto handle = assetCache.getRegistry().findHandleByUuid<SceneAsset>(
       mConfig.startingScene);
 
   QuollAssert(handle, "Scene not found");

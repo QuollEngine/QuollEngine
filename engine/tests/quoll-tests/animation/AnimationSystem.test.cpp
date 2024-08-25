@@ -36,7 +36,7 @@ public:
                                          .speed = speed,
                                          .loopMode = loopMode});
 
-    auto animatorHandle = assetRegistry.getAnimators().addAsset(animatorAsset);
+    auto animatorHandle = assetRegistry.add(animatorAsset);
 
     quoll::Animator animator{};
     animator.playing = playing;
@@ -80,7 +80,7 @@ public:
 
     animation.data.keyframes.push_back(sequence);
 
-    return assetRegistry.getAnimations().addAsset(animation);
+    return assetRegistry.add(animation);
   }
 
   quoll::AssetHandle<quoll::AnimationAsset>
@@ -100,7 +100,7 @@ public:
 
     animation.data.keyframes.push_back(sequence);
 
-    return assetRegistry.getAnimations().addAsset(animation);
+    return assetRegistry.add(animation);
   }
 };
 
@@ -130,7 +130,7 @@ TEST_F(
   animatorAsset.data.states.push_back(state0);
   animatorAsset.data.states.push_back(state1);
 
-  auto animatorHandle = assetRegistry.getAnimators().addAsset(animatorAsset);
+  auto animatorHandle = assetRegistry.add(animatorAsset);
 
   auto entity = entityDatabase.create();
 
@@ -188,7 +188,7 @@ TEST_F(
   animatorAsset.data.states.push_back(state0);
   animatorAsset.data.states.push_back(state1);
 
-  auto animatorHandle = assetRegistry.getAnimators().addAsset(animatorAsset);
+  auto animatorHandle = assetRegistry.add(animatorAsset);
 
   auto entity = entityDatabase.create();
 

@@ -210,7 +210,7 @@ TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
   quoll::AssetData<quoll::MeshAsset> mesh{};
   mesh.uuid = quoll::Uuid("mesh.asset");
 
-  auto handle = assetRegistry.getMeshes().addAsset(mesh);
+  auto handle = assetRegistry.add(mesh);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Mesh>(entity, {handle});
@@ -235,8 +235,8 @@ TEST_F(EntitySerializerTest, CreatesMeshRendererFieldWithMaterials) {
   quoll::AssetData<quoll::MaterialAsset> material2{};
   material2.uuid = quoll::Uuid("material2.asset");
 
-  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
-  auto handle2 = assetRegistry.getMaterials().addAsset(material2);
+  auto handle1 = assetRegistry.add(material1);
+  auto handle2 = assetRegistry.add(material2);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::MeshRenderer>(entity, {{handle1, handle2}});
@@ -255,7 +255,7 @@ TEST_F(EntitySerializerTest,
        CreatesMeshRendererAndIgnoresNonExistentMaterials) {
   quoll::AssetData<quoll::MaterialAsset> material1{};
   material1.uuid = quoll::Uuid("material1.asset");
-  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+  auto handle1 = assetRegistry.add(material1);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::MeshRenderer>(
@@ -303,7 +303,7 @@ TEST_F(EntitySerializerTest,
        CreatesSkinnedMeshFieldIfSkinnedMeshAssetIsRegistry) {
   quoll::AssetData<quoll::MeshAsset> mesh{};
   mesh.uuid = quoll::Uuid("skinnedMesh.mesh");
-  auto handle = assetRegistry.getMeshes().addAsset(mesh);
+  auto handle = assetRegistry.add(mesh);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::SkinnedMesh>(entity, {handle});
@@ -329,8 +329,8 @@ TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererFieldWithMaterials) {
   quoll::AssetData<quoll::MaterialAsset> material2{};
   material2.uuid = quoll::Uuid("material2.asset");
 
-  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
-  auto handle2 = assetRegistry.getMaterials().addAsset(material2);
+  auto handle1 = assetRegistry.add(material1);
+  auto handle2 = assetRegistry.add(material2);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::SkinnedMeshRenderer>(entity, {{handle1, handle2}});
@@ -349,7 +349,7 @@ TEST_F(EntitySerializerTest,
        CreatesSkinnedMeshRendererAndIgnoresNonExistentMaterials) {
   quoll::AssetData<quoll::MaterialAsset> material1{};
   material1.uuid = quoll::Uuid("material1.asset");
-  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+  auto handle1 = assetRegistry.add(material1);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::SkinnedMeshRenderer>(
@@ -398,7 +398,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
   quoll::AssetData<quoll::SkeletonAsset> skeleton{};
   skeleton.uuid = quoll::Uuid("skeleton.skel");
-  auto handle = assetRegistry.getSkeletons().addAsset(skeleton);
+  auto handle = assetRegistry.add(skeleton);
 
   auto entity = entityDatabase.create();
   quoll::Skeleton component{};
@@ -456,7 +456,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
   quoll::AssetData<quoll::AnimatorAsset> animator{};
   animator.uuid = quoll::Uuid("test.animator");
-  auto handle = assetRegistry.getAnimators().addAsset(animator);
+  auto handle = assetRegistry.add(animator);
 
   quoll::Animator component{};
   component.asset = handle;
@@ -643,7 +643,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
   quoll::AssetData<quoll::AudioAsset> audio{};
   audio.uuid = quoll::Uuid("bark.wav");
-  auto handle = assetRegistry.getAudios().addAsset(audio);
+  auto handle = assetRegistry.add(audio);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::AudioSource>(entity, {handle});
@@ -686,11 +686,11 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   script.data.variables.insert_or_assign(
       "test_texture",
       quoll::LuaScriptVariable{quoll::LuaScriptVariableType::AssetTexture});
-  auto handle = assetRegistry.getLuaScripts().addAsset(script);
+  auto handle = assetRegistry.add(script);
 
   quoll::AssetData<quoll::PrefabAsset> prefab{};
   prefab.uuid = quoll::Uuid("test.prefab");
-  auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefab);
+  auto prefabHandle = assetRegistry.add(prefab);
 
   quoll::AssetData<quoll::TextureAsset> texture{};
   texture.uuid = quoll::Uuid("test.ktx2");
@@ -747,7 +747,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
   quoll::AssetData<quoll::FontAsset> font{};
   font.uuid = quoll::Uuid("Roboto.ttf");
-  auto handle = assetRegistry.getFonts().addAsset(font);
+  auto handle = assetRegistry.add(font);
 
   auto entity = entityDatabase.create();
   quoll::Text component{};
@@ -776,7 +776,7 @@ TEST_F(EntitySerializerTest,
        CreatesTextFieldIfTextContentsAreNotEmptyAndFontAssetIsInRegistry) {
   quoll::AssetData<quoll::FontAsset> font{};
   font.uuid = quoll::Uuid("Roboto.ttf");
-  auto handle = assetRegistry.getFonts().addAsset(font);
+  auto handle = assetRegistry.add(font);
 
   auto entity = entityDatabase.create();
   quoll::Text component{};
@@ -1063,7 +1063,7 @@ TEST_F(EntitySerializerTest,
        CreatesSkyboxWithTextureColorIfTypeIsTextureAndAssetExists) {
   quoll::AssetData<quoll::EnvironmentAsset> data{};
   data.uuid = quoll::Uuid("uuid.env");
-  auto handle = assetRegistry.getEnvironments().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto entity = entityDatabase.create();
 
@@ -1139,7 +1139,7 @@ TEST_F(EntitySerializerTest,
   quoll::AssetData<quoll::InputMapAsset> asset{};
   asset.uuid = quoll::Uuid("inputMap.asset");
 
-  auto handle = assetRegistry.getInputMaps().addAsset(asset);
+  auto handle = assetRegistry.add(asset);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::InputMapAssetRef>(entity, {handle, 0});

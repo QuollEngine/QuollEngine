@@ -129,11 +129,8 @@ void loadSkeletons(GLTFImportData &importData) {
     importData.skeletons.skeletonMap.map.insert_or_assign(
         static_cast<usize>(si), handle.getData());
 
-    importData.outputUuids.insert_or_assign(assetName,
-                                            assetCache.getRegistry()
-                                                .getSkeletons()
-                                                .getAsset(handle.getData())
-                                                .uuid);
+    importData.outputUuids.insert_or_assign(
+        assetName, assetCache.getRegistry().get(handle.getData()).uuid);
   }
 }
 

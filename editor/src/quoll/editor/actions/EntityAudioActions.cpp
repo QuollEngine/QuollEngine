@@ -33,7 +33,7 @@ ActionExecutorResult EntitySetAudio::onUndo(WorkspaceState &state,
 
 bool EntitySetAudio::predicate(WorkspaceState &state,
                                AssetRegistry &assetRegistry) {
-  return assetRegistry.getAudios().hasAsset(mAudio);
+  return assetRegistry.has(mAudio);
 }
 
 EntityCreateAudio::EntityCreateAudio(Entity entity,
@@ -57,7 +57,7 @@ bool EntityCreateAudio::predicate(WorkspaceState &state,
                                   AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
   return !scene.entityDatabase.has<AudioSource>(mEntity) &&
-         assetRegistry.getAudios().hasAsset(mHandle);
+         assetRegistry.has(mHandle);
 }
 
 } // namespace quoll::editor

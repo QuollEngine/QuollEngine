@@ -95,7 +95,7 @@ public:
         {0, 5, quoll::input::get("GAMEPAD_BUMPER_RIGHT")});
 
     asset.uuid = quoll::Uuid::generate();
-    auto handle = registry.getInputMaps().addAsset(asset);
+    auto handle = registry.add(asset);
 
     auto entity = db.create();
     db.set<quoll::InputMapAssetRef>(entity, {handle});

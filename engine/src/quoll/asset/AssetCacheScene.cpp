@@ -66,7 +66,7 @@ Result<AssetHandle<SceneAsset>> AssetCache::loadScene(const Uuid &uuid) {
   asset.uuid = Uuid(filePath.stem().string());
   asset.data.data = root;
 
-  auto handle = mRegistry.getScenes().addAsset(asset);
+  auto handle = mRegistry.add(asset);
   return Result<AssetHandle<SceneAsset>>::Ok(handle);
 }
 

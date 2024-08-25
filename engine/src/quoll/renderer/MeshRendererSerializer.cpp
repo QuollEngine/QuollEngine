@@ -13,8 +13,8 @@ void MeshRendererSerializer::serialize(YAML::Node &node,
     node["meshRenderer"]["materials"] = YAML::Node(YAML::NodeType::Sequence);
 
     for (auto material : renderer.materials) {
-      if (assetRegistry.getMaterials().hasAsset(material)) {
-        auto uuid = assetRegistry.getMaterials().getAsset(material).uuid;
+      if (assetRegistry.has(material)) {
+        auto uuid = assetRegistry.get(material).uuid;
         node["meshRenderer"]["materials"].push_back(uuid);
       }
     }
@@ -33,7 +33,7 @@ void MeshRendererSerializer::deserialize(const YAML::Node &node,
       for (auto material : materials) {
         auto uuid = material.as<Uuid>(Uuid{});
 
-        auto handle = assetRegistry.getMaterials().findHandleByUuid(uuid);
+        auto handle = assetRegistry.findHandleByUuid<MaterialAsset>(uuid);
         if (!handle) {
           continue;
         }

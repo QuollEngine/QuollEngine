@@ -115,14 +115,14 @@ AssetCache::loadLuaScript(const Uuid &uuid) {
     return Result<AssetHandle<LuaScriptAsset>>::Error(message);
   }
 
-  auto handle = mRegistry.getLuaScripts().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<LuaScriptAsset>(uuid);
 
   if (!handle) {
-    auto newHandle = mRegistry.getLuaScripts().addAsset(asset);
+    auto newHandle = mRegistry.add(asset);
     return Result<AssetHandle<LuaScriptAsset>>::Ok(newHandle);
   }
 
-  mRegistry.getLuaScripts().updateAsset(handle, asset);
+  mRegistry.update(handle, asset);
 
   return Result<AssetHandle<LuaScriptAsset>>::Ok(handle);
 }

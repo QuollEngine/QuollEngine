@@ -75,11 +75,11 @@ public:
     asset.name = "Scene";
     asset.data.data = root;
 
-    return assetRegistry.getScenes().addAsset(asset);
+    return assetRegistry.add(asset);
   }
 
   YAML::Node getSceneYaml(quoll::AssetHandle<quoll::SceneAsset> handle) {
-    return assetRegistry.getScenes().getAsset(handle).data.data;
+    return assetRegistry.get(handle).data.data;
   }
 
 public:

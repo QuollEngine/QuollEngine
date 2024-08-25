@@ -113,8 +113,7 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
     stream.read(mesh.data.geometries.at(i).indices);
   }
 
-  return Result<AssetHandle<MeshAsset>>::Ok(
-      mRegistry.getMeshes().addAsset(mesh), warnings);
+  return Result<AssetHandle<MeshAsset>>::Ok(mRegistry.add(mesh), warnings);
 }
 
 Result<AssetHandle<MeshAsset>> AssetCache::loadMesh(const Uuid &uuid) {
@@ -141,7 +140,7 @@ Result<AssetHandle<MeshAsset>> AssetCache::getOrLoadMesh(const Uuid &uuid) {
     return Result<AssetHandle<MeshAsset>>::Ok(AssetHandle<MeshAsset>());
   }
 
-  auto handle = mRegistry.getMeshes().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<MeshAsset>(uuid);
   if (handle) {
     return Result<AssetHandle<MeshAsset>>::Ok(handle);
   }

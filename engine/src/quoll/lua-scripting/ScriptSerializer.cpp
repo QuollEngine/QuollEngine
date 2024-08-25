@@ -9,8 +9,8 @@ void ScriptSerializer::serialize(YAML::Node &node,
                                  AssetRegistry &assetRegistry) {
   if (entityDatabase.has<LuaScript>(entity)) {
     const auto &script = entityDatabase.get<LuaScript>(entity);
-    if (assetRegistry.getLuaScripts().hasAsset(script.handle)) {
-      const auto &asset = assetRegistry.getLuaScripts().getAsset(script.handle);
+    if (assetRegistry.has(script.handle)) {
+      const auto &asset = assetRegistry.get(script.handle);
 
       auto uuid = asset.uuid;
 
@@ -28,8 +28,8 @@ void ScriptSerializer::serialize(YAML::Node &node,
           node["script"]["variables"][name]["value"] = value.get<String>();
         } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
           auto handle = value.get<AssetHandle<PrefabAsset>>();
-          if (assetRegistry.getPrefabs().hasAsset(handle)) {
-            auto uuid = assetRegistry.getPrefabs().getAsset(handle).uuid;
+          if (assetRegistry.has(handle)) {
+            auto uuid = assetRegistry.get(handle).uuid;
 
             node["script"]["variables"][name]["type"] = "prefab";
             node["script"]["variables"][name]["value"] = uuid;
@@ -73,7 +73,7 @@ void ScriptSerializer::deserialize(const YAML::Node &node,
             script.variables.insert_or_assign(name, value);
           } else if (type == "prefab") {
             auto handle =
-                assetRegistry.getPrefabs().findHandleByUuid(Uuid(value));
+                assetRegistry.findHandleByUuid<PrefabAsset>(Uuid(value));
             if (handle) {
               script.variables.insert_or_assign(name, handle);
             }
@@ -88,7 +88,7 @@ void ScriptSerializer::deserialize(const YAML::Node &node,
       }
     }
 
-    script.handle = assetRegistry.getLuaScripts().findHandleByUuid(uuid);
+    script.handle = assetRegistry.findHandleByUuid<LuaScriptAsset>(uuid);
 
     if (script.handle) {
       entityDatabase.set(entity, script);

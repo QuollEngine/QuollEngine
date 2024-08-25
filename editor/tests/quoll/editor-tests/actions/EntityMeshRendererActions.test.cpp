@@ -65,7 +65,7 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
 TEST_F(EntitySetMeshRendererMaterialActionTest,
        PredicateReturnsFalseIfNoMeshRendererComponent) {
   auto entity = state.scene.entityDatabase.create();
-  auto material = assetRegistry.getMaterials().addAsset({});
+  auto material = assetRegistry.add<quoll::MaterialAsset>({});
   EXPECT_FALSE(quoll::editor::EntitySetMeshRendererMaterial(entity, 0, material)
                    .predicate(state, assetRegistry));
 }
@@ -82,8 +82,7 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
     state.scene.entityDatabase.set(entity, renderer);
   }
 
-  auto material = assetRegistry.getMaterials().addAsset({});
-
+  auto material = assetRegistry.add<quoll::MaterialAsset>({});
   EXPECT_FALSE(quoll::editor::EntitySetMeshRendererMaterial(entity, 5, material)
                    .predicate(state, assetRegistry));
 }
@@ -117,8 +116,7 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
     state.scene.entityDatabase.set(entity, renderer);
   }
 
-  auto material = assetRegistry.getMaterials().addAsset({});
-
+  auto material = assetRegistry.add<quoll::MaterialAsset>({});
   EXPECT_TRUE(quoll::editor::EntitySetMeshRendererMaterial(entity, 1, material)
                   .predicate(state, assetRegistry));
 }
@@ -186,7 +184,7 @@ TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
 TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
        PredicateReturnsFalseIfNoMeshRenderer) {
   auto entity = state.scene.entityDatabase.create();
-  auto material = assetRegistry.getMaterials().addAsset({});
+  auto material = assetRegistry.add<quoll::MaterialAsset>({});
   EXPECT_FALSE(
       quoll::editor::EntityAddMeshRendererMaterialSlot(entity, material)
           .predicate(state, assetRegistry));
@@ -211,7 +209,7 @@ TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
   quoll::MeshRenderer renderer{};
   state.scene.entityDatabase.set(entity, renderer);
 
-  auto material = assetRegistry.getMaterials().addAsset({});
+  auto material = assetRegistry.add<quoll::MaterialAsset>({});
 
   EXPECT_TRUE(quoll::editor::EntityAddMeshRendererMaterialSlot(entity, material)
                   .predicate(state, assetRegistry));
@@ -274,7 +272,7 @@ TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
 TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
        PredicateReturnsFalseIfNoMeshRenderer) {
   auto entity = state.scene.entityDatabase.create();
-  auto material = assetRegistry.getMaterials().addAsset({});
+  auto material = assetRegistry.add<quoll::MaterialAsset>({});
   EXPECT_FALSE(
       quoll::editor::EntityRemoveLastMeshRendererMaterialSlot(entity).predicate(
           state, assetRegistry));

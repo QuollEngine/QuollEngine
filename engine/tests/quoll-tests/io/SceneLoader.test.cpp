@@ -293,7 +293,7 @@ TEST_F(SceneLoaderMeshTest,
   quoll::AssetData<quoll::MeshAsset> data{};
   data.uuid = quoll::Uuid("hello");
   data.type = quoll::AssetType::Mesh;
-  auto handle = assetRegistry.getMeshes().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["mesh"] = "bye";
@@ -306,7 +306,7 @@ TEST_F(SceneLoaderMeshTest, CreatesMeshComponentIfValidAssetTypeIsMesh) {
   quoll::AssetData<quoll::MeshAsset> data{};
   data.type = quoll::AssetType::Mesh;
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getMeshes().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["mesh"] = data.uuid;
@@ -322,7 +322,7 @@ TEST_F(SceneLoaderMeshTest,
   quoll::AssetData<quoll::MeshAsset> data{};
   data.type = quoll::AssetType::SkinnedMesh;
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getMeshes().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["mesh"] = data.uuid;
@@ -358,11 +358,11 @@ TEST_F(SceneLoaderMeshRendererTest, DoesNotCreateComponentIfFieldIsInvalid) {
 TEST_F(SceneLoaderMeshRendererTest, CreatesComponentWithMaterialsIfValid) {
   quoll::AssetData<quoll::MaterialAsset> material1{};
   material1.uuid = quoll::Uuid("material1");
-  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+  auto handle1 = assetRegistry.add(material1);
 
   quoll::AssetData<quoll::MaterialAsset> material2{};
   material2.uuid = quoll::Uuid("material2");
-  auto handle2 = assetRegistry.getMaterials().addAsset(material2);
+  auto handle2 = assetRegistry.add(material2);
 
   auto [node, entity] = createNode();
   node["meshRenderer"]["materials"].push_back("material1");
@@ -385,7 +385,7 @@ TEST_F(SceneLoaderMeshRendererTest,
 
   quoll::AssetData<quoll::MaterialAsset> material1{};
   material1.uuid = quoll::Uuid("material1");
-  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+  auto handle1 = assetRegistry.add(material1);
 
   auto [node, entity] = createNode();
   // Valid node
@@ -458,11 +458,11 @@ TEST_F(SceneLoaderSkinnedMeshRendererTest,
        CreatesComponentWithMaterialsIfValid) {
   quoll::AssetData<quoll::MaterialAsset> material1{};
   material1.uuid = quoll::Uuid("material1");
-  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+  auto handle1 = assetRegistry.add(material1);
 
   quoll::AssetData<quoll::MaterialAsset> material2{};
   material2.uuid = quoll::Uuid("material2");
-  auto handle2 = assetRegistry.getMaterials().addAsset(material2);
+  auto handle2 = assetRegistry.add(material2);
 
   auto [node, entity] = createNode();
   node["skinnedMeshRenderer"]["materials"].push_back("material1");
@@ -485,7 +485,7 @@ TEST_F(SceneLoaderSkinnedMeshRendererTest,
 
   quoll::AssetData<quoll::MaterialAsset> material1{};
   material1.uuid = quoll::Uuid("material1");
-  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+  auto handle1 = assetRegistry.add(material1);
 
   auto [node, entity] = createNode();
   // Valid node
@@ -561,7 +561,7 @@ TEST_F(SceneLoaderSkeletonTest,
   quoll::AssetData<quoll::SkeletonAsset> data{};
   data.uuid = quoll::Uuid("hello");
 
-  auto handle = assetRegistry.getSkeletons().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["skeleton"] = "bye";
@@ -588,7 +588,7 @@ TEST_F(SceneLoaderSkeletonTest,
   }
 
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getSkeletons().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["skeleton"] = data.uuid;
@@ -723,7 +723,7 @@ TEST_F(SceneLoaderAnimatorTest, CreatesAnimatorComponentIfAllFieldsAreValid) {
   quoll::AssetData<quoll::AnimatorAsset> data{};
   data.uuid = quoll::Uuid("hello");
   data.data.initialState = 5;
-  auto handle = assetRegistry.getAnimators().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["animator"]["asset"] = data.uuid;
@@ -1577,7 +1577,7 @@ TEST_F(SceneLoaderAudioTest,
   quoll::AssetData<quoll::AudioAsset> data{};
   data.uuid = quoll::Uuid("hello");
 
-  auto handle = assetRegistry.getAudios().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["audio"]["source"] = "bye";
@@ -1590,7 +1590,7 @@ TEST_F(SceneLoaderAudioTest, CreatesAudioComponentWithFileDataIfValidField) {
   quoll::AssetData<quoll::AudioAsset> data{};
   data.uuid = quoll::Uuid("hello");
 
-  auto handle = assetRegistry.getAudios().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["audio"]["source"] = data.uuid;
@@ -1630,7 +1630,7 @@ TEST_F(SceneLoaderScriptTest,
   quoll::AssetData<quoll::LuaScriptAsset> data{};
   data.uuid = quoll::Uuid("hello");
 
-  auto handle = assetRegistry.getLuaScripts().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["script"] = "bye";
@@ -1643,7 +1643,7 @@ TEST_F(SceneLoaderScriptTest,
        CreatesScriptComponentWithFileDataIfStringFieldWithValidPath) {
   quoll::AssetData<quoll::LuaScriptAsset> data{};
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getLuaScripts().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["script"] = data.uuid;
@@ -1657,11 +1657,11 @@ TEST_F(SceneLoaderScriptTest,
        CreatesScriptComponentWithFileAndVariablesIfMapWithValidPath) {
   quoll::AssetData<quoll::LuaScriptAsset> data{};
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getLuaScripts().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   quoll::AssetData<quoll::PrefabAsset> prefabData{};
   prefabData.uuid = quoll::Uuid("my-prefab");
-  auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefabData);
+  auto prefabHandle = assetRegistry.add(prefabData);
 
   quoll::AssetData<quoll::TextureAsset> textureData{};
   textureData.uuid = quoll::Uuid("my-texture");
@@ -1742,7 +1742,7 @@ TEST_F(SceneLoaderScriptTest,
        DoesNotCreateTextComponentIfNoFontHandleInRegistry) {
   quoll::AssetData<quoll::FontAsset> data{};
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getFonts().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["text"]["font"] = "bye";
@@ -1760,7 +1760,7 @@ TEST_F(SceneLoaderScriptTest,
 
   quoll::AssetData<quoll::FontAsset> data{};
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getFonts().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   quoll::Text defaults{};
 
@@ -1804,7 +1804,7 @@ TEST_F(SceneLoaderTextTest, CreatesTextComponentWithFileDataIfValidField) {
 
   quoll::AssetData<quoll::FontAsset> data{};
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getFonts().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   quoll::Text defaults{};
 
@@ -2590,7 +2590,7 @@ TEST_F(SceneLoaderSkyboxTest,
   quoll::AssetData<quoll::EnvironmentAsset> data{};
   data.uuid = quoll::Uuid("test-uuid.uuid");
 
-  auto handle = assetRegistry.getEnvironments().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["skybox"]["type"] = "texture";
@@ -2642,7 +2642,7 @@ TEST_F(SceneLoaderSkyboxTest, AddsColorSkyboxIfTypeIsColorAndColorIsDefined) {
   quoll::AssetData<quoll::EnvironmentAsset> data{};
   data.uuid = quoll::Uuid("test-uuid.uuid");
 
-  auto handle = assetRegistry.getEnvironments().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["skybox"]["type"] = "color";
@@ -2786,7 +2786,7 @@ TEST_F(SceneLoaderInputMapTest,
   quoll::AssetData<quoll::InputMapAsset> data{};
   data.uuid = quoll::Uuid("hello");
   data.type = quoll::AssetType::InputMap;
-  auto handle = assetRegistry.getInputMaps().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["inputMap"]["asset"] = "bye";
@@ -2799,7 +2799,7 @@ TEST_F(SceneLoaderInputMapTest, CreatesInputMapComponentIfInputMapAssetExists) {
   quoll::AssetData<quoll::InputMapAsset> data{};
   data.type = quoll::AssetType::InputMap;
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getInputMaps().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   auto [node, entity] = createNode();
   node["inputMap"]["asset"] = data.uuid;
@@ -2816,7 +2816,7 @@ TEST_F(SceneLoaderInputMapTest, SetsInputMapDefaultSchemeToZeroIfInvalidField) {
   quoll::AssetData<quoll::InputMapAsset> data{};
   data.type = quoll::AssetType::InputMap;
   data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.getInputMaps().addAsset(data);
+  auto handle = assetRegistry.add(data);
 
   std::vector<YAML::Node> invalidNodes{
       YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),

@@ -308,14 +308,14 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
     asset.data.bindings.push_back(binding);
   }
 
-  auto handle = mRegistry.getInputMaps().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<InputMapAsset>(uuid);
 
   if (!handle) {
-    auto newHandle = mRegistry.getInputMaps().addAsset(asset);
+    auto newHandle = mRegistry.add(asset);
     return Result<AssetHandle<InputMapAsset>>::Ok(newHandle);
   }
 
-  mRegistry.getInputMaps().updateAsset(handle, asset);
+  mRegistry.update(handle, asset);
 
   return Result<AssetHandle<InputMapAsset>>::Ok(handle);
 }

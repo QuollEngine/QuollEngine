@@ -10,8 +10,8 @@ void AnimatorSerializer::serialize(YAML::Node &node,
   if (entityDatabase.has<Animator>(entity)) {
     auto handle = entityDatabase.get<Animator>(entity).asset;
 
-    if (assetRegistry.getAnimators().hasAsset(handle)) {
-      auto uuid = assetRegistry.getAnimators().getAsset(handle).uuid;
+    if (assetRegistry.has(handle)) {
+      auto uuid = assetRegistry.get(handle).uuid;
 
       node["animator"]["asset"] = uuid;
     }
@@ -25,10 +25,10 @@ void AnimatorSerializer::deserialize(const YAML::Node &node,
   if (node["animator"] && node["animator"].IsMap() &&
       node["animator"]["asset"]) {
     auto assetUuid = node["animator"]["asset"].as<Uuid>(Uuid{});
-    auto handle = assetRegistry.getAnimators().findHandleByUuid(assetUuid);
+    auto handle = assetRegistry.findHandleByUuid<AnimatorAsset>(assetUuid);
 
     if (handle) {
-      const auto &asset = assetRegistry.getAnimators().getAsset(handle);
+      const auto &asset = assetRegistry.get(handle);
       Animator animator;
       animator.asset = handle;
       entityDatabase.set(entity, animator);

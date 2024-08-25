@@ -53,7 +53,7 @@ TEST_F(GLTFImporterSkeletonTest, DoesNotCreateSkeletonIfNoSkins) {
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
 
-  EXPECT_TRUE(assetCache.getRegistry().getSkeletons().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 }
 
 TEST_F(GLTFImporterSkeletonTest,
@@ -79,7 +79,7 @@ TEST_F(GLTFImporterSkeletonTest,
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
 
-  EXPECT_TRUE(assetCache.getRegistry().getSkeletons().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 }
 
 TEST_F(GLTFImporterSkeletonTest,
@@ -102,7 +102,7 @@ TEST_F(GLTFImporterSkeletonTest,
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
 
-  EXPECT_TRUE(assetCache.getRegistry().getSkeletons().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 }
 
 TEST_F(
@@ -128,7 +128,7 @@ TEST_F(
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
 
-  EXPECT_TRUE(assetCache.getRegistry().getSkeletons().getAssets().empty());
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 }
 
 TEST_F(GLTFImporterSkeletonTest,
@@ -156,7 +156,7 @@ TEST_F(GLTFImporterSkeletonTest,
   EXPECT_FALSE(res.hasError());
 
   // First skin is created while second one is ignored
-  EXPECT_EQ(assetCache.getRegistry().getSkeletons().getAssets().size(), 1);
+  EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 1);
 }
 
 TEST_F(GLTFImporterSkeletonTest, CreatesSkeletonWithJoints) {
@@ -171,10 +171,10 @@ TEST_F(GLTFImporterSkeletonTest, CreatesSkeletonWithJoints) {
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
 
-  EXPECT_FALSE(assetCache.getRegistry().getSkeletons().getAssets().empty());
+  EXPECT_GT(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 
-  auto &skeleton = assetCache.getRegistry().getSkeletons().getAsset(
-      quoll::AssetHandle<quoll::SkeletonAsset>{1});
+  auto &skeleton =
+      assetCache.getRegistry().get(quoll::AssetHandle<quoll::SkeletonAsset>{1});
 
   for (usize i = 0; i < skeleton.data.jointLocalPositions.size(); ++i) {
     auto &node = scene.nodes.at(skin.joints.at(i));

@@ -64,7 +64,7 @@ void EditorScreen::start(const Project &rawProject) {
 
   AssetHandle<SceneAsset> sceneAsset;
   for (auto [handle, data] :
-       assetManager.getAssetRegistry().getScenes().getAssets()) {
+       assetManager.getAssetRegistry().getAll<SceneAsset>()) {
     sceneAsset = handle;
     project.startingScene = data.uuid;
   }

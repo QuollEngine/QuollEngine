@@ -58,7 +58,7 @@ public:
     quoll::AssetData<quoll::AudioAsset> asset{};
     asset.data.bytes = bytes;
     asset.data.format = quoll::AudioAssetFormat::Wav;
-    return assetRegistry.getAudios().addAsset(asset);
+    return assetRegistry.add(asset);
   }
 
   quoll::AssetRegistry assetRegistry;

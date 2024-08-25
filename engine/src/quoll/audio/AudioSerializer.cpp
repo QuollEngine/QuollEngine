@@ -9,8 +9,8 @@ void AudioSerializer::serialize(YAML::Node &node,
                                 AssetRegistry &assetRegistry) {
   if (entityDatabase.has<AudioSource>(entity)) {
     auto handle = entityDatabase.get<AudioSource>(entity).source;
-    if (assetRegistry.getAudios().hasAsset(handle)) {
-      auto uuid = assetRegistry.getAudios().getAsset(handle).uuid;
+    if (assetRegistry.has(handle)) {
+      auto uuid = assetRegistry.get(handle).uuid;
 
       node["audio"]["source"] = uuid;
     }
@@ -23,7 +23,7 @@ void AudioSerializer::deserialize(const YAML::Node &node,
   if (node["audio"] && node["audio"].IsMap()) {
     auto uuid = node["audio"]["source"].as<Uuid>(Uuid{});
 
-    auto handle = assetRegistry.getAudios().findHandleByUuid(uuid);
+    auto handle = assetRegistry.findHandleByUuid<AudioAsset>(uuid);
 
     if (handle) {
       entityDatabase.set<AudioSource>(entity, {handle});

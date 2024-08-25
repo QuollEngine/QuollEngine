@@ -52,7 +52,7 @@ TEST_F(EntityCreateAudioActionTest,
 TEST_F(EntityCreateAudioActionTest,
        PredicateReturnsTrueIfAudioDoesNotExistAndAssetIsValid) {
   auto entity = state.scene.entityDatabase.create();
-  auto handle = assetRegistry.getAudios().addAsset({});
+  auto handle = assetRegistry.add<quoll::AudioAsset>({});
 
   quoll::editor::EntityCreateAudio action(entity, handle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
@@ -97,8 +97,8 @@ TEST_F(EntitySetAudioActionTest, PredicateReturnsFalseIfAudioIsInvalid) {
 
 TEST_F(EntitySetAudioActionTest, PredicateReturnsTrueIfAudioExists) {
   auto entity = state.scene.entityDatabase.create();
-  auto scriptHandle = assetRegistry.getAudios().addAsset({});
+  auto handle = assetRegistry.add<quoll::AudioAsset>({});
 
-  quoll::editor::EntitySetAudio action(entity, scriptHandle);
+  quoll::editor::EntitySetAudio action(entity, handle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }

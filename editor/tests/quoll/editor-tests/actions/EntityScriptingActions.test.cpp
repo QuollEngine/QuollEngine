@@ -51,7 +51,7 @@ TEST_F(EntityCreateScriptActionTest,
 TEST_F(EntityCreateScriptActionTest,
        PredicateReturnsTrueIfScriptDoesNotExistAndAssetIsValid) {
   auto entity = state.scene.entityDatabase.create();
-  auto handle = assetRegistry.getLuaScripts().addAsset({});
+  auto handle = assetRegistry.add<quoll::LuaScriptAsset>({});
 
   quoll::editor::EntityCreateScript action(entity, handle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
@@ -97,7 +97,7 @@ TEST_F(EntitySetScriptActionTest, PredicateReturnsFalseIfScriptIsInvalid) {
 
 TEST_F(EntitySetScriptActionTest, PredicateReturnsTrueIfScriptExists) {
   auto entity = state.scene.entityDatabase.create();
-  auto scriptHandle = assetRegistry.getLuaScripts().addAsset({});
+  auto scriptHandle = assetRegistry.add<quoll::LuaScriptAsset>({});
 
   quoll::editor::EntitySetScript action(entity, scriptHandle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
@@ -180,7 +180,7 @@ TEST_F(EntitySetScriptVariableActionTest,
   asset.data.variables.insert_or_assign(
       "var1",
       quoll::LuaScriptVariable{quoll::LuaScriptVariableType::String, "var1"});
-  auto handle = assetRegistry.getLuaScripts().addAsset(asset);
+  auto handle = assetRegistry.add(asset);
 
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::LuaScript>(entity, {handle});
@@ -196,7 +196,7 @@ TEST_F(EntitySetScriptVariableActionTest,
   asset.data.variables.insert_or_assign(
       "var1", quoll::LuaScriptVariable{
                   quoll::LuaScriptVariableType::AssetPrefab, "var1"});
-  auto handle = assetRegistry.getLuaScripts().addAsset(asset);
+  auto handle = assetRegistry.add(asset);
 
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::LuaScript>(entity, {handle});
@@ -212,7 +212,7 @@ TEST_F(EntitySetScriptVariableActionTest,
   asset.data.variables.insert_or_assign(
       "var1", quoll::LuaScriptVariable{
                   quoll::LuaScriptVariableType::AssetPrefab, "var1"});
-  auto handle = assetRegistry.getLuaScripts().addAsset(asset);
+  auto handle = assetRegistry.add(asset);
 
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::LuaScript>(entity, {handle});
@@ -227,9 +227,9 @@ TEST_F(EntitySetScriptVariableActionTest, PredicateReturnsTrueIfValidVariable) {
   asset.data.variables.insert_or_assign(
       "var1", quoll::LuaScriptVariable{
                   quoll::LuaScriptVariableType::AssetPrefab, "var1"});
-  auto handle = assetRegistry.getLuaScripts().addAsset(asset);
+  auto handle = assetRegistry.add(asset);
 
-  auto prefabHandle = assetRegistry.getPrefabs().addAsset({});
+  auto prefabHandle = assetRegistry.add<quoll::PrefabAsset>({});
 
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::LuaScript>(entity, {handle});

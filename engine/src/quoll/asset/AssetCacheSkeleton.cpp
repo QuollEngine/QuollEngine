@@ -70,8 +70,7 @@ AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
   stream.read(skeleton.data.jointInverseBindMatrices);
   stream.read(skeleton.data.jointNames);
 
-  return Result<AssetHandle<SkeletonAsset>>::Ok(
-      mRegistry.getSkeletons().addAsset(skeleton));
+  return Result<AssetHandle<SkeletonAsset>>::Ok(mRegistry.add(skeleton));
 }
 
 Result<AssetHandle<SkeletonAsset>> AssetCache::loadSkeleton(const Uuid &uuid) {
@@ -92,7 +91,7 @@ AssetCache::getOrLoadSkeleton(const Uuid &uuid) {
     return Result<AssetHandle<SkeletonAsset>>::Ok(AssetHandle<SkeletonAsset>());
   }
 
-  auto handle = mRegistry.getSkeletons().findHandleByUuid(uuid);
+  auto handle = mRegistry.findHandleByUuid<SkeletonAsset>(uuid);
   if (handle) {
     return Result<AssetHandle<SkeletonAsset>>::Ok(handle);
   }

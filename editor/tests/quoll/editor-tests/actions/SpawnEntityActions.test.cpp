@@ -152,7 +152,7 @@ TEST_F(SpawnPrefabAtViewActionTest, ExecutorSpawnsPrefabAtView) {
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
 
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state, assetRegistry);
@@ -184,7 +184,7 @@ TEST_F(SpawnPrefabAtViewActionTest, UndoRemovesRootNode) {
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
 
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto execRes = action.onExecute(state, assetRegistry);
@@ -208,7 +208,7 @@ TEST_F(SpawnPrefabAtViewActionTest,
 
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state, assetRegistry);
@@ -228,7 +228,7 @@ TEST_F(SpawnPrefabAtViewActionTest,
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state, assetRegistry);
@@ -248,7 +248,7 @@ TEST_F(
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state, assetRegistry);
@@ -267,7 +267,7 @@ TEST_F(
 
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
@@ -286,7 +286,7 @@ TEST_F(SpawnPrefabAtViewActionTest, PredicateReturnsFalseIfPrefabAssetIsEmpty) {
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
   quoll::AssetData<quoll::PrefabAsset> asset{};
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
   EXPECT_FALSE(action.predicate(state, assetRegistry));
@@ -298,7 +298,7 @@ TEST_F(SpawnPrefabAtViewActionTest,
 
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
   EXPECT_FALSE(action.predicate(state, assetRegistry));

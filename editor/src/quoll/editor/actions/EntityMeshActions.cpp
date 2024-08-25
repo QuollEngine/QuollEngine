@@ -37,7 +37,7 @@ ActionExecutorResult EntitySetMesh::onExecute(WorkspaceState &state,
     mOldMesh = db.get<SkinnedMesh>(mEntity).handle;
   }
 
-  auto type = assetRegistry.getMeshes().getAsset(mMesh).type;
+  auto type = assetRegistry.get(mMesh).type;
   replaceMesh(type, mMesh, mEntity, db);
 
   ActionExecutorResult res;
@@ -53,7 +53,7 @@ ActionExecutorResult EntitySetMesh::onUndo(WorkspaceState &state,
   auto &db = scene.entityDatabase;
 
   if (mOldMesh) {
-    auto type = assetRegistry.getMeshes().getAsset(mOldMesh).type;
+    auto type = assetRegistry.get(mOldMesh).type;
     replaceMesh(type, mOldMesh, mEntity, db);
   } else {
     if (db.has<Mesh>(mEntity)) {
@@ -71,7 +71,7 @@ ActionExecutorResult EntitySetMesh::onUndo(WorkspaceState &state,
 
 bool EntitySetMesh::predicate(WorkspaceState &state,
                               AssetRegistry &assetRegistry) {
-  return assetRegistry.getMeshes().hasAsset(mMesh);
+  return assetRegistry.has(mMesh);
 }
 
 EntityDeleteMesh::EntityDeleteMesh(Entity entity) : mEntity(entity) {}
@@ -100,7 +100,7 @@ ActionExecutorResult EntityDeleteMesh::onUndo(WorkspaceState &state,
                                               AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
-  auto type = assetRegistry.getMeshes().getAsset(mOldMesh).type;
+  auto type = assetRegistry.get(mOldMesh).type;
 
   replaceMesh(type, mOldMesh, mEntity, db);
 

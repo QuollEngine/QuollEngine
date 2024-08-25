@@ -50,7 +50,7 @@ bool EntitySetSkinnedMeshRendererMaterial::predicate(
     return false;
   }
 
-  return assetRegistry.getMaterials().hasAsset(mNewMaterial);
+  return assetRegistry.has(mNewMaterial);
 }
 
 EntityAddSkinnedMeshRendererMaterialSlot::
@@ -92,7 +92,7 @@ bool EntityAddSkinnedMeshRendererMaterialSlot::predicate(
     return false;
   }
 
-  return assetRegistry.getMaterials().hasAsset(mNewMaterial);
+  return assetRegistry.has(mNewMaterial);
 }
 
 EntityRemoveLastSkinnedMeshRendererMaterialSlot::

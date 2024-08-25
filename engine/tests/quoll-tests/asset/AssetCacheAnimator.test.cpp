@@ -32,13 +32,13 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   quoll::AssetData<quoll::AnimationAsset> animData{};
   animData.uuid = quoll::Uuid("idle");
-  auto idle = cache.getRegistry().getAnimations().addAsset(animData);
+  auto idle = cache.getRegistry().add(animData);
 
   animData.uuid = quoll::Uuid("walk");
-  auto walk = cache.getRegistry().getAnimations().addAsset(animData);
+  auto walk = cache.getRegistry().add(animData);
 
   animData.uuid = quoll::Uuid("run");
-  auto run = cache.getRegistry().getAnimations().addAsset(animData);
+  auto run = cache.getRegistry().add(animData);
 
   quoll::AssetData<quoll::AnimatorAsset> asset{};
   asset.data.initialState = 1;
@@ -273,8 +273,8 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
   EXPECT_EQ(res.getWarnings().size(), invalidStateNames.size());
 
   auto handle = res.getData();
-  EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
-  const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+  EXPECT_TRUE(cache.getRegistry().has(handle));
+  const auto &animator = cache.getRegistry().get(handle);
 
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "valid");
@@ -315,8 +315,8 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
   EXPECT_EQ(res.getWarnings().size(), invalidStateNames.size() + 2);
 
   auto handle = res.getData();
-  EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
-  const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+  EXPECT_TRUE(cache.getRegistry().has(handle));
+  const auto &animator = cache.getRegistry().get(handle);
 
   EXPECT_EQ(animator.data.initialState, 0);
   EXPECT_EQ(animator.data.states.size(), 1);
@@ -352,8 +352,8 @@ TEST_F(AssetCacheAnimatorTest,
     EXPECT_EQ(res.getWarnings().size(), 1);
 
     auto handle = res.getData();
-    EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
-    const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+    EXPECT_TRUE(cache.getRegistry().has(handle));
+    const auto &animator = cache.getRegistry().get(handle);
 
     EXPECT_EQ(animator.data.initialState, 0);
     EXPECT_EQ(animator.data.states.size(), 1);
@@ -381,8 +381,8 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorSetsInitialState) {
   EXPECT_FALSE(res.hasWarnings());
 
   auto handle = res.getData();
-  EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
-  const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+  EXPECT_TRUE(cache.getRegistry().has(handle));
+  const auto &animator = cache.getRegistry().get(handle);
 
   EXPECT_EQ(animator.data.initialState, 1);
   EXPECT_EQ(animator.data.states.size(), 2);
@@ -421,8 +421,8 @@ TEST_F(AssetCacheAnimatorTest,
   EXPECT_FALSE(res.hasWarnings());
 
   auto handle = res.getData();
-  EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
-  const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+  EXPECT_TRUE(cache.getRegistry().has(handle));
+  const auto &animator = cache.getRegistry().get(handle);
 
   EXPECT_EQ(animator.data.states.size(), invalidNodes.size());
   for (auto state : animator.data.states) {
@@ -502,8 +502,8 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
   EXPECT_EQ(res.getWarnings().size(), 9);
 
   auto handle = res.getData();
-  EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
-  const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+  EXPECT_TRUE(cache.getRegistry().has(handle));
+  const auto &animator = cache.getRegistry().get(handle);
 
   EXPECT_EQ(animator.data.states.size(), 2);
   EXPECT_EQ(animator.data.states.at(0).name, "idle");
@@ -519,7 +519,7 @@ TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
   quoll::AssetData<quoll::AnimationAsset> animData{};
   animData.uuid = quoll::Uuid("my-animation");
 
-  auto animationHandle = cache.getRegistry().getAnimations().addAsset(animData);
+  auto animationHandle = cache.getRegistry().add(animData);
 
   YAML::Node node;
   node["version"] = "0.1";
@@ -541,8 +541,8 @@ TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
   EXPECT_FALSE(res.hasWarnings());
 
   auto handle = res.getData();
-  EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
-  const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+  EXPECT_TRUE(cache.getRegistry().has(handle));
+  const auto &animator = cache.getRegistry().get(handle);
 
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "idle");
@@ -578,8 +578,8 @@ TEST_F(AssetCacheAnimatorTest,
   EXPECT_FALSE(res.hasWarnings());
 
   auto handle = res.getData();
-  EXPECT_TRUE(cache.getRegistry().getAnimators().hasAsset(handle));
-  const auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+  EXPECT_TRUE(cache.getRegistry().has(handle));
+  const auto &animator = cache.getRegistry().get(handle);
 
   EXPECT_EQ(animator.name, "test.animator");
   EXPECT_EQ(animator.data.states.size(), 1);
@@ -607,7 +607,7 @@ TEST_F(AssetCacheAnimatorTest,
   auto handle = result.getData();
 
   {
-    auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+    auto &animator = cache.getRegistry().get(handle);
     EXPECT_EQ(animator.type, quoll::AssetType::Animator);
     EXPECT_EQ(animator.name, "old-name");
   }
@@ -619,7 +619,7 @@ TEST_F(AssetCacheAnimatorTest,
     auto result = cache.loadAnimator(animData.uuid);
     EXPECT_EQ(result.getData(), handle);
 
-    auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+    auto &animator = cache.getRegistry().get(handle);
     EXPECT_EQ(animator.type, quoll::AssetType::Animator);
     EXPECT_EQ(animator.name, "new-name");
   }

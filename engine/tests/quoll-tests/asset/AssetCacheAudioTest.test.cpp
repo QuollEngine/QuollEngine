@@ -38,7 +38,7 @@ TEST_F(AssetCacheAudioTest, LoadsWavAudioFileIntoRegistry) {
 
   auto handle = result.getData();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::AudioAsset>());
-  const auto &asset = cache.getRegistry().getAudios().getAsset(handle);
+  const auto &asset = cache.getRegistry().get(handle);
 
   EXPECT_EQ(asset.name, "valid-audio.wav");
   EXPECT_EQ(asset.path, filePath.getData());

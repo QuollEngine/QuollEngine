@@ -14,9 +14,8 @@ void EnvironmentSkyboxSerializer::serialize(YAML::Node &node,
       node["skybox"]["type"] = "color";
       node["skybox"]["color"] = component.color;
     } else if (component.type == EnvironmentSkyboxType::Texture) {
-      if (assetRegistry.getEnvironments().hasAsset(component.texture)) {
-        const auto &asset =
-            assetRegistry.getEnvironments().getAsset(component.texture);
+      if (assetRegistry.has(component.texture)) {
+        const auto &asset = assetRegistry.get(component.texture);
         node["skybox"]["type"] = "texture";
         node["skybox"]["texture"] = asset.uuid;
       }
@@ -38,7 +37,7 @@ void EnvironmentSkyboxSerializer::deserialize(const YAML::Node &node,
       entityDatabase.set(entity, skybox);
     } else if (type == "texture") {
       auto uuid = node["skybox"]["texture"].as<Uuid>(Uuid{});
-      auto handle = assetRegistry.getEnvironments().findHandleByUuid(uuid);
+      auto handle = assetRegistry.findHandleByUuid<EnvironmentAsset>(uuid);
       if (handle) {
         skybox.type = EnvironmentSkyboxType::Texture;
         skybox.texture = handle;

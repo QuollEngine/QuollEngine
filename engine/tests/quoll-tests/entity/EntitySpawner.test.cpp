@@ -44,7 +44,7 @@ TEST_F(EntitySpawnerDeathTest, SpawnPrefabFailsIfPrefabDoesNotExist) {
 }
 
 TEST_F(EntitySpawnerDeathTest, SpawnPrefabReturnsEmptyListIfPrefabIsEmpty) {
-  auto prefab = assetRegistry.getPrefabs().addAsset({});
+  auto prefab = assetRegistry.add<quoll::PrefabAsset>({});
   EXPECT_DEATH(entitySpawner.spawnPrefab(prefab, {}), ".*");
 }
 
@@ -103,7 +103,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
     quoll::PrefabComponent<quoll::AssetHandle<quoll::MeshAsset>> mesh{};
     mesh.entity = i;
-    mesh.value = assetRegistry.getMeshes().addAsset(meshAsset);
+    mesh.value = assetRegistry.add(meshAsset);
     asset.data.meshes.push_back(mesh);
   }
 
@@ -146,7 +146,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
     quoll::PrefabComponent<quoll::AssetHandle<quoll::MeshAsset>> mesh{};
     mesh.entity = i;
-    mesh.value = assetRegistry.getMeshes().addAsset(meshAsset);
+    mesh.value = assetRegistry.add(meshAsset);
     asset.data.meshes.push_back(mesh);
   }
 
@@ -154,7 +154,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (u32 i = 2; i < 5; ++i) {
     quoll::PrefabComponent<quoll::AssetHandle<quoll::SkeletonAsset>> skeleton{};
     skeleton.entity = i;
-    skeleton.value = assetRegistry.getSkeletons().addAsset({});
+    skeleton.value = assetRegistry.add<quoll::SkeletonAsset>({});
     asset.data.skeletons.push_back(skeleton);
   }
 
@@ -168,7 +168,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (u32 i = 2; i < 5; ++i) {
     quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
     animatorAsset.data.initialState = i;
-    auto handle = assetRegistry.getAnimators().addAsset(animatorAsset);
+    auto handle = assetRegistry.add(animatorAsset);
 
     quoll::PrefabComponent<quoll::AssetHandle<quoll::AnimatorAsset>> animator{};
     animator.entity = i;
@@ -192,7 +192,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     asset.data.pointLights.push_back(light);
   }
 
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
@@ -317,9 +317,8 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     const auto &animator = db.get<quoll::Animator>(entity);
     EXPECT_NE(animator.asset, quoll::AssetHandle<quoll::AnimatorAsset>());
     EXPECT_EQ(animator.currentState, i);
-    EXPECT_EQ(
-        assetRegistry.getAnimators().getAsset(animator.asset).data.initialState,
-        animator.currentState);
+    EXPECT_EQ(assetRegistry.get(animator.asset).data.initialState,
+              animator.currentState);
     EXPECT_EQ(animator.normalizedTime, 0.0f);
   }
 
@@ -346,7 +345,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesParentsBeforeChild) {
     transform.value.position = glm::vec3(0.2f);
     asset.data.transforms.push_back(transform);
   }
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
@@ -380,10 +379,10 @@ TEST_F(
 
     quoll::PrefabComponent<quoll::AssetHandle<quoll::MeshAsset>> mesh{};
     mesh.entity = 1;
-    mesh.value = assetRegistry.getMeshes().addAsset(meshData);
+    mesh.value = assetRegistry.add(meshData);
     asset.data.meshes.push_back(mesh);
   }
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
@@ -424,7 +423,7 @@ TEST_F(EntitySpawnerTest,
     transform.value.parent = i - 1;
     asset.data.transforms.push_back(transform);
   }
-  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.add(asset);
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);

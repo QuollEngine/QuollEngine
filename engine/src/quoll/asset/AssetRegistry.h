@@ -61,75 +61,58 @@ public:
 
   void syncWithDevice(RenderStorage &renderStorage);
 
-  inline FontMap &getFonts() { return mFonts; }
-
-  inline MaterialMap &getMaterials() { return mMaterials; }
-
-  inline MeshMap &getMeshes() { return mMeshes; }
-
-  inline SkeletonMap &getSkeletons() { return mSkeletons; }
-
-  inline AnimationMap &getAnimations() { return mAnimations; }
-
-  inline AnimatorMap &getAnimators() { return mAnimators; }
-
-  inline AudioMap &getAudios() { return mAudios; }
-
-  inline PrefabMap &getPrefabs() { return mPrefabs; }
-
-  inline LuaScriptMap &getLuaScripts() { return mLuaScripts; }
-
-  inline EnvironmentMap &getEnvironments() { return mEnvironments; }
-
-  inline SceneMap &getScenes() { return mScenes; }
-
-  inline InputMapMap &getInputMaps() { return mInputMaps; }
-
   std::pair<AssetType, u32> getAssetByUuid(const Uuid &uuid);
 
   template <typename TAssetData>
-  const AssetData<TAssetData> &get(AssetHandle<TAssetData> handle) const {
+  constexpr const AssetData<TAssetData> &
+  get(AssetHandle<TAssetData> handle) const {
     auto &map = getMap<TAssetData>();
     return map.getAsset(handle);
   }
 
   template <typename TAssetData>
-  AssetData<TAssetData> &get(AssetHandle<TAssetData> handle) {
+  constexpr AssetData<TAssetData> &get(AssetHandle<TAssetData> handle) {
     auto &map = getMap<TAssetData>();
     return map.getAsset(handle);
   }
 
-  template <typename TAssetData> bool has(AssetHandle<TAssetData> handle) {
+  template <typename TAssetData>
+  constexpr bool has(AssetHandle<TAssetData> handle) {
     auto &map = getMap<TAssetData>();
     return map.hasAsset(handle);
   }
 
-  template <typename TAssetData> void remove(AssetHandle<TAssetData> handle) {
+  template <typename TAssetData>
+  constexpr void remove(AssetHandle<TAssetData> handle) {
     auto &map = getMap<TAssetData>();
     map.removeAsset(handle);
   }
 
   template <typename TAssetData>
-  AssetHandle<TAssetData> add(const AssetData<TAssetData> &data) {
+  constexpr AssetHandle<TAssetData> add(const AssetData<TAssetData> &data) {
     auto &map = getMap<TAssetData>();
     return map.addAsset(data);
   }
 
   template <typename TAssetData>
-  void update(AssetHandle<TAssetData> handle,
-              const AssetData<TAssetData> &data) {
+  constexpr void update(AssetHandle<TAssetData> handle,
+                        const AssetData<TAssetData> &data) {
     auto &map = getMap<TAssetData>();
     map.updateAsset(handle, data);
   }
 
   template <typename TAssetData>
-  AssetHandle<TAssetData> findHandleByUuid(const Uuid &uuid) {
+  constexpr AssetHandle<TAssetData> findHandleByUuid(const Uuid &uuid) {
     auto &map = getMap<TAssetData>();
     return map.findHandleByUuid(uuid);
   }
 
-  template <typename TAssetData> usize count() {
+  template <typename TAssetData> constexpr usize count() {
     return getMap<TAssetData>().getAssets().size();
+  }
+
+  template <typename TAssetData> constexpr auto &getAll() {
+    return getMap<TAssetData>().getAssets();
   }
 
 private:
