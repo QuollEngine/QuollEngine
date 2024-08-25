@@ -10,12 +10,12 @@ using EntityCreateSpriteActionTest = ActionTestBase;
 TEST_F(EntityCreateSpriteActionTest, ExecutorCreatesSpriteComponent) {
   auto entity = state.scene.entityDatabase.create();
 
-  quoll::editor::EntityCreateSprite action(entity,
-                                           quoll::TextureAssetHandle{15});
+  quoll::editor::EntityCreateSprite action(
+      entity, quoll::AssetHandle<quoll::TextureAsset>{15});
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Sprite>(entity).handle,
-            quoll::TextureAssetHandle{15});
+            quoll::AssetHandle<quoll::TextureAsset>{15});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -23,10 +23,10 @@ TEST_F(EntityCreateSpriteActionTest, ExecutorCreatesSpriteComponent) {
 TEST_F(EntityCreateSpriteActionTest, UndoDeletesSpriteComponent) {
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Sprite>(
-      entity, {quoll::TextureAssetHandle{25}});
+      entity, {quoll::AssetHandle<quoll::TextureAsset>{25}});
 
-  quoll::editor::EntityCreateSprite action(entity,
-                                           quoll::TextureAssetHandle{15});
+  quoll::editor::EntityCreateSprite action(
+      entity, quoll::AssetHandle<quoll::TextureAsset>{15});
   auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Sprite>(entity));
@@ -36,16 +36,16 @@ TEST_F(EntityCreateSpriteActionTest, UndoDeletesSpriteComponent) {
 TEST_F(EntityCreateSpriteActionTest,
        PredicateReturnsFalseIfTextureAssetIsInvalid) {
   auto entity = state.scene.entityDatabase.create();
-  quoll::editor::EntityCreateSprite action(entity,
-                                           quoll::TextureAssetHandle{15});
+  quoll::editor::EntityCreateSprite action(
+      entity, quoll::AssetHandle<quoll::TextureAsset>{15});
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_F(EntityCreateSpriteActionTest,
        PredicateReturnsFalseIfEntityAlreadyHasSprite) {
   auto entity = state.scene.entityDatabase.create();
-  quoll::editor::EntityCreateSprite action(entity,
-                                           quoll::TextureAssetHandle{15});
+  quoll::editor::EntityCreateSprite action(
+      entity, quoll::AssetHandle<quoll::TextureAsset>{15});
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
@@ -64,31 +64,34 @@ TEST_F(EntitySetSpriteActionTest, ExecutorSetsSpriteForEntity) {
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Sprite>(entity, {});
 
-  quoll::editor::EntitySetSprite action(entity, quoll::TextureAssetHandle{15});
+  quoll::editor::EntitySetSprite action(
+      entity, quoll::AssetHandle<quoll::TextureAsset>{15});
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Sprite>(entity).handle,
-            quoll::TextureAssetHandle{15});
+            quoll::AssetHandle<quoll::TextureAsset>{15});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
 TEST_F(EntitySetSpriteActionTest, UndoSetsPreviousSpriteForEntity) {
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Sprite>(
-      entity, {quoll::TextureAssetHandle{25}});
+      entity, {quoll::AssetHandle<quoll::TextureAsset>{25}});
 
-  quoll::editor::EntitySetSprite action(entity, quoll::TextureAssetHandle{15});
+  quoll::editor::EntitySetSprite action(
+      entity, quoll::AssetHandle<quoll::TextureAsset>{15});
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Sprite>(entity).handle,
-            quoll::TextureAssetHandle{25});
+            quoll::AssetHandle<quoll::TextureAsset>{25});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
 TEST_F(EntitySetSpriteActionTest, PredicateReturnsFalseIfTextureIsInvalid) {
   auto entity = state.scene.entityDatabase.create();
-  quoll::editor::EntitySetSprite action(entity, quoll::TextureAssetHandle{15});
+  quoll::editor::EntitySetSprite action(
+      entity, quoll::AssetHandle<quoll::TextureAsset>{15});
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 

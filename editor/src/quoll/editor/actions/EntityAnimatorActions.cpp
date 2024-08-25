@@ -5,7 +5,7 @@
 namespace quoll::editor {
 
 EntityCreateAnimator::EntityCreateAnimator(Entity entity,
-                                           AnimatorAssetHandle handle)
+                                           AssetHandle<AnimatorAsset> handle)
     : mEntity(entity), mHandle(handle) {}
 
 ActionExecutorResult
@@ -29,7 +29,8 @@ bool EntityCreateAnimator::predicate(WorkspaceState &state,
          assetRegistry.getAnimators().hasAsset(mHandle);
 }
 
-EntitySetAnimator::EntitySetAnimator(Entity entity, AnimatorAssetHandle script)
+EntitySetAnimator::EntitySetAnimator(Entity entity,
+                                     AssetHandle<AnimatorAsset> script)
     : mEntity(entity), mAnimator(script) {}
 
 ActionExecutorResult

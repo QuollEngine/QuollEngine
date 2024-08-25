@@ -23,16 +23,16 @@ TEST_F(UICanvasLuaTableTest, CreatesCanvasUIRenderRequestOnRender) {
 
   EXPECT_EQ(view.children.size(), 6);
   EXPECT_EQ(std::get<quoll::UIImage>(view.children.at(0)).texture,
-            quoll::TextureAssetHandle{10});
+            quoll::AssetHandle<quoll::TextureAsset>{10});
   EXPECT_EQ(std::get<quoll::UIText>(view.children.at(1)).content, "Hello");
   EXPECT_EQ(std::get<quoll::UIImage>(view.children.at(2)).texture,
-            quoll::TextureAssetHandle{20});
+            quoll::AssetHandle<quoll::TextureAsset>{20});
   EXPECT_EQ(std::get<quoll::UIText>(view.children.at(3)).content, "Test");
 
   auto child = std::get<quoll::UIView>(view.children.at(4));
   EXPECT_EQ(child.children.size(), 2);
   EXPECT_EQ(std::get<quoll::UIText>(child.children.at(0)).content, "Child");
   EXPECT_EQ(std::get<quoll::UIImage>(child.children.at(1)).texture,
-            quoll::TextureAssetHandle{30});
+            quoll::AssetHandle<quoll::TextureAsset>{30});
   EXPECT_EQ(std::get<quoll::UIView>(view.children.at(5)).children.size(), 0);
 }

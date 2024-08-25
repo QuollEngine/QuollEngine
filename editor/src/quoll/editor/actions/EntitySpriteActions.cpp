@@ -5,7 +5,8 @@
 
 namespace quoll::editor {
 
-EntitySetSprite::EntitySetSprite(Entity entity, TextureAssetHandle handle)
+EntitySetSprite::EntitySetSprite(Entity entity,
+                                 AssetHandle<TextureAsset> handle)
     : mEntity(entity), mSprite(handle) {}
 
 ActionExecutorResult EntitySetSprite::onExecute(WorkspaceState &state,
@@ -36,7 +37,8 @@ bool EntitySetSprite::predicate(WorkspaceState &state,
   return assetRegistry.getTextures().hasAsset(mSprite);
 }
 
-EntityCreateSprite::EntityCreateSprite(Entity entity, TextureAssetHandle handle)
+EntityCreateSprite::EntityCreateSprite(Entity entity,
+                                       AssetHandle<TextureAsset> handle)
     : mEntity(entity), mHandle(handle) {}
 
 ActionExecutorResult

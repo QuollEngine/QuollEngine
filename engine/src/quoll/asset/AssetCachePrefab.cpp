@@ -29,7 +29,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   header.name = asset.name;
   file.write(header);
 
-  std::map<MaterialAssetHandle, u32> localMaterialMap;
+  std::unordered_map<AssetHandle<MaterialAsset>, u32> localMaterialMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.meshes.size());
@@ -60,7 +60,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     file.write(assetPaths);
   }
 
-  std::map<MeshAssetHandle, u32> localMeshMap;
+  std::unordered_map<AssetHandle<MeshAsset>, u32> localMeshMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.meshes.size());
@@ -78,7 +78,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     file.write(assetPaths);
   }
 
-  std::map<SkeletonAssetHandle, u32> localSkeletonMap;
+  std::map<AssetHandle<SkeletonAsset>, u32> localSkeletonMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.skeletons.size());
@@ -97,7 +97,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     file.write(assetPaths);
   }
 
-  std::map<AnimationAssetHandle, u32> localAnimationMap;
+  std::map<AssetHandle<AnimationAsset>, u32> localAnimationMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.animations.size());
@@ -116,7 +116,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     file.write(assetPaths);
   }
 
-  std::map<AnimatorAssetHandle, u32> localAnimatorMap;
+  std::map<AssetHandle<AnimatorAsset>, u32> localAnimatorMap;
   {
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.animators.size());
@@ -251,7 +251,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   return Result<Path>::Ok(assetPath);
 }
 
-Result<PrefabAssetHandle>
+Result<AssetHandle<PrefabAsset>>
 AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
                                           const Path &filePath,
                                           const AssetFileHeader &header) {
@@ -264,13 +264,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   prefab.type = AssetType::Prefab;
   prefab.uuid = Uuid(filePath.stem().string());
 
-  std::vector<MaterialAssetHandle> localMaterialMap;
+  std::vector<AssetHandle<MaterialAsset>> localMaterialMap;
   {
     u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localMaterialMap.resize(numAssets, MaterialAssetHandle::Null);
+    localMaterialMap.resize(numAssets, AssetHandle<MaterialAsset>());
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
@@ -285,13 +285,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     }
   }
 
-  std::vector<MeshAssetHandle> localMeshMap;
+  std::vector<AssetHandle<MeshAsset>> localMeshMap;
   {
     u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localMeshMap.resize(numAssets, MeshAssetHandle::Null);
+    localMeshMap.resize(numAssets, AssetHandle<MeshAsset>());
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
@@ -306,13 +306,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     }
   }
 
-  std::vector<SkeletonAssetHandle> localSkeletonMap;
+  std::vector<AssetHandle<SkeletonAsset>> localSkeletonMap;
   {
     u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localSkeletonMap.resize(numAssets, SkeletonAssetHandle::Null);
+    localSkeletonMap.resize(numAssets, AssetHandle<SkeletonAsset>());
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
@@ -327,7 +327,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     }
   }
 
-  std::vector<AnimationAssetHandle> localAnimationMap;
+  std::vector<AssetHandle<AnimationAsset>> localAnimationMap;
   {
     auto &map = mRegistry.getAnimations();
 
@@ -335,7 +335,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localAnimationMap.resize(numAssets, AnimationAssetHandle::Null);
+    localAnimationMap.resize(numAssets, AssetHandle<AnimationAsset>());
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
@@ -351,7 +351,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     }
   }
 
-  std::vector<AnimatorAssetHandle> localAnimatorMap;
+  std::vector<AssetHandle<AnimatorAsset>> localAnimatorMap;
   {
     auto &map = mRegistry.getAnimators();
 
@@ -359,7 +359,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localAnimatorMap.resize(numAssets, AnimatorAssetHandle::Null);
+    localAnimatorMap.resize(numAssets, AssetHandle<AnimatorAsset>());
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
@@ -574,21 +574,21 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
       prefab.data.skeletons.empty() && prefab.data.animators.empty() &&
       prefab.data.names.empty() && prefab.data.meshRenderers.empty() &&
       prefab.data.skinnedMeshRenderers.empty()) {
-    return Result<PrefabAssetHandle>::Error("Prefab is empty");
+    return Result<AssetHandle<PrefabAsset>>::Error("Prefab is empty");
   }
 
-  return Result<PrefabAssetHandle>::Ok(mRegistry.getPrefabs().addAsset(prefab),
-                                       warnings);
+  return Result<AssetHandle<PrefabAsset>>::Ok(
+      mRegistry.getPrefabs().addAsset(prefab), warnings);
 }
 
-Result<PrefabAssetHandle> AssetCache::loadPrefab(const Uuid &uuid) {
+Result<AssetHandle<PrefabAsset>> AssetCache::loadPrefab(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Prefab);
   if (header.hasError()) {
-    return Result<PrefabAssetHandle>::Error(header.getError());
+    return Result<AssetHandle<PrefabAsset>>::Error(header.getError());
   }
 
   return loadPrefabDataFromInputStream(stream, filePath, header.getData());

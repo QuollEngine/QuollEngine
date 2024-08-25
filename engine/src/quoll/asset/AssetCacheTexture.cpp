@@ -174,12 +174,12 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   return Result<Path>::Ok(assetPath);
 }
 
-Result<TextureAssetHandle> AssetCache::loadTexture(const Uuid &uuid) {
+Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
   std::ifstream stream(filePath, std::ios::binary);
   if (!stream.good()) {
-    return Result<TextureAssetHandle>::Error("Cannot open file: " +
-                                             filePath.string());
+    return Result<AssetHandle<TextureAsset>>::Error("Cannot open file: " +
+                                                    filePath.string());
   }
 
   stream.seekg(0, std::ios::end);
@@ -196,16 +196,17 @@ Result<TextureAssetHandle> AssetCache::loadTexture(const Uuid &uuid) {
       &ktxTextureData);
 
   if (result != KTX_SUCCESS) {
-    return Result<TextureAssetHandle>::Error(
+    return Result<AssetHandle<TextureAsset>>::Error(
         KtxError("Cannot load KTX texture", result).what());
   }
 
   if (ktxTextureData->numDimensions != 2) {
-    return Result<TextureAssetHandle>::Error("Only 2D textures are supported");
+    return Result<AssetHandle<TextureAsset>>::Error(
+        "Only 2D textures are supported");
   }
 
   if (ktxTextureData->isArray) {
-    return Result<TextureAssetHandle>::Error(
+    return Result<AssetHandle<TextureAsset>>::Error(
         "Texture arrays are not supported");
   }
 
@@ -272,18 +273,19 @@ Result<TextureAssetHandle> AssetCache::loadTexture(const Uuid &uuid) {
 
   ktxTexture_Destroy(ktxTextureData);
 
-  return Result<TextureAssetHandle>::Ok(
+  return Result<AssetHandle<TextureAsset>>::Ok(
       mRegistry.getTextures().addAsset(texture));
 }
 
-Result<TextureAssetHandle> AssetCache::getOrLoadTexture(const Uuid &uuid) {
+Result<AssetHandle<TextureAsset>>
+AssetCache::getOrLoadTexture(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<TextureAssetHandle>::Ok(TextureAssetHandle::Null);
+    return Result<AssetHandle<TextureAsset>>::Ok(AssetHandle<TextureAsset>());
   }
 
   auto handle = mRegistry.getTextures().findHandleByUuid(uuid);
-  if (handle != TextureAssetHandle::Null) {
-    return Result<TextureAssetHandle>::Ok(handle);
+  if (handle) {
+    return Result<AssetHandle<TextureAsset>>::Ok(handle);
   }
 
   return loadTexture(uuid);

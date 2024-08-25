@@ -48,7 +48,7 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   return Result<Path>::Ok(assetPath, {});
 }
 
-Result<AnimationAssetHandle>
+Result<AssetHandle<AnimationAsset>>
 AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
                                              const Path &filePath,
                                              const AssetFileHeader &header) {
@@ -78,31 +78,34 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
     stream.read(keyframe.keyframeValues);
   }
 
-  return Result<AnimationAssetHandle>::Ok(
+  return Result<AssetHandle<AnimationAsset>>::Ok(
       mRegistry.getAnimations().addAsset(animation));
 }
 
-Result<AnimationAssetHandle> AssetCache::loadAnimation(const Uuid &uuid) {
+Result<AssetHandle<AnimationAsset>>
+AssetCache::loadAnimation(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Animation);
   if (header.hasError()) {
-    return Result<AnimationAssetHandle>::Error(header.getError());
+    return Result<AssetHandle<AnimationAsset>>::Error(header.getError());
   }
 
   return loadAnimationDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<AnimationAssetHandle> AssetCache::getOrLoadAnimation(const Uuid &uuid) {
+Result<AssetHandle<AnimationAsset>>
+AssetCache::getOrLoadAnimation(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<AnimationAssetHandle>::Ok(AnimationAssetHandle::Null);
+    return Result<AssetHandle<AnimationAsset>>::Ok(
+        AssetHandle<AnimationAsset>());
   }
 
   auto handle = mRegistry.getAnimations().findHandleByUuid(uuid);
-  if (handle != AnimationAssetHandle::Null) {
-    return Result<AnimationAssetHandle>::Ok(handle);
+  if (handle) {
+    return Result<AssetHandle<AnimationAsset>>::Ok(handle);
   }
 
   return loadAnimation(uuid);

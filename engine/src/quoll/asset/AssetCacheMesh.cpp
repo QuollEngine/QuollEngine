@@ -54,7 +54,7 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   return Result<Path>::Ok(assetPath);
 }
 
-Result<MeshAssetHandle>
+Result<AssetHandle<MeshAsset>>
 AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
                                         const Path &filePath,
                                         const AssetFileHeader &header) {
@@ -76,7 +76,8 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
     stream.read(numVertices);
 
     if (numVertices == 0) {
-      return Result<MeshAssetHandle>::Error("Mesh geometry has no vertices");
+      return Result<AssetHandle<MeshAsset>>::Error(
+          "Mesh geometry has no vertices");
     }
 
     auto &g = mesh.data.geometries.at(i);
@@ -104,44 +105,45 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
     stream.read(numIndices);
 
     if (numIndices == 0) {
-      return Result<MeshAssetHandle>::Error("Mesh does not have indices");
+      return Result<AssetHandle<MeshAsset>>::Error(
+          "Mesh does not have indices");
     }
 
     mesh.data.geometries.at(i).indices.resize(numIndices);
     stream.read(mesh.data.geometries.at(i).indices);
   }
 
-  return Result<MeshAssetHandle>::Ok(mRegistry.getMeshes().addAsset(mesh),
-                                     warnings);
+  return Result<AssetHandle<MeshAsset>>::Ok(
+      mRegistry.getMeshes().addAsset(mesh), warnings);
 }
 
-Result<MeshAssetHandle> AssetCache::loadMesh(const Uuid &uuid) {
+Result<AssetHandle<MeshAsset>> AssetCache::loadMesh(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::None);
   if (header.hasError()) {
-    return Result<MeshAssetHandle>::Error(header.getError());
+    return Result<AssetHandle<MeshAsset>>::Error(header.getError());
   }
 
   if (header.getData().type != AssetType::Mesh &&
       header.getData().type != AssetType::SkinnedMesh) {
-    return Result<MeshAssetHandle>::Error("Opened file is not a quoll asset: " +
-                                          filePath.string());
+    return Result<AssetHandle<MeshAsset>>::Error(
+        "Opened file is not a quoll asset: " + filePath.string());
   }
 
   return loadMeshDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<MeshAssetHandle> AssetCache::getOrLoadMesh(const Uuid &uuid) {
+Result<AssetHandle<MeshAsset>> AssetCache::getOrLoadMesh(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Null);
+    return Result<AssetHandle<MeshAsset>>::Ok(AssetHandle<MeshAsset>());
   }
 
   auto handle = mRegistry.getMeshes().findHandleByUuid(uuid);
-  if (handle != MeshAssetHandle::Null) {
-    return Result<MeshAssetHandle>::Ok(handle);
+  if (handle) {
+    return Result<AssetHandle<MeshAsset>>::Ok(handle);
   }
 
   return loadMesh(uuid);

@@ -279,7 +279,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "valid");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            quoll::AnimationAssetHandle::Null);
+            quoll::AssetHandle<quoll::AnimationAsset>());
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 0);
 }
 
@@ -322,7 +322,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "INITIAL");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            quoll::AnimationAssetHandle::Null);
+            quoll::AssetHandle<quoll::AnimationAsset>());
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 0);
 }
 
@@ -508,7 +508,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
   EXPECT_EQ(animator.data.states.size(), 2);
   EXPECT_EQ(animator.data.states.at(0).name, "idle");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            quoll::AnimationAssetHandle::Null);
+            quoll::AssetHandle<quoll::AnimationAsset>());
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).transitions.at(0).eventName,
             "NEW_EVENT");
@@ -588,7 +588,7 @@ TEST_F(AssetCacheAnimatorTest,
             quoll::AnimationLoopMode::Linear);
   EXPECT_EQ(animator.data.states.at(0).speed, 0.5f);
   EXPECT_NE(animator.data.states.at(0).animation,
-            quoll::AnimationAssetHandle{0});
+            quoll::AssetHandle<quoll::AnimationAsset>{0});
 }
 
 TEST_F(AssetCacheAnimatorTest,

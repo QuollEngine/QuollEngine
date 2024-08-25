@@ -27,7 +27,7 @@ void ScriptSerializer::serialize(YAML::Node &node,
           node["script"]["variables"][name]["type"] = "string";
           node["script"]["variables"][name]["value"] = value.get<String>();
         } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
-          auto handle = value.get<PrefabAssetHandle>();
+          auto handle = value.get<AssetHandle<PrefabAsset>>();
           if (assetRegistry.getPrefabs().hasAsset(handle)) {
             auto uuid = assetRegistry.getPrefabs().getAsset(handle).uuid;
 
@@ -35,7 +35,7 @@ void ScriptSerializer::serialize(YAML::Node &node,
             node["script"]["variables"][name]["value"] = uuid;
           }
         } else if (value.isType(LuaScriptVariableType::AssetTexture)) {
-          auto handle = value.get<TextureAssetHandle>();
+          auto handle = value.get<AssetHandle<TextureAsset>>();
           if (assetRegistry.getTextures().hasAsset(handle)) {
             auto uuid = assetRegistry.getTextures().getAsset(handle).uuid;
 
@@ -74,13 +74,13 @@ void ScriptSerializer::deserialize(const YAML::Node &node,
           } else if (type == "prefab") {
             auto handle =
                 assetRegistry.getPrefabs().findHandleByUuid(Uuid(value));
-            if (handle != PrefabAssetHandle::Null) {
+            if (handle) {
               script.variables.insert_or_assign(name, handle);
             }
           } else if (type == "texture") {
             auto handle =
                 assetRegistry.getTextures().findHandleByUuid(Uuid(value));
-            if (handle != TextureAssetHandle::Null) {
+            if (handle) {
               script.variables.insert_or_assign(name, handle);
             }
           }
@@ -90,7 +90,7 @@ void ScriptSerializer::deserialize(const YAML::Node &node,
 
     script.handle = assetRegistry.getLuaScripts().findHandleByUuid(uuid);
 
-    if (script.handle != LuaScriptAssetHandle::Null) {
+    if (script.handle) {
       entityDatabase.set(entity, script);
     }
   }

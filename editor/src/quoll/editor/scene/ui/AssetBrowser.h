@@ -39,11 +39,11 @@ private:
 
   void fetchAssetDirectory(Path path, AssetManager &assetManager);
 
-  void fetchPrefab(PrefabAssetHandle handle, AssetManager &assetManager);
+  void fetchPrefab(AssetHandle<PrefabAsset> handle, AssetManager &assetManager);
 
   void setDefaultProps(Entry &entry, AssetRegistry &assetRegistry);
 
-  void setCurrentFetch(std::variant<Path, PrefabAssetHandle> fetch);
+  void setCurrentFetch(std::variant<Path, AssetHandle<PrefabAsset>> fetch);
 
   const Path &getCurrentFetchPath() const;
 
@@ -53,7 +53,7 @@ private:
   bool mInitialFocusSet = false;
 
   bool mNeedsRefresh = true;
-  std::variant<Path, PrefabAssetHandle> mCurrentFetch;
+  std::variant<Path, AssetHandle<PrefabAsset>> mCurrentFetch;
 
   std::vector<Entry> mEntries;
   Path mCurrentDirectory;

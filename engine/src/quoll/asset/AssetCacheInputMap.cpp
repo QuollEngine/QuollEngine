@@ -98,7 +98,7 @@ static Result<bool> checkAxis2d(YAML::Node node) {
   return Result<bool>::Error("Invalid binding item value");
 }
 
-Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
+Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -107,39 +107,44 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
 
   // Validation
   if (root["type"].as<String>("") != "inputmap") {
-    return Result<InputMapAssetHandle>::Error("Type must be input map");
+    return Result<AssetHandle<InputMapAsset>>::Error("Type must be input map");
   }
 
   if (root["version"].as<String>("") != "0.1") {
-    return Result<InputMapAssetHandle>::Error("Version is not supported");
+    return Result<AssetHandle<InputMapAsset>>::Error(
+        "Version is not supported");
   }
 
   if (!root["schemes"] || !root["schemes"].IsSequence()) {
-    return Result<InputMapAssetHandle>::Error("Schemes field must be a list");
+    return Result<AssetHandle<InputMapAsset>>::Error(
+        "Schemes field must be a list");
   }
 
   if (!root["commands"] || !root["commands"].IsSequence()) {
-    return Result<InputMapAssetHandle>::Error("Commands field must be a list");
+    return Result<AssetHandle<InputMapAsset>>::Error(
+        "Commands field must be a list");
   }
 
   if (!root["bindings"] || !root["bindings"].IsSequence()) {
-    return Result<InputMapAssetHandle>::Error("Bindings field must be a list");
+    return Result<AssetHandle<InputMapAsset>>::Error(
+        "Bindings field must be a list");
   }
 
   std::set<String> duplicateNames;
   for (auto scheme : root["schemes"]) {
     if (!scheme.IsMap()) {
-      return Result<InputMapAssetHandle>::Error("Scheme item must be a map");
+      return Result<AssetHandle<InputMapAsset>>::Error(
+          "Scheme item must be a map");
     }
 
     auto name = scheme["name"].as<String>("");
     if (name == "") {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Scheme item name must be a string and cannot be empty");
     }
 
     if (duplicateNames.contains(name)) {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Scheme item with same name is found");
     }
 
@@ -150,18 +155,19 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
 
   for (auto command : root["commands"]) {
     if (!command.IsMap()) {
-      return Result<InputMapAssetHandle>::Error("Command item must be a map");
+      return Result<AssetHandle<InputMapAsset>>::Error(
+          "Command item must be a map");
     }
 
     auto name = command["name"].as<String>("");
 
     if (name == "") {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Command item name must be a string and cannot be empty");
     }
 
     if (duplicateNames.contains(name)) {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Scheme item with same name is found");
     }
 
@@ -169,35 +175,36 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
 
     auto type = command["type"].as<String>("");
     if (type != "boolean" && type != "axis-2d") {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Command item type must be \"boolean\" or \"axis-2d\"");
     }
   }
 
   for (auto binding : root["bindings"]) {
     if (!binding.IsMap()) {
-      return Result<InputMapAssetHandle>::Error("Binding item must be a map");
+      return Result<AssetHandle<InputMapAsset>>::Error(
+          "Binding item must be a map");
     }
 
     auto scheme = binding["scheme"].as<i32>(-1);
     if (scheme == -1) {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Binding item scheme is invalid");
     }
 
     auto command = binding["command"].as<i32>(-1);
     if (command == -1) {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Binding item command is invalid");
     }
 
     if (scheme >= static_cast<i32>(root["schemes"].size())) {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Binding item scheme does not point to scheme item");
     }
 
     if (command >= static_cast<i32>(root["commands"].size())) {
-      return Result<InputMapAssetHandle>::Error(
+      return Result<AssetHandle<InputMapAsset>>::Error(
           "Binding item command does not point to command item");
     }
 
@@ -209,12 +216,12 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
     if (commandType == "boolean") {
       auto p = value.as<String>("");
       if (!value.IsNull() && p == "") {
-        return Result<InputMapAssetHandle>::Error(
+        return Result<AssetHandle<InputMapAsset>>::Error(
             "Binding item value cannot be used with boolean command");
       }
 
       if (!value.IsNull() && !input::exists(p)) {
-        return Result<InputMapAssetHandle>::Error(
+        return Result<AssetHandle<InputMapAsset>>::Error(
             "Binding item value is invalid: " + p);
       }
     }
@@ -223,7 +230,7 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
       auto res = checkAxis2d(value);
 
       if (res.hasError()) {
-        return Result<InputMapAssetHandle>::Error(res.getError());
+        return Result<AssetHandle<InputMapAsset>>::Error(res.getError());
       }
     }
   }
@@ -303,14 +310,14 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
 
   auto handle = mRegistry.getInputMaps().findHandleByUuid(uuid);
 
-  if (handle == InputMapAssetHandle::Null) {
+  if (!handle) {
     auto newHandle = mRegistry.getInputMaps().addAsset(asset);
-    return Result<InputMapAssetHandle>::Ok(newHandle);
+    return Result<AssetHandle<InputMapAsset>>::Ok(newHandle);
   }
 
   mRegistry.getInputMaps().updateAsset(handle, asset);
 
-  return Result<InputMapAssetHandle>::Ok(handle);
+  return Result<AssetHandle<InputMapAsset>>::Ok(handle);
 }
 
 Result<Path> AssetCache::createInputMapFromSource(const Path &sourcePath,

@@ -1,4 +1,6 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetHandle.h"
+#include "quoll/renderer/TextureAsset.h"
 #include "quoll/ui/UILuaTable.h"
 #include "UILuaTable.h"
 #include "YogaSerializer.h"
@@ -7,7 +9,11 @@ namespace quoll {
 
 sol::table UILuaTable::create(sol::state_view state) {
   auto uiImage = state.new_usertype<UIImage>("UIImage", sol::no_constructor);
-  uiImage["texture"] = &UIImage::texture;
+  uiImage["texture"] =
+      sol::property([](UIImage &image) { return image.texture.getRawId(); },
+                    [](UIImage &image, AssetHandleType value) {
+                      image.texture = AssetHandle<TextureAsset>(value);
+                    });
 
   auto uiText = state.new_usertype<UIText>("UIText", sol::no_constructor);
   uiText["content"] = &UIText::content;
@@ -18,7 +24,8 @@ sol::table UILuaTable::create(sol::state_view state) {
   auto ui = state.create_table();
 
   ui["image"] = [](sol::table props) {
-    return UIImage{.texture = props.get<TextureAssetHandle>("texture")};
+    return UIImage{.texture = AssetHandle<TextureAsset>(
+                       props.get<AssetHandleType>("texture"))};
   };
 
   ui["text"] = [](sol::table props) {

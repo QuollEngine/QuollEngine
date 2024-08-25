@@ -13,8 +13,9 @@
 #include "quoll/scene/SceneAsset.h"
 #include "quoll/skeleton/SkeletonAsset.h"
 #include "quoll/text/FontAsset.h"
-#include "Asset.h"
+#include "AssetHandle.h"
 #include "AssetMap.h"
+#include "AssetType.h"
 
 namespace quoll {
 
@@ -27,24 +28,24 @@ class RenderStorage;
  * the registry already has all the processed data in memory.
  */
 class AssetRegistry : NoCopyMove {
-  using TextureMap = AssetMap<TextureAssetHandle, TextureAsset>;
-  using FontMap = AssetMap<FontAssetHandle, FontAsset>;
-  using MaterialMap = AssetMap<MaterialAssetHandle, MaterialAsset>;
-  using MeshMap = AssetMap<MeshAssetHandle, MeshAsset>;
-  using SkeletonMap = AssetMap<SkeletonAssetHandle, SkeletonAsset>;
-  using AnimationMap = AssetMap<AnimationAssetHandle, AnimationAsset>;
-  using AnimatorMap = AssetMap<AnimatorAssetHandle, AnimatorAsset>;
-  using AudioMap = AssetMap<AudioAssetHandle, AudioAsset>;
-  using PrefabMap = AssetMap<PrefabAssetHandle, PrefabAsset>;
-  using LuaScriptMap = AssetMap<LuaScriptAssetHandle, LuaScriptAsset>;
-  using EnvironmentMap = AssetMap<EnvironmentAssetHandle, EnvironmentAsset>;
-  using SceneMap = AssetMap<SceneAssetHandle, SceneAsset>;
-  using InputMapMap = AssetMap<InputMapAssetHandle, InputMapAsset>;
+  using TextureMap = AssetMap<TextureAsset>;
+  using FontMap = AssetMap<FontAsset>;
+  using MaterialMap = AssetMap<MaterialAsset>;
+  using MeshMap = AssetMap<MeshAsset>;
+  using SkeletonMap = AssetMap<SkeletonAsset>;
+  using AnimationMap = AssetMap<AnimationAsset>;
+  using AnimatorMap = AssetMap<AnimatorAsset>;
+  using AudioMap = AssetMap<AudioAsset>;
+  using PrefabMap = AssetMap<PrefabAsset>;
+  using LuaScriptMap = AssetMap<LuaScriptAsset>;
+  using EnvironmentMap = AssetMap<EnvironmentAsset>;
+  using SceneMap = AssetMap<SceneAsset>;
+  using InputMapMap = AssetMap<InputMapAsset>;
 
   struct DefaultObjects {
-    MeshAssetHandle cube = MeshAssetHandle::Null;
-    MaterialAssetHandle defaultMaterial = MaterialAssetHandle::Null;
-    FontAssetHandle defaultFont = FontAssetHandle::Null;
+    AssetHandle<MeshAsset> cube;
+    AssetHandle<MaterialAsset> defaultMaterial;
+    AssetHandle<FontAsset> defaultFont;
   };
 
 public:

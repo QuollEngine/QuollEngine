@@ -93,7 +93,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
     if (const auto *path = std::get_if<Path>(&mCurrentFetch)) {
       fetchAssetDirectory(*path, assetManager);
     } else if (const auto *handle =
-                   std::get_if<PrefabAssetHandle>(&mCurrentFetch)) {
+                   std::get_if<AssetHandle<PrefabAsset>>(&mCurrentFetch)) {
       fetchPrefab(*handle, assetManager);
     }
 
@@ -154,13 +154,15 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
               setCurrentFetch(entry.path);
             } else if (entry.assetType == AssetType::Prefab) {
               actionExecutor.execute<SpawnPrefabAtView>(
-                  static_cast<PrefabAssetHandle>(entry.asset), state.camera);
+                  static_cast<AssetHandle<PrefabAsset>>(entry.asset),
+                  state.camera);
             } else if (entry.assetType == AssetType::Texture) {
               actionExecutor.execute<SpawnSpriteAtView>(
-                  static_cast<TextureAssetHandle>(entry.asset), state.camera);
+                  static_cast<AssetHandle<TextureAsset>>(entry.asset),
+                  state.camera);
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
-                  static_cast<MaterialAssetHandle>(entry.asset));
+                  static_cast<AssetHandle<MaterialAsset>>(entry.asset));
             } else {
               platform::FileOpener::openFile(entry.path);
             }
@@ -203,7 +205,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
         if (ImGui::BeginPopup(id.c_str())) {
           if (entry.assetType == AssetType::Prefab &&
               ImGui::MenuItem("View contents")) {
-            setCurrentFetch(static_cast<PrefabAssetHandle>(entry.asset));
+            setCurrentFetch(static_cast<AssetHandle<PrefabAsset>>(entry.asset));
           }
 
           if (ImGui::MenuItem("Copy UUID")) {
@@ -399,7 +401,7 @@ void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
   });
 }
 
-void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
+void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
                                AssetManager &assetManager) {
   auto &assetRegistry = assetManager.getAssetRegistry();
   const auto &prefab = assetRegistry.getPrefabs().getAsset(handle);
@@ -417,8 +419,7 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
   };
 
   auto createPrefabEntry = [&]<typename AssetHandle, typename AssetData>(
-                               AssetMap<AssetHandle, AssetData> &map,
-                               AssetHandle handle) {
+                               AssetMap<AssetData> &map, AssetHandle handle) {
     const auto &asset = map.getAsset(handle);
     Entry entry;
     entry.isDirectory = false;
@@ -433,10 +434,9 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
   };
 
   auto addPrefabEntry = [&]<typename AssetHandle, typename AssetData>(
-                            AssetMap<AssetHandle, AssetData> &map,
-                            AssetHandle handle,
+                            AssetMap<AssetData> &map, AssetHandle handle,
                             std::unordered_map<AssetHandle, bool> &cache) {
-    if (handle != AssetHandle::Null && !cache.contains(handle)) {
+    if (handle && !cache.contains(handle)) {
       cache.insert_or_assign(handle, true);
       mEntries.push_back(createPrefabEntry(map, handle));
       return true;
@@ -445,13 +445,13 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
     return false;
   };
 
-  std::unordered_map<TextureAssetHandle, bool> textureCache;
-  auto addTextureEntryIfExists = [&](TextureAssetHandle handle) {
+  std::unordered_map<AssetHandle<TextureAsset>, bool> textureCache;
+  auto addTextureEntryIfExists = [&](AssetHandle<TextureAsset> handle) {
     addPrefabEntry(assetRegistry.getTextures(), handle, textureCache);
   };
 
-  std::unordered_map<MaterialAssetHandle, bool> materialCache;
-  auto addMaterialEntry = [&](MaterialAssetHandle handle) {
+  std::unordered_map<AssetHandle<MaterialAsset>, bool> materialCache;
+  auto addMaterialEntry = [&](AssetHandle<MaterialAsset> handle) {
     if (addPrefabEntry(assetRegistry.getMaterials(), handle, materialCache)) {
       const auto &material = assetRegistry.getMaterials().getAsset(handle);
 
@@ -463,7 +463,7 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
     }
   };
 
-  std::unordered_map<MeshAssetHandle, bool> meshCache;
+  std::unordered_map<AssetHandle<MeshAsset>, bool> meshCache;
   for (const auto &ref : prefab.data.meshes) {
     addPrefabEntry(assetRegistry.getMeshes(), ref.value, meshCache);
   }
@@ -480,17 +480,17 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
     }
   }
 
-  std::unordered_map<SkeletonAssetHandle, bool> skeletonCache;
+  std::unordered_map<AssetHandle<SkeletonAsset>, bool> skeletonCache;
   for (const auto &ref : prefab.data.skeletons) {
     addPrefabEntry(assetRegistry.getSkeletons(), ref.value, skeletonCache);
   }
 
-  std::unordered_map<AnimatorAssetHandle, bool> animatorCache;
+  std::unordered_map<AssetHandle<AnimatorAsset>, bool> animatorCache;
   for (const auto &ref : prefab.data.animators) {
     addPrefabEntry(assetRegistry.getAnimators(), ref.value, animatorCache);
   }
 
-  std::unordered_map<AnimationAssetHandle, bool> animationCache;
+  std::unordered_map<AssetHandle<AnimationAsset>, bool> animationCache;
   for (const auto &ref : prefab.data.animators) {
     const auto &animator = assetRegistry.getAnimators().getAsset(ref.value);
     for (const auto &state : animator.data.states) {
@@ -526,13 +526,14 @@ void AssetBrowser::setDefaultProps(Entry &entry, AssetRegistry &assetRegistry) {
                                  : getIconFromAssetType(entry.assetType);
 
   if (entry.assetType == AssetType::Texture) {
-    entry.preview = assetRegistry.getTextures()
-                        .getAsset(static_cast<TextureAssetHandle>(entry.asset))
-                        .data.deviceHandle;
+    entry.preview =
+        assetRegistry.getTextures()
+            .getAsset(static_cast<AssetHandle<TextureAsset>>(entry.asset))
+            .data.deviceHandle;
   } else if (entry.assetType == AssetType::Environment) {
     entry.preview =
         assetRegistry.getEnvironments()
-            .getAsset(static_cast<EnvironmentAssetHandle>(entry.asset))
+            .getAsset(static_cast<AssetHandle<EnvironmentAsset>>(entry.asset))
             .preview;
   } else {
     entry.preview = IconRegistry::getIcon(entry.icon);
@@ -540,13 +541,13 @@ void AssetBrowser::setDefaultProps(Entry &entry, AssetRegistry &assetRegistry) {
 }
 
 void AssetBrowser::setCurrentFetch(
-    std::variant<Path, PrefabAssetHandle> fetch) {
+    std::variant<Path, AssetHandle<PrefabAsset>> fetch) {
   mCurrentFetch = fetch;
   reload();
 }
 
 const Path &AssetBrowser::getCurrentFetchPath() const {
-  if (std::get_if<PrefabAssetHandle>(&mCurrentFetch)) {
+  if (std::get_if<AssetHandle<PrefabAsset>>(&mCurrentFetch)) {
     return mPrefabDirectory;
   }
 

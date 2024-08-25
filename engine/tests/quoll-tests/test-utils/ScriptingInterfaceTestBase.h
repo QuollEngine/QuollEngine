@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/asset/AssetCache.h"
+#include "quoll/lua-scripting/LuaScriptAsset.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"
 #include "quoll/physics/PhysicsSystem.h"
 #include "quoll/system/SystemView.h"
@@ -18,7 +19,8 @@ public:
 
   sol::state_view call(quoll::Entity entity, const quoll::String &functionName);
 
-  quoll::LuaScriptAssetHandle loadScript(quoll::String scriptName);
+  quoll::AssetHandle<quoll::LuaScriptAsset>
+  loadScript(quoll::String scriptName);
 
   void SetUp() override;
 

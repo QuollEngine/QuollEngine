@@ -2,32 +2,6 @@
 
 namespace quoll {
 
-enum class MaterialAssetHandle : u32 { Null = 0 };
-
-enum class TextureAssetHandle : u32 { Null = 0 };
-
-enum class FontAssetHandle : u32 { Null = 0 };
-
-enum class MeshAssetHandle : u32 { Null = 0 };
-
-enum class SkeletonAssetHandle : u32 { Null = 0 };
-
-enum class AnimationAssetHandle : u32 { Null = 0 };
-
-enum class AnimatorAssetHandle : u32 { Null = 0 };
-
-enum class AudioAssetHandle : u32 { Null = 0 };
-
-enum class PrefabAssetHandle : u32 { Null = 0 };
-
-enum class LuaScriptAssetHandle : u32 { Null = 0 };
-
-enum class EnvironmentAssetHandle : u32 { Null = 0 };
-
-enum class SceneAssetHandle : u32 { Null = 0 };
-
-enum class InputMapAssetHandle : u32 { Null = 0 };
-
 enum class AssetType : u8 {
   None,
   Material,

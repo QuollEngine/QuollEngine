@@ -1,12 +1,13 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
 #include "InputDataType.h"
+#include "InputMapAsset.h"
 
 namespace quoll {
 
 struct InputMapAssetRef {
-  InputMapAssetHandle handle = InputMapAssetHandle::Null;
+  AssetHandle<InputMapAsset> handle;
 
   usize defaultScheme = 0;
 };

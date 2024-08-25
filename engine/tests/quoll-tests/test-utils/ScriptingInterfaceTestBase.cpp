@@ -40,7 +40,7 @@ LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
   return state;
 }
 
-quoll::LuaScriptAssetHandle
+quoll::AssetHandle<quoll::LuaScriptAsset>
 LuaScriptingInterfaceTestBase::loadScript(quoll::String scriptName) {
   auto uuid = quoll::Uuid::generate();
   assetCache.createLuaScriptFromSource(FixturesPath / scriptName, uuid);

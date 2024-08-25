@@ -8,10 +8,10 @@ class MaterialViewer {
 public:
   void render(AssetRegistry &assetRegistry);
 
-  void open(MaterialAssetHandle handle);
+  void open(AssetHandle<MaterialAsset> handle);
 
 private:
-  MaterialAssetHandle mHandle = MaterialAssetHandle::Null;
+  AssetHandle<MaterialAsset> mHandle;
 };
 
 } // namespace quoll::editor

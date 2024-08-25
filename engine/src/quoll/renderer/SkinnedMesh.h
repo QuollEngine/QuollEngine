@@ -1,11 +1,11 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetType.h"
 
 namespace quoll {
 
 struct SkinnedMesh {
-  MeshAssetHandle handle = MeshAssetHandle::Null;
+  AssetHandle<MeshAsset> handle;
 };
 
 } // namespace quoll

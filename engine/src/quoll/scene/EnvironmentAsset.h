@@ -1,13 +1,14 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
+#include "quoll/renderer/TextureAsset.h"
 
 namespace quoll {
 
 struct EnvironmentAsset {
-  TextureAssetHandle irradianceMap = TextureAssetHandle::Null;
+  AssetHandle<TextureAsset> irradianceMap;
 
-  TextureAssetHandle specularMap = TextureAssetHandle::Null;
+  AssetHandle<TextureAsset> specularMap;
 };
 
 } // namespace quoll

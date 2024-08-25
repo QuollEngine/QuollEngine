@@ -125,7 +125,7 @@ public:
     auto &gltfMesh = scene.meshes.at(0);
 
     const auto &meshAsset = assetCache.getRegistry().getMeshes().getAsset(
-        quoll::MeshAssetHandle{1});
+        quoll::AssetHandle<quoll::MeshAsset>{1});
 
     EXPECT_EQ(meshAsset.data.geometries.size(), gltfMesh.primitives.size());
     for (usize gi = 0; gi < meshAsset.data.geometries.size(); ++gi) {

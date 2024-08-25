@@ -5,8 +5,8 @@
 
 namespace quoll::editor {
 
-static void replaceMesh(AssetType type, MeshAssetHandle mesh, Entity entity,
-                        EntityDatabase &db) {
+static void replaceMesh(AssetType type, AssetHandle<MeshAsset> mesh,
+                        Entity entity, EntityDatabase &db) {
   if (type == AssetType::Mesh) {
     db.set<Mesh>(entity, {mesh});
 
@@ -22,7 +22,7 @@ static void replaceMesh(AssetType type, MeshAssetHandle mesh, Entity entity,
   }
 }
 
-EntitySetMesh::EntitySetMesh(Entity entity, MeshAssetHandle mesh)
+EntitySetMesh::EntitySetMesh(Entity entity, AssetHandle<MeshAsset> mesh)
     : mEntity(entity), mMesh(mesh) {}
 
 ActionExecutorResult EntitySetMesh::onExecute(WorkspaceState &state,
@@ -52,7 +52,7 @@ ActionExecutorResult EntitySetMesh::onUndo(WorkspaceState &state,
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
-  if (mOldMesh != MeshAssetHandle::Null) {
+  if (mOldMesh) {
     auto type = assetRegistry.getMeshes().getAsset(mOldMesh).type;
     replaceMesh(type, mOldMesh, mEntity, db);
   } else {

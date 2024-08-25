@@ -63,7 +63,7 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   return Result<Path>::Ok(assetPath);
 }
 
-Result<MaterialAssetHandle>
+Result<AssetHandle<MaterialAsset>>
 AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
                                             const Path &filePath,
                                             const AssetFileHeader &header) {
@@ -157,35 +157,36 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
     stream.read(material.data.emissiveFactor);
   }
 
-  return Result<MaterialAssetHandle>::Ok(
+  return Result<AssetHandle<MaterialAsset>>::Ok(
       mRegistry.getMaterials().addAsset(material), warnings);
 }
 
-Result<MaterialAssetHandle> AssetCache::loadMaterial(const Uuid &uuid) {
+Result<AssetHandle<MaterialAsset>> AssetCache::loadMaterial(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
   InputBinaryStream stream(filePath);
 
   if (!stream.good()) {
-    return Result<MaterialAssetHandle>::Error(
+    return Result<AssetHandle<MaterialAsset>>::Error(
         "File cannot be opened for reading: " + filePath.string());
   }
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Material);
   if (header.hasError()) {
-    return Result<MaterialAssetHandle>::Error(header.getError());
+    return Result<AssetHandle<MaterialAsset>>::Error(header.getError());
   }
 
   return loadMaterialDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<MaterialAssetHandle> AssetCache::getOrLoadMaterial(const Uuid &uuid) {
+Result<AssetHandle<MaterialAsset>>
+AssetCache::getOrLoadMaterial(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<MaterialAssetHandle>::Ok(MaterialAssetHandle::Null);
+    return Result<AssetHandle<MaterialAsset>>::Ok(AssetHandle<MaterialAsset>());
   }
 
   auto handle = mRegistry.getMaterials().findHandleByUuid(uuid);
-  if (handle != MaterialAssetHandle::Null) {
-    return Result<MaterialAssetHandle>::Ok(handle);
+  if (handle) {
+    return Result<AssetHandle<MaterialAsset>>::Ok(handle);
   }
 
   return loadMaterial(uuid);

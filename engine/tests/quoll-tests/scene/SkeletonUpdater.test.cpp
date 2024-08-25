@@ -6,7 +6,7 @@
 #include "quoll-tests/Testing.h"
 
 struct SkeletonUpdaterTest : public ::testing::Test {
-  quoll::SkeletonAssetHandle handle{2};
+  quoll::AssetHandle<quoll::SkeletonAsset> handle{2};
   quoll::Scene scene;
   quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
   quoll::SkeletonUpdater skeletonUpdater;

@@ -67,8 +67,8 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
   }
 
   // Synchronize materials
-  auto getTextureFromRegistry = [this](TextureAssetHandle handle) {
-    if (handle != TextureAssetHandle::Null) {
+  auto getTextureFromRegistry = [this](AssetHandle<TextureAsset> handle) {
+    if (handle) {
       return mTextures.getAsset(handle).data.deviceHandle;
     }
 

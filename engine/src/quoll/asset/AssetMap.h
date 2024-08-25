@@ -2,66 +2,62 @@
 
 #include "quoll/core/Uuid.h"
 #include "AssetData.h"
+#include "AssetHandle.h"
 
 namespace quoll {
 
-template <class THandle, class TData> class AssetMap {
+template <class TData> class AssetMap {
 public:
-  using Handle = THandle;
+  using Handle = AssetHandle<TData>;
 
 public:
-  THandle addAsset(const AssetData<TData> &data) {
+  Handle addAsset(const AssetData<TData> &data) {
     auto handle = getNewHandle();
     mAssets.insert_or_assign(handle, data);
     return handle;
   }
 
-  void updateAsset(THandle handle, const AssetData<TData> &data) {
+  void updateAsset(Handle handle, const AssetData<TData> &data) {
     QuollAssert(mAssets.find(handle) != mAssets.end(), "Asset does not exist");
     mAssets.at(handle) = data;
   }
 
-  const AssetData<TData> &getAsset(THandle handle) const {
+  const AssetData<TData> &getAsset(Handle handle) const {
     return mAssets.at(handle);
   }
 
-  AssetData<TData> &getAsset(THandle handle) { return mAssets.at(handle); }
+  AssetData<TData> &getAsset(Handle handle) { return mAssets.at(handle); }
 
-  inline const std::unordered_map<THandle, AssetData<TData>> &
-  getAssets() const {
+  inline const std::unordered_map<Handle, AssetData<TData>> &getAssets() const {
     return mAssets;
   }
 
-  inline THandle findHandleByUuid(const Uuid &uuid) const {
+  inline Handle findHandleByUuid(const Uuid &uuid) const {
     for (auto &[handle, data] : mAssets) {
       if (data.uuid == uuid) {
         return handle;
       }
     }
 
-    return THandle::Null;
+    return Handle();
   }
 
-  inline std::unordered_map<THandle, AssetData<TData>> &getAssets() {
+  inline std::unordered_map<Handle, AssetData<TData>> &getAssets() {
     return mAssets;
   }
 
-  inline bool hasAsset(THandle handle) const {
+  inline bool hasAsset(Handle handle) const {
     return mAssets.find(handle) != mAssets.end();
   }
 
-  void deleteAsset(THandle handle) { mAssets.erase(handle); }
+  void deleteAsset(Handle handle) { mAssets.erase(handle); }
 
 private:
-  THandle getNewHandle() {
-    THandle handle = mLastHandle;
-    mLastHandle = THandle{static_cast<u32>(mLastHandle) + 1};
-    return handle;
-  }
+  Handle getNewHandle() { return Handle(mLastHandle++); }
 
 private:
-  std::unordered_map<THandle, AssetData<TData>> mAssets;
-  THandle mLastHandle{1};
+  std::unordered_map<Handle, AssetData<TData>> mAssets;
+  AssetHandleType mLastHandle = 1;
 };
 
 } // namespace quoll

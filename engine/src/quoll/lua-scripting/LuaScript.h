@@ -1,15 +1,16 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
 #include "quoll/signals/SignalSlot.h"
 #include "DeferredLoader.h"
 #include "LuaHeaders.h"
+#include "LuaScriptAsset.h"
 #include "LuaScriptInputVariable.h"
 
 namespace quoll {
 
 struct LuaScript {
-  LuaScriptAssetHandle handle = LuaScriptAssetHandle::Null;
+  AssetHandle<LuaScriptAsset> handle;
 
   bool started = false;
 

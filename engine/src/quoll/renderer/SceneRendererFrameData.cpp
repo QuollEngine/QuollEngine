@@ -229,7 +229,8 @@ void SceneRendererFrameData::setDefaultMaterial(rhi::DeviceAddress material) {
 }
 
 void SceneRendererFrameData::addMesh(
-    MeshAssetHandle handle, quoll::Entity entity, const glm::mat4 &transform,
+    AssetHandle<MeshAsset> handle, quoll::Entity entity,
+    const glm::mat4 &transform,
     const std::vector<rhi::DeviceAddress> &materials) {
   u32 start = static_cast<u32>(mFlatMaterials.size());
   for (const auto &material : materials) {
@@ -249,7 +250,7 @@ void SceneRendererFrameData::addMesh(
 }
 
 void SceneRendererFrameData::addSkinnedMesh(
-    MeshAssetHandle handle, Entity entity, const glm::mat4 &transform,
+    AssetHandle<MeshAsset> handle, Entity entity, const glm::mat4 &transform,
     const std::vector<glm::mat4> &skeleton,
     const std::vector<rhi::DeviceAddress> &materials) {
   u32 start = static_cast<u32>(mFlatMaterials.size());

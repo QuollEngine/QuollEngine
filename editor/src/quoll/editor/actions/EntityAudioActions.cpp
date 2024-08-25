@@ -5,7 +5,7 @@
 
 namespace quoll::editor {
 
-EntitySetAudio::EntitySetAudio(Entity entity, AudioAssetHandle audio)
+EntitySetAudio::EntitySetAudio(Entity entity, AssetHandle<AudioAsset> audio)
     : mEntity(entity), mAudio(audio) {}
 
 ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state,
@@ -36,7 +36,8 @@ bool EntitySetAudio::predicate(WorkspaceState &state,
   return assetRegistry.getAudios().hasAsset(mAudio);
 }
 
-EntityCreateAudio::EntityCreateAudio(Entity entity, AudioAssetHandle handle)
+EntityCreateAudio::EntityCreateAudio(Entity entity,
+                                     AssetHandle<AudioAsset> handle)
     : mEntity(entity), mHandle(handle) {}
 
 ActionExecutorResult

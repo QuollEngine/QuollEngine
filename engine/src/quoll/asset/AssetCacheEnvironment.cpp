@@ -35,7 +35,7 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
   return Result<Path>::Ok(assetPath);
 }
 
-Result<EnvironmentAssetHandle>
+Result<AssetHandle<EnvironmentAsset>>
 AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
                                                const Path &filePath,
                                                const AssetFileHeader &header) {
@@ -47,13 +47,15 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
 
   auto irradianceMapRes = getOrLoadTexture(irradianceMapUuid);
   if (irradianceMapRes.hasError()) {
-    return Result<EnvironmentAssetHandle>::Error(irradianceMapRes.getError());
+    return Result<AssetHandle<EnvironmentAsset>>::Error(
+        irradianceMapRes.getError());
   }
 
   auto specularMapRes = getOrLoadTexture(specularMapUuid);
   if (specularMapRes.hasError()) {
     mRegistry.getTextures().deleteAsset(irradianceMapRes.getData());
-    return Result<EnvironmentAssetHandle>::Error(specularMapRes.getError());
+    return Result<AssetHandle<EnvironmentAsset>>::Error(
+        specularMapRes.getError());
   }
 
   AssetData<EnvironmentAsset> environment{};
@@ -65,16 +67,17 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
 
   auto environmentHandle = mRegistry.getEnvironments().addAsset(environment);
 
-  return Result<EnvironmentAssetHandle>::Ok(environmentHandle);
+  return Result<AssetHandle<EnvironmentAsset>>::Ok(environmentHandle);
 }
 
-Result<EnvironmentAssetHandle> AssetCache::loadEnvironment(const Uuid &uuid) {
+Result<AssetHandle<EnvironmentAsset>>
+AssetCache::loadEnvironment(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Environment);
   if (header.hasError()) {
-    return Result<EnvironmentAssetHandle>::Error(header.getError());
+    return Result<AssetHandle<EnvironmentAsset>>::Error(header.getError());
   }
 
   return loadEnvironmentDataFromInputStream(stream, filePath, header.getData());

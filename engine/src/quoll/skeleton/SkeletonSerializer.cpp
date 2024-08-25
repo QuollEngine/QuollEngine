@@ -26,7 +26,7 @@ void SkeletonSerializer::deserialize(const YAML::Node &node,
     auto uuid = node["skeleton"].as<Uuid>(Uuid{});
     auto handle = assetRegistry.getSkeletons().findHandleByUuid(uuid);
 
-    if (handle != SkeletonAssetHandle::Null) {
+    if (handle) {
       const auto &skeleton = assetRegistry.getSkeletons().getAsset(handle).data;
 
       Skeleton skeletonComponent{};

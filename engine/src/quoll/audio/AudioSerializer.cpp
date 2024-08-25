@@ -25,7 +25,7 @@ void AudioSerializer::deserialize(const YAML::Node &node,
 
     auto handle = assetRegistry.getAudios().findHandleByUuid(uuid);
 
-    if (handle != AudioAssetHandle::Null) {
+    if (handle) {
       entityDatabase.set<AudioSource>(entity, {handle});
     }
   }

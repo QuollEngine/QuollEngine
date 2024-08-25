@@ -31,7 +31,7 @@ void MeshSerializer::deserialize(const YAML::Node &node,
     auto uuid = node["mesh"].as<Uuid>(Uuid{});
     auto handle = assetRegistry.getMeshes().findHandleByUuid(uuid);
 
-    if (handle != MeshAssetHandle::Null) {
+    if (handle) {
       auto type = assetRegistry.getMeshes().getAsset(handle).type;
 
       if (type == AssetType::Mesh) {

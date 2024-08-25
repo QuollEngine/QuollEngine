@@ -1,11 +1,12 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
+#include "AudioAsset.h"
 
 namespace quoll {
 
 struct AudioSource {
-  AudioAssetHandle source = AudioAssetHandle::Null;
+  AssetHandle<AudioAsset> source;
 };
 
 } // namespace quoll

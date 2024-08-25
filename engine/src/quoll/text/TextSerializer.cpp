@@ -29,7 +29,7 @@ void TextSerializer::deserialize(const YAML::Node &node,
     Text textComponent{};
     textComponent.font = handle;
 
-    if (handle != FontAssetHandle::Null) {
+    if (handle) {
       if (node["text"]["content"] && node["text"]["content"].IsScalar()) {
         textComponent.content =
             node["text"]["content"].as<String>(textComponent.content);

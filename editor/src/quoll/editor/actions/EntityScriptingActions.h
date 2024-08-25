@@ -7,7 +7,7 @@ namespace quoll::editor {
 
 class EntityCreateScript : public Action {
 public:
-  EntityCreateScript(Entity entity, LuaScriptAssetHandle handle);
+  EntityCreateScript(Entity entity, AssetHandle<LuaScriptAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -19,12 +19,12 @@ public:
 
 private:
   Entity mEntity;
-  LuaScriptAssetHandle mHandle;
+  AssetHandle<LuaScriptAsset> mHandle;
 };
 
 class EntitySetScript : public Action {
 public:
-  EntitySetScript(Entity entity, LuaScriptAssetHandle script);
+  EntitySetScript(Entity entity, AssetHandle<LuaScriptAsset> script);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) override;
@@ -36,8 +36,8 @@ public:
 
 private:
   Entity mEntity;
-  LuaScriptAssetHandle mScript;
-  LuaScriptAssetHandle mOldScript{};
+  AssetHandle<LuaScriptAsset> mScript;
+  AssetHandle<LuaScriptAsset> mOldScript;
 };
 
 class EntitySetScriptVariable : public Action {

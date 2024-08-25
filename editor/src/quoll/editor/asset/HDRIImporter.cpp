@@ -308,7 +308,7 @@ HDRIImporter::convertEquirectangularToCubemap(f32 *data, u32 width,
   return CubemapData{unfilteredCubemap, levels};
 }
 
-Result<TextureAssetHandle>
+Result<AssetHandle<TextureAsset>>
 HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
                                     const Uuid &uuid, const String &name) {
   auto *device = mRenderStorage.getDevice();
@@ -383,13 +383,13 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
   if (createdFileRes.hasError()) {
-    return Result<TextureAssetHandle>::Error(createdFileRes.getError());
+    return Result<AssetHandle<TextureAsset>>::Error(createdFileRes.getError());
   }
 
   return mAssetCache.loadTexture(asset.uuid);
 }
 
-Result<TextureAssetHandle>
+Result<AssetHandle<TextureAsset>>
 HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
                                   const Uuid &uuid, const String &name) {
   auto *device = mRenderStorage.getDevice();
@@ -476,7 +476,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
   if (createdFileRes.hasError()) {
-    return Result<TextureAssetHandle>::Error(createdFileRes.getError());
+    return Result<AssetHandle<TextureAsset>>::Error(createdFileRes.getError());
   }
 
   return mAssetCache.loadTexture(asset.uuid);

@@ -101,7 +101,7 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
   return Result<Path>::Ok(assetPath);
 }
 
-Result<AnimatorAssetHandle> AssetCache::loadAnimator(const Uuid &uuid) {
+Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -109,15 +109,17 @@ Result<AnimatorAssetHandle> AssetCache::loadAnimator(const Uuid &uuid) {
   stream.close();
 
   if (root["type"].as<String>("") != "animator") {
-    return Result<AnimatorAssetHandle>::Error("Type must be animator");
+    return Result<AssetHandle<AnimatorAsset>>::Error("Type must be animator");
   }
 
   if (root["version"].as<String>("") != "0.1") {
-    return Result<AnimatorAssetHandle>::Error("Version is not supported");
+    return Result<AssetHandle<AnimatorAsset>>::Error(
+        "Version is not supported");
   }
 
   if (!root["states"] || !root["states"].IsMap()) {
-    return Result<AnimatorAssetHandle>::Error("`states` field must be a map");
+    return Result<AssetHandle<AnimatorAsset>>::Error(
+        "`states` field must be a map");
   }
 
   auto meta = getAssetMeta(uuid);
@@ -267,24 +269,25 @@ Result<AnimatorAssetHandle> AssetCache::loadAnimator(const Uuid &uuid) {
 
   auto handle = mRegistry.getAnimators().findHandleByUuid(uuid);
 
-  if (handle == AnimatorAssetHandle::Null) {
+  if (!handle) {
     auto newHandle = mRegistry.getAnimators().addAsset(asset);
-    return Result<AnimatorAssetHandle>::Ok(newHandle, warnings);
+    return Result<AssetHandle<AnimatorAsset>>::Ok(newHandle, warnings);
   }
 
   mRegistry.getAnimators().updateAsset(handle, asset);
 
-  return Result<AnimatorAssetHandle>::Ok(handle, warnings);
+  return Result<AssetHandle<AnimatorAsset>>::Ok(handle, warnings);
 }
 
-Result<AnimatorAssetHandle> AssetCache::getOrLoadAnimator(const Uuid &uuid) {
+Result<AssetHandle<AnimatorAsset>>
+AssetCache::getOrLoadAnimator(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<AnimatorAssetHandle>::Ok(AnimatorAssetHandle::Null);
+    return Result<AssetHandle<AnimatorAsset>>::Ok(AssetHandle<AnimatorAsset>());
   }
 
   auto handle = mRegistry.getAnimators().findHandleByUuid(uuid);
-  if (handle != AnimatorAssetHandle::Null) {
-    return Result<AnimatorAssetHandle>::Ok(handle);
+  if (handle) {
+    return Result<AssetHandle<AnimatorAsset>>::Ok(handle);
   }
 
   return loadAnimator(uuid);

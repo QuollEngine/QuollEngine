@@ -25,11 +25,11 @@ public:
 private:
   CubemapData convertEquirectangularToCubemap(f32 *data, u32 width, u32 height);
 
-  Result<TextureAssetHandle>
+  Result<AssetHandle<TextureAsset>>
   generateIrradianceMap(const CubemapData &unfilteredCubemap, const Uuid &uuid,
                         const String &name);
 
-  Result<TextureAssetHandle>
+  Result<AssetHandle<TextureAsset>>
   generateSpecularMap(const CubemapData &unfilteredCubemap, const Uuid &uuid,
                       const String &name);
 

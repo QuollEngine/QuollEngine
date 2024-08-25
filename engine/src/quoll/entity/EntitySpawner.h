@@ -1,7 +1,9 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetHandle.h"
+#include "quoll/renderer/TextureAsset.h"
 #include "quoll/scene/LocalTransform.h"
+#include "quoll/scene/PrefabAsset.h"
 #include "Entity.h"
 
 namespace quoll {
@@ -15,10 +17,11 @@ public:
 
   Entity spawnEmpty(LocalTransform transform);
 
-  std::vector<Entity> spawnPrefab(PrefabAssetHandle handle,
+  std::vector<Entity> spawnPrefab(AssetHandle<PrefabAsset> handle,
                                   LocalTransform transform);
 
-  Entity spawnSprite(TextureAssetHandle handle, LocalTransform transform);
+  Entity spawnSprite(AssetHandle<TextureAsset> handle,
+                     LocalTransform transform);
 
 private:
   EntityDatabase &mEntityDatabase;

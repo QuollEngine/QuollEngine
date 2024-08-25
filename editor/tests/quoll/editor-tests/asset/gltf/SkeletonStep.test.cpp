@@ -174,7 +174,7 @@ TEST_F(GLTFImporterSkeletonTest, CreatesSkeletonWithJoints) {
   EXPECT_FALSE(assetCache.getRegistry().getSkeletons().getAssets().empty());
 
   auto &skeleton = assetCache.getRegistry().getSkeletons().getAsset(
-      quoll::SkeletonAssetHandle{1});
+      quoll::AssetHandle<quoll::SkeletonAsset>{1});
 
   for (usize i = 0; i < skeleton.data.jointLocalPositions.size(); ++i) {
     auto &node = scene.nodes.at(skin.joints.at(i));

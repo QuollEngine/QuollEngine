@@ -6,7 +6,7 @@
 namespace quoll::editor {
 
 EntityCreateScript::EntityCreateScript(Entity entity,
-                                       LuaScriptAssetHandle handle)
+                                       AssetHandle<LuaScriptAsset> handle)
     : mEntity(entity), mHandle(handle) {}
 
 ActionExecutorResult
@@ -29,7 +29,8 @@ bool EntityCreateScript::predicate(WorkspaceState &state,
          assetRegistry.getLuaScripts().hasAsset(mHandle);
 }
 
-EntitySetScript::EntitySetScript(Entity entity, LuaScriptAssetHandle script)
+EntitySetScript::EntitySetScript(Entity entity,
+                                 AssetHandle<LuaScriptAsset> script)
     : mEntity(entity), mScript(script) {}
 
 ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state,
@@ -120,7 +121,7 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state,
   }
 
   if (mValue.isType(LuaScriptVariableType::AssetPrefab)) {
-    auto handle = mValue.get<PrefabAssetHandle>();
+    auto handle = mValue.get<AssetHandle<PrefabAsset>>();
     if (!assetRegistry.getPrefabs().hasAsset(handle)) {
       return false;
     }

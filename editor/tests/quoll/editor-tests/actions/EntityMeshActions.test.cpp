@@ -8,13 +8,13 @@
 
 class EntityMeshActionTestBase : public ActionTestBase {
 public:
-  quoll::MeshAssetHandle createMesh() {
+  quoll::AssetHandle<quoll::MeshAsset> createMesh() {
     quoll::AssetData<quoll::MeshAsset> asset{};
     asset.type = quoll::AssetType::Mesh;
     return assetRegistry.getMeshes().addAsset(asset);
   }
 
-  quoll::MeshAssetHandle createSkinnedMesh() {
+  quoll::AssetHandle<quoll::MeshAsset> createSkinnedMesh() {
     quoll::AssetData<quoll::MeshAsset> asset{};
     asset.type = quoll::AssetType::SkinnedMesh;
     return assetRegistry.getMeshes().addAsset(asset);
@@ -192,7 +192,8 @@ TEST_F(EntitySetMeshTest, PredicateReturnsTrueIfMeshExists) {
 TEST_F(EntitySetMeshTest, PredicateReturnsFalseIfMeshDoesNotExist) {
   auto entity = state.scene.entityDatabase.create();
 
-  EXPECT_FALSE(quoll::editor::EntitySetMesh(entity, quoll::MeshAssetHandle{25})
+  EXPECT_FALSE(quoll::editor::EntitySetMesh(
+                   entity, quoll::AssetHandle<quoll::MeshAsset>{25})
                    .predicate(state, assetRegistry));
 }
 

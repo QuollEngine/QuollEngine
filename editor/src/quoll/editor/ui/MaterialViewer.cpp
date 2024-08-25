@@ -6,7 +6,7 @@
 namespace quoll::editor {
 
 static void renderTextureIfExists(widgets::Table &table, const String &label,
-                                  TextureAssetHandle handle,
+                                  AssetHandle<TextureAsset> handle,
                                   AssetRegistry &assetRegistry) {
   static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
@@ -20,13 +20,13 @@ static void renderTextureIfExists(widgets::Table &table, const String &label,
 }
 
 void MaterialViewer::render(AssetRegistry &assetRegistry) {
-  bool open = mHandle != MaterialAssetHandle::Null;
+  bool open = mHandle;
 
   if (!open)
     return;
 
   if (!assetRegistry.getMaterials().hasAsset(mHandle)) {
-    mHandle = MaterialAssetHandle::Null;
+    mHandle = AssetHandle<MaterialAsset>();
     return;
   }
 
@@ -61,10 +61,12 @@ void MaterialViewer::render(AssetRegistry &assetRegistry) {
   }
 
   if (!open) {
-    mHandle = MaterialAssetHandle::Null;
+    mHandle = AssetHandle<MaterialAsset>();
   }
 }
 
-void MaterialViewer::open(MaterialAssetHandle handle) { mHandle = handle; }
+void MaterialViewer::open(AssetHandle<MaterialAsset> handle) {
+  mHandle = handle;
+}
 
 } // namespace quoll::editor

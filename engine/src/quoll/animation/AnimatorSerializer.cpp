@@ -27,7 +27,7 @@ void AnimatorSerializer::deserialize(const YAML::Node &node,
     auto assetUuid = node["animator"]["asset"].as<Uuid>(Uuid{});
     auto handle = assetRegistry.getAnimators().findHandleByUuid(assetUuid);
 
-    if (handle != AnimatorAssetHandle::Null) {
+    if (handle) {
       const auto &asset = assetRegistry.getAnimators().getAsset(handle);
       Animator animator;
       animator.asset = handle;

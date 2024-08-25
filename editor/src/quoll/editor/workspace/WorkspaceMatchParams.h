@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/Asset.h"
+#include "quoll/asset/AssetType.h"
 
 namespace quoll::editor {
 
