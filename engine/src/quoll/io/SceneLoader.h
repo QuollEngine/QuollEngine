@@ -18,7 +18,7 @@ class SceneLoader {
 public:
   SceneLoader(AssetRegistry &assetRegistry, EntityDatabase &entityDatabase);
 
-  Result<bool> loadComponents(const YAML::Node &node, Entity entity,
+  Result<void> loadComponents(const YAML::Node &node, Entity entity,
                               EntityIdCache &entityIdCache);
 
   Result<Entity> loadStartingCamera(const YAML::Node &node,

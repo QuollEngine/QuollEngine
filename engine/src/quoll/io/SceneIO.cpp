@@ -26,8 +26,8 @@ std::vector<Entity> SceneIO::loadScene(AssetHandle<SceneAsset> scene) {
   for (const auto &node : root["entities"]) {
     auto res = createEntityFromNode(node);
 
-    if (res.hasData()) {
-      entities.push_back(res.getData());
+    if (res) {
+      entities.push_back(res);
       yamlNodes.push_back(node);
     }
   }
@@ -42,8 +42,8 @@ std::vector<Entity> SceneIO::loadScene(AssetHandle<SceneAsset> scene) {
     auto res = sceneLoader.loadStartingCamera(currentZone["startingCamera"],
                                               mEntityIdCache);
 
-    if (res.hasData()) {
-      mScene.activeCamera = res.getData();
+    if (res) {
+      mScene.activeCamera = res;
     } else {
       mScene.activeCamera = mScene.dummyCamera;
     }
@@ -53,8 +53,8 @@ std::vector<Entity> SceneIO::loadScene(AssetHandle<SceneAsset> scene) {
     auto res =
         sceneLoader.loadEnvironment(currentZone["environment"], mEntityIdCache);
 
-    if (res.hasData()) {
-      mScene.activeEnvironment = res.getData();
+    if (res) {
+      mScene.activeEnvironment = res;
     } else {
       mScene.activeEnvironment = mScene.dummyEnvironment;
     }
@@ -85,11 +85,11 @@ Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {
       mScene.entityDatabase.set<Id>(entity, {id});
 
       mEntityIdCache.insert({id, entity});
-      return Result<Entity>::Ok(entity);
+      return entity;
     }
   }
 
-  return Result<Entity>::Error("Node does not have an ID");
+  return Error("Node does not have an ID");
 }
 
 } // namespace quoll

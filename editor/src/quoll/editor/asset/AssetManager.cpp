@@ -89,29 +89,29 @@ Result<Path> AssetManager::importAsset(const Path &source,
   if (targetAssetPath.extension() == ".gltf" ||
       targetAssetPath.extension() == ".glb") {
     auto res = GLTFImporter::createEmbeddedGlb(source, targetAssetPath);
-    if (res.hasError()) {
-      return Result<Path>::Error(res.getError());
+    if (!res) {
+      return res.error();
     }
 
-    targetAssetPath = res.getData();
+    targetAssetPath = res;
   } else {
     std::filesystem::copy_file(source, targetAssetPath, co::overwrite_existing);
   }
 
   auto res = loadSourceAsset(targetAssetPath, {});
 
-  if (res.hasError()) {
+  if (!res) {
     std::filesystem::remove(targetAssetPath);
     if (createdDirectory.has_value()) {
       std::filesystem::remove_all(createdDirectory.value());
     }
   }
 
-  if (res.hasError()) {
-    return Result<Path>::Error(res.getError());
+  if (!res) {
+    return res.error();
   }
 
-  return Result<Path>::Ok(targetAssetPath, res.getWarnings());
+  return {targetAssetPath, res.warnings()};
 }
 
 void AssetManager::generatePreview(const Path &sourceAssetPath,
@@ -161,12 +161,12 @@ Uuid AssetManager::findRootAssetUuid(const Path &sourceAssetPath) {
   return uuid;
 }
 
-Result<bool> AssetManager::createDirectory(const Path &directory) {
+Result<void> AssetManager::createDirectory(const Path &directory) {
   if (std::filesystem::create_directory(directory)) {
-    return Result<bool>::Ok(true);
+    return Ok();
   }
 
-  return Result<bool>::Error("Could not create directory");
+  return Error("Could not create directory");
 }
 
 Result<Path> AssetManager::createLuaScript(const Path &assetPath) {
@@ -180,11 +180,11 @@ Result<Path> AssetManager::createLuaScript(const Path &assetPath) {
 
   auto res = loadSourceAsset(sourceAssetPath, {});
 
-  if (res.hasError()) {
-    return Result<Path>::Error(res.getError());
+  if (!res) {
+    return res.error();
   }
 
-  return Result<Path>::Ok(sourceAssetPath, res.getWarnings());
+  return {sourceAssetPath, res.warnings()};
 }
 
 Result<Path> AssetManager::createAnimator(const Path &assetPath) {
@@ -197,11 +197,11 @@ Result<Path> AssetManager::createAnimator(const Path &assetPath) {
   stream.close();
 
   auto res = loadSourceAsset(sourceAssetPath, {});
-  if (res.hasError()) {
-    return Result<Path>::Error(res.getError());
+  if (!res) {
+    return res.error();
   }
 
-  return Result<Path>::Ok(sourceAssetPath, res.getWarnings());
+  return {sourceAssetPath, res.warnings()};
 }
 
 Result<Path> AssetManager::createInputMap(const Path &assetPath) {
@@ -214,14 +214,14 @@ Result<Path> AssetManager::createInputMap(const Path &assetPath) {
   stream.close();
 
   auto res = loadSourceAsset(sourceAssetPath, {});
-  if (res.hasError()) {
-    return Result<Path>::Error(res.getError());
+  if (!res) {
+    return res.error();
   }
 
-  return Result<Path>::Ok(sourceAssetPath, res.getWarnings());
+  return {sourceAssetPath, res.warnings()};
 }
 
-Result<bool> AssetManager::reloadAssets() {
+Result<void> AssetManager::reloadAssets() {
   QUOLL_PROFILE_EVENT("AssetManager::reloadAssets");
 
   std::vector<String> warnings;
@@ -236,17 +236,17 @@ Result<bool> AssetManager::reloadAssets() {
 
     auto res = loadSourceIfChanged(entry.path());
 
-    if (res.hasData()) {
-      for (const auto &[_, uuid] : res.getData()) {
+    if (res) {
+      for (const auto &[_, uuid] : res.data()) {
         allLoadedUuids.insert_or_assign(uuid.toString(), true);
       }
     }
 
-    if (res.hasError()) {
-      warnings.push_back(res.getError());
+    if (!res) {
+      warnings.push_back(res.error());
     } else {
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
+      warnings.insert(warnings.end(), res.warnings().begin(),
+                      res.warnings().end());
     }
   }
 
@@ -265,18 +265,18 @@ Result<bool> AssetManager::reloadAssets() {
     }
   }
 
-  return Result<bool>::Ok(true, warnings);
+  return {warnings};
 }
 
-Result<bool>
+Result<void>
 AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
   QUOLL_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
   auto reloadRes = reloadAssets();
 
   auto res = mAssetCache.preloadAssets(renderStorage);
-  auto warnings = res.getWarnings();
+  auto warnings = res.warnings();
 
-  if (res.hasError())
+  if (!res)
     return res;
 
   for (const auto &entry :
@@ -288,16 +288,15 @@ AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
     generatePreview(entry.path(), renderStorage);
   }
 
-  warnings.insert(warnings.end(), res.getWarnings().begin(),
-                  res.getWarnings().end());
+  warnings.insert(warnings.end(), res.warnings().begin(), res.warnings().end());
 
-  return Result<bool>::Ok(true, warnings);
+  return {warnings};
 }
 
 Result<UUIDMap> AssetManager::loadSourceAsset(const Path &sourceAssetPath,
                                               const UUIDMap &uuids) {
-  auto res = Result<UUIDMap>::Error("Unsupported asset format: " +
-                                    sourceAssetPath.filename().string());
+  Result<UUIDMap> res =
+      Error("Unsupported asset format: " + sourceAssetPath.filename().string());
 
   auto type = getAssetTypeFromExtension(sourceAssetPath);
 
@@ -321,9 +320,8 @@ Result<UUIDMap> AssetManager::loadSourceAsset(const Path &sourceAssetPath,
     res = loadSourceScene(sourceAssetPath, uuids);
   }
 
-  if (res.hasData()) {
-    createMetaFile(sourceAssetPath, res.getData(),
-                   getRevisionForAssetType(type));
+  if (res) {
+    createMetaFile(sourceAssetPath, res, getRevisionForAssetType(type));
   }
 
   return res;
@@ -335,7 +333,7 @@ Result<UUIDMap> AssetManager::loadSourceIfChanged(const Path &sourceAssetPath) {
     return loadSourceAsset(sourceAssetPath, uuids);
   }
 
-  return Result<UUIDMap>::Ok(uuids);
+  return uuids;
 }
 
 Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
@@ -347,118 +345,118 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
   if (sourceAssetPath.extension() == ".ktx2") {
     auto uuid = getOrCreateUuidFromMap(uuids, "root");
     auto createRes = mAssetCache.createTextureFromSource(sourceAssetPath, uuid);
-    if (!createRes.hasData()) {
-      return Result<UUIDMap>::Error(createRes.getError());
+    if (!createRes) {
+      return createRes.error();
     }
 
     auto res = mAssetCache.loadTexture(uuid);
 
-    if (res.hasData()) {
-      auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
-      return Result<UUIDMap>::Ok({{"root", uuid}});
+    if (res) {
+      auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+      return UUIDMap{{"root", uuid}};
     }
 
-    return Result<UUIDMap>::Error(res.getError());
+    return res.error();
   }
 
   auto uuid = mImageLoader.loadFromPath(sourceAssetPath,
                                         getOrCreateUuidFromMap(uuids, "root"),
                                         mOptimize, rhi::Format::Rgba8Srgb);
 
-  if (uuid.hasError()) {
-    return Result<UUIDMap>::Error(uuid.getError());
+  if (!uuid) {
+    return uuid.error();
   }
 
-  return Result<UUIDMap>::Ok({{"root", uuid.getData()}});
+  return UUIDMap{{"root", uuid}};
 }
 
 Result<UUIDMap> AssetManager::loadSourceAudio(const Path &sourceAssetPath,
                                               const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
   auto createRes = mAssetCache.createAudioFromSource(sourceAssetPath, uuid);
-  if (!createRes.hasData()) {
-    return Result<UUIDMap>::Error(createRes.getError());
+  if (!createRes) {
+    return createRes.error();
   }
 
   auto res = mAssetCache.loadAudio(uuid);
 
-  if (res.hasData()) {
-    return Result<UUIDMap>::Ok({{"root", uuid}});
+  if (res) {
+    return UUIDMap{{"root", uuid}};
   }
 
-  return Result<UUIDMap>::Error(res.getError());
+  return res.error();
 }
 
 Result<UUIDMap> AssetManager::loadSourceScript(const Path &sourceAssetPath,
                                                const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
   auto createRes = mAssetCache.createLuaScriptFromSource(sourceAssetPath, uuid);
-  if (!createRes.hasData()) {
-    return Result<UUIDMap>::Error(createRes.getError());
+  if (!createRes) {
+    return createRes.error();
   }
 
   auto res = mAssetCache.loadLuaScript(uuid);
 
-  if (res.hasData()) {
-    auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
-    return Result<UUIDMap>::Ok({{"root", uuid}});
+  if (res) {
+    auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+    return UUIDMap{{"root", uuid}};
   }
 
-  return Result<UUIDMap>::Error(res.getError());
+  return res.error();
 }
 
 Result<UUIDMap> AssetManager::loadSourceFont(const Path &sourceAssetPath,
                                              const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
   auto createRes = mAssetCache.createFontFromSource(sourceAssetPath, uuid);
-  if (!createRes.hasData()) {
-    return Result<UUIDMap>::Error(createRes.getError());
+  if (!createRes) {
+    return createRes.error();
   }
 
   auto res = mAssetCache.loadFont(uuid);
 
-  if (res.hasData()) {
-    auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
-    return Result<UUIDMap>::Ok({{"root", uuid}});
+  if (res) {
+    auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+    return UUIDMap{{"root", uuid}};
   }
 
-  return Result<UUIDMap>::Error(res.getError());
+  return res.error();
 }
 
 Result<UUIDMap> AssetManager::loadSourceAnimator(const Path &sourceAssetPath,
                                                  const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
   auto createRes = mAssetCache.createAnimatorFromSource(sourceAssetPath, uuid);
-  if (!createRes.hasData()) {
-    return Result<UUIDMap>::Error(createRes.getError());
+  if (!createRes) {
+    return createRes.error();
   }
 
   auto res = mAssetCache.loadAnimator(uuid);
 
-  if (res.hasData()) {
-    auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
-    return Result<UUIDMap>::Ok({{"root", uuid}});
+  if (res) {
+    auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+    return UUIDMap{{"root", uuid}};
   }
 
-  return Result<UUIDMap>::Error(res.getError());
+  return res.error();
 }
 
 Result<UUIDMap> AssetManager::loadSourceInputMap(const Path &sourceAssetPath,
                                                  const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
   auto createRes = mAssetCache.createInputMapFromSource(sourceAssetPath, uuid);
-  if (!createRes.hasData()) {
-    return Result<UUIDMap>::Error(createRes.getError());
+  if (!createRes) {
+    return createRes.error();
   }
 
   auto res = mAssetCache.loadInputMap(uuid);
 
-  if (res.hasData()) {
-    auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
-    return Result<UUIDMap>::Ok({{"root", uuid}});
+  if (res) {
+    auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+    return UUIDMap{{"root", uuid}};
   }
 
-  return Result<UUIDMap>::Error(res.getError());
+  return res.error();
 }
 
 Result<UUIDMap> AssetManager::loadSourcePrefab(const Path &sourceAssetPath,
@@ -476,17 +474,17 @@ Result<UUIDMap> AssetManager::loadSourceScene(const Path &sourceAssetPath,
                                               const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
   auto createRes = mAssetCache.createSceneFromSource(sourceAssetPath, uuid);
-  if (!createRes.hasData()) {
-    return Result<UUIDMap>::Error(createRes.getError());
+  if (!createRes) {
+    return createRes.error();
   }
 
   auto res = mAssetCache.loadScene(uuid);
 
-  if (res.hasData()) {
-    return Result<UUIDMap>::Ok({{"root", uuid}});
+  if (res) {
+    return UUIDMap{{"root", uuid}};
   }
 
-  return Result<UUIDMap>::Error(res.getError());
+  return res.error();
 }
 
 String AssetManager::getFileHash(const Path &path) {
@@ -557,7 +555,7 @@ Result<Path> AssetManager::createMetaFile(const Path &sourceAssetPath,
 
   mAssetCacheMap.erase(std::filesystem::canonical(sourceAssetPath).string());
 
-  return Result<Path>::Ok(metaFilePath);
+  return metaFilePath;
 }
 
 Path AssetManager::getMetaFilePath(const Path &sourceAssetPath) const {

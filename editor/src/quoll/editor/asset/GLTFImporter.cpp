@@ -24,17 +24,17 @@ Result<UUIDMap> GLTFImporter::loadFromPath(const Path &sourceAssetPath,
                                        sourceAssetPath.string());
 
   if (!warning.empty()) {
-    return Result<UUIDMap>::Error(warning);
+    return Error(warning);
     // TODO: Show warning (in a dialog)
   }
 
   if (!error.empty()) {
-    return Result<UUIDMap>::Error(error);
+    return Error(error);
     // TODO: Show error (in a dialog)
   }
 
   if (!ret) {
-    return Result<UUIDMap>::Error("Cannot load GLB file");
+    return Error("Cannot load GLB file");
   }
 
   GLTFImportData importData{mAssetCache, mImageLoader, sourceAssetPath,
@@ -47,7 +47,7 @@ Result<UUIDMap> GLTFImporter::loadFromPath(const Path &sourceAssetPath,
   loadLights(importData);
   loadPrefabs(importData);
 
-  return Result<UUIDMap>::Ok(importData.outputUuids, importData.warnings);
+  return {importData.outputUuids, importData.warnings};
 }
 
 Result<Path> GLTFImporter::createEmbeddedGlb(const Path &source,
@@ -64,15 +64,15 @@ Result<Path> GLTFImporter::createEmbeddedGlb(const Path &source,
   }
 
   if (!warning.empty()) {
-    return Result<Path>::Error(warning);
+    return Error(warning);
   }
 
   if (!error.empty()) {
-    return Result<Path>::Error(error);
+    return Error(error);
   }
 
   if (!ret) {
-    return Result<Path>::Error("Cannot load ASCII GLTF file");
+    return Error("Cannot load ASCII GLTF file");
   }
 
   auto destinationGlb = destination;
@@ -82,10 +82,10 @@ Result<Path> GLTFImporter::createEmbeddedGlb(const Path &source,
                                   false, true);
 
   if (!ret) {
-    return Result<Path>::Error("Cannot create binary GLB file from GLTF file");
+    return Error("Cannot create binary GLB file from GLTF file");
   }
 
-  return Result<Path>::Ok(destinationGlb);
+  return destinationGlb;
 }
 
 } // namespace quoll::editor

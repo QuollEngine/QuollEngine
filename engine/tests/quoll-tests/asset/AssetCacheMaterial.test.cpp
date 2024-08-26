@@ -88,11 +88,11 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
   auto asset = createMaterialAsset(true);
   auto filePath = cache.createMaterialFromAsset(asset);
 
-  ASSERT_FALSE(filePath.hasError());
+  ASSERT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
   {
-    quoll::InputBinaryStream file(filePath.getData());
+    quoll::InputBinaryStream file(filePath);
     EXPECT_TRUE(file.good());
 
     quoll::AssetFileHeader header;
@@ -158,8 +158,8 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     EXPECT_EQ(emissiveFactor, glm::vec3(0.5f, 0.6f, 2.5f));
   }
 
-  EXPECT_TRUE(std::filesystem::exists(
-      filePath.getData().replace_extension("assetmeta")));
+  EXPECT_TRUE(
+      std::filesystem::exists(filePath.data().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheMaterialTest,
@@ -169,7 +169,7 @@ TEST_F(AssetCacheMaterialTest,
   auto filePath = cache.createMaterialFromAsset(asset);
 
   {
-    quoll::InputBinaryStream file(filePath.getData());
+    quoll::InputBinaryStream file(filePath);
     EXPECT_TRUE(file.good());
 
     quoll::AssetFileHeader header;
@@ -242,15 +242,15 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
   auto asset = createMaterialAsset(true);
 
   auto assetFile = cache.createMaterialFromAsset(asset);
-  EXPECT_FALSE(assetFile.hasError());
+  EXPECT_TRUE(assetFile);
   EXPECT_FALSE(assetFile.hasWarnings());
 
   auto res = cache.loadMaterial(asset.uuid);
 
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
-  auto handle = res.getData();
+  auto handle = res.data();
 
   EXPECT_NE(handle, quoll::AssetHandle<quoll::MaterialAsset>());
 
@@ -292,17 +292,17 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
   auto asset = createMaterialAsset(false);
 
   auto assetFile = cache.createMaterialFromAsset(asset);
-  EXPECT_FALSE(assetFile.hasError());
+  EXPECT_TRUE(assetFile);
   EXPECT_FALSE(assetFile.hasWarnings());
 
   auto res = cache.loadMaterial(asset.uuid);
 
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
-  EXPECT_EQ(res.getWarnings().size(), 0);
+  EXPECT_EQ(res.warnings().size(), 0);
 
-  auto handle = res.getData();
+  auto handle = res.data();
 
   EXPECT_NE(handle, quoll::AssetHandle<quoll::MaterialAsset>());
 
@@ -339,18 +339,18 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
 }
 
 TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
-  auto texture = cache.loadTexture(textureUuid);
+  auto texture = cache.loadTexture(textureUuid).data();
   quoll::AssetData<quoll::MaterialAsset> material{};
   material.uuid = quoll::Uuid::generate();
-  material.data.baseColorTexture = texture.getData();
+  material.data.baseColorTexture = texture;
   auto path = cache.createMaterialFromAsset(material);
 
-  cache.getRegistry().remove(texture.getData());
-  EXPECT_FALSE(cache.getRegistry().has(texture.getData()));
+  cache.getRegistry().remove(texture);
+  EXPECT_FALSE(cache.getRegistry().has(texture));
 
   auto handle = cache.loadMaterial(material.uuid);
 
-  auto &newMaterial = cache.getRegistry().get(handle.getData());
+  auto &newMaterial = cache.getRegistry().get(handle.data());
 
   EXPECT_NE(newMaterial.baseColorTexture,
             quoll::AssetHandle<quoll::TextureAsset>());

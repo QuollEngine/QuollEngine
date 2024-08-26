@@ -14,11 +14,10 @@ TEST_F(AssetCacheTextureTest, CreatesTextureFromSource) {
   auto uuid = quoll::Uuid::generate();
   auto filePath =
       cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
-  EXPECT_TRUE(filePath.hasData());
-  EXPECT_FALSE(filePath.hasError());
+  EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
-  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+  EXPECT_EQ(filePath.data().filename().string().size(), 38);
 
   auto meta = cache.getAssetMeta(uuid);
 
@@ -31,18 +30,17 @@ TEST_F(AssetCacheTextureTest, CreatesTextureFromAsset) {
   auto createdRes =
       cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
   auto texture = cache.loadTexture(uuid);
-  auto handle = texture.getData();
+  auto handle = texture.data();
 
   auto asset = cache.getRegistry().getMeta(handle);
 
   cache.getRegistry().remove(handle);
 
   auto filePath = cache.createTextureFromAsset(asset);
-  EXPECT_TRUE(filePath.hasData());
-  EXPECT_FALSE(filePath.hasError());
+  EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
-  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+  EXPECT_EQ(filePath.data().filename().string().size(), 38);
 
   auto meta = cache.getAssetMeta(uuid);
   EXPECT_EQ(meta.type, quoll::AssetType::Texture);
@@ -55,7 +53,7 @@ TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
       cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
 
   auto texture = cache.loadTexture(uuid);
-  auto handle = texture.getData();
+  auto handle = texture.data();
 
   auto asset = cache.getRegistry().getMeta(handle);
 
@@ -66,14 +64,14 @@ TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
 
 TEST_F(AssetCacheTextureTest, FailsIfKtxFileCannotBeLoaded) {
   // non-existent file
-  EXPECT_TRUE(cache.loadTexture(quoll::Uuid::generate()).hasError());
+  EXPECT_FALSE(cache.loadTexture(quoll::Uuid::generate()));
 
   // invalid format
   auto uuid = quoll::Uuid::generate();
   auto filePath = cache.createTextureFromSource(
       FixturesPath / "white-image-100x100.png", uuid);
 
-  EXPECT_TRUE(cache.loadTexture(uuid).hasError());
+  EXPECT_FALSE(cache.loadTexture(uuid));
 }
 
 TEST_F(AssetCacheTextureTest, FailsIfTextureIsOneDimensional) {
@@ -81,7 +79,7 @@ TEST_F(AssetCacheTextureTest, FailsIfTextureIsOneDimensional) {
   auto filePath =
       cache.createTextureFromSource(FixturesPath / "1x1-1d.ktx", uuid);
 
-  EXPECT_TRUE(cache.loadTexture(uuid).hasError());
+  EXPECT_FALSE(cache.loadTexture(uuid));
 }
 
 TEST_F(AssetCacheTextureTest, LoadsTexture2D) {
@@ -90,9 +88,9 @@ TEST_F(AssetCacheTextureTest, LoadsTexture2D) {
       cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
 
   auto texture = cache.loadTexture(uuid);
-  EXPECT_TRUE(texture.hasData());
+  EXPECT_TRUE(texture);
 
-  auto &asset = cache.getRegistry().get(texture.getData());
+  auto &asset = cache.getRegistry().get(texture.data());
 
   EXPECT_EQ(asset.width, 1);
   EXPECT_EQ(asset.height, 1);
@@ -107,9 +105,9 @@ TEST_F(AssetCacheTextureTest, LoadsTextureCubemap) {
       cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx", uuid);
   auto texture = cache.loadTexture(uuid);
 
-  EXPECT_TRUE(texture.hasData());
+  EXPECT_TRUE(texture);
 
-  const auto &asset = cache.getRegistry().get(texture.getData());
+  const auto &asset = cache.getRegistry().get(texture.data());
 
   EXPECT_EQ(asset.width, 1);
   EXPECT_EQ(asset.height, 1);

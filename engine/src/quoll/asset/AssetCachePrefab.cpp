@@ -10,21 +10,20 @@ Result<Path>
 AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   if (asset.uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
   auto metaRes = createAssetMeta(AssetType::Prefab, asset.name, assetPath);
-  if (!metaRes.hasData()) {
-    return Result<Path>::Error("Cannot create prefab asset: " + asset.name);
+  if (!metaRes) {
+    return Error("Cannot create prefab asset: " + asset.name);
   }
 
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<Path>::Error("File cannot be opened for writing: " +
-                               assetPath.string());
+    return Error("File cannot be opened for writing: " + assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -251,7 +250,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     }
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<PrefabAsset>>
@@ -262,7 +261,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
   stream.read(header);
   if (header.magic != AssetFileHeader::MagicConstant ||
       header.type != AssetType::Prefab) {
-    return Result<AssetHandle<PrefabAsset>>::Error("Invalid file format");
+    return Error("Invalid file format");
   }
 
   std::vector<String> warnings;
@@ -282,13 +281,13 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadMaterial(assetUuid);
-      if (res.hasData()) {
-        localMaterialMap.at(i) = res.getData();
-        warnings.insert(warnings.end(), res.getWarnings().begin(),
-                        res.getWarnings().end());
+      auto res = getOrLoadMaterial(assetUuid);
+      if (res) {
+        localMaterialMap.at(i) = res;
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
       } else {
-        warnings.push_back(res.getError());
+        warnings.push_back(res.error());
       }
     }
   }
@@ -303,13 +302,13 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadMesh(assetUuid);
-      if (res.hasData()) {
-        localMeshMap.at(i) = res.getData();
-        warnings.insert(warnings.end(), res.getWarnings().begin(),
-                        res.getWarnings().end());
+      auto res = getOrLoadMesh(assetUuid);
+      if (res) {
+        localMeshMap.at(i) = res;
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
       } else {
-        warnings.push_back(res.getError());
+        warnings.push_back(res.error());
       }
     }
   }
@@ -324,13 +323,13 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadSkeleton(assetUuid);
-      if (res.hasData()) {
-        localSkeletonMap.at(i) = res.getData();
-        warnings.insert(warnings.end(), res.getWarnings().begin(),
-                        res.getWarnings().end());
+      auto res = getOrLoadSkeleton(assetUuid);
+      if (res) {
+        localSkeletonMap.at(i) = res;
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
       } else {
-        warnings.push_back(res.getError());
+        warnings.push_back(res.error());
       }
     }
   }
@@ -345,14 +344,14 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadAnimation(assetUuid);
-      if (res.hasData()) {
-        localAnimationMap.at(i) = res.getData();
-        warnings.insert(warnings.end(), res.getWarnings().begin(),
-                        res.getWarnings().end());
+      auto res = getOrLoadAnimation(assetUuid);
+      if (res) {
+        localAnimationMap.at(i) = res;
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
 
       } else {
-        warnings.push_back(res.getError());
+        warnings.push_back(res.error());
       }
     }
   }
@@ -367,14 +366,14 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadAnimator(assetUuid);
-      if (res.hasData()) {
-        localAnimatorMap.at(i) = res.getData();
-        warnings.insert(warnings.end(), res.getWarnings().begin(),
-                        res.getWarnings().end());
+      auto res = getOrLoadAnimator(assetUuid);
+      if (res) {
+        localAnimatorMap.at(i) = res;
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
 
       } else {
-        warnings.push_back(res.getError());
+        warnings.push_back(res.error());
       }
     }
   }
@@ -578,16 +577,16 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       prefab.data.skeletons.empty() && prefab.data.animators.empty() &&
       prefab.data.names.empty() && prefab.data.meshRenderers.empty() &&
       prefab.data.skinnedMeshRenderers.empty()) {
-    return Result<AssetHandle<PrefabAsset>>::Error("Prefab is empty");
+    return Error("Prefab is empty");
   }
 
-  return Result<AssetHandle<PrefabAsset>>::Ok(mRegistry.add(prefab), warnings);
+  return {mRegistry.add(prefab), warnings};
 }
 
 Result<AssetHandle<PrefabAsset>> AssetCache::loadPrefab(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Prefab) {
-    return Result<AssetHandle<PrefabAsset>>::Error("Asset type is not prefab");
+    return Error("Asset type is not prefab");
   }
 
   return loadPrefabDataFromInputStream(getPathFromUuid(uuid), uuid, meta);

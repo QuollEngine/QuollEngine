@@ -12,21 +12,20 @@ Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
   std::error_code code;
   if (!std::filesystem::copy_file(sourcePath, assetPath, co::overwrite_existing,
                                   code)) {
-    return Result<Path>::Error(
-        "Cannot create scene from source: " + sourcePath.stem().string() +
-        "; " + code.message());
+    return Error("Cannot create scene from source: " +
+                 sourcePath.stem().string() + "; " + code.message());
   }
 
   auto metaRes = createAssetMeta(AssetType::Scene,
                                  sourcePath.filename().string(), assetPath);
 
-  if (!metaRes.hasData()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
-    return Result<Path>::Error("Cannot create scene from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create scene from source: " +
+                 sourcePath.stem().string());
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<SceneAsset>> AssetCache::loadScene(const Uuid &uuid) {
@@ -37,24 +36,23 @@ Result<AssetHandle<SceneAsset>> AssetCache::loadScene(const Uuid &uuid) {
   stream.close();
 
   if (root["type"].as<String>("") != "scene") {
-    return Result<AssetHandle<SceneAsset>>::Error("Type must be scene");
+    return Error("Type must be scene");
   }
 
   if (root["version"].as<String>("") != "0.1") {
-    return Result<AssetHandle<SceneAsset>>::Error("Version is not supported");
+    return Error("Version is not supported");
   }
 
   if (root["name"].as<String>("").length() == 0) {
-    return Result<AssetHandle<SceneAsset>>::Error("`name` cannot be empty");
+    return Error("`name` cannot be empty");
   }
 
   if (root["zones"].Type() != YAML::NodeType::Sequence) {
-    return Result<AssetHandle<SceneAsset>>::Error("`zones` field is invalid");
+    return Error("`zones` field is invalid");
   }
 
   if (root["entities"].Type() != YAML::NodeType::Sequence) {
-    return Result<AssetHandle<SceneAsset>>::Error(
-        "`entities` field is invalid");
+    return Error("`entities` field is invalid");
   }
 
   auto meta = getAssetMeta(uuid);
@@ -66,7 +64,7 @@ Result<AssetHandle<SceneAsset>> AssetCache::loadScene(const Uuid &uuid) {
   asset.data.data = root;
 
   auto handle = mRegistry.add(asset);
-  return Result<AssetHandle<SceneAsset>>::Ok(handle);
+  return handle;
 }
 
 } // namespace quoll

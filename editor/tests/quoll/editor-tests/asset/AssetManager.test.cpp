@@ -79,24 +79,24 @@ TEST_F(AssetManagerTest, SetsProvidedAssetsAndCachePathsOnConstruct) {
 TEST_F(AssetManagerTest, CreatesScriptFileAndLoadsIt) {
   auto handle = manager.createLuaScript(InnerPathInAssets / "test");
 
-  EXPECT_TRUE(handle.hasData());
-  EXPECT_EQ(handle.getData(), InnerPathInAssets / "test.lua");
+  EXPECT_TRUE(handle);
+  EXPECT_EQ(handle, InnerPathInAssets / "test.lua");
   EXPECT_TRUE(fs::exists(InnerPathInAssets / ("test.lua")));
 }
 
 TEST_F(AssetManagerTest, CreatesAnimatorFileAndLoadsIt) {
   auto handle = manager.createAnimator(InnerPathInAssets / "test");
 
-  EXPECT_TRUE(handle.hasData());
-  EXPECT_EQ(handle.getData(), InnerPathInAssets / "test.animator");
+  EXPECT_TRUE(handle);
+  EXPECT_EQ(handle, InnerPathInAssets / "test.animator");
   EXPECT_TRUE(fs::exists(InnerPathInAssets / "test.animator"));
 }
 
 TEST_F(AssetManagerTest, CreatesInputMapFileAndLoadsIt) {
   auto handle = manager.createInputMap(InnerPathInAssets / "test");
 
-  EXPECT_TRUE(handle.hasData());
-  EXPECT_EQ(handle.getData(), InnerPathInAssets / "test.inputmap");
+  EXPECT_TRUE(handle);
+  EXPECT_EQ(handle, InnerPathInAssets / "test.inputmap");
   EXPECT_TRUE(fs::exists(InnerPathInAssets / "test.inputmap"));
 }
 
@@ -107,7 +107,7 @@ TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
   auto metaPath = animatorPath;
   metaPath.replace_extension("animator.meta");
 
-  auto sourcePath = manager.createAnimator(animatorPath).getData();
+  auto sourcePath = manager.createAnimator(animatorPath);
   auto engineUuidBefore = manager.findRootAssetUuid(sourcePath);
   EXPECT_TRUE(engineUuidBefore.isValid());
 
@@ -131,7 +131,7 @@ TEST_F(
   auto metaPath = animatorPath;
   metaPath.replace_extension("animator.meta");
 
-  auto sourcePath = manager.createAnimator(animatorPath).getData();
+  auto sourcePath = manager.createAnimator(animatorPath);
   auto engineUuidBefore = manager.findRootAssetUuid(sourcePath);
   EXPECT_TRUE(engineUuidBefore.isValid());
 
@@ -174,7 +174,7 @@ TEST_P(AssetTest, FailedImportDoesNotCreateAssetInCache) {
 
   auto res = manager.importAsset(TempPath / filename, AssetsPath);
 
-  EXPECT_TRUE(res.hasError());
+  EXPECT_FALSE(res);
   EXPECT_FALSE(fs::exists(AssetsPath / filename));
 }
 
@@ -184,7 +184,7 @@ TEST_P(AssetTest, ImportCopiesSourceToAssets) {
 
   auto res = manager.importAsset(FixturesPath / filename, AssetsPath);
 
-  EXPECT_TRUE(res.hasData());
+  EXPECT_TRUE(res);
   EXPECT_TRUE(fs::exists(AssetsPath / filename));
 }
 
@@ -195,9 +195,9 @@ TEST_P(AssetTest, ImportModifiesTheNameAndCopiesSourceToAssetsIfDuplicate) {
 
   {
     auto res = manager.importAsset(fixturePath, AssetsPath);
-    EXPECT_TRUE(res.hasData());
-    EXPECT_TRUE(fs::exists(res.getData()));
-    EXPECT_EQ(res.getData(),
+    EXPECT_TRUE(res);
+    EXPECT_TRUE(fs::exists(res));
+    EXPECT_EQ(res,
               (AssetsPath / "valid-asset").replace_extension(fixtureExtension));
   }
 
@@ -206,8 +206,8 @@ TEST_P(AssetTest, ImportModifiesTheNameAndCopiesSourceToAssetsIfDuplicate) {
                              .replace_extension(fixtureExtension);
 
     auto res = manager.importAsset(fixturePath, AssetsPath);
-    EXPECT_TRUE(res.hasData());
-    EXPECT_EQ(res.getData(), duplicateName);
+    EXPECT_TRUE(res);
+    EXPECT_EQ(res, duplicateName);
     EXPECT_TRUE(fs::exists(duplicateName))
         << duplicateName << " does not exist";
   }
@@ -219,14 +219,13 @@ TEST_P(AssetTest, ImportCreatesAssetInCache) {
 
   auto res = manager.importAsset(FixturesPath / filename, AssetsPath);
 
-  auto uuid = manager.findRootAssetUuid(res.getData());
+  auto uuid = manager.findRootAssetUuid(res);
 
-  EXPECT_TRUE(res.hasData());
+  EXPECT_TRUE(res);
   EXPECT_TRUE(uuid.isValid());
 
-  EXPECT_EQ(
-      manager.getCache().getAssetMeta(uuid).type,
-      quoll::editor::AssetManager::getAssetTypeFromExtension(res.getData()));
+  EXPECT_EQ(manager.getCache().getAssetMeta(uuid).type,
+            quoll::editor::AssetManager::getAssetTypeFromExtension(res));
 }
 
 TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
@@ -234,11 +233,11 @@ TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
   auto fixturePath = FixturesPath / ("valid-asset." + fixtureExt);
 
   auto res = manager.importAsset(fixturePath, InnerPathInAssets);
-  EXPECT_TRUE(res.hasData());
+  EXPECT_TRUE(res);
 
-  auto sourcePath = res.getData();
-  auto metaPath = sourcePath;
-  metaPath.replace_extension(sourcePath.extension().string() + ".meta");
+  auto sourcePath = res;
+  auto metaPath = sourcePath.data();
+  metaPath.replace_extension(sourcePath.data().extension().string() + ".meta");
   EXPECT_TRUE(fs::exists(metaPath));
 
   std::ifstream stream(metaPath);
@@ -252,7 +251,7 @@ TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
   EXPECT_NE(revision, 0);
 
   {
-    std::ifstream stream(sourcePath, std::ios::binary);
+    std::ifstream stream(sourcePath.data(), std::ios::binary);
 
     quoll::String calculatedHash;
     CryptoPP::SHA256 sha256;

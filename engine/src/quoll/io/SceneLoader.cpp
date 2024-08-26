@@ -30,7 +30,7 @@ SceneLoader::SceneLoader(AssetRegistry &assetRegistry,
                          EntityDatabase &entityDatabase)
     : mAssetRegistry(assetRegistry), mEntityDatabase(entityDatabase) {}
 
-Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
+Result<void> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                          EntityIdCache &entityIdCache) {
 
   NameSerializer::deserialize(node, mEntityDatabase, entity, entityIdCache);
@@ -65,7 +65,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                   mAssetRegistry);
   UICanvasSerializer::deserialize(node, mEntityDatabase, entity);
 
-  return Result<bool>::Ok(true);
+  return Ok();
 }
 
 Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
@@ -84,10 +84,10 @@ Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
   }
 
   if (entity == Entity::Null) {
-    return Result<Entity>::Error("Camera entity not found");
+    return Error("Camera entity not found");
   }
 
-  return Result<Entity>::Ok(entity);
+  return entity;
 }
 
 Result<Entity> SceneLoader::loadEnvironment(const YAML::Node &node,
@@ -97,11 +97,11 @@ Result<Entity> SceneLoader::loadEnvironment(const YAML::Node &node,
 
     if (entityId > 0 && entityIdCache.contains(entityId)) {
       auto entity = entityIdCache.at(entityId);
-      return Result<Entity>::Ok(entity);
+      return entity;
     }
   }
 
-  return Result<Entity>::Error("Environment entity not found");
+  return Error("Environment entity not found");
 }
 
 } // namespace quoll::detail

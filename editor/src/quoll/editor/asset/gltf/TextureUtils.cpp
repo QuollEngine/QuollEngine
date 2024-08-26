@@ -40,13 +40,12 @@ AssetHandle<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
       getGLTFAssetName(importData, assetName),
       generateMipMaps && importData.optimize, format);
 
-  if (uuid.hasError()) {
+  if (!uuid) {
     importData.warnings.push_back(assetName + " could not be loaded");
     return AssetHandle<TextureAsset>();
   }
 
-  auto handle =
-      assetCache.getRegistry().findHandleByUuid<TextureAsset>(uuid.getData());
+  auto handle = assetCache.getRegistry().findHandleByUuid<TextureAsset>(uuid);
 
   importData.outputUuids.insert_or_assign(
       assetName, assetCache.getRegistry().getMeta(handle).uuid);

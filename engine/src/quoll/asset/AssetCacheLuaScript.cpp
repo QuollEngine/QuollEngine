@@ -49,7 +49,7 @@ quoll::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
                                              const Uuid &uuid) {
   if (uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   using co = std::filesystem::copy_options;
@@ -58,20 +58,20 @@ quoll::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
-    return Result<Path>::Error("Cannot create Lua script from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create Lua script from source: " +
+                 sourcePath.stem().string());
   }
 
   auto metaRes = createAssetMeta(AssetType::LuaScript,
                                  sourcePath.filename().string(), assetPath);
 
-  if (!metaRes.hasData()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
-    return Result<Path>::Error("Cannot create Lua script from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create Lua script from source: " +
+                 sourcePath.stem().string());
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<LuaScriptAsset>>
@@ -81,8 +81,7 @@ AssetCache::loadLuaScript(const Uuid &uuid) {
   std::ifstream stream(filePath);
 
   if (!stream.good()) {
-    return Result<AssetHandle<LuaScriptAsset>>::Error(
-        "File cannot be opened for reading: " + filePath.string());
+    return Error("File cannot be opened for reading: " + filePath.string());
   }
 
   auto meta = getAssetMeta(uuid);
@@ -111,19 +110,19 @@ AssetCache::loadLuaScript(const Uuid &uuid) {
 
   if (!success) {
     const auto *message = lua_tostring(luaState, -1);
-    return Result<AssetHandle<LuaScriptAsset>>::Error(message);
+    return Error(message);
   }
 
   auto handle = mRegistry.findHandleByUuid<LuaScriptAsset>(uuid);
 
   if (!handle) {
     auto newHandle = mRegistry.add(asset);
-    return Result<AssetHandle<LuaScriptAsset>>::Ok(newHandle);
+    return newHandle;
   }
 
   mRegistry.update(handle, asset);
 
-  return Result<AssetHandle<LuaScriptAsset>>::Ok(handle);
+  return handle;
 }
 
 } // namespace quoll

@@ -132,12 +132,12 @@ void loadPrefabs(GLTFImportData &importData) {
 
   auto path = assetCache.createPrefabFromAsset(prefab);
 
-  if (path.hasData()) {
+  if (path) {
     auto handle = assetCache.loadPrefab(prefab.uuid);
 
-    if (handle.hasData()) {
+    if (handle) {
       importData.outputUuids.insert_or_assign(
-          "root", assetCache.getRegistry().getMeta(handle.getData()).uuid);
+          "root", assetCache.getRegistry().getMeta(handle.data()).uuid);
     }
   }
 }

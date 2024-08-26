@@ -12,7 +12,7 @@ Result<Path> AssetCache::createFontFromSource(const Path &sourcePath,
                                               const Uuid &uuid) {
   if (uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   using co = std::filesystem::copy_options;
@@ -21,20 +21,20 @@ Result<Path> AssetCache::createFontFromSource(const Path &sourcePath,
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
-    return Result<Path>::Error("Cannot create font from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create font from source: " +
+                 sourcePath.stem().string());
   }
 
   auto metaRes = createAssetMeta(AssetType::Font,
                                  sourcePath.filename().string(), assetPath);
 
-  if (!metaRes.hasData()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
-    return Result<Path>::Error("Cannot create font from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create font from source: " +
+                 sourcePath.stem().string());
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<FontAsset>> AssetCache::loadFont(const Uuid &uuid) {
@@ -44,20 +44,20 @@ Result<AssetHandle<FontAsset>> AssetCache::loadFont(const Uuid &uuid) {
 
   auto res = loader.loadFontData(filePath);
 
-  if (res.hasError()) {
-    return Result<AssetHandle<FontAsset>>::Error(res.getError());
+  if (!res) {
+    return res.error();
   }
 
   auto meta = getAssetMeta(uuid);
 
-  auto &data = res.getData();
+  auto &data = res.data();
   data.type = AssetType::Font;
   data.name = meta.name;
   data.uuid = Uuid(filePath.stem().string());
 
   auto handle = mRegistry.add(data);
 
-  return Result<AssetHandle<FontAsset>>::Ok(handle);
+  return handle;
 }
 
 } // namespace quoll

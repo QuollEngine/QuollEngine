@@ -65,9 +65,9 @@ void SceneWriter::updateSceneYaml(
   auto id = mScene.entityDatabase.get<Id>(entity).id;
 
   auto updatedNode = serializer.serialize(entity);
-  if (updatedNode.hasData()) {
+  if (updatedNode) {
     if (mEntityIdCache.find(id) == mEntityIdCache.end()) {
-      node["entities"].push_back(updatedNode.getData());
+      node["entities"].push_back(updatedNode.data());
     } else {
       usize i = 0;
       for (; i < node["entities"].size() &&
@@ -76,7 +76,7 @@ void SceneWriter::updateSceneYaml(
       }
 
       if (i < node["entities"].size()) {
-        node["entities"][i] = updatedNode.getData();
+        node["entities"][i] = updatedNode.data();
       }
     }
   }

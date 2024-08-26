@@ -78,7 +78,7 @@ Result<Path> AssetCache::createTextureFromSource(const Path &sourcePath,
                                                  const Uuid &uuid) {
   if (uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   using co = std::filesystem::copy_options;
@@ -87,27 +87,27 @@ Result<Path> AssetCache::createTextureFromSource(const Path &sourcePath,
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
-    return Result<Path>::Error("Cannot create texture from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create texture from source: " +
+                 sourcePath.stem().string());
   }
 
   auto metaRes = createAssetMeta(AssetType::Texture,
                                  sourcePath.filename().string(), assetPath);
 
-  if (!metaRes.hasData()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
-    return Result<Path>::Error("Cannot create texture from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create texture from source: " +
+                 sourcePath.stem().string());
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<Path>
 AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   if (asset.uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   ktxTextureCreateInfo createInfo{};
@@ -131,8 +131,7 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
                                   &texture);
 
     if (res != KTX_SUCCESS) {
-      return Result<Path>::Error(
-          KtxError("Cannot create KTX texture", res).what());
+      return Error(KtxError("Cannot create KTX texture", res).what());
     }
   }
 
@@ -158,28 +157,26 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
         ktxTexture_WriteToNamedFile(baseTexture, assetPath.string().c_str());
 
     if (res != KTX_SUCCESS) {
-      return Result<Path>::Error(
-          KtxError("Cannot write KTX texture to a file", res).what());
+      return Error(KtxError("Cannot write KTX texture to a file", res).what());
     }
   }
 
   auto metaRes = createAssetMeta(AssetType::Texture, asset.name, assetPath);
-  if (metaRes.hasError()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
     return metaRes;
   }
 
   ktxTexture_Destroy(baseTexture);
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
   std::ifstream stream(filePath, std::ios::binary);
   if (!stream.good()) {
-    return Result<AssetHandle<TextureAsset>>::Error("Cannot open file: " +
-                                                    filePath.string());
+    return Error("Cannot open file: " + filePath.string());
   }
 
   stream.seekg(0, std::ios::end);
@@ -196,18 +193,15 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
       &ktxTextureData);
 
   if (result != KTX_SUCCESS) {
-    return Result<AssetHandle<TextureAsset>>::Error(
-        KtxError("Cannot load KTX texture", result).what());
+    return Error(KtxError("Cannot load KTX texture", result).what());
   }
 
   if (ktxTextureData->numDimensions != 2) {
-    return Result<AssetHandle<TextureAsset>>::Error(
-        "Only 2D textures are supported");
+    return Error("Only 2D textures are supported");
   }
 
   if (ktxTextureData->isArray) {
-    return Result<AssetHandle<TextureAsset>>::Error(
-        "Texture arrays are not supported");
+    return Error("Texture arrays are not supported");
   }
 
   auto meta = getAssetMeta(uuid);
@@ -271,18 +265,18 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
 
   ktxTexture_Destroy(ktxTextureData);
 
-  return Result<AssetHandle<TextureAsset>>::Ok(mRegistry.add(texture));
+  return mRegistry.add(texture);
 }
 
 Result<AssetHandle<TextureAsset>>
 AssetCache::getOrLoadTexture(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<AssetHandle<TextureAsset>>::Ok(AssetHandle<TextureAsset>());
+    return AssetHandle<TextureAsset>();
   }
 
   auto handle = mRegistry.findHandleByUuid<TextureAsset>(uuid);
   if (handle) {
-    return Result<AssetHandle<TextureAsset>>::Ok(handle);
+    return handle;
   }
 
   return loadTexture(uuid);

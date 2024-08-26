@@ -4,98 +4,96 @@
 
 namespace quoll {
 
-static Result<bool> checkBoolean(YAML::Node node) {
+static Result<void> checkBoolean(YAML::Node node) {
   if (node.IsNull()) {
-    return Result<bool>::Ok(true);
+    return Ok();
   }
 
   auto value = node.as<String>("");
 
   if (!input::exists(value)) {
-    return Result<bool>::Error("Binding item value is invalid: " + value);
+    return Error("Binding item value is invalid: " + value);
   }
 
   if (input::getKeyDataType(value) != InputDataType::Boolean) {
-    return Result<bool>::Error("Binding item value must be boolean: " + value);
+    return Error("Binding item value must be boolean: " + value);
   }
 
-  return Result<bool>::Ok(true);
+  return Ok();
 }
 
-static Result<bool> checkAxis1d(YAML::Node node) {
+static Result<void> checkAxis1d(YAML::Node node) {
   if (node.IsNull()) {
-    return Result<bool>::Ok(true);
+    return Ok();
   }
 
   if (node.IsScalar()) {
     auto value = node.as<String>("");
 
     if (!input::exists(value)) {
-      return Result<bool>::Error("Binding item value is invalid: " + value);
+      return Error("Binding item value is invalid: " + value);
     }
 
     if (input::getKeyDataType(value) != InputDataType::Axis1d) {
-      return Result<bool>::Error("Binding item value must be axis-1d: " +
-                                 value);
+      return Error("Binding item value must be axis-1d: " + value);
     }
 
-    return Result<bool>::Ok(true);
+    return Ok();
   }
 
   if (node.IsSequence() && node.size() == 2) {
     for (auto segment : node) {
       auto res = checkBoolean(segment);
-      if (res.hasError()) {
+      if (!res) {
         return res;
       }
     }
 
-    return Result<bool>::Ok(true);
+    return Ok();
   }
 
-  return Result<bool>::Error("Invalid binding item value");
+  return Error("Invalid binding item value");
 }
 
-static Result<bool> checkAxis2d(YAML::Node node) {
+static Result<void> checkAxis2d(YAML::Node node) {
   if (node.IsNull()) {
-    return Result<bool>::Ok(true);
+    return Ok();
   }
 
   if (node.IsScalar()) {
     auto value = node.as<String>("");
 
     if (!input::exists(value)) {
-      return Result<bool>::Error("Binding item value is invalid: " + value);
+      return Error("Binding item value is invalid: " + value);
     }
 
     if (input::getKeyDataType(value) != InputDataType::Axis2d) {
-      return Result<bool>::Error("Binding item value must be axis-2d: " +
-                                 value);
+      return Error("Binding item value must be axis-2d: " + value);
     }
 
-    return Result<bool>::Ok(true);
+    return Ok();
   }
 
   if (node.IsMap()) {
     if (!node["x"] || !node["y"]) {
-      return Result<bool>::Error(
+      return Error(
           "Both `x` and `y` values must be provided for expanded axis-2d");
     }
 
     auto resX = checkAxis1d(node["x"]);
-    if (resX.hasError()) {
+    if (!resX) {
       return resX;
     }
 
     auto resY = checkAxis1d(node["y"]);
-    if (resY.hasError()) {
+    if (!resY) {
       return resY;
     }
 
-    return Result<bool>::Ok(true);
+    return Ok();
   }
 
-  return Result<bool>::Error("Invalid binding item value");
+  return Error("Invalid binding item value");
 }
 
 Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
@@ -107,45 +105,38 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
 
   // Validation
   if (root["type"].as<String>("") != "inputmap") {
-    return Result<AssetHandle<InputMapAsset>>::Error("Type must be input map");
+    return Error("Type must be input map");
   }
 
   if (root["version"].as<String>("") != "0.1") {
-    return Result<AssetHandle<InputMapAsset>>::Error(
-        "Version is not supported");
+    return Error("Version is not supported");
   }
 
   if (!root["schemes"] || !root["schemes"].IsSequence()) {
-    return Result<AssetHandle<InputMapAsset>>::Error(
-        "Schemes field must be a list");
+    return Error("Schemes field must be a list");
   }
 
   if (!root["commands"] || !root["commands"].IsSequence()) {
-    return Result<AssetHandle<InputMapAsset>>::Error(
-        "Commands field must be a list");
+    return Error("Commands field must be a list");
   }
 
   if (!root["bindings"] || !root["bindings"].IsSequence()) {
-    return Result<AssetHandle<InputMapAsset>>::Error(
-        "Bindings field must be a list");
+    return Error("Bindings field must be a list");
   }
 
   std::set<String> duplicateNames;
   for (auto scheme : root["schemes"]) {
     if (!scheme.IsMap()) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Scheme item must be a map");
+      return Error("Scheme item must be a map");
     }
 
     auto name = scheme["name"].as<String>("");
     if (name == "") {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Scheme item name must be a string and cannot be empty");
+      return Error("Scheme item name must be a string and cannot be empty");
     }
 
     if (duplicateNames.contains(name)) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Scheme item with same name is found");
+      return Error("Scheme item with same name is found");
     }
 
     duplicateNames.insert(name);
@@ -155,57 +146,48 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
 
   for (auto command : root["commands"]) {
     if (!command.IsMap()) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Command item must be a map");
+      return Error("Command item must be a map");
     }
 
     auto name = command["name"].as<String>("");
 
     if (name == "") {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Command item name must be a string and cannot be empty");
+      return Error("Command item name must be a string and cannot be empty");
     }
 
     if (duplicateNames.contains(name)) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Scheme item with same name is found");
+      return Error("Scheme item with same name is found");
     }
 
     duplicateNames.insert(name);
 
     auto type = command["type"].as<String>("");
     if (type != "boolean" && type != "axis-2d") {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Command item type must be \"boolean\" or \"axis-2d\"");
+      return Error("Command item type must be \"boolean\" or \"axis-2d\"");
     }
   }
 
   for (auto binding : root["bindings"]) {
     if (!binding.IsMap()) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Binding item must be a map");
+      return Error("Binding item must be a map");
     }
 
     auto scheme = binding["scheme"].as<i32>(-1);
     if (scheme == -1) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Binding item scheme is invalid");
+      return Error("Binding item scheme is invalid");
     }
 
     auto command = binding["command"].as<i32>(-1);
     if (command == -1) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Binding item command is invalid");
+      return Error("Binding item command is invalid");
     }
 
     if (scheme >= static_cast<i32>(root["schemes"].size())) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Binding item scheme does not point to scheme item");
+      return Error("Binding item scheme does not point to scheme item");
     }
 
     if (command >= static_cast<i32>(root["commands"].size())) {
-      return Result<AssetHandle<InputMapAsset>>::Error(
-          "Binding item command does not point to command item");
+      return Error("Binding item command does not point to command item");
     }
 
     auto value = binding["binding"];
@@ -216,21 +198,19 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
     if (commandType == "boolean") {
       auto p = value.as<String>("");
       if (!value.IsNull() && p == "") {
-        return Result<AssetHandle<InputMapAsset>>::Error(
-            "Binding item value cannot be used with boolean command");
+        return Error("Binding item value cannot be used with boolean command");
       }
 
       if (!value.IsNull() && !input::exists(p)) {
-        return Result<AssetHandle<InputMapAsset>>::Error(
-            "Binding item value is invalid: " + p);
+        return Error("Binding item value is invalid: " + p);
       }
     }
 
     if (commandType == "axis-2d") {
       auto res = checkAxis2d(value);
 
-      if (res.hasError()) {
-        return Result<AssetHandle<InputMapAsset>>::Error(res.getError());
+      if (!res) {
+        return res.error();
       }
     }
   }
@@ -311,19 +291,19 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
 
   if (!handle) {
     auto newHandle = mRegistry.add(asset);
-    return Result<AssetHandle<InputMapAsset>>::Ok(newHandle);
+    return newHandle;
   }
 
   mRegistry.update(handle, asset);
 
-  return Result<AssetHandle<InputMapAsset>>::Ok(handle);
+  return handle;
 }
 
 Result<Path> AssetCache::createInputMapFromSource(const Path &sourcePath,
                                                   const Uuid &uuid) {
   if (uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   using co = std::filesystem::copy_options;
@@ -332,20 +312,20 @@ Result<Path> AssetCache::createInputMapFromSource(const Path &sourcePath,
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
-    return Result<Path>::Error("Cannot create input map from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create input map from source: " +
+                 sourcePath.stem().string());
   }
 
   auto metaRes = createAssetMeta(AssetType::InputMap,
                                  sourcePath.filename().string(), assetPath);
 
-  if (!metaRes.hasData()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
-    return Result<Path>::Error("Cannot create input map from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create input map from source: " +
+                 sourcePath.stem().string());
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 } // namespace quoll

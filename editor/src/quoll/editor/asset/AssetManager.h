@@ -74,7 +74,7 @@ public:
 
   Uuid findRootAssetUuid(const Path &sourceAssetPath);
 
-  Result<bool> createDirectory(const Path &assetsPath);
+  Result<void> createDirectory(const Path &assetsPath);
 
   Result<Path> createLuaScript(const Path &assetPath);
 
@@ -82,9 +82,9 @@ public:
 
   Result<Path> createInputMap(const Path &assetPath);
 
-  Result<bool> reloadAssets();
+  Result<void> reloadAssets();
 
-  Result<bool> validateAndPreloadAssets(RenderStorage &renderStorage);
+  Result<void> validateAndPreloadAssets(RenderStorage &renderStorage);
 
   Result<UUIDMap> loadSourceIfChanged(const Path &sourceAssetPath);
 

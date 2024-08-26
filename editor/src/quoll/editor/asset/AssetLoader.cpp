@@ -12,17 +12,16 @@ Result<Path> AssetLoader::loadFromPath(const Path &path,
                                        const Path &directory) {
   auto res = mAssetManager.importAsset(path, directory);
 
-  if (res.hasData()) {
+  if (res) {
     mAssetManager.getAssetRegistry().syncWithDevice(
         mAssetManager.getRenderStorage());
-    mAssetManager.generatePreview(res.getData(),
-                                  mAssetManager.getRenderStorage());
+    mAssetManager.generatePreview(res, mAssetManager.getRenderStorage());
   }
 
   return res;
 }
 
-Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
+Result<void> AssetLoader::loadFromFileDialog(const Path &directory) {
   using FileTypeEntry = platform::FileDialog::FileTypeEntry;
 
   std::vector<FileTypeEntry> entries{
@@ -37,14 +36,14 @@ Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
 
   auto filePath = platform::FileDialog::getFilePathFromDialog(entries);
   if (filePath.empty())
-    return Result<bool>::Ok(true, {});
+    return Ok();
 
   auto res = loadFromPath(filePath, directory);
 
-  if (res.hasError()) {
-    return Result<bool>::Error(res.getError());
+  if (!res) {
+    return res.error();
   }
-  return Result<bool>::Ok(true, res.getWarnings());
+  return {res.warnings()};
 }
 
 } // namespace quoll::editor

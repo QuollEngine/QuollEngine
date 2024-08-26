@@ -100,7 +100,7 @@ void optimizeMeshes(BaseGeometryAsset &g) {
   }
 }
 
-Result<bool> loadStandardMeshAttributes(const String &primitiveName,
+Result<void> loadStandardMeshAttributes(const String &primitiveName,
                                         const tinygltf::Primitive &primitive,
                                         const tinygltf::Model &model,
                                         BaseGeometryAsset &geometry) {
@@ -108,8 +108,8 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
   std::vector<String> warnings;
 
   if (primitive.attributes.find("POSITION") == primitive.attributes.end()) {
-    return Result<bool>::Error(
-        primitiveName + " skipped because it does not have position attribute");
+    return Error(primitiveName +
+                 " skipped because it does not have position attribute");
   }
 
   auto &&positionMeta =
@@ -130,8 +130,8 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
       geometry.positions.at(i) = data[i];
     }
   } else {
-    return Result<bool>::Error(
-        primitiveName + " skipped because it has invalid position format");
+    return Error(primitiveName +
+                 " skipped because it has invalid position format");
   }
 
   if (primitive.indices >= 0) {
@@ -159,8 +159,8 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
         indices[i] = data[i];
       }
     } else {
-      return Result<bool>::Error(
-          primitiveName + " skipped because it has invalid index format");
+      return Error(primitiveName +
+                   " skipped because it has invalid index format");
     }
   } else {
     indices.resize(geometry.positions.size());
@@ -275,10 +275,10 @@ Result<bool> loadStandardMeshAttributes(const String &primitiveName,
                      geometry.indices, geometry.tangents);
   }
 
-  return Result<bool>::Ok(true, warnings);
+  return {warnings};
 }
 
-Result<bool> loadSkinnedMeshAttributes(const String &primitiveName,
+Result<void> loadSkinnedMeshAttributes(const String &primitiveName,
                                        const tinygltf::Primitive &primitive,
                                        const tinygltf::Model &model,
                                        BaseGeometryAsset &geometry) {
@@ -346,7 +346,7 @@ Result<bool> loadSkinnedMeshAttributes(const String &primitiveName,
     warnings.push_back(primitiveName + " weights attribute is invalid");
   }
 
-  return Result<bool>::Ok(true, warnings);
+  return {warnings};
 }
 
 void loadMeshes(GLTFImportData &importData) {
@@ -390,21 +390,21 @@ void loadMeshes(GLTFImportData &importData) {
       auto &&result =
           loadStandardMeshAttributes(primitiveName, primitive, model, geometry);
 
-      if (result.hasError()) {
-        importData.warnings.push_back(result.getError());
+      if (!result) {
+        importData.warnings.push_back(result.error());
         continue;
       }
 
       importData.warnings.insert(importData.warnings.end(),
-                                 result.getWarnings().begin(),
-                                 result.getWarnings().end());
+                                 result.warnings().begin(),
+                                 result.warnings().end());
 
       if (isSkinnedMesh) {
         auto &&skinnedResult = loadSkinnedMeshAttributes(
             primitiveName, primitive, model, geometry);
 
-        if (skinnedResult.hasError()) {
-          importData.warnings.push_back(result.getError());
+        if (!skinnedResult) {
+          importData.warnings.push_back(result.error());
           continue;
         }
 
@@ -413,8 +413,8 @@ void loadMeshes(GLTFImportData &importData) {
         }
 
         importData.warnings.insert(importData.warnings.end(),
-                                   skinnedResult.getWarnings().begin(),
-                                   skinnedResult.getWarnings().end());
+                                   skinnedResult.warnings().begin(),
+                                   skinnedResult.warnings().end());
       }
 
       if (importData.optimize) {
@@ -439,11 +439,11 @@ void loadMeshes(GLTFImportData &importData) {
     auto path = assetCache.createMeshFromAsset(mesh);
 
     auto handle = assetCache.loadMesh(mesh.uuid);
-    importData.meshes.map.insert_or_assign(i, handle.getData());
+    importData.meshes.map.insert_or_assign(i, handle);
 
-    importData.meshMaterials.insert_or_assign(handle.getData(), materials);
+    importData.meshMaterials.insert_or_assign(handle, materials);
     importData.outputUuids.insert_or_assign(
-        assetName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
+        assetName, assetCache.getRegistry().getMeta(handle.data()).uuid);
   }
 }
 

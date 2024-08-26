@@ -10,7 +10,7 @@ public:
 
   Result<Path> loadFromPath(const Path &path, const Path &directory);
 
-  Result<bool> loadFromFileDialog(const Path &directory);
+  Result<void> loadFromFileDialog(const Path &directory);
 
 private:
   AssetManager &mAssetManager;

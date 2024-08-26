@@ -225,7 +225,7 @@ void loadAnimations(GLTFImportData &importData) {
     auto filePath = assetCache.createAnimationFromAsset(animation);
     auto handle = assetCache.loadAnimation(animation.uuid);
     importData.outputUuids.insert_or_assign(
-        assetName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
+        assetName, assetCache.getRegistry().getMeta(handle.data()).uuid);
 
     if (!animationValid) {
       continue;
@@ -235,12 +235,12 @@ void loadAnimations(GLTFImportData &importData) {
       if (skinAnimationMap.find(targetSkin) == skinAnimationMap.end()) {
         skinAnimationMap.insert({static_cast<u32>(targetSkin), {}});
       }
-      skinAnimationMap.at(targetSkin).push_back({handle.getData(), assetName});
+      skinAnimationMap.at(targetSkin).push_back({handle, assetName});
     } else {
       if (nodeAnimationMap.find(targetSkin) == nodeAnimationMap.end()) {
         nodeAnimationMap.insert({static_cast<u32>(targetNode), {}});
       }
-      nodeAnimationMap.at(targetNode).push_back({handle.getData(), assetName});
+      nodeAnimationMap.at(targetNode).push_back({handle, assetName});
     }
   }
 
@@ -277,11 +277,10 @@ void loadAnimations(GLTFImportData &importData) {
 
     auto path = assetCache.createAnimatorFromAsset(asset);
     auto handle = assetCache.loadAnimator(asset.uuid);
-    importData.animations.skinAnimatorMap.insert_or_assign(skin,
-                                                           handle.getData());
+    importData.animations.skinAnimatorMap.insert_or_assign(skin, handle);
 
     importData.outputUuids.insert_or_assign(
-        animatorName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
+        animatorName, assetCache.getRegistry().getMeta(handle.data()).uuid);
   }
 
   for (auto &[node, animations] : nodeAnimationMap) {
@@ -315,10 +314,9 @@ void loadAnimations(GLTFImportData &importData) {
 
     auto path = assetCache.createAnimatorFromAsset(asset);
     auto handle = assetCache.loadAnimator(asset.uuid);
-    importData.animations.nodeAnimatorMap.insert_or_assign(node,
-                                                           handle.getData());
+    importData.animations.nodeAnimatorMap.insert_or_assign(node, handle);
     importData.outputUuids.insert_or_assign(
-        animatorName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
+        animatorName, assetCache.getRegistry().getMeta(handle.data()).uuid);
   }
 }
 

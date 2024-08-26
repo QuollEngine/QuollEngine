@@ -22,11 +22,10 @@ TEST_F(AssetCacheLuaScriptTest, CreateLuaScriptFromSource) {
 
   auto uuid = quoll::Uuid::generate();
   auto filePath = cache.createLuaScriptFromSource(scriptPath, uuid);
-  EXPECT_TRUE(filePath.hasData());
-  EXPECT_FALSE(filePath.hasError());
+  EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
-  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+  EXPECT_EQ(filePath.data().filename().string().size(), 38);
 
   auto meta = cache.getAssetMeta(uuid);
 
@@ -36,18 +35,14 @@ TEST_F(AssetCacheLuaScriptTest, CreateLuaScriptFromSource) {
 
 TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfFileCannotBeOpened) {
   auto result = cache.loadLuaScript(quoll::Uuid::generate());
-  EXPECT_TRUE(result.hasError());
-  EXPECT_FALSE(result.hasWarnings());
-  EXPECT_FALSE(result.hasData());
+  EXPECT_FALSE(result);
 }
 
 TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfScriptHasSyntaxError) {
   auto scriptPath = FixturesPath / "script-asset-invalid-syntax.lua";
 
   auto result = loadFromSource(scriptPath);
-  EXPECT_TRUE(result.hasError());
-  EXPECT_FALSE(result.hasWarnings());
-  EXPECT_FALSE(result.hasData());
+  EXPECT_FALSE(result);
 }
 
 TEST_F(AssetCacheLuaScriptTest,
@@ -55,9 +50,7 @@ TEST_F(AssetCacheLuaScriptTest,
   auto scriptPath = FixturesPath / "script-asset-duplicate-var-names.lua";
 
   auto result = loadFromSource(scriptPath);
-  EXPECT_TRUE(result.hasError());
-  EXPECT_FALSE(result.hasWarnings());
-  EXPECT_FALSE(result.hasData());
+  EXPECT_FALSE(result);
 }
 
 TEST_F(AssetCacheLuaScriptTest,
@@ -65,29 +58,26 @@ TEST_F(AssetCacheLuaScriptTest,
   auto scriptPath = FixturesPath / "script-asset-invalid-var-type.lua";
 
   auto result = loadFromSource(scriptPath);
-  EXPECT_TRUE(result.hasError());
-  EXPECT_FALSE(result.hasWarnings());
-  EXPECT_FALSE(result.hasData());
+  EXPECT_FALSE(result);
 }
 
 TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
   auto scriptPath = FixturesPath / "script-asset-valid.lua";
 
   auto result = loadFromSource(scriptPath);
-  EXPECT_FALSE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
-  EXPECT_TRUE(result.hasData());
+  EXPECT_TRUE(result);
 
-  auto handle = result.getData();
+  auto handle = result;
 
   {
-    auto &script = cache.getRegistry().getMeta(handle);
+    auto &script = cache.getRegistry().getMeta(handle.data());
     script.name = "script-asset-valid.lua";
     EXPECT_EQ(script.name, "script-asset-valid.lua");
     EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
   }
 
-  auto &script = cache.getRegistry().get(handle);
+  auto &script = cache.getRegistry().get(handle.data());
   EXPECT_EQ(script.variables.size(), 2);
   EXPECT_EQ(script.variables.at("string_value").type,
             quoll::LuaScriptVariableType::String);
@@ -116,13 +106,12 @@ TEST_F(AssetCacheLuaScriptTest,
       FixturesPath / "component-script.lua", uuid1);
 
   auto result = cache.loadLuaScript(uuid1);
-  EXPECT_FALSE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
-  EXPECT_TRUE(result.hasData());
+  EXPECT_TRUE(result);
 
-  auto handle = result.getData();
+  auto handle = result;
   {
-    auto &script = cache.getRegistry().getMeta(handle);
+    auto &script = cache.getRegistry().getMeta(handle.data());
     EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
     EXPECT_EQ(script.name, "component-script.lua");
   }
@@ -132,8 +121,8 @@ TEST_F(AssetCacheLuaScriptTest,
 
   {
     auto result = cache.loadLuaScript(uuid1);
-    EXPECT_EQ(result.getData(), handle);
-    const auto &scriptMeta = cache.getRegistry().getMeta(handle);
+    EXPECT_EQ(result, handle);
+    const auto &scriptMeta = cache.getRegistry().getMeta(handle.data());
     EXPECT_EQ(scriptMeta.type, quoll::AssetType::LuaScript);
     EXPECT_EQ(scriptMeta.name, "component-script-2.lua");
 
@@ -147,7 +136,7 @@ TEST_F(AssetCacheLuaScriptTest,
     std::vector<char> bytes(s.begin(), s.end());
     file.close();
 
-    const auto &script = cache.getRegistry().get(handle);
+    const auto &script = cache.getRegistry().get(handle.data());
 
     quoll::String contents(bytes.begin(), bytes.end());
     quoll::String scriptContents(script.bytes.begin(), script.bytes.end());

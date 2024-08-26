@@ -10,21 +10,20 @@ Result<Path>
 AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   if (asset.uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
   auto metaRes = createAssetMeta(AssetType::Material, asset.name, assetPath);
-  if (!metaRes.hasData()) {
-    return Result<Path>::Error("Cannot create material asset: " + asset.name);
+  if (!metaRes) {
+    return Error("Cannot create material asset: " + asset.name);
   }
 
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<Path>::Error("File cannot be opened for writing: " +
-                               assetPath.string());
+    return Error("File cannot be opened for writing: " + assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -59,7 +58,7 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   file.write(asset.data.emissiveTextureCoord);
   file.write(asset.data.emissiveFactor);
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<MaterialAsset>>
@@ -71,7 +70,7 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
   stream.read(header);
   if (header.magic != AssetFileHeader::MagicConstant ||
       header.type != AssetType::Material) {
-    return Result<AssetHandle<MaterialAsset>>::Error("Invalid file format");
+    return Error("Invalid file format");
   }
 
   AssetData<MaterialAsset> material{};
@@ -84,13 +83,13 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTexture(textureUuid);
-    if (res.hasData()) {
-      material.data.baseColorTexture = res.getData();
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
+    auto res = getOrLoadTexture(textureUuid);
+    if (res) {
+      material.data.baseColorTexture = res;
+      warnings.insert(warnings.end(), res.warnings().begin(),
+                      res.warnings().end());
     } else {
-      warnings.push_back(res.getError());
+      warnings.push_back(res.error());
     }
     stream.read(material.data.baseColorTextureCoord);
     stream.read(material.data.baseColorFactor);
@@ -100,13 +99,13 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTexture(textureUuid);
-    if (res.hasData()) {
-      material.data.metallicRoughnessTexture = res.getData();
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
+    auto res = getOrLoadTexture(textureUuid);
+    if (res) {
+      material.data.metallicRoughnessTexture = res;
+      warnings.insert(warnings.end(), res.warnings().begin(),
+                      res.warnings().end());
     } else {
-      warnings.push_back(res.getError());
+      warnings.push_back(res.error());
     }
 
     stream.read(material.data.metallicRoughnessTextureCoord);
@@ -118,13 +117,13 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTexture(textureUuid);
-    if (res.hasData()) {
-      material.data.normalTexture = res.getData();
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
+    auto res = getOrLoadTexture(textureUuid);
+    if (res) {
+      material.data.normalTexture = res;
+      warnings.insert(warnings.end(), res.warnings().begin(),
+                      res.warnings().end());
     } else {
-      warnings.push_back(res.getError());
+      warnings.push_back(res.error());
     }
     stream.read(material.data.normalTextureCoord);
     stream.read(material.data.normalScale);
@@ -134,13 +133,13 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTexture(textureUuid);
-    if (res.hasData()) {
-      material.data.occlusionTexture = res.getData();
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
+    auto res = getOrLoadTexture(textureUuid);
+    if (res) {
+      material.data.occlusionTexture = res;
+      warnings.insert(warnings.end(), res.warnings().begin(),
+                      res.warnings().end());
     } else {
-      warnings.push_back(res.getError());
+      warnings.push_back(res.error());
     }
     stream.read(material.data.occlusionTextureCoord);
     stream.read(material.data.occlusionStrength);
@@ -150,27 +149,25 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTexture(textureUuid);
-    if (res.hasData()) {
-      material.data.emissiveTexture = res.getData();
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
+    auto res = getOrLoadTexture(textureUuid);
+    if (res) {
+      material.data.emissiveTexture = res;
+      warnings.insert(warnings.end(), res.warnings().begin(),
+                      res.warnings().end());
     } else {
-      warnings.push_back(res.getError());
+      warnings.push_back(res.error());
     }
     stream.read(material.data.emissiveTextureCoord);
     stream.read(material.data.emissiveFactor);
   }
 
-  return Result<AssetHandle<MaterialAsset>>::Ok(mRegistry.add(material),
-                                                warnings);
+  return {mRegistry.add(material), warnings};
 }
 
 Result<AssetHandle<MaterialAsset>> AssetCache::loadMaterial(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Material) {
-    return Result<AssetHandle<MaterialAsset>>::Error(
-        "Asset type is not material");
+    return Error("Asset type is not material");
   }
 
   return loadMaterialDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
@@ -179,12 +176,12 @@ Result<AssetHandle<MaterialAsset>> AssetCache::loadMaterial(const Uuid &uuid) {
 Result<AssetHandle<MaterialAsset>>
 AssetCache::getOrLoadMaterial(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<AssetHandle<MaterialAsset>>::Ok(AssetHandle<MaterialAsset>());
+    return AssetHandle<MaterialAsset>();
   }
 
   auto handle = mRegistry.findHandleByUuid<MaterialAsset>(uuid);
   if (handle) {
-    return Result<AssetHandle<MaterialAsset>>::Ok(handle);
+    return handle;
   }
 
   return loadMaterial(uuid);

@@ -105,7 +105,7 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
                           &channels, STBI_rgb_alpha);
 
   if (!data) {
-    return Result<UUIDMap>::Error(stbi_failure_reason());
+    return Error(stbi_failure_reason());
   }
 
   auto unfilteredCubemap = convertEquirectangularToCubemap(
@@ -117,9 +117,9 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
       unfilteredCubemap, getOrCreateUuidFromMap(uuids, "irradiance"),
       irradianceMapName);
 
-  if (irradianceCubemap.hasError()) {
+  if (!irradianceCubemap) {
     device->destroyTexture(unfilteredCubemap.texture);
-    return Result<UUIDMap>::Error(irradianceCubemap.getError());
+    return irradianceCubemap.error();
   }
 
   auto specularMapName = sourceAssetPath.filename().string() + "/specular";
@@ -127,39 +127,39 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
       unfilteredCubemap, getOrCreateUuidFromMap(uuids, "specular"),
       specularMapName);
 
-  if (specularCubemap.hasError()) {
+  if (!specularCubemap) {
     device->destroyTexture(unfilteredCubemap.texture);
-    mAssetCache.getRegistry().remove(irradianceCubemap.getData());
+    mAssetCache.getRegistry().remove(irradianceCubemap.data());
 
-    return Result<UUIDMap>::Error(specularCubemap.getError());
+    return specularCubemap.error();
   }
 
   device->destroyTexture(unfilteredCubemap.texture);
 
   AssetData<EnvironmentAsset> environment{};
   environment.uuid = getOrCreateUuidFromMap(uuids, "root");
-  environment.data.specularMap = specularCubemap.getData();
-  environment.data.irradianceMap = irradianceCubemap.getData();
+  environment.data.specularMap = specularCubemap;
+  environment.data.irradianceMap = irradianceCubemap;
 
   auto createdFileRes = mAssetCache.createEnvironmentFromAsset(environment);
 
-  if (createdFileRes.hasError()) {
-    return Result<UUIDMap>::Error(createdFileRes.getError());
+  if (!createdFileRes) {
+    return createdFileRes.error();
   }
 
   auto loadRes = mAssetCache.loadEnvironment(environment.uuid);
-  if (loadRes.hasError()) {
-    return Result<UUIDMap>::Error(loadRes.getError());
+  if (!loadRes) {
+    return loadRes.error();
   }
 
   auto &registry = mAssetCache.getRegistry();
 
   UUIDMap output{
-      {"root", registry.getMeta(loadRes.getData()).uuid},
+      {"root", registry.getMeta(loadRes.data()).uuid},
       {"irradiance", registry.getMeta(environment.data.irradianceMap).uuid},
       {"specular", registry.getMeta(environment.data.specularMap).uuid}};
 
-  return Result<UUIDMap>::Ok(output);
+  return output;
 }
 
 rhi::TextureHandle
@@ -379,8 +379,8 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   device->destroyTexture(irradianceCubemap);
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
-  if (createdFileRes.hasError()) {
-    return Result<AssetHandle<TextureAsset>>::Error(createdFileRes.getError());
+  if (!createdFileRes) {
+    return createdFileRes.error();
   }
 
   return mAssetCache.loadTexture(asset.uuid);
@@ -473,8 +473,8 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   device->destroyTexture(specularCubemap);
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
-  if (createdFileRes.hasError()) {
-    return Result<AssetHandle<TextureAsset>>::Error(createdFileRes.getError());
+  if (!createdFileRes) {
+    return createdFileRes.error();
   }
 
   return mAssetCache.loadTexture(asset.uuid);
