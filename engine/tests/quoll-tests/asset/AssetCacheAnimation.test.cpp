@@ -71,7 +71,6 @@ TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   file.read(header);
   EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, quoll::AssetType::Animation);
-  EXPECT_EQ(header.name, asset.name);
 
   f32 time = 0.0f;
   u32 numKeyframes = 0;

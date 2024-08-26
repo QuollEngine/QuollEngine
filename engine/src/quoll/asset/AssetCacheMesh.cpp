@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
 #include "AssetCache.h"
-#include "AssetFileHeader.h"
 #include "InputBinaryStream.h"
 #include "OutputBinaryStream.h"
 
@@ -16,7 +15,7 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
-  auto metaRes = createAssetMeta(AssetType::Mesh, asset.name, assetPath);
+  auto metaRes = createAssetMeta(asset.type, asset.name, assetPath);
   if (!metaRes.hasData()) {
     return Result<Path>::Error("Cannot create mesh asset: " + asset.name);
   }
@@ -31,7 +30,6 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   AssetFileHeader header{};
   header.type = asset.type;
   header.magic = AssetFileHeader::MagicConstant;
-  header.name = asset.name;
   file.write(header);
 
   auto numGeometries = static_cast<u32>(asset.data.geometries.size());
@@ -60,15 +58,22 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
 }
 
 Result<AssetHandle<MeshAsset>>
-AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
-                                        const Path &filePath,
-                                        const AssetFileHeader &header) {
+AssetCache::loadMeshDataFromInputStream(const Path &path, const Uuid &uuid,
+                                        const AssetMeta &meta) {
+  InputBinaryStream stream(path);
+  AssetFileHeader header;
+  stream.read(header);
+  if (header.magic != AssetFileHeader::MagicConstant ||
+      header.type != AssetType::Mesh && header.type != AssetType::SkinnedMesh) {
+    return Result<AssetHandle<MeshAsset>>::Error("Invalid file format");
+  }
+
   std::vector<String> warnings;
 
   AssetData<MeshAsset> mesh{};
-  mesh.name = header.name;
-  mesh.type = header.type;
-  mesh.uuid = Uuid(filePath.stem().string());
+  mesh.name = meta.name;
+  mesh.type = meta.type;
+  mesh.uuid = uuid;
 
   u32 numGeometries = 0;
   stream.read(numGeometries);
@@ -121,22 +126,13 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
 }
 
 Result<AssetHandle<MeshAsset>> AssetCache::loadMesh(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-
-  InputBinaryStream stream(filePath);
-
-  const auto &header = checkAssetFile(stream, filePath, AssetType::None);
-  if (header.hasError()) {
-    return Result<AssetHandle<MeshAsset>>::Error(header.getError());
-  }
-
-  if (header.getData().type != AssetType::Mesh &&
-      header.getData().type != AssetType::SkinnedMesh) {
+  auto meta = getAssetMeta(uuid);
+  if (meta.type != AssetType::Mesh && meta.type != AssetType::SkinnedMesh) {
     return Result<AssetHandle<MeshAsset>>::Error(
-        "Opened file is not a quoll asset: " + filePath.string());
+        "Asset type is not mesh or skinned mesh");
   }
 
-  return loadMeshDataFromInputStream(stream, filePath, header.getData());
+  return loadMeshDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
 }
 
 Result<AssetHandle<MeshAsset>> AssetCache::getOrLoadMesh(const Uuid &uuid) {

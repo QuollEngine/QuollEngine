@@ -75,7 +75,6 @@ template <> inline void InputBinaryStream::read(std::vector<Uuid> &value) {
 
 template <> inline void InputBinaryStream::read(AssetFileHeader &header) {
   read(header.magic);
-  read(header.name);
   read(header.type);
 }
 

@@ -11,8 +11,6 @@ struct AssetFileHeader {
 
   String magic;
 
-  String name;
-
   AssetType type = AssetType::None;
 };
 

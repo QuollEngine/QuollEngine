@@ -31,7 +31,6 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   AssetFileHeader header{};
   header.type = AssetType::Animation;
   header.magic = AssetFileHeader::MagicConstant;
-  header.name = asset.name;
   file.write(header);
 
   file.write(asset.data.time);
@@ -54,14 +53,21 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
 }
 
 Result<AssetHandle<AnimationAsset>>
-AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
-                                             const Path &filePath,
-                                             const AssetFileHeader &header) {
+AssetCache::loadAnimationDataFromInputStream(const Path &path, const Uuid &uuid,
+                                             const AssetMeta &meta) {
+  InputBinaryStream stream(path);
+
+  AssetFileHeader header;
+  stream.read(header);
+  if (header.magic != AssetFileHeader::MagicConstant ||
+      header.type != AssetType::Animation) {
+    return Result<AssetHandle<AnimationAsset>>::Error("Invalid file format");
+  }
 
   AssetData<AnimationAsset> animation{};
   animation.type = AssetType::Animation;
-  animation.uuid = Uuid(filePath.stem().string());
-  animation.name = header.name;
+  animation.uuid = uuid;
+  animation.name = meta.name;
 
   stream.read(animation.data.time);
   u32 numKeyframes = 0;
@@ -87,16 +93,13 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
 
 Result<AssetHandle<AnimationAsset>>
 AssetCache::loadAnimation(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-
-  InputBinaryStream stream(filePath);
-
-  const auto &header = checkAssetFile(stream, filePath, AssetType::Animation);
-  if (header.hasError()) {
-    return Result<AssetHandle<AnimationAsset>>::Error(header.getError());
+  auto meta = getAssetMeta(uuid);
+  if (meta.type != AssetType::Animation) {
+    return Result<AssetHandle<AnimationAsset>>::Error(
+        "Asset type is not animation");
   }
 
-  return loadAnimationDataFromInputStream(stream, filePath, header.getData());
+  return loadAnimationDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
 }
 
 Result<AssetHandle<AnimationAsset>>

@@ -62,7 +62,6 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   file.read(header);
   EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, quoll::AssetType::Environment);
-  EXPECT_EQ(header.name, asset.name);
 
   quoll::Uuid readIrradianceUuid;
   file.read(readIrradianceUuid);

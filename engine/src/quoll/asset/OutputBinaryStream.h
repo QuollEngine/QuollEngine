@@ -61,7 +61,6 @@ template <> inline void OutputBinaryStream::write(const glm::quat &value) {
 template <>
 inline void OutputBinaryStream::write(const AssetFileHeader &value) {
   write(value.magic);
-  write(value.name);
   write(value.type);
 }
 

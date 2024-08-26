@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
 #include "AssetCache.h"
-#include "AssetFileHeader.h"
 #include "InputBinaryStream.h"
 #include "OutputBinaryStream.h"
 
@@ -31,7 +30,6 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   AssetFileHeader header{};
   header.type = AssetType::Prefab;
   header.magic = AssetFileHeader::MagicConstant;
-  header.name = asset.name;
   file.write(header);
 
   std::unordered_map<AssetHandle<MaterialAsset>, u32> localMaterialMap;
@@ -257,16 +255,22 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
 }
 
 Result<AssetHandle<PrefabAsset>>
-AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
-                                          const Path &filePath,
-                                          const AssetFileHeader &header) {
+AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
+                                          const AssetMeta &meta) {
+  InputBinaryStream stream(path);
+  AssetFileHeader header;
+  stream.read(header);
+  if (header.magic != AssetFileHeader::MagicConstant ||
+      header.type != AssetType::Prefab) {
+    return Result<AssetHandle<PrefabAsset>>::Error("Invalid file format");
+  }
 
   std::vector<String> warnings;
 
   AssetData<PrefabAsset> prefab{};
-  prefab.name = header.name;
+  prefab.name = meta.name;
   prefab.type = AssetType::Prefab;
-  prefab.uuid = Uuid(filePath.stem().string());
+  prefab.uuid = uuid;
 
   std::vector<AssetHandle<MaterialAsset>> localMaterialMap;
   {
@@ -581,16 +585,12 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 }
 
 Result<AssetHandle<PrefabAsset>> AssetCache::loadPrefab(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-
-  InputBinaryStream stream(filePath);
-
-  const auto &header = checkAssetFile(stream, filePath, AssetType::Prefab);
-  if (header.hasError()) {
-    return Result<AssetHandle<PrefabAsset>>::Error(header.getError());
+  auto meta = getAssetMeta(uuid);
+  if (meta.type != AssetType::Prefab) {
+    return Result<AssetHandle<PrefabAsset>>::Error("Asset type is not prefab");
   }
 
-  return loadPrefabDataFromInputStream(stream, filePath, header.getData());
+  return loadPrefabDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
 }
 
 } // namespace quoll
