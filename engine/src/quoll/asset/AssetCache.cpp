@@ -85,7 +85,6 @@ AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
 Result<bool> AssetCache::loadAsset(const Path &path) {
   auto uuid = Uuid(path.stem().string());
 
-  // Handle files that are not in quoll format
   auto meta = getAssetMeta(uuid);
 
   if (meta.type == AssetType::Texture) {
@@ -151,15 +150,11 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  InputBinaryStream stream(path);
-  AssetFileHeader header;
-  stream.read(header);
+  if (meta.type == AssetType::Material) {
+    InputBinaryStream stream(path);
+    AssetFileHeader header;
+    stream.read(header);
 
-  if (header.magic != AssetFileHeader::MagicConstant) {
-    return Result<bool>::Error("Not a quoll asset: " + path.stem().string());
-  }
-
-  if (header.type == AssetType::Material) {
     auto res = loadMaterialDataFromInputStream(stream, path, header);
 
     if (res.hasError()) {
@@ -168,7 +163,11 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (header.type == AssetType::Mesh) {
+  if (meta.type == AssetType::Mesh) {
+    InputBinaryStream stream(path);
+    AssetFileHeader header;
+    stream.read(header);
+
     auto res = loadMeshDataFromInputStream(stream, path, header);
 
     if (res.hasError()) {
@@ -177,7 +176,11 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (header.type == AssetType::SkinnedMesh) {
+  if (meta.type == AssetType::SkinnedMesh) {
+    InputBinaryStream stream(path);
+    AssetFileHeader header;
+    stream.read(header);
+
     auto res = loadMeshDataFromInputStream(stream, path, header);
 
     if (res.hasError()) {
@@ -186,7 +189,11 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (header.type == AssetType::Skeleton) {
+  if (meta.type == AssetType::Skeleton) {
+    InputBinaryStream stream(path);
+    AssetFileHeader header;
+    stream.read(header);
+
     auto res = loadSkeletonDataFromInputStream(stream, path, header);
 
     if (res.hasError()) {
@@ -195,7 +202,11 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (header.type == AssetType::Animation) {
+  if (meta.type == AssetType::Animation) {
+    InputBinaryStream stream(path);
+    AssetFileHeader header;
+    stream.read(header);
+
     auto res = loadAnimationDataFromInputStream(stream, path, header);
 
     if (res.hasError()) {
@@ -204,7 +215,11 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (header.type == AssetType::Prefab) {
+  if (meta.type == AssetType::Prefab) {
+    InputBinaryStream stream(path);
+    AssetFileHeader header;
+    stream.read(header);
+
     auto res = loadPrefabDataFromInputStream(stream, path, header);
 
     if (res.hasError()) {
@@ -213,7 +228,11 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (header.type == AssetType::Environment) {
+  if (meta.type == AssetType::Environment) {
+    InputBinaryStream stream(path);
+    AssetFileHeader header;
+    stream.read(header);
+
     auto res = loadEnvironmentDataFromInputStream(stream, path, header);
 
     if (res.hasError()) {

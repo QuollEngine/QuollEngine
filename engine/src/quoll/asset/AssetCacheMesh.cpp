@@ -16,6 +16,11 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
+  auto metaRes = createAssetMeta(AssetType::Mesh, asset.name, assetPath);
+  if (!metaRes.hasData()) {
+    return Result<Path>::Error("Cannot create mesh asset: " + asset.name);
+  }
+
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {

@@ -16,6 +16,11 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
+  auto metaRes = createAssetMeta(AssetType::Animation, asset.name, assetPath);
+  if (!metaRes.hasData()) {
+    return Result<Path>::Error("Cannot create animation asset: " + asset.name);
+  }
+
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {

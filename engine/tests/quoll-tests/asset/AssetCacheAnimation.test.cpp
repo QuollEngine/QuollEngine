@@ -52,6 +52,15 @@ quoll::AssetData<quoll::AnimationAsset> createRandomizedAnimation() {
   return asset;
 }
 
+TEST_F(AssetCacheAnimationTest, CreatesMetaFileFromAsset) {
+  auto asset = createRandomizedAnimation();
+  auto filePath = cache.createAnimationFromAsset(asset);
+  auto meta = cache.getAssetMeta(asset.uuid);
+
+  EXPECT_EQ(meta.type, quoll::AssetType::Animation);
+  EXPECT_EQ(meta.name, "test-anim0");
+}
+
 TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   auto asset = createRandomizedAnimation();
   auto filePath = cache.createAnimationFromAsset(asset);
@@ -104,9 +113,6 @@ TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
       EXPECT_EQ(values.at(i), keyframe.keyframeValues.at(i));
     }
   }
-
-  EXPECT_FALSE(std::filesystem::exists(
-      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {

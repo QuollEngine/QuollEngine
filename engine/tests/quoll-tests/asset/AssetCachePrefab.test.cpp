@@ -159,6 +159,15 @@ public:
   quoll::Uuid textureUuid;
 };
 
+TEST_F(AssetCachePrefabTest, CreatesMetaFileFromAsset) {
+  auto asset = createPrefabAsset();
+  auto filePath = cache.createPrefabFromAsset(asset);
+  auto meta = cache.getAssetMeta(asset.uuid);
+
+  EXPECT_EQ(meta.type, quoll::AssetType::Prefab);
+  EXPECT_EQ(meta.name, "test-prefab0");
+}
+
 TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   auto asset = createPrefabAsset();
 
@@ -467,9 +476,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       EXPECT_EQ(asset.data.pointLights.at(i).value.range, range);
     }
   }
-
-  EXPECT_FALSE(std::filesystem::exists(
-      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCachePrefabTest, FailsLoadingPrefabIfPrefabHasNoComponents) {

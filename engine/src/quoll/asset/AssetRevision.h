@@ -18,17 +18,17 @@ namespace quoll {
  *          value should be `230901`
  */
 enum class AssetRevision : u32 {
-  Material = 230901,
+  Material = 240826,
   Texture = 230901,
-  Mesh = 230901,
-  SkinnedMesh = 230901,
-  Skeleton = 230901,
-  Animation = 230901,
+  Mesh = 240826,
+  SkinnedMesh = 240826,
+  Skeleton = 240826,
+  Animation = 240826,
   Audio = 230901,
-  Prefab = 230901,
+  Prefab = 240826,
   LuaScript = 230901,
   Font = 230901,
-  Environment = 230901,
+  Environment = 240826,
   Animator = 230901,
   InputMap = 230916,
   Scene = 230901

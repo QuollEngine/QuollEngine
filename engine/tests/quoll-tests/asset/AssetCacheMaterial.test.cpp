@@ -75,11 +75,20 @@ public:
   quoll::Uuid textureUuid;
 };
 
+TEST_F(AssetCacheMaterialTest, CreatesMetaFileFromAsset) {
+  auto asset = createMaterialAsset(true);
+  auto filePath = cache.createMaterialFromAsset(asset);
+  auto meta = cache.getAssetMeta(asset.uuid);
+
+  EXPECT_EQ(meta.type, quoll::AssetType::Material);
+  EXPECT_EQ(meta.name, "material1");
+}
+
 TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
   auto asset = createMaterialAsset(true);
   auto filePath = cache.createMaterialFromAsset(asset);
 
-  EXPECT_FALSE(filePath.hasError());
+  ASSERT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
   {
@@ -149,7 +158,7 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     EXPECT_EQ(emissiveFactor, glm::vec3(0.5f, 0.6f, 2.5f));
   }
 
-  EXPECT_FALSE(std::filesystem::exists(
+  EXPECT_TRUE(std::filesystem::exists(
       filePath.getData().replace_extension("assetmeta")));
 }
 

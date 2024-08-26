@@ -14,11 +14,16 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
     return Result<Path>::Error("Invalid uuid provided");
   }
 
-  auto irradianceMapUuid = mRegistry.get(asset.data.irradianceMap).uuid;
-
-  auto specularMapUuid = mRegistry.get(asset.data.specularMap).uuid;
-
   auto assetPath = getPathFromUuid(asset.uuid);
+
+  auto metaRes = createAssetMeta(AssetType::Environment, asset.name, assetPath);
+  if (!metaRes.hasData()) {
+    return Result<Path>::Error("Cannot create environment asset: " +
+                               asset.name);
+  }
+
+  auto irradianceMapUuid = mRegistry.get(asset.data.irradianceMap).uuid;
+  auto specularMapUuid = mRegistry.get(asset.data.specularMap).uuid;
 
   OutputBinaryStream stream(assetPath);
   AssetFileHeader header{};

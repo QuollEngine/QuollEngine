@@ -16,6 +16,10 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   }
 
   auto assetPath = getPathFromUuid(asset.uuid);
+  auto metaRes = createAssetMeta(AssetType::Skeleton, asset.name, assetPath);
+  if (!metaRes.hasData()) {
+    return Result<Path>::Error("Cannot create skeleton asset: " + asset.name);
+  }
 
   OutputBinaryStream file(assetPath);
 

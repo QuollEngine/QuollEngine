@@ -11,6 +11,62 @@ class AssetCacheSkeletonTest : public AssetCacheTestBase {
 public:
 };
 
+TEST_F(AssetCacheSkeletonTest, CreatesMetaFileFromAsset) {
+  quoll::AssetData<quoll::SkeletonAsset> asset;
+  asset.name = "test-skel0";
+  asset.uuid = quoll::Uuid::generate();
+
+  {
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_real_distribution<f32> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<u32> udist(0, 20);
+
+    usize countJoints = 20;
+    for (usize i = 0; i < countJoints; ++i) {
+      asset.data.jointLocalPositions.push_back(
+          glm::vec3(dist(mt), dist(mt), dist(mt)));
+      asset.data.jointLocalRotations.push_back(
+          glm::quat(dist(mt), dist(mt), dist(mt), dist(mt)));
+      asset.data.jointLocalScales.push_back(
+          glm::vec3(dist(mt), dist(mt), dist(mt)));
+      asset.data.jointInverseBindMatrices.push_back(glm::mat4{
+          // row 0
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          // row 1
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+
+          // row 2
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+
+          // row3
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+      });
+
+      asset.data.jointParents.push_back(udist(mt));
+      asset.data.jointNames.push_back("Joint " + std::to_string(i));
+    }
+  }
+
+  auto filePath = cache.createSkeletonFromAsset(asset);
+  auto meta = cache.getAssetMeta(asset.uuid);
+
+  EXPECT_EQ(meta.type, quoll::AssetType::Skeleton);
+  EXPECT_EQ(meta.name, "test-skel0");
+}
+
 TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
   quoll::AssetData<quoll::SkeletonAsset> asset;
   asset.name = "test-skel0";
@@ -96,9 +152,6 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
               asset.data.jointInverseBindMatrices.at(i));
     EXPECT_EQ(actualNames.at(i), asset.data.jointNames.at(i));
   }
-
-  EXPECT_FALSE(std::filesystem::exists(
-      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
