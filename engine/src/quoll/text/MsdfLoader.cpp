@@ -111,7 +111,6 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   }
 
   AssetData<FontAsset> fontAsset{};
-  fontAsset.path = path;
   fontAsset.type = AssetType::Font;
   fontAsset.data.size =
       sizeof(std::byte) * bitmap.width * bitmap.height * NumChannels;

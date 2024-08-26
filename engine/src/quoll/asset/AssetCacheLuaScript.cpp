@@ -88,7 +88,6 @@ AssetCache::loadLuaScript(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
 
   AssetData<LuaScriptAsset> asset;
-  asset.path = filePath;
   asset.name = meta.name;
   asset.type = AssetType::LuaScript;
   asset.uuid = Uuid(filePath.stem().string());

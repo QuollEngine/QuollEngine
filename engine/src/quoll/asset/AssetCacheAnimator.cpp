@@ -126,7 +126,6 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
   AssetData<AnimatorAsset> asset{};
   asset.type = AssetType::Animator;
   asset.name = meta.name;
-  asset.path = filePath;
   asset.uuid = Uuid(filePath.stem().string());
 
   std::vector<String> warnings;

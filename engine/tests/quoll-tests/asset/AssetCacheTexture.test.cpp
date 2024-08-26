@@ -59,7 +59,7 @@ TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
 
   auto asset = cache.getRegistry().get(handle);
 
-  EXPECT_EQ(asset.path, filePath.getData());
+  EXPECT_EQ(asset.uuid, uuid);
   EXPECT_EQ(asset.name, "1x1-2d.ktx");
   EXPECT_EQ(asset.type, quoll::AssetType::Texture);
 }

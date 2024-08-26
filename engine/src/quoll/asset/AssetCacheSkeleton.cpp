@@ -52,7 +52,6 @@ AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
                                             const Path &filePath,
                                             const AssetFileHeader &header) {
   AssetData<SkeletonAsset> skeleton{};
-  skeleton.path = filePath;
   skeleton.type = AssetType::Skeleton;
   skeleton.uuid = Uuid(filePath.stem().string());
   skeleton.name = header.name;

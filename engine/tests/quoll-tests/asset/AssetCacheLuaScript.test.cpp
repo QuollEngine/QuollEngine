@@ -135,7 +135,7 @@ TEST_F(AssetCacheLuaScriptTest,
     EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
     EXPECT_EQ(script.name, "component-script-2.lua");
 
-    std::ifstream file(script.path);
+    std::ifstream file(cache.getPathFromUuid(script.uuid));
 
     EXPECT_TRUE(file.good());
 

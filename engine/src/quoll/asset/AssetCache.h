@@ -90,7 +90,7 @@ public:
 
   AssetMeta getAssetMeta(const Uuid &uuid) const;
 
-  Path getPathFromUuid(const Uuid &uuid);
+  Path getPathFromUuid(const Uuid &uuid) const;
 
 private:
   template <typename TAssetData>

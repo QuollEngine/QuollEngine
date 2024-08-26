@@ -265,7 +265,6 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
   AssetData<PrefabAsset> prefab{};
   prefab.name = header.name;
-  prefab.path = filePath;
   prefab.type = AssetType::Prefab;
   prefab.uuid = Uuid(filePath.stem().string());
 

@@ -10,8 +10,6 @@ template <class TData> struct AssetData {
 
   TData data;
 
-  Path path;
-
   Uuid uuid;
 
   String name;

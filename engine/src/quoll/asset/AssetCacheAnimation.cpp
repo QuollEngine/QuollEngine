@@ -59,7 +59,6 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
                                              const AssetFileHeader &header) {
 
   AssetData<AnimationAsset> animation{};
-  animation.path = filePath;
   animation.type = AssetType::Animation;
   animation.uuid = Uuid(filePath.stem().string());
   animation.name = header.name;

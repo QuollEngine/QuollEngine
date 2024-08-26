@@ -62,7 +62,6 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
   }
 
   AssetData<EnvironmentAsset> environment{};
-  environment.path = filePath;
   environment.uuid = Uuid(filePath.stem().string());
   environment.type = AssetType::Environment;
   environment.data.irradianceMap = irradianceMapRes.getData();

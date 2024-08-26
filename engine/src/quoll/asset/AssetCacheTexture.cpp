@@ -214,7 +214,6 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
 
   AssetData<TextureAsset> texture{};
   texture.name = meta.name;
-  texture.path = filePath;
   texture.uuid = Uuid(filePath.stem().string());
   texture.type = AssetType::Texture;
   texture.data.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);

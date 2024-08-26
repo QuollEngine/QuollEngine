@@ -423,7 +423,7 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
         const auto &asset = assetRegistry.get<AssetData>(handle);
         Entry entry;
         entry.isDirectory = false;
-        entry.path = asset.path;
+        entry.path = assetManager.getCache().getPathFromUuid(asset.uuid);
         entry.name = removePrefabName(asset.name);
         entry.assetType = asset.type;
         entry.uuid = asset.uuid;

@@ -67,7 +67,6 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
 
   AssetData<MeshAsset> mesh{};
   mesh.name = header.name;
-  mesh.path = filePath;
   mesh.type = header.type;
   mesh.uuid = Uuid(filePath.stem().string());
 

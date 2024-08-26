@@ -62,7 +62,6 @@ Result<AssetHandle<SceneAsset>> AssetCache::loadScene(const Uuid &uuid) {
   AssetData<SceneAsset> asset{};
   asset.type = AssetType::Scene;
   asset.name = meta.name;
-  asset.path = filePath;
   asset.uuid = Uuid(filePath.stem().string());
   asset.data.data = root;
 
