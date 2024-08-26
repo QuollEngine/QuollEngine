@@ -37,7 +37,7 @@ Result<Path> AssetCache::createFontFromSource(const Path &sourcePath,
   return assetPath;
 }
 
-Result<AssetHandle<FontAsset>> AssetCache::loadFont(const Uuid &uuid) {
+Result<FontAsset> AssetCache::loadFont(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   MsdfLoader loader;
@@ -48,16 +48,7 @@ Result<AssetHandle<FontAsset>> AssetCache::loadFont(const Uuid &uuid) {
     return res.error();
   }
 
-  auto meta = getAssetMeta(uuid);
-
-  auto &data = res.data();
-  data.type = AssetType::Font;
-  data.name = meta.name;
-  data.uuid = Uuid(filePath.stem().string());
-
-  auto handle = mRegistry.add(data);
-
-  return handle;
+  return res.data().data;
 }
 
 } // namespace quoll

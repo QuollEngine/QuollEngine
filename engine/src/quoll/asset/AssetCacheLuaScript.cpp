@@ -74,8 +74,7 @@ quoll::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
   return assetPath;
 }
 
-Result<AssetHandle<LuaScriptAsset>>
-AssetCache::loadLuaScript(const Uuid &uuid) {
+Result<LuaScriptAsset> AssetCache::loadLuaScript(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -86,11 +85,8 @@ AssetCache::loadLuaScript(const Uuid &uuid) {
 
   auto meta = getAssetMeta(uuid);
 
-  AssetData<LuaScriptAsset> asset;
-  asset.name = meta.name;
-  asset.type = AssetType::LuaScript;
-  asset.uuid = Uuid(filePath.stem().string());
-  asset.data.bytes = readFileIntoBuffer(stream);
+  LuaScriptAsset asset;
+  asset.bytes = readFileIntoBuffer(stream);
 
   stream.close();
 
@@ -103,26 +99,17 @@ AssetCache::loadLuaScript(const Uuid &uuid) {
   state["game"] = lua::NoopMetatable{};
   state["print"] = [](sol::variadic_args) {};
 
-  injectInputVarsInterface(state, asset.data);
+  injectInputVarsInterface(state, asset);
 
   auto *luaState = state.lua_state();
-  bool success = interpreter.evaluate(asset.data.bytes, luaState);
+  bool success = interpreter.evaluate(asset.bytes, luaState);
 
   if (!success) {
     const auto *message = lua_tostring(luaState, -1);
     return Error(message);
   }
 
-  auto handle = mRegistry.findHandleByUuid<LuaScriptAsset>(uuid);
-
-  if (!handle) {
-    auto newHandle = mRegistry.add(asset);
-    return newHandle;
-  }
-
-  mRegistry.update(handle, asset);
-
-  return handle;
+  return asset;
 }
 
 } // namespace quoll

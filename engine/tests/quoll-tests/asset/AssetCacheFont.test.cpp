@@ -28,7 +28,7 @@ TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
   auto uuid = quoll::Uuid::generate();
   auto filePath = cache.createFontFromSource(sourcePath, uuid);
 
-  auto result = cache.loadFont(uuid);
+  auto result = cache.load<quoll::FontAsset>(uuid);
 
   EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
@@ -47,7 +47,7 @@ TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
   auto uuid = quoll::Uuid::generate();
   auto filePath = cache.createFontFromSource(sourcePath, uuid);
 
-  auto result = cache.loadFont(uuid);
+  auto result = cache.load<quoll::FontAsset>(uuid);
 
   EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
@@ -62,6 +62,6 @@ TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
 }
 
 TEST_F(AssetCacheFontTest, FileReturnsErrorIfFontFileCannotBeOpened) {
-  auto result = cache.loadFont(quoll::Uuid::generate());
+  auto result = cache.load<quoll::FontAsset>(quoll::Uuid::generate());
   EXPECT_FALSE(result);
 }

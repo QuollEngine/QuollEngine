@@ -17,8 +17,9 @@ private:
 
 template <class TData> class Result {
 public:
-  constexpr Result(const TData &data) : mData(data) {}
+  constexpr Result() : mError("No data"){};
 
+  constexpr Result(const TData &data) : mData(data) {}
   constexpr Result(const TData &data, const std::vector<String> &warnings)
       : mData(data), mWarnings(warnings) {}
 

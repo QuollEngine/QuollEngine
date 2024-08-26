@@ -176,7 +176,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoVertices) {
   }
 
   auto filePath = cache.createMeshFromAsset(asset);
-  auto handle = cache.loadMesh(asset.uuid);
+  auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(handle);
 }
 
@@ -187,16 +187,16 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoIndices) {
   }
 
   auto filePath = cache.createMeshFromAsset(asset);
-  auto handle = cache.loadMesh(asset.uuid);
+  auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(handle);
 }
 
 TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = cache.createMeshFromAsset(asset);
-  auto handleRes = cache.loadMesh(asset.uuid);
-
+  auto handleRes = cache.load<quoll::MeshAsset>(asset.uuid);
   auto handle = handleRes.data();
+
   EXPECT_NE(handle, quoll::AssetHandle<quoll::MeshAsset>());
   auto &mesh = cache.getRegistry().get(handle);
   EXPECT_EQ(cache.getRegistry().getMeta(handle).name, asset.name);
@@ -325,7 +325,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoVertices) {
   }
 
   auto filePath = cache.createMeshFromAsset(asset);
-  auto handle = cache.loadMesh(asset.uuid);
+  auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(handle);
 }
 
@@ -336,7 +336,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
   }
 
   auto filePath = cache.createMeshFromAsset(asset);
-  auto handle = cache.loadMesh(asset.uuid);
+  auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(handle);
 }
 
@@ -344,7 +344,7 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
   auto filePath = cache.createMeshFromAsset(asset);
-  auto handle = cache.loadMesh(asset.uuid).data();
+  auto handle = cache.load<quoll::MeshAsset>(asset.uuid).data();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::MeshAsset>());
   auto &mesh = cache.getRegistry().get(handle);
   EXPECT_EQ(cache.getRegistry().getMeta(handle).name, asset.name);

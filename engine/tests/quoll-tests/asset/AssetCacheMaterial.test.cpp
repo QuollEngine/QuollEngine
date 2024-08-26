@@ -245,7 +245,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
   EXPECT_TRUE(assetFile);
   EXPECT_FALSE(assetFile.hasWarnings());
 
-  auto res = cache.loadMaterial(asset.uuid);
+  auto res = cache.load<quoll::MaterialAsset>(asset.uuid);
 
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
@@ -295,7 +295,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
   EXPECT_TRUE(assetFile);
   EXPECT_FALSE(assetFile.hasWarnings());
 
-  auto res = cache.loadMaterial(asset.uuid);
+  auto res = cache.load<quoll::MaterialAsset>(asset.uuid);
 
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
@@ -339,7 +339,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
 }
 
 TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
-  auto texture = cache.loadTexture(textureUuid).data();
+  auto texture = cache.load<quoll::TextureAsset>(textureUuid).data();
   quoll::AssetData<quoll::MaterialAsset> material{};
   material.uuid = quoll::Uuid::generate();
   material.data.baseColorTexture = texture;
@@ -348,7 +348,7 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
   cache.getRegistry().remove(texture);
   EXPECT_FALSE(cache.getRegistry().has(texture));
 
-  auto handle = cache.loadMaterial(material.uuid);
+  auto handle = cache.load<quoll::MaterialAsset>(material.uuid);
 
   auto &newMaterial = cache.getRegistry().get(handle.data());
 

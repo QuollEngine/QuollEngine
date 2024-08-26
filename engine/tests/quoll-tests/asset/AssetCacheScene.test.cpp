@@ -38,7 +38,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfTypeIsInvalid) {
   stream << node;
   stream.close();
 
-  auto res = cache.loadScene(uuid);
+  auto res = cache.load<quoll::SceneAsset>(uuid);
   EXPECT_FALSE(res);
 }
 
@@ -57,7 +57,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfVersionIsInvalid) {
   stream << node;
   stream.close();
 
-  auto res = cache.loadScene(uuid);
+  auto res = cache.load<quoll::SceneAsset>(uuid);
   EXPECT_FALSE(res);
 }
 
@@ -83,7 +83,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfZonesFieldIsNotSequence) {
     stream << node;
     stream.close();
 
-    auto res = cache.loadScene(uuid);
+    auto res = cache.load<quoll::SceneAsset>(uuid);
     EXPECT_FALSE(res);
   }
 }
@@ -109,7 +109,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfEntitiesFieldIsNotSequence) {
     stream << node;
     stream.close();
 
-    auto res = cache.loadScene(uuid);
+    auto res = cache.load<quoll::SceneAsset>(uuid);
     EXPECT_FALSE(res);
   }
 }

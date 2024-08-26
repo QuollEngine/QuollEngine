@@ -53,7 +53,7 @@ public:
     stream << node;
     stream.close();
 
-    return cache.loadInputMap(uuid);
+    return cache.load<quoll::InputMapAsset>(uuid);
   };
 };
 

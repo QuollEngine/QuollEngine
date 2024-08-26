@@ -133,7 +133,7 @@ void loadPrefabs(GLTFImportData &importData) {
   auto path = assetCache.createPrefabFromAsset(prefab);
 
   if (path) {
-    auto handle = assetCache.loadPrefab(prefab.uuid);
+    auto handle = assetCache.load<PrefabAsset>(prefab.uuid);
 
     if (handle) {
       importData.outputUuids.insert_or_assign(

@@ -253,9 +253,8 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   return assetPath;
 }
 
-Result<AssetHandle<PrefabAsset>>
-AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
-                                          const AssetMeta &meta) {
+Result<PrefabAsset>
+AssetCache::loadPrefabDataFromInputStream(const Path &path) {
   InputBinaryStream stream(path);
   AssetFileHeader header;
   stream.read(header);
@@ -266,10 +265,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
   std::vector<String> warnings;
 
-  AssetData<PrefabAsset> prefab{};
-  prefab.name = meta.name;
-  prefab.type = AssetType::Prefab;
-  prefab.uuid = uuid;
+  PrefabAsset prefab{};
 
   std::vector<AssetHandle<MaterialAsset>> localMaterialMap;
   {
@@ -281,7 +277,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoadMaterial(assetUuid);
+      auto res = getOrLoad<MaterialAsset>(assetUuid);
       if (res) {
         localMaterialMap.at(i) = res;
         warnings.insert(warnings.end(), res.warnings().begin(),
@@ -302,7 +298,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoadMesh(assetUuid);
+      auto res = getOrLoad<MeshAsset>(assetUuid);
       if (res) {
         localMeshMap.at(i) = res;
         warnings.insert(warnings.end(), res.warnings().begin(),
@@ -323,7 +319,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoadSkeleton(assetUuid);
+      auto res = getOrLoad<SkeletonAsset>(assetUuid);
       if (res) {
         localSkeletonMap.at(i) = res;
         warnings.insert(warnings.end(), res.warnings().begin(),
@@ -344,7 +340,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoadAnimation(assetUuid);
+      auto res = getOrLoad<AnimationAsset>(assetUuid);
       if (res) {
         localAnimationMap.at(i) = res;
         warnings.insert(warnings.end(), res.warnings().begin(),
@@ -366,7 +362,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoadAnimator(assetUuid);
+      auto res = getOrLoad<AnimatorAsset>(assetUuid);
       if (res) {
         localAnimatorMap.at(i) = res;
         warnings.insert(warnings.end(), res.warnings().begin(),
@@ -381,7 +377,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
   {
     u32 numComponents = 0;
     stream.read(numComponents);
-    prefab.data.transforms.resize(numComponents);
+    prefab.transforms.resize(numComponents);
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
       stream.read(entity);
@@ -395,15 +391,15 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       stream.read(scale);
       stream.read(parent);
 
-      prefab.data.transforms.at(i).entity = entity;
-      prefab.data.transforms.at(i).value = {position, rotation, scale, parent};
+      prefab.transforms.at(i).entity = entity;
+      prefab.transforms.at(i).value = {position, rotation, scale, parent};
     }
   }
 
   {
     u32 numComponents = 0;
     stream.read(numComponents);
-    prefab.data.names.resize(numComponents);
+    prefab.names.resize(numComponents);
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
       stream.read(entity);
@@ -411,8 +407,8 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       String name;
       stream.read(name);
 
-      prefab.data.names.at(i).entity = entity;
-      prefab.data.names.at(i).value = name;
+      prefab.names.at(i).entity = entity;
+      prefab.names.at(i).value = name;
     }
   }
 
@@ -420,7 +416,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
     u32 numComponents = 0;
     stream.read(numComponents);
 
-    prefab.data.meshes.resize(numComponents);
+    prefab.meshes.resize(numComponents);
 
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
@@ -429,8 +425,8 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       u32 meshIndex = 0;
       stream.read(meshIndex);
 
-      prefab.data.meshes.at(i).entity = entity;
-      prefab.data.meshes.at(i).value = localMeshMap.at(meshIndex);
+      prefab.meshes.at(i).entity = entity;
+      prefab.meshes.at(i).value = localMeshMap.at(meshIndex);
     }
   }
 
@@ -438,7 +434,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
     u32 numComponents = 0;
     stream.read(numComponents);
 
-    prefab.data.meshRenderers.resize(numComponents);
+    prefab.meshRenderers.resize(numComponents);
 
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
@@ -450,10 +446,10 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       std::vector<u32> materialIndices(numMaterials);
       stream.read(materialIndices);
 
-      prefab.data.meshRenderers.at(i).entity = entity;
+      prefab.meshRenderers.at(i).entity = entity;
 
       for (auto materialIndex : materialIndices) {
-        prefab.data.meshRenderers.at(i).value.materials.push_back(
+        prefab.meshRenderers.at(i).value.materials.push_back(
             localMaterialMap.at(materialIndex));
       }
     }
@@ -463,7 +459,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
     u32 numComponents = 0;
     stream.read(numComponents);
 
-    prefab.data.skinnedMeshRenderers.resize(numComponents);
+    prefab.skinnedMeshRenderers.resize(numComponents);
 
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
@@ -475,10 +471,10 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       std::vector<u32> materialIndices(numMaterials);
       stream.read(materialIndices);
 
-      prefab.data.skinnedMeshRenderers.at(i).entity = entity;
+      prefab.skinnedMeshRenderers.at(i).entity = entity;
 
       for (auto materialIndex : materialIndices) {
-        prefab.data.skinnedMeshRenderers.at(i).value.materials.push_back(
+        prefab.skinnedMeshRenderers.at(i).value.materials.push_back(
             localMaterialMap.at(materialIndex));
       }
     }
@@ -488,7 +484,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
     u32 numComponents = 0;
     stream.read(numComponents);
 
-    prefab.data.skeletons.resize(numComponents);
+    prefab.skeletons.resize(numComponents);
 
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
@@ -497,8 +493,8 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       u32 meshIndex = 0;
       stream.read(meshIndex);
 
-      prefab.data.skeletons.at(i).entity = entity;
-      prefab.data.skeletons.at(i).value = localSkeletonMap.at(meshIndex);
+      prefab.skeletons.at(i).entity = entity;
+      prefab.skeletons.at(i).value = localSkeletonMap.at(meshIndex);
     }
   }
 
@@ -506,13 +502,13 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
     u32 numComponents = 0;
     stream.read(numComponents);
 
-    prefab.data.animations.resize(numComponents);
+    prefab.animations.resize(numComponents);
 
     for (u32 i = 0; i < numComponents; ++i) {
       u32 animationIndex = 0;
       stream.read(animationIndex);
 
-      prefab.data.animations.at(i) = localAnimationMap.at(animationIndex);
+      prefab.animations.at(i) = localAnimationMap.at(animationIndex);
     }
   }
 
@@ -520,7 +516,7 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
     u32 numComponents = 0;
     stream.read(numComponents);
 
-    prefab.data.animators.resize(numComponents);
+    prefab.animators.resize(numComponents);
 
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
@@ -529,15 +525,15 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       u32 animatorIndex = 0;
       stream.read(animatorIndex);
 
-      prefab.data.animators.at(i).entity = entity;
-      prefab.data.animators.at(i).value = localAnimatorMap.at(animatorIndex);
+      prefab.animators.at(i).entity = entity;
+      prefab.animators.at(i).value = localAnimatorMap.at(animatorIndex);
     }
   }
 
   {
     u32 numComponents = 0;
     stream.read(numComponents);
-    prefab.data.directionalLights.resize(numComponents);
+    prefab.directionalLights.resize(numComponents);
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
       stream.read(entity);
@@ -547,15 +543,15 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       stream.read(color);
       stream.read(intensity);
 
-      prefab.data.directionalLights.at(i).entity = entity;
-      prefab.data.directionalLights.at(i).value = {color, intensity};
+      prefab.directionalLights.at(i).entity = entity;
+      prefab.directionalLights.at(i).value = {color, intensity};
     }
   }
 
   {
     u32 numComponents = 0;
     stream.read(numComponents);
-    prefab.data.pointLights.resize(numComponents);
+    prefab.pointLights.resize(numComponents);
     for (u32 i = 0; i < numComponents; ++i) {
       u32 entity = 0;
       stream.read(entity);
@@ -567,29 +563,29 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
       stream.read(intensity);
       stream.read(range);
 
-      prefab.data.pointLights.at(i).entity = entity;
-      prefab.data.pointLights.at(i).value = {color, intensity, range};
+      prefab.pointLights.at(i).entity = entity;
+      prefab.pointLights.at(i).value = {color, intensity, range};
     }
   }
 
-  if (prefab.data.transforms.empty() && prefab.data.directionalLights.empty() &&
-      prefab.data.pointLights.empty() && prefab.data.meshes.empty() &&
-      prefab.data.skeletons.empty() && prefab.data.animators.empty() &&
-      prefab.data.names.empty() && prefab.data.meshRenderers.empty() &&
-      prefab.data.skinnedMeshRenderers.empty()) {
+  if (prefab.transforms.empty() && prefab.directionalLights.empty() &&
+      prefab.pointLights.empty() && prefab.meshes.empty() &&
+      prefab.skeletons.empty() && prefab.animators.empty() &&
+      prefab.names.empty() && prefab.meshRenderers.empty() &&
+      prefab.skinnedMeshRenderers.empty()) {
     return Error("Prefab is empty");
   }
 
-  return {mRegistry.add(prefab), warnings};
+  return {prefab, warnings};
 }
 
-Result<AssetHandle<PrefabAsset>> AssetCache::loadPrefab(const Uuid &uuid) {
+Result<PrefabAsset> AssetCache::loadPrefab(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Prefab) {
     return Error("Asset type is not prefab");
   }
 
-  return loadPrefabDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
+  return loadPrefabDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

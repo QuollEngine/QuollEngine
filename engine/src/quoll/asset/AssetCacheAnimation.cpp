@@ -51,9 +51,8 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   return assetPath;
 }
 
-Result<AssetHandle<AnimationAsset>>
-AssetCache::loadAnimationDataFromInputStream(const Path &path, const Uuid &uuid,
-                                             const AssetMeta &meta) {
+Result<AnimationAsset>
+AssetCache::loadAnimationDataFromInputStream(const Path &path) {
   InputBinaryStream stream(path);
 
   AssetFileHeader header;
@@ -63,17 +62,14 @@ AssetCache::loadAnimationDataFromInputStream(const Path &path, const Uuid &uuid,
     return Error("Invalid file format");
   }
 
-  AssetData<AnimationAsset> animation{};
-  animation.type = AssetType::Animation;
-  animation.uuid = uuid;
-  animation.name = meta.name;
+  AnimationAsset animation{};
 
-  stream.read(animation.data.time);
+  stream.read(animation.time);
   u32 numKeyframes = 0;
   stream.read(numKeyframes);
-  animation.data.keyframes.resize(numKeyframes);
+  animation.keyframes.resize(numKeyframes);
 
-  for (auto &keyframe : animation.data.keyframes) {
+  for (auto &keyframe : animation.keyframes) {
     stream.read(keyframe.target);
     stream.read(keyframe.interpolation);
     stream.read(keyframe.jointTarget);
@@ -87,31 +83,16 @@ AssetCache::loadAnimationDataFromInputStream(const Path &path, const Uuid &uuid,
     stream.read(keyframe.keyframeValues);
   }
 
-  return mRegistry.add(animation);
+  return animation;
 }
 
-Result<AssetHandle<AnimationAsset>>
-AssetCache::loadAnimation(const Uuid &uuid) {
+Result<AnimationAsset> AssetCache::loadAnimation(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Animation) {
     return Error("Asset type is not animation");
   }
 
-  return loadAnimationDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
-}
-
-Result<AssetHandle<AnimationAsset>>
-AssetCache::getOrLoadAnimation(const Uuid &uuid) {
-  if (uuid.isEmpty()) {
-    return AssetHandle<AnimationAsset>();
-  }
-
-  auto handle = mRegistry.findHandleByUuid<AnimationAsset>(uuid);
-  if (handle) {
-    return handle;
-  }
-
-  return loadAnimation(uuid);
+  return loadAnimationDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

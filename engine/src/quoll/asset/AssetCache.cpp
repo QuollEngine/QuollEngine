@@ -61,7 +61,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   auto meta = getAssetMeta(uuid);
 
   if (meta.type == AssetType::Texture) {
-    auto res = loadTexture(uuid);
+    auto res = load<TextureAsset>(uuid);
     if (!res) {
       return res.error();
     }
@@ -70,7 +70,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::LuaScript) {
-    auto res = loadLuaScript(uuid);
+    auto res = load<LuaScriptAsset>(uuid);
     if (!res) {
       return res.error();
     }
@@ -79,7 +79,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Animator) {
-    auto res = loadAnimator(uuid);
+    auto res = load<AnimatorAsset>(uuid);
     if (!res) {
       return res.error();
     }
@@ -88,7 +88,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::InputMap) {
-    auto res = loadInputMap(uuid);
+    auto res = load<InputMapAsset>(uuid);
     if (!res) {
       return res.error();
     }
@@ -97,7 +97,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Audio) {
-    auto res = loadAudio(uuid);
+    auto res = load<AudioAsset>(uuid);
     if (!res) {
       return res.error();
     }
@@ -106,7 +106,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Font) {
-    auto res = loadFont(uuid);
+    auto res = load<FontAsset>(uuid);
     if (!res) {
       return res.error();
     }
@@ -115,7 +115,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Scene) {
-    auto res = loadScene(uuid);
+    auto res = load<SceneAsset>(uuid);
     if (!res) {
       return res.error();
     }
@@ -124,7 +124,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Material) {
-    auto res = loadMaterialDataFromInputStream(path, uuid, meta);
+    auto res = load<MaterialAsset>(uuid);
 
     if (!res) {
       return res.error();
@@ -133,7 +133,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Mesh) {
-    auto res = loadMeshDataFromInputStream(path, uuid, meta);
+    auto res = load<MeshAsset>(uuid);
 
     if (!res) {
       return res.error();
@@ -142,7 +142,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::SkinnedMesh) {
-    auto res = loadMeshDataFromInputStream(path, uuid, meta);
+    auto res = load<MeshAsset>(uuid);
 
     if (!res) {
       return res.error();
@@ -151,7 +151,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Skeleton) {
-    auto res = loadSkeletonDataFromInputStream(path, uuid, meta);
+    auto res = load<SkeletonAsset>(uuid);
 
     if (!res) {
       return res.error();
@@ -160,7 +160,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Animation) {
-    auto res = loadAnimationDataFromInputStream(path, uuid, meta);
+    auto res = load<AnimationAsset>(uuid);
 
     if (!res) {
       return res.error();
@@ -169,7 +169,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Prefab) {
-    auto res = loadPrefabDataFromInputStream(path, uuid, meta);
+    auto res = load<PrefabAsset>(uuid);
 
     if (!res) {
       return res.error();
@@ -178,7 +178,7 @@ Result<void> AssetCache::loadAsset(const Path &path) {
   }
 
   if (meta.type == AssetType::Environment) {
-    auto res = loadEnvironmentDataFromInputStream(path, uuid, meta);
+    auto res = load<EnvironmentAsset>(uuid);
 
     if (!res) {
       return res.error();

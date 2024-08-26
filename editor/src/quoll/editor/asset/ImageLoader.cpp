@@ -93,7 +93,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
     return createdFileRes.error();
   }
 
-  auto loadRes = mAssetCache.loadTexture(asset.uuid);
+  auto loadRes = mAssetCache.load<TextureAsset>(asset.uuid);
   if (!loadRes) {
     return loadRes.error();
   }

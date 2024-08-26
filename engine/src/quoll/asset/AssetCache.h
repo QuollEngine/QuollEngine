@@ -20,66 +20,108 @@ class AssetCache {
 public:
   AssetCache(const Path &assetsPath, bool createDefaultObjects = false);
 
+  template <typename TAssetData>
+  Result<AssetHandle<TAssetData>> getOrLoad(const Uuid &uuid) {
+    if (uuid.isEmpty()) {
+      return AssetHandle<TAssetData>();
+    }
+
+    auto handle = mRegistry.findHandleByUuid<TAssetData>(uuid);
+
+    if (handle) {
+      return handle;
+    }
+
+    return load<TAssetData>(uuid);
+  }
+
+  template <typename TAssetData>
+  Result<AssetHandle<TAssetData>> load(const Uuid &uuid) {
+    Result<TAssetData> data;
+
+    if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
+      data = loadTexture(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, FontAsset>) {
+      data = loadFont(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, MaterialAsset>) {
+      data = loadMaterial(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, MeshAsset>) {
+      data = loadMesh(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, SkeletonAsset>) {
+      data = loadSkeleton(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, AnimationAsset>) {
+      data = loadAnimation(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, AnimatorAsset>) {
+      data = loadAnimator(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, AudioAsset>) {
+      data = loadAudio(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, PrefabAsset>) {
+      data = loadPrefab(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, LuaScriptAsset>) {
+      data = loadLuaScript(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, EnvironmentAsset>) {
+      data = loadEnvironment(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, SceneAsset>) {
+      data = loadScene(uuid);
+    } else if constexpr (std::is_same_v<TAssetData, InputMapAsset>) {
+      data = loadInputMap(uuid);
+    }
+
+    if (!data) {
+      return data.error();
+    }
+
+    auto meta = getAssetMeta(uuid);
+
+    AssetData<TAssetData> asset;
+    asset.uuid = uuid;
+    asset.name = meta.name;
+    asset.type = meta.type;
+    asset.data = data.data();
+
+    auto existing = mRegistry.findHandleByUuid<TAssetData>(uuid);
+    if (existing) {
+      mRegistry.update(existing, asset);
+      return {existing, data.warnings()};
+    }
+
+    return {mRegistry.add(asset), data.warnings()};
+  }
+
   Result<Path> createTextureFromSource(const Path &sourcePath,
                                        const Uuid &uuid);
 
   Result<Path> createTextureFromAsset(const AssetData<TextureAsset> &asset);
 
-  Result<AssetHandle<TextureAsset>> loadTexture(const Uuid &uuid);
-
   Result<Path> createFontFromSource(const Path &sourcePath, const Uuid &uuid);
-
-  Result<AssetHandle<FontAsset>> loadFont(const Uuid &uuid);
 
   Result<Path> createMaterialFromAsset(const AssetData<MaterialAsset> &asset);
 
-  Result<AssetHandle<MaterialAsset>> loadMaterial(const Uuid &uuid);
-
   Result<Path> createMeshFromAsset(const AssetData<MeshAsset> &asset);
-
-  Result<AssetHandle<MeshAsset>> loadMesh(const Uuid &uuid);
 
   Result<Path> createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset);
 
-  Result<AssetHandle<SkeletonAsset>> loadSkeleton(const Uuid &uuid);
-
   Result<Path> createAnimationFromAsset(const AssetData<AnimationAsset> &asset);
-
-  Result<AssetHandle<AnimationAsset>> loadAnimation(const Uuid &uuid);
 
   Result<Path> createAnimatorFromSource(const Path &sourcePath,
                                         const Uuid &uuid);
 
   Result<Path> createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset);
 
-  Result<AssetHandle<InputMapAsset>> loadInputMap(const Uuid &uuid);
-
   Result<Path> createInputMapFromSource(const Path &sourcePath,
                                         const Uuid &uuid);
 
-  Result<AssetHandle<AnimatorAsset>> loadAnimator(const Uuid &uuid);
-
   Result<Path> createAudioFromSource(const Path &sourcePath, const Uuid &uuid);
 
-  Result<AssetHandle<AudioAsset>> loadAudio(const Uuid &uuid);
-
   Result<Path> createPrefabFromAsset(const AssetData<PrefabAsset> &asset);
-
-  Result<AssetHandle<PrefabAsset>> loadPrefab(const Uuid &uuid);
 
   Result<Path>
   createEnvironmentFromAsset(const AssetData<EnvironmentAsset> &asset);
 
-  Result<AssetHandle<EnvironmentAsset>> loadEnvironment(const Uuid &uuid);
-
   Result<Path> createLuaScriptFromSource(const Path &sourcePath,
                                          const Uuid &uuid);
 
-  Result<AssetHandle<LuaScriptAsset>> loadLuaScript(const Uuid &uuid);
-
   Result<Path> createSceneFromSource(const Path &sourcePath, const Uuid &uuid);
-
-  Result<AssetHandle<SceneAsset>> loadScene(const Uuid &uuid);
 
   inline AssetRegistry &getRegistry() { return mRegistry; }
 
@@ -90,6 +132,21 @@ public:
   AssetMeta getAssetMeta(const Uuid &uuid) const;
 
   Path getPathFromUuid(const Uuid &uuid) const;
+
+private:
+  Result<TextureAsset> loadTexture(const Uuid &uuid);
+  Result<FontAsset> loadFont(const Uuid &uuid);
+  Result<MaterialAsset> loadMaterial(const Uuid &uuid);
+  Result<MeshAsset> loadMesh(const Uuid &uuid);
+  Result<SkeletonAsset> loadSkeleton(const Uuid &uuid);
+  Result<AnimationAsset> loadAnimation(const Uuid &uuid);
+  Result<AnimatorAsset> loadAnimator(const Uuid &uuid);
+  Result<InputMapAsset> loadInputMap(const Uuid &uuid);
+  Result<AudioAsset> loadAudio(const Uuid &uuid);
+  Result<PrefabAsset> loadPrefab(const Uuid &uuid);
+  Result<EnvironmentAsset> loadEnvironment(const Uuid &uuid);
+  Result<LuaScriptAsset> loadLuaScript(const Uuid &uuid);
+  Result<SceneAsset> loadScene(const Uuid &uuid);
 
 private:
   template <typename TAssetData>
@@ -106,41 +163,18 @@ private:
   Result<void> loadAsset(const Path &path);
 
 private:
-  Result<AssetHandle<MaterialAsset>>
-  loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
-                                  const AssetMeta &meta);
+  Result<MaterialAsset> loadMaterialDataFromInputStream(const Path &path);
 
-  Result<AssetHandle<MeshAsset>>
-  loadMeshDataFromInputStream(const Path &path, const Uuid &uuid,
-                              const AssetMeta &meta);
+  Result<MeshAsset> loadMeshDataFromInputStream(const Path &path,
+                                                AssetType type);
 
-  Result<AssetHandle<SkeletonAsset>>
-  loadSkeletonDataFromInputStream(const Path &path, const Uuid &uuid,
-                                  const AssetMeta &meta);
-  Result<AssetHandle<AnimationAsset>>
-  loadAnimationDataFromInputStream(const Path &path, const Uuid &uuid,
-                                   const AssetMeta &meta);
+  Result<SkeletonAsset> loadSkeletonDataFromInputStream(const Path &path);
 
-  Result<AssetHandle<EnvironmentAsset>>
-  loadEnvironmentDataFromInputStream(const Path &path, const Uuid &uuid,
-                                     const AssetMeta &meta);
+  Result<AnimationAsset> loadAnimationDataFromInputStream(const Path &path);
 
-  Result<AssetHandle<PrefabAsset>>
-  loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
-                                const AssetMeta &meta);
+  Result<EnvironmentAsset> loadEnvironmentDataFromInputStream(const Path &path);
 
-private:
-  Result<AssetHandle<TextureAsset>> getOrLoadTexture(const Uuid &uuid);
-
-  Result<AssetHandle<MaterialAsset>> getOrLoadMaterial(const Uuid &uuid);
-
-  Result<AssetHandle<MeshAsset>> getOrLoadMesh(const Uuid &uuid);
-
-  Result<AssetHandle<SkeletonAsset>> getOrLoadSkeleton(const Uuid &uuid);
-
-  Result<AssetHandle<AnimationAsset>> getOrLoadAnimation(const Uuid &uuid);
-
-  Result<AssetHandle<AnimatorAsset>> getOrLoadAnimator(const Uuid &uuid);
+  Result<PrefabAsset> loadPrefabDataFromInputStream(const Path &path);
 
 private:
   AssetRegistry mRegistry;

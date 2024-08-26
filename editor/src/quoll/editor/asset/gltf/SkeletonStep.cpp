@@ -124,7 +124,7 @@ void loadSkeletons(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createSkeletonFromAsset(asset);
-    auto handle = assetCache.loadSkeleton(asset.uuid);
+    auto handle = assetCache.load<quoll::SkeletonAsset>(asset.uuid);
 
     importData.skeletons.skeletonMap.map.insert_or_assign(
         static_cast<usize>(si), handle);

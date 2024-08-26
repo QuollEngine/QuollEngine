@@ -19,7 +19,7 @@ public:
   loadLuaScript(quoll::String filename) {
     auto uuid = quoll::Uuid::generate();
     cache.createLuaScriptFromSource(FixturesPath / filename, uuid);
-    return cache.loadLuaScript(uuid);
+    return cache.load<quoll::LuaScriptAsset>(uuid);
   }
 
   quoll::Scene scene;

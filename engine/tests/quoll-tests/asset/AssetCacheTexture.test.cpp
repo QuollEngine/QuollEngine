@@ -29,7 +29,7 @@ TEST_F(AssetCacheTextureTest, CreatesTextureFromAsset) {
   auto uuid = quoll::Uuid::generate();
   auto createdRes =
       cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
-  auto texture = cache.loadTexture(uuid);
+  auto texture = cache.load<quoll::TextureAsset>(uuid);
   auto handle = texture.data();
 
   auto asset = cache.getRegistry().getMeta(handle);
@@ -52,7 +52,7 @@ TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
   auto filePath =
       cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
 
-  auto texture = cache.loadTexture(uuid);
+  auto texture = cache.load<quoll::TextureAsset>(uuid);
   auto handle = texture.data();
 
   auto asset = cache.getRegistry().getMeta(handle);
@@ -64,14 +64,14 @@ TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
 
 TEST_F(AssetCacheTextureTest, FailsIfKtxFileCannotBeLoaded) {
   // non-existent file
-  EXPECT_FALSE(cache.loadTexture(quoll::Uuid::generate()));
+  EXPECT_FALSE(cache.load<quoll::TextureAsset>(quoll::Uuid::generate()));
 
   // invalid format
   auto uuid = quoll::Uuid::generate();
   auto filePath = cache.createTextureFromSource(
       FixturesPath / "white-image-100x100.png", uuid);
 
-  EXPECT_FALSE(cache.loadTexture(uuid));
+  EXPECT_FALSE(cache.load<quoll::TextureAsset>(uuid));
 }
 
 TEST_F(AssetCacheTextureTest, FailsIfTextureIsOneDimensional) {
@@ -79,7 +79,7 @@ TEST_F(AssetCacheTextureTest, FailsIfTextureIsOneDimensional) {
   auto filePath =
       cache.createTextureFromSource(FixturesPath / "1x1-1d.ktx", uuid);
 
-  EXPECT_FALSE(cache.loadTexture(uuid));
+  EXPECT_FALSE(cache.load<quoll::TextureAsset>(uuid));
 }
 
 TEST_F(AssetCacheTextureTest, LoadsTexture2D) {
@@ -87,7 +87,7 @@ TEST_F(AssetCacheTextureTest, LoadsTexture2D) {
   auto filePath =
       cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
 
-  auto texture = cache.loadTexture(uuid);
+  auto texture = cache.load<quoll::TextureAsset>(uuid);
   EXPECT_TRUE(texture);
 
   auto &asset = cache.getRegistry().get(texture.data());
@@ -103,7 +103,7 @@ TEST_F(AssetCacheTextureTest, LoadsTextureCubemap) {
 
   auto filePath =
       cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx", uuid);
-  auto texture = cache.loadTexture(uuid);
+  auto texture = cache.load<quoll::TextureAsset>(uuid);
 
   EXPECT_TRUE(texture);
 
