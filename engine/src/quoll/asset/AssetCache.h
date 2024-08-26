@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AssetFileHeader.h"
 #include "AssetHandle.h"
 #include "AssetMeta.h"
 #include "AssetRegistry.h"
@@ -102,41 +101,33 @@ private:
     return Uuid{};
   }
 
-  Result<AssetFileHeader> checkAssetFile(InputBinaryStream &file,
-                                         const Path &filePath,
-                                         AssetType assetType);
-
   Result<Path> createAssetMeta(AssetType type, String name, Path path);
 
   Result<bool> loadAsset(const Path &path);
 
 private:
   Result<AssetHandle<MaterialAsset>>
-  loadMaterialDataFromInputStream(InputBinaryStream &stream,
-                                  const Path &filePath,
-                                  const AssetFileHeader &header);
+  loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
+                                  const AssetMeta &meta);
 
   Result<AssetHandle<MeshAsset>>
-  loadMeshDataFromInputStream(InputBinaryStream &stream, const Path &filePath,
-                              const AssetFileHeader &header);
+  loadMeshDataFromInputStream(const Path &path, const Uuid &uuid,
+                              const AssetMeta &meta);
 
   Result<AssetHandle<SkeletonAsset>>
-  loadSkeletonDataFromInputStream(InputBinaryStream &stream,
-                                  const Path &filePath,
-                                  const AssetFileHeader &header);
+  loadSkeletonDataFromInputStream(const Path &path, const Uuid &uuid,
+                                  const AssetMeta &meta);
   Result<AssetHandle<AnimationAsset>>
-  loadAnimationDataFromInputStream(InputBinaryStream &stream,
-                                   const Path &filePath,
-                                   const AssetFileHeader &header);
+  loadAnimationDataFromInputStream(const Path &path, const Uuid &uuid,
+                                   const AssetMeta &meta);
 
   Result<AssetHandle<EnvironmentAsset>>
-  loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
-                                     const Path &filePath,
-                                     const AssetFileHeader &header);
+  loadEnvironmentDataFromInputStream(const Path &path, const Uuid &uuid,
+                                     const AssetMeta &meta);
 
   Result<AssetHandle<PrefabAsset>>
-  loadPrefabDataFromInputStream(InputBinaryStream &stream, const Path &filePath,
-                                const AssetFileHeader &header);
+  loadPrefabDataFromInputStream(const Path &path, const Uuid &uuid,
+                                const AssetMeta &meta);
 
 private:
   Result<AssetHandle<TextureAsset>> getOrLoadTexture(const Uuid &uuid);

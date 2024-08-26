@@ -2,7 +2,6 @@
 #include "quoll/core/Version.h"
 #include "quoll/skeleton/SkeletonAsset.h"
 #include "AssetCache.h"
-#include "AssetFileHeader.h"
 #include "InputBinaryStream.h"
 #include "OutputBinaryStream.h"
 
@@ -31,7 +30,6 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   AssetFileHeader header{};
   header.type = AssetType::Skeleton;
   header.magic = AssetFileHeader::MagicConstant;
-  header.name = asset.name;
   file.write(header);
 
   auto numJoints = static_cast<u32>(asset.data.jointLocalPositions.size());
@@ -48,13 +46,20 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
 }
 
 Result<AssetHandle<SkeletonAsset>>
-AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
-                                            const Path &filePath,
-                                            const AssetFileHeader &header) {
+AssetCache::loadSkeletonDataFromInputStream(const Path &path, const Uuid &uuid,
+                                            const AssetMeta &meta) {
+  InputBinaryStream stream(path);
+  AssetFileHeader header;
+  stream.read(header);
+  if (header.magic != AssetFileHeader::MagicConstant ||
+      header.type != AssetType::Skeleton) {
+    return Result<AssetHandle<SkeletonAsset>>::Error("Invalid file format");
+  }
+
   AssetData<SkeletonAsset> skeleton{};
   skeleton.type = AssetType::Skeleton;
-  skeleton.uuid = Uuid(filePath.stem().string());
-  skeleton.name = header.name;
+  skeleton.uuid = uuid;
+  skeleton.name = meta.name;
 
   u32 numJoints = 0;
   stream.read(numJoints);
@@ -77,15 +82,13 @@ AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
 }
 
 Result<AssetHandle<SkeletonAsset>> AssetCache::loadSkeleton(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-  InputBinaryStream stream(filePath);
-
-  const auto &header = checkAssetFile(stream, filePath, AssetType::Skeleton);
-  if (header.hasError()) {
-    return Result<AssetHandle<SkeletonAsset>>::Error(header.getError());
+  auto meta = getAssetMeta(uuid);
+  if (meta.type != AssetType::Skeleton) {
+    return Result<AssetHandle<SkeletonAsset>>::Error(
+        "Asset type is not skeleton");
   }
 
-  return loadSkeletonDataFromInputStream(stream, filePath, header.getData());
+  return loadSkeletonDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
 }
 
 Result<AssetHandle<SkeletonAsset>>

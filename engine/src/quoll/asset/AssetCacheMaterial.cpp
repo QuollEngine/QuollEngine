@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
 #include "AssetCache.h"
-#include "AssetFileHeader.h"
 #include "InputBinaryStream.h"
 #include "OutputBinaryStream.h"
 
@@ -31,7 +30,6 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   AssetFileHeader header{};
   header.type = AssetType::Material;
   header.magic = AssetFileHeader::MagicConstant;
-  header.name = asset.name;
   file.write(header);
 
   auto baseColorTexture = getAssetUuid(asset.data.baseColorTexture);
@@ -65,13 +63,20 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
 }
 
 Result<AssetHandle<MaterialAsset>>
-AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
-                                            const Path &filePath,
-                                            const AssetFileHeader &header) {
+AssetCache::loadMaterialDataFromInputStream(const Path &path, const Uuid &uuid,
+                                            const AssetMeta &meta) {
+  InputBinaryStream stream(path);
+
+  AssetFileHeader header;
+  stream.read(header);
+  if (header.magic != AssetFileHeader::MagicConstant ||
+      header.type != AssetType::Material) {
+    return Result<AssetHandle<MaterialAsset>>::Error("Invalid file format");
+  }
 
   AssetData<MaterialAsset> material{};
-  material.name = header.name;
-  material.uuid = Uuid(filePath.stem().string());
+  material.name = meta.name;
+  material.uuid = uuid;
   material.type = AssetType::Material;
   std::vector<String> warnings{};
 
@@ -162,20 +167,13 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 }
 
 Result<AssetHandle<MaterialAsset>> AssetCache::loadMaterial(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-  InputBinaryStream stream(filePath);
-
-  if (!stream.good()) {
+  auto meta = getAssetMeta(uuid);
+  if (meta.type != AssetType::Material) {
     return Result<AssetHandle<MaterialAsset>>::Error(
-        "File cannot be opened for reading: " + filePath.string());
+        "Asset type is not material");
   }
 
-  const auto &header = checkAssetFile(stream, filePath, AssetType::Material);
-  if (header.hasError()) {
-    return Result<AssetHandle<MaterialAsset>>::Error(header.getError());
-  }
-
-  return loadMaterialDataFromInputStream(stream, filePath, header.getData());
+  return loadMaterialDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
 }
 
 Result<AssetHandle<MaterialAsset>>

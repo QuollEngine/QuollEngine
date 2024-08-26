@@ -104,7 +104,6 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
 
   quoll::AssetFileHeader header;
   file.read(header);
-  EXPECT_EQ(header.name, asset.name);
   EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, quoll::AssetType::Mesh);
 
@@ -238,7 +237,6 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   file.read(header);
 
   EXPECT_EQ(header.magic, header.MagicConstant);
-  EXPECT_EQ(header.name, "test-mesh0");
   EXPECT_EQ(header.type, quoll::AssetType::SkinnedMesh);
 
   u32 numGeometries = 0;

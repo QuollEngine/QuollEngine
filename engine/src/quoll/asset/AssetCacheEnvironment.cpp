@@ -1,7 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
 #include "quoll/asset/AssetCache.h"
-#include "quoll/asset/AssetFileHeader.h"
 #include "quoll/asset/InputBinaryStream.h"
 #include "quoll/asset/OutputBinaryStream.h"
 
@@ -29,7 +28,6 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
   AssetFileHeader header{};
   header.type = AssetType::Environment;
   header.magic = AssetFileHeader::MagicConstant;
-  header.name = asset.name;
   stream.write(header);
 
   stream.write(irradianceMapUuid);
@@ -39,9 +37,18 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
 }
 
 Result<AssetHandle<EnvironmentAsset>>
-AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
-                                               const Path &filePath,
-                                               const AssetFileHeader &header) {
+AssetCache::loadEnvironmentDataFromInputStream(const Path &path,
+                                               const Uuid &uuid,
+                                               const AssetMeta &meta) {
+  InputBinaryStream stream(path);
+
+  AssetFileHeader header;
+  stream.read(header);
+  if (header.magic != AssetFileHeader::MagicConstant ||
+      header.type != AssetType::Environment) {
+    return Result<AssetHandle<EnvironmentAsset>>::Error("Invalid file format");
+  }
+
   Uuid irradianceMapUuid;
   stream.read(irradianceMapUuid);
 
@@ -62,7 +69,8 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
   }
 
   AssetData<EnvironmentAsset> environment{};
-  environment.uuid = Uuid(filePath.stem().string());
+  environment.name = meta.name;
+  environment.uuid = uuid;
   environment.type = AssetType::Environment;
   environment.data.irradianceMap = irradianceMapRes.getData();
   environment.data.specularMap = specularMapRes.getData();
@@ -74,15 +82,13 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
 
 Result<AssetHandle<EnvironmentAsset>>
 AssetCache::loadEnvironment(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-  InputBinaryStream stream(filePath);
-
-  const auto &header = checkAssetFile(stream, filePath, AssetType::Environment);
-  if (header.hasError()) {
-    return Result<AssetHandle<EnvironmentAsset>>::Error(header.getError());
+  auto meta = getAssetMeta(uuid);
+  if (meta.type != AssetType::Environment) {
+    return Result<AssetHandle<EnvironmentAsset>>::Error(
+        "Asset type is not environment");
   }
 
-  return loadEnvironmentDataFromInputStream(stream, filePath, header.getData());
+  return loadEnvironmentDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
 }
 
 } // namespace quoll
