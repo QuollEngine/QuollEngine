@@ -16,6 +16,11 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
+  auto metaRes = createAssetMeta(AssetType::Material, asset.name, assetPath);
+  if (!metaRes.hasData()) {
+    return Result<Path>::Error("Cannot create material asset: " + asset.name);
+  }
+
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {

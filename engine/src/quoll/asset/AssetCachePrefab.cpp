@@ -16,6 +16,11 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
+  auto metaRes = createAssetMeta(AssetType::Prefab, asset.name, assetPath);
+  if (!metaRes.hasData()) {
+    return Result<Path>::Error("Cannot create prefab asset: " + asset.name);
+  }
+
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {

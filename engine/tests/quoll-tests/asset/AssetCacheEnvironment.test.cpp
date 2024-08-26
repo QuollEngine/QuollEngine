@@ -24,6 +24,24 @@ public:
   quoll::Uuid specularUuid;
 };
 
+TEST_F(AssetCacheEnvironmentTest, CreatesMetaFileFromAsset) {
+  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
+  auto specularMap = cache.loadTexture(specularUuid).getData();
+
+  quoll::AssetData<quoll::EnvironmentAsset> asset{};
+  asset.name = "env-0";
+  asset.uuid = quoll::Uuid::generate();
+  asset.path = FixturesPath / "environment";
+  asset.data.irradianceMap = irradianceMap;
+  asset.data.specularMap = specularMap;
+
+  auto filePath = cache.createEnvironmentFromAsset(asset);
+  auto meta = cache.getAssetMeta(asset.uuid);
+
+  EXPECT_EQ(meta.type, quoll::AssetType::Environment);
+  EXPECT_EQ(meta.name, "env-0");
+}
+
 TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
   auto specularMap = cache.loadTexture(specularUuid).getData();
@@ -56,9 +74,6 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
 
   EXPECT_EQ(readIrradianceUuid, irradianceUuid);
   EXPECT_EQ(readSpecularUuid, specularUuid);
-
-  EXPECT_FALSE(std::filesystem::exists(
-      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheEnvironmentTest,

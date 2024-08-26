@@ -86,6 +86,15 @@ public:
   }
 };
 
+TEST_F(AssetCacheMeshTest, CreatesMetaFileFromAsset) {
+  auto asset = createRandomizedMeshAsset();
+  auto filePath = cache.createMeshFromAsset(asset);
+  auto meta = cache.getAssetMeta(asset.uuid);
+
+  EXPECT_EQ(meta.type, quoll::AssetType::Mesh);
+  EXPECT_EQ(meta.name, "test-mesh0");
+}
+
 TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = cache.createMeshFromAsset(asset);
@@ -159,9 +168,6 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
       EXPECT_EQ(valueExpected, valueActual);
     }
   }
-
-  EXPECT_FALSE(std::filesystem::exists(
-      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoVertices) {
