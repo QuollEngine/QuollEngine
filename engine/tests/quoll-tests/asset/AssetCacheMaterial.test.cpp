@@ -254,36 +254,38 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
 
   EXPECT_NE(handle, quoll::AssetHandle<quoll::MaterialAsset>());
 
+  {
+    auto &material = cache.getRegistry().getMeta(handle);
+
+    EXPECT_EQ(material.name, asset.name);
+    EXPECT_TRUE(material.uuid.isValid());
+    EXPECT_EQ(material.type, quoll::AssetType::Material);
+  }
+
   auto &material = cache.getRegistry().get(handle);
-  EXPECT_EQ(material.name, asset.name);
-  EXPECT_TRUE(material.uuid.isValid());
-  EXPECT_EQ(material.type, quoll::AssetType::Material);
 
-  EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
-  EXPECT_EQ(material.data.baseColorTextureCoord,
-            asset.data.baseColorTextureCoord);
-  EXPECT_EQ(material.data.baseColorFactor, asset.data.baseColorFactor);
+  EXPECT_EQ(material.baseColorTexture, asset.data.baseColorTexture);
+  EXPECT_EQ(material.baseColorTextureCoord, asset.data.baseColorTextureCoord);
+  EXPECT_EQ(material.baseColorFactor, asset.data.baseColorFactor);
 
-  EXPECT_EQ(material.data.metallicRoughnessTexture,
+  EXPECT_EQ(material.metallicRoughnessTexture,
             asset.data.metallicRoughnessTexture);
-  EXPECT_EQ(material.data.metallicRoughnessTextureCoord,
+  EXPECT_EQ(material.metallicRoughnessTextureCoord,
             asset.data.metallicRoughnessTextureCoord);
-  EXPECT_EQ(material.data.metallicFactor, asset.data.metallicFactor);
-  EXPECT_EQ(material.data.roughnessFactor, asset.data.roughnessFactor);
+  EXPECT_EQ(material.metallicFactor, asset.data.metallicFactor);
+  EXPECT_EQ(material.roughnessFactor, asset.data.roughnessFactor);
 
-  EXPECT_EQ(material.data.normalTexture, asset.data.normalTexture);
-  EXPECT_EQ(material.data.normalTextureCoord, asset.data.normalTextureCoord);
-  EXPECT_EQ(material.data.normalScale, asset.data.normalScale);
+  EXPECT_EQ(material.normalTexture, asset.data.normalTexture);
+  EXPECT_EQ(material.normalTextureCoord, asset.data.normalTextureCoord);
+  EXPECT_EQ(material.normalScale, asset.data.normalScale);
 
-  EXPECT_EQ(material.data.occlusionTexture, asset.data.occlusionTexture);
-  EXPECT_EQ(material.data.occlusionTextureCoord,
-            asset.data.occlusionTextureCoord);
-  EXPECT_EQ(material.data.occlusionStrength, asset.data.occlusionStrength);
+  EXPECT_EQ(material.occlusionTexture, asset.data.occlusionTexture);
+  EXPECT_EQ(material.occlusionTextureCoord, asset.data.occlusionTextureCoord);
+  EXPECT_EQ(material.occlusionStrength, asset.data.occlusionStrength);
 
-  EXPECT_EQ(material.data.emissiveTexture, asset.data.emissiveTexture);
-  EXPECT_EQ(material.data.emissiveTextureCoord,
-            asset.data.emissiveTextureCoord);
-  EXPECT_EQ(material.data.emissiveFactor, asset.data.emissiveFactor);
+  EXPECT_EQ(material.emissiveTexture, asset.data.emissiveTexture);
+  EXPECT_EQ(material.emissiveTextureCoord, asset.data.emissiveTextureCoord);
+  EXPECT_EQ(material.emissiveFactor, asset.data.emissiveFactor);
 }
 
 TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
@@ -304,35 +306,36 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
 
   EXPECT_NE(handle, quoll::AssetHandle<quoll::MaterialAsset>());
 
+  {
+    auto &material = cache.getRegistry().getMeta(handle);
+    EXPECT_TRUE(material.uuid.isValid());
+    EXPECT_EQ(material.type, quoll::AssetType::Material);
+  }
+
   auto &material = cache.getRegistry().get(handle);
-  EXPECT_TRUE(material.uuid.isValid());
-  EXPECT_EQ(material.type, quoll::AssetType::Material);
 
-  EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
-  EXPECT_EQ(material.data.baseColorTextureCoord,
-            asset.data.baseColorTextureCoord);
-  EXPECT_EQ(material.data.baseColorFactor, asset.data.baseColorFactor);
+  EXPECT_EQ(material.baseColorTexture, asset.data.baseColorTexture);
+  EXPECT_EQ(material.baseColorTextureCoord, asset.data.baseColorTextureCoord);
+  EXPECT_EQ(material.baseColorFactor, asset.data.baseColorFactor);
 
-  EXPECT_EQ(material.data.metallicRoughnessTexture,
+  EXPECT_EQ(material.metallicRoughnessTexture,
             asset.data.metallicRoughnessTexture);
-  EXPECT_EQ(material.data.metallicRoughnessTextureCoord,
+  EXPECT_EQ(material.metallicRoughnessTextureCoord,
             asset.data.metallicRoughnessTextureCoord);
-  EXPECT_EQ(material.data.metallicFactor, asset.data.metallicFactor);
-  EXPECT_EQ(material.data.roughnessFactor, asset.data.roughnessFactor);
+  EXPECT_EQ(material.metallicFactor, asset.data.metallicFactor);
+  EXPECT_EQ(material.roughnessFactor, asset.data.roughnessFactor);
 
-  EXPECT_EQ(material.data.normalTexture, asset.data.normalTexture);
-  EXPECT_EQ(material.data.normalTextureCoord, asset.data.normalTextureCoord);
-  EXPECT_EQ(material.data.normalScale, asset.data.normalScale);
+  EXPECT_EQ(material.normalTexture, asset.data.normalTexture);
+  EXPECT_EQ(material.normalTextureCoord, asset.data.normalTextureCoord);
+  EXPECT_EQ(material.normalScale, asset.data.normalScale);
 
-  EXPECT_EQ(material.data.occlusionTexture, asset.data.occlusionTexture);
-  EXPECT_EQ(material.data.occlusionTextureCoord,
-            asset.data.occlusionTextureCoord);
-  EXPECT_EQ(material.data.occlusionStrength, asset.data.occlusionStrength);
+  EXPECT_EQ(material.occlusionTexture, asset.data.occlusionTexture);
+  EXPECT_EQ(material.occlusionTextureCoord, asset.data.occlusionTextureCoord);
+  EXPECT_EQ(material.occlusionStrength, asset.data.occlusionStrength);
 
-  EXPECT_EQ(material.data.emissiveTexture, asset.data.emissiveTexture);
-  EXPECT_EQ(material.data.emissiveTextureCoord,
-            asset.data.emissiveTextureCoord);
-  EXPECT_EQ(material.data.emissiveFactor, asset.data.emissiveFactor);
+  EXPECT_EQ(material.emissiveTexture, asset.data.emissiveTexture);
+  EXPECT_EQ(material.emissiveTextureCoord, asset.data.emissiveTextureCoord);
+  EXPECT_EQ(material.emissiveFactor, asset.data.emissiveFactor);
 }
 
 TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
@@ -349,9 +352,9 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
 
   auto &newMaterial = cache.getRegistry().get(handle.getData());
 
-  EXPECT_NE(newMaterial.data.baseColorTexture,
+  EXPECT_NE(newMaterial.baseColorTexture,
             quoll::AssetHandle<quoll::TextureAsset>());
 
-  auto &newTexture = cache.getRegistry().get(newMaterial.data.baseColorTexture);
+  auto &newTexture = cache.getRegistry().getMeta(newMaterial.baseColorTexture);
   EXPECT_EQ(newTexture.uuid, textureUuid);
 }

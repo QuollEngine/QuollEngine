@@ -176,11 +176,11 @@ TEST_F(GLTFImporterSkeletonTest, CreatesSkeletonWithJoints) {
   auto &skeleton =
       assetCache.getRegistry().get(quoll::AssetHandle<quoll::SkeletonAsset>{1});
 
-  for (usize i = 0; i < skeleton.data.jointLocalPositions.size(); ++i) {
+  for (usize i = 0; i < skeleton.jointLocalPositions.size(); ++i) {
     auto &node = scene.nodes.at(skin.joints.at(i));
 
-    auto &position = skeleton.data.jointLocalPositions.at(i);
-    auto &scale = skeleton.data.jointLocalScales.at(i);
+    auto &position = skeleton.jointLocalPositions.at(i);
+    auto &scale = skeleton.jointLocalScales.at(i);
 
     EXPECT_EQ(position, node.position);
     EXPECT_EQ(scale, node.scale);

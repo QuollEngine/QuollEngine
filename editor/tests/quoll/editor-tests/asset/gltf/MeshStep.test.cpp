@@ -127,9 +127,9 @@ public:
     const auto &meshAsset =
         assetCache.getRegistry().get(quoll::AssetHandle<quoll::MeshAsset>{1});
 
-    EXPECT_EQ(meshAsset.data.geometries.size(), gltfMesh.primitives.size());
-    for (usize gi = 0; gi < meshAsset.data.geometries.size(); ++gi) {
-      const auto &g = meshAsset.data.geometries.at(gi);
+    EXPECT_EQ(meshAsset.geometries.size(), gltfMesh.primitives.size());
+    for (usize gi = 0; gi < meshAsset.geometries.size(); ++gi) {
+      const auto &g = meshAsset.geometries.at(gi);
       auto &p = gltfMesh.primitives.at(gi);
 
       EXPECT_EQ(g.positions.size(), p.positions.data.size());

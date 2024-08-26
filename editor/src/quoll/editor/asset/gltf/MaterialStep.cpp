@@ -94,7 +94,7 @@ void loadMaterials(GLTFImportData &importData) {
     importData.materials.map.insert_or_assign(i, handle.getData());
 
     importData.outputUuids.insert_or_assign(
-        assetName, assetCache.getRegistry().get(handle.getData()).uuid);
+        assetName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
   }
 }
 

@@ -10,11 +10,9 @@ void TextSerializer::serialize(YAML::Node &node, EntityDatabase &entityDatabase,
     const auto &text = entityDatabase.get<Text>(entity);
 
     if (!text.content.empty() && assetRegistry.has(text.font)) {
-      auto font = assetRegistry.get(text.font).uuid;
-
       node["text"]["content"] = text.content;
       node["text"]["lineHeight"] = text.lineHeight;
-      node["text"]["font"] = font;
+      node["text"]["font"] = assetRegistry.getMeta(text.font).uuid;
     }
   }
 }

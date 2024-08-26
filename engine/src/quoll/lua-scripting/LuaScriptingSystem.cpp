@@ -30,7 +30,7 @@ void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
 
     bool valid = true;
     auto &script = mAssetRegistry.get(component.handle);
-    for (auto &[key, value] : script.data.variables) {
+    for (auto &[key, value] : script.variables) {
       auto it = component.variables.find(key);
       if (it == component.variables.end() || !it->second.isType(value.type)) {
         // TODO: Throw error here
@@ -58,7 +58,7 @@ void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
       scriptDecorator.attachToScope(state, entity, scriptGlobals);
       scriptDecorator.attachVariableInjectors(state, component.variables);
 
-      mLuaInterpreter.evaluate(script.data.bytes, component.state);
+      mLuaInterpreter.evaluate(script.bytes, component.state);
       scriptDecorator.removeVariableInjectors(state);
     };
 

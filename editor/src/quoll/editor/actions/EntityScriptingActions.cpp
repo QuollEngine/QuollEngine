@@ -108,7 +108,7 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state,
     return false;
   }
 
-  const auto &variables = assetRegistry.get(scriptHandle).data.variables;
+  const auto &variables = assetRegistry.get(scriptHandle).variables;
 
   auto it = variables.find(mName);
   if (it == variables.end()) {

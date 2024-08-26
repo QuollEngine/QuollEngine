@@ -404,10 +404,12 @@ void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
 void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
                                AssetManager &assetManager) {
   auto &assetRegistry = assetManager.getAssetRegistry();
+  const auto &prefabMeta = assetRegistry.getMeta(handle);
   const auto &prefab = assetRegistry.get(handle);
-  mPrefabDirectory = mCurrentDirectory / prefab.name;
 
-  auto prefabName = prefab.name + "/";
+  mPrefabDirectory = mCurrentDirectory / prefabMeta.name;
+
+  auto prefabName = prefabMeta.name + "/";
 
   auto removePrefabName = [&prefabName](String name) {
     auto index = name.find(prefabName);
@@ -420,7 +422,7 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
 
   auto createPrefabEntry =
       [&]<typename AssetData>(AssetHandle<AssetData> handle) {
-        const auto &asset = assetRegistry.get<AssetData>(handle);
+        const auto &asset = assetRegistry.getMeta<AssetData>(handle);
         Entry entry;
         entry.isDirectory = false;
         entry.path = assetManager.getCache().getPathFromUuid(asset.uuid);
@@ -456,45 +458,45 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
     if (addPrefabEntry(handle, materialCache)) {
       const auto &material = assetRegistry.get(handle);
 
-      addTextureEntryIfExists(material.data.baseColorTexture);
-      addTextureEntryIfExists(material.data.metallicRoughnessTexture);
-      addTextureEntryIfExists(material.data.normalTexture);
-      addTextureEntryIfExists(material.data.occlusionTexture);
-      addTextureEntryIfExists(material.data.emissiveTexture);
+      addTextureEntryIfExists(material.baseColorTexture);
+      addTextureEntryIfExists(material.metallicRoughnessTexture);
+      addTextureEntryIfExists(material.normalTexture);
+      addTextureEntryIfExists(material.occlusionTexture);
+      addTextureEntryIfExists(material.emissiveTexture);
     }
   };
 
   std::unordered_map<AssetHandle<MeshAsset>, bool> meshCache;
-  for (const auto &ref : prefab.data.meshes) {
+  for (const auto &ref : prefab.meshes) {
     addPrefabEntry(ref.value, meshCache);
   }
 
-  for (const auto &renderer : prefab.data.meshRenderers) {
+  for (const auto &renderer : prefab.meshRenderers) {
     for (auto material : renderer.value.materials) {
       addMaterialEntry(material);
     }
   }
 
-  for (const auto &renderer : prefab.data.skinnedMeshRenderers) {
+  for (const auto &renderer : prefab.skinnedMeshRenderers) {
     for (auto material : renderer.value.materials) {
       addMaterialEntry(material);
     }
   }
 
   std::unordered_map<AssetHandle<SkeletonAsset>, bool> skeletonCache;
-  for (const auto &ref : prefab.data.skeletons) {
+  for (const auto &ref : prefab.skeletons) {
     addPrefabEntry(ref.value, skeletonCache);
   }
 
   std::unordered_map<AssetHandle<AnimatorAsset>, bool> animatorCache;
-  for (const auto &ref : prefab.data.animators) {
+  for (const auto &ref : prefab.animators) {
     addPrefabEntry(ref.value, animatorCache);
   }
 
   std::unordered_map<AssetHandle<AnimationAsset>, bool> animationCache;
-  for (const auto &ref : prefab.data.animators) {
+  for (const auto &ref : prefab.animators) {
     const auto &animator = assetRegistry.get(ref.value);
-    for (const auto &state : animator.data.states) {
+    for (const auto &state : animator.states) {
       addPrefabEntry(state.animation, animationCache);
     }
   }
@@ -528,11 +530,11 @@ void AssetBrowser::setDefaultProps(Entry &entry, AssetRegistry &assetRegistry) {
   if (entry.assetType == AssetType::Texture) {
     entry.preview =
         assetRegistry.get(static_cast<AssetHandle<TextureAsset>>(entry.asset))
-            .data.deviceHandle;
+            .deviceHandle;
   } else if (entry.assetType == AssetType::Environment) {
     entry.preview =
         assetRegistry
-            .get(static_cast<AssetHandle<EnvironmentAsset>>(entry.asset))
+            .getMeta(static_cast<AssetHandle<EnvironmentAsset>>(entry.asset))
             .preview;
   } else {
     entry.preview = IconRegistry::getIcon(entry.icon);

@@ -650,23 +650,23 @@ TEST_F(AssetCacheInputMapTest,
 
   const auto &inputMap = cache.getRegistry().get(res.getData());
 
-  EXPECT_EQ(inputMap.data.schemes.size(), 2);
-  EXPECT_EQ(inputMap.data.schemes.at(0).name, "Gamepad");
-  EXPECT_EQ(inputMap.data.schemes.at(1).name, "KBM");
+  EXPECT_EQ(inputMap.schemes.size(), 2);
+  EXPECT_EQ(inputMap.schemes.at(0).name, "Gamepad");
+  EXPECT_EQ(inputMap.schemes.at(1).name, "KBM");
 
-  EXPECT_EQ(inputMap.data.commands.size(), 3);
-  EXPECT_EQ(inputMap.data.commands.at(0).name, "Move");
-  EXPECT_EQ(inputMap.data.commands.at(0).type, quoll::InputDataType::Axis2d);
+  EXPECT_EQ(inputMap.commands.size(), 3);
+  EXPECT_EQ(inputMap.commands.at(0).name, "Move");
+  EXPECT_EQ(inputMap.commands.at(0).type, quoll::InputDataType::Axis2d);
 
-  EXPECT_EQ(inputMap.data.commands.at(1).name, "Look");
-  EXPECT_EQ(inputMap.data.commands.at(1).type, quoll::InputDataType::Axis2d);
+  EXPECT_EQ(inputMap.commands.at(1).name, "Look");
+  EXPECT_EQ(inputMap.commands.at(1).type, quoll::InputDataType::Axis2d);
 
-  EXPECT_EQ(inputMap.data.commands.at(2).name, "Jump");
-  EXPECT_EQ(inputMap.data.commands.at(2).type, quoll::InputDataType::Boolean);
+  EXPECT_EQ(inputMap.commands.at(2).name, "Jump");
+  EXPECT_EQ(inputMap.commands.at(2).type, quoll::InputDataType::Boolean);
 
-  EXPECT_EQ(inputMap.data.bindings.size(), 6);
+  EXPECT_EQ(inputMap.bindings.size(), 6);
 
-  auto &bindings = inputMap.data.bindings;
+  auto &bindings = inputMap.bindings;
   EXPECT_EQ(bindings.at(0).scheme, 0);
   EXPECT_EQ(bindings.at(0).command, 0);
   {
@@ -735,7 +735,7 @@ TEST_F(AssetCacheInputMapTest,
 
   {
     auto &inputMap = cache.getRegistry().get(handle);
-    EXPECT_EQ(inputMap.data.schemes.size(), 1);
+    EXPECT_EQ(inputMap.schemes.size(), 1);
   }
 
   {
@@ -750,6 +750,6 @@ TEST_F(AssetCacheInputMapTest,
     EXPECT_EQ(result.getData(), handle);
 
     auto &inputMap = cache.getRegistry().get(handle);
-    EXPECT_EQ(inputMap.data.schemes.size(), 2);
+    EXPECT_EQ(inputMap.schemes.size(), 2);
   }
 }

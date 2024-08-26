@@ -20,8 +20,8 @@ void AnimationSystem::prepare(SystemView &view) {
   for (auto [entity, animator] : entityDatabase.view<Animator>()) {
     const auto &animatorAsset = mAssetRegistry.get(animator.asset);
 
-    if (animator.currentState >= animatorAsset.data.states.size()) {
-      animator.currentState = animatorAsset.data.initialState;
+    if (animator.currentState >= animatorAsset.states.size()) {
+      animator.currentState = animatorAsset.initialState;
     }
   }
 }
@@ -32,8 +32,8 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, animator, animatorEvent] :
        entityDatabase.view<Animator, AnimatorEvent>()) {
-    const auto &state = mAssetRegistry.get(animator.asset)
-                            .data.states.at(animator.currentState);
+    const auto &state =
+        mAssetRegistry.get(animator.asset).states.at(animator.currentState);
 
     for (auto &transition : state.transitions) {
       if (transition.eventName == animatorEvent.eventName) {
@@ -51,7 +51,7 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
 
     const auto &animatorAsset = mAssetRegistry.get(animator.asset);
 
-    const auto &state = animatorAsset.data.states.at(animator.currentState);
+    const auto &state = animatorAsset.states.at(animator.currentState);
 
     auto handle = state.animation;
 
@@ -65,8 +65,7 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
       animator.normalizedTime = std::min(
           // Divide delta time by animation time
           // to advance time at a constant speed
-          animator.normalizedTime + (dt * state.speed / animation.data.time),
-          1.0f);
+          animator.normalizedTime + (dt * state.speed / animation.time), 1.0f);
       if (animator.normalizedTime >= 1.0f &&
           state.loopMode == AnimationLoopMode::Linear) {
         animator.normalizedTime = 0.0f;
@@ -75,7 +74,7 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
 
     bool hasSkeleton = entityDatabase.has<Skeleton>(entity);
 
-    for (const auto &sequence : animation.data.keyframes) {
+    for (const auto &sequence : animation.keyframes) {
       if (sequence.jointTarget && hasSkeleton) {
         auto &skeleton = entityDatabase.get<Skeleton>(entity);
         if (sequence.target == KeyframeSequenceAssetTarget::Position) {

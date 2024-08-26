@@ -121,14 +121,14 @@ void AssetManager::generatePreview(const Path &sourceAssetPath,
   auto handle = res.second;
 
   if (res.first == AssetType::Environment) {
-    auto &asset = mAssetCache.getRegistry().get(
+    auto &asset = mAssetCache.getRegistry().getMeta(
         static_cast<quoll::AssetHandle<quoll::EnvironmentAsset>>(handle));
     if (!rhi::isHandleValid(asset.preview)) {
       asset.preview =
           mHDRIImporter.loadFromPathToDevice(sourceAssetPath, renderStorage);
     }
   } else if (res.first == AssetType::Texture) {
-    auto &asset = mAssetCache.getRegistry().get(
+    auto &asset = mAssetCache.getRegistry().getMeta(
         static_cast<quoll::AssetHandle<quoll::TextureAsset>>(handle));
 
     if (!rhi::isHandleValid(asset.preview)) {
@@ -354,7 +354,7 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
     auto res = mAssetCache.loadTexture(uuid);
 
     if (res.hasData()) {
-      auto uuid = mAssetCache.getRegistry().get(res.getData()).uuid;
+      auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
       return Result<UUIDMap>::Ok({{"root", uuid}});
     }
 
@@ -400,7 +400,7 @@ Result<UUIDMap> AssetManager::loadSourceScript(const Path &sourceAssetPath,
   auto res = mAssetCache.loadLuaScript(uuid);
 
   if (res.hasData()) {
-    auto uuid = mAssetCache.getRegistry().get(res.getData()).uuid;
+    auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
     return Result<UUIDMap>::Ok({{"root", uuid}});
   }
 
@@ -418,7 +418,7 @@ Result<UUIDMap> AssetManager::loadSourceFont(const Path &sourceAssetPath,
   auto res = mAssetCache.loadFont(uuid);
 
   if (res.hasData()) {
-    auto uuid = mAssetCache.getRegistry().get(res.getData()).uuid;
+    auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
     return Result<UUIDMap>::Ok({{"root", uuid}});
   }
 
@@ -436,7 +436,7 @@ Result<UUIDMap> AssetManager::loadSourceAnimator(const Path &sourceAssetPath,
   auto res = mAssetCache.loadAnimator(uuid);
 
   if (res.hasData()) {
-    auto uuid = mAssetCache.getRegistry().get(res.getData()).uuid;
+    auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
     return Result<UUIDMap>::Ok({{"root", uuid}});
   }
 
@@ -454,7 +454,7 @@ Result<UUIDMap> AssetManager::loadSourceInputMap(const Path &sourceAssetPath,
   auto res = mAssetCache.loadInputMap(uuid);
 
   if (res.hasData()) {
-    auto uuid = mAssetCache.getRegistry().get(res.getData()).uuid;
+    auto uuid = mAssetCache.getRegistry().getMeta(res.getData()).uuid;
     return Result<UUIDMap>::Ok({{"root", uuid}});
   }
 

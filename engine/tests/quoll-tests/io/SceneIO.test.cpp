@@ -79,7 +79,7 @@ public:
   }
 
   YAML::Node getSceneYaml(quoll::AssetHandle<quoll::SceneAsset> handle) {
-    return assetRegistry.get(handle).data.data;
+    return assetRegistry.get(handle).data;
   }
 
 public:

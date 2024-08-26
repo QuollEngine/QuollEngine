@@ -225,7 +225,7 @@ void loadAnimations(GLTFImportData &importData) {
     auto filePath = assetCache.createAnimationFromAsset(animation);
     auto handle = assetCache.loadAnimation(animation.uuid);
     importData.outputUuids.insert_or_assign(
-        assetName, assetCache.getRegistry().get(handle.getData()).uuid);
+        assetName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
 
     if (!animationValid) {
       continue;
@@ -281,7 +281,7 @@ void loadAnimations(GLTFImportData &importData) {
                                                            handle.getData());
 
     importData.outputUuids.insert_or_assign(
-        animatorName, assetCache.getRegistry().get(handle.getData()).uuid);
+        animatorName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
   }
 
   for (auto &[node, animations] : nodeAnimationMap) {
@@ -318,7 +318,7 @@ void loadAnimations(GLTFImportData &importData) {
     importData.animations.nodeAnimatorMap.insert_or_assign(node,
                                                            handle.getData());
     importData.outputUuids.insert_or_assign(
-        animatorName, assetCache.getRegistry().get(handle.getData()).uuid);
+        animatorName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
   }
 }
 

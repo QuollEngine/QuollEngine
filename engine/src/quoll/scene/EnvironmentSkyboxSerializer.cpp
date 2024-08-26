@@ -15,9 +15,9 @@ void EnvironmentSkyboxSerializer::serialize(YAML::Node &node,
       node["skybox"]["color"] = component.color;
     } else if (component.type == EnvironmentSkyboxType::Texture) {
       if (assetRegistry.has(component.texture)) {
-        const auto &asset = assetRegistry.get(component.texture);
         node["skybox"]["type"] = "texture";
-        node["skybox"]["texture"] = asset.uuid;
+        node["skybox"]["texture"] =
+            assetRegistry.getMeta(component.texture).uuid;
       }
     }
   }

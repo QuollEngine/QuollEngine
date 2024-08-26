@@ -210,18 +210,17 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
 
   auto &actual = cache.getRegistry().get(handle.getData());
 
-  EXPECT_EQ(actual.name, asset.name);
+  EXPECT_EQ(cache.getRegistry().getMeta(handle.getData()).name, asset.name);
 
-  for (usize i = 0; i < actual.data.jointLocalPositions.size(); ++i) {
-    EXPECT_EQ(actual.data.jointLocalPositions.at(i),
+  for (usize i = 0; i < actual.jointLocalPositions.size(); ++i) {
+    EXPECT_EQ(actual.jointLocalPositions.at(i),
               asset.data.jointLocalPositions.at(i));
-    EXPECT_EQ(actual.data.jointLocalRotations.at(i),
+    EXPECT_EQ(actual.jointLocalRotations.at(i),
               asset.data.jointLocalRotations.at(i));
-    EXPECT_EQ(actual.data.jointLocalScales.at(i),
-              asset.data.jointLocalScales.at(i));
-    EXPECT_EQ(actual.data.jointParents.at(i), asset.data.jointParents.at(i));
-    EXPECT_EQ(actual.data.jointInverseBindMatrices.at(i),
+    EXPECT_EQ(actual.jointLocalScales.at(i), asset.data.jointLocalScales.at(i));
+    EXPECT_EQ(actual.jointParents.at(i), asset.data.jointParents.at(i));
+    EXPECT_EQ(actual.jointInverseBindMatrices.at(i),
               asset.data.jointInverseBindMatrices.at(i));
-    EXPECT_EQ(actual.data.jointNames.at(i), asset.data.jointNames.at(i));
+    EXPECT_EQ(actual.jointNames.at(i), asset.data.jointNames.at(i));
   }
 }

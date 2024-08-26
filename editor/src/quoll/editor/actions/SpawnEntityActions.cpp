@@ -31,7 +31,7 @@ static bool isPrefabValid(AssetRegistry &assetRegistry,
     return false;
   }
 
-  const auto &prefab = assetRegistry.get(handle).data;
+  const auto &prefab = assetRegistry.get(handle);
 
   return !prefab.animators.empty() || !prefab.meshes.empty() ||
          !prefab.skeletons.empty() || !prefab.transforms.empty() ||

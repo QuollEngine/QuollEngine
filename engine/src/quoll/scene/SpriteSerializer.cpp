@@ -11,7 +11,7 @@ void SpriteSerializer::serialize(YAML::Node &node,
   if (entityDatabase.has<Sprite>(entity)) {
     auto handle = entityDatabase.get<Sprite>(entity).handle;
     if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.get(handle).uuid;
+      auto uuid = assetRegistry.getMeta(handle).uuid;
 
       node["sprite"] = uuid;
     }

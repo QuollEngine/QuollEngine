@@ -11,7 +11,7 @@ void SkeletonSerializer::serialize(YAML::Node &node,
   if (entityDatabase.has<Skeleton>(entity)) {
     auto handle = entityDatabase.get<Skeleton>(entity).assetHandle;
     if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.get(handle).uuid;
+      auto uuid = assetRegistry.getMeta(handle).uuid;
 
       node["skeleton"] = uuid;
     }
@@ -27,7 +27,7 @@ void SkeletonSerializer::deserialize(const YAML::Node &node,
     auto handle = assetRegistry.findHandleByUuid<SkeletonAsset>(uuid);
 
     if (handle) {
-      const auto &skeleton = assetRegistry.get(handle).data;
+      const auto &skeleton = assetRegistry.get(handle);
 
       Skeleton skeletonComponent{};
       skeletonComponent.jointLocalPositions = skeleton.jointLocalPositions;

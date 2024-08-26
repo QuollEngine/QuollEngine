@@ -122,15 +122,19 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   EXPECT_FALSE(handle.hasError());
   EXPECT_NE(handle.getData(), quoll::AssetHandle<quoll::AnimationAsset>());
 
-  auto &actual = cache.getRegistry().get(handle.getData());
-  EXPECT_EQ(actual.name, asset.name);
-  EXPECT_EQ(actual.type, quoll::AssetType::Animation);
+  {
+    auto &actual = cache.getRegistry().getMeta(handle.getData());
+    EXPECT_EQ(actual.name, asset.name);
+    EXPECT_EQ(actual.type, quoll::AssetType::Animation);
+  }
 
-  EXPECT_EQ(actual.data.time, asset.data.time);
-  EXPECT_EQ(actual.data.keyframes.size(), asset.data.keyframes.size());
+  auto &actual = cache.getRegistry().get(handle.getData());
+
+  EXPECT_EQ(actual.time, asset.data.time);
+  EXPECT_EQ(actual.keyframes.size(), asset.data.keyframes.size());
   for (usize i = 0; i < asset.data.keyframes.size(); ++i) {
     auto &expectedKf = asset.data.keyframes.at(i);
-    auto &actualKf = actual.data.keyframes.at(i);
+    auto &actualKf = actual.keyframes.at(i);
 
     EXPECT_EQ(expectedKf.target, actualKf.target);
     EXPECT_EQ(expectedKf.interpolation, actualKf.interpolation);
