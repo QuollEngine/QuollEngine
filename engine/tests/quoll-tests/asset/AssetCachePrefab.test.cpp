@@ -675,24 +675,24 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   EXPECT_NE(newPrefab.data.meshes.at(0).value,
             quoll::AssetHandle<quoll::MeshAsset>());
   auto &newMesh = cache.getRegistry().get(newPrefab.data.meshes.at(0).value);
-  EXPECT_EQ(newMesh.path, meshPath);
+  EXPECT_EQ(newMesh.uuid, meshData.uuid);
 
   // Validate skeleton
   EXPECT_NE(newPrefab.data.skeletons.at(0).value,
             quoll::AssetHandle<quoll::SkeletonAsset>());
   auto &newSkeleton =
       cache.getRegistry().get(newPrefab.data.skeletons.at(0).value);
-  EXPECT_EQ(newSkeleton.path, skeletonPath);
+  EXPECT_EQ(newSkeleton.uuid, skeletonData.uuid);
 
   // Validate animation
   auto newAnimationHandle = newPrefab.data.animations.at(0);
   EXPECT_NE(newAnimationHandle, quoll::AssetHandle<quoll::AnimationAsset>());
   auto &newAnimation = cache.getRegistry().get(newAnimationHandle);
-  EXPECT_EQ(newAnimation.path, animationPath);
+  EXPECT_EQ(newAnimation.uuid, animationData.uuid);
 
   // Validate animator
   auto newAnimatorHandle = newPrefab.data.animators.at(0).value;
   EXPECT_NE(newAnimatorHandle, quoll::AssetHandle<quoll::AnimatorAsset>());
   auto &newAnimator = cache.getRegistry().get(newAnimatorHandle);
-  EXPECT_EQ(newAnimator.path, animatorPath);
+  EXPECT_EQ(newAnimator.uuid, animatorData.uuid);
 }

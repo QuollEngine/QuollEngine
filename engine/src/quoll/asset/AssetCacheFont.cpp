@@ -53,7 +53,6 @@ Result<AssetHandle<FontAsset>> AssetCache::loadFont(const Uuid &uuid) {
   auto &data = res.getData();
   data.type = AssetType::Font;
   data.name = meta.name;
-  data.path = filePath;
   data.uuid = Uuid(filePath.stem().string());
 
   auto handle = mRegistry.add(data);

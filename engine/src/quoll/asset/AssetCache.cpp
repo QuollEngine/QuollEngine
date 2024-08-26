@@ -84,7 +84,6 @@ AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
 
 Result<bool> AssetCache::loadAsset(const Path &path) {
   auto uuid = Uuid(path.stem().string());
-
   auto meta = getAssetMeta(uuid);
 
   if (meta.type == AssetType::Texture) {
@@ -260,7 +259,7 @@ Result<Path> AssetCache::createAssetMeta(AssetType type, String name,
   return Result<Path>::Ok(metaPath);
 }
 
-Path AssetCache::getPathFromUuid(const Uuid &uuid) {
+Path AssetCache::getPathFromUuid(const Uuid &uuid) const {
   return (mAssetsPath / uuid.toString()).replace_extension("asset");
 }
 

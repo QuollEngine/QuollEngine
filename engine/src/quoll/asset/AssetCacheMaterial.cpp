@@ -71,7 +71,6 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   AssetData<MaterialAsset> material{};
   material.name = header.name;
-  material.path = filePath;
   material.uuid = Uuid(filePath.stem().string());
   material.type = AssetType::Material;
   std::vector<String> warnings{};

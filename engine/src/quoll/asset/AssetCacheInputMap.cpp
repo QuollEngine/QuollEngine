@@ -241,7 +241,6 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
   AssetData<InputMapAsset> asset{};
   asset.type = AssetType::InputMap;
   asset.name = meta.name;
-  asset.path = filePath;
   asset.uuid = Uuid(filePath.stem().string());
 
   asset.data.schemes.reserve(root["schemes"].size());

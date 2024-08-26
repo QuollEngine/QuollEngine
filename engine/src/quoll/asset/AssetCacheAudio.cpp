@@ -71,7 +71,6 @@ Result<AssetHandle<AudioAsset>> AssetCache::loadAudio(const Uuid &uuid) {
 
   AssetData<AudioAsset> asset;
   asset.name = meta.name;
-  asset.path = filePath;
   asset.uuid = Uuid(filePath.stem().string());
   asset.type = AssetType::Audio;
   asset.data.bytes = bytes;

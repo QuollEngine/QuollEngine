@@ -155,7 +155,6 @@ AssetData<MeshAsset> createCube() {
 
   AssetData<MeshAsset> mesh;
   mesh.name = "Cube";
-  mesh.path = "quoll::engine/meshes/cube";
   mesh.uuid = Uuid("quoll::engine/meshes/cube");
   mesh.data.geometries.push_back(geometry);
 
@@ -167,7 +166,6 @@ AssetData<MeshAsset> createCube() {
 AssetData<MaterialAsset> createDefaultMaterial() {
   AssetData<MaterialAsset> material;
   material.name = "Default material";
-  material.path = "quoll::engine/materials/default";
   material.uuid = Uuid("quoll::engine/materials/default");
 
   return material;
@@ -180,7 +178,6 @@ AssetData<FontAsset> createDefaultFont() {
       loader.loadFontData(Engine::getFontsPath() / "Roboto-Regular.ttf");
 
   font.getData().name = "Roboto (default)";
-  font.getData().path = "quoll::engine/fonts/Roboto-Regular";
   font.getData().uuid = Uuid("quoll::engine/fonts/Roboto-Regular");
 
   return font.getData();
