@@ -28,7 +28,7 @@ Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
   return assetPath;
 }
 
-Result<AssetHandle<SceneAsset>> AssetCache::loadScene(const Uuid &uuid) {
+Result<SceneAsset> AssetCache::loadScene(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -55,16 +55,7 @@ Result<AssetHandle<SceneAsset>> AssetCache::loadScene(const Uuid &uuid) {
     return Error("`entities` field is invalid");
   }
 
-  auto meta = getAssetMeta(uuid);
-
-  AssetData<SceneAsset> asset{};
-  asset.type = AssetType::Scene;
-  asset.name = meta.name;
-  asset.uuid = Uuid(filePath.stem().string());
-  asset.data.data = root;
-
-  auto handle = mRegistry.add(asset);
-  return handle;
+  return SceneAsset{.data = root};
 }
 
 } // namespace quoll

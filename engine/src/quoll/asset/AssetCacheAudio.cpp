@@ -41,7 +41,7 @@ Result<Path> AssetCache::createAudioFromSource(const Path &sourcePath,
   return assetPath;
 }
 
-Result<AssetHandle<AudioAsset>> AssetCache::loadAudio(const Uuid &uuid) {
+Result<AudioAsset> AssetCache::loadAudio(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   auto ext = filePath.extension().string();
@@ -67,13 +67,10 @@ Result<AssetHandle<AudioAsset>> AssetCache::loadAudio(const Uuid &uuid) {
 
   auto meta = getAssetMeta(uuid);
 
-  AssetData<AudioAsset> asset;
-  asset.name = meta.name;
-  asset.uuid = Uuid(filePath.stem().string());
-  asset.type = AssetType::Audio;
-  asset.data.bytes = bytes;
+  AudioAsset asset;
+  asset.bytes = bytes;
 
-  return mRegistry.add(asset);
+  return asset;
 }
 
 } // namespace quoll

@@ -90,7 +90,7 @@ void loadMaterials(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createMaterialFromAsset(material);
-    auto handle = assetCache.loadMaterial(material.uuid);
+    auto handle = assetCache.load<quoll::MaterialAsset>(material.uuid);
     importData.materials.map.insert_or_assign(i, handle);
 
     importData.outputUuids.insert_or_assign(

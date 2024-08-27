@@ -223,7 +223,7 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto filePath = assetCache.createAnimationFromAsset(animation);
-    auto handle = assetCache.loadAnimation(animation.uuid);
+    auto handle = assetCache.load<quoll::AnimationAsset>(animation.uuid);
     importData.outputUuids.insert_or_assign(
         assetName, assetCache.getRegistry().getMeta(handle.data()).uuid);
 
@@ -276,7 +276,7 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createAnimatorFromAsset(asset);
-    auto handle = assetCache.loadAnimator(asset.uuid);
+    auto handle = assetCache.load<quoll::AnimatorAsset>(asset.uuid);
     importData.animations.skinAnimatorMap.insert_or_assign(skin, handle);
 
     importData.outputUuids.insert_or_assign(
@@ -313,7 +313,7 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createAnimatorFromAsset(asset);
-    auto handle = assetCache.loadAnimator(asset.uuid);
+    auto handle = assetCache.load<quoll::AnimatorAsset>(asset.uuid);
     importData.animations.nodeAnimatorMap.insert_or_assign(node, handle);
     importData.outputUuids.insert_or_assign(
         animatorName, assetCache.getRegistry().getMeta(handle.data()).uuid);

@@ -45,7 +45,7 @@ LuaScriptingInterfaceTestBase::loadScript(quoll::String scriptName) {
   auto uuid = quoll::Uuid::generate();
   assetCache.createLuaScriptFromSource(FixturesPath / scriptName, uuid);
 
-  auto res = assetCache.loadLuaScript(uuid);
+  auto res = assetCache.load<quoll::LuaScriptAsset>(uuid);
   QuollAssert(res, "Error loading script");
   return res;
 }

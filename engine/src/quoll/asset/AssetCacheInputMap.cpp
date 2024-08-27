@@ -96,7 +96,7 @@ static Result<void> checkAxis2d(YAML::Node node) {
   return Error("Invalid binding item value");
 }
 
-Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
+Result<InputMapAsset> AssetCache::loadInputMap(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -216,21 +216,15 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
   }
 
   // Load
-  auto meta = getAssetMeta(uuid);
-
-  AssetData<InputMapAsset> asset{};
-  asset.type = AssetType::InputMap;
-  asset.name = meta.name;
-  asset.uuid = Uuid(filePath.stem().string());
-
-  asset.data.schemes.reserve(root["schemes"].size());
-  asset.data.commands.reserve(root["commands"].size());
-  asset.data.bindings.reserve(root["bindings"].size());
+  InputMapAsset asset{};
+  asset.schemes.reserve(root["schemes"].size());
+  asset.commands.reserve(root["commands"].size());
+  asset.bindings.reserve(root["bindings"].size());
 
   for (auto node : root["schemes"]) {
     InputMapScheme scheme{};
     scheme.name = node["name"].as<String>("");
-    asset.data.schemes.push_back(scheme);
+    asset.schemes.push_back(scheme);
   }
 
   for (auto node : root["commands"]) {
@@ -244,7 +238,7 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
       command.type = InputDataType::Boolean;
     }
 
-    asset.data.commands.push_back(command);
+    asset.commands.push_back(command);
   }
 
   for (auto node : root["bindings"]) {
@@ -252,7 +246,7 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
     binding.command = node["command"].as<usize>(0);
     binding.scheme = node["scheme"].as<usize>(0);
 
-    auto &command = asset.data.commands.at(binding.command);
+    auto &command = asset.commands.at(binding.command);
 
     if (node["binding"].IsNull()) {
       binding.value = -1;
@@ -284,19 +278,10 @@ Result<AssetHandle<InputMapAsset>> AssetCache::loadInputMap(const Uuid &uuid) {
     if (command.type == InputDataType::Boolean) {
     }
 
-    asset.data.bindings.push_back(binding);
+    asset.bindings.push_back(binding);
   }
 
-  auto handle = mRegistry.findHandleByUuid<InputMapAsset>(uuid);
-
-  if (!handle) {
-    auto newHandle = mRegistry.add(asset);
-    return newHandle;
-  }
-
-  mRegistry.update(handle, asset);
-
-  return handle;
+  return asset;
 }
 
 Result<Path> AssetCache::createInputMapFromSource(const Path &sourcePath,

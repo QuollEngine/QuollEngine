@@ -349,7 +349,7 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
       return createRes.error();
     }
 
-    auto res = mAssetCache.loadTexture(uuid);
+    auto res = mAssetCache.load<quoll::TextureAsset>(uuid);
 
     if (res) {
       auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
@@ -378,7 +378,7 @@ Result<UUIDMap> AssetManager::loadSourceAudio(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.loadAudio(uuid);
+  auto res = mAssetCache.load<quoll::AudioAsset>(uuid);
 
   if (res) {
     return UUIDMap{{"root", uuid}};
@@ -395,7 +395,7 @@ Result<UUIDMap> AssetManager::loadSourceScript(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.loadLuaScript(uuid);
+  auto res = mAssetCache.load<quoll::LuaScriptAsset>(uuid);
 
   if (res) {
     auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
@@ -413,7 +413,7 @@ Result<UUIDMap> AssetManager::loadSourceFont(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.loadFont(uuid);
+  auto res = mAssetCache.load<quoll::FontAsset>(uuid);
 
   if (res) {
     auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
@@ -431,7 +431,7 @@ Result<UUIDMap> AssetManager::loadSourceAnimator(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.loadAnimator(uuid);
+  auto res = mAssetCache.load<quoll::AnimatorAsset>(uuid);
 
   if (res) {
     auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
@@ -449,7 +449,7 @@ Result<UUIDMap> AssetManager::loadSourceInputMap(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.loadInputMap(uuid);
+  auto res = mAssetCache.load<quoll::InputMapAsset>(uuid);
 
   if (res) {
     auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
@@ -478,7 +478,7 @@ Result<UUIDMap> AssetManager::loadSourceScene(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.loadScene(uuid);
+  auto res = mAssetCache.load<quoll::SceneAsset>(uuid);
 
   if (res) {
     return UUIDMap{{"root", uuid}};

@@ -204,7 +204,7 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   }
 
   auto filePath = cache.createSkeletonFromAsset(asset);
-  auto handle = cache.loadSkeleton(asset.uuid);
+  auto handle = cache.load<quoll::SkeletonAsset>(asset.uuid);
 
   EXPECT_NE(handle, quoll::AssetHandle<quoll::SkeletonAsset>());
 

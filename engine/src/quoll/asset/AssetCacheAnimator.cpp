@@ -100,7 +100,7 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
   return assetPath;
 }
 
-Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
+Result<AnimatorAsset> AssetCache::loadAnimator(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -121,10 +121,7 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
 
   auto meta = getAssetMeta(uuid);
 
-  AssetData<AnimatorAsset> asset{};
-  asset.type = AssetType::Animator;
-  asset.name = meta.name;
-  asset.uuid = Uuid(filePath.stem().string());
+  AnimatorAsset asset{};
 
   std::vector<String> warnings;
 
@@ -147,7 +144,7 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
     if (output["type"] && output["type"].as<String>("") == "animation") {
       auto animation = output["animation"].as<Uuid>(Uuid{});
       if (!animation.isEmpty()) {
-        auto res = getOrLoadAnimation(animation);
+        auto res = getOrLoad<AnimationAsset>(animation);
         if (res) {
           state.animation = res;
         }
@@ -167,11 +164,11 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
     }
 
     transitionNodes.push_back(stateNode["on"]);
-    asset.data.states.push_back(state);
+    asset.states.push_back(state);
   }
 
   for (usize i = 0; i < transitionNodes.size(); ++i) {
-    auto &state = asset.data.states.at(i);
+    auto &state = asset.states.at(i);
     auto &stateOn = transitionNodes.at(i);
     if (!stateOn || !stateOn.IsSequence()) {
       continue;
@@ -221,12 +218,11 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
 
       auto target = transitionNode["target"].as<String>("");
       usize i = 0;
-      for (; i < asset.data.states.size() &&
-             asset.data.states.at(i).name != target;
+      for (; i < asset.states.size() && asset.states.at(i).name != target;
            ++i) {
       }
 
-      if (i < asset.data.states.size()) {
+      if (i < asset.states.size()) {
         AnimationStateTransition transition{};
         transition.eventName = transitionNode["event"].as<String>("");
         transition.target = i;
@@ -238,10 +234,10 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
     }
   }
 
-  if (asset.data.states.empty()) {
+  if (asset.states.empty()) {
     AnimationState dummyState{};
     dummyState.name = "INITIAL";
-    asset.data.states.push_back(dummyState);
+    asset.states.push_back(dummyState);
     warnings.push_back(
         "Dummy state added because no valid states in the state machine");
   }
@@ -249,44 +245,19 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
   if (root["initial"]) {
     auto initial = root["initial"].as<String>("");
     usize i = 0;
-    for (; i < asset.data.states.size() &&
-           asset.data.states.at(i).name != initial;
-         ++i) {
+    for (; i < asset.states.size() && asset.states.at(i).name != initial; ++i) {
     }
 
-    if (i < asset.data.states.size()) {
-      asset.data.initialState = i;
+    if (i < asset.states.size()) {
+      asset.initialState = i;
     } else {
-      asset.data.initialState = 0;
+      asset.initialState = 0;
       warnings.push_back(
           "Initial state is set to first item because it was invalid");
     }
   }
 
-  auto handle = mRegistry.findHandleByUuid<AnimatorAsset>(uuid);
-
-  if (!handle) {
-    auto newHandle = mRegistry.add(asset);
-    return {newHandle, warnings};
-  }
-
-  mRegistry.update(handle, asset);
-
-  return {handle, warnings};
-}
-
-Result<AssetHandle<AnimatorAsset>>
-AssetCache::getOrLoadAnimator(const Uuid &uuid) {
-  if (uuid.isEmpty()) {
-    return AssetHandle<AnimatorAsset>();
-  }
-
-  auto handle = mRegistry.findHandleByUuid<AnimatorAsset>(uuid);
-  if (handle) {
-    return handle;
-  }
-
-  return loadAnimator(uuid);
+  return {asset, warnings};
 }
 
 } // namespace quoll

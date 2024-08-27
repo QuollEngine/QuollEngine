@@ -35,17 +35,15 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
   return assetPath;
 }
 
-Result<AssetHandle<EnvironmentAsset>>
-AssetCache::loadEnvironmentDataFromInputStream(const Path &path,
-                                               const Uuid &uuid,
-                                               const AssetMeta &meta) {
+Result<EnvironmentAsset>
+AssetCache::loadEnvironmentDataFromInputStream(const Path &path) {
   InputBinaryStream stream(path);
 
   AssetFileHeader header;
   stream.read(header);
   if (header.magic != AssetFileHeader::MagicConstant ||
       header.type != AssetType::Environment) {
-    return Result<AssetHandle<EnvironmentAsset>>(Error("Invalid file format"));
+    return Error("Invalid file format");
   }
 
   Uuid irradianceMapUuid;
@@ -54,37 +52,30 @@ AssetCache::loadEnvironmentDataFromInputStream(const Path &path,
   Uuid specularMapUuid;
   stream.read(specularMapUuid);
 
-  auto irradianceMapRes = getOrLoadTexture(irradianceMapUuid);
+  auto irradianceMapRes = getOrLoad<TextureAsset>(irradianceMapUuid);
   if (!irradianceMapRes) {
     return irradianceMapRes.error();
   }
 
-  auto specularMapRes = getOrLoadTexture(specularMapUuid);
+  auto specularMapRes = getOrLoad<TextureAsset>(specularMapUuid);
   if (!specularMapRes) {
     mRegistry.remove(irradianceMapRes.data());
     return specularMapRes.error();
   }
 
-  AssetData<EnvironmentAsset> environment{};
-  environment.name = meta.name;
-  environment.uuid = uuid;
-  environment.type = AssetType::Environment;
-  environment.data.irradianceMap = irradianceMapRes;
-  environment.data.specularMap = specularMapRes;
-
-  auto environmentHandle = mRegistry.add(environment);
-
-  return environmentHandle;
+  EnvironmentAsset environment{};
+  environment.irradianceMap = irradianceMapRes;
+  environment.specularMap = specularMapRes;
+  return environment;
 }
 
-Result<AssetHandle<EnvironmentAsset>>
-AssetCache::loadEnvironment(const Uuid &uuid) {
+Result<EnvironmentAsset> AssetCache::loadEnvironment(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Environment) {
     return Error("Asset type is not environment");
   }
 
-  return loadEnvironmentDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
+  return loadEnvironmentDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

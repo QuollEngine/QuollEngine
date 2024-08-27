@@ -172,7 +172,7 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   return assetPath;
 }
 
-Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
+Result<TextureAsset> AssetCache::loadTexture(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
   std::ifstream stream(filePath, std::ios::binary);
   if (!stream.good()) {
@@ -206,31 +206,28 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
 
   auto meta = getAssetMeta(uuid);
 
-  AssetData<TextureAsset> texture{};
-  texture.name = meta.name;
-  texture.uuid = Uuid(filePath.stem().string());
-  texture.type = AssetType::Texture;
-  texture.data.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
-  texture.data.data.resize(texture.data.size);
-  texture.data.width = ktxTextureData->baseWidth;
-  texture.data.height = ktxTextureData->baseHeight;
-  texture.data.layers = ktxTextureData->numLayers *
-                        (ktxTextureData->isCubemap ? CubemapSides : 1);
-  texture.data.type = ktxTextureData->isCubemap ? TextureAssetType::Cubemap
-                                                : TextureAssetType::Standard;
-  texture.data.format =
+  TextureAsset texture{};
+  texture.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
+  texture.data.resize(texture.size);
+  texture.width = ktxTextureData->baseWidth;
+  texture.height = ktxTextureData->baseHeight;
+  texture.layers = ktxTextureData->numLayers *
+                   (ktxTextureData->isCubemap ? CubemapSides : 1);
+  texture.type = ktxTextureData->isCubemap ? TextureAssetType::Cubemap
+                                           : TextureAssetType::Standard;
+  texture.format =
       getFormatFromVulkanFormat(ktxTexture_GetVkFormat(ktxTextureData));
-  texture.data.levels.resize(ktxTextureData->numLevels);
+  texture.levels.resize(ktxTextureData->numLevels);
 
   auto *srcData = ktxTexture_GetData(ktxTextureData);
 
   usize numFaces = ktxTextureData->isCubemap ? CubemapSides : 1;
 
   usize levelOffset = 0;
-  u32 mipWidth = texture.data.width;
-  u32 mipHeight = texture.data.height;
+  u32 mipWidth = texture.width;
+  u32 mipHeight = texture.height;
 
-  for (usize level = 0; level < texture.data.levels.size(); ++level) {
+  for (usize level = 0; level < texture.levels.size(); ++level) {
     // ktsTexture_GetImageSize returns size of a
     // single face or layer within a level
     usize blockSize =
@@ -238,10 +235,10 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
 
     usize levelSize = blockSize * numFaces;
 
-    texture.data.levels.at(level).offset = static_cast<u32>(levelOffset);
-    texture.data.levels.at(level).size = static_cast<u32>(levelSize);
-    texture.data.levels.at(level).width = mipWidth;
-    texture.data.levels.at(level).height = mipHeight;
+    texture.levels.at(level).offset = static_cast<u32>(levelOffset);
+    texture.levels.at(level).size = static_cast<u32>(levelSize);
+    texture.levels.at(level).width = mipWidth;
+    texture.levels.at(level).height = mipHeight;
 
     if (mipWidth > 1) {
       mipWidth /= 2;
@@ -256,7 +253,7 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
       ktxTexture_GetImageOffset(ktxTextureData, static_cast<i32>(level), 0,
                                 static_cast<u32>(face), &offset);
 
-      memcpy(static_cast<u8 *>(texture.data.data.data()) + levelOffset +
+      memcpy(static_cast<u8 *>(texture.data.data()) + levelOffset +
                  (blockSize * face),
              srcData + offset, blockSize);
     }
@@ -265,21 +262,7 @@ Result<AssetHandle<TextureAsset>> AssetCache::loadTexture(const Uuid &uuid) {
 
   ktxTexture_Destroy(ktxTextureData);
 
-  return mRegistry.add(texture);
-}
-
-Result<AssetHandle<TextureAsset>>
-AssetCache::getOrLoadTexture(const Uuid &uuid) {
-  if (uuid.isEmpty()) {
-    return AssetHandle<TextureAsset>();
-  }
-
-  auto handle = mRegistry.findHandleByUuid<TextureAsset>(uuid);
-  if (handle) {
-    return handle;
-  }
-
-  return loadTexture(uuid);
+  return texture;
 }
 
 } // namespace quoll

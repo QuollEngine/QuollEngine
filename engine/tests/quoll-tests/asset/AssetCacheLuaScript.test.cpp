@@ -11,7 +11,7 @@ public:
     auto uuid = quoll::Uuid::generate();
     auto cachePath = cache.createLuaScriptFromSource(sourcePath, uuid);
 
-    return cache.loadLuaScript(uuid);
+    return cache.load<quoll::LuaScriptAsset>(uuid);
   }
 };
 
@@ -34,7 +34,7 @@ TEST_F(AssetCacheLuaScriptTest, CreateLuaScriptFromSource) {
 }
 
 TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfFileCannotBeOpened) {
-  auto result = cache.loadLuaScript(quoll::Uuid::generate());
+  auto result = cache.load<quoll::LuaScriptAsset>(quoll::Uuid::generate());
   EXPECT_FALSE(result);
 }
 
@@ -105,7 +105,7 @@ TEST_F(AssetCacheLuaScriptTest,
   auto filePath = cache.createLuaScriptFromSource(
       FixturesPath / "component-script.lua", uuid1);
 
-  auto result = cache.loadLuaScript(uuid1);
+  auto result = cache.load<quoll::LuaScriptAsset>(uuid1);
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_TRUE(result);
 
@@ -120,7 +120,7 @@ TEST_F(AssetCacheLuaScriptTest,
                                   uuid1);
 
   {
-    auto result = cache.loadLuaScript(uuid1);
+    auto result = cache.load<quoll::LuaScriptAsset>(uuid1);
     EXPECT_EQ(result, handle);
     const auto &scriptMeta = cache.getRegistry().getMeta(handle.data());
     EXPECT_EQ(scriptMeta.type, quoll::AssetType::LuaScript);

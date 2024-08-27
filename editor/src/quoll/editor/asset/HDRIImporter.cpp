@@ -147,7 +147,7 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
     return createdFileRes.error();
   }
 
-  auto loadRes = mAssetCache.loadEnvironment(environment.uuid);
+  auto loadRes = mAssetCache.load<EnvironmentAsset>(environment.uuid);
   if (!loadRes) {
     return loadRes.error();
   }
@@ -383,7 +383,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
     return createdFileRes.error();
   }
 
-  return mAssetCache.loadTexture(asset.uuid);
+  return mAssetCache.load<quoll::TextureAsset>(asset.uuid);
 }
 
 Result<AssetHandle<TextureAsset>>
@@ -477,7 +477,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
     return createdFileRes.error();
   }
 
-  return mAssetCache.loadTexture(asset.uuid);
+  return mAssetCache.load<quoll::TextureAsset>(asset.uuid);
 }
 
 } // namespace quoll::editor

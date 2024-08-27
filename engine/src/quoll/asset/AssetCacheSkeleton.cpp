@@ -44,9 +44,8 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   return assetPath;
 }
 
-Result<AssetHandle<SkeletonAsset>>
-AssetCache::loadSkeletonDataFromInputStream(const Path &path, const Uuid &uuid,
-                                            const AssetMeta &meta) {
+Result<SkeletonAsset>
+AssetCache::loadSkeletonDataFromInputStream(const Path &path) {
   InputBinaryStream stream(path);
   AssetFileHeader header;
   stream.read(header);
@@ -55,52 +54,35 @@ AssetCache::loadSkeletonDataFromInputStream(const Path &path, const Uuid &uuid,
     return Error("Invalid file format");
   }
 
-  AssetData<SkeletonAsset> skeleton{};
-  skeleton.type = AssetType::Skeleton;
-  skeleton.uuid = uuid;
-  skeleton.name = meta.name;
+  SkeletonAsset skeleton{};
 
   u32 numJoints = 0;
   stream.read(numJoints);
 
-  skeleton.data.jointLocalPositions.resize(numJoints);
-  skeleton.data.jointLocalRotations.resize(numJoints);
-  skeleton.data.jointLocalScales.resize(numJoints);
-  skeleton.data.jointParents.resize(numJoints);
-  skeleton.data.jointInverseBindMatrices.resize(numJoints);
-  skeleton.data.jointNames.resize(numJoints);
+  skeleton.jointLocalPositions.resize(numJoints);
+  skeleton.jointLocalRotations.resize(numJoints);
+  skeleton.jointLocalScales.resize(numJoints);
+  skeleton.jointParents.resize(numJoints);
+  skeleton.jointInverseBindMatrices.resize(numJoints);
+  skeleton.jointNames.resize(numJoints);
 
-  stream.read(skeleton.data.jointLocalPositions);
-  stream.read(skeleton.data.jointLocalRotations);
-  stream.read(skeleton.data.jointLocalScales);
-  stream.read(skeleton.data.jointParents);
-  stream.read(skeleton.data.jointInverseBindMatrices);
-  stream.read(skeleton.data.jointNames);
+  stream.read(skeleton.jointLocalPositions);
+  stream.read(skeleton.jointLocalRotations);
+  stream.read(skeleton.jointLocalScales);
+  stream.read(skeleton.jointParents);
+  stream.read(skeleton.jointInverseBindMatrices);
+  stream.read(skeleton.jointNames);
 
-  return mRegistry.add(skeleton);
+  return skeleton;
 }
 
-Result<AssetHandle<SkeletonAsset>> AssetCache::loadSkeleton(const Uuid &uuid) {
+Result<SkeletonAsset> AssetCache::loadSkeleton(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Skeleton) {
     return Error("Asset type is not skeleton");
   }
 
-  return loadSkeletonDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
-}
-
-Result<AssetHandle<SkeletonAsset>>
-AssetCache::getOrLoadSkeleton(const Uuid &uuid) {
-  if (uuid.isEmpty()) {
-    return AssetHandle<SkeletonAsset>();
-  }
-
-  auto handle = mRegistry.findHandleByUuid<SkeletonAsset>(uuid);
-  if (handle) {
-    return handle;
-  }
-
-  return loadSkeleton(uuid);
+  return loadSkeletonDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll
