@@ -505,7 +505,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 
-      const auto &data = assetRegistry.get(handle).data;
+      const auto &data = assetRegistry.get(handle);
       frameData.addMeshOutline(data, world.worldTransform);
     } else if (entityDatabase.has<SkinnedMesh>(state.selectedEntity) &&
                entityDatabase.has<Skeleton>(state.selectedEntity)) {
@@ -514,7 +514,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
-      const auto &data = assetRegistry.get(handle).data;
+      const auto &data = assetRegistry.get(handle);
 
       const auto &skeleton = entityDatabase.get<Skeleton>(state.selectedEntity)
                                  .jointFinalTransforms;
@@ -522,7 +522,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       frameData.addSkinnedMeshOutline(data, skeleton, world.worldTransform);
     } else if (entityDatabase.has<Text>(state.selectedEntity)) {
       const auto &text = entityDatabase.get<Text>(state.selectedEntity);
-      const auto &font = assetRegistry.get(text.font).data;
+      const auto &font = assetRegistry.get(text.font);
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 

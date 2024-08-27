@@ -35,11 +35,11 @@ EntitySpawnerLuaTable::spawnPrefab(AssetHandleType handle) {
     return sol::nil;
   }
 
-  if (isPrefabEmpty(mScriptGlobals.assetRegistry.get(prefab).data)) {
+  if (isPrefabEmpty(mScriptGlobals.assetRegistry.get(prefab))) {
     Engine::getUserLogger().warning()
         << lua::Messages::nothingSpawnedBecauseEmptyPrefab(
                "EntitySpawner", "spawnPrefab",
-               mScriptGlobals.assetRegistry.get(prefab).name);
+               mScriptGlobals.assetRegistry.getMeta(prefab).name);
 
     return sol::nil;
   }

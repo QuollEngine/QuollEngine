@@ -59,8 +59,8 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
                                                LocalTransform transform) {
   QuollAssert(mAssetRegistry.has(handle), "Prefab not found");
 
-  const auto &assetName = mAssetRegistry.get(handle).name;
-  const auto &asset = mAssetRegistry.get(handle).data;
+  const auto &assetName = mAssetRegistry.getMeta(handle).name;
+  const auto &asset = mAssetRegistry.get(handle);
 
   std::unordered_map<u32, usize> entityMap;
   std::vector<Entity> entities;
@@ -114,7 +114,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
   for (const auto &pMesh : asset.meshes) {
     auto entity = getOrCreateEntity(pMesh.entity);
 
-    auto type = mAssetRegistry.get(pMesh.value).type;
+    auto type = mAssetRegistry.getMeta(pMesh.value).type;
     if (type == AssetType::Mesh) {
       mEntityDatabase.set<Mesh>(entity, {pMesh.value});
     } else if (type == AssetType::SkinnedMesh) {
@@ -135,7 +135,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
   for (const auto &pSkeleton : asset.skeletons) {
     auto entity = getOrCreateEntity(pSkeleton.entity);
 
-    const auto &asset = mAssetRegistry.get(pSkeleton.value).data;
+    const auto &asset = mAssetRegistry.get(pSkeleton.value);
 
     usize numJoints = asset.jointLocalPositions.size();
 
@@ -170,7 +170,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
 
     Animator animator{};
     animator.asset = item.value;
-    animator.currentState = asset.data.initialState;
+    animator.currentState = asset.initialState;
     mEntityDatabase.set(entity, animator);
   }
 
@@ -219,7 +219,7 @@ Entity EntitySpawner::spawnSprite(AssetHandle<TextureAsset> handle,
                                   LocalTransform transform) {
   auto entity = mEntityDatabase.create();
 
-  auto name = mAssetRegistry.get(handle).name;
+  auto name = mAssetRegistry.getMeta(handle).name;
 
   mEntityDatabase.set(entity, transform);
   mEntityDatabase.set<WorldTransform>(entity, {});

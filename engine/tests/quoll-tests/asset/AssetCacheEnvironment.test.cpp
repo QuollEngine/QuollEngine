@@ -135,10 +135,9 @@ TEST_F(AssetCacheEnvironmentTest,
   EXPECT_GT(cache.getRegistry().count<quoll::EnvironmentAsset>(), 0);
 
   const auto &environment = cache.getRegistry().get(res.getData());
-  EXPECT_NE(environment.data.irradianceMap,
+  EXPECT_NE(environment.irradianceMap,
             quoll::AssetHandle<quoll::TextureAsset>());
-  EXPECT_NE(environment.data.specularMap,
-            quoll::AssetHandle<quoll::TextureAsset>());
+  EXPECT_NE(environment.specularMap, quoll::AssetHandle<quoll::TextureAsset>());
 }
 
 TEST_F(AssetCacheEnvironmentTest,
@@ -166,6 +165,6 @@ TEST_F(AssetCacheEnvironmentTest,
 
   const auto &environment = cache.getRegistry().get(res.getData());
 
-  EXPECT_EQ(environment.data.irradianceMap, irradianceMap);
-  EXPECT_EQ(environment.data.specularMap, specularMap);
+  EXPECT_EQ(environment.irradianceMap, irradianceMap);
+  EXPECT_EQ(environment.specularMap, specularMap);
 }

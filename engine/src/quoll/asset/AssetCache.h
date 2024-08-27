@@ -95,7 +95,7 @@ private:
   template <typename TAssetData>
   Uuid getAssetUuid(AssetHandle<TAssetData> handle) {
     if (handle) {
-      return mRegistry.get<TAssetData>(handle).uuid;
+      return mRegistry.getMeta<TAssetData>(handle).uuid;
     }
 
     return Uuid{};

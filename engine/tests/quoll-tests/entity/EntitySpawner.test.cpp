@@ -317,7 +317,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     const auto &animator = db.get<quoll::Animator>(entity);
     EXPECT_NE(animator.asset, quoll::AssetHandle<quoll::AnimatorAsset>());
     EXPECT_EQ(animator.currentState, i);
-    EXPECT_EQ(assetRegistry.get(animator.asset).data.initialState,
+    EXPECT_EQ(assetRegistry.get(animator.asset).initialState,
               animator.currentState);
     EXPECT_EQ(animator.normalizedTime, 0.0f);
   }

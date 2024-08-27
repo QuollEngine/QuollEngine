@@ -64,14 +64,26 @@ public:
   std::pair<AssetType, u32> getAssetByUuid(const Uuid &uuid);
 
   template <typename TAssetData>
+  constexpr const TAssetData &get(AssetHandle<TAssetData> handle) const {
+    auto &map = getMap<TAssetData>();
+    return map.getAsset(handle).data;
+  }
+
+  template <typename TAssetData>
+  constexpr TAssetData &get(AssetHandle<TAssetData> handle) {
+    auto &map = getMap<TAssetData>();
+    return map.getAsset(handle).data;
+  }
+
+  template <typename TAssetData>
   constexpr const AssetData<TAssetData> &
-  get(AssetHandle<TAssetData> handle) const {
+  getMeta(AssetHandle<TAssetData> handle) const {
     auto &map = getMap<TAssetData>();
     return map.getAsset(handle);
   }
 
   template <typename TAssetData>
-  constexpr AssetData<TAssetData> &get(AssetHandle<TAssetData> handle) {
+  constexpr AssetData<TAssetData> &getMeta(AssetHandle<TAssetData> handle) {
     auto &map = getMap<TAssetData>();
     return map.getAsset(handle);
   }

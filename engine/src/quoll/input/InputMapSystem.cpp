@@ -16,9 +16,8 @@ void InputMapSystem::update(SystemView &view) {
   for (auto [entity, ref] : entityDatabase.view<InputMapAssetRef>()) {
     if (mAssetRegistry.has(ref.handle) &&
         !entityDatabase.has<InputMap>(entity)) {
-      entityDatabase.set(entity,
-                         createInputMap(mAssetRegistry.get(ref.handle).data,
-                                        ref.defaultScheme));
+      entityDatabase.set(entity, createInputMap(mAssetRegistry.get(ref.handle),
+                                                ref.defaultScheme));
     }
   }
 

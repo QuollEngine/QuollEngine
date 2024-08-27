@@ -10,7 +10,7 @@ void AudioSerializer::serialize(YAML::Node &node,
   if (entityDatabase.has<AudioSource>(entity)) {
     auto handle = entityDatabase.get<AudioSource>(entity).source;
     if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.get(handle).uuid;
+      auto uuid = assetRegistry.getMeta(handle).uuid;
 
       node["audio"]["source"] = uuid;
     }

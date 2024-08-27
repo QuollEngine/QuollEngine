@@ -15,7 +15,7 @@ void SkinnedMeshRendererSerializer::serialize(YAML::Node &node,
 
     for (auto material : renderer.materials) {
       if (assetRegistry.has(material)) {
-        auto uuid = assetRegistry.get(material).uuid;
+        auto uuid = assetRegistry.getMeta(material).uuid;
         node["skinnedMeshRenderer"]["materials"].push_back(uuid);
       }
     }

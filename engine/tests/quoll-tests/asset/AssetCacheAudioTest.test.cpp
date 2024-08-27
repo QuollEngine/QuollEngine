@@ -38,12 +38,14 @@ TEST_F(AssetCacheAudioTest, LoadsWavAudioFileIntoRegistry) {
 
   auto handle = result.getData();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::AudioAsset>());
-  const auto &asset = cache.getRegistry().get(handle);
+  const auto &asset = cache.getRegistry().getMeta(handle);
 
   EXPECT_EQ(asset.name, "valid-audio.wav");
   EXPECT_EQ(asset.uuid, uuid);
   EXPECT_EQ(asset.type, quoll::AssetType::Audio);
-  EXPECT_EQ(asset.data.format, quoll::AudioAssetFormat::Wav);
+
+  EXPECT_EQ(cache.getRegistry().get(handle).format,
+            quoll::AudioAssetFormat::Wav);
 }
 
 TEST_F(AssetCacheAudioTest, FileReturnsErrorIfAudioFileCannotBeOpened) {

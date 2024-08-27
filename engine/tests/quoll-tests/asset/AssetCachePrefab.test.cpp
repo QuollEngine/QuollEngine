@@ -207,7 +207,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actualMeshes);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto expectedString = cache.getRegistry().get(expected.at(i).value).uuid;
+      auto expectedString =
+          cache.getRegistry().getMeta(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualMeshes.at(i));
     }
   }
@@ -222,7 +223,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actualSkeletons);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto expectedString = cache.getRegistry().get(expected.at(i).value).uuid;
+      auto expectedString =
+          cache.getRegistry().getMeta(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualSkeletons.at(i));
     }
   }
@@ -238,7 +240,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actual);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto expectedString = cache.getRegistry().get(expected.at(i)).uuid;
+      auto expectedString = cache.getRegistry().getMeta(expected.at(i)).uuid;
       EXPECT_EQ(expectedString, actual.at(i));
     }
   }
@@ -254,7 +256,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     file.read(actual);
 
     for (u32 i = 0; i < numAssets; ++i) {
-      auto expectedString = cache.getRegistry().get(expected.at(i).value).uuid;
+      auto expectedString =
+          cache.getRegistry().getMeta(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actual.at(i));
     }
   }
@@ -315,7 +318,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       file.read(meshIndex);
       EXPECT_EQ(meshIndex, i % 5);
 
-      auto &expected = cache.getRegistry().get(asset.data.meshes.at(i).value);
+      auto &expected =
+          cache.getRegistry().getMeta(asset.data.meshes.at(i).value);
 
       EXPECT_EQ(expected.uuid, actualMeshes.at(meshIndex));
     }
@@ -345,7 +349,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
         auto handle = expected.materials.at(mi);
 
         auto uuid = actualMaterials.at(materialIndex);
-        EXPECT_EQ(uuid, cache.getRegistry().get(handle).uuid);
+        EXPECT_EQ(uuid, cache.getRegistry().getMeta(handle).uuid);
       }
     }
   }
@@ -374,7 +378,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
         auto handle = expected.materials.at(mi);
 
         auto uuid = actualMaterials.at(materialIndex);
-        EXPECT_EQ(uuid, cache.getRegistry().get(handle).uuid);
+        EXPECT_EQ(uuid, cache.getRegistry().getMeta(handle).uuid);
       }
     }
   }
@@ -393,7 +397,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       EXPECT_EQ(skeletonIndex, i % 3);
 
       auto &expected =
-          cache.getRegistry().get(asset.data.skeletons.at(i).value);
+          cache.getRegistry().getMeta(asset.data.skeletons.at(i).value);
 
       EXPECT_EQ(expected.uuid, actualSkeletons.at(skeletonIndex));
     }
@@ -408,7 +412,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       u32 animatorIndex = 999;
       file.read(animatorIndex);
 
-      auto &expected = cache.getRegistry().get(asset.data.animations.at(i));
+      auto &expected = cache.getRegistry().getMeta(asset.data.animations.at(i));
 
       EXPECT_EQ(expected.uuid, actualAnimations.at(animatorIndex));
     }
@@ -428,7 +432,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       file.read(animatorIndex);
 
       auto &expected =
-          cache.getRegistry().get(asset.data.animators.at(i).value);
+          cache.getRegistry().getMeta(asset.data.animators.at(i).value);
 
       EXPECT_EQ(expected.uuid, actualAnimators.at(animatorIndex));
     }
@@ -498,12 +502,12 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   EXPECT_FALSE(handle.hasWarnings());
 
   auto &prefab = cache.getRegistry().get(handle.getData());
-  EXPECT_EQ(prefab.name, asset.name);
+  EXPECT_EQ(cache.getRegistry().getMeta(handle.getData()).name, asset.name);
 
-  EXPECT_EQ(asset.data.transforms.size(), prefab.data.transforms.size());
-  for (usize i = 0; i < prefab.data.transforms.size(); ++i) {
+  EXPECT_EQ(asset.data.transforms.size(), prefab.transforms.size());
+  for (usize i = 0; i < prefab.transforms.size(); ++i) {
     auto &expected = asset.data.transforms.at(i);
-    auto &actual = prefab.data.transforms.at(i);
+    auto &actual = prefab.transforms.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.position, actual.value.position);
     EXPECT_EQ(expected.value.rotation, actual.value.rotation);
@@ -511,26 +515,26 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
     EXPECT_EQ(expected.value.parent, actual.value.parent);
   }
 
-  EXPECT_EQ(asset.data.names.size(), prefab.data.names.size());
-  for (usize i = 0; i < prefab.data.names.size(); ++i) {
+  EXPECT_EQ(asset.data.names.size(), prefab.names.size());
+  for (usize i = 0; i < prefab.names.size(); ++i) {
     auto &expected = asset.data.names.at(i);
-    auto &actual = prefab.data.names.at(i);
+    auto &actual = prefab.names.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
   }
 
-  EXPECT_EQ(asset.data.meshes.size(), prefab.data.meshes.size());
-  for (usize i = 0; i < prefab.data.meshes.size(); ++i) {
+  EXPECT_EQ(asset.data.meshes.size(), prefab.meshes.size());
+  for (usize i = 0; i < prefab.meshes.size(); ++i) {
     auto &expected = asset.data.meshes.at(i);
-    auto &actual = prefab.data.meshes.at(i);
+    auto &actual = prefab.meshes.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
   }
 
-  EXPECT_EQ(asset.data.meshRenderers.size(), prefab.data.meshRenderers.size());
-  for (usize i = 0; i < prefab.data.meshRenderers.size(); ++i) {
+  EXPECT_EQ(asset.data.meshRenderers.size(), prefab.meshRenderers.size());
+  for (usize i = 0; i < prefab.meshRenderers.size(); ++i) {
     auto &expected = asset.data.meshRenderers.at(i);
-    auto &actual = prefab.data.meshRenderers.at(i);
+    auto &actual = prefab.meshRenderers.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.materials.size(), actual.value.materials.size());
     for (usize mi = 0; mi < expected.value.materials.size(); ++mi) {
@@ -539,10 +543,10 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   }
 
   EXPECT_EQ(asset.data.skinnedMeshRenderers.size(),
-            prefab.data.skinnedMeshRenderers.size());
-  for (usize i = 0; i < prefab.data.skinnedMeshRenderers.size(); ++i) {
+            prefab.skinnedMeshRenderers.size());
+  for (usize i = 0; i < prefab.skinnedMeshRenderers.size(); ++i) {
     auto &expected = asset.data.skinnedMeshRenderers.at(i);
-    auto &actual = prefab.data.skinnedMeshRenderers.at(i);
+    auto &actual = prefab.skinnedMeshRenderers.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.materials.size(), actual.value.materials.size());
     for (usize mi = 0; mi < expected.value.materials.size(); ++mi) {
@@ -550,36 +554,36 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
     }
   }
 
-  EXPECT_EQ(asset.data.skeletons.size(), prefab.data.skeletons.size());
-  for (usize i = 0; i < prefab.data.skeletons.size(); ++i) {
+  EXPECT_EQ(asset.data.skeletons.size(), prefab.skeletons.size());
+  for (usize i = 0; i < prefab.skeletons.size(); ++i) {
     auto &expected = asset.data.skeletons.at(i);
-    auto &actual = prefab.data.skeletons.at(i);
+    auto &actual = prefab.skeletons.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
   }
 
-  EXPECT_EQ(asset.data.animations.size(), prefab.data.animations.size());
-  for (usize i = 0; i < prefab.data.animations.size(); ++i) {
+  EXPECT_EQ(asset.data.animations.size(), prefab.animations.size());
+  for (usize i = 0; i < prefab.animations.size(); ++i) {
     auto &expected = asset.data.animations.at(i);
-    auto &actual = prefab.data.animations.at(i);
+    auto &actual = prefab.animations.at(i);
 
     EXPECT_EQ(expected, actual);
   }
 
-  EXPECT_EQ(asset.data.animators.size(), prefab.data.animators.size());
-  for (usize i = 0; i < prefab.data.animators.size(); ++i) {
+  EXPECT_EQ(asset.data.animators.size(), prefab.animators.size());
+  for (usize i = 0; i < prefab.animators.size(); ++i) {
     auto &expected = asset.data.animators.at(i);
-    auto &actual = prefab.data.animators.at(i);
+    auto &actual = prefab.animators.at(i);
 
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
   }
 
   EXPECT_EQ(asset.data.directionalLights.size(),
-            prefab.data.directionalLights.size());
-  for (usize i = 0; i < prefab.data.directionalLights.size(); ++i) {
+            prefab.directionalLights.size());
+  for (usize i = 0; i < prefab.directionalLights.size(); ++i) {
     auto &expected = asset.data.directionalLights.at(i);
-    auto &actual = prefab.data.directionalLights.at(i);
+    auto &actual = prefab.directionalLights.at(i);
 
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.color, actual.value.color);
@@ -588,10 +592,10 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
     EXPECT_EQ(actual.value.direction, glm::vec3(0.0f));
   }
 
-  EXPECT_EQ(asset.data.pointLights.size(), prefab.data.pointLights.size());
-  for (usize i = 0; i < prefab.data.pointLights.size(); ++i) {
+  EXPECT_EQ(asset.data.pointLights.size(), prefab.pointLights.size());
+  for (usize i = 0; i < prefab.pointLights.size(); ++i) {
     auto &expected = asset.data.pointLights.at(i);
-    auto &actual = prefab.data.pointLights.at(i);
+    auto &actual = prefab.pointLights.at(i);
 
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.color, actual.value.color);
@@ -603,7 +607,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
 TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   // Create texture
   auto tempTextureHandle = cache.loadTexture(textureUuid).getData();
-  auto tempTextureAsset = cache.getRegistry().get(tempTextureHandle);
+  auto tempTextureAsset = cache.getRegistry().getMeta(tempTextureHandle);
   cache.getRegistry().remove(tempTextureHandle);
 
   auto texturePath = cache.createTextureFromAsset(tempTextureAsset).getData();
@@ -672,27 +676,27 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   auto &newPrefab = cache.getRegistry().get(prefabHandle.getData());
 
   // Validate mesh
-  EXPECT_NE(newPrefab.data.meshes.at(0).value,
+  EXPECT_NE(newPrefab.meshes.at(0).value,
             quoll::AssetHandle<quoll::MeshAsset>());
-  auto &newMesh = cache.getRegistry().get(newPrefab.data.meshes.at(0).value);
+  auto &newMesh = cache.getRegistry().getMeta(newPrefab.meshes.at(0).value);
   EXPECT_EQ(newMesh.uuid, meshData.uuid);
 
   // Validate skeleton
-  EXPECT_NE(newPrefab.data.skeletons.at(0).value,
+  EXPECT_NE(newPrefab.skeletons.at(0).value,
             quoll::AssetHandle<quoll::SkeletonAsset>());
   auto &newSkeleton =
-      cache.getRegistry().get(newPrefab.data.skeletons.at(0).value);
+      cache.getRegistry().getMeta(newPrefab.skeletons.at(0).value);
   EXPECT_EQ(newSkeleton.uuid, skeletonData.uuid);
 
   // Validate animation
-  auto newAnimationHandle = newPrefab.data.animations.at(0);
+  auto newAnimationHandle = newPrefab.animations.at(0);
   EXPECT_NE(newAnimationHandle, quoll::AssetHandle<quoll::AnimationAsset>());
-  auto &newAnimation = cache.getRegistry().get(newAnimationHandle);
+  auto &newAnimation = cache.getRegistry().getMeta(newAnimationHandle);
   EXPECT_EQ(newAnimation.uuid, animationData.uuid);
 
   // Validate animator
-  auto newAnimatorHandle = newPrefab.data.animators.at(0).value;
+  auto newAnimatorHandle = newPrefab.animators.at(0).value;
   EXPECT_NE(newAnimatorHandle, quoll::AssetHandle<quoll::AnimatorAsset>());
-  auto &newAnimator = cache.getRegistry().get(newAnimatorHandle);
+  auto &newAnimator = cache.getRegistry().getMeta(newAnimatorHandle);
   EXPECT_EQ(newAnimator.uuid, animatorData.uuid);
 }

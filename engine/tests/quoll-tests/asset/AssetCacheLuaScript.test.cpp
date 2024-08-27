@@ -80,15 +80,18 @@ TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
 
   auto handle = result.getData();
 
-  auto &script = cache.getRegistry().get(handle);
-  script.name = "script-asset-valid.lua";
-  EXPECT_EQ(script.name, "script-asset-valid.lua");
-  EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
-  EXPECT_EQ(script.data.variables.size(), 2);
+  {
+    auto &script = cache.getRegistry().getMeta(handle);
+    script.name = "script-asset-valid.lua";
+    EXPECT_EQ(script.name, "script-asset-valid.lua");
+    EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
+  }
 
-  EXPECT_EQ(script.data.variables.at("string_value").type,
+  auto &script = cache.getRegistry().get(handle);
+  EXPECT_EQ(script.variables.size(), 2);
+  EXPECT_EQ(script.variables.at("string_value").type,
             quoll::LuaScriptVariableType::String);
-  EXPECT_EQ(script.data.variables.at("prefab_value").type,
+  EXPECT_EQ(script.variables.at("prefab_value").type,
             quoll::LuaScriptVariableType::AssetPrefab);
 
   std::ifstream file(scriptPath);
@@ -102,8 +105,7 @@ TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
   file.close();
 
   quoll::String contents(bytes.begin(), bytes.end());
-  quoll::String scriptContents(script.data.bytes.begin(),
-                               script.data.bytes.end());
+  quoll::String scriptContents(script.bytes.begin(), script.bytes.end());
   EXPECT_EQ(scriptContents, contents);
 }
 
@@ -120,7 +122,7 @@ TEST_F(AssetCacheLuaScriptTest,
 
   auto handle = result.getData();
   {
-    auto &script = cache.getRegistry().get(handle);
+    auto &script = cache.getRegistry().getMeta(handle);
     EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
     EXPECT_EQ(script.name, "component-script.lua");
   }
@@ -131,11 +133,11 @@ TEST_F(AssetCacheLuaScriptTest,
   {
     auto result = cache.loadLuaScript(uuid1);
     EXPECT_EQ(result.getData(), handle);
-    const auto &script = cache.getRegistry().get(handle);
-    EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
-    EXPECT_EQ(script.name, "component-script-2.lua");
+    const auto &scriptMeta = cache.getRegistry().getMeta(handle);
+    EXPECT_EQ(scriptMeta.type, quoll::AssetType::LuaScript);
+    EXPECT_EQ(scriptMeta.name, "component-script-2.lua");
 
-    std::ifstream file(cache.getPathFromUuid(script.uuid));
+    std::ifstream file(cache.getPathFromUuid(scriptMeta.uuid));
 
     EXPECT_TRUE(file.good());
 
@@ -145,9 +147,10 @@ TEST_F(AssetCacheLuaScriptTest,
     std::vector<char> bytes(s.begin(), s.end());
     file.close();
 
+    const auto &script = cache.getRegistry().get(handle);
+
     quoll::String contents(bytes.begin(), bytes.end());
-    quoll::String scriptContents(script.data.bytes.begin(),
-                                 script.data.bytes.end());
+    quoll::String scriptContents(script.bytes.begin(), script.bytes.end());
     EXPECT_EQ(scriptContents, contents);
   }
 }

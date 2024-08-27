@@ -12,7 +12,7 @@ void InputMapSerializer::serialize(YAML::Node &node,
     const auto &component = entityDatabase.get<InputMapAssetRef>(entity);
 
     if (assetRegistry.has(component.handle)) {
-      node["inputMap"]["asset"] = assetRegistry.get(component.handle).uuid;
+      node["inputMap"]["asset"] = assetRegistry.getMeta(component.handle).uuid;
       node["inputMap"]["defaultScheme"] = component.defaultScheme;
     }
   }
@@ -29,7 +29,7 @@ void InputMapSerializer::deserialize(const YAML::Node &node,
     auto handle = assetRegistry.findHandleByUuid<InputMapAsset>(uuid);
 
     if (handle) {
-      auto type = assetRegistry.get(handle).type;
+      auto type = assetRegistry.getMeta(handle).type;
 
       entityDatabase.set<InputMapAssetRef>(entity, {handle, defaultScheme});
     }

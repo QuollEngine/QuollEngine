@@ -199,11 +199,11 @@ TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto handle = handleRes.getData();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::MeshAsset>());
   auto &mesh = cache.getRegistry().get(handle);
-  EXPECT_EQ(mesh.name, asset.name);
+  EXPECT_EQ(cache.getRegistry().getMeta(handle).name, asset.name);
 
   for (usize g = 0; g < asset.data.geometries.size(); ++g) {
     auto &expectedGeometry = asset.data.geometries.at(g);
-    auto &actualGeometry = mesh.data.geometries.at(g);
+    auto &actualGeometry = mesh.geometries.at(g);
 
     EXPECT_EQ(expectedGeometry.positions.size(),
               actualGeometry.positions.size());
@@ -347,11 +347,11 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
   auto handle = cache.loadMesh(asset.uuid);
   EXPECT_NE(handle.getData(), quoll::AssetHandle<quoll::MeshAsset>());
   auto &mesh = cache.getRegistry().get(handle.getData());
-  EXPECT_EQ(mesh.name, asset.name);
+  EXPECT_EQ(cache.getRegistry().getMeta(handle.getData()).name, asset.name);
 
   for (usize g = 0; g < asset.data.geometries.size(); ++g) {
     auto &expectedGeometry = asset.data.geometries.at(g);
-    auto &actualGeometry = mesh.data.geometries.at(g);
+    auto &actualGeometry = mesh.geometries.at(g);
 
     EXPECT_EQ(expectedGeometry.positions.size(),
               actualGeometry.positions.size());

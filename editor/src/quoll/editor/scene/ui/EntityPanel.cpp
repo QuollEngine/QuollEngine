@@ -636,9 +636,9 @@ void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
       static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
       if (auto table = widgets::Table("TableSprite", 2)) {
-        table.row("Texture", asset.name);
+        table.row("Texture", assetRegistry.getMeta(handle).name);
         table.column("Preview");
-        table.column(asset.data.deviceHandle, TextureSize);
+        table.column(asset.deviceHandle, TextureSize);
       }
     }
 
@@ -675,8 +675,8 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
       const auto &asset = assetRegistry.get(handle);
 
       if (auto table = widgets::Table("TableMesh", 2)) {
-        table.row("Name", asset.name);
-        table.row("Geometries", static_cast<u32>(asset.data.geometries.size()));
+        table.row("Name", assetRegistry.getMeta(handle).name);
+        table.row("Geometries", static_cast<u32>(asset.geometries.size()));
       }
     }
 
@@ -693,8 +693,8 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
       const auto &asset = assetRegistry.get(handle);
 
       if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
-        table.row("Name", asset.name);
-        table.row("Geometries", static_cast<u32>(asset.data.geometries.size()));
+        table.row("Name", assetRegistry.getMeta(handle).name);
+        table.row("Geometries", static_cast<u32>(asset.geometries.size()));
       }
     }
 
@@ -718,12 +718,13 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
 
     if (auto table = widgets::Table("TableMaterials", 2)) {
       for (usize i = 0; i < renderer.materials.size(); ++i) {
-        const auto &asset = assetRegistry.get(renderer.materials.at(i));
+        auto material = renderer.materials.at(i);
+        const auto &asset = assetRegistry.get(material);
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::Text("Slot %d", static_cast<u32>(i));
         ImGui::TableNextColumn();
-        widgets::Button(asset.name.c_str());
+        widgets::Button(assetRegistry.getMeta(material).name.c_str());
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
@@ -782,12 +783,13 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
 
     if (auto table = widgets::Table("TableMaterials", 2)) {
       for (usize i = 0; i < renderer.materials.size(); ++i) {
-        const auto &asset = assetRegistry.get(renderer.materials.at(i));
+        auto material = renderer.materials.at(i);
+        const auto &asset = assetRegistry.get(material);
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::Text("Slot %d", static_cast<u32>(i));
         ImGui::TableNextColumn();
-        widgets::Button(asset.name.c_str());
+        widgets::Button(assetRegistry.getMeta(material).name.c_str());
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
@@ -848,7 +850,7 @@ void EntityPanel::renderSkeleton(Scene &scene, AssetRegistry &assetRegistry,
     const auto &asset = assetRegistry.get(handle);
 
     if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
-      table.row("Name", asset.name);
+      table.row("Name", assetRegistry.getMeta(handle).name);
       table.row("Number of joints",
                 static_cast<u32>(skeleton.jointNames.size()));
     }
@@ -928,7 +930,7 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component = scene.entityDatabase.get<Animator>(mSelectedEntity);
-    const auto &animatorAsset = assetRegistry.get(component.asset).data;
+    const auto &animatorAsset = assetRegistry.get(component.asset);
 
     auto currentStateIndex =
         component.currentState < animatorAsset.states.size()
@@ -960,8 +962,7 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
 
     if (isSimulation) {
       if (assetRegistry.has(currentState.animation)) {
-        const auto &animationAsset =
-            assetRegistry.get(currentState.animation).data;
+        const auto &animationAsset = assetRegistry.get(currentState.animation);
 
         ImGui::Text("Time");
         f32 animationTime = component.normalizedTime * animationAsset.time;
@@ -1341,9 +1342,9 @@ void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     const auto &audio = scene.entityDatabase.get<AudioSource>(mSelectedEntity);
-    const auto &asset = assetRegistry.get(audio.source);
+    const auto &assetName = assetRegistry.getMeta(audio.source).name;
 
-    ImGui::Text("Name: %s", asset.name.c_str());
+    ImGui::Text("Name: %s", assetName.c_str());
   }
 
   if (shouldDelete("Audio")) {
@@ -1362,16 +1363,17 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &script = scene.entityDatabase.get<LuaScript>(mSelectedEntity);
     const auto &asset = assetRegistry.get(script.handle);
+    const auto &name = assetRegistry.getMeta(script.handle).name;
 
-    ImGui::Text("Name: %s", asset.name.c_str());
+    ImGui::Text("Name: %s", name.c_str());
 
-    if (!asset.data.variables.empty()) {
+    if (!asset.variables.empty()) {
       ImGui::Text("Variables");
 
       if (script.started) {
         widgets::Table table("scriptVariables", 3);
         table.row("Name", "Type", "Value");
-        for (const auto &[name, variable] : asset.data.variables) {
+        for (const auto &[name, variable] : asset.variables) {
 
           String type = "Unknown";
           if (variable.type == LuaScriptVariableType::String) {
@@ -1393,18 +1395,18 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
                          LuaScriptVariableType::AssetPrefab)) {
             auto handle =
                 script.variables.at(name).get<AssetHandle<PrefabAsset>>();
-            value = assetRegistry.get(handle).name;
+            value = assetRegistry.getMeta(handle).name;
           } else if (script.variables.at(name).isType(
                          LuaScriptVariableType::AssetTexture)) {
             auto handle =
                 script.variables.at(name).get<AssetHandle<TextureAsset>>();
-            value = assetRegistry.get(handle).name;
+            value = assetRegistry.getMeta(handle).name;
           }
 
           table.row(name, type, value);
         }
       } else {
-        for (const auto &[name, variable] : asset.data.variables) {
+        for (const auto &[name, variable] : asset.variables) {
           LuaScriptInputVariable existingVariable;
           if (mSetScriptVariable &&
               mSetScriptVariable->getValue().isType(variable.type) &&
@@ -1443,8 +1445,8 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             if (!value) {
               widgets::Button("Drag prefab here", ImVec2(width, halfWidth));
             } else {
-              String buttonLabel =
-                  "Replace current prefab: " + assetRegistry.get(value).name;
+              String buttonLabel = "Replace current prefab: " +
+                                   assetRegistry.getMeta(value).name;
               widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
             }
 
@@ -1469,8 +1471,8 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             if (!value) {
               widgets::Button("Drag texture here", ImVec2(width, halfWidth));
             } else {
-              String buttonLabel =
-                  "Replace current texture: " + assetRegistry.get(value).name;
+              String buttonLabel = "Replace current texture: " +
+                                   assetRegistry.getMeta(value).name;
               widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
             }
 
@@ -1514,9 +1516,9 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
         scene.entityDatabase.get<InputMapAssetRef>(mSelectedEntity);
 
     if (assetRegistry.has(component.handle)) {
-      const auto &asset = assetRegistry.get(component.handle);
+      const auto &assetName = assetRegistry.getMeta(component.handle).name;
 
-      widgets::Button(asset.name.c_str(), ImVec2(width, height));
+      widgets::Button(assetName.c_str(), ImVec2(width, height));
     } else {
       widgets::Button("Drag input map here", ImVec2(width, height));
     }
@@ -1545,14 +1547,14 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
       const auto &asset = assetRegistry.get(component.handle);
 
       const auto *schemeName =
-          component.defaultScheme < asset.data.schemes.size()
-              ? asset.data.schemes.at(component.defaultScheme).name.c_str()
+          component.defaultScheme < asset.schemes.size()
+              ? asset.schemes.at(component.defaultScheme).name.c_str()
               : "Select scheme";
 
       ImGui::Text("Default scheme");
       if (ImGui::BeginCombo("##DefaultScheme", schemeName)) {
-        for (usize i = 0; i < asset.data.schemes.size(); ++i) {
-          const auto *name = asset.data.schemes.at(i).name.c_str();
+        for (usize i = 0; i < asset.schemes.size(); ++i) {
+          const auto *name = asset.schemes.at(i).name.c_str();
           bool selectable = i == component.defaultScheme;
 
           if (ImGui::Selectable(name, &selectable)) {
@@ -1572,7 +1574,7 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
           scene.entityDatabase.get<InputMap>(mSelectedEntity);
 
       const auto *schemeName = assetRegistry.get(component.handle)
-                                   .data.schemes.at(inputMap.activeScheme)
+                                   .schemes.at(inputMap.activeScheme)
                                    .name.c_str();
 
       ImGui::Text("Debug");
@@ -1657,9 +1659,9 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
 
     } else if (skybox.type == EnvironmentSkyboxType::Texture) {
       if (assetRegistry.has(skybox.texture)) {
-        const auto &envAsset = assetRegistry.get(skybox.texture);
+        auto envAssetPreview = assetRegistry.getMeta(skybox.texture).preview;
 
-        imgui::image(envAsset.preview, ImVec2(width, height), ImVec2(0, 0),
+        imgui::image(envAssetPreview, ImVec2(width, height), ImVec2(0, 0),
                      ImVec2(1, 1), ImGui::GetID("environment-texture-drop"));
 
         dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);

@@ -462,7 +462,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           pipeline, 1, frameData.getBindlessParams().getDescriptor(), offsets);
 
       const auto &cube =
-          mAssetRegistry.get(mAssetRegistry.getDefaultObjects().cube).data;
+          mAssetRegistry.get(mAssetRegistry.getDefaultObjects().cube);
 
       std::array<u64, 1> vbOffsets{0};
       commandList.bindVertexBuffers(std::array{cube.vertexBuffers.at(0)},
@@ -778,11 +778,11 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   frameData.setDefaultMaterial(
       mAssetRegistry.get(mAssetRegistry.getDefaultObjects().defaultMaterial)
-          .data.deviceHandle->getAddress());
+          .deviceHandle->getAddress());
 
   for (auto [entity, sprite, world] :
        entityDatabase.view<Sprite, WorldTransform>()) {
-    auto handle = mAssetRegistry.get(sprite.handle).data.deviceHandle;
+    auto handle = mAssetRegistry.get(sprite.handle).deviceHandle;
     frameData.addSprite(entity, handle, world.worldTransform);
   }
 
@@ -794,7 +794,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
       materials.push_back(
-          mAssetRegistry.get(material).data.deviceHandle->getAddress());
+          mAssetRegistry.get(material).deviceHandle->getAddress());
     }
 
     frameData.addMesh(mesh.handle, entity, world.worldTransform, materials);
@@ -809,7 +809,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
       materials.push_back(
-          mAssetRegistry.get(material).data.deviceHandle->getAddress());
+          mAssetRegistry.get(material).deviceHandle->getAddress());
     }
 
     frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
@@ -819,7 +819,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   // Texts
   for (auto [entity, text, world] :
        entityDatabase.view<Text, WorldTransform>()) {
-    const auto &font = mAssetRegistry.get(text.font).data;
+    const auto &font = mAssetRegistry.get(text.font);
 
     std::vector<SceneRendererFrameData::GlyphData> glyphs(
         text.content.length());
@@ -873,12 +873,12 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       frameData.setSkyboxColor(environment.color);
     } else if (environment.type == EnvironmentSkyboxType::Texture &&
                mAssetRegistry.has(environment.texture)) {
-      const auto &asset = mAssetRegistry.get(environment.texture).data;
+      const auto &asset = mAssetRegistry.get(environment.texture);
 
       frameData.setSkyboxTexture(
-          mAssetRegistry.get(asset.specularMap).data.deviceHandle);
-      irradianceMap = mAssetRegistry.get(asset.irradianceMap).data.deviceHandle;
-      specularMap = mAssetRegistry.get(asset.specularMap).data.deviceHandle;
+          mAssetRegistry.get(asset.specularMap).deviceHandle);
+      irradianceMap = mAssetRegistry.get(asset.irradianceMap).deviceHandle;
+      specularMap = mAssetRegistry.get(asset.specularMap).deviceHandle;
     }
 
     if (entityDatabase.has<EnvironmentLightingSkyboxSource>(entity)) {
@@ -900,7 +900,7 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-    const auto &mesh = mAssetRegistry.get(handle).data;
+    const auto &mesh = mAssetRegistry.get(handle);
     u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
@@ -918,7 +918,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
   u32 instanceStart = 0;
 
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-    const auto &mesh = mAssetRegistry.get(handle).data;
+    const auto &mesh = mAssetRegistry.get(handle);
     u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
@@ -960,7 +960,7 @@ void SceneRenderer::renderShadowsMesh(rhi::RenderCommandList &commandList,
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-    const auto &mesh = mAssetRegistry.get(handle).data;
+    const auto &mesh = mAssetRegistry.get(handle);
     u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(
@@ -980,7 +980,7 @@ void SceneRenderer::renderShadowsSkinnedMesh(
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-    const auto &mesh = mAssetRegistry.get(handle).data;
+    const auto &mesh = mAssetRegistry.get(handle);
     u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(

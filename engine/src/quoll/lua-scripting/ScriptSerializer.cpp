@@ -12,14 +12,13 @@ void ScriptSerializer::serialize(YAML::Node &node,
     if (assetRegistry.has(script.handle)) {
       const auto &asset = assetRegistry.get(script.handle);
 
-      auto uuid = asset.uuid;
+      auto uuid = assetRegistry.getMeta(script.handle).uuid;
 
       node["script"]["asset"] = uuid;
 
       for (auto &[name, value] : script.variables) {
-        auto it = asset.data.variables.find(name);
-        if (it == asset.data.variables.end() ||
-            !value.isType(it->second.type)) {
+        auto it = asset.variables.find(name);
+        if (it == asset.variables.end() || !value.isType(it->second.type)) {
           continue;
         }
 
@@ -29,7 +28,7 @@ void ScriptSerializer::serialize(YAML::Node &node,
         } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
           auto handle = value.get<AssetHandle<PrefabAsset>>();
           if (assetRegistry.has(handle)) {
-            auto uuid = assetRegistry.get(handle).uuid;
+            auto uuid = assetRegistry.getMeta(handle).uuid;
 
             node["script"]["variables"][name]["type"] = "prefab";
             node["script"]["variables"][name]["value"] = uuid;
@@ -37,7 +36,7 @@ void ScriptSerializer::serialize(YAML::Node &node,
         } else if (value.isType(LuaScriptVariableType::AssetTexture)) {
           auto handle = value.get<AssetHandle<TextureAsset>>();
           if (assetRegistry.has(handle)) {
-            auto uuid = assetRegistry.get(handle).uuid;
+            auto uuid = assetRegistry.getMeta(handle).uuid;
 
             node["script"]["variables"][name]["type"] = "texture";
             node["script"]["variables"][name]["value"] = uuid;

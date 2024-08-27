@@ -155,9 +155,9 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
   auto &registry = mAssetCache.getRegistry();
 
   UUIDMap output{
-      {"root", registry.get(loadRes.getData()).uuid},
-      {"irradiance", registry.get(environment.data.irradianceMap).uuid},
-      {"specular", registry.get(environment.data.specularMap).uuid}};
+      {"root", registry.getMeta(loadRes.getData()).uuid},
+      {"irradiance", registry.getMeta(environment.data.irradianceMap).uuid},
+      {"specular", registry.getMeta(environment.data.specularMap).uuid}};
 
   return Result<UUIDMap>::Ok(output);
 }

@@ -21,8 +21,8 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
                                asset.name);
   }
 
-  auto irradianceMapUuid = mRegistry.get(asset.data.irradianceMap).uuid;
-  auto specularMapUuid = mRegistry.get(asset.data.specularMap).uuid;
+  auto irradianceMapUuid = mRegistry.getMeta(asset.data.irradianceMap).uuid;
+  auto specularMapUuid = mRegistry.getMeta(asset.data.specularMap).uuid;
 
   OutputBinaryStream stream(assetPath);
   AssetFileHeader header{};

@@ -11,7 +11,7 @@ void AnimatorSerializer::serialize(YAML::Node &node,
     auto handle = entityDatabase.get<Animator>(entity).asset;
 
     if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.get(handle).uuid;
+      auto uuid = assetRegistry.getMeta(handle).uuid;
 
       node["animator"]["asset"] = uuid;
     }

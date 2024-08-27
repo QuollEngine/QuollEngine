@@ -137,7 +137,7 @@ void loadPrefabs(GLTFImportData &importData) {
 
     if (handle.hasData()) {
       importData.outputUuids.insert_or_assign(
-          "root", assetCache.getRegistry().get(handle.getData()).uuid);
+          "root", assetCache.getRegistry().getMeta(handle.getData()).uuid);
     }
   }
 }

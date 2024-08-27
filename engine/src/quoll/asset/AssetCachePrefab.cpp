@@ -40,7 +40,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     for (auto &component : asset.data.meshRenderers) {
       for (auto material : component.value.materials) {
         if (localMaterialMap.find(material) == localMaterialMap.end()) {
-          auto uuid = mRegistry.get(material).uuid;
+          auto uuid = mRegistry.getMeta(material).uuid;
           localMaterialMap.insert_or_assign(
               material, static_cast<u32>(assetPaths.size()));
           assetPaths.push_back(uuid);
@@ -51,7 +51,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     for (auto &component : asset.data.skinnedMeshRenderers) {
       for (auto material : component.value.materials) {
         if (localMaterialMap.find(material) == localMaterialMap.end()) {
-          auto uuid = mRegistry.get(material).uuid;
+          auto uuid = mRegistry.getMeta(material).uuid;
           localMaterialMap.insert_or_assign(
               material, static_cast<u32>(assetPaths.size()));
           assetPaths.push_back(uuid);
@@ -70,7 +70,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
 
     for (auto &component : asset.data.meshes) {
       if (localMeshMap.find(component.value) == localMeshMap.end()) {
-        auto uuid = mRegistry.get(component.value).uuid;
+        auto uuid = mRegistry.getMeta(component.value).uuid;
         localMeshMap.insert_or_assign(component.value,
                                       static_cast<u32>(assetPaths.size()));
         assetPaths.push_back(uuid);
@@ -87,7 +87,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     assetPaths.reserve(asset.data.skeletons.size());
 
     for (auto &component : asset.data.skeletons) {
-      auto uuid = mRegistry.get(component.value).uuid;
+      auto uuid = mRegistry.getMeta(component.value).uuid;
 
       if (localSkeletonMap.find(component.value) == localSkeletonMap.end()) {
         localSkeletonMap.insert_or_assign(component.value,
@@ -106,7 +106,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     assetPaths.reserve(asset.data.animations.size());
 
     for (auto handle : asset.data.animations) {
-      auto uuid = mRegistry.get(handle).uuid;
+      auto uuid = mRegistry.getMeta(handle).uuid;
 
       if (localAnimationMap.find(handle) == localAnimationMap.end()) {
         localAnimationMap.insert_or_assign(handle,
@@ -125,7 +125,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     assetPaths.reserve(asset.data.animators.size());
 
     for (auto &component : asset.data.animators) {
-      auto uuid = mRegistry.get(component.value).uuid;
+      auto uuid = mRegistry.getMeta(component.value).uuid;
 
       if (localAnimatorMap.find(component.value) == localAnimatorMap.end()) {
         localAnimatorMap.insert_or_assign(component.value,
