@@ -3,7 +3,6 @@
 #include "quoll/audio/AudioSource.h"
 #include "quoll/imgui/Imgui.h"
 #include "quoll/renderer/Mesh.h"
-#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/scene/Camera.h"
 #include "quoll/scene/Children.h"
 #include "quoll/scene/EnvironmentSkybox.h"

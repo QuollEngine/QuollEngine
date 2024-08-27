@@ -18,7 +18,6 @@
 #include "quoll/physx/PhysxInstance.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/MeshRenderer.h"
-#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/scene/AutoAspectRatio.h"
 #include "quoll/scene/Camera.h"
@@ -681,24 +680,6 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
     }
 
     if (shouldDelete("Mesh")) {
-      actionExecutor.execute<EntityDeleteMesh>(mSelectedEntity);
-    }
-  }
-
-  if (scene.entityDatabase.has<SkinnedMesh>(mSelectedEntity)) {
-    if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto handle =
-          scene.entityDatabase.get<SkinnedMesh>(mSelectedEntity).handle;
-
-      const auto &asset = assetRegistry.get(handle);
-
-      if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
-        table.row("Name", assetRegistry.getMeta(handle).name);
-        table.row("Geometries", static_cast<u32>(asset.geometries.size()));
-      }
-    }
-
-    if (shouldDelete("SkinnedMesh")) {
       actionExecutor.execute<EntityDeleteMesh>(mSelectedEntity);
     }
   }
@@ -1848,12 +1829,6 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
   if (ImGui::BeginDragDropTarget()) {
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Mesh).c_str())) {
-      auto asset = *static_cast<AssetHandle<MeshAsset> *>(payload->Data);
-      actionExecutor.execute<EntitySetMesh>(mSelectedEntity, asset);
-    }
-
-    if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::SkinnedMesh).c_str())) {
       auto asset = *static_cast<AssetHandle<MeshAsset> *>(payload->Data);
       actionExecutor.execute<EntitySetMesh>(mSelectedEntity, asset);
     }

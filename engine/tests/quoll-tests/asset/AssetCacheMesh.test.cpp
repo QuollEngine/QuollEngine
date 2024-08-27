@@ -49,7 +49,7 @@ public:
     quoll::AssetData<quoll::MeshAsset> asset;
     asset.name = "test-mesh0";
     asset.uuid = quoll::Uuid::generate();
-    asset.type = quoll::AssetType::SkinnedMesh;
+    asset.type = quoll::AssetType::Mesh;
 
     std::random_device device;
     std::mt19937 mt(device());
@@ -113,54 +113,83 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
   EXPECT_EQ(numGeometries, 2);
 
   for (u32 i = 0; i < numGeometries; ++i) {
-    u32 numVertices = 0;
-    file.read(numVertices);
-    EXPECT_EQ(numVertices, 10);
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).positions.at(v);
+    const auto &g = asset.data.geometries.at(i);
+
+    u32 numAttributes = 0;
+
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.positions.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.positions.at(v);
       glm::vec3 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).normals.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.normals.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.normals.at(v);
       glm::vec3 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).tangents.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.tangents.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.tangents.at(v);
       glm::vec4 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).texCoords0.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.texCoords0.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.texCoords0.at(v);
       glm::vec2 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).texCoords1.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.texCoords1.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.texCoords1.at(v);
       glm::vec2 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    u32 numIndices = 0;
-    file.read(numIndices);
-    EXPECT_EQ(numIndices, 20);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.joints.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.joints.at(v);
+      glm::uvec4 valueActual;
+      file.read(valueActual);
 
-    for (u32 idx = 0; idx < numIndices; ++idx) {
+      EXPECT_EQ(valueExpected, valueActual);
+    }
+
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.weights.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.weights.at(v);
+      glm::vec4 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual);
+    }
+
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.indices.size());
+    for (u32 idx = 0; idx < numAttributes; ++idx) {
       const auto valueExpected = asset.data.geometries.at(i).indices.at(idx);
       u32 valueActual = 100000;
       file.read(valueActual);
@@ -225,7 +254,7 @@ TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
     }
   }
 }
-TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
+TEST_F(AssetCacheMeshTest, CreateMeshAssetWithSkinData) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
   auto filePath = cache.createMeshFromAsset(asset);
@@ -237,7 +266,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   file.read(header);
 
   EXPECT_EQ(header.magic, header.MagicConstant);
-  EXPECT_EQ(header.type, quoll::AssetType::SkinnedMesh);
+  EXPECT_EQ(header.type, quoll::AssetType::Mesh);
 
   u32 numGeometries = 0;
   file.read(numGeometries);
@@ -245,71 +274,82 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   EXPECT_EQ(numGeometries, 2);
 
   for (u32 i = 0; i < numGeometries; ++i) {
-    u32 numVertices = 0;
-    file.read(numVertices);
-    EXPECT_EQ(numVertices, 10);
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).positions.at(v);
-      glm::vec3 valueExpected(vertex.x, vertex.y, vertex.z);
+    auto &g = asset.data.geometries.at(i);
+    u32 numAttributes = 0;
+
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.positions.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.positions.at(v);
       glm::vec3 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).normals.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.normals.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.normals.at(v);
       glm::vec3 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).tangents.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.tangents.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.tangents.at(v);
       glm::vec4 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).texCoords0.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.texCoords0.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.texCoords0.at(v);
       glm::vec2 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).texCoords1.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.texCoords1.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.texCoords1.at(v);
       glm::vec2 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).joints.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.joints.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.joints.at(v);
       glm::uvec4 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    for (u32 v = 0; v < numVertices; ++v) {
-      const auto &valueExpected = asset.data.geometries.at(i).weights.at(v);
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.weights.size());
+    for (u32 v = 0; v < numAttributes; ++v) {
+      const auto &valueExpected = g.weights.at(v);
       glm::vec4 valueActual;
       file.read(valueActual);
 
       EXPECT_EQ(valueExpected, valueActual);
     }
 
-    u32 numIndices = 0;
-    file.read(numIndices);
-    EXPECT_EQ(numIndices, 20);
-
-    for (u32 idx = 0; idx < numIndices; ++idx) {
+    file.read(numAttributes);
+    EXPECT_EQ(numAttributes, g.indices.size());
+    for (u32 idx = 0; idx < numAttributes; ++idx) {
       const auto valueExpected = asset.data.geometries.at(i).indices.at(idx);
       u32 valueActual = 100000;
       file.read(valueActual);

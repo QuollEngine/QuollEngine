@@ -18,7 +18,6 @@
 #include "quoll/physx/PhysxInstance.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/MeshRenderer.h"
-#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/scene/AutoAspectRatio.h"
 #include "quoll/scene/Camera.h"
@@ -65,7 +64,6 @@ EntityDatabase::EntityDatabase() {
   reg<AudioSource>();
   reg<AudioStart>();
   reg<AudioStatus>();
-  reg<SkinnedMesh>();
   reg<Skeleton>();
   reg<JointAttachment>();
   reg<SkeletonDebug>();

@@ -78,4 +78,9 @@ inline void OutputBinaryStream::write(const std::vector<Uuid> &value) {
   }
 }
 
+template <> inline void OutputBinaryStream::write(const usize &value) {
+  auto v = static_cast<u32>(value);
+  write(v);
+}
+
 } // namespace quoll

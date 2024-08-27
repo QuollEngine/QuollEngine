@@ -20,7 +20,6 @@
 #include "quoll/physx/PhysxInstance.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/MeshRenderer.h"
-#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/scene/AutoAspectRatio.h"
 #include "quoll/scene/Camera.h"
@@ -313,14 +312,13 @@ TEST_F(SceneLoaderMeshTest, CreatesMeshComponentIfValidAssetTypeIsMesh) {
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Mesh>(entity));
-  EXPECT_FALSE(entityDatabase.has<quoll::SkinnedMesh>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).handle, handle);
 }
 
 TEST_F(SceneLoaderMeshTest,
        CreatesSkinnedMeshComponentIfValidAssetTypeIsSkinnedMesh) {
   quoll::AssetData<quoll::MeshAsset> data{};
-  data.type = quoll::AssetType::SkinnedMesh;
+  data.type = quoll::AssetType::Mesh;
   data.uuid = quoll::Uuid("hello");
   auto handle = assetRegistry.add(data);
 
@@ -328,9 +326,8 @@ TEST_F(SceneLoaderMeshTest,
   node["mesh"] = data.uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  ASSERT_TRUE(entityDatabase.has<quoll::SkinnedMesh>(entity));
-  EXPECT_FALSE(entityDatabase.has<quoll::Mesh>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::SkinnedMesh>(entity).handle, handle);
+  ASSERT_TRUE(entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).handle, handle);
 }
 
 using SceneLoaderMeshRendererTest = SceneLoaderTest;

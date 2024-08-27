@@ -613,7 +613,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   // Create mesh
   quoll::AssetData<quoll::MeshAsset> meshData{};
-  meshData.type = quoll::AssetType::SkinnedMesh;
+  meshData.type = quoll::AssetType::Mesh;
   meshData.uuid = quoll::Uuid::generate();
 
   quoll::BaseGeometryAsset geometry{};

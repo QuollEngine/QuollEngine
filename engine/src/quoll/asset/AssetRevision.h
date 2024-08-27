@@ -20,8 +20,7 @@ namespace quoll {
 enum class AssetRevision : u32 {
   Material = 240827,
   Texture = 230901,
-  Mesh = 240827,
-  SkinnedMesh = 240827,
+  Mesh = 240828,
   Skeleton = 240827,
   Animation = 240827,
   Audio = 230901,
@@ -42,8 +41,6 @@ static constexpr AssetRevision getRevisionForAssetType(AssetType type) {
     return AssetRevision::Texture;
   case AssetType::Mesh:
     return AssetRevision::Mesh;
-  case AssetType::SkinnedMesh:
-    return AssetRevision::SkinnedMesh;
   case AssetType::Skeleton:
     return AssetRevision::Skeleton;
   case AssetType::Animation:

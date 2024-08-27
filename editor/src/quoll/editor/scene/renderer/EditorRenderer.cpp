@@ -3,7 +3,6 @@
 #include "quoll/core/Profiler.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/MeshVertexLayout.h"
-#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/scene/Sprite.h"
 #include "quoll/skeleton/Skeleton.h"
 #include "quoll/text/Text.h"
@@ -499,7 +498,8 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
       frameData.addSpriteOutline(world.worldTransform);
-    } else if (entityDatabase.has<Mesh>(state.selectedEntity)) {
+    } else if (entityDatabase.has<Mesh>(state.selectedEntity) &&
+               entityDatabase.has<MeshRenderer>(state.selectedEntity)) {
       auto handle = entityDatabase.get<Mesh>(state.selectedEntity).handle;
 
       const auto &world =
@@ -507,10 +507,10 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
       const auto &data = assetRegistry.get(handle);
       frameData.addMeshOutline(data, world.worldTransform);
-    } else if (entityDatabase.has<SkinnedMesh>(state.selectedEntity) &&
+    } else if (entityDatabase.has<Mesh>(state.selectedEntity) &&
+               entityDatabase.has<SkinnedMeshRenderer>(state.selectedEntity) &&
                entityDatabase.has<Skeleton>(state.selectedEntity)) {
-      auto handle =
-          entityDatabase.get<SkinnedMesh>(state.selectedEntity).handle;
+      auto handle = entityDatabase.get<Mesh>(state.selectedEntity).handle;
 
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);

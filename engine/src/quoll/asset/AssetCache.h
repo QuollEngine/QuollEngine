@@ -165,8 +165,7 @@ private:
 private:
   Result<MaterialAsset> loadMaterialDataFromInputStream(const Path &path);
 
-  Result<MeshAsset> loadMeshDataFromInputStream(const Path &path,
-                                                AssetType type);
+  Result<MeshAsset> loadMeshDataFromInputStream(const Path &path);
 
   Result<SkeletonAsset> loadSkeletonDataFromInputStream(const Path &path);
 

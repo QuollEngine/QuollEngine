@@ -31,37 +31,37 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   header.magic = AssetFileHeader::MagicConstant;
   file.write(header);
 
-  auto numGeometries = static_cast<u32>(asset.data.geometries.size());
+  auto numGeometries = asset.data.geometries.size();
   file.write(numGeometries);
 
   for (auto &geometry : asset.data.geometries) {
-    auto numVertices = static_cast<u32>(geometry.positions.size());
-    file.write(numVertices);
+    file.write(geometry.positions.size());
     file.write(geometry.positions);
+    file.write(geometry.normals.size());
     file.write(geometry.normals);
+    file.write(geometry.tangents.size());
     file.write(geometry.tangents);
+    file.write(geometry.texCoords0.size());
     file.write(geometry.texCoords0);
+    file.write(geometry.texCoords1.size());
     file.write(geometry.texCoords1);
-
-    if (asset.type == AssetType::SkinnedMesh) {
-      file.write(geometry.joints);
-      file.write(geometry.weights);
-    }
-
-    auto numIndices = static_cast<u32>(geometry.indices.size());
-    file.write(numIndices);
+    file.write(geometry.joints.size());
+    file.write(geometry.joints);
+    file.write(geometry.weights.size());
+    file.write(geometry.weights);
+    file.write(geometry.indices.size());
     file.write(geometry.indices);
   }
 
   return assetPath;
 }
 
-Result<MeshAsset> AssetCache::loadMeshDataFromInputStream(const Path &path,
-                                                          AssetType type) {
+Result<MeshAsset> AssetCache::loadMeshDataFromInputStream(const Path &path) {
   InputBinaryStream stream(path);
   AssetFileHeader header;
   stream.read(header);
-  if (header.magic != AssetFileHeader::MagicConstant || header.type != type) {
+  if (header.magic != AssetFileHeader::MagicConstant ||
+      header.type != AssetType::Mesh) {
     return Error("Invalid file format");
   }
 
@@ -75,42 +75,47 @@ Result<MeshAsset> AssetCache::loadMeshDataFromInputStream(const Path &path,
   mesh.geometries.resize(numGeometries);
 
   for (u32 i = 0; i < numGeometries; ++i) {
-    u32 numVertices = 0;
-    stream.read(numVertices);
-
-    if (numVertices == 0) {
-      return Error("Mesh geometry has no vertices");
-    }
-
     auto &g = mesh.geometries.at(i);
 
-    g.positions.resize(numVertices);
-    g.normals.resize(numVertices);
-    g.tangents.resize(numVertices);
-    g.texCoords0.resize(numVertices);
-    g.texCoords1.resize(numVertices);
-
-    stream.read(g.positions);
-    stream.read(g.normals);
-    stream.read(g.tangents);
-    stream.read(g.texCoords0);
-    stream.read(g.texCoords1);
-
-    if (type == AssetType::SkinnedMesh) {
-      g.joints.resize(numVertices);
-      g.weights.resize(numVertices);
-      stream.read(g.joints);
-      stream.read(g.weights);
+    u32 size = 0;
+    stream.read(size);
+    if (size == 0) {
+      return Error("Mesh has no vertices");
     }
 
-    u32 numIndices = 0;
-    stream.read(numIndices);
+    g.positions.resize(size);
+    stream.read(g.positions);
 
-    if (numIndices == 0) {
+    stream.read(size);
+    g.normals.resize(size);
+    stream.read(g.normals);
+
+    stream.read(size);
+    g.tangents.resize(size);
+    stream.read(g.tangents);
+
+    stream.read(size);
+    g.texCoords0.resize(size);
+    stream.read(g.texCoords0);
+
+    stream.read(size);
+    g.texCoords1.resize(size);
+    stream.read(g.texCoords1);
+
+    stream.read(size);
+    g.joints.resize(size);
+    stream.read(g.joints);
+
+    stream.read(size);
+    g.weights.resize(size);
+    stream.read(g.weights);
+
+    stream.read(size);
+    if (size == 0) {
       return Error("Mesh does not have indices");
     }
 
-    mesh.geometries.at(i).indices.resize(numIndices);
+    mesh.geometries.at(i).indices.resize(size);
     stream.read(mesh.geometries.at(i).indices);
   }
 
@@ -119,11 +124,11 @@ Result<MeshAsset> AssetCache::loadMeshDataFromInputStream(const Path &path,
 
 Result<MeshAsset> AssetCache::loadMesh(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
-  if (meta.type != AssetType::Mesh && meta.type != AssetType::SkinnedMesh) {
-    return Error("Asset type is not mesh or skinned mesh");
+  if (meta.type != AssetType::Mesh) {
+    return Error("Asset type is not mesh");
   }
 
-  return loadMeshDataFromInputStream(getPathFromUuid(uuid), meta.type);
+  return loadMeshDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

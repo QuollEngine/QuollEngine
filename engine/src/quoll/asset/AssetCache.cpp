@@ -141,15 +141,6 @@ Result<void> AssetCache::loadAsset(const Path &path) {
     return {res.warnings()};
   }
 
-  if (meta.type == AssetType::SkinnedMesh) {
-    auto res = load<MeshAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
   if (meta.type == AssetType::Skeleton) {
     auto res = load<SkeletonAsset>(uuid);
 
