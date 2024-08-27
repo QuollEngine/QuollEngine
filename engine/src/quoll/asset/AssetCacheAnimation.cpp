@@ -11,21 +11,20 @@ Result<Path>
 AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   if (asset.uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
   auto metaRes = createAssetMeta(AssetType::Animation, asset.name, assetPath);
-  if (!metaRes.hasData()) {
-    return Result<Path>::Error("Cannot create animation asset: " + asset.name);
+  if (!metaRes) {
+    return Error("Cannot create animation asset: " + asset.name);
   }
 
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<Path>::Error("File cannot be opened for writing: " +
-                               assetPath.string());
+    return Error("File cannot be opened for writing: " + assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -49,7 +48,7 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
     file.write(keyframe.keyframeValues);
   }
 
-  return Result<Path>::Ok(assetPath, {});
+  return assetPath;
 }
 
 Result<AssetHandle<AnimationAsset>>
@@ -61,7 +60,7 @@ AssetCache::loadAnimationDataFromInputStream(const Path &path, const Uuid &uuid,
   stream.read(header);
   if (header.magic != AssetFileHeader::MagicConstant ||
       header.type != AssetType::Animation) {
-    return Result<AssetHandle<AnimationAsset>>::Error("Invalid file format");
+    return Error("Invalid file format");
   }
 
   AssetData<AnimationAsset> animation{};
@@ -88,15 +87,14 @@ AssetCache::loadAnimationDataFromInputStream(const Path &path, const Uuid &uuid,
     stream.read(keyframe.keyframeValues);
   }
 
-  return Result<AssetHandle<AnimationAsset>>::Ok(mRegistry.add(animation));
+  return mRegistry.add(animation);
 }
 
 Result<AssetHandle<AnimationAsset>>
 AssetCache::loadAnimation(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Animation) {
-    return Result<AssetHandle<AnimationAsset>>::Error(
-        "Asset type is not animation");
+    return Error("Asset type is not animation");
   }
 
   return loadAnimationDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
@@ -105,13 +103,12 @@ AssetCache::loadAnimation(const Uuid &uuid) {
 Result<AssetHandle<AnimationAsset>>
 AssetCache::getOrLoadAnimation(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<AssetHandle<AnimationAsset>>::Ok(
-        AssetHandle<AnimationAsset>());
+    return AssetHandle<AnimationAsset>();
   }
 
   auto handle = mRegistry.findHandleByUuid<AnimationAsset>(uuid);
   if (handle) {
-    return Result<AssetHandle<AnimationAsset>>::Ok(handle);
+    return handle;
   }
 
   return loadAnimation(uuid);

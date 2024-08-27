@@ -25,8 +25,8 @@ public:
 };
 
 TEST_F(AssetCacheEnvironmentTest, CreatesMetaFileFromAsset) {
-  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
-  auto specularMap = cache.loadTexture(specularUuid).getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid);
+  auto specularMap = cache.loadTexture(specularUuid);
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
   asset.name = "env-0";
@@ -42,8 +42,8 @@ TEST_F(AssetCacheEnvironmentTest, CreatesMetaFileFromAsset) {
 }
 
 TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
-  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
-  auto specularMap = cache.loadTexture(specularUuid).getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid);
+  auto specularMap = cache.loadTexture(specularUuid);
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
   asset.name = "env-0";
@@ -52,11 +52,10 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   asset.data.specularMap = specularMap;
 
   auto filePath = cache.createEnvironmentFromAsset(asset);
-  EXPECT_TRUE(filePath.hasData());
-  EXPECT_FALSE(filePath.hasError());
+  EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
-  quoll::InputBinaryStream file(filePath.getData());
+  quoll::InputBinaryStream file(filePath);
   EXPECT_TRUE(file.good());
   quoll::AssetFileHeader header;
   file.read(header);
@@ -75,8 +74,8 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
 
 TEST_F(AssetCacheEnvironmentTest,
        DoesNotLoadEnvironmentAssetIfEnvironmentTexturesCouldNotBeLoaded) {
-  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
-  auto specularMap = cache.loadTexture(specularUuid).getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid);
+  auto specularMap = cache.loadTexture(specularUuid);
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
@@ -85,14 +84,14 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
 
-  cache.getRegistry().remove(irradianceMap);
-  cache.getRegistry().remove(specularMap);
+  cache.getRegistry().remove(irradianceMap.data());
+  cache.getRegistry().remove(specularMap.data());
 
   {
     std::filesystem::remove(cache.getPathFromUuid(irradianceUuid));
     auto res = cache.loadEnvironment(asset.uuid);
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
     EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
   }
 
@@ -103,15 +102,15 @@ TEST_F(AssetCacheEnvironmentTest,
 
     auto res = cache.loadEnvironment(asset.uuid);
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
     EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
   }
 }
 
 TEST_F(AssetCacheEnvironmentTest,
        LoadsEnvironmentAssetWithTexturesIfTexturesAreNotLoaded) {
-  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
-  auto specularMap = cache.loadTexture(specularUuid).getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid);
+  auto specularMap = cache.loadTexture(specularUuid);
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
@@ -120,21 +119,20 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
 
-  cache.getRegistry().remove(irradianceMap);
-  cache.getRegistry().remove(specularMap);
+  cache.getRegistry().remove(irradianceMap.data());
+  cache.getRegistry().remove(specularMap.data());
 
   EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
 
   auto res = cache.loadEnvironment(asset.uuid);
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
   EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 2);
   EXPECT_GT(cache.getRegistry().count<quoll::EnvironmentAsset>(), 0);
 
-  const auto &environment = cache.getRegistry().get(res.getData());
+  const auto &environment = cache.getRegistry().get(res.data());
   EXPECT_NE(environment.irradianceMap,
             quoll::AssetHandle<quoll::TextureAsset>());
   EXPECT_NE(environment.specularMap, quoll::AssetHandle<quoll::TextureAsset>());
@@ -142,8 +140,8 @@ TEST_F(AssetCacheEnvironmentTest,
 
 TEST_F(AssetCacheEnvironmentTest,
        LoadsEnvironmentAssetWithExistingTexturesIfTexturesAreLoaded) {
-  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
-  auto specularMap = cache.loadTexture(specularUuid).getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid);
+  auto specularMap = cache.loadTexture(specularUuid);
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
@@ -156,14 +154,13 @@ TEST_F(AssetCacheEnvironmentTest,
 
   auto res = cache.loadEnvironment(asset.uuid);
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
   EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 2);
   EXPECT_GT(cache.getRegistry().count<quoll::EnvironmentAsset>(), 0);
 
-  const auto &environment = cache.getRegistry().get(res.getData());
+  const auto &environment = cache.getRegistry().get(res.data());
 
   EXPECT_EQ(environment.irradianceMap, irradianceMap);
   EXPECT_EQ(environment.specularMap, specularMap);

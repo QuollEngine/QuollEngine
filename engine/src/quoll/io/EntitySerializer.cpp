@@ -30,12 +30,12 @@ EntitySerializer::EntitySerializer(AssetRegistry &assetRegistry,
 
 Result<YAML::Node> EntitySerializer::serialize(Entity entity) {
   if (!mEntityDatabase.has<Id>(entity)) {
-    return Result<YAML::Node>::Error("Entity does not have an ID");
+    return Error("Entity does not have an ID");
   }
 
   auto node = createComponentsNode(entity);
 
-  return Result<YAML::Node>::Ok(node);
+  return node;
 }
 
 YAML::Node EntitySerializer::createComponentsNode(Entity entity) {

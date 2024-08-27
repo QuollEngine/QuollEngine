@@ -85,7 +85,7 @@ public:
 
   inline const Path &getAssetsPath() const { return mAssetsPath; }
 
-  Result<bool> preloadAssets(RenderStorage &renderStorage);
+  Result<void> preloadAssets(RenderStorage &renderStorage);
 
   AssetMeta getAssetMeta(const Uuid &uuid) const;
 
@@ -103,7 +103,7 @@ private:
 
   Result<Path> createAssetMeta(AssetType type, String name, Path path);
 
-  Result<bool> loadAsset(const Path &path);
+  Result<void> loadAsset(const Path &path);
 
 private:
   Result<AssetHandle<MaterialAsset>>

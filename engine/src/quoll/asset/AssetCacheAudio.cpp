@@ -16,7 +16,7 @@ Result<Path> AssetCache::createAudioFromSource(const Path &sourcePath,
                                                const Uuid &uuid) {
   if (uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   using co = std::filesystem::copy_options;
@@ -25,20 +25,20 @@ Result<Path> AssetCache::createAudioFromSource(const Path &sourcePath,
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
-    return Result<Path>::Error("Cannot create audio from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create audio from source: " +
+                 sourcePath.stem().string());
   }
 
   auto metaRes = createAssetMeta(AssetType::Audio,
                                  sourcePath.filename().string(), assetPath);
 
-  if (!metaRes.hasData()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
-    return Result<Path>::Error("Cannot create audio from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create audio from source: " +
+                 sourcePath.stem().string());
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<AudioAsset>> AssetCache::loadAudio(const Uuid &uuid) {
@@ -52,15 +52,13 @@ Result<AssetHandle<AudioAsset>> AssetCache::loadAudio(const Uuid &uuid) {
   std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
 
   if (stream.bad()) {
-    return Result<AssetHandle<AudioAsset>>::Error("Cannot load audio file: " +
-                                                  filePath.string());
+    return Error("Cannot load audio file: " + filePath.string());
   }
 
   std::ifstream::pos_type pos = stream.tellg();
 
   if (pos <= 0) {
-    return Result<AssetHandle<AudioAsset>>::Error(
-        "Could not open file: File is empty");
+    return Error("Could not open file: File is empty");
   }
 
   std::vector<char> bytes(pos);
@@ -75,7 +73,7 @@ Result<AssetHandle<AudioAsset>> AssetCache::loadAudio(const Uuid &uuid) {
   asset.type = AssetType::Audio;
   asset.data.bytes = bytes;
 
-  return Result<AssetHandle<AudioAsset>>::Ok(mRegistry.add(asset));
+  return mRegistry.add(asset);
 }
 
 } // namespace quoll

@@ -212,7 +212,7 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
 
     auto entityNode = serializer.serialize(entity);
 
-    createSceneFileWithEntity({entityNode.getData()});
+    createSceneFileWithEntity({entityNode});
   }
 
   sceneIO.loadScene(handle);

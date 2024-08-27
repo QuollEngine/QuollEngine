@@ -13,11 +13,10 @@ TEST_F(AssetCacheAudioTest, CreatesAudioFromSource) {
   auto uuid = quoll::Uuid::generate();
 
   auto filePath = cache.createAudioFromSource(audioPath, uuid);
-  EXPECT_TRUE(filePath.hasData());
-  EXPECT_FALSE(filePath.hasError());
+  EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
-  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+  EXPECT_EQ(filePath.data().filename().string().size(), 38);
 
   auto meta = cache.getAssetMeta(uuid);
   EXPECT_EQ(meta.type, quoll::AssetType::Audio);
@@ -32,11 +31,10 @@ TEST_F(AssetCacheAudioTest, LoadsWavAudioFileIntoRegistry) {
   auto filePath = cache.createAudioFromSource(audioPath, uuid);
   auto result = cache.loadAudio(uuid);
 
-  EXPECT_TRUE(result.hasData());
-  EXPECT_FALSE(result.hasError());
+  EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
 
-  auto handle = result.getData();
+  auto handle = result.data();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::AudioAsset>());
   const auto &asset = cache.getRegistry().getMeta(handle);
 
@@ -52,7 +50,5 @@ TEST_F(AssetCacheAudioTest, FileReturnsErrorIfAudioFileCannotBeOpened) {
   auto uuid = quoll::Uuid::generate();
 
   auto result = cache.loadAudio(uuid);
-  EXPECT_TRUE(result.hasError());
-  EXPECT_FALSE(result.hasWarnings());
-  EXPECT_FALSE(result.hasData());
+  EXPECT_FALSE(result);
 }

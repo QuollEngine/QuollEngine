@@ -13,11 +13,10 @@ TEST_F(AssetCacheSceneTest, CreatesSceneFromSource) {
   auto uuid = quoll::Uuid::generate();
   auto filePath =
       cache.createSceneFromSource(FixturesPath / "test.scene", uuid);
-  EXPECT_TRUE(filePath.hasData());
-  EXPECT_FALSE(filePath.hasError());
+  EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
-  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+  EXPECT_EQ(filePath.data().filename().string().size(), 38);
 
   auto meta = cache.getAssetMeta(uuid);
 
@@ -40,9 +39,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfTypeIsInvalid) {
   stream.close();
 
   auto res = cache.loadScene(uuid);
-  EXPECT_FALSE(res.hasData());
-  EXPECT_TRUE(res.hasError());
-  EXPECT_FALSE(res.hasWarnings());
+  EXPECT_FALSE(res);
 }
 
 TEST_F(AssetCacheSceneTest, LoadSceneFailsIfVersionIsInvalid) {
@@ -61,9 +58,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfVersionIsInvalid) {
   stream.close();
 
   auto res = cache.loadScene(uuid);
-  EXPECT_FALSE(res.hasData());
-  EXPECT_TRUE(res.hasError());
-  EXPECT_FALSE(res.hasWarnings());
+  EXPECT_FALSE(res);
 }
 
 TEST_F(AssetCacheSceneTest, LoadSceneFailsIfZonesFieldIsNotSequence) {
@@ -89,9 +84,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfZonesFieldIsNotSequence) {
     stream.close();
 
     auto res = cache.loadScene(uuid);
-    EXPECT_FALSE(res.hasData());
-    EXPECT_TRUE(res.hasError());
-    EXPECT_FALSE(res.hasWarnings());
+    EXPECT_FALSE(res);
   }
 }
 
@@ -117,8 +110,6 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfEntitiesFieldIsNotSequence) {
     stream.close();
 
     auto res = cache.loadScene(uuid);
-    EXPECT_FALSE(res.hasData());
-    EXPECT_TRUE(res.hasError());
-    EXPECT_FALSE(res.hasWarnings());
+    EXPECT_FALSE(res);
   }
 }

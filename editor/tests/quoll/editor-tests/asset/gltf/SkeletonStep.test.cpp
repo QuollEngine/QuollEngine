@@ -50,8 +50,7 @@ TEST_F(GLTFImporterSkeletonTest, DoesNotCreateSkeletonIfNoSkins) {
 
   auto res = importer.loadFromPath(path, {});
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
 
   EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 }
@@ -76,8 +75,7 @@ TEST_F(GLTFImporterSkeletonTest,
 
   auto res = importer.loadFromPath(path, {});
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
 
   EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 }
@@ -99,8 +97,7 @@ TEST_F(GLTFImporterSkeletonTest,
 
   auto res = importer.loadFromPath(path, {});
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
 
   EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 }
@@ -125,8 +122,7 @@ TEST_F(
 
   auto res = importer.loadFromPath(path, {});
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
 
   EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 }
@@ -152,8 +148,7 @@ TEST_F(GLTFImporterSkeletonTest,
 
   auto res = importer.loadFromPath(path, {});
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
 
   // First skin is created while second one is ignored
   EXPECT_EQ(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 1);
@@ -168,8 +163,7 @@ TEST_F(GLTFImporterSkeletonTest, CreatesSkeletonWithJoints) {
 
   auto res = importer.loadFromPath(path, {});
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res);
 
   EXPECT_GT(assetCache.getRegistry().count<quoll::SkeletonAsset>(), 0);
 

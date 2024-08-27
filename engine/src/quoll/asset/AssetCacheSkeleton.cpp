@@ -11,20 +11,19 @@ Result<Path>
 AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   if (asset.uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   auto assetPath = getPathFromUuid(asset.uuid);
   auto metaRes = createAssetMeta(AssetType::Skeleton, asset.name, assetPath);
-  if (!metaRes.hasData()) {
-    return Result<Path>::Error("Cannot create skeleton asset: " + asset.name);
+  if (!metaRes) {
+    return Error("Cannot create skeleton asset: " + asset.name);
   }
 
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<Path>::Error("File cannot be opened for writing: " +
-                               assetPath.string());
+    return Error("File cannot be opened for writing: " + assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -42,7 +41,7 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   file.write(asset.data.jointInverseBindMatrices);
   file.write(asset.data.jointNames);
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<SkeletonAsset>>
@@ -53,7 +52,7 @@ AssetCache::loadSkeletonDataFromInputStream(const Path &path, const Uuid &uuid,
   stream.read(header);
   if (header.magic != AssetFileHeader::MagicConstant ||
       header.type != AssetType::Skeleton) {
-    return Result<AssetHandle<SkeletonAsset>>::Error("Invalid file format");
+    return Error("Invalid file format");
   }
 
   AssetData<SkeletonAsset> skeleton{};
@@ -78,14 +77,13 @@ AssetCache::loadSkeletonDataFromInputStream(const Path &path, const Uuid &uuid,
   stream.read(skeleton.data.jointInverseBindMatrices);
   stream.read(skeleton.data.jointNames);
 
-  return Result<AssetHandle<SkeletonAsset>>::Ok(mRegistry.add(skeleton));
+  return mRegistry.add(skeleton);
 }
 
 Result<AssetHandle<SkeletonAsset>> AssetCache::loadSkeleton(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Skeleton) {
-    return Result<AssetHandle<SkeletonAsset>>::Error(
-        "Asset type is not skeleton");
+    return Error("Asset type is not skeleton");
   }
 
   return loadSkeletonDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
@@ -94,12 +92,12 @@ Result<AssetHandle<SkeletonAsset>> AssetCache::loadSkeleton(const Uuid &uuid) {
 Result<AssetHandle<SkeletonAsset>>
 AssetCache::getOrLoadSkeleton(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<AssetHandle<SkeletonAsset>>::Ok(AssetHandle<SkeletonAsset>());
+    return AssetHandle<SkeletonAsset>();
   }
 
   auto handle = mRegistry.findHandleByUuid<SkeletonAsset>(uuid);
   if (handle) {
-    return Result<AssetHandle<SkeletonAsset>>::Ok(handle);
+    return handle;
   }
 
   return loadSkeleton(uuid);

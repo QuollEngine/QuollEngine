@@ -118,7 +118,7 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
 
   auto filePath = cache.createSkeletonFromAsset(asset);
 
-  quoll::InputBinaryStream file(filePath.getData());
+  quoll::InputBinaryStream file(filePath);
   EXPECT_TRUE(file.good());
 
   quoll::AssetFileHeader header;
@@ -206,11 +206,11 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   auto filePath = cache.createSkeletonFromAsset(asset);
   auto handle = cache.loadSkeleton(asset.uuid);
 
-  EXPECT_NE(handle.getData(), quoll::AssetHandle<quoll::SkeletonAsset>());
+  EXPECT_NE(handle, quoll::AssetHandle<quoll::SkeletonAsset>());
 
-  auto &actual = cache.getRegistry().get(handle.getData());
+  auto &actual = cache.getRegistry().get(handle.data());
 
-  EXPECT_EQ(cache.getRegistry().getMeta(handle.getData()).name, asset.name);
+  EXPECT_EQ(cache.getRegistry().getMeta(handle.data()).name, asset.name);
 
   for (usize i = 0; i < actual.jointLocalPositions.size(); ++i) {
     EXPECT_EQ(actual.jointLocalPositions.at(i),

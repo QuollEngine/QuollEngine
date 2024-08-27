@@ -17,15 +17,14 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
 
   auto *ft = msdfgen::initializeFreetype();
   if (!ft) {
-    return Result<AssetData<FontAsset>>::Error("Failed to initialize freetype");
+    return Error("Failed to initialize freetype");
   }
 
   auto *font = msdfgen::loadFont(ft, path.string().c_str());
 
   if (font == nullptr) {
     msdfgen::deinitializeFreetype(ft);
-    return Result<AssetData<FontAsset>>::Error("Failed to load font: " +
-                                               path.string());
+    return Error("Failed to load font: " + path.string());
   }
 
   std::vector<GlyphGeometry> msdfGlyphs;
@@ -122,7 +121,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   msdfgen::destroyFont(font);
   msdfgen::deinitializeFreetype(ft);
 
-  return Result<AssetData<FontAsset>>::Ok(fontAsset);
+  return fontAsset;
 }
 
 } // namespace quoll

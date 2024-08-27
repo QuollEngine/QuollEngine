@@ -21,7 +21,7 @@ Result<Uuid> ImageLoader::loadFromPath(const Path &sourceAssetPath,
                          &channels, STBI_rgb_alpha);
 
   if (!data) {
-    return Result<Uuid>::Error(stbi_failure_reason());
+    return Error(stbi_failure_reason());
   }
 
   auto res = loadFromMemory(
@@ -89,17 +89,16 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
 
-  if (createdFileRes.hasError()) {
-    return Result<Uuid>::Error(createdFileRes.getError());
+  if (!createdFileRes) {
+    return createdFileRes.error();
   }
 
   auto loadRes = mAssetCache.loadTexture(asset.uuid);
-  if (loadRes.hasError()) {
-    return Result<Uuid>::Error(loadRes.getError());
+  if (!loadRes) {
+    return loadRes.error();
   }
 
-  return Result<Uuid>::Ok(
-      mAssetCache.getRegistry().getMeta(loadRes.getData()).uuid);
+  return mAssetCache.getRegistry().getMeta(loadRes.data()).uuid;
 }
 
 std::vector<u8> ImageLoader::generateMipMapsFromTextureData(

@@ -91,10 +91,10 @@ void loadMaterials(GLTFImportData &importData) {
 
     auto path = assetCache.createMaterialFromAsset(material);
     auto handle = assetCache.loadMaterial(material.uuid);
-    importData.materials.map.insert_or_assign(i, handle.getData());
+    importData.materials.map.insert_or_assign(i, handle);
 
     importData.outputUuids.insert_or_assign(
-        assetName, assetCache.getRegistry().getMeta(handle.getData()).uuid);
+        assetName, assetCache.getRegistry().getMeta(handle.data()).uuid);
   }
 }
 

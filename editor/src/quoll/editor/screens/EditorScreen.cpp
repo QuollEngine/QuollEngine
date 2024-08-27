@@ -77,11 +77,11 @@ void EditorScreen::start(const Project &rawProject) {
   AssetLoadStatusDialog loadStatusDialog("Loaded with warnings");
 
   if (res.hasWarnings()) {
-    for (const auto &warning : res.getWarnings()) {
+    for (const auto &warning : res.warnings()) {
       Engine::getUserLogger().warning() << warning;
     }
 
-    loadStatusDialog.setMessages(res.getWarnings());
+    loadStatusDialog.setMessages(res.warnings());
     loadStatusDialog.show();
   }
 
@@ -158,15 +158,15 @@ void EditorScreen::start(const Project &rawProject) {
     std::vector<String> messages;
     for (auto &change : changes) {
       auto res = assetManager.loadSourceIfChanged(change.path);
-      if (res.hasError()) {
-        messages.push_back(res.getError());
+      if (!res) {
+        messages.push_back(res.error());
 
-        Engine::getUserLogger().error() << res.getError();
+        Engine::getUserLogger().error() << res.error().message();
       } else {
-        messages.insert(messages.end(), res.getWarnings().begin(),
-                        res.getWarnings().end());
+        messages.insert(messages.end(), res.warnings().begin(),
+                        res.warnings().end());
 
-        for (const auto &warning : res.getWarnings()) {
+        for (const auto &warning : res.warnings()) {
           Engine::getUserLogger().warning() << warning;
         }
       }

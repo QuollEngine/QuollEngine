@@ -61,11 +61,10 @@ TEST_F(AssetCacheInputMapTest, CreateInputMapFromSource) {
   auto uuid = quoll::Uuid::generate();
   auto filePath =
       cache.createInputMapFromSource(FixturesPath / "test.inputmap", uuid);
-  EXPECT_TRUE(filePath.hasData());
-  EXPECT_FALSE(filePath.hasError());
+  EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
-  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+  EXPECT_EQ(filePath.data().filename().string().size(), 38);
 
   auto meta = cache.getAssetMeta(uuid);
 
@@ -77,12 +76,12 @@ TEST_F(AssetCacheInputMapTest,
        LoadInputMapFailsIfProvidedPropertiesAreInvalid) {
   {
     auto res = loadInputMap([](auto &node) { node["version"] = "0.2"; });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
     auto res = loadInputMap([](auto &node) { node["type"] = "not-input-map"; });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   // Control schemes
@@ -93,18 +92,18 @@ TEST_F(AssetCacheInputMapTest,
 
       node["schemes"].push_back(item);
     });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
     auto res = loadInputMap([](auto &node) { node["schemes"] = "test"; });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
     auto res =
         loadInputMap([](auto &node) { node["schemes"].push_back("test"); });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -114,7 +113,7 @@ TEST_F(AssetCacheInputMapTest,
       node["schemes"].push_back(item);
     });
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   // Commands
@@ -126,18 +125,18 @@ TEST_F(AssetCacheInputMapTest,
 
       node["commands"].push_back(item);
     });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
     auto res = loadInputMap([](auto &node) { node["commands"] = "test"; });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
     auto res =
         loadInputMap([](auto &node) { node["commands"].push_back("test"); });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -148,7 +147,7 @@ TEST_F(AssetCacheInputMapTest,
       node["commands"].push_back(item);
     });
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -159,7 +158,7 @@ TEST_F(AssetCacheInputMapTest,
       node["commands"].push_back(item);
     });
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -170,19 +169,19 @@ TEST_F(AssetCacheInputMapTest,
       node["commands"].push_back(item);
     });
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   // Bindings
   {
     auto res = loadInputMap([](auto &node) { node["bindings"] = "test"; });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
     auto res =
         loadInputMap([](auto &node) { node["bindings"].push_back("test"); });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -194,7 +193,7 @@ TEST_F(AssetCacheInputMapTest,
 
       node["bindings"].push_back(item);
     });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -206,7 +205,7 @@ TEST_F(AssetCacheInputMapTest,
 
       node["bindings"].push_back(item);
     });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -218,7 +217,7 @@ TEST_F(AssetCacheInputMapTest,
 
       node["bindings"].push_back(item);
     });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -230,7 +229,7 @@ TEST_F(AssetCacheInputMapTest,
 
       node["bindings"].push_back(item);
     });
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 }
 
@@ -251,7 +250,7 @@ TEST_F(AssetCacheInputMapTest,
     binding["binding"] = "RandomText";
     node["bindings"].push_back(binding);
   });
-  EXPECT_TRUE(res.hasError());
+  EXPECT_FALSE(res);
 }
 
 // Boolean
@@ -276,7 +275,7 @@ TEST_F(AssetCacheInputMapTest,
 
     node["bindings"].push_back(binding);
   });
-  EXPECT_TRUE(res.hasError());
+  EXPECT_FALSE(res);
 }
 
 TEST_F(AssetCacheInputMapTest,
@@ -298,7 +297,7 @@ TEST_F(AssetCacheInputMapTest,
     node["bindings"].push_back(binding);
   });
 
-  EXPECT_TRUE(res.hasData());
+  EXPECT_TRUE(res);
 }
 
 TEST_F(AssetCacheInputMapTest,
@@ -320,7 +319,7 @@ TEST_F(AssetCacheInputMapTest,
     node["bindings"].push_back(binding);
   });
 
-  EXPECT_TRUE(res.hasData());
+  EXPECT_TRUE(res);
 }
 
 // Axis2d
@@ -342,7 +341,7 @@ TEST_F(AssetCacheInputMapTest,
     node["bindings"].push_back(binding);
   });
 
-  EXPECT_TRUE(res.hasError());
+  EXPECT_FALSE(res);
 }
 
 TEST_F(AssetCacheInputMapTest, LoadInputMapSupportsPassingAxis2dValueToAxis2d) {
@@ -362,7 +361,7 @@ TEST_F(AssetCacheInputMapTest, LoadInputMapSupportsPassingAxis2dValueToAxis2d) {
     node["bindings"].push_back(binding);
   });
 
-  EXPECT_TRUE(res.hasData());
+  EXPECT_TRUE(res);
 }
 
 TEST_F(AssetCacheInputMapTest,
@@ -384,7 +383,7 @@ TEST_F(AssetCacheInputMapTest,
       node["bindings"].push_back(binding);
     });
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -404,7 +403,7 @@ TEST_F(AssetCacheInputMapTest,
       node["bindings"].push_back(binding);
     });
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 }
 
@@ -427,7 +426,7 @@ TEST_F(AssetCacheInputMapTest,
     node["bindings"].push_back(binding);
   });
 
-  EXPECT_TRUE(res.hasError());
+  EXPECT_FALSE(res);
 }
 
 TEST_F(AssetCacheInputMapTest,
@@ -449,7 +448,7 @@ TEST_F(AssetCacheInputMapTest,
     node["bindings"].push_back(binding);
   });
 
-  EXPECT_TRUE(res.hasData());
+  EXPECT_TRUE(res);
 }
 
 TEST_F(
@@ -473,7 +472,7 @@ TEST_F(
       node["bindings"].push_back(binding);
     });
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 
   {
@@ -497,7 +496,7 @@ TEST_F(
       node["bindings"].push_back(binding);
     });
 
-    EXPECT_TRUE(res.hasError());
+    EXPECT_FALSE(res);
   }
 }
 
@@ -522,7 +521,7 @@ TEST_F(
     node["bindings"].push_back(binding);
   });
 
-  EXPECT_TRUE(res.hasError());
+  EXPECT_FALSE(res);
 }
 
 TEST_F(AssetCacheInputMapTest,
@@ -545,7 +544,7 @@ TEST_F(AssetCacheInputMapTest,
     node["bindings"].push_back(binding);
   });
 
-  EXPECT_TRUE(res.hasError());
+  EXPECT_FALSE(res);
 }
 
 TEST_F(AssetCacheInputMapTest,
@@ -644,11 +643,10 @@ TEST_F(AssetCacheInputMapTest,
     }
   });
 
-  EXPECT_FALSE(res.hasError());
-  EXPECT_TRUE(res.hasData());
+  EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
-  const auto &inputMap = cache.getRegistry().get(res.getData());
+  const auto &inputMap = cache.getRegistry().get(res.data());
 
   EXPECT_EQ(inputMap.schemes.size(), 2);
   EXPECT_EQ(inputMap.schemes.at(0).name, "Gamepad");
@@ -727,14 +725,13 @@ TEST_F(AssetCacheInputMapTest,
   auto uuid = quoll::Uuid::generate();
   auto result = loadInputMap([](auto &node) {}, uuid);
 
-  EXPECT_FALSE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
-  EXPECT_TRUE(result.hasData());
+  EXPECT_TRUE(result);
 
-  auto handle = result.getData();
+  auto handle = result;
 
   {
-    auto &inputMap = cache.getRegistry().get(handle);
+    auto &inputMap = cache.getRegistry().get(handle.data());
     EXPECT_EQ(inputMap.schemes.size(), 1);
   }
 
@@ -747,9 +744,9 @@ TEST_F(AssetCacheInputMapTest,
         },
         uuid);
 
-    EXPECT_EQ(result.getData(), handle);
+    EXPECT_EQ(result, handle);
 
-    auto &inputMap = cache.getRegistry().get(handle);
+    auto &inputMap = cache.getRegistry().get(handle.data());
     EXPECT_EQ(inputMap.schemes.size(), 2);
   }
 }

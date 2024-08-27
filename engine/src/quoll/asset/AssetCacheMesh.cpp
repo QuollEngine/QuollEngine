@@ -10,21 +10,20 @@ Result<Path>
 AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   if (asset.uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   auto assetPath = getPathFromUuid(asset.uuid);
 
   auto metaRes = createAssetMeta(asset.type, asset.name, assetPath);
-  if (!metaRes.hasData()) {
-    return Result<Path>::Error("Cannot create mesh asset: " + asset.name);
+  if (!metaRes) {
+    return Error("Cannot create mesh asset: " + asset.name);
   }
 
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<Path>::Error("File cannot be opened for writing: " +
-                               assetPath.string());
+    return Error("File cannot be opened for writing: " + assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -54,7 +53,7 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
     file.write(geometry.indices);
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<MeshAsset>>
@@ -65,7 +64,7 @@ AssetCache::loadMeshDataFromInputStream(const Path &path, const Uuid &uuid,
   stream.read(header);
   if (header.magic != AssetFileHeader::MagicConstant ||
       header.type != AssetType::Mesh && header.type != AssetType::SkinnedMesh) {
-    return Result<AssetHandle<MeshAsset>>::Error("Invalid file format");
+    return Error("Invalid file format");
   }
 
   std::vector<String> warnings;
@@ -85,8 +84,7 @@ AssetCache::loadMeshDataFromInputStream(const Path &path, const Uuid &uuid,
     stream.read(numVertices);
 
     if (numVertices == 0) {
-      return Result<AssetHandle<MeshAsset>>::Error(
-          "Mesh geometry has no vertices");
+      return Error("Mesh geometry has no vertices");
     }
 
     auto &g = mesh.data.geometries.at(i);
@@ -114,22 +112,20 @@ AssetCache::loadMeshDataFromInputStream(const Path &path, const Uuid &uuid,
     stream.read(numIndices);
 
     if (numIndices == 0) {
-      return Result<AssetHandle<MeshAsset>>::Error(
-          "Mesh does not have indices");
+      return Error("Mesh does not have indices");
     }
 
     mesh.data.geometries.at(i).indices.resize(numIndices);
     stream.read(mesh.data.geometries.at(i).indices);
   }
 
-  return Result<AssetHandle<MeshAsset>>::Ok(mRegistry.add(mesh), warnings);
+  return {mRegistry.add(mesh), warnings};
 }
 
 Result<AssetHandle<MeshAsset>> AssetCache::loadMesh(const Uuid &uuid) {
   auto meta = getAssetMeta(uuid);
   if (meta.type != AssetType::Mesh && meta.type != AssetType::SkinnedMesh) {
-    return Result<AssetHandle<MeshAsset>>::Error(
-        "Asset type is not mesh or skinned mesh");
+    return Error("Asset type is not mesh or skinned mesh");
   }
 
   return loadMeshDataFromInputStream(getPathFromUuid(uuid), uuid, meta);
@@ -137,12 +133,12 @@ Result<AssetHandle<MeshAsset>> AssetCache::loadMesh(const Uuid &uuid) {
 
 Result<AssetHandle<MeshAsset>> AssetCache::getOrLoadMesh(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<AssetHandle<MeshAsset>>::Ok(AssetHandle<MeshAsset>());
+    return AssetHandle<MeshAsset>();
   }
 
   auto handle = mRegistry.findHandleByUuid<MeshAsset>(uuid);
   if (handle) {
-    return Result<AssetHandle<MeshAsset>>::Ok(handle);
+    return handle;
   }
 
   return loadMesh(uuid);

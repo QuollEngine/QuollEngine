@@ -12,11 +12,10 @@ TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
   auto sourcePath = FixturesPath / "valid-font.ttf";
   auto filePath = cache.createFontFromSource(sourcePath, uuid);
 
-  EXPECT_TRUE(filePath.hasData());
-  EXPECT_FALSE(filePath.hasError());
+  EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
-  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+  EXPECT_EQ(filePath.data().filename().string().size(), 38);
 
   auto meta = cache.getAssetMeta(uuid);
 
@@ -31,11 +30,10 @@ TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
 
   auto result = cache.loadFont(uuid);
 
-  EXPECT_TRUE(result.hasData());
-  EXPECT_FALSE(result.hasError());
+  EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
 
-  auto handle = result.getData();
+  auto handle = result.data();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::FontAsset>());
   const auto &asset = cache.getRegistry().getMeta(handle);
 
@@ -51,11 +49,10 @@ TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
 
   auto result = cache.loadFont(uuid);
 
-  EXPECT_TRUE(result.hasData());
-  EXPECT_FALSE(result.hasError());
+  EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
 
-  auto handle = result.getData();
+  auto handle = result.data();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::FontAsset>());
   const auto &asset = cache.getRegistry().getMeta(handle);
 
@@ -66,7 +63,5 @@ TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
 
 TEST_F(AssetCacheFontTest, FileReturnsErrorIfFontFileCannotBeOpened) {
   auto result = cache.loadFont(quoll::Uuid::generate());
-  EXPECT_TRUE(result.hasError());
-  EXPECT_FALSE(result.hasWarnings());
-  EXPECT_FALSE(result.hasData());
+  EXPECT_FALSE(result);
 }

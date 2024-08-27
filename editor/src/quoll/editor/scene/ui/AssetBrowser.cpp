@@ -302,22 +302,22 @@ void AssetBrowser::reload() { mNeedsRefresh = true; }
 void AssetBrowser::handleAssetImport(AssetManager &assetManager) {
   auto res = AssetLoader(assetManager).loadFromFileDialog(mCurrentDirectory);
 
-  if (res.hasError()) {
+  if (!res) {
     mStatusDialog.setTitle("Import failed");
-    mStatusDialog.setMessages({res.getError()});
+    mStatusDialog.setMessages({res.error()});
     mStatusDialog.show();
 
-    Engine::getUserLogger().error() << res.getError();
+    Engine::getUserLogger().error() << res.error().message();
 
     return;
   }
 
   if (res.hasWarnings()) {
     mStatusDialog.setTitle("Import successful with warnings");
-    mStatusDialog.setMessages(res.getWarnings());
+    mStatusDialog.setMessages(res.warnings());
     mStatusDialog.show();
 
-    for (const auto &warning : res.getWarnings()) {
+    for (const auto &warning : res.warnings()) {
       Engine::getUserLogger().warning() << warning;
     }
   }

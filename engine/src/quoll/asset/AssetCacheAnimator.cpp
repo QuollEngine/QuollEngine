@@ -29,7 +29,7 @@ Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
                                                   const Uuid &uuid) {
   if (uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   using co = std::filesystem::copy_options;
@@ -38,27 +38,27 @@ Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
-    return Result<Path>::Error("Cannot create animator from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create animator from source: " +
+                 sourcePath.stem().string());
   }
 
   auto metaRes = createAssetMeta(AssetType::Animator,
                                  sourcePath.filename().string(), assetPath);
 
-  if (!metaRes.hasData()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
-    return Result<Path>::Error("Cannot create animator from source: " +
-                               sourcePath.stem().string());
+    return Error("Cannot create animator from source: " +
+                 sourcePath.stem().string());
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<Path>
 AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
   if (asset.uuid.isEmpty()) {
     QuollAssert(false, "Invalid uuid provided");
-    return Result<Path>::Error("Invalid uuid provided");
+    return Error("Invalid uuid provided");
   }
 
   YAML::Node root;
@@ -92,12 +92,12 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
   stream.close();
 
   auto metaRes = createAssetMeta(AssetType::Animator, asset.name, assetPath);
-  if (metaRes.hasError()) {
+  if (!metaRes) {
     std::filesystem::remove(assetPath);
     return metaRes;
   }
 
-  return Result<Path>::Ok(assetPath);
+  return assetPath;
 }
 
 Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
@@ -108,17 +108,15 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
   stream.close();
 
   if (root["type"].as<String>("") != "animator") {
-    return Result<AssetHandle<AnimatorAsset>>::Error("Type must be animator");
+    return Error("Type must be animator");
   }
 
   if (root["version"].as<String>("") != "0.1") {
-    return Result<AssetHandle<AnimatorAsset>>::Error(
-        "Version is not supported");
+    return Error("Version is not supported");
   }
 
   if (!root["states"] || !root["states"].IsMap()) {
-    return Result<AssetHandle<AnimatorAsset>>::Error(
-        "`states` field must be a map");
+    return Error("`states` field must be a map");
   }
 
   auto meta = getAssetMeta(uuid);
@@ -150,20 +148,20 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
       auto animation = output["animation"].as<Uuid>(Uuid{});
       if (!animation.isEmpty()) {
         auto res = getOrLoadAnimation(animation);
-        if (res.hasData()) {
-          state.animation = res.getData();
+        if (res) {
+          state.animation = res;
         }
 
         state.speed = std::max(output["speed"].as<f32>(1.0f), 0.0f);
         state.loopMode = deserializeLoopMode(output["loopMode"].as<String>(""));
 
         if (res.hasWarnings()) {
-          warnings.insert(warnings.end(), res.getWarnings().begin(),
-                          res.getWarnings().end());
+          warnings.insert(warnings.end(), res.warnings().begin(),
+                          res.warnings().end());
         }
 
-        if (res.hasError()) {
-          warnings.push_back(res.getError());
+        if (!res) {
+          warnings.push_back(res.error());
         }
       }
     }
@@ -269,23 +267,23 @@ Result<AssetHandle<AnimatorAsset>> AssetCache::loadAnimator(const Uuid &uuid) {
 
   if (!handle) {
     auto newHandle = mRegistry.add(asset);
-    return Result<AssetHandle<AnimatorAsset>>::Ok(newHandle, warnings);
+    return {newHandle, warnings};
   }
 
   mRegistry.update(handle, asset);
 
-  return Result<AssetHandle<AnimatorAsset>>::Ok(handle, warnings);
+  return {handle, warnings};
 }
 
 Result<AssetHandle<AnimatorAsset>>
 AssetCache::getOrLoadAnimator(const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    return Result<AssetHandle<AnimatorAsset>>::Ok(AssetHandle<AnimatorAsset>());
+    return AssetHandle<AnimatorAsset>();
   }
 
   auto handle = mRegistry.findHandleByUuid<AnimatorAsset>(uuid);
   if (handle) {
-    return Result<AssetHandle<AnimatorAsset>>::Ok(handle);
+    return handle;
   }
 
   return loadAnimator(uuid);

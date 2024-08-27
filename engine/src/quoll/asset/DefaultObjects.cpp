@@ -175,12 +175,12 @@ AssetData<FontAsset> createDefaultFont() {
   MsdfLoader loader;
 
   auto font =
-      loader.loadFontData(Engine::getFontsPath() / "Roboto-Regular.ttf");
+      loader.loadFontData(Engine::getFontsPath() / "Roboto-Regular.ttf").data();
 
-  font.getData().name = "Roboto (default)";
-  font.getData().uuid = Uuid("quoll::engine/fonts/Roboto-Regular");
+  font.name = "Roboto (default)";
+  font.uuid = Uuid("quoll::engine/fonts/Roboto-Regular");
 
-  return font.getData();
+  return font;
 }
 
 } // namespace quoll::default_objects

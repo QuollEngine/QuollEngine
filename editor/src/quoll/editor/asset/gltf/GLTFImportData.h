@@ -57,7 +57,7 @@ struct GLTFImportData {
 
   GLTFToAsset<PointLight> pointLights;
 
-  Result<Path> outputPath = Result<Path>::Error("Empty");
+  Result<Path> outputPath = Error("Empty");
 
   UUIDMap outputUuids;
 };

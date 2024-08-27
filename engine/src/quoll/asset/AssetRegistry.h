@@ -16,6 +16,7 @@
 #include "AssetHandle.h"
 #include "AssetMap.h"
 #include "AssetType.h"
+#include "Result.h"
 
 namespace quoll {
 
