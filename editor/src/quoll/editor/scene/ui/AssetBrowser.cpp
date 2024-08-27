@@ -55,7 +55,6 @@ static EditorIcon getIconFromAssetType(AssetType type) {
   case AssetType::Material:
     return EditorIcon::Material;
   case AssetType::Mesh:
-  case AssetType::SkinnedMesh:
     return EditorIcon::Mesh;
   case AssetType::Skeleton:
     return EditorIcon::Skeleton;
@@ -171,7 +170,6 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
         bool dndAllowed = entry.assetType == AssetType::Prefab ||
                           entry.assetType == AssetType::Mesh ||
-                          entry.assetType == AssetType::SkinnedMesh ||
                           entry.assetType == AssetType::Material ||
                           entry.assetType == AssetType::Skeleton ||
                           entry.assetType == AssetType::Texture ||

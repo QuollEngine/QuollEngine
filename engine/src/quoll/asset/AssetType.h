@@ -7,7 +7,6 @@ enum class AssetType : u8 {
   Material,
   Texture,
   Mesh,
-  SkinnedMesh,
   Skeleton,
   Animation,
   Audio,
@@ -30,8 +29,6 @@ inline const String getAssetTypeString(AssetType type) {
     return "font";
   case AssetType::Mesh:
     return "mesh";
-  case AssetType::SkinnedMesh:
-    return "skinned mesh";
   case AssetType::Animation:
     return "animation";
   case AssetType::Animator:

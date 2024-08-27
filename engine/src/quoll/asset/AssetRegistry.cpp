@@ -131,23 +131,25 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       usize vertexSize = g.FieldName.size();                                   \
       vbSize += vertexSize * sizeof(Type);                                     \
     }                                                                          \
-    rhi::BufferDescription description;                                        \
-    description.usage = rhi::BufferUsage::Vertex;                              \
-    description.size = vbSize;                                                 \
-    description.data = nullptr;                                                \
-    description.debugName = mesh.name + " vertices";                           \
-    auto buffer = renderStorage.createBuffer(description);                     \
                                                                                \
-    auto *data = static_cast<Type *>(buffer.map());                            \
-    mesh.data.vertexBufferOffsets.push_back(0);                                \
-    usize offset = 0;                                                          \
-    for (auto &g : mesh.data.geometries) {                                     \
-      memcpy(data + offset, g.FieldName.data(),                                \
-             g.FieldName.size() * sizeof(Type));                               \
-      offset += g.FieldName.size();                                            \
+    if (vbSize > 0) {                                                          \
+      rhi::BufferDescription description;                                      \
+      description.usage = rhi::BufferUsage::Vertex;                            \
+      description.size = vbSize;                                               \
+      description.data = nullptr;                                              \
+      description.debugName = mesh.name + " " #FieldName;                      \
+      auto buffer = renderStorage.createBuffer(description);                   \
+      auto *data = static_cast<Type *>(buffer.map());                          \
+      mesh.data.vertexBufferOffsets.push_back(0);                              \
+      usize offset = 0;                                                        \
+      for (auto &g : mesh.data.geometries) {                                   \
+        memcpy(data + offset, g.FieldName.data(),                              \
+               g.FieldName.size() * sizeof(Type));                             \
+        offset += g.FieldName.size();                                          \
+      }                                                                        \
+      buffer.unmap();                                                          \
+      mesh.data.vertexBuffers.push_back(buffer.getHandle());                   \
     }                                                                          \
-    buffer.unmap();                                                            \
-    mesh.data.vertexBuffers.push_back(buffer.getHandle());                     \
   }
 
     CreateBuffer(positions, glm::vec3);
@@ -155,11 +157,8 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
     CreateBuffer(tangents, glm::vec4);
     CreateBuffer(texCoords0, glm::vec2);
     CreateBuffer(texCoords1, glm::vec2);
-
-    if (mesh.type == AssetType::SkinnedMesh) {
-      CreateBuffer(joints, glm::uvec4);
-      CreateBuffer(weights, glm::vec4);
-    }
+    CreateBuffer(joints, glm::uvec4);
+    CreateBuffer(weights, glm::vec4);
 
     {
       rhi::BufferDescription description;

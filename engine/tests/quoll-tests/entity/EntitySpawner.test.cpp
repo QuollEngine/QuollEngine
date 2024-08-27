@@ -4,7 +4,6 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/entity/EntitySpawner.h"
 #include "quoll/renderer/Mesh.h"
-#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/scene/Children.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/scene/Parent.h"
@@ -142,7 +141,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   // Create three skinned meshes
   for (u32 i = 2; i < 5; ++i) {
     quoll::AssetData<quoll::MeshAsset> meshAsset{};
-    meshAsset.type = quoll::AssetType::SkinnedMesh;
+    meshAsset.type = quoll::AssetType::Mesh;
 
     quoll::PrefabComponent<quoll::AssetHandle<quoll::MeshAsset>> mesh{};
     mesh.entity = i;
@@ -273,7 +272,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (u32 i = 2; i < 5; ++i) {
     auto entity = res.at(i);
 
-    const auto &mesh = db.get<quoll::SkinnedMesh>(entity);
+    const auto &mesh = db.get<quoll::Mesh>(entity);
     EXPECT_EQ(mesh.handle, asset.data.meshes.at(i).value);
   }
 
@@ -375,7 +374,7 @@ TEST_F(
     asset.data.transforms.push_back(transform);
 
     quoll::AssetData<quoll::MeshAsset> meshData{};
-    meshData.type = quoll::AssetType::SkinnedMesh;
+    meshData.type = quoll::AssetType::Mesh;
 
     quoll::PrefabComponent<quoll::AssetHandle<quoll::MeshAsset>> mesh{};
     mesh.entity = 1;

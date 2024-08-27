@@ -20,7 +20,6 @@
 #include "quoll/physx/PhysxInstance.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/MeshRenderer.h"
-#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/renderer/TextureAsset.h"
 #include "quoll/scene/AutoAspectRatio.h"
@@ -277,40 +276,6 @@ TEST_F(EntitySerializerTest, CreatesMeshRendererWithNoMaterials) {
   EXPECT_TRUE(node["meshRenderer"]);
   EXPECT_TRUE(node["meshRenderer"]["materials"]);
   EXPECT_EQ(node["meshRenderer"]["materials"].size(), 0);
-}
-
-// Skinned mesh
-TEST_F(EntitySerializerTest,
-       DoesNotCreateSkinnedMeshFieldIfSkinnedMeshComponentDoesNotExist) {
-  auto entity = entityDatabase.create();
-  auto node = entitySerializer.createComponentsNode(entity);
-  EXPECT_FALSE(node["skinnedMesh"]);
-}
-
-TEST_F(EntitySerializerTest,
-       DoesNotCreateSkinnedMeshFieldIfSkinnedMeshAssetIsNotInRegistry) {
-  static constexpr quoll::AssetHandle<quoll::MeshAsset> NonExistentMeshHandle{
-      45};
-
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::SkinnedMesh>(entity, {NonExistentMeshHandle});
-
-  auto node = entitySerializer.createComponentsNode(entity);
-  EXPECT_FALSE(node["skinnedMesh"]);
-}
-
-TEST_F(EntitySerializerTest,
-       CreatesSkinnedMeshFieldIfSkinnedMeshAssetIsRegistry) {
-  quoll::AssetData<quoll::MeshAsset> mesh{};
-  mesh.uuid = quoll::Uuid("skinnedMesh.mesh");
-  auto handle = assetRegistry.add(mesh);
-
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::SkinnedMesh>(entity, {handle});
-
-  auto node = entitySerializer.createComponentsNode(entity);
-  EXPECT_TRUE(node["mesh"]);
-  EXPECT_EQ(node["mesh"].as<quoll::String>(""), "skinnedMesh.mesh");
 }
 
 // Skinned mesh renderer

@@ -13,7 +13,6 @@
 #include "MeshVertexLayout.h"
 #include "RenderStorage.h"
 #include "SceneRenderer.h"
-#include "SkinnedMesh.h"
 #include "StandardPushConstants.h"
 
 namespace quoll {
@@ -802,8 +801,8 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   // Skinned Meshes
   for (auto [entity, skeleton, world, mesh, renderer] :
-       entityDatabase.view<Skeleton, WorldTransform, SkinnedMesh,
-                           SkinnedMeshRenderer>()) {
+       entityDatabase
+           .view<Skeleton, WorldTransform, Mesh, SkinnedMeshRenderer>()) {
     const auto &asset = mAssetRegistry.get(mesh.handle);
 
     std::vector<rhi::DeviceAddress> materials;

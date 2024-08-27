@@ -432,7 +432,7 @@ void loadMeshes(GLTFImportData &importData) {
       return;
     }
 
-    mesh.type = isSkinnedMesh ? AssetType::SkinnedMesh : AssetType::Mesh;
+    mesh.type = AssetType::Mesh;
     mesh.name = getGLTFAssetName(importData, assetName);
     mesh.uuid = getOrCreateGLTFUuid(importData, assetName);
 

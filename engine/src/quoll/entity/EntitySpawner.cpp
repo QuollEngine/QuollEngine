@@ -18,7 +18,6 @@
 #include "quoll/physx/PhysxInstance.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/MeshRenderer.h"
-#include "quoll/renderer/SkinnedMesh.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
 #include "quoll/scene/AutoAspectRatio.h"
 #include "quoll/scene/Camera.h"
@@ -117,8 +116,6 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
     auto type = mAssetRegistry.getMeta(pMesh.value).type;
     if (type == AssetType::Mesh) {
       mEntityDatabase.set<Mesh>(entity, {pMesh.value});
-    } else if (type == AssetType::SkinnedMesh) {
-      mEntityDatabase.set<SkinnedMesh>(entity, {pMesh.value});
     }
   }
 
