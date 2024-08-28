@@ -3,31 +3,6 @@
 
 namespace quoll {
 
-Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
-                                               const Uuid &uuid) {
-  using co = std::filesystem::copy_options;
-
-  auto assetPath = getPathFromUuid(uuid);
-
-  std::error_code code;
-  if (!std::filesystem::copy_file(sourcePath, assetPath, co::overwrite_existing,
-                                  code)) {
-    return Error("Cannot create scene from source: " +
-                 sourcePath.stem().string() + "; " + code.message());
-  }
-
-  auto metaRes = createAssetMeta(AssetType::Scene,
-                                 sourcePath.filename().string(), assetPath);
-
-  if (!metaRes) {
-    std::filesystem::remove(assetPath);
-    return Error("Cannot create scene from source: " +
-                 sourcePath.stem().string());
-  }
-
-  return assetPath;
-}
-
 Result<SceneAsset> AssetCache::loadScene(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 

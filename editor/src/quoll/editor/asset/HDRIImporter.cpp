@@ -141,7 +141,7 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
   environment.data.specularMap = specularCubemap;
   environment.data.irradianceMap = irradianceCubemap;
 
-  auto createdFileRes = mAssetCache.createEnvironmentFromAsset(environment);
+  auto createdFileRes = mAssetCache.createFromData(environment);
 
   if (!createdFileRes) {
     return createdFileRes.error();
@@ -378,7 +378,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
       CubemapSides, asset.data.levels, asset.data.data.data());
   device->destroyTexture(irradianceCubemap);
 
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
+  auto createdFileRes = mAssetCache.createFromData(asset);
   if (!createdFileRes) {
     return createdFileRes.error();
   }
@@ -472,7 +472,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
       CubemapSides, asset.data.levels, asset.data.data.data());
   device->destroyTexture(specularCubemap);
 
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
+  auto createdFileRes = mAssetCache.createFromData(asset);
   if (!createdFileRes) {
     return createdFileRes.error();
   }

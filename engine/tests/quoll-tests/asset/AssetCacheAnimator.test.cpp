@@ -15,8 +15,8 @@ public:
 
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
   auto uuid = quoll::Uuid::generate();
-  auto filePath =
-      cache.createAnimatorFromSource(FixturesPath / "test.animator", uuid);
+  auto filePath = cache.createFromSource<quoll::AnimatorAsset>(
+      FixturesPath / "test.animator", uuid);
   EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
@@ -68,7 +68,7 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   asset.data.states.push_back(stateWalk);
   asset.data.states.push_back(stateRun);
 
-  auto filePath = cache.createAnimatorFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
 
   EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
@@ -536,7 +536,7 @@ TEST_F(AssetCacheAnimatorTest,
        LoadAnimatorLoadsAnimationsBeforeLoadingAnimator) {
   quoll::AssetData<quoll::AnimationAsset> animData{};
   animData.uuid = quoll::Uuid::generate();
-  auto path = cache.createAnimationFromAsset(animData).data();
+  auto path = cache.createFromData(animData).data();
 
   YAML::Node node;
   node["version"] = "0.1";
@@ -553,7 +553,7 @@ TEST_F(AssetCacheAnimatorTest,
   stream.close();
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.createAnimatorFromSource(FilePath, uuid);
+  auto filePath = cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid);
 
   auto res = cache.load<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
@@ -578,7 +578,7 @@ TEST_F(AssetCacheAnimatorTest,
   animData.name = "old-name";
   animData.uuid = quoll::Uuid::generate();
   animData.data.states.push_back({});
-  auto animatorPath = cache.createAnimatorFromAsset(animData);
+  auto animatorPath = cache.createFromData(animData);
 
   auto result = cache.load<quoll::AnimatorAsset>(animData.uuid);
   EXPECT_TRUE(result);
@@ -593,7 +593,7 @@ TEST_F(AssetCacheAnimatorTest,
   }
 
   animData.name = "new-name";
-  cache.createAnimatorFromAsset(animData);
+  cache.createFromData(animData);
 
   {
     auto res = cache.load<quoll::AnimatorAsset>(animData.uuid);

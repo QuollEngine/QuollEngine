@@ -18,7 +18,8 @@ public:
   quoll::AssetHandle<quoll::LuaScriptAsset>
   loadLuaScript(quoll::String filename) {
     auto uuid = quoll::Uuid::generate();
-    cache.createLuaScriptFromSource(FixturesPath / filename, uuid);
+    cache.createFromSource<quoll::LuaScriptAsset>(FixturesPath / filename,
+                                                  uuid);
     return cache.load<quoll::LuaScriptAsset>(uuid);
   }
 

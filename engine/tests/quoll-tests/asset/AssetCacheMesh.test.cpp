@@ -88,7 +88,7 @@ public:
 
 TEST_F(AssetCacheMeshTest, CreatesMetaFileFromAsset) {
   auto asset = createRandomizedMeshAsset();
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto meta = cache.getAssetMeta(asset.uuid);
 
   EXPECT_EQ(meta.type, quoll::AssetType::Mesh);
@@ -97,7 +97,7 @@ TEST_F(AssetCacheMeshTest, CreatesMetaFileFromAsset) {
 
 TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
   auto asset = createRandomizedMeshAsset();
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
 
   quoll::InputBinaryStream file(filePath);
   EXPECT_TRUE(file.good());
@@ -204,7 +204,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoVertices) {
     geometry.positions.clear();
   }
 
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(handle);
 }
@@ -215,14 +215,14 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoIndices) {
     geometry.indices.clear();
   }
 
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(handle);
 }
 
 TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto handleRes = cache.load<quoll::MeshAsset>(asset.uuid);
   auto handle = handleRes.data();
 
@@ -257,7 +257,7 @@ TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
 TEST_F(AssetCacheMeshTest, CreateMeshAssetWithSkinData) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
 
   quoll::InputBinaryStream file(filePath);
   EXPECT_TRUE(file.good());
@@ -364,7 +364,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoVertices) {
     geometry.positions.clear();
   }
 
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(handle);
 }
@@ -375,7 +375,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
     geometry.indices.clear();
   }
 
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(handle);
 }
@@ -383,7 +383,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
 TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
-  auto filePath = cache.createMeshFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto handle = cache.load<quoll::MeshAsset>(asset.uuid).data();
   EXPECT_NE(handle, quoll::AssetHandle<quoll::MeshAsset>());
   auto &mesh = cache.getRegistry().get(handle);

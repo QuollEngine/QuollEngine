@@ -69,7 +69,8 @@ public:
     AssetCacheTestBase::SetUp();
 
     textureUuid = quoll::Uuid::generate();
-    cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", textureUuid);
+    cache.createFromSource<quoll::TextureAsset>(FixturesPath / "1x1-2d.ktx",
+                                                textureUuid);
   }
 
   quoll::Uuid textureUuid;
@@ -77,7 +78,7 @@ public:
 
 TEST_F(AssetCacheMaterialTest, CreatesMetaFileFromAsset) {
   auto asset = createMaterialAsset(true);
-  auto filePath = cache.createMaterialFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto meta = cache.getAssetMeta(asset.uuid);
 
   EXPECT_EQ(meta.type, quoll::AssetType::Material);
@@ -86,7 +87,7 @@ TEST_F(AssetCacheMaterialTest, CreatesMetaFileFromAsset) {
 
 TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
   auto asset = createMaterialAsset(true);
-  auto filePath = cache.createMaterialFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
 
   ASSERT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
@@ -166,7 +167,7 @@ TEST_F(AssetCacheMaterialTest,
        CreatesMaterialWithoutTexturesFromAssetIfReferencedTexturesAreInvalid) {
   auto asset = createMaterialAsset(false);
 
-  auto filePath = cache.createMaterialFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
 
   {
     quoll::InputBinaryStream file(filePath);
@@ -241,7 +242,7 @@ TEST_F(AssetCacheMaterialTest,
 TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
   auto asset = createMaterialAsset(true);
 
-  auto assetFile = cache.createMaterialFromAsset(asset);
+  auto assetFile = cache.createFromData(asset);
   EXPECT_TRUE(assetFile);
   EXPECT_FALSE(assetFile.hasWarnings());
 
@@ -291,7 +292,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
 TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
   auto asset = createMaterialAsset(false);
 
-  auto assetFile = cache.createMaterialFromAsset(asset);
+  auto assetFile = cache.createFromData(asset);
   EXPECT_TRUE(assetFile);
   EXPECT_FALSE(assetFile.hasWarnings());
 
@@ -343,7 +344,7 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
   quoll::AssetData<quoll::MaterialAsset> material{};
   material.uuid = quoll::Uuid::generate();
   material.data.baseColorTexture = texture;
-  auto path = cache.createMaterialFromAsset(material);
+  auto path = cache.createFromData(material);
 
   cache.getRegistry().remove(texture);
   EXPECT_FALSE(cache.getRegistry().has(texture));

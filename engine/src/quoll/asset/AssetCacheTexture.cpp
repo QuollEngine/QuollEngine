@@ -74,56 +74,20 @@ static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
   }
 }
 
-Result<Path> AssetCache::createTextureFromSource(const Path &sourcePath,
-                                                 const Uuid &uuid) {
-  if (uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  using co = std::filesystem::copy_options;
-
-  auto assetPath = getPathFromUuid(uuid);
-
-  if (!std::filesystem::copy_file(sourcePath, assetPath,
-                                  co::overwrite_existing)) {
-    return Error("Cannot create texture from source: " +
-                 sourcePath.stem().string());
-  }
-
-  auto metaRes = createAssetMeta(AssetType::Texture,
-                                 sourcePath.filename().string(), assetPath);
-
-  if (!metaRes) {
-    std::filesystem::remove(assetPath);
-    return Error("Cannot create texture from source: " +
-                 sourcePath.stem().string());
-  }
-
-  return assetPath;
-}
-
-Result<Path>
-AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
-  if (asset.uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
+Result<void> AssetCache::createTextureFromData(const TextureAsset &data,
+                                               const Path &assetPath) {
   ktxTextureCreateInfo createInfo{};
-  createInfo.baseWidth = asset.data.width;
-  createInfo.baseHeight = asset.data.height;
+  createInfo.baseWidth = data.width;
+  createInfo.baseHeight = data.height;
   createInfo.baseDepth = 1;
   createInfo.numDimensions = 2;
   createInfo.numFaces =
-      asset.data.type == quoll::TextureAssetType::Cubemap ? CubemapSides : 1;
-  createInfo.numLayers = asset.data.layers;
-  createInfo.numLevels = static_cast<u32>(asset.data.levels.size());
+      data.type == quoll::TextureAssetType::Cubemap ? CubemapSides : 1;
+  createInfo.numLayers = data.layers;
+  createInfo.numLevels = static_cast<u32>(data.levels.size());
   createInfo.isArray = KTX_FALSE;
   createInfo.generateMipmaps = KTX_FALSE;
-  createInfo.vkFormat = getVulkanFormatFromFormat(asset.data.format);
-
-  auto assetPath = getPathFromUuid(asset.uuid);
+  createInfo.vkFormat = getVulkanFormatFromFormat(data.format);
 
   ktxTexture2 *texture = nullptr;
   {
@@ -137,10 +101,9 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
 
   auto *baseTexture = reinterpret_cast<ktxTexture *>(texture);
 
-  const auto *baseData =
-      static_cast<const ktx_uint8_t *>(asset.data.data.data());
-  for (usize i = 0; i < asset.data.levels.size(); ++i) {
-    const auto &level = asset.data.levels.at(i);
+  const auto *baseData = static_cast<const ktx_uint8_t *>(data.data.data());
+  for (usize i = 0; i < data.levels.size(); ++i) {
+    const auto &level = data.levels.at(i);
 
     usize faceOffset = 0;
     usize faceSize = level.size / createInfo.numFaces;
@@ -161,15 +124,9 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
     }
   }
 
-  auto metaRes = createAssetMeta(AssetType::Texture, asset.name, assetPath);
-  if (!metaRes) {
-    std::filesystem::remove(assetPath);
-    return metaRes;
-  }
-
   ktxTexture_Destroy(baseTexture);
 
-  return assetPath;
+  return Ok();
 }
 
 Result<TextureAsset> AssetCache::loadTexture(const Uuid &uuid) {

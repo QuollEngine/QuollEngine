@@ -54,7 +54,7 @@ quoll::AssetData<quoll::AnimationAsset> createRandomizedAnimation() {
 
 TEST_F(AssetCacheAnimationTest, CreatesMetaFileFromAsset) {
   auto asset = createRandomizedAnimation();
-  auto filePath = cache.createAnimationFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto meta = cache.getAssetMeta(asset.uuid);
 
   EXPECT_EQ(meta.type, quoll::AssetType::Animation);
@@ -63,7 +63,7 @@ TEST_F(AssetCacheAnimationTest, CreatesMetaFileFromAsset) {
 
 TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   auto asset = createRandomizedAnimation();
-  auto filePath = cache.createAnimationFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   quoll::InputBinaryStream file(filePath);
   EXPECT_TRUE(file.good());
 
@@ -117,7 +117,7 @@ TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
 TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   auto asset = createRandomizedAnimation();
 
-  auto filePath = cache.createAnimationFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto handle = cache.load<quoll::AnimationAsset>(asset.uuid);
   EXPECT_TRUE(handle);
   EXPECT_NE(handle, quoll::AssetHandle<quoll::AnimationAsset>());

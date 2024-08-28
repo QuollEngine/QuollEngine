@@ -6,20 +6,8 @@
 
 namespace quoll {
 
-Result<Path>
-AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
-  if (asset.uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  auto assetPath = getPathFromUuid(asset.uuid);
-
-  auto metaRes = createAssetMeta(AssetType::Prefab, asset.name, assetPath);
-  if (!metaRes) {
-    return Error("Cannot create prefab asset: " + asset.name);
-  }
-
+Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
+                                              const Path &assetPath) {
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -34,9 +22,9 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   std::unordered_map<AssetHandle<MaterialAsset>, u32> localMaterialMap;
   {
     std::vector<Uuid> assetPaths;
-    assetPaths.reserve(asset.data.meshes.size());
+    assetPaths.reserve(data.meshes.size());
 
-    for (auto &component : asset.data.meshRenderers) {
+    for (auto &component : data.meshRenderers) {
       for (auto material : component.value.materials) {
         if (localMaterialMap.find(material) == localMaterialMap.end()) {
           auto uuid = mRegistry.getMeta(material).uuid;
@@ -47,7 +35,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
       }
     }
 
-    for (auto &component : asset.data.skinnedMeshRenderers) {
+    for (auto &component : data.skinnedMeshRenderers) {
       for (auto material : component.value.materials) {
         if (localMaterialMap.find(material) == localMaterialMap.end()) {
           auto uuid = mRegistry.getMeta(material).uuid;
@@ -65,9 +53,9 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   std::unordered_map<AssetHandle<MeshAsset>, u32> localMeshMap;
   {
     std::vector<Uuid> assetPaths;
-    assetPaths.reserve(asset.data.meshes.size());
+    assetPaths.reserve(data.meshes.size());
 
-    for (auto &component : asset.data.meshes) {
+    for (auto &component : data.meshes) {
       if (localMeshMap.find(component.value) == localMeshMap.end()) {
         auto uuid = mRegistry.getMeta(component.value).uuid;
         localMeshMap.insert_or_assign(component.value,
@@ -83,9 +71,9 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   std::map<AssetHandle<SkeletonAsset>, u32> localSkeletonMap;
   {
     std::vector<Uuid> assetPaths;
-    assetPaths.reserve(asset.data.skeletons.size());
+    assetPaths.reserve(data.skeletons.size());
 
-    for (auto &component : asset.data.skeletons) {
+    for (auto &component : data.skeletons) {
       auto uuid = mRegistry.getMeta(component.value).uuid;
 
       if (localSkeletonMap.find(component.value) == localSkeletonMap.end()) {
@@ -102,9 +90,9 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   std::map<AssetHandle<AnimationAsset>, u32> localAnimationMap;
   {
     std::vector<Uuid> assetPaths;
-    assetPaths.reserve(asset.data.animations.size());
+    assetPaths.reserve(data.animations.size());
 
-    for (auto handle : asset.data.animations) {
+    for (auto handle : data.animations) {
       auto uuid = mRegistry.getMeta(handle).uuid;
 
       if (localAnimationMap.find(handle) == localAnimationMap.end()) {
@@ -121,9 +109,9 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   std::map<AssetHandle<AnimatorAsset>, u32> localAnimatorMap;
   {
     std::vector<Uuid> assetPaths;
-    assetPaths.reserve(asset.data.animators.size());
+    assetPaths.reserve(data.animators.size());
 
-    for (auto &component : asset.data.animators) {
+    for (auto &component : data.animators) {
       auto uuid = mRegistry.getMeta(component.value).uuid;
 
       if (localAnimatorMap.find(component.value) == localAnimatorMap.end()) {
@@ -139,12 +127,12 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
 
   // Load component data
   {
-    auto numComponents = static_cast<u32>(asset.data.transforms.size());
+    auto numComponents = static_cast<u32>(data.transforms.size());
 
     file.write(numComponents);
     for (u32 i = 0; i < numComponents; ++i) {
-      const auto &transform = asset.data.transforms.at(i).value;
-      file.write(asset.data.transforms.at(i).entity);
+      const auto &transform = data.transforms.at(i).value;
+      file.write(data.transforms.at(i).entity);
 
       file.write(transform.position);
       file.write(transform.rotation);
@@ -154,28 +142,28 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<u32>(asset.data.names.size());
+    auto numComponents = static_cast<u32>(data.names.size());
     file.write(numComponents);
 
-    for (auto &name : asset.data.names) {
+    for (auto &name : data.names) {
       file.write(name.entity);
       file.write(name.value);
     }
   }
 
   {
-    auto numComponents = static_cast<u32>(asset.data.meshes.size());
+    auto numComponents = static_cast<u32>(data.meshes.size());
     file.write(numComponents);
-    for (auto &component : asset.data.meshes) {
+    for (auto &component : data.meshes) {
       file.write(component.entity);
       file.write(localMeshMap.at(component.value));
     }
   }
 
   {
-    auto numComponents = static_cast<u32>(asset.data.meshRenderers.size());
+    auto numComponents = static_cast<u32>(data.meshRenderers.size());
     file.write(numComponents);
-    for (auto &component : asset.data.meshRenderers) {
+    for (auto &component : data.meshRenderers) {
       file.write(component.entity);
 
       file.write(static_cast<u32>(component.value.materials.size()));
@@ -186,10 +174,9 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents =
-        static_cast<u32>(asset.data.skinnedMeshRenderers.size());
+    auto numComponents = static_cast<u32>(data.skinnedMeshRenderers.size());
     file.write(numComponents);
-    for (auto &component : asset.data.skinnedMeshRenderers) {
+    for (auto &component : data.skinnedMeshRenderers) {
       file.write(component.entity);
 
       file.write(static_cast<u32>(component.value.materials.size()));
@@ -200,38 +187,38 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<u32>(asset.data.skeletons.size());
+    auto numComponents = static_cast<u32>(data.skeletons.size());
     file.write(numComponents);
-    for (auto &component : asset.data.skeletons) {
+    for (auto &component : data.skeletons) {
       file.write(component.entity);
       file.write(localSkeletonMap.at(component.value));
     }
   }
 
   {
-    auto numComponents = static_cast<u32>(asset.data.animations.size());
+    auto numComponents = static_cast<u32>(data.animations.size());
     file.write(numComponents);
 
-    for (auto &component : asset.data.animations) {
+    for (auto &component : data.animations) {
       file.write(localAnimationMap.at(component));
     }
   }
 
   {
-    auto numComponents = static_cast<u32>(asset.data.animators.size());
+    auto numComponents = static_cast<u32>(data.animators.size());
     file.write(numComponents);
 
-    for (auto &component : asset.data.animators) {
+    for (auto &component : data.animators) {
       file.write(component.entity);
       file.write(localAnimatorMap.at(component.value));
     }
   }
 
   {
-    auto numComponents = static_cast<u32>(asset.data.directionalLights.size());
+    auto numComponents = static_cast<u32>(data.directionalLights.size());
     file.write(numComponents);
 
-    for (auto &light : asset.data.directionalLights) {
+    for (auto &light : data.directionalLights) {
       file.write(light.entity);
       file.write(light.value.color);
       file.write(light.value.intensity);
@@ -239,10 +226,10 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
-    auto numComponents = static_cast<u32>(asset.data.pointLights.size());
+    auto numComponents = static_cast<u32>(data.pointLights.size());
     file.write(numComponents);
 
-    for (auto &light : asset.data.pointLights) {
+    for (auto &light : data.pointLights) {
       file.write(light.entity);
       file.write(light.value.color);
       file.write(light.value.intensity);
@@ -250,7 +237,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     }
   }
 
-  return assetPath;
+  return Ok();
 }
 
 Result<PrefabAsset>

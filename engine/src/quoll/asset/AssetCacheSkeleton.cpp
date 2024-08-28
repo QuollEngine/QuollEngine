@@ -7,19 +7,8 @@
 
 namespace quoll {
 
-Result<Path>
-AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
-  if (asset.uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  auto assetPath = getPathFromUuid(asset.uuid);
-  auto metaRes = createAssetMeta(AssetType::Skeleton, asset.name, assetPath);
-  if (!metaRes) {
-    return Error("Cannot create skeleton asset: " + asset.name);
-  }
-
+Result<void> AssetCache::createSkeletonFromData(const SkeletonAsset &data,
+                                                const Path &assetPath) {
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -31,17 +20,17 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   header.magic = AssetFileHeader::MagicConstant;
   file.write(header);
 
-  auto numJoints = static_cast<u32>(asset.data.jointLocalPositions.size());
+  auto numJoints = static_cast<u32>(data.jointLocalPositions.size());
   file.write(numJoints);
 
-  file.write(asset.data.jointLocalPositions);
-  file.write(asset.data.jointLocalRotations);
-  file.write(asset.data.jointLocalScales);
-  file.write(asset.data.jointParents);
-  file.write(asset.data.jointInverseBindMatrices);
-  file.write(asset.data.jointNames);
+  file.write(data.jointLocalPositions);
+  file.write(data.jointLocalRotations);
+  file.write(data.jointLocalScales);
+  file.write(data.jointParents);
+  file.write(data.jointInverseBindMatrices);
+  file.write(data.jointNames);
 
-  return assetPath;
+  return Ok();
 }
 
 Result<SkeletonAsset>

@@ -59,8 +59,8 @@ public:
 
 TEST_F(AssetCacheInputMapTest, CreateInputMapFromSource) {
   auto uuid = quoll::Uuid::generate();
-  auto filePath =
-      cache.createInputMapFromSource(FixturesPath / "test.inputmap", uuid);
+  auto filePath = cache.createFromSource<quoll::InputMapAsset>(
+      FixturesPath / "test.inputmap", uuid);
   EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 

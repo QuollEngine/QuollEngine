@@ -25,50 +25,16 @@ static AnimationLoopMode deserializeLoopMode(String loopMode) {
   return AnimationLoopMode::None;
 }
 
-Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
-                                                  const Uuid &uuid) {
-  if (uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  using co = std::filesystem::copy_options;
-
-  auto assetPath = getPathFromUuid(uuid);
-
-  if (!std::filesystem::copy_file(sourcePath, assetPath,
-                                  co::overwrite_existing)) {
-    return Error("Cannot create animator from source: " +
-                 sourcePath.stem().string());
-  }
-
-  auto metaRes = createAssetMeta(AssetType::Animator,
-                                 sourcePath.filename().string(), assetPath);
-
-  if (!metaRes) {
-    std::filesystem::remove(assetPath);
-    return Error("Cannot create animator from source: " +
-                 sourcePath.stem().string());
-  }
-
-  return assetPath;
-}
-
-Result<Path>
-AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
-  if (asset.uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
+Result<void> AssetCache::createAnimatorFromData(const AnimatorAsset &data,
+                                                const Path &assetPath) {
   YAML::Node root;
   root["version"] = "0.1";
   root["type"] = "animator";
-  root["initial"] = asset.data.states.at(asset.data.initialState).name;
+  root["initial"] = data.states.at(data.initialState).name;
 
   auto statesNode = root["states"];
 
-  for (const auto &state : asset.data.states) {
+  for (const auto &state : data.states) {
     auto stateNode = statesNode[state.name];
     stateNode["output"]["type"] = "animation";
     stateNode["output"]["animation"] = getAssetUuid(state.animation);
@@ -79,25 +45,17 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
       YAML::Node transitionNode(YAML::NodeType::Map);
       transitionNode["type"] = "event";
       transitionNode["event"] = transition.eventName;
-      transitionNode["target"] = asset.data.states.at(transition.target).name;
+      transitionNode["target"] = data.states.at(transition.target).name;
 
       stateNode["on"].push_back(transitionNode);
     }
   }
 
-  auto assetPath = getPathFromUuid(asset.uuid);
-
   std::ofstream stream(assetPath);
   stream << root;
   stream.close();
 
-  auto metaRes = createAssetMeta(AssetType::Animator, asset.name, assetPath);
-  if (!metaRes) {
-    std::filesystem::remove(assetPath);
-    return metaRes;
-  }
-
-  return assetPath;
+  return Ok();
 }
 
 Result<AnimatorAsset> AssetCache::loadAnimator(const Uuid &uuid) {

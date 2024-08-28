@@ -9,7 +9,8 @@ public:
   quoll::Result<quoll::AssetHandle<quoll::LuaScriptAsset>>
   loadFromSource(quoll::Path sourcePath) {
     auto uuid = quoll::Uuid::generate();
-    auto cachePath = cache.createLuaScriptFromSource(sourcePath, uuid);
+    auto cachePath =
+        cache.createFromSource<quoll::LuaScriptAsset>(sourcePath, uuid);
 
     return cache.load<quoll::LuaScriptAsset>(uuid);
   }
@@ -21,7 +22,8 @@ TEST_F(AssetCacheLuaScriptTest, CreateLuaScriptFromSource) {
   auto scriptPath = FixturesPath / "script-asset-valid.lua";
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.createLuaScriptFromSource(scriptPath, uuid);
+  auto filePath =
+      cache.createFromSource<quoll::LuaScriptAsset>(scriptPath, uuid);
   EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
@@ -102,7 +104,7 @@ TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
 TEST_F(AssetCacheLuaScriptTest,
        UpdatesExistingLuaScriptIfAssetWithUuidAlreadyExists) {
   auto uuid1 = quoll::Uuid::generate();
-  auto filePath = cache.createLuaScriptFromSource(
+  auto filePath = cache.createFromSource<quoll::LuaScriptAsset>(
       FixturesPath / "component-script.lua", uuid1);
 
   auto result = cache.load<quoll::LuaScriptAsset>(uuid1);
@@ -116,8 +118,8 @@ TEST_F(AssetCacheLuaScriptTest,
     EXPECT_EQ(script.name, "component-script.lua");
   }
 
-  cache.createLuaScriptFromSource(FixturesPath / "component-script-2.lua",
-                                  uuid1);
+  cache.createFromSource<quoll::LuaScriptAsset>(
+      FixturesPath / "component-script-2.lua", uuid1);
 
   {
     auto result = cache.load<quoll::LuaScriptAsset>(uuid1);

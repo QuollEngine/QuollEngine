@@ -11,8 +11,8 @@ public:
 
 TEST_F(AssetCacheSceneTest, CreatesSceneFromSource) {
   auto uuid = quoll::Uuid::generate();
-  auto filePath =
-      cache.createSceneFromSource(FixturesPath / "test.scene", uuid);
+  auto filePath = cache.createFromSource<quoll::SceneAsset>(
+      FixturesPath / "test.scene", uuid);
   EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 

@@ -14,10 +14,10 @@ public:
     irradianceUuid = quoll::Uuid::generate();
     specularUuid = quoll::Uuid::generate();
 
-    cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx",
-                                  irradianceUuid);
-    cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx",
-                                  specularUuid);
+    cache.createFromSource<quoll::TextureAsset>(
+        FixturesPath / "1x1-cubemap.ktx", irradianceUuid);
+    cache.createFromSource<quoll::TextureAsset>(
+        FixturesPath / "1x1-cubemap.ktx", specularUuid);
   }
 
   quoll::Uuid irradianceUuid;
@@ -34,7 +34,7 @@ TEST_F(AssetCacheEnvironmentTest, CreatesMetaFileFromAsset) {
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
 
-  auto filePath = cache.createEnvironmentFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto meta = cache.getAssetMeta(asset.uuid);
 
   EXPECT_EQ(meta.type, quoll::AssetType::Environment);
@@ -51,7 +51,7 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
 
-  auto filePath = cache.createEnvironmentFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
@@ -82,7 +82,7 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.uuid = quoll::Uuid::generate();
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset);
+  auto createRes = cache.createFromData(asset);
 
   cache.getRegistry().remove(irradianceMap.data());
   cache.getRegistry().remove(specularMap.data());
@@ -96,8 +96,8 @@ TEST_F(AssetCacheEnvironmentTest,
   }
 
   {
-    cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx",
-                                  irradianceUuid);
+    cache.createFromSource<quoll::TextureAsset>(
+        FixturesPath / "1x1-cubemap.ktx", irradianceUuid);
     std::filesystem::remove(cache.getPathFromUuid(specularUuid));
 
     auto res = cache.load<quoll::EnvironmentAsset>(asset.uuid);
@@ -117,7 +117,7 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.uuid = quoll::Uuid::generate();
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset);
+  auto createRes = cache.createFromData(asset);
 
   cache.getRegistry().remove(irradianceMap.data());
   cache.getRegistry().remove(specularMap.data());
@@ -148,7 +148,7 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.uuid = quoll::Uuid::generate();
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset);
+  auto createRes = cache.createFromData(asset);
 
   EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 2);
 

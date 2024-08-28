@@ -436,7 +436,7 @@ void loadMeshes(GLTFImportData &importData) {
     mesh.name = getGLTFAssetName(importData, assetName);
     mesh.uuid = getOrCreateGLTFUuid(importData, assetName);
 
-    auto path = assetCache.createMeshFromAsset(mesh);
+    auto path = assetCache.createFromData(mesh);
 
     auto handle = assetCache.load<quoll::MeshAsset>(mesh.uuid);
     importData.meshes.map.insert_or_assign(i, handle);
