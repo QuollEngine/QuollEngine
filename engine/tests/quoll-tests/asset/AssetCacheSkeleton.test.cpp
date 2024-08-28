@@ -60,7 +60,7 @@ TEST_F(AssetCacheSkeletonTest, CreatesMetaFileFromAsset) {
     }
   }
 
-  auto filePath = cache.createSkeletonFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto meta = cache.getAssetMeta(asset.uuid);
 
   EXPECT_EQ(meta.type, quoll::AssetType::Skeleton);
@@ -116,7 +116,7 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
     }
   }
 
-  auto filePath = cache.createSkeletonFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
 
   quoll::InputBinaryStream file(filePath);
   EXPECT_TRUE(file.good());
@@ -203,7 +203,7 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
     }
   }
 
-  auto filePath = cache.createSkeletonFromAsset(asset);
+  auto filePath = cache.createFromData(asset);
   auto handle = cache.load<quoll::SkeletonAsset>(asset.uuid);
 
   EXPECT_NE(handle, quoll::AssetHandle<quoll::SkeletonAsset>());

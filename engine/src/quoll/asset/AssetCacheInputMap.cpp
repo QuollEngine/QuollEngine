@@ -284,33 +284,4 @@ Result<InputMapAsset> AssetCache::loadInputMap(const Uuid &uuid) {
   return asset;
 }
 
-Result<Path> AssetCache::createInputMapFromSource(const Path &sourcePath,
-                                                  const Uuid &uuid) {
-  if (uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  using co = std::filesystem::copy_options;
-
-  auto assetPath = getPathFromUuid(uuid);
-
-  if (!std::filesystem::copy_file(sourcePath, assetPath,
-                                  co::overwrite_existing)) {
-    return Error("Cannot create input map from source: " +
-                 sourcePath.stem().string());
-  }
-
-  auto metaRes = createAssetMeta(AssetType::InputMap,
-                                 sourcePath.filename().string(), assetPath);
-
-  if (!metaRes) {
-    std::filesystem::remove(assetPath);
-    return Error("Cannot create input map from source: " +
-                 sourcePath.stem().string());
-  }
-
-  return assetPath;
-}
-
 } // namespace quoll

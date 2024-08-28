@@ -87,7 +87,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
   asset.data.levels = levels;
   asset.data.format = format;
 
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
+  auto createdFileRes = mAssetCache.createFromData(asset);
 
   if (!createdFileRes) {
     return createdFileRes.error();

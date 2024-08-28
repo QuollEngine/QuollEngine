@@ -7,20 +7,8 @@
 
 namespace quoll {
 
-Result<Path>
-AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
-  if (asset.uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  auto assetPath = getPathFromUuid(asset.uuid);
-
-  auto metaRes = createAssetMeta(AssetType::Animation, asset.name, assetPath);
-  if (!metaRes) {
-    return Error("Cannot create animation asset: " + asset.name);
-  }
-
+Result<void> AssetCache::createAnimationFromData(const AnimationAsset &data,
+                                                 const Path &assetPath) {
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -32,11 +20,11 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   header.magic = AssetFileHeader::MagicConstant;
   file.write(header);
 
-  file.write(asset.data.time);
-  u32 numKeyframes = static_cast<u32>(asset.data.keyframes.size());
+  file.write(data.time);
+  u32 numKeyframes = static_cast<u32>(data.keyframes.size());
   file.write(numKeyframes);
 
-  for (auto &keyframe : asset.data.keyframes) {
+  for (auto &keyframe : data.keyframes) {
     file.write(keyframe.target);
     file.write(keyframe.interpolation);
     file.write(keyframe.jointTarget);
@@ -48,7 +36,7 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
     file.write(keyframe.keyframeValues);
   }
 
-  return assetPath;
+  return Ok();
 }
 
 Result<AnimationAsset>

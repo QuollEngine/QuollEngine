@@ -6,22 +6,10 @@
 
 namespace quoll {
 
-Result<Path> AssetCache::createEnvironmentFromAsset(
-    const AssetData<EnvironmentAsset> &asset) {
-  if (asset.uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  auto assetPath = getPathFromUuid(asset.uuid);
-
-  auto metaRes = createAssetMeta(AssetType::Environment, asset.name, assetPath);
-  if (!metaRes) {
-    return Error("Cannot create environment asset: " + asset.name);
-  }
-
-  auto irradianceMapUuid = mRegistry.getMeta(asset.data.irradianceMap).uuid;
-  auto specularMapUuid = mRegistry.getMeta(asset.data.specularMap).uuid;
+Result<void> AssetCache::createEnvironmentFromData(const EnvironmentAsset &data,
+                                                   const Path &assetPath) {
+  auto irradianceMapUuid = mRegistry.getMeta(data.irradianceMap).uuid;
+  auto specularMapUuid = mRegistry.getMeta(data.specularMap).uuid;
 
   OutputBinaryStream stream(assetPath);
   AssetFileHeader header{};
@@ -32,7 +20,7 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
   stream.write(irradianceMapUuid);
   stream.write(specularMapUuid);
 
-  return assetPath;
+  return Ok();
 }
 
 Result<EnvironmentAsset>

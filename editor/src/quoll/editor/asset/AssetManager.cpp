@@ -344,7 +344,8 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
 
   if (sourceAssetPath.extension() == ".ktx2") {
     auto uuid = getOrCreateUuidFromMap(uuids, "root");
-    auto createRes = mAssetCache.createTextureFromSource(sourceAssetPath, uuid);
+    auto createRes =
+        mAssetCache.createFromSource<TextureAsset>(sourceAssetPath, uuid);
     if (!createRes) {
       return createRes.error();
     }
@@ -373,7 +374,8 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
 Result<UUIDMap> AssetManager::loadSourceAudio(const Path &sourceAssetPath,
                                               const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
-  auto createRes = mAssetCache.createAudioFromSource(sourceAssetPath, uuid);
+  auto createRes =
+      mAssetCache.createFromSource<AudioAsset>(sourceAssetPath, uuid);
   if (!createRes) {
     return createRes.error();
   }
@@ -390,7 +392,8 @@ Result<UUIDMap> AssetManager::loadSourceAudio(const Path &sourceAssetPath,
 Result<UUIDMap> AssetManager::loadSourceScript(const Path &sourceAssetPath,
                                                const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
-  auto createRes = mAssetCache.createLuaScriptFromSource(sourceAssetPath, uuid);
+  auto createRes =
+      mAssetCache.createFromSource<LuaScriptAsset>(sourceAssetPath, uuid);
   if (!createRes) {
     return createRes.error();
   }
@@ -408,7 +411,8 @@ Result<UUIDMap> AssetManager::loadSourceScript(const Path &sourceAssetPath,
 Result<UUIDMap> AssetManager::loadSourceFont(const Path &sourceAssetPath,
                                              const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
-  auto createRes = mAssetCache.createFontFromSource(sourceAssetPath, uuid);
+  auto createRes =
+      mAssetCache.createFromSource<FontAsset>(sourceAssetPath, uuid);
   if (!createRes) {
     return createRes.error();
   }
@@ -426,7 +430,8 @@ Result<UUIDMap> AssetManager::loadSourceFont(const Path &sourceAssetPath,
 Result<UUIDMap> AssetManager::loadSourceAnimator(const Path &sourceAssetPath,
                                                  const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
-  auto createRes = mAssetCache.createAnimatorFromSource(sourceAssetPath, uuid);
+  auto createRes =
+      mAssetCache.createFromSource<AnimatorAsset>(sourceAssetPath, uuid);
   if (!createRes) {
     return createRes.error();
   }
@@ -444,7 +449,8 @@ Result<UUIDMap> AssetManager::loadSourceAnimator(const Path &sourceAssetPath,
 Result<UUIDMap> AssetManager::loadSourceInputMap(const Path &sourceAssetPath,
                                                  const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
-  auto createRes = mAssetCache.createInputMapFromSource(sourceAssetPath, uuid);
+  auto createRes =
+      mAssetCache.createFromSource<InputMapAsset>(sourceAssetPath, uuid);
   if (!createRes) {
     return createRes.error();
   }
@@ -473,7 +479,8 @@ Result<UUIDMap> AssetManager::loadSourceEnvironment(const Path &sourceAssetPath,
 Result<UUIDMap> AssetManager::loadSourceScene(const Path &sourceAssetPath,
                                               const UUIDMap &uuids) {
   auto uuid = getOrCreateUuidFromMap(uuids, "root");
-  auto createRes = mAssetCache.createSceneFromSource(sourceAssetPath, uuid);
+  auto createRes =
+      mAssetCache.createFromSource<SceneAsset>(sourceAssetPath, uuid);
   if (!createRes) {
     return createRes.error();
   }

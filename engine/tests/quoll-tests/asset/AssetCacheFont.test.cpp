@@ -10,7 +10,7 @@ public:
 TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
   auto uuid = quoll::Uuid::generate();
   auto sourcePath = FixturesPath / "valid-font.ttf";
-  auto filePath = cache.createFontFromSource(sourcePath, uuid);
+  auto filePath = cache.createFromSource<quoll::FontAsset>(sourcePath, uuid);
 
   EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
@@ -26,7 +26,7 @@ TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
 TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
   auto sourcePath = FixturesPath / "valid-font.ttf";
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.createFontFromSource(sourcePath, uuid);
+  auto filePath = cache.createFromSource<quoll::FontAsset>(sourcePath, uuid);
 
   auto result = cache.load<quoll::FontAsset>(uuid);
 
@@ -45,7 +45,7 @@ TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
 TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
   auto sourcePath = FixturesPath / "valid-font.otf";
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.createFontFromSource(sourcePath, uuid);
+  auto filePath = cache.createFromSource<quoll::FontAsset>(sourcePath, uuid);
 
   auto result = cache.load<quoll::FontAsset>(uuid);
 

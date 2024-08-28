@@ -6,20 +6,8 @@
 
 namespace quoll {
 
-Result<Path>
-AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
-  if (asset.uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  auto assetPath = getPathFromUuid(asset.uuid);
-
-  auto metaRes = createAssetMeta(AssetType::Material, asset.name, assetPath);
-  if (!metaRes) {
-    return Error("Cannot create material asset: " + asset.name);
-  }
-
+Result<void> AssetCache::createMaterialFromData(const MaterialAsset &data,
+                                                const Path &assetPath) {
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -31,34 +19,33 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   header.magic = AssetFileHeader::MagicConstant;
   file.write(header);
 
-  auto baseColorTexture = getAssetUuid(asset.data.baseColorTexture);
+  auto baseColorTexture = getAssetUuid(data.baseColorTexture);
   file.write(baseColorTexture);
-  file.write(asset.data.baseColorTextureCoord);
-  file.write(asset.data.baseColorFactor);
+  file.write(data.baseColorTextureCoord);
+  file.write(data.baseColorFactor);
 
-  auto metallicRoughnessTexture =
-      getAssetUuid(asset.data.metallicRoughnessTexture);
+  auto metallicRoughnessTexture = getAssetUuid(data.metallicRoughnessTexture);
   file.write(metallicRoughnessTexture);
-  file.write(asset.data.metallicRoughnessTextureCoord);
-  file.write(asset.data.metallicFactor);
-  file.write(asset.data.roughnessFactor);
+  file.write(data.metallicRoughnessTextureCoord);
+  file.write(data.metallicFactor);
+  file.write(data.roughnessFactor);
 
-  auto normalTexture = getAssetUuid(asset.data.normalTexture);
+  auto normalTexture = getAssetUuid(data.normalTexture);
   file.write(normalTexture);
-  file.write(asset.data.normalTextureCoord);
-  file.write(asset.data.normalScale);
+  file.write(data.normalTextureCoord);
+  file.write(data.normalScale);
 
-  auto occlusionTexture = getAssetUuid(asset.data.occlusionTexture);
+  auto occlusionTexture = getAssetUuid(data.occlusionTexture);
   file.write(occlusionTexture);
-  file.write(asset.data.occlusionTextureCoord);
-  file.write(asset.data.occlusionStrength);
+  file.write(data.occlusionTextureCoord);
+  file.write(data.occlusionStrength);
 
-  auto emissiveTexture = getAssetUuid(asset.data.emissiveTexture);
+  auto emissiveTexture = getAssetUuid(data.emissiveTexture);
   file.write(emissiveTexture);
-  file.write(asset.data.emissiveTextureCoord);
-  file.write(asset.data.emissiveFactor);
+  file.write(data.emissiveTextureCoord);
+  file.write(data.emissiveFactor);
 
-  return assetPath;
+  return Ok();
 }
 
 Result<MaterialAsset>

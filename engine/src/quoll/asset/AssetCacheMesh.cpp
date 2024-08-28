@@ -6,20 +6,8 @@
 
 namespace quoll {
 
-Result<Path>
-AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
-  if (asset.uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  auto assetPath = getPathFromUuid(asset.uuid);
-
-  auto metaRes = createAssetMeta(asset.type, asset.name, assetPath);
-  if (!metaRes) {
-    return Error("Cannot create mesh asset: " + asset.name);
-  }
-
+Result<void> AssetCache::createMeshFromData(const MeshAsset &data,
+                                            const Path &assetPath) {
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -27,14 +15,14 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   }
 
   AssetFileHeader header{};
-  header.type = asset.type;
+  header.type = AssetType::Mesh;
   header.magic = AssetFileHeader::MagicConstant;
   file.write(header);
 
-  auto numGeometries = asset.data.geometries.size();
+  auto numGeometries = data.geometries.size();
   file.write(numGeometries);
 
-  for (auto &geometry : asset.data.geometries) {
+  for (auto &geometry : data.geometries) {
     file.write(geometry.positions.size());
     file.write(geometry.positions);
     file.write(geometry.normals.size());
@@ -53,7 +41,7 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
     file.write(geometry.indices);
   }
 
-  return assetPath;
+  return Ok();
 }
 
 Result<MeshAsset> AssetCache::loadMeshDataFromInputStream(const Path &path) {

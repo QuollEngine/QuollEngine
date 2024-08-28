@@ -12,35 +12,6 @@ static AudioAssetFormat getAudioFormatFromExtension(StringView extension) {
   return AudioAssetFormat::Unknown;
 }
 
-Result<Path> AssetCache::createAudioFromSource(const Path &sourcePath,
-                                               const Uuid &uuid) {
-  if (uuid.isEmpty()) {
-    QuollAssert(false, "Invalid uuid provided");
-    return Error("Invalid uuid provided");
-  }
-
-  using co = std::filesystem::copy_options;
-
-  auto assetPath = getPathFromUuid(uuid);
-
-  if (!std::filesystem::copy_file(sourcePath, assetPath,
-                                  co::overwrite_existing)) {
-    return Error("Cannot create audio from source: " +
-                 sourcePath.stem().string());
-  }
-
-  auto metaRes = createAssetMeta(AssetType::Audio,
-                                 sourcePath.filename().string(), assetPath);
-
-  if (!metaRes) {
-    std::filesystem::remove(assetPath);
-    return Error("Cannot create audio from source: " +
-                 sourcePath.stem().string());
-  }
-
-  return assetPath;
-}
-
 Result<AudioAsset> AssetCache::loadAudio(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
