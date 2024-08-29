@@ -204,23 +204,24 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto handle = cache.load<quoll::SkeletonAsset>(asset.uuid);
+  auto res = cache.request<quoll::SkeletonAsset>(asset.uuid);
+  ASSERT_TRUE(res);
 
-  EXPECT_NE(handle, quoll::AssetHandle<quoll::SkeletonAsset>());
+  auto skeleton = res.data();
+  EXPECT_NE(skeleton.handle(), quoll::AssetHandle<quoll::SkeletonAsset>());
 
-  auto &actual = cache.getRegistry().get(handle.data());
+  EXPECT_EQ(skeleton.meta().name, asset.name);
 
-  EXPECT_EQ(cache.getRegistry().getMeta(handle.data()).name, asset.name);
-
-  for (usize i = 0; i < actual.jointLocalPositions.size(); ++i) {
-    EXPECT_EQ(actual.jointLocalPositions.at(i),
+  for (usize i = 0; i < skeleton->jointLocalPositions.size(); ++i) {
+    EXPECT_EQ(skeleton->jointLocalPositions.at(i),
               asset.data.jointLocalPositions.at(i));
-    EXPECT_EQ(actual.jointLocalRotations.at(i),
+    EXPECT_EQ(skeleton->jointLocalRotations.at(i),
               asset.data.jointLocalRotations.at(i));
-    EXPECT_EQ(actual.jointLocalScales.at(i), asset.data.jointLocalScales.at(i));
-    EXPECT_EQ(actual.jointParents.at(i), asset.data.jointParents.at(i));
-    EXPECT_EQ(actual.jointInverseBindMatrices.at(i),
+    EXPECT_EQ(skeleton->jointLocalScales.at(i),
+              asset.data.jointLocalScales.at(i));
+    EXPECT_EQ(skeleton->jointParents.at(i), asset.data.jointParents.at(i));
+    EXPECT_EQ(skeleton->jointInverseBindMatrices.at(i),
               asset.data.jointInverseBindMatrices.at(i));
-    EXPECT_EQ(actual.jointNames.at(i), asset.data.jointNames.at(i));
+    EXPECT_EQ(skeleton->jointNames.at(i), asset.data.jointNames.at(i));
   }
 }

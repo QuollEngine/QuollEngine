@@ -264,9 +264,9 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path) {
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoad<MaterialAsset>(assetUuid);
+      auto res = request<MaterialAsset>(assetUuid);
       if (res) {
-        localMaterialMap.at(i) = res;
+        localMaterialMap.at(i) = res.data().handle();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -285,9 +285,9 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path) {
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoad<MeshAsset>(assetUuid);
+      auto res = request<MeshAsset>(assetUuid);
       if (res) {
-        localMeshMap.at(i) = res;
+        localMeshMap.at(i) = res.data().handle();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -306,9 +306,9 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path) {
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoad<SkeletonAsset>(assetUuid);
+      auto res = request<SkeletonAsset>(assetUuid);
       if (res) {
-        localSkeletonMap.at(i) = res;
+        localSkeletonMap.at(i) = res.data().handle();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -327,9 +327,9 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path) {
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoad<AnimationAsset>(assetUuid);
+      auto res = request<AnimationAsset>(assetUuid);
       if (res) {
-        localAnimationMap.at(i) = res;
+        localAnimationMap.at(i) = res.data().handle();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
 
@@ -349,9 +349,9 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path) {
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      auto res = getOrLoad<AnimatorAsset>(assetUuid);
+      auto res = request<AnimatorAsset>(assetUuid);
       if (res) {
-        localAnimatorMap.at(i) = res;
+        localAnimatorMap.at(i) = res.data().handle();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
 

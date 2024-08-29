@@ -28,18 +28,17 @@ TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
   auto uuid = quoll::Uuid::generate();
   auto filePath = cache.createFromSource<quoll::FontAsset>(sourcePath, uuid);
 
-  auto result = cache.load<quoll::FontAsset>(uuid);
+  auto result = cache.request<quoll::FontAsset>(uuid);
 
   EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
 
-  auto handle = result.data();
-  EXPECT_NE(handle, quoll::AssetHandle<quoll::FontAsset>());
-  const auto &asset = cache.getRegistry().getMeta(handle);
+  auto asset = result.data();
+  EXPECT_NE(asset.handle(), quoll::AssetHandle<quoll::FontAsset>());
 
-  EXPECT_EQ(asset.uuid, uuid);
-  EXPECT_EQ(asset.name, "valid-font.ttf");
-  EXPECT_EQ(asset.type, quoll::AssetType::Font);
+  EXPECT_EQ(asset.meta().uuid, uuid);
+  EXPECT_EQ(asset.meta().name, "valid-font.ttf");
+  EXPECT_EQ(asset.meta().type, quoll::AssetType::Font);
 }
 
 TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
@@ -47,21 +46,20 @@ TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
   auto uuid = quoll::Uuid::generate();
   auto filePath = cache.createFromSource<quoll::FontAsset>(sourcePath, uuid);
 
-  auto result = cache.load<quoll::FontAsset>(uuid);
+  auto result = cache.request<quoll::FontAsset>(uuid);
 
   EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
 
-  auto handle = result.data();
-  EXPECT_NE(handle, quoll::AssetHandle<quoll::FontAsset>());
-  const auto &asset = cache.getRegistry().getMeta(handle);
+  auto asset = result.data();
+  EXPECT_NE(asset.handle(), quoll::AssetHandle<quoll::FontAsset>());
 
-  EXPECT_EQ(asset.uuid, uuid);
-  EXPECT_EQ(asset.type, quoll::AssetType::Font);
-  EXPECT_EQ(asset.name, "valid-font.otf");
+  EXPECT_EQ(asset.meta().uuid, uuid);
+  EXPECT_EQ(asset.meta().type, quoll::AssetType::Font);
+  EXPECT_EQ(asset.meta().name, "valid-font.otf");
 }
 
 TEST_F(AssetCacheFontTest, FileReturnsErrorIfFontFileCannotBeOpened) {
-  auto result = cache.load<quoll::FontAsset>(quoll::Uuid::generate());
+  auto result = cache.request<quoll::FontAsset>(quoll::Uuid::generate());
   EXPECT_FALSE(result);
 }

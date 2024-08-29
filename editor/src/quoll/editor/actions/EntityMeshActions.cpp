@@ -4,13 +4,6 @@
 
 namespace quoll::editor {
 
-static void replaceMesh(AssetType type, AssetHandle<MeshAsset> mesh,
-                        Entity entity, EntityDatabase &db) {
-  if (type == AssetType::Mesh) {
-    db.set<Mesh>(entity, {mesh});
-  }
-}
-
 EntitySetMesh::EntitySetMesh(Entity entity, AssetHandle<MeshAsset> mesh)
     : mEntity(entity), mMesh(mesh) {}
 
@@ -24,8 +17,7 @@ ActionExecutorResult EntitySetMesh::onExecute(WorkspaceState &state,
     mOldMesh = db.get<Mesh>(mEntity).handle;
   }
 
-  auto type = assetRegistry.getMeta(mMesh).type;
-  replaceMesh(type, mMesh, mEntity, db);
+  db.set<Mesh>(mEntity, {mMesh});
 
   ActionExecutorResult res;
   res.entitiesToSave.push_back(mEntity);
@@ -41,7 +33,8 @@ ActionExecutorResult EntitySetMesh::onUndo(WorkspaceState &state,
 
   if (mOldMesh) {
     auto type = assetRegistry.getMeta(mOldMesh).type;
-    replaceMesh(type, mOldMesh, mEntity, db);
+    db.set<Mesh>(mEntity, {mOldMesh});
+
   } else {
     if (db.has<Mesh>(mEntity)) {
       db.remove<Mesh>(mEntity);
@@ -84,7 +77,7 @@ ActionExecutorResult EntityDeleteMesh::onUndo(WorkspaceState &state,
   auto &db = scene.entityDatabase;
   auto type = assetRegistry.getMeta(mOldMesh).type;
 
-  replaceMesh(type, mOldMesh, mEntity, db);
+  db.set<Mesh>(mEntity, {mOldMesh});
 
   ActionExecutorResult res;
   res.entitiesToSave.push_back(mEntity);
@@ -94,9 +87,7 @@ ActionExecutorResult EntityDeleteMesh::onUndo(WorkspaceState &state,
 
 bool EntityDeleteMesh::predicate(WorkspaceState &state,
                                  AssetRegistry &assetRegistry) {
-  auto &scene = state.scene;
-
-  return scene.entityDatabase.has<quoll::Mesh>(mEntity);
+  return state.scene.entityDatabase.has<quoll::Mesh>(mEntity);
 }
 
 } // namespace quoll::editor

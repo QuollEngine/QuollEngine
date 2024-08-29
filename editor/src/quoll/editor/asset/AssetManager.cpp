@@ -350,10 +350,10 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
       return createRes.error();
     }
 
-    auto res = mAssetCache.load<quoll::TextureAsset>(uuid);
+    auto res = mAssetCache.request<TextureAsset>(uuid);
 
     if (res) {
-      auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+      auto uuid = res.data().meta().uuid;
       return UUIDMap{{"root", uuid}};
     }
 
@@ -380,7 +380,7 @@ Result<UUIDMap> AssetManager::loadSourceAudio(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.load<quoll::AudioAsset>(uuid);
+  auto res = mAssetCache.request<AudioAsset>(uuid);
 
   if (res) {
     return UUIDMap{{"root", uuid}};
@@ -398,10 +398,10 @@ Result<UUIDMap> AssetManager::loadSourceScript(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.load<quoll::LuaScriptAsset>(uuid);
+  auto res = mAssetCache.request<LuaScriptAsset>(uuid);
 
   if (res) {
-    auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+    auto uuid = res.data().meta().uuid;
     return UUIDMap{{"root", uuid}};
   }
 
@@ -417,10 +417,10 @@ Result<UUIDMap> AssetManager::loadSourceFont(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.load<quoll::FontAsset>(uuid);
+  auto res = mAssetCache.request<FontAsset>(uuid);
 
   if (res) {
-    auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+    auto uuid = res.data().meta().uuid;
     return UUIDMap{{"root", uuid}};
   }
 
@@ -436,10 +436,10 @@ Result<UUIDMap> AssetManager::loadSourceAnimator(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.load<quoll::AnimatorAsset>(uuid);
+  auto res = mAssetCache.request<AnimatorAsset>(uuid);
 
   if (res) {
-    auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+    auto uuid = res.data().meta().uuid;
     return UUIDMap{{"root", uuid}};
   }
 
@@ -455,10 +455,10 @@ Result<UUIDMap> AssetManager::loadSourceInputMap(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.load<quoll::InputMapAsset>(uuid);
+  auto res = mAssetCache.request<InputMapAsset>(uuid);
 
   if (res) {
-    auto uuid = mAssetCache.getRegistry().getMeta(res.data()).uuid;
+    auto uuid = res.data().meta().uuid;
     return UUIDMap{{"root", uuid}};
   }
 
@@ -485,8 +485,7 @@ Result<UUIDMap> AssetManager::loadSourceScene(const Path &sourceAssetPath,
     return createRes.error();
   }
 
-  auto res = mAssetCache.load<quoll::SceneAsset>(uuid);
-
+  auto res = mAssetCache.request<SceneAsset>(uuid);
   if (res) {
     return UUIDMap{{"root", uuid}};
   }

@@ -118,23 +118,21 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   auto asset = createRandomizedAnimation();
 
   auto filePath = cache.createFromData(asset);
-  auto handle = cache.load<quoll::AnimationAsset>(asset.uuid);
-  EXPECT_TRUE(handle);
-  EXPECT_NE(handle, quoll::AssetHandle<quoll::AnimationAsset>());
+  auto res = cache.request<quoll::AnimationAsset>(asset.uuid);
+  EXPECT_TRUE(res);
 
-  {
-    auto &actual = cache.getRegistry().getMeta(handle.data());
-    EXPECT_EQ(actual.name, asset.name);
-    EXPECT_EQ(actual.type, quoll::AssetType::Animation);
-  }
+  auto animation = res.data();
+  EXPECT_TRUE(animation);
 
-  auto &actual = cache.getRegistry().get(handle.data());
+  auto &meta = animation.meta();
+  EXPECT_EQ(meta.name, asset.name);
+  EXPECT_EQ(meta.type, quoll::AssetType::Animation);
 
-  EXPECT_EQ(actual.time, asset.data.time);
-  EXPECT_EQ(actual.keyframes.size(), asset.data.keyframes.size());
+  EXPECT_EQ(animation->time, asset.data.time);
+  EXPECT_EQ(animation->keyframes.size(), asset.data.keyframes.size());
   for (usize i = 0; i < asset.data.keyframes.size(); ++i) {
     auto &expectedKf = asset.data.keyframes.at(i);
-    auto &actualKf = actual.keyframes.at(i);
+    auto &actualKf = animation->keyframes.at(i);
 
     EXPECT_EQ(expectedKf.target, actualKf.target);
     EXPECT_EQ(expectedKf.interpolation, actualKf.interpolation);

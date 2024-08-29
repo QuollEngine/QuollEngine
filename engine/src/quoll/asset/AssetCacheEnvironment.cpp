@@ -40,20 +40,20 @@ AssetCache::loadEnvironmentDataFromInputStream(const Path &path) {
   Uuid specularMapUuid;
   stream.read(specularMapUuid);
 
-  auto irradianceMapRes = getOrLoad<TextureAsset>(irradianceMapUuid);
+  auto irradianceMapRes = request<TextureAsset>(irradianceMapUuid);
   if (!irradianceMapRes) {
     return irradianceMapRes.error();
   }
 
-  auto specularMapRes = getOrLoad<TextureAsset>(specularMapUuid);
+  auto specularMapRes = request<TextureAsset>(specularMapUuid);
   if (!specularMapRes) {
-    mRegistry.remove(irradianceMapRes.data());
+    mRegistry.remove(irradianceMapRes.data().handle());
     return specularMapRes.error();
   }
 
   EnvironmentAsset environment{};
-  environment.irradianceMap = irradianceMapRes;
-  environment.specularMap = specularMapRes;
+  environment.irradianceMap = irradianceMapRes.data().handle();
+  environment.specularMap = specularMapRes.data().handle();
   return environment;
 }
 

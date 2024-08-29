@@ -2,6 +2,7 @@
 
 #include "AssetHandle.h"
 #include "AssetMeta.h"
+#include "AssetRef.h"
 #include "AssetRegistry.h"
 #include "Result.h"
 
@@ -21,18 +22,22 @@ public:
   AssetCache(const Path &assetsPath, bool createDefaultObjects = false);
 
   template <typename TAssetData>
-  Result<AssetHandle<TAssetData>> getOrLoad(const Uuid &uuid) {
+  Result<AssetRef<TAssetData>> request(const Uuid &uuid) {
     if (uuid.isEmpty()) {
-      return AssetHandle<TAssetData>();
+      return Error("Invalid uuid");
     }
 
     auto handle = mRegistry.findHandleByUuid<TAssetData>(uuid);
-
     if (handle) {
-      return handle;
+      return AssetRef(&mRegistry, handle);
     }
 
-    return load<TAssetData>(uuid);
+    auto res = load<TAssetData>(uuid);
+    if (!res) {
+      return res.error();
+    }
+
+    return Result(AssetRef(&mRegistry, res.data()), res.warnings());
   }
 
   template <typename TAssetData>
@@ -112,6 +117,14 @@ public:
                    " from source: " + sourcePath.stem().string());
     }
 
+    auto handle = mRegistry.findHandleByUuid<TAssetData>(uuid);
+    if (handle) {
+      auto loadRes = load<TAssetData>(uuid);
+      if (!loadRes) {
+        return loadRes.error();
+      }
+    }
+
     return path;
   }
 
@@ -148,6 +161,14 @@ public:
     if (!res) {
       std::filesystem::remove(metaPath);
       return res.error();
+    }
+
+    auto handle = mRegistry.findHandleByUuid<TAssetData>(info.uuid);
+    if (handle) {
+      auto loadRes = load<TAssetData>(info.uuid);
+      if (!loadRes) {
+        return res.error();
+      }
     }
 
     return path;

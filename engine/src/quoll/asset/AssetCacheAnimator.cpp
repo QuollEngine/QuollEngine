@@ -102,9 +102,9 @@ Result<AnimatorAsset> AssetCache::loadAnimator(const Uuid &uuid) {
     if (output["type"] && output["type"].as<String>("") == "animation") {
       auto animation = output["animation"].as<Uuid>(Uuid{});
       if (!animation.isEmpty()) {
-        auto res = getOrLoad<AnimationAsset>(animation);
+        auto res = request<AnimationAsset>(animation);
         if (res) {
-          state.animation = res;
+          state.animation = res.data().handle();
         }
 
         state.speed = std::max(output["speed"].as<f32>(1.0f), 0.0f);

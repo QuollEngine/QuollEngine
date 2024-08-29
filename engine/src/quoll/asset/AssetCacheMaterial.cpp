@@ -66,13 +66,15 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path) {
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    auto res = getOrLoad<TextureAsset>(textureUuid);
-    if (res) {
-      material.baseColorTexture = res;
-      warnings.insert(warnings.end(), res.warnings().begin(),
-                      res.warnings().end());
-    } else {
-      warnings.push_back(res.error());
+    if (textureUuid.isValid()) {
+      auto res = request<TextureAsset>(textureUuid);
+      if (res) {
+        material.baseColorTexture = res.data().handle();
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
+      } else {
+        warnings.push_back(res.error());
+      }
     }
     stream.read(material.baseColorTextureCoord);
     stream.read(material.baseColorFactor);
@@ -82,15 +84,16 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path) {
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    auto res = getOrLoad<TextureAsset>(textureUuid);
-    if (res) {
-      material.metallicRoughnessTexture = res;
-      warnings.insert(warnings.end(), res.warnings().begin(),
-                      res.warnings().end());
-    } else {
-      warnings.push_back(res.error());
+    if (textureUuid.isValid()) {
+      auto res = request<TextureAsset>(textureUuid);
+      if (res) {
+        material.metallicRoughnessTexture = res.data().handle();
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
+      } else {
+        warnings.push_back(res.error());
+      }
     }
-
     stream.read(material.metallicRoughnessTextureCoord);
     stream.read(material.metallicFactor);
     stream.read(material.roughnessFactor);
@@ -100,13 +103,15 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path) {
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    auto res = getOrLoad<TextureAsset>(textureUuid);
-    if (res) {
-      material.normalTexture = res;
-      warnings.insert(warnings.end(), res.warnings().begin(),
-                      res.warnings().end());
-    } else {
-      warnings.push_back(res.error());
+    if (textureUuid.isValid()) {
+      auto res = request<TextureAsset>(textureUuid);
+      if (res) {
+        material.normalTexture = res.data().handle();
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
+      } else {
+        warnings.push_back(res.error());
+      }
     }
     stream.read(material.normalTextureCoord);
     stream.read(material.normalScale);
@@ -116,13 +121,15 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path) {
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    auto res = getOrLoad<TextureAsset>(textureUuid);
-    if (res) {
-      material.occlusionTexture = res;
-      warnings.insert(warnings.end(), res.warnings().begin(),
-                      res.warnings().end());
-    } else {
-      warnings.push_back(res.error());
+    if (textureUuid.isValid()) {
+      auto res = request<TextureAsset>(textureUuid);
+      if (res) {
+        material.occlusionTexture = res.data().handle();
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
+      } else {
+        warnings.push_back(res.error());
+      }
     }
     stream.read(material.occlusionTextureCoord);
     stream.read(material.occlusionStrength);
@@ -132,13 +139,15 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path) {
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    auto res = getOrLoad<TextureAsset>(textureUuid);
-    if (res) {
-      material.emissiveTexture = res;
-      warnings.insert(warnings.end(), res.warnings().begin(),
-                      res.warnings().end());
-    } else {
-      warnings.push_back(res.error());
+    if (textureUuid.isValid()) {
+      auto res = request<TextureAsset>(textureUuid);
+      if (res) {
+        material.emissiveTexture = res.data().handle();
+        warnings.insert(warnings.end(), res.warnings().begin(),
+                        res.warnings().end());
+      } else {
+        warnings.push_back(res.error());
+      }
     }
     stream.read(material.emissiveTextureCoord);
     stream.read(material.emissiveFactor);
