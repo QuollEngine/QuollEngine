@@ -6,13 +6,13 @@
 
 class AssetCacheLuaScriptTest : public AssetCacheTestBase {
 public:
-  quoll::Result<quoll::AssetHandle<quoll::LuaScriptAsset>>
+  quoll::Result<quoll::AssetRef<quoll::LuaScriptAsset>>
   loadFromSource(quoll::Path sourcePath) {
     auto uuid = quoll::Uuid::generate();
     auto cachePath =
         cache.createFromSource<quoll::LuaScriptAsset>(sourcePath, uuid);
 
-    return cache.load<quoll::LuaScriptAsset>(uuid);
+    return cache.request<quoll::LuaScriptAsset>(uuid);
   }
 };
 
@@ -36,7 +36,7 @@ TEST_F(AssetCacheLuaScriptTest, CreateLuaScriptFromSource) {
 }
 
 TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfFileCannotBeOpened) {
-  auto result = cache.load<quoll::LuaScriptAsset>(quoll::Uuid::generate());
+  auto result = cache.request<quoll::LuaScriptAsset>(quoll::Uuid::generate());
   EXPECT_FALSE(result);
 }
 
@@ -73,17 +73,16 @@ TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
   auto handle = result;
 
   {
-    auto &script = cache.getRegistry().getMeta(handle.data());
-    script.name = "script-asset-valid.lua";
+    auto script = result.data().meta();
     EXPECT_EQ(script.name, "script-asset-valid.lua");
     EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
   }
 
-  auto &script = cache.getRegistry().get(handle.data());
-  EXPECT_EQ(script.variables.size(), 2);
-  EXPECT_EQ(script.variables.at("string_value").type,
+  auto script = result.data();
+  EXPECT_EQ(script->variables.size(), 2);
+  EXPECT_EQ(script->variables.at("string_value").type,
             quoll::LuaScriptVariableType::String);
-  EXPECT_EQ(script.variables.at("prefab_value").type,
+  EXPECT_EQ(script->variables.at("prefab_value").type,
             quoll::LuaScriptVariableType::AssetPrefab);
 
   std::ifstream file(scriptPath);
@@ -97,7 +96,7 @@ TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
   file.close();
 
   quoll::String contents(bytes.begin(), bytes.end());
-  quoll::String scriptContents(script.bytes.begin(), script.bytes.end());
+  quoll::String scriptContents(script->bytes.begin(), script->bytes.end());
   EXPECT_EQ(scriptContents, contents);
 }
 
@@ -107,24 +106,21 @@ TEST_F(AssetCacheLuaScriptTest,
   auto filePath = cache.createFromSource<quoll::LuaScriptAsset>(
       FixturesPath / "component-script.lua", uuid1);
 
-  auto result = cache.load<quoll::LuaScriptAsset>(uuid1);
+  auto result = cache.request<quoll::LuaScriptAsset>(uuid1);
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_TRUE(result);
 
-  auto handle = result;
-  {
-    auto &script = cache.getRegistry().getMeta(handle.data());
-    EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
-    EXPECT_EQ(script.name, "component-script.lua");
-  }
+  auto script = result.data();
+  EXPECT_EQ(script.meta().type, quoll::AssetType::LuaScript);
+  EXPECT_EQ(script.meta().name, "component-script.lua");
 
   cache.createFromSource<quoll::LuaScriptAsset>(
       FixturesPath / "component-script-2.lua", uuid1);
 
   {
-    auto result = cache.load<quoll::LuaScriptAsset>(uuid1);
-    EXPECT_EQ(result, handle);
-    const auto &scriptMeta = cache.getRegistry().getMeta(handle.data());
+    auto result = cache.request<quoll::LuaScriptAsset>(uuid1);
+    EXPECT_EQ(result.data().handle(), script.handle());
+    const auto &scriptMeta = result.data().meta();
     EXPECT_EQ(scriptMeta.type, quoll::AssetType::LuaScript);
     EXPECT_EQ(scriptMeta.name, "component-script-2.lua");
 
@@ -138,10 +134,8 @@ TEST_F(AssetCacheLuaScriptTest,
     std::vector<char> bytes(s.begin(), s.end());
     file.close();
 
-    const auto &script = cache.getRegistry().get(handle.data());
-
     quoll::String contents(bytes.begin(), bytes.end());
-    quoll::String scriptContents(script.bytes.begin(), script.bytes.end());
+    quoll::String scriptContents(script->bytes.begin(), script->bytes.end());
     EXPECT_EQ(scriptContents, contents);
   }
 }

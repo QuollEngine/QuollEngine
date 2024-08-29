@@ -13,11 +13,9 @@ static const quoll::Path FilePath =
 
 class AssetCacheInputMapTest : public AssetCacheTestBase {
 public:
-  quoll::Result<quoll::AssetHandle<quoll::InputMapAsset>>
+  quoll::Result<quoll::AssetRef<quoll::InputMapAsset>>
   loadInputMap(std::function<void(YAML::Node &)> fn,
                quoll::Uuid uuid = quoll::Uuid::generate()) {
-    auto filePath = cache.getPathFromUuid(uuid);
-
     // prepopulate with valid values
     YAML::Node node;
     node["version"] = "0.1";
@@ -49,11 +47,13 @@ public:
 
     fn(node);
 
-    std::ofstream stream(filePath);
+    std::ofstream stream(FilePath);
     stream << node;
     stream.close();
 
-    return cache.load<quoll::InputMapAsset>(uuid);
+    cache.createFromSource<quoll::InputMapAsset>(FilePath, uuid);
+
+    return cache.request<quoll::InputMapAsset>(uuid);
   };
 };
 
@@ -643,28 +643,28 @@ TEST_F(AssetCacheInputMapTest,
     }
   });
 
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
-  const auto &inputMap = cache.getRegistry().get(res.data());
+  auto inputMap = res.data();
 
-  EXPECT_EQ(inputMap.schemes.size(), 2);
-  EXPECT_EQ(inputMap.schemes.at(0).name, "Gamepad");
-  EXPECT_EQ(inputMap.schemes.at(1).name, "KBM");
+  EXPECT_EQ(inputMap->schemes.size(), 2);
+  EXPECT_EQ(inputMap->schemes.at(0).name, "Gamepad");
+  EXPECT_EQ(inputMap->schemes.at(1).name, "KBM");
 
-  EXPECT_EQ(inputMap.commands.size(), 3);
-  EXPECT_EQ(inputMap.commands.at(0).name, "Move");
-  EXPECT_EQ(inputMap.commands.at(0).type, quoll::InputDataType::Axis2d);
+  EXPECT_EQ(inputMap->commands.size(), 3);
+  EXPECT_EQ(inputMap->commands.at(0).name, "Move");
+  EXPECT_EQ(inputMap->commands.at(0).type, quoll::InputDataType::Axis2d);
 
-  EXPECT_EQ(inputMap.commands.at(1).name, "Look");
-  EXPECT_EQ(inputMap.commands.at(1).type, quoll::InputDataType::Axis2d);
+  EXPECT_EQ(inputMap->commands.at(1).name, "Look");
+  EXPECT_EQ(inputMap->commands.at(1).type, quoll::InputDataType::Axis2d);
 
-  EXPECT_EQ(inputMap.commands.at(2).name, "Jump");
-  EXPECT_EQ(inputMap.commands.at(2).type, quoll::InputDataType::Boolean);
+  EXPECT_EQ(inputMap->commands.at(2).name, "Jump");
+  EXPECT_EQ(inputMap->commands.at(2).type, quoll::InputDataType::Boolean);
 
-  EXPECT_EQ(inputMap.bindings.size(), 6);
+  EXPECT_EQ(inputMap->bindings.size(), 6);
 
-  auto &bindings = inputMap.bindings;
+  auto &bindings = inputMap->bindings;
   EXPECT_EQ(bindings.at(0).scheme, 0);
   EXPECT_EQ(bindings.at(0).command, 0);
   {
@@ -724,16 +724,11 @@ TEST_F(AssetCacheInputMapTest,
        UpdatesExistingInputMapIfAssetWithUuidAlreadyExists) {
   auto uuid = quoll::Uuid::generate();
   auto result = loadInputMap([](auto &node) {}, uuid);
-
+  ASSERT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
-  EXPECT_TRUE(result);
 
-  auto handle = result;
-
-  {
-    auto &inputMap = cache.getRegistry().get(handle.data());
-    EXPECT_EQ(inputMap.schemes.size(), 1);
-  }
+  auto inputMap = result.data();
+  EXPECT_EQ(inputMap->schemes.size(), 1);
 
   {
     auto result = loadInputMap(
@@ -744,9 +739,11 @@ TEST_F(AssetCacheInputMapTest,
         },
         uuid);
 
-    EXPECT_EQ(result, handle);
+    ASSERT_TRUE(result);
 
-    auto &inputMap = cache.getRegistry().get(handle.data());
-    EXPECT_EQ(inputMap.schemes.size(), 2);
+    auto newInputMap = result.data();
+
+    EXPECT_EQ(newInputMap.handle(), inputMap.handle());
+    EXPECT_EQ(newInputMap->schemes.size(), 2);
   }
 }

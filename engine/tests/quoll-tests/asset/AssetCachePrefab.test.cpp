@@ -489,24 +489,26 @@ TEST_F(AssetCachePrefabTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
 
   auto filePath = cache.createFromData(asset);
 
-  auto res = cache.load<quoll::PrefabAsset>(asset.uuid);
-  EXPECT_FALSE(res);
+  auto prefab = cache.request<quoll::PrefabAsset>(asset.uuid);
+  EXPECT_FALSE(prefab);
 }
 
 TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
   auto filePath = cache.createFromData(asset);
-  auto handle = cache.load<quoll::PrefabAsset>(asset.uuid);
-  EXPECT_NE(handle, quoll::AssetHandle<quoll::PrefabAsset>());
-  EXPECT_FALSE(handle.hasWarnings());
+  auto res = cache.request<quoll::PrefabAsset>(asset.uuid);
+  ASSERT_TRUE(res);
+  EXPECT_FALSE(res.hasWarnings());
 
-  auto &prefab = cache.getRegistry().get(handle.data());
-  EXPECT_EQ(cache.getRegistry().getMeta(handle.data()).name, asset.name);
+  auto prefab = res.data();
+  EXPECT_NE(prefab, quoll::AssetHandle<quoll::PrefabAsset>());
 
-  EXPECT_EQ(asset.data.transforms.size(), prefab.transforms.size());
-  for (usize i = 0; i < prefab.transforms.size(); ++i) {
+  EXPECT_EQ(prefab.meta().name, asset.name);
+
+  EXPECT_EQ(prefab->transforms.size(), prefab->transforms.size());
+  for (usize i = 0; i < prefab->transforms.size(); ++i) {
     auto &expected = asset.data.transforms.at(i);
-    auto &actual = prefab.transforms.at(i);
+    auto &actual = prefab->transforms.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.position, actual.value.position);
     EXPECT_EQ(expected.value.rotation, actual.value.rotation);
@@ -514,26 +516,26 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
     EXPECT_EQ(expected.value.parent, actual.value.parent);
   }
 
-  EXPECT_EQ(asset.data.names.size(), prefab.names.size());
-  for (usize i = 0; i < prefab.names.size(); ++i) {
+  EXPECT_EQ(asset.data.names.size(), prefab->names.size());
+  for (usize i = 0; i < prefab->names.size(); ++i) {
     auto &expected = asset.data.names.at(i);
-    auto &actual = prefab.names.at(i);
+    auto &actual = prefab->names.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
   }
 
-  EXPECT_EQ(asset.data.meshes.size(), prefab.meshes.size());
-  for (usize i = 0; i < prefab.meshes.size(); ++i) {
+  EXPECT_EQ(asset.data.meshes.size(), prefab->meshes.size());
+  for (usize i = 0; i < prefab->meshes.size(); ++i) {
     auto &expected = asset.data.meshes.at(i);
-    auto &actual = prefab.meshes.at(i);
+    auto &actual = prefab->meshes.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
   }
 
-  EXPECT_EQ(asset.data.meshRenderers.size(), prefab.meshRenderers.size());
-  for (usize i = 0; i < prefab.meshRenderers.size(); ++i) {
+  EXPECT_EQ(asset.data.meshRenderers.size(), prefab->meshRenderers.size());
+  for (usize i = 0; i < prefab->meshRenderers.size(); ++i) {
     auto &expected = asset.data.meshRenderers.at(i);
-    auto &actual = prefab.meshRenderers.at(i);
+    auto &actual = prefab->meshRenderers.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.materials.size(), actual.value.materials.size());
     for (usize mi = 0; mi < expected.value.materials.size(); ++mi) {
@@ -542,10 +544,10 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   }
 
   EXPECT_EQ(asset.data.skinnedMeshRenderers.size(),
-            prefab.skinnedMeshRenderers.size());
-  for (usize i = 0; i < prefab.skinnedMeshRenderers.size(); ++i) {
+            prefab->skinnedMeshRenderers.size());
+  for (usize i = 0; i < prefab->skinnedMeshRenderers.size(); ++i) {
     auto &expected = asset.data.skinnedMeshRenderers.at(i);
-    auto &actual = prefab.skinnedMeshRenderers.at(i);
+    auto &actual = prefab->skinnedMeshRenderers.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.materials.size(), actual.value.materials.size());
     for (usize mi = 0; mi < expected.value.materials.size(); ++mi) {
@@ -553,36 +555,36 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
     }
   }
 
-  EXPECT_EQ(asset.data.skeletons.size(), prefab.skeletons.size());
-  for (usize i = 0; i < prefab.skeletons.size(); ++i) {
+  EXPECT_EQ(asset.data.skeletons.size(), prefab->skeletons.size());
+  for (usize i = 0; i < prefab->skeletons.size(); ++i) {
     auto &expected = asset.data.skeletons.at(i);
-    auto &actual = prefab.skeletons.at(i);
+    auto &actual = prefab->skeletons.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
   }
 
-  EXPECT_EQ(asset.data.animations.size(), prefab.animations.size());
-  for (usize i = 0; i < prefab.animations.size(); ++i) {
+  EXPECT_EQ(asset.data.animations.size(), prefab->animations.size());
+  for (usize i = 0; i < prefab->animations.size(); ++i) {
     auto &expected = asset.data.animations.at(i);
-    auto &actual = prefab.animations.at(i);
+    auto &actual = prefab->animations.at(i);
 
     EXPECT_EQ(expected, actual);
   }
 
-  EXPECT_EQ(asset.data.animators.size(), prefab.animators.size());
-  for (usize i = 0; i < prefab.animators.size(); ++i) {
+  EXPECT_EQ(asset.data.animators.size(), prefab->animators.size());
+  for (usize i = 0; i < prefab->animators.size(); ++i) {
     auto &expected = asset.data.animators.at(i);
-    auto &actual = prefab.animators.at(i);
+    auto &actual = prefab->animators.at(i);
 
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
   }
 
   EXPECT_EQ(asset.data.directionalLights.size(),
-            prefab.directionalLights.size());
-  for (usize i = 0; i < prefab.directionalLights.size(); ++i) {
+            prefab->directionalLights.size());
+  for (usize i = 0; i < prefab->directionalLights.size(); ++i) {
     auto &expected = asset.data.directionalLights.at(i);
-    auto &actual = prefab.directionalLights.at(i);
+    auto &actual = prefab->directionalLights.at(i);
 
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.color, actual.value.color);
@@ -591,10 +593,10 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
     EXPECT_EQ(actual.value.direction, glm::vec3(0.0f));
   }
 
-  EXPECT_EQ(asset.data.pointLights.size(), prefab.pointLights.size());
-  for (usize i = 0; i < prefab.pointLights.size(); ++i) {
+  EXPECT_EQ(asset.data.pointLights.size(), prefab->pointLights.size());
+  for (usize i = 0; i < prefab->pointLights.size(); ++i) {
     auto &expected = asset.data.pointLights.at(i);
-    auto &actual = prefab.pointLights.at(i);
+    auto &actual = prefab->pointLights.at(i);
 
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value.color, actual.value.color);
@@ -605,12 +607,12 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
 
 TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   // Create texture
-  auto tempTextureHandle = cache.load<quoll::TextureAsset>(textureUuid).data();
-  auto tempTextureAsset = cache.getRegistry().getMeta(tempTextureHandle);
-  cache.getRegistry().remove(tempTextureHandle);
+  auto tempTexture = cache.request<quoll::TextureAsset>(textureUuid).data();
+  auto tempTextureAsset = tempTexture.meta();
+  cache.getRegistry().remove(tempTexture.handle());
 
   auto texturePath = cache.createFromData(tempTextureAsset).data();
-  auto textureHandle = cache.load<quoll::TextureAsset>(textureUuid);
+  auto texture = cache.request<quoll::TextureAsset>(textureUuid).data();
 
   // Create mesh
   quoll::AssetData<quoll::MeshAsset> meshData{};
@@ -629,72 +631,74 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   geometry.indices.push_back(0);
   meshData.data.geometries.push_back(geometry);
   auto meshPath = cache.createFromData(meshData).data();
-  auto meshHandle = cache.load<quoll::MeshAsset>(meshData.uuid);
+  auto mesh = cache.request<quoll::MeshAsset>(meshData.uuid).data();
 
   // Create skeleton
   quoll::AssetData<quoll::SkeletonAsset> skeletonData{};
   skeletonData.uuid = quoll::Uuid::generate();
 
   auto skeletonPath = cache.createFromData(skeletonData);
-  auto skeletonHandle = cache.load<quoll::SkeletonAsset>(skeletonData.uuid);
+  auto skeleton = cache.request<quoll::SkeletonAsset>(skeletonData.uuid).data();
 
   // Create animation
   quoll::AssetData<quoll::AnimationAsset> animationData{};
   animationData.data.time = 2.5;
   animationData.uuid = quoll::Uuid::generate();
   auto animationPath = cache.createFromData(animationData);
-  auto animationHandle = cache.load<quoll::AnimationAsset>(animationData.uuid);
+  auto animation =
+      cache.request<quoll::AnimationAsset>(animationData.uuid).data();
 
   // Create animator
   quoll::AssetData<quoll::AnimatorAsset> animatorData{};
   animatorData.data.states.push_back({"INITIAL"});
   animatorData.uuid = quoll::Uuid::generate();
   auto animatorPath = cache.createFromData(animatorData);
-  auto animatorHandle = cache.load<quoll::AnimatorAsset>(animatorData.uuid);
+  auto animator = cache.request<quoll::AnimatorAsset>(animatorData.uuid).data();
 
   // Create prefab
   quoll::AssetData<quoll::PrefabAsset> prefabData{};
   prefabData.uuid = quoll::Uuid::generate();
-  prefabData.data.meshes.push_back({0U, meshHandle});
-  prefabData.data.skeletons.push_back({0U, skeletonHandle});
-  prefabData.data.animations.push_back(animationHandle);
-  prefabData.data.animators.push_back({0U, animatorHandle});
+  prefabData.data.meshes.push_back({0U, mesh.handle()});
+  prefabData.data.skeletons.push_back({0U, skeleton.handle()});
+  prefabData.data.animations.push_back(animation.handle());
+  prefabData.data.animators.push_back({0U, animator.handle()});
 
   auto prefabPath = cache.createFromData(prefabData);
 
   // Delete all existing assets
-  cache.getRegistry().remove(textureHandle.data());
-  cache.getRegistry().remove(meshHandle.data());
-  cache.getRegistry().remove(skeletonHandle.data());
-  cache.getRegistry().remove(animationHandle.data());
-  cache.getRegistry().remove(animatorHandle.data());
+  cache.getRegistry().remove(texture.handle());
+  cache.getRegistry().remove(mesh.handle());
+  cache.getRegistry().remove(skeleton.handle());
+  cache.getRegistry().remove(animation.handle());
+  cache.getRegistry().remove(animator.handle());
 
-  auto prefabHandle = cache.load<quoll::PrefabAsset>(prefabData.uuid);
-  EXPECT_NE(prefabHandle, quoll::AssetHandle<quoll::PrefabAsset>());
+  auto res = cache.request<quoll::PrefabAsset>(prefabData.uuid);
+  ASSERT_TRUE(res);
 
-  auto &newPrefab = cache.getRegistry().get(prefabHandle.data());
+  auto newPrefab = res.data();
+  EXPECT_NE(newPrefab.handle(), quoll::AssetHandle<quoll::PrefabAsset>());
 
   // Validate mesh
-  EXPECT_NE(newPrefab.meshes.at(0).value,
+  EXPECT_NE(newPrefab->meshes.at(0).value,
             quoll::AssetHandle<quoll::MeshAsset>());
-  auto &newMesh = cache.getRegistry().getMeta(newPrefab.meshes.at(0).value);
+  auto &newMesh = cache.getRegistry().getMeta(newPrefab->meshes.at(0).value);
   EXPECT_EQ(newMesh.uuid, meshData.uuid);
 
   // Validate skeleton
-  EXPECT_NE(newPrefab.skeletons.at(0).value,
+  EXPECT_NE(newPrefab->skeletons.at(0).value,
             quoll::AssetHandle<quoll::SkeletonAsset>());
   auto &newSkeleton =
-      cache.getRegistry().getMeta(newPrefab.skeletons.at(0).value);
+      cache.getRegistry().getMeta(newPrefab->skeletons.at(0).value);
   EXPECT_EQ(newSkeleton.uuid, skeletonData.uuid);
 
   // Validate animation
-  auto newAnimationHandle = newPrefab.animations.at(0);
+  auto newAnimationHandle = newPrefab->animations.at(0);
   EXPECT_NE(newAnimationHandle, quoll::AssetHandle<quoll::AnimationAsset>());
   auto &newAnimation = cache.getRegistry().getMeta(newAnimationHandle);
   EXPECT_EQ(newAnimation.uuid, animationData.uuid);
 
   // Validate animator
-  auto newAnimatorHandle = newPrefab.animators.at(0).value;
+  auto newAnimatorHandle = newPrefab->animators.at(0).value;
   EXPECT_NE(newAnimatorHandle, quoll::AssetHandle<quoll::AnimatorAsset>());
   auto &newAnimator = cache.getRegistry().getMeta(newAnimatorHandle);
   EXPECT_EQ(newAnimator.uuid, animatorData.uuid);

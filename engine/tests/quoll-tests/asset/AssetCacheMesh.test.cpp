@@ -205,8 +205,8 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoVertices) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
-  EXPECT_FALSE(handle);
+  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid);
+  EXPECT_FALSE(mesh);
 }
 
 TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoIndices) {
@@ -216,23 +216,24 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoIndices) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
-  EXPECT_FALSE(handle);
+  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid);
+  EXPECT_FALSE(mesh);
 }
 
 TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = cache.createFromData(asset);
-  auto handleRes = cache.load<quoll::MeshAsset>(asset.uuid);
-  auto handle = handleRes.data();
+  auto res = cache.request<quoll::MeshAsset>(asset.uuid);
+  ASSERT_TRUE(res);
 
-  EXPECT_NE(handle, quoll::AssetHandle<quoll::MeshAsset>());
-  auto &mesh = cache.getRegistry().get(handle);
-  EXPECT_EQ(cache.getRegistry().getMeta(handle).name, asset.name);
+  auto mesh = res.data();
+
+  EXPECT_NE(mesh.handle(), quoll::AssetHandle<quoll::MeshAsset>());
+  EXPECT_EQ(mesh.meta().name, asset.name);
 
   for (usize g = 0; g < asset.data.geometries.size(); ++g) {
     auto &expectedGeometry = asset.data.geometries.at(g);
-    auto &actualGeometry = mesh.geometries.at(g);
+    auto &actualGeometry = mesh->geometries.at(g);
 
     EXPECT_EQ(expectedGeometry.positions.size(),
               actualGeometry.positions.size());
@@ -365,8 +366,8 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoVertices) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
-  EXPECT_FALSE(handle);
+  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid);
+  EXPECT_FALSE(mesh);
 }
 
 TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
@@ -376,22 +377,21 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto handle = cache.load<quoll::MeshAsset>(asset.uuid);
-  EXPECT_FALSE(handle);
+  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid);
+  EXPECT_FALSE(mesh);
 }
 
 TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
   auto filePath = cache.createFromData(asset);
-  auto handle = cache.load<quoll::MeshAsset>(asset.uuid).data();
-  EXPECT_NE(handle, quoll::AssetHandle<quoll::MeshAsset>());
-  auto &mesh = cache.getRegistry().get(handle);
-  EXPECT_EQ(cache.getRegistry().getMeta(handle).name, asset.name);
+  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid).data();
+  EXPECT_NE(mesh.handle(), quoll::AssetHandle<quoll::MeshAsset>());
+  EXPECT_EQ(mesh.meta().name, asset.name);
 
   for (usize g = 0; g < asset.data.geometries.size(); ++g) {
     auto &expectedGeometry = asset.data.geometries.at(g);
-    auto &actualGeometry = mesh.geometries.at(g);
+    auto &actualGeometry = mesh->geometries.at(g);
 
     EXPECT_EQ(expectedGeometry.positions.size(),
               actualGeometry.positions.size());

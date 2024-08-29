@@ -438,7 +438,7 @@ void loadMeshes(GLTFImportData &importData) {
 
     auto path = assetCache.createFromData(mesh);
 
-    auto handle = assetCache.load<quoll::MeshAsset>(mesh.uuid);
+    auto handle = assetCache.load<MeshAsset>(mesh.uuid);
     importData.meshes.map.insert_or_assign(i, handle);
 
     importData.meshMaterials.insert_or_assign(handle, materials);

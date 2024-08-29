@@ -129,7 +129,7 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
 
   if (!specularCubemap) {
     device->destroyTexture(unfilteredCubemap.texture);
-    mAssetCache.getRegistry().remove(irradianceCubemap.data());
+    mAssetCache.getRegistry().remove(irradianceCubemap.data().handle());
 
     return specularCubemap.error();
   }
@@ -138,8 +138,8 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
 
   AssetData<EnvironmentAsset> environment{};
   environment.uuid = getOrCreateUuidFromMap(uuids, "root");
-  environment.data.specularMap = specularCubemap;
-  environment.data.irradianceMap = irradianceCubemap;
+  environment.data.specularMap = specularCubemap.data().handle();
+  environment.data.irradianceMap = irradianceCubemap.data().handle();
 
   auto createdFileRes = mAssetCache.createFromData(environment);
 
@@ -147,15 +147,17 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
     return createdFileRes.error();
   }
 
-  auto loadRes = mAssetCache.load<EnvironmentAsset>(environment.uuid);
-  if (!loadRes) {
-    return loadRes.error();
+  auto res = mAssetCache.request<EnvironmentAsset>(environment.uuid);
+  if (!res) {
+    return res.error();
   }
+
+  auto env = res.data();
 
   auto &registry = mAssetCache.getRegistry();
 
   UUIDMap output{
-      {"root", registry.getMeta(loadRes.data()).uuid},
+      {"root", env.meta().uuid},
       {"irradiance", registry.getMeta(environment.data.irradianceMap).uuid},
       {"specular", registry.getMeta(environment.data.specularMap).uuid}};
 
@@ -305,7 +307,7 @@ HDRIImporter::convertEquirectangularToCubemap(f32 *data, u32 width,
   return CubemapData{unfilteredCubemap, levels};
 }
 
-Result<AssetHandle<TextureAsset>>
+Result<AssetRef<TextureAsset>>
 HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
                                     const Uuid &uuid, const String &name) {
   auto *device = mRenderStorage.getDevice();
@@ -383,10 +385,10 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
     return createdFileRes.error();
   }
 
-  return mAssetCache.load<quoll::TextureAsset>(asset.uuid);
+  return mAssetCache.request<TextureAsset>(asset.uuid);
 }
 
-Result<AssetHandle<TextureAsset>>
+Result<AssetRef<TextureAsset>>
 HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
                                   const Uuid &uuid, const String &name) {
   auto *device = mRenderStorage.getDevice();
@@ -477,7 +479,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
     return createdFileRes.error();
   }
 
-  return mAssetCache.load<quoll::TextureAsset>(asset.uuid);
+  return mAssetCache.request<TextureAsset>(asset.uuid);
 }
 
 } // namespace quoll::editor
