@@ -252,10 +252,11 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
   node["states"]["valid"] = YAML::Node(YAML::NodeType::Map);
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.getPathFromUuid(uuid);
-  std::ofstream stream(filePath);
+  std::ofstream stream(FilePath);
   stream << node;
   stream.close();
+
+  ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
   auto res = cache.request<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
@@ -292,10 +293,11 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
   }
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.getPathFromUuid(uuid);
-  std::ofstream stream(filePath);
+  std::ofstream stream(FilePath);
   stream << node;
   stream.close();
+
+  ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
   auto res = cache.request<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
@@ -326,10 +328,11 @@ TEST_F(AssetCacheAnimatorTest,
     node["states"]["valid"] = YAML::Node(YAML::NodeType::Map);
 
     auto uuid = quoll::Uuid::generate();
-    auto filePath = cache.getPathFromUuid(uuid);
-    std::ofstream stream(filePath);
+    std::ofstream stream(FilePath);
     stream << node;
     stream.close();
+
+    ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
     auto res = cache.request<quoll::AnimatorAsset>(uuid);
     EXPECT_TRUE(res);
@@ -353,11 +356,11 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorSetsInitialState) {
   node["states"]["valid2"] = YAML::Node(YAML::NodeType::Map);
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.getPathFromUuid(uuid);
-
-  std::ofstream stream(filePath);
+  std::ofstream stream(FilePath);
   stream << node;
   stream.close();
+
+  ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
   auto res = cache.request<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
@@ -392,10 +395,11 @@ TEST_F(AssetCacheAnimatorTest,
   }
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.getPathFromUuid(uuid);
-  std::ofstream stream(filePath);
+  std::ofstream stream(FilePath);
   stream << node;
   stream.close();
+
+  ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
   auto res = cache.request<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
@@ -468,10 +472,11 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
   node["states"]["walk"] = YAML::Node(YAML::NodeType::Map);
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.getPathFromUuid(uuid);
-  std::ofstream stream(filePath);
+  std::ofstream stream(FilePath);
   stream << node;
   stream.close();
+
+  ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
   auto res = cache.request<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
@@ -505,10 +510,11 @@ TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
   state["output"]["animation"] = "my-animation";
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.getPathFromUuid(uuid);
-  std::ofstream stream(filePath);
+  std::ofstream stream(FilePath);
   stream << node;
   stream.close();
+
+  ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
   auto res = cache.request<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
@@ -543,7 +549,7 @@ TEST_F(AssetCacheAnimatorTest,
   stream.close();
 
   auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid);
+  ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
   auto res = cache.request<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);

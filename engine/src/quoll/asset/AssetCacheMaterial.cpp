@@ -48,8 +48,7 @@ Result<void> AssetCache::createMaterialFromData(const MaterialAsset &data,
   return Ok();
 }
 
-Result<MaterialAsset>
-AssetCache::loadMaterialDataFromInputStream(const Path &path) {
+Result<MaterialAsset> AssetCache::loadMaterial(const Path &path) {
   InputBinaryStream stream(path);
 
   AssetFileHeader header;
@@ -154,15 +153,6 @@ AssetCache::loadMaterialDataFromInputStream(const Path &path) {
   }
 
   return {material, warnings};
-}
-
-Result<MaterialAsset> AssetCache::loadMaterial(const Uuid &uuid) {
-  auto meta = getAssetMeta(uuid);
-  if (meta.type != AssetType::Material) {
-    return Error("Asset type is not material");
-  }
-
-  return loadMaterialDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

@@ -33,8 +33,7 @@ Result<void> AssetCache::createSkeletonFromData(const SkeletonAsset &data,
   return Ok();
 }
 
-Result<SkeletonAsset>
-AssetCache::loadSkeletonDataFromInputStream(const Path &path) {
+Result<SkeletonAsset> AssetCache::loadSkeleton(const Path &path) {
   InputBinaryStream stream(path);
   AssetFileHeader header;
   stream.read(header);
@@ -63,15 +62,6 @@ AssetCache::loadSkeletonDataFromInputStream(const Path &path) {
   stream.read(skeleton.jointNames);
 
   return skeleton;
-}
-
-Result<SkeletonAsset> AssetCache::loadSkeleton(const Uuid &uuid) {
-  auto meta = getAssetMeta(uuid);
-  if (meta.type != AssetType::Skeleton) {
-    return Error("Asset type is not skeleton");
-  }
-
-  return loadSkeletonDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

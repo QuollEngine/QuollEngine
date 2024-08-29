@@ -23,8 +23,7 @@ Result<void> AssetCache::createEnvironmentFromData(const EnvironmentAsset &data,
   return Ok();
 }
 
-Result<EnvironmentAsset>
-AssetCache::loadEnvironmentDataFromInputStream(const Path &path) {
+Result<EnvironmentAsset> AssetCache::loadEnvironment(const Path &path) {
   InputBinaryStream stream(path);
 
   AssetFileHeader header;
@@ -55,15 +54,6 @@ AssetCache::loadEnvironmentDataFromInputStream(const Path &path) {
   environment.irradianceMap = irradianceMapRes.data().handle();
   environment.specularMap = specularMapRes.data().handle();
   return environment;
-}
-
-Result<EnvironmentAsset> AssetCache::loadEnvironment(const Uuid &uuid) {
-  auto meta = getAssetMeta(uuid);
-  if (meta.type != AssetType::Environment) {
-    return Error("Asset type is not environment");
-  }
-
-  return loadEnvironmentDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll
