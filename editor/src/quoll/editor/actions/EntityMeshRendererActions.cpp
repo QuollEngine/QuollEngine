@@ -4,8 +4,8 @@
 namespace quoll::editor {
 
 EntitySetMeshRendererMaterial::EntitySetMeshRendererMaterial(
-    Entity entity, usize slot, AssetHandle<MaterialAsset> handle)
-    : mEntity(entity), mSlot(slot), mNewMaterial(handle) {}
+    Entity entity, usize slot, AssetRef<MaterialAsset> material)
+    : mEntity(entity), mSlot(slot), mNewMaterial(material) {}
 
 ActionExecutorResult
 EntitySetMeshRendererMaterial::onExecute(WorkspaceState &state,
@@ -15,7 +15,7 @@ EntitySetMeshRendererMaterial::onExecute(WorkspaceState &state,
   mOldMaterial =
       scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot);
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot) =
-      mNewMaterial;
+      mNewMaterial.handle();
 
   ActionExecutorResult result{};
   result.addToHistory = true;
@@ -49,12 +49,12 @@ bool EntitySetMeshRendererMaterial::predicate(WorkspaceState &state,
     return false;
   }
 
-  return assetCache.getRegistry().has(mNewMaterial);
+  return mNewMaterial;
 }
 
 EntityAddMeshRendererMaterialSlot::EntityAddMeshRendererMaterialSlot(
-    Entity entity, AssetHandle<MaterialAsset> handle)
-    : mEntity(entity), mNewMaterial(handle) {}
+    Entity entity, AssetRef<MaterialAsset> material)
+    : mEntity(entity), mNewMaterial(material) {}
 
 ActionExecutorResult
 EntityAddMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
@@ -62,7 +62,7 @@ EntityAddMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
   auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.push_back(
-      mNewMaterial);
+      mNewMaterial.handle());
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -91,7 +91,7 @@ bool EntityAddMeshRendererMaterialSlot::predicate(WorkspaceState &state,
     return false;
   }
 
-  return assetCache.getRegistry().has(mNewMaterial);
+  return mNewMaterial;
 }
 
 EntityRemoveLastMeshRendererMaterialSlot::

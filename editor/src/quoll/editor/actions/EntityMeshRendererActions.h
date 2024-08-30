@@ -8,7 +8,7 @@ namespace quoll::editor {
 class EntitySetMeshRendererMaterial : public Action {
 public:
   EntitySetMeshRendererMaterial(Entity entity, usize slot,
-                                AssetHandle<MaterialAsset> handle);
+                                AssetRef<MaterialAsset> material);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetCache &assetCache) override;
@@ -22,13 +22,13 @@ private:
   Entity mEntity;
   usize mSlot;
   AssetHandle<MaterialAsset> mOldMaterial;
-  AssetHandle<MaterialAsset> mNewMaterial;
+  AssetRef<MaterialAsset> mNewMaterial;
 };
 
 class EntityAddMeshRendererMaterialSlot : public Action {
 public:
   EntityAddMeshRendererMaterialSlot(Entity entity,
-                                    AssetHandle<MaterialAsset> handle);
+                                    AssetRef<MaterialAsset> material);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetCache &assetCache) override;
@@ -40,7 +40,7 @@ public:
 
 private:
   Entity mEntity;
-  AssetHandle<MaterialAsset> mNewMaterial;
+  AssetRef<MaterialAsset> mNewMaterial;
 };
 
 class EntityRemoveLastMeshRendererMaterialSlot : public Action {

@@ -4,8 +4,8 @@
 namespace quoll::editor {
 
 EntitySetSkinnedMeshRendererMaterial::EntitySetSkinnedMeshRendererMaterial(
-    Entity entity, usize slot, AssetHandle<MaterialAsset> handle)
-    : mEntity(entity), mSlot(slot), mNewMaterial(handle) {}
+    Entity entity, usize slot, AssetRef<MaterialAsset> material)
+    : mEntity(entity), mSlot(slot), mNewMaterial(material) {}
 
 ActionExecutorResult
 EntitySetSkinnedMeshRendererMaterial::onExecute(WorkspaceState &state,
@@ -16,7 +16,7 @@ EntitySetSkinnedMeshRendererMaterial::onExecute(WorkspaceState &state,
       scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(
           mSlot);
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(mSlot) =
-      mNewMaterial;
+      mNewMaterial.handle();
 
   ActionExecutorResult result{};
   result.addToHistory = true;
@@ -50,13 +50,13 @@ bool EntitySetSkinnedMeshRendererMaterial::predicate(WorkspaceState &state,
     return false;
   }
 
-  return assetCache.getRegistry().has(mNewMaterial);
+  return mNewMaterial;
 }
 
 EntityAddSkinnedMeshRendererMaterialSlot::
     EntityAddSkinnedMeshRendererMaterialSlot(Entity entity,
-                                             AssetHandle<MaterialAsset> handle)
-    : mEntity(entity), mNewMaterial(handle) {}
+                                             AssetRef<MaterialAsset> material)
+    : mEntity(entity), mNewMaterial(material) {}
 
 ActionExecutorResult
 EntityAddSkinnedMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
@@ -64,7 +64,7 @@ EntityAddSkinnedMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
   auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.push_back(
-      mNewMaterial);
+      mNewMaterial.handle());
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);
@@ -93,7 +93,7 @@ bool EntityAddSkinnedMeshRendererMaterialSlot::predicate(
     return false;
   }
 
-  return assetCache.getRegistry().has(mNewMaterial);
+  return mNewMaterial;
 }
 
 EntityRemoveLastSkinnedMeshRendererMaterialSlot::

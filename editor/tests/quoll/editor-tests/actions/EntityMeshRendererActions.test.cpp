@@ -4,8 +4,33 @@
 #include "ActionTestBase.h"
 #include "DefaultEntityTests.h"
 
+class EntityMeshRendererActionTestBase : public ActionTestBase {
+public:
+  EntityMeshRendererActionTestBase() {
+    quoll::AssetData<quoll::MaterialAsset> m1;
+    m1.uuid = quoll::Uuid::generate();
+    assetCache.getRegistry().add(m1);
+    mat1 = assetCache.request<quoll::MaterialAsset>(m1.uuid).data();
+
+    quoll::AssetData<quoll::MaterialAsset> m2;
+    m2.uuid = quoll::Uuid::generate();
+    assetCache.getRegistry().add(m2);
+    mat2 = assetCache.request<quoll::MaterialAsset>(m1.uuid).data();
+
+    quoll::AssetData<quoll::MaterialAsset> m3;
+    m3.uuid = quoll::Uuid::generate();
+    assetCache.getRegistry().add(m3);
+    mat3 = assetCache.request<quoll::MaterialAsset>(m1.uuid).data();
+  }
+
+  quoll::AssetRef<quoll::MaterialAsset> mat1;
+  quoll::AssetRef<quoll::MaterialAsset> mat2;
+  quoll::AssetRef<quoll::MaterialAsset> mat3;
+};
+
 // SetMeshRendererMaterialSlot
-using EntitySetMeshRendererMaterialActionTest = ActionTestBase;
+using EntitySetMeshRendererMaterialActionTest =
+    EntityMeshRendererActionTestBase;
 
 TEST_F(EntitySetMeshRendererMaterialActionTest,
        ExecutorSetsMaterialInSpecifiedSlot) {
@@ -13,24 +38,20 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
 
-  quoll::editor::EntitySetMeshRendererMaterial action(
-      entity, 1, quoll::AssetHandle<quoll::MaterialAsset>{5});
+  quoll::editor::EntitySetMeshRendererMaterial action(entity, 1, mat3);
   auto res = action.onExecute(state, assetCache);
 
   const auto &renderer =
       state.scene.entityDatabase.get<quoll::MeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 2);
-  EXPECT_EQ(renderer.materials.at(0),
-            quoll::AssetHandle<quoll::MaterialAsset>{1});
-  EXPECT_EQ(renderer.materials.at(1),
-            quoll::AssetHandle<quoll::MaterialAsset>{5});
+  EXPECT_EQ(renderer.materials.at(0), mat1.handle());
+  EXPECT_EQ(renderer.materials.at(1), mat3.handle());
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -41,14 +62,12 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
 
-  quoll::editor::EntitySetMeshRendererMaterial action(
-      entity, 1, quoll::AssetHandle<quoll::MaterialAsset>{5});
+  quoll::editor::EntitySetMeshRendererMaterial action(entity, 1, mat3);
   action.onExecute(state, assetCache);
   action.onUndo(state, assetCache);
 
@@ -56,17 +75,14 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
       state.scene.entityDatabase.get<quoll::MeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 2);
-  EXPECT_EQ(renderer.materials.at(0),
-            quoll::AssetHandle<quoll::MaterialAsset>{1});
-  EXPECT_EQ(renderer.materials.at(1),
-            quoll::AssetHandle<quoll::MaterialAsset>{2});
+  EXPECT_EQ(renderer.materials.at(0), mat1.handle());
+  EXPECT_EQ(renderer.materials.at(1), mat2.handle());
 }
 
 TEST_F(EntitySetMeshRendererMaterialActionTest,
        PredicateReturnsFalseIfNoMeshRendererComponent) {
   auto entity = state.scene.entityDatabase.create();
-  auto material = assetCache.getRegistry().add<quoll::MaterialAsset>({});
-  EXPECT_FALSE(quoll::editor::EntitySetMeshRendererMaterial(entity, 0, material)
+  EXPECT_FALSE(quoll::editor::EntitySetMeshRendererMaterial(entity, 0, mat1)
                    .predicate(state, assetCache));
 }
 
@@ -76,14 +92,13 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
 
   auto material = assetCache.getRegistry().add<quoll::MaterialAsset>({});
-  EXPECT_FALSE(quoll::editor::EntitySetMeshRendererMaterial(entity, 5, material)
+  EXPECT_FALSE(quoll::editor::EntitySetMeshRendererMaterial(entity, 5, mat3)
                    .predicate(state, assetCache));
 }
 
@@ -93,14 +108,13 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
 
   EXPECT_FALSE(quoll::editor::EntitySetMeshRendererMaterial(
-                   entity, 5, quoll::AssetHandle<quoll::MaterialAsset>{25})
+                   entity, 1, quoll::AssetRef<quoll::MaterialAsset>())
                    .predicate(state, assetCache));
 }
 
@@ -110,19 +124,18 @@ TEST_F(EntitySetMeshRendererMaterialActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
 
-  auto material = assetCache.getRegistry().add<quoll::MaterialAsset>({});
-  EXPECT_TRUE(quoll::editor::EntitySetMeshRendererMaterial(entity, 1, material)
+  EXPECT_TRUE(quoll::editor::EntitySetMeshRendererMaterial(entity, 1, mat3)
                   .predicate(state, assetCache));
 }
 
 // CreateMeshRendererMaterialSlot
-using EntityAddMeshRendererMaterialSlotActionTest = ActionTestBase;
+using EntityAddMeshRendererMaterialSlotActionTest =
+    EntityMeshRendererActionTestBase;
 
 TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
        ExecutorCreatesNewSlotInMeshRendererMaterials) {
@@ -130,26 +143,21 @@ TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
 
-  quoll::editor::EntityAddMeshRendererMaterialSlot action(
-      entity, quoll::AssetHandle<quoll::MaterialAsset>{5});
+  quoll::editor::EntityAddMeshRendererMaterialSlot action(entity, mat3);
   auto res = action.onExecute(state, assetCache);
 
   const auto &renderer =
       state.scene.entityDatabase.get<quoll::MeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 3);
-  EXPECT_EQ(renderer.materials.at(0),
-            quoll::AssetHandle<quoll::MaterialAsset>{1});
-  EXPECT_EQ(renderer.materials.at(1),
-            quoll::AssetHandle<quoll::MaterialAsset>{2});
-  EXPECT_EQ(renderer.materials.at(2),
-            quoll::AssetHandle<quoll::MaterialAsset>{5});
+  EXPECT_EQ(renderer.materials.at(0), mat1.handle());
+  EXPECT_EQ(renderer.materials.at(1), mat2.handle());
+  EXPECT_EQ(renderer.materials.at(2), mat3.handle());
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -160,14 +168,12 @@ TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
 
-  quoll::editor::EntityAddMeshRendererMaterialSlot action(
-      entity, quoll::AssetHandle<quoll::MaterialAsset>{5});
+  quoll::editor::EntityAddMeshRendererMaterialSlot action(entity, mat3);
   action.onExecute(state, assetCache);
   action.onUndo(state, assetCache);
 
@@ -175,19 +181,15 @@ TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
       state.scene.entityDatabase.get<quoll::MeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 2);
-  EXPECT_EQ(renderer.materials.at(0),
-            quoll::AssetHandle<quoll::MaterialAsset>{1});
-  EXPECT_EQ(renderer.materials.at(1),
-            quoll::AssetHandle<quoll::MaterialAsset>{2});
+  EXPECT_EQ(renderer.materials.at(0), mat1.handle());
+  EXPECT_EQ(renderer.materials.at(1), mat2.handle());
 }
 
 TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
        PredicateReturnsFalseIfNoMeshRenderer) {
   auto entity = state.scene.entityDatabase.create();
-  auto material = assetCache.getRegistry().add<quoll::MaterialAsset>({});
-  EXPECT_FALSE(
-      quoll::editor::EntityAddMeshRendererMaterialSlot(entity, material)
-          .predicate(state, assetCache));
+  EXPECT_FALSE(quoll::editor::EntityAddMeshRendererMaterialSlot(entity, mat1)
+                   .predicate(state, assetCache));
 }
 
 TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
@@ -198,7 +200,7 @@ TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
   state.scene.entityDatabase.set(entity, renderer);
 
   EXPECT_FALSE(quoll::editor::EntityAddMeshRendererMaterialSlot(
-                   entity, quoll::AssetHandle<quoll::MaterialAsset>{25})
+                   entity, quoll::AssetRef<quoll::MaterialAsset>())
                    .predicate(state, assetCache));
 }
 
@@ -209,14 +211,13 @@ TEST_F(EntityAddMeshRendererMaterialSlotActionTest,
   quoll::MeshRenderer renderer{};
   state.scene.entityDatabase.set(entity, renderer);
 
-  auto material = assetCache.getRegistry().add<quoll::MaterialAsset>({});
-
-  EXPECT_TRUE(quoll::editor::EntityAddMeshRendererMaterialSlot(entity, material)
+  EXPECT_TRUE(quoll::editor::EntityAddMeshRendererMaterialSlot(entity, mat1)
                   .predicate(state, assetCache));
 }
 
 // EntityRemoveLastMeshRendererMaterialSlot
-using EntityRemoveLastMeshRendererMaterialSlotActionTest = ActionTestBase;
+using EntityRemoveLastMeshRendererMaterialSlotActionTest =
+    EntityMeshRendererActionTestBase;
 
 TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
        ExecutorRemovesLastSlotFromMeshRenderer) {
@@ -224,8 +225,7 @@ TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -237,8 +237,7 @@ TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
       state.scene.entityDatabase.get<quoll::MeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 1);
-  EXPECT_EQ(renderer.materials.at(0),
-            quoll::AssetHandle<quoll::MaterialAsset>{1});
+  EXPECT_EQ(renderer.materials.at(0), mat1.handle());
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -249,8 +248,7 @@ TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
 
   {
     std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        quoll::AssetHandle<quoll::MaterialAsset>{1},
-        quoll::AssetHandle<quoll::MaterialAsset>{2}};
+        mat1.handle(), mat2.handle()};
     quoll::MeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -263,10 +261,8 @@ TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
       state.scene.entityDatabase.get<quoll::MeshRenderer>(entity);
 
   EXPECT_EQ(renderer.materials.size(), 2);
-  EXPECT_EQ(renderer.materials.at(0),
-            quoll::AssetHandle<quoll::MaterialAsset>{1});
-  EXPECT_EQ(renderer.materials.at(1),
-            quoll::AssetHandle<quoll::MaterialAsset>{2});
+  EXPECT_EQ(renderer.materials.at(0), mat1.handle());
+  EXPECT_EQ(renderer.materials.at(1), mat2.handle());
 }
 
 TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
@@ -293,7 +289,7 @@ TEST_F(EntityRemoveLastMeshRendererMaterialSlotActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-      quoll::AssetHandle<quoll::MaterialAsset>{1}};
+      mat1.handle()};
   quoll::MeshRenderer renderer{materials};
   state.scene.entityDatabase.set(entity, renderer);
 

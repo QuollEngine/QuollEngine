@@ -6,7 +6,6 @@
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/scene/Parent.h"
 #include "EntityLightActions.h"
-#include "EntityMeshActions.h"
 #include "EntitySkeletonActions.h"
 #include "EntityTransformActions.h"
 #include "EntityUpdateComponentAction.h"
@@ -25,14 +24,7 @@ static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
   return transform;
 }
 
-static bool isPrefabValid(AssetCache &assetCache,
-                          AssetHandle<PrefabAsset> handle) {
-  if (!assetCache.getRegistry().has(handle)) {
-    return false;
-  }
-
-  const auto &prefab = assetCache.getRegistry().get(handle);
-
+static bool isPrefabValid(const PrefabAsset &prefab) {
   return !prefab.animators.empty() || !prefab.meshes.empty() ||
          !prefab.skeletons.empty() || !prefab.transforms.empty() ||
          !prefab.directionalLights.empty() || !prefab.pointLights.empty() ||
@@ -94,9 +86,9 @@ bool SpawnEmptyEntityAtView::predicate(WorkspaceState &state,
   return scene.entityDatabase.has<Camera>(state.camera);
 }
 
-SpawnPrefabAtView::SpawnPrefabAtView(AssetHandle<PrefabAsset> handle,
+SpawnPrefabAtView::SpawnPrefabAtView(AssetRef<PrefabAsset> prefab,
                                      Entity camera)
-    : mHandle(handle), mCamera(camera) {}
+    : mPrefab(prefab), mCamera(camera) {}
 
 ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state,
                                                   AssetCache &assetCache) {
@@ -107,7 +99,7 @@ ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state,
   ActionExecutorResult res{};
   res.entitiesToSave =
       EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
-          .spawnPrefab(mHandle, getTransformFromView(viewMatrix));
+          .spawnPrefab(mPrefab.handle(), getTransformFromView(viewMatrix));
   res.addToHistory = true;
 
   mSpawnedRootEntity = res.entitiesToSave.back();
@@ -146,13 +138,13 @@ bool SpawnPrefabAtView::predicate(WorkspaceState &state,
                                   AssetCache &assetCache) {
   auto &scene = state.scene;
 
-  return isPrefabValid(assetCache, mHandle) &&
+  return mPrefab && isPrefabValid(mPrefab.get()) &&
          scene.entityDatabase.has<Camera>(mCamera);
 }
 
-SpawnSpriteAtView::SpawnSpriteAtView(AssetHandle<TextureAsset> handle,
+SpawnSpriteAtView::SpawnSpriteAtView(AssetRef<TextureAsset> texture,
                                      Entity camera)
-    : mHandle(handle), mCamera(camera) {}
+    : mTexture(texture), mCamera(camera) {}
 
 ActionExecutorResult SpawnSpriteAtView::onExecute(WorkspaceState &state,
                                                   AssetCache &assetCache) {
@@ -161,8 +153,9 @@ ActionExecutorResult SpawnSpriteAtView::onExecute(WorkspaceState &state,
   const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
 
   ActionExecutorResult res{};
-  mSpawnedEntity = EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
-                       .spawnSprite(mHandle, getTransformFromView(viewMatrix));
+  mSpawnedEntity =
+      EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
+          .spawnSprite(mTexture.handle(), getTransformFromView(viewMatrix));
 
   res.entitiesToSave.push_back(mSpawnedEntity);
   res.addToHistory = true;
@@ -201,8 +194,7 @@ bool SpawnSpriteAtView::predicate(WorkspaceState &state,
                                   AssetCache &assetCache) {
   auto &scene = state.scene;
 
-  return assetCache.getRegistry().has(mHandle) &&
-         scene.entityDatabase.has<Camera>(mCamera);
+  return mTexture && scene.entityDatabase.has<Camera>(mCamera);
 }
 
 } // namespace quoll::editor

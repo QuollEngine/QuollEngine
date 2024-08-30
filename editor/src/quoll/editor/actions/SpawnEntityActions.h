@@ -20,7 +20,7 @@ private:
 
 class SpawnPrefabAtView : public Action {
 public:
-  SpawnPrefabAtView(AssetHandle<PrefabAsset> handle, Entity camera);
+  SpawnPrefabAtView(AssetRef<PrefabAsset> prefab, Entity camera);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetCache &assetCache) override;
@@ -31,14 +31,14 @@ public:
   bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
-  AssetHandle<PrefabAsset> mHandle;
+  AssetRef<PrefabAsset> mPrefab;
   Entity mCamera;
   Entity mSpawnedRootEntity = Entity::Null;
 };
 
 class SpawnSpriteAtView : public Action {
 public:
-  SpawnSpriteAtView(AssetHandle<TextureAsset> handle, Entity camera);
+  SpawnSpriteAtView(AssetRef<TextureAsset> texture, Entity camera);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
                                  AssetCache &assetCache) override;
@@ -49,7 +49,7 @@ public:
   bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
-  AssetHandle<TextureAsset> mHandle;
+  AssetRef<TextureAsset> mTexture;
   Entity mCamera;
   Entity mSpawnedEntity = Entity::Null;
 };
