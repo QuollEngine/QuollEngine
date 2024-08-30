@@ -9,12 +9,12 @@ public:
   EntityCreateAnimator(Entity entity, AssetHandle<AnimatorAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mEntity;
@@ -26,12 +26,12 @@ public:
   EntitySetAnimator(Entity entity, AssetHandle<AnimatorAsset> script);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mEntity;

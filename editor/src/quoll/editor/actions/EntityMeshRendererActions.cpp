@@ -9,7 +9,7 @@ EntitySetMeshRendererMaterial::EntitySetMeshRendererMaterial(
 
 ActionExecutorResult
 EntitySetMeshRendererMaterial::onExecute(WorkspaceState &state,
-                                         AssetRegistry &assetRegistry) {
+                                         AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldMaterial =
@@ -25,7 +25,7 @@ EntitySetMeshRendererMaterial::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 EntitySetMeshRendererMaterial::onUndo(WorkspaceState &state,
-                                      AssetRegistry &assetRegistry) {
+                                      AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot) =
@@ -37,7 +37,7 @@ EntitySetMeshRendererMaterial::onUndo(WorkspaceState &state,
 }
 
 bool EntitySetMeshRendererMaterial::predicate(WorkspaceState &state,
-                                              AssetRegistry &assetRegistry) {
+                                              AssetCache &assetCache) {
   auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {
@@ -49,7 +49,7 @@ bool EntitySetMeshRendererMaterial::predicate(WorkspaceState &state,
     return false;
   }
 
-  return assetRegistry.has(mNewMaterial);
+  return assetCache.getRegistry().has(mNewMaterial);
 }
 
 EntityAddMeshRendererMaterialSlot::EntityAddMeshRendererMaterialSlot(
@@ -58,7 +58,7 @@ EntityAddMeshRendererMaterialSlot::EntityAddMeshRendererMaterialSlot(
 
 ActionExecutorResult
 EntityAddMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.push_back(
@@ -72,7 +72,7 @@ EntityAddMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 EntityAddMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
-                                          AssetRegistry &assetRegistry) {
+                                          AssetCache &assetCache) {
 
   auto &scene = state.scene;
 
@@ -83,23 +83,24 @@ EntityAddMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
   return result;
 }
 
-bool EntityAddMeshRendererMaterialSlot::predicate(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+bool EntityAddMeshRendererMaterialSlot::predicate(WorkspaceState &state,
+                                                  AssetCache &assetCache) {
   auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {
     return false;
   }
 
-  return assetRegistry.has(mNewMaterial);
+  return assetCache.getRegistry().has(mNewMaterial);
 }
 
 EntityRemoveLastMeshRendererMaterialSlot::
     EntityRemoveLastMeshRendererMaterialSlot(Entity entity)
     : mEntity(entity) {}
 
-ActionExecutorResult EntityRemoveLastMeshRendererMaterialSlot::onExecute(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+ActionExecutorResult
+EntityRemoveLastMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
+                                                    AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldMaterial =
@@ -115,7 +116,7 @@ ActionExecutorResult EntityRemoveLastMeshRendererMaterialSlot::onExecute(
 
 ActionExecutorResult
 EntityRemoveLastMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
-                                                 AssetRegistry &assetRegistry) {
+                                                 AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.push_back(
@@ -127,7 +128,7 @@ EntityRemoveLastMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
 }
 
 bool EntityRemoveLastMeshRendererMaterialSlot::predicate(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+    WorkspaceState &state, AssetCache &assetCache) {
   auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<MeshRenderer>(mEntity)) {

@@ -68,7 +68,7 @@ public:
     return mAssetCache.getAssetsPath();
   }
 
-  inline const AssetCache &getCache() const { return mAssetCache; }
+  inline AssetCache &getCache() { return mAssetCache; }
 
   void generatePreview(const Path &path, RenderStorage &renderStorage);
 

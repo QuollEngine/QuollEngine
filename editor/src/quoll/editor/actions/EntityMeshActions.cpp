@@ -8,7 +8,7 @@ EntitySetMesh::EntitySetMesh(Entity entity, AssetHandle<MeshAsset> mesh)
     : mEntity(entity), mMesh(mesh) {}
 
 ActionExecutorResult EntitySetMesh::onExecute(WorkspaceState &state,
-                                              AssetRegistry &assetRegistry) {
+                                              AssetCache &assetCache) {
   auto &scene = state.scene;
 
   auto &db = scene.entityDatabase;
@@ -27,12 +27,12 @@ ActionExecutorResult EntitySetMesh::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult EntitySetMesh::onUndo(WorkspaceState &state,
-                                           AssetRegistry &assetRegistry) {
+                                           AssetCache &assetCache) {
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
   if (mOldMesh) {
-    auto type = assetRegistry.getMeta(mOldMesh).type;
+    auto type = assetCache.getRegistry().getMeta(mOldMesh).type;
     db.set<Mesh>(mEntity, {mOldMesh});
 
   } else {
@@ -47,15 +47,14 @@ ActionExecutorResult EntitySetMesh::onUndo(WorkspaceState &state,
   return res;
 }
 
-bool EntitySetMesh::predicate(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) {
-  return assetRegistry.has(mMesh);
+bool EntitySetMesh::predicate(WorkspaceState &state, AssetCache &assetCache) {
+  return assetCache.getRegistry().has(mMesh);
 }
 
 EntityDeleteMesh::EntityDeleteMesh(Entity entity) : mEntity(entity) {}
 
 ActionExecutorResult EntityDeleteMesh::onExecute(WorkspaceState &state,
-                                                 AssetRegistry &assetRegistry) {
+                                                 AssetCache &assetCache) {
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
@@ -72,10 +71,10 @@ ActionExecutorResult EntityDeleteMesh::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult EntityDeleteMesh::onUndo(WorkspaceState &state,
-                                              AssetRegistry &assetRegistry) {
+                                              AssetCache &assetCache) {
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
-  auto type = assetRegistry.getMeta(mOldMesh).type;
+  auto type = assetCache.getRegistry().getMeta(mOldMesh).type;
 
   db.set<Mesh>(mEntity, {mOldMesh});
 
@@ -86,7 +85,7 @@ ActionExecutorResult EntityDeleteMesh::onUndo(WorkspaceState &state,
 }
 
 bool EntityDeleteMesh::predicate(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) {
+                                 AssetCache &assetCache) {
   return state.scene.entityDatabase.has<quoll::Mesh>(mEntity);
 }
 

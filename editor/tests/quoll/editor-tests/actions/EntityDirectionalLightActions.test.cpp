@@ -19,8 +19,8 @@ TEST_F(
   state.scene.entityDatabase.set<quoll::DirectionalLight>(entity, {});
 
   quoll::editor::EntityDeleteDirectionalLight action(entity);
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_FALSE(
       state.scene.entityDatabase.has<quoll::CascadedShadowMap>(entity));
@@ -35,9 +35,9 @@ TEST_F(EntityDeleteDirectionalLightActionTest,
   state.scene.entityDatabase.set<quoll::CascadedShadowMap>(entity, {});
 
   quoll::editor::EntityDeleteDirectionalLight action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::CascadedShadowMap>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);

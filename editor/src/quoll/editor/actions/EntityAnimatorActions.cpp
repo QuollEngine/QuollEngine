@@ -8,34 +8,31 @@ EntityCreateAnimator::EntityCreateAnimator(Entity entity,
                                            AssetHandle<AnimatorAsset> handle)
     : mEntity(entity), mHandle(handle) {}
 
-ActionExecutorResult
-EntityCreateAnimator::onExecute(WorkspaceState &state,
-                                AssetRegistry &assetRegistry) {
+ActionExecutorResult EntityCreateAnimator::onExecute(WorkspaceState &state,
+                                                     AssetCache &assetCache) {
   return EntityCreateComponent<Animator>(mEntity, {mHandle})
-      .onExecute(state, assetRegistry);
+      .onExecute(state, assetCache);
 }
 
-ActionExecutorResult
-EntityCreateAnimator::onUndo(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+ActionExecutorResult EntityCreateAnimator::onUndo(WorkspaceState &state,
+                                                  AssetCache &assetCache) {
   return EntityCreateComponent<Animator>(mEntity, {mHandle})
-      .onUndo(state, assetRegistry);
+      .onUndo(state, assetCache);
 }
 
 bool EntityCreateAnimator::predicate(WorkspaceState &state,
-                                     AssetRegistry &assetRegistry) {
+                                     AssetCache &assetCache) {
   auto &scene = state.scene;
   return !scene.entityDatabase.has<Animator>(mEntity) &&
-         assetRegistry.has(mHandle);
+         assetCache.getRegistry().has(mHandle);
 }
 
 EntitySetAnimator::EntitySetAnimator(Entity entity,
                                      AssetHandle<AnimatorAsset> script)
     : mEntity(entity), mAnimator(script) {}
 
-ActionExecutorResult
-EntitySetAnimator::onExecute(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+ActionExecutorResult EntitySetAnimator::onExecute(WorkspaceState &state,
+                                                  AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldAnimator = scene.entityDatabase.get<Animator>(mEntity).asset;
@@ -49,7 +46,7 @@ EntitySetAnimator::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult EntitySetAnimator::onUndo(WorkspaceState &state,
-                                               AssetRegistry &assetRegistry) {
+                                               AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set<Animator>(mEntity, {mOldAnimator});
@@ -60,8 +57,8 @@ ActionExecutorResult EntitySetAnimator::onUndo(WorkspaceState &state,
 }
 
 bool EntitySetAnimator::predicate(WorkspaceState &state,
-                                  AssetRegistry &assetRegistry) {
-  return assetRegistry.has(mAnimator);
+                                  AssetCache &assetCache) {
+  return assetCache.getRegistry().has(mAnimator);
 }
 
 } // namespace quoll::editor

@@ -8,14 +8,14 @@ AddWorkspace::AddWorkspace(Workspace *workspace,
     : mWorkspace(workspace), mWorkspaceManager(workspaceManager) {}
 
 ActionExecutorResult AddWorkspace::onExecute(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   mWorkspaceManager.add(mWorkspace);
 
   return {};
 }
 
 bool AddWorkspace::predicate(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+                             AssetCache &assetCache) {
   return true;
 }
 

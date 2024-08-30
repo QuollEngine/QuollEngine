@@ -17,7 +17,7 @@ TEST_F(MoveCameraToEntityActionTest,
 
   quoll::editor::MoveCameraToEntity action(entity);
 
-  EXPECT_DEATH(action.onExecute(state, assetRegistry), ".*");
+  EXPECT_DEATH(action.onExecute(state, assetCache), ".*");
 }
 
 TEST_F(MoveCameraToEntityActionTest,
@@ -32,7 +32,7 @@ TEST_F(MoveCameraToEntityActionTest,
   state.scene.entityDatabase.set<quoll::WorldTransform>(entity, {world});
 
   quoll::editor::MoveCameraToEntity action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
   const auto &lookAt =
       state.scene.entityDatabase.get<quoll::editor::CameraLookAt>(state.camera);

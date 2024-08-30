@@ -68,7 +68,7 @@ void SceneSimulatorUI::render(WorkspaceState &state, AssetManager &assetManager,
   renderToolbar(state, actionExecutor);
 
   mSceneHierarchyPanel.render(state, actionExecutor);
-  mInspector.render(state, assetManager.getAssetRegistry(), actionExecutor);
+  mInspector.render(state, assetManager.getCache(), actionExecutor);
 
   mAssetBrowser.render(state, assetManager, actionExecutor);
 }

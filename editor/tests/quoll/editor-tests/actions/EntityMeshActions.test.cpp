@@ -10,7 +10,7 @@ public:
   quoll::AssetHandle<quoll::MeshAsset> createMesh() {
     quoll::AssetData<quoll::MeshAsset> asset{};
     asset.type = quoll::AssetType::Mesh;
-    return assetRegistry.add(asset);
+    return assetCache.getRegistry().add(asset);
   }
 };
 
@@ -21,7 +21,7 @@ TEST_F(EntitySetMeshTest, ExecutorSetsMeshComponentIfMeshTypeIsMesh) {
   auto mesh = createMesh();
 
   quoll::editor::EntitySetMesh action(entity, mesh);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Mesh>(entity));
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Mesh>(entity).handle, mesh);
@@ -38,8 +38,8 @@ TEST_F(EntitySetMeshTest,
   state.scene.entityDatabase.set<quoll::Mesh>(entity, {oldMesh});
 
   quoll::editor::EntitySetMesh action(entity, mesh);
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Mesh>(entity));
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Mesh>(entity).handle,
@@ -52,8 +52,8 @@ TEST_F(EntitySetMeshTest, UndoDeletesMeshComponentIfNoPreviousComponent) {
   auto mesh = createMesh();
 
   quoll::editor::EntitySetMesh action(entity, mesh);
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Mesh>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -64,7 +64,7 @@ TEST_F(EntitySetMeshTest, PredicateReturnsFalseIfMeshDoesNotExist) {
 
   EXPECT_FALSE(quoll::editor::EntitySetMesh(
                    entity, quoll::AssetHandle<quoll::MeshAsset>{25})
-                   .predicate(state, assetRegistry));
+                   .predicate(state, assetCache));
 }
 
 using EntityDeleteMeshTest = EntityMeshActionTestBase;
@@ -75,7 +75,7 @@ TEST_F(EntityDeleteMeshTest, ExecutorDeletesMeshIfCurrentComponentIsMesh) {
 
   state.scene.entityDatabase.set<quoll::Mesh>(entity, {oldMesh});
   quoll::editor::EntityDeleteMesh action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Mesh>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -88,12 +88,12 @@ TEST_F(EntityDeleteMeshTest, PredicateReturnsTrueIfEntityHasMesh) {
   state.scene.entityDatabase.set<quoll::Mesh>(entity, {mesh});
 
   EXPECT_TRUE(
-      quoll::editor::EntityDeleteMesh(entity).predicate(state, assetRegistry));
+      quoll::editor::EntityDeleteMesh(entity).predicate(state, assetCache));
 }
 
 TEST_F(EntityDeleteMeshTest, PredicateReturnsFalseIfEntityHasNoMesh) {
   auto entity = state.scene.entityDatabase.create();
 
   EXPECT_FALSE(
-      quoll::editor::EntityDeleteMesh(entity).predicate(state, assetRegistry));
+      quoll::editor::EntityDeleteMesh(entity).predicate(state, assetCache));
 }

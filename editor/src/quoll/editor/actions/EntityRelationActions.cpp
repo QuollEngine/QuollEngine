@@ -11,7 +11,7 @@ EntitySetParent::EntitySetParent(Entity entity, Entity parent)
     : mEntity(entity), mParent(parent) {}
 
 ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
-                                                AssetRegistry &assetRegistry) {
+                                                AssetCache &assetCache) {
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
@@ -34,7 +34,7 @@ ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   auto &scene = state.scene;
   auto &db = scene.entityDatabase;
 
@@ -54,8 +54,7 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
   return res;
 }
 
-bool EntitySetParent::predicate(WorkspaceState &state,
-                                AssetRegistry &assetRegistry) {
+bool EntitySetParent::predicate(WorkspaceState &state, AssetCache &assetCache) {
 
   return state.scene.entityDatabase.exists(mParent) &&
          EntityRelationUtils::isValidParentForEntity(state.scene.entityDatabase,
@@ -65,9 +64,8 @@ bool EntitySetParent::predicate(WorkspaceState &state,
 
 EntityRemoveParent::EntityRemoveParent(Entity entity) : mEntity(entity) {}
 
-ActionExecutorResult
-EntityRemoveParent::onExecute(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) {
+ActionExecutorResult EntityRemoveParent::onExecute(WorkspaceState &state,
+                                                   AssetCache &assetCache) {
   auto &scene = state.scene;
 
   auto parent = scene.entityDatabase.get<Parent>(mEntity).parent;
@@ -94,7 +92,7 @@ EntityRemoveParent::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult EntityRemoveParent::onUndo(WorkspaceState &state,
-                                                AssetRegistry &assetRegistry) {
+                                                AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set<Parent>(mEntity, {mPreviousParent});
@@ -113,7 +111,7 @@ ActionExecutorResult EntityRemoveParent::onUndo(WorkspaceState &state,
 }
 
 bool EntityRemoveParent::predicate(WorkspaceState &state,
-                                   AssetRegistry &assetRegistry) {
+                                   AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.entityDatabase.has<Parent>(mEntity);

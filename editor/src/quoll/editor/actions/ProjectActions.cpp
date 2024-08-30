@@ -9,7 +9,7 @@ ExportAsGame::ExportAsGame(AssetManager &assetManager)
     : mAssetManager(assetManager) {}
 
 ActionExecutorResult ExportAsGame::onExecute(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   auto path = platform::FileDialog::getFilePathFromCreateDialog({});
 
   mAssetManager.reloadAssets();
@@ -20,8 +20,7 @@ ActionExecutorResult ExportAsGame::onExecute(WorkspaceState &state,
   return ActionExecutorResult{};
 }
 
-bool ExportAsGame::predicate(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+bool ExportAsGame::predicate(WorkspaceState &state, AssetCache &assetCache) {
   return true;
 }
 

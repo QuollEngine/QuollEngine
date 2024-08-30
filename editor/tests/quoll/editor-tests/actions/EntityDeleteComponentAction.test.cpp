@@ -12,7 +12,7 @@ TEST_F(EntityDeleteComponentActionTest,
   state.scene.entityDatabase.set<quoll::Name>(entity, {"Hello"});
   quoll::editor::EntityDeleteComponent<quoll::Name> action(entity);
 
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntityDeleteComponentActionTest,
@@ -20,7 +20,7 @@ TEST_F(EntityDeleteComponentActionTest,
   auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntityDeleteComponent<quoll::Name> action(entity);
 
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntityDeleteComponentActionTest, ExecutorDeletesComponentFromEntity) {
@@ -30,7 +30,7 @@ TEST_F(EntityDeleteComponentActionTest, ExecutorDeletesComponentFromEntity) {
   state.scene.entityDatabase.set<quoll::Name>(entity, {"Hello"});
   quoll::editor::EntityDeleteComponent<quoll::Name> action(entity);
 
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -44,10 +44,10 @@ TEST_F(EntityDeleteComponentActionTest, UndoAddsPreviousComponentToEntity) {
   state.scene.entityDatabase.set<quoll::Name>(entity, {"Hello"});
   quoll::editor::EntityDeleteComponent<quoll::Name> action(entity);
 
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Name>(entity));
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Name>(entity));

@@ -25,13 +25,13 @@ static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
   return transform;
 }
 
-static bool isPrefabValid(AssetRegistry &assetRegistry,
+static bool isPrefabValid(AssetCache &assetCache,
                           AssetHandle<PrefabAsset> handle) {
-  if (!assetRegistry.has(handle)) {
+  if (!assetCache.getRegistry().has(handle)) {
     return false;
   }
 
-  const auto &prefab = assetRegistry.get(handle);
+  const auto &prefab = assetCache.getRegistry().get(handle);
 
   return !prefab.animators.empty() || !prefab.meshes.empty() ||
          !prefab.skeletons.empty() || !prefab.transforms.empty() ||
@@ -39,20 +39,19 @@ static bool isPrefabValid(AssetRegistry &assetRegistry,
          !prefab.meshRenderers.empty() || !prefab.skinnedMeshRenderers.empty();
 }
 
-ActionExecutorResult
-SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
-                                  AssetRegistry &assetRegistry) {
+ActionExecutorResult SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
+                                                       AssetCache &assetCache) {
   auto &scene = state.scene;
   const auto &viewMatrix =
       scene.entityDatabase.get<Camera>(state.camera).viewMatrix;
 
   auto transform = getTransformFromView(viewMatrix);
 
-  mSpawnedEntity =
-      EntitySpawner(scene.entityDatabase, assetRegistry).spawnEmpty(transform);
+  mSpawnedEntity = EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
+                       .spawnEmpty(transform);
 
   EntityUpdateComponent<Name>(mSpawnedEntity, {}, Name{"New entity"})
-      .onExecute(state, assetRegistry);
+      .onExecute(state, assetCache);
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mSpawnedEntity);
@@ -61,9 +60,8 @@ SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
   return res;
 }
 
-ActionExecutorResult
-SpawnEmptyEntityAtView::onUndo(WorkspaceState &state,
-                               AssetRegistry &assetRegistry) {
+ActionExecutorResult SpawnEmptyEntityAtView::onUndo(WorkspaceState &state,
+                                                    AssetCache &assetCache) {
   auto &scene = state.scene;
 
   bool preserveSelectedEntity = true;
@@ -90,7 +88,7 @@ SpawnEmptyEntityAtView::onUndo(WorkspaceState &state,
 }
 
 bool SpawnEmptyEntityAtView::predicate(WorkspaceState &state,
-                                       AssetRegistry &assetRegistry) {
+                                       AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.entityDatabase.has<Camera>(state.camera);
@@ -100,16 +98,15 @@ SpawnPrefabAtView::SpawnPrefabAtView(AssetHandle<PrefabAsset> handle,
                                      Entity camera)
     : mHandle(handle), mCamera(camera) {}
 
-ActionExecutorResult
-SpawnPrefabAtView::onExecute(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state,
+                                                  AssetCache &assetCache) {
   auto &scene = state.scene;
 
   const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
 
   ActionExecutorResult res{};
   res.entitiesToSave =
-      EntitySpawner(scene.entityDatabase, assetRegistry)
+      EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
           .spawnPrefab(mHandle, getTransformFromView(viewMatrix));
   res.addToHistory = true;
 
@@ -119,7 +116,7 @@ SpawnPrefabAtView::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult SpawnPrefabAtView::onUndo(WorkspaceState &state,
-                                               AssetRegistry &assetRegistry) {
+                                               AssetCache &assetCache) {
   auto &scene = state.scene;
 
   bool preserveSelectedEntity = true;
@@ -146,10 +143,10 @@ ActionExecutorResult SpawnPrefabAtView::onUndo(WorkspaceState &state,
 }
 
 bool SpawnPrefabAtView::predicate(WorkspaceState &state,
-                                  AssetRegistry &assetRegistry) {
+                                  AssetCache &assetCache) {
   auto &scene = state.scene;
 
-  return isPrefabValid(assetRegistry, mHandle) &&
+  return isPrefabValid(assetCache, mHandle) &&
          scene.entityDatabase.has<Camera>(mCamera);
 }
 
@@ -157,15 +154,14 @@ SpawnSpriteAtView::SpawnSpriteAtView(AssetHandle<TextureAsset> handle,
                                      Entity camera)
     : mHandle(handle), mCamera(camera) {}
 
-ActionExecutorResult
-SpawnSpriteAtView::onExecute(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+ActionExecutorResult SpawnSpriteAtView::onExecute(WorkspaceState &state,
+                                                  AssetCache &assetCache) {
   auto &scene = state.scene;
 
   const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
 
   ActionExecutorResult res{};
-  mSpawnedEntity = EntitySpawner(scene.entityDatabase, assetRegistry)
+  mSpawnedEntity = EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
                        .spawnSprite(mHandle, getTransformFromView(viewMatrix));
 
   res.entitiesToSave.push_back(mSpawnedEntity);
@@ -175,7 +171,7 @@ SpawnSpriteAtView::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult SpawnSpriteAtView::onUndo(WorkspaceState &state,
-                                               AssetRegistry &assetRegistry) {
+                                               AssetCache &assetCache) {
   auto &scene = state.scene;
 
   bool preserveSelectedEntity = true;
@@ -202,10 +198,10 @@ ActionExecutorResult SpawnSpriteAtView::onUndo(WorkspaceState &state,
 }
 
 bool SpawnSpriteAtView::predicate(WorkspaceState &state,
-                                  AssetRegistry &assetRegistry) {
+                                  AssetCache &assetCache) {
   auto &scene = state.scene;
 
-  return assetRegistry.has(mHandle) &&
+  return assetCache.getRegistry().has(mHandle) &&
          scene.entityDatabase.has<Camera>(mCamera);
 }
 

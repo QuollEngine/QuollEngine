@@ -12,7 +12,7 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Rotate;
 
   quoll::editor::SetActiveTransform action(TO::Move);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.activeTransform, TO::Move);
   EXPECT_TRUE(res.addToHistory);
@@ -23,8 +23,8 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Rotate;
 
   quoll::editor::SetActiveTransform action(TO::Move);
-  action.onExecute(state, assetRegistry);
-  action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.activeTransform, TO::Rotate);
 }
@@ -34,7 +34,7 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Move;
 
   quoll::editor::SetActiveTransform action(TO::Move);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(SetActiveTransformActionTest,
@@ -42,5 +42,5 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Move;
 
   quoll::editor::SetActiveTransform action(TO::Scale);
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }

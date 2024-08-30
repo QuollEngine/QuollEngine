@@ -9,12 +9,12 @@ public:
   EntitySetMesh(Entity entity, AssetHandle<MeshAsset> mesh);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mEntity;
@@ -27,12 +27,12 @@ public:
   EntityDeleteMesh(Entity entity);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mEntity;

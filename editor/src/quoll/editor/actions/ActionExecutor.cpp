@@ -3,9 +3,8 @@
 
 namespace quoll::editor {
 
-ActionExecutor::ActionExecutor(WorkspaceState &state,
-                               AssetRegistry &assetRegistry)
-    : mState(state), mAssetRegistry(assetRegistry) {}
+ActionExecutor::ActionExecutor(WorkspaceState &state, AssetCache &assetCache)
+    : mState(state), mAssetCache(assetCache) {}
 
 void ActionExecutor::setAssetSyncer(AssetSyncer *assetSyncer) {
   mAssetSyncer = assetSyncer;
@@ -18,11 +17,11 @@ void ActionExecutor::process() {
 
   auto action = std::move(mActionToProcess);
 
-  if (!action->predicate(mState, mAssetRegistry)) {
+  if (!action->predicate(mState, mAssetCache)) {
     return;
   }
 
-  auto result = action->onExecute(mState, mAssetRegistry);
+  auto result = action->onExecute(mState, mAssetCache);
 
   if (result.addToHistory) {
     mUndoStack.push_back(std::move(action));
@@ -42,7 +41,7 @@ void ActionExecutor::undo() {
   }
 
   auto &action = mUndoStack.back();
-  auto result = action->onUndo(mState, mAssetRegistry);
+  auto result = action->onUndo(mState, mAssetCache);
   saveActionResult(result);
 
   mRedoStack.push_back(std::move(action));
@@ -55,7 +54,7 @@ void ActionExecutor::redo() {
   }
 
   auto &action = mRedoStack.back();
-  auto result = action->onExecute(mState, mAssetRegistry);
+  auto result = action->onExecute(mState, mAssetCache);
   saveActionResult(result);
 
   mUndoStack.push_back(std::move(action));

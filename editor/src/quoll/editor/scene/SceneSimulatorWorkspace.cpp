@@ -17,7 +17,7 @@ SceneSimulatorWorkspace::SceneSimulatorWorkspace(
     EditorRenderer &editorRenderer, MousePickingGraph &mousePickingGraph,
     MainEngineModules &engineModules, EditorCamera &editorCamera)
     : mAssetManager(assetManager), mState{project},
-      mActionExecutor(mState, mAssetManager.getAssetRegistry()),
+      mActionExecutor(mState, mAssetManager.getCache()),
       mSceneAssetHandle(scene),
       mSceneIO(mAssetManager.getAssetRegistry(), mState.scene),
       mRenderer(renderer), mSceneRenderer(sceneRenderer),

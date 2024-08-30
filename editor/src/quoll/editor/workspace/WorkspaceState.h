@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/Entity.h"
 #include "quoll/scene/Scene.h"
 #include "quoll/editor/core/TransformOperation.h"

@@ -90,7 +90,7 @@ void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
                 editorCamera, workspaceManager);
 
   mSceneHierarchyPanel.render(state, actionExecutor);
-  mInspector.render(state, assetManager.getAssetRegistry(), actionExecutor);
+  mInspector.render(state, assetManager.getCache(), actionExecutor);
 
   mAssetBrowser.render(state, assetManager, actionExecutor);
 }

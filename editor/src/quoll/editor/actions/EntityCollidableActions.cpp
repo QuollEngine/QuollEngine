@@ -25,7 +25,7 @@ EntitySetCollidableType::EntitySetCollidableType(Entity entity,
 
 ActionExecutorResult
 EntitySetCollidableType::onExecute(WorkspaceState &state,
-                                   AssetRegistry &assetRegistry) {
+                                   AssetCache &assetCache) {
   auto &scene = state.scene;
 
   auto &collidable = scene.entityDatabase.get<Collidable>(mEntity);
@@ -42,9 +42,8 @@ EntitySetCollidableType::onExecute(WorkspaceState &state,
   return res;
 }
 
-ActionExecutorResult
-EntitySetCollidableType::onUndo(WorkspaceState &state,
-                                AssetRegistry &assetRegistry) {
+ActionExecutorResult EntitySetCollidableType::onUndo(WorkspaceState &state,
+                                                     AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set(mEntity, mOldCollidable);
@@ -55,7 +54,7 @@ EntitySetCollidableType::onUndo(WorkspaceState &state,
 }
 
 bool EntitySetCollidableType::predicate(WorkspaceState &state,
-                                        AssetRegistry &assetRegistry) {
+                                        AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.entityDatabase.has<Collidable>(mEntity) &&

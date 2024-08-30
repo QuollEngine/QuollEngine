@@ -7,12 +7,12 @@ namespace quoll::editor {
 class SpawnEmptyEntityAtView : public Action {
 public:
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mSpawnedEntity = Entity::Null;
@@ -23,12 +23,12 @@ public:
   SpawnPrefabAtView(AssetHandle<PrefabAsset> handle, Entity camera);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   AssetHandle<PrefabAsset> mHandle;
@@ -41,12 +41,12 @@ public:
   SpawnSpriteAtView(AssetHandle<TextureAsset> handle, Entity camera);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   AssetHandle<TextureAsset> mHandle;

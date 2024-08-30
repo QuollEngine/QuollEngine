@@ -93,7 +93,8 @@ static bool ImguiMultilineInputText(const String &label, String &value,
 
 static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
                                 const EnvironmentSkybox &skybox,
-                                ActionExecutor &actionExecutor) {
+                                ActionExecutor &actionExecutor,
+                                AssetCache &assetCache) {
   static constexpr f32 DropBorderWidth = 3.5f;
   auto &g = *ImGui::GetCurrentContext();
 
@@ -126,8 +127,7 @@ static String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
   return "None";
 }
 
-void EntityPanel::renderContent(WorkspaceState &state,
-                                AssetRegistry &assetRegistry,
+void EntityPanel::renderContent(WorkspaceState &state, AssetCache &assetCache,
                                 ActionExecutor &actionExecutor) {
   if (state.selectedEntity == Entity::Null) {
     ImGui::Text("Select an entity in the scene to see properties");
@@ -139,31 +139,31 @@ void EntityPanel::renderContent(WorkspaceState &state,
   if (scene.entityDatabase.exists(mSelectedEntity)) {
     renderName(scene, actionExecutor);
     renderTransform(scene, actionExecutor);
-    renderText(scene, assetRegistry, actionExecutor);
-    renderSprite(scene, assetRegistry, actionExecutor);
-    renderMesh(scene, assetRegistry, actionExecutor);
-    renderMeshRenderer(scene, assetRegistry, actionExecutor);
-    renderSkinnedMeshRenderer(scene, assetRegistry, actionExecutor);
+    renderText(scene, assetCache, actionExecutor);
+    renderSprite(scene, assetCache, actionExecutor);
+    renderMesh(scene, assetCache, actionExecutor);
+    renderMeshRenderer(scene, assetCache, actionExecutor);
+    renderSkinnedMeshRenderer(scene, assetCache, actionExecutor);
     renderDirectionalLight(scene, actionExecutor);
     renderPointLight(scene, actionExecutor);
     renderCamera(state, scene, actionExecutor);
-    renderAnimation(state, scene, assetRegistry, actionExecutor);
-    renderSkeleton(scene, assetRegistry, actionExecutor);
+    renderAnimation(state, scene, assetCache, actionExecutor);
+    renderSkeleton(scene, assetCache, actionExecutor);
     renderJointAttachment(scene, actionExecutor);
     renderCollidable(scene, actionExecutor);
     renderRigidBody(scene, actionExecutor);
-    renderAudio(scene, assetRegistry, actionExecutor);
-    renderScripting(scene, assetRegistry, actionExecutor);
-    renderInput(scene, assetRegistry, actionExecutor);
+    renderAudio(scene, assetCache, actionExecutor);
+    renderScripting(scene, assetCache, actionExecutor);
+    renderInput(scene, assetCache, actionExecutor);
     renderUICanvas(scene, actionExecutor);
-    renderSkybox(scene, assetRegistry, actionExecutor);
-    renderEnvironmentLighting(scene, assetRegistry, actionExecutor);
+    renderSkybox(scene, assetCache, actionExecutor);
+    renderEnvironmentLighting(scene, assetCache, actionExecutor);
 
 #ifdef QUOLL_DEBUG
     renderDebug();
 #endif
-    renderAddComponent(scene, assetRegistry, actionExecutor);
-    handleDragAndDrop(scene, assetRegistry, actionExecutor);
+    renderAddComponent(scene, assetCache, actionExecutor);
+    handleDragAndDrop(scene, assetCache, actionExecutor);
   }
 }
 
@@ -622,8 +622,9 @@ void EntityPanel::renderTransform(Scene &scene,
   }
 }
 
-void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderSprite(Scene &scene, AssetCache &assetCache,
                                ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
   static const String SectionName = String(fa::Image) + "  Sprite";
 
   if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
@@ -663,8 +664,10 @@ void EntityPanel::renderUICanvas(Scene &scene, ActionExecutor &actionExecutor) {
   }
 }
 
-void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderMesh(Scene &scene, AssetCache &assetCache,
                              ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   static const String SectionName = String(fa::Cubes) + "  Mesh";
 
   if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
@@ -685,8 +688,10 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
   }
 }
 
-void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderMeshRenderer(Scene &scene, AssetCache &assetCache,
                                      ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.has<MeshRenderer>(mSelectedEntity)) {
     return;
   }
@@ -749,8 +754,10 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
 }
 
 void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
-                                            AssetRegistry &assetRegistry,
+                                            AssetCache &assetCache,
                                             ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mSelectedEntity)) {
     return;
   }
@@ -813,8 +820,10 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
   }
 }
 
-void EntityPanel::renderSkeleton(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderSkeleton(Scene &scene, AssetCache &assetCache,
                                  ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.has<Skeleton>(mSelectedEntity)) {
     return;
   }
@@ -901,8 +910,10 @@ void EntityPanel::renderJointAttachment(Scene &scene,
 }
 
 void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
-                                  AssetRegistry &assetRegistry,
+                                  AssetCache &assetCache,
                                   ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.has<Animator>(mSelectedEntity)) {
     return;
   }
@@ -1238,8 +1249,9 @@ void EntityPanel::renderRigidBody(Scene &scene,
   }
 }
 
-void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderText(Scene &scene, AssetCache &assetCache,
                              ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
   if (!scene.entityDatabase.has<Text>(mSelectedEntity)) {
     return;
   }
@@ -1313,8 +1325,10 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
   }
 }
 
-void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderAudio(Scene &scene, AssetCache &assetCache,
                               ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
     return;
   }
@@ -1333,8 +1347,10 @@ void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
   }
 }
 
-void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
                                   ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
     return;
   }
@@ -1481,8 +1497,10 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
   }
 }
 
-void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
                               ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.has<InputMapAssetRef>(mSelectedEntity)) {
     return;
   }
@@ -1583,8 +1601,10 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
   }
 }
 
-void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderSkybox(Scene &scene, AssetCache &assetCache,
                                ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.has<EnvironmentSkybox>(mSelectedEntity)) {
     return;
   }
@@ -1645,7 +1665,8 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
         imgui::image(envAssetPreview, ImVec2(width, height), ImVec2(0, 0),
                      ImVec2(1, 1), ImGui::GetID("environment-texture-drop"));
 
-        dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);
+        dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor,
+                            assetCache);
 
         if (widgets::Button(fa::Times)) {
           auto newSkybox = skybox;
@@ -1656,7 +1677,8 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
 
       } else {
         widgets::Button("Drag environment asset here", ImVec2(width, height));
-        dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);
+        dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor,
+                            assetCache);
       }
     }
 
@@ -1676,7 +1698,7 @@ void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
 }
 
 void EntityPanel::renderEnvironmentLighting(Scene &scene,
-                                            AssetRegistry &assetRegistry,
+                                            AssetCache &assetCache,
                                             ActionExecutor &actionExecutor) {
   if (!scene.entityDatabase.has<EnvironmentLightingSkyboxSource>(
           mSelectedEntity)) {
@@ -1707,8 +1729,10 @@ void EntityPanel::renderDebug() {
   }
 }
 
-void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::renderAddComponent(Scene &scene, AssetCache &assetCache,
                                      ActionExecutor &actionExecutor) {
+  auto &assetRegistry = assetCache.getRegistry();
+
   if (!scene.entityDatabase.exists(mSelectedEntity)) {
     return;
   }
@@ -1819,7 +1843,7 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
   }
 }
 
-void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
+void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
                                     ActionExecutor &actionExecutor) {
   const auto width = ImGui::GetWindowContentRegionWidth();
   const f32 halfWidth = width * 0.5f;

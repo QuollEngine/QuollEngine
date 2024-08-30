@@ -6,9 +6,8 @@ namespace quoll::editor {
 SetActiveTransform::SetActiveTransform(TransformOperation transformOperation)
     : mTransformOperation(transformOperation) {}
 
-ActionExecutorResult
-SetActiveTransform::onExecute(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) {
+ActionExecutorResult SetActiveTransform::onExecute(WorkspaceState &state,
+                                                   AssetCache &assetCache) {
   mOldTransformOperation = state.activeTransform;
   state.activeTransform = mTransformOperation;
 
@@ -18,13 +17,13 @@ SetActiveTransform::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult SetActiveTransform::onUndo(WorkspaceState &state,
-                                                AssetRegistry &assetRegistry) {
+                                                AssetCache &assetCache) {
   state.activeTransform = mOldTransformOperation;
   return ActionExecutorResult{};
 }
 
 bool SetActiveTransform::predicate(WorkspaceState &state,
-                                   AssetRegistry &assetRegistry) {
+                                   AssetCache &assetCache) {
   return state.activeTransform != mTransformOperation;
 }
 

@@ -7,9 +7,8 @@ namespace quoll::editor {
 SceneSetStartingCamera::SceneSetStartingCamera(Entity entity)
     : mEntity(entity) {}
 
-ActionExecutorResult
-SceneSetStartingCamera::onExecute(WorkspaceState &state,
-                                  AssetRegistry &assetRegistry) {
+ActionExecutorResult SceneSetStartingCamera::onExecute(WorkspaceState &state,
+                                                       AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mPreviousCamera = scene.activeCamera;
@@ -21,9 +20,8 @@ SceneSetStartingCamera::onExecute(WorkspaceState &state,
   return res;
 }
 
-ActionExecutorResult
-SceneSetStartingCamera::onUndo(WorkspaceState &state,
-                               AssetRegistry &assetRegistry) {
+ActionExecutorResult SceneSetStartingCamera::onUndo(WorkspaceState &state,
+                                                    AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.activeCamera = mPreviousCamera;
@@ -34,7 +32,7 @@ SceneSetStartingCamera::onUndo(WorkspaceState &state,
 }
 
 bool SceneSetStartingCamera::predicate(WorkspaceState &state,
-                                       AssetRegistry &assetRegistry) {
+                                       AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.activeCamera != mEntity &&
@@ -46,7 +44,7 @@ SceneSetStartingEnvironment::SceneSetStartingEnvironment(Entity entity)
 
 ActionExecutorResult
 SceneSetStartingEnvironment::onExecute(WorkspaceState &state,
-                                       AssetRegistry &assetRegistry) {
+                                       AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mPreviousEnvironment = scene.activeEnvironment;
@@ -60,7 +58,7 @@ SceneSetStartingEnvironment::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 SceneSetStartingEnvironment::onUndo(WorkspaceState &state,
-                                    AssetRegistry &assetRegistry) {
+                                    AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.activeEnvironment = mPreviousEnvironment;
@@ -71,7 +69,7 @@ SceneSetStartingEnvironment::onUndo(WorkspaceState &state,
 }
 
 bool SceneSetStartingEnvironment::predicate(WorkspaceState &state,
-                                            AssetRegistry &assetRegistry) {
+                                            AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.activeEnvironment != mEntity;
@@ -79,7 +77,7 @@ bool SceneSetStartingEnvironment::predicate(WorkspaceState &state,
 
 ActionExecutorResult
 SceneRemoveStartingEnvironment::onExecute(WorkspaceState &state,
-                                          AssetRegistry &assetRegistry) {
+                                          AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mPreviousEnvironment = scene.activeEnvironment;
@@ -93,7 +91,7 @@ SceneRemoveStartingEnvironment::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 SceneRemoveStartingEnvironment::onUndo(WorkspaceState &state,
-                                       AssetRegistry &assetRegistry) {
+                                       AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.activeEnvironment = mPreviousEnvironment;
@@ -104,7 +102,7 @@ SceneRemoveStartingEnvironment::onUndo(WorkspaceState &state,
 }
 
 bool SceneRemoveStartingEnvironment::predicate(WorkspaceState &state,
-                                               AssetRegistry &assetRegistry) {
+                                               AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.activeEnvironment != scene.dummyEnvironment;

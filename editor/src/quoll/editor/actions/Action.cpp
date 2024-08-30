@@ -4,7 +4,7 @@
 namespace quoll::editor {
 
 ActionExecutorResult Action::onUndo(WorkspaceState &state,
-                                    AssetRegistry &assetRegistry) {
+                                    AssetCache &assetCache) {
   return {};
 }
 

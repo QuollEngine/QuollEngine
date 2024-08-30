@@ -128,7 +128,6 @@ public:
     return getMap<TAssetData>().getAssets();
   }
 
-private:
   template <typename TAssetData> constexpr auto &getMap() {
     if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
       return mTextures;

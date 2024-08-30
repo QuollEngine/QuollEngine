@@ -9,7 +9,7 @@ public:
   EntityDeleteComponent(Entity entity) : mEntity(entity) {}
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override {
+                                 AssetCache &assetCache) override {
     auto &scene = state.scene;
 
     mOldComponent = scene.entityDatabase.get<TComponent>(mEntity);
@@ -24,7 +24,7 @@ public:
   }
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override {
+                              AssetCache &assetCache) override {
     auto &scene = state.scene;
 
     scene.entityDatabase.set(mEntity, mOldComponent);
@@ -35,7 +35,7 @@ public:
     return res;
   }
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override {
     auto &scene = state.scene;
 
     return scene.entityDatabase.has<TComponent>(mEntity);

@@ -9,7 +9,7 @@ EntityDeleteDirectionalLight::EntityDeleteDirectionalLight(Entity entity)
 
 ActionExecutorResult
 EntityDeleteDirectionalLight::onExecute(WorkspaceState &state,
-                                        AssetRegistry &assetRegistry) {
+                                        AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldDirectionalLight = scene.entityDatabase.get<DirectionalLight>(mEntity);
@@ -29,7 +29,7 @@ EntityDeleteDirectionalLight::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 EntityDeleteDirectionalLight::onUndo(WorkspaceState &state,
-                                     AssetRegistry &assetRegistry) {
+                                     AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set(mEntity, mOldDirectionalLight);
@@ -44,7 +44,7 @@ EntityDeleteDirectionalLight::onUndo(WorkspaceState &state,
 }
 
 bool EntityDeleteDirectionalLight::predicate(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.entityDatabase.has<DirectionalLight>(mEntity);

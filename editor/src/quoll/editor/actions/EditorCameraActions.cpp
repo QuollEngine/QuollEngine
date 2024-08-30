@@ -6,9 +6,8 @@ namespace quoll::editor {
 
 MoveCameraToEntity::MoveCameraToEntity(Entity entity) : mEntity(entity) {}
 
-ActionExecutorResult
-MoveCameraToEntity::onExecute(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) {
+ActionExecutorResult MoveCameraToEntity::onExecute(WorkspaceState &state,
+                                                   AssetCache &assetCache) {
   auto &scene = state.scene;
 
   auto &transformComponent = scene.entityDatabase.get<WorldTransform>(mEntity);
@@ -27,7 +26,7 @@ MoveCameraToEntity::onExecute(WorkspaceState &state,
 }
 
 bool MoveCameraToEntity::predicate(WorkspaceState &state,
-                                   AssetRegistry &assetRegistry) {
+                                   AssetCache &assetCache) {
   return true;
 }
 
