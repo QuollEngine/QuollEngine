@@ -44,16 +44,12 @@ static void injectInputVarsInterface(sol::state &state, LuaScriptAsset &data) {
   );
 }
 
-Result<LuaScriptAsset> AssetCache::loadLuaScript(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-
-  std::ifstream stream(filePath);
+Result<LuaScriptAsset> AssetCache::loadLuaScript(const Path &path) {
+  std::ifstream stream(path);
 
   if (!stream.good()) {
-    return Error("File cannot be opened for reading: " + filePath.string());
+    return Error("File cannot be opened for reading: " + path.string());
   }
-
-  auto meta = getAssetMeta(uuid);
 
   LuaScriptAsset asset;
   asset.bytes = readFileIntoBuffer(stream);

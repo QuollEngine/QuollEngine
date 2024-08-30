@@ -129,11 +129,10 @@ Result<void> AssetCache::createTextureFromData(const TextureAsset &data,
   return Ok();
 }
 
-Result<TextureAsset> AssetCache::loadTexture(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-  std::ifstream stream(filePath, std::ios::binary);
+Result<TextureAsset> AssetCache::loadTexture(const Path &path) {
+  std::ifstream stream(path, std::ios::binary);
   if (!stream.good()) {
-    return Error("Cannot open file: " + filePath.string());
+    return Error("Cannot open file: " + path.string());
   }
 
   stream.seekg(0, std::ios::end);
@@ -160,8 +159,6 @@ Result<TextureAsset> AssetCache::loadTexture(const Uuid &uuid) {
   if (ktxTextureData->isArray) {
     return Error("Texture arrays are not supported");
   }
-
-  auto meta = getAssetMeta(uuid);
 
   TextureAsset texture{};
   texture.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);

@@ -8,12 +8,10 @@
 
 namespace quoll {
 
-Result<FontAsset> AssetCache::loadFont(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-
+Result<FontAsset> AssetCache::loadFont(const Path &path) {
   MsdfLoader loader;
 
-  auto res = loader.loadFontData(filePath);
+  auto res = loader.loadFontData(path);
 
   if (!res) {
     return res.error();

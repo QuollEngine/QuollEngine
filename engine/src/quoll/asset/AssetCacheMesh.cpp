@@ -44,7 +44,7 @@ Result<void> AssetCache::createMeshFromData(const MeshAsset &data,
   return Ok();
 }
 
-Result<MeshAsset> AssetCache::loadMeshDataFromInputStream(const Path &path) {
+Result<MeshAsset> AssetCache::loadMesh(const Path &path) {
   InputBinaryStream stream(path);
   AssetFileHeader header;
   stream.read(header);
@@ -108,15 +108,6 @@ Result<MeshAsset> AssetCache::loadMeshDataFromInputStream(const Path &path) {
   }
 
   return {mesh, warnings};
-}
-
-Result<MeshAsset> AssetCache::loadMesh(const Uuid &uuid) {
-  auto meta = getAssetMeta(uuid);
-  if (meta.type != AssetType::Mesh) {
-    return Error("Asset type is not mesh");
-  }
-
-  return loadMeshDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

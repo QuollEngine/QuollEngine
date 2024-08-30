@@ -240,8 +240,7 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
   return Ok();
 }
 
-Result<PrefabAsset>
-AssetCache::loadPrefabDataFromInputStream(const Path &path) {
+Result<PrefabAsset> AssetCache::loadPrefab(const Path &path) {
   InputBinaryStream stream(path);
   AssetFileHeader header;
   stream.read(header);
@@ -564,15 +563,6 @@ AssetCache::loadPrefabDataFromInputStream(const Path &path) {
   }
 
   return {prefab, warnings};
-}
-
-Result<PrefabAsset> AssetCache::loadPrefab(const Uuid &uuid) {
-  auto meta = getAssetMeta(uuid);
-  if (meta.type != AssetType::Prefab) {
-    return Error("Asset type is not prefab");
-  }
-
-  return loadPrefabDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

@@ -3,10 +3,8 @@
 
 namespace quoll {
 
-Result<SceneAsset> AssetCache::loadScene(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-
-  std::ifstream stream(filePath);
+Result<SceneAsset> AssetCache::loadScene(const Path &path) {
+  std::ifstream stream(path);
   auto root = YAML::Load(stream);
   stream.close();
 

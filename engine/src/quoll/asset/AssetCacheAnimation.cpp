@@ -39,8 +39,7 @@ Result<void> AssetCache::createAnimationFromData(const AnimationAsset &data,
   return Ok();
 }
 
-Result<AnimationAsset>
-AssetCache::loadAnimationDataFromInputStream(const Path &path) {
+Result<AnimationAsset> AssetCache::loadAnimation(const Path &path) {
   InputBinaryStream stream(path);
 
   AssetFileHeader header;
@@ -72,15 +71,6 @@ AssetCache::loadAnimationDataFromInputStream(const Path &path) {
   }
 
   return animation;
-}
-
-Result<AnimationAsset> AssetCache::loadAnimation(const Uuid &uuid) {
-  auto meta = getAssetMeta(uuid);
-  if (meta.type != AssetType::Animation) {
-    return Error("Asset type is not animation");
-  }
-
-  return loadAnimationDataFromInputStream(getPathFromUuid(uuid));
 }
 
 } // namespace quoll

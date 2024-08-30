@@ -58,10 +58,8 @@ Result<void> AssetCache::createAnimatorFromData(const AnimatorAsset &data,
   return Ok();
 }
 
-Result<AnimatorAsset> AssetCache::loadAnimator(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-
-  std::ifstream stream(filePath);
+Result<AnimatorAsset> AssetCache::loadAnimator(const Path &path) {
+  std::ifstream stream(path);
   auto root = YAML::Load(stream);
   stream.close();
 
@@ -76,8 +74,6 @@ Result<AnimatorAsset> AssetCache::loadAnimator(const Uuid &uuid) {
   if (!root["states"] || !root["states"].IsMap()) {
     return Error("`states` field must be a map");
   }
-
-  auto meta = getAssetMeta(uuid);
 
   AnimatorAsset asset{};
 

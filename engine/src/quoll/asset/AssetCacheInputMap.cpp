@@ -96,10 +96,8 @@ static Result<void> checkAxis2d(YAML::Node node) {
   return Error("Invalid binding item value");
 }
 
-Result<InputMapAsset> AssetCache::loadInputMap(const Uuid &uuid) {
-  auto filePath = getPathFromUuid(uuid);
-
-  std::ifstream stream(filePath);
+Result<InputMapAsset> AssetCache::loadInputMap(const Path &path) {
+  std::ifstream stream(path);
   auto root = YAML::Load(stream);
   stream.close();
 
