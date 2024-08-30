@@ -8,7 +8,7 @@ EntityToggleSkeletonDebugBones::EntityToggleSkeletonDebugBones(Entity entity)
 
 ActionExecutorResult
 EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state,
-                                          AssetRegistry &assetRegistry) {
+                                          AssetCache &assetCache) {
   auto &scene = state.scene;
 
   if (scene.entityDatabase.has<SkeletonDebug>(mEntity)) {
@@ -35,7 +35,7 @@ EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state,
 }
 
 bool EntityToggleSkeletonDebugBones::predicate(WorkspaceState &state,
-                                               AssetRegistry &assetRegistry) {
+                                               AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.entityDatabase.has<Skeleton>(mEntity);
@@ -43,9 +43,8 @@ bool EntityToggleSkeletonDebugBones::predicate(WorkspaceState &state,
 
 EntityDeleteSkeleton::EntityDeleteSkeleton(Entity entity) : mEntity(entity) {}
 
-ActionExecutorResult
-EntityDeleteSkeleton::onExecute(WorkspaceState &state,
-                                AssetRegistry &assetRegistry) {
+ActionExecutorResult EntityDeleteSkeleton::onExecute(WorkspaceState &state,
+                                                     AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldComponent = scene.entityDatabase.get<Skeleton>(mEntity);
@@ -63,9 +62,8 @@ EntityDeleteSkeleton::onExecute(WorkspaceState &state,
   return res;
 }
 
-ActionExecutorResult
-EntityDeleteSkeleton::onUndo(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+ActionExecutorResult EntityDeleteSkeleton::onUndo(WorkspaceState &state,
+                                                  AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set(mEntity, mOldComponent);
@@ -79,7 +77,7 @@ EntityDeleteSkeleton::onUndo(WorkspaceState &state,
 }
 
 bool EntityDeleteSkeleton::predicate(WorkspaceState &state,
-                                     AssetRegistry &assetRegistry) {
+                                     AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.entityDatabase.has<Skeleton>(mEntity);

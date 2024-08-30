@@ -9,7 +9,7 @@ EntityCreatePerspectiveLens::EntityCreatePerspectiveLens(Entity entity)
 
 ActionExecutorResult
 EntityCreatePerspectiveLens::onExecute(WorkspaceState &state,
-                                       AssetRegistry &assetRegistry) {
+                                       AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set<PerspectiveLens>(mEntity, {});
@@ -24,7 +24,7 @@ EntityCreatePerspectiveLens::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 EntityCreatePerspectiveLens::onUndo(WorkspaceState &state,
-                                    AssetRegistry &assetRegistry) {
+                                    AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.remove<PerspectiveLens>(mEntity);
@@ -37,7 +37,7 @@ EntityCreatePerspectiveLens::onUndo(WorkspaceState &state,
 }
 
 bool EntityCreatePerspectiveLens::predicate(WorkspaceState &state,
-                                            AssetRegistry &assetRegistry) {
+                                            AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return !scene.entityDatabase.has<PerspectiveLens>(mEntity);
@@ -48,7 +48,7 @@ EntityDeletePerspectiveLens::EntityDeletePerspectiveLens(Entity entity)
 
 ActionExecutorResult
 EntityDeletePerspectiveLens::onExecute(WorkspaceState &state,
-                                       AssetRegistry &assetRegistry) {
+                                       AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldPerspectiveLens = scene.entityDatabase.get<PerspectiveLens>(mEntity);
@@ -82,7 +82,7 @@ EntityDeletePerspectiveLens::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 EntityDeletePerspectiveLens::onUndo(WorkspaceState &state,
-                                    AssetRegistry &assetRegistry) {
+                                    AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set(mEntity, mOldPerspectiveLens);
@@ -111,7 +111,7 @@ EntityDeletePerspectiveLens::onUndo(WorkspaceState &state,
 }
 
 bool EntityDeletePerspectiveLens::predicate(WorkspaceState &state,
-                                            AssetRegistry &assetRegistry) {
+                                            AssetCache &assetCache) {
   auto &scene = state.scene;
 
   return scene.entityDatabase.has<PerspectiveLens>(mEntity);

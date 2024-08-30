@@ -10,14 +10,14 @@ namespace quoll::editor {
 
 Inspector::Inspector() {
   mTabs.push_back({"Entity", fa::Wrench,
-                   [this](WorkspaceState &state, AssetRegistry &assetRegistry,
+                   [this](WorkspaceState &state, AssetCache &assetCache,
                           ActionExecutor &actionExecutor) {
-                     mEntityPanel.renderContent(state, assetRegistry,
+                     mEntityPanel.renderContent(state, assetCache,
                                                 actionExecutor);
                    }});
 }
 
-void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
+void Inspector::render(WorkspaceState &state, AssetCache &assetCache,
                        ActionExecutor &actionExecutor) {
   StyleStack stack;
   stack.pushStyle(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -78,7 +78,7 @@ void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
         stack.pushStyle(ImGuiStyleVar_ChildRounding,
                         Theme::getStyles().childRounding);
 
-        mTabs.at(mSelectedIndex).renderFn(state, assetRegistry, actionExecutor);
+        mTabs.at(mSelectedIndex).renderFn(state, assetCache, actionExecutor);
       }
       ImGui::EndChild();
     }

@@ -14,7 +14,7 @@ TEST_F(EntityUpdateComponentActionTest,
   quoll::editor::EntityUpdateComponent<quoll::Name> action(entity,
                                                            {"Old name"});
 
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntityUpdateComponentActionTest,
@@ -23,7 +23,7 @@ TEST_F(EntityUpdateComponentActionTest,
   quoll::editor::EntityUpdateComponent<quoll::Name> action(
       entity, {"Old name"}, quoll::Name{"New name"});
 
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntityUpdateComponentActionTest,
@@ -33,7 +33,7 @@ TEST_F(EntityUpdateComponentActionTest,
   quoll::editor::EntityUpdateComponent<quoll::Name> action(
       entity, {"Old name"}, quoll::Name{"New name"});
 
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntityUpdateComponentActionTest,
@@ -45,7 +45,7 @@ TEST_F(EntityUpdateComponentActionTest,
   quoll::editor::EntityUpdateComponent<quoll::Name> action(
       entity, {"Old name"}, quoll::Name{"New name"});
 
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -63,11 +63,11 @@ TEST_F(EntityUpdateComponentActionTest,
   quoll::editor::EntityUpdateComponent<quoll::Name> action(
       entity, {"Old name"}, quoll::Name{"New name"});
 
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Name>(entity).name,
             "New name");
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Name>(entity));

@@ -9,7 +9,7 @@ class ActionExecutor {
   using ActionStack = std::list<std::unique_ptr<Action>>;
 
 public:
-  ActionExecutor(WorkspaceState &state, AssetRegistry &assetRegistry);
+  ActionExecutor(WorkspaceState &state, AssetCache &assetCache);
 
   void setAssetSyncer(AssetSyncer *assetSyncer);
 
@@ -34,7 +34,7 @@ private:
 
 private:
   WorkspaceState &mState;
-  AssetRegistry &mAssetRegistry;
+  AssetCache &mAssetCache;
   Path mScenePath;
   AssetSyncer *mAssetSyncer = nullptr;
 

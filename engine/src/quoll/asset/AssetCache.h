@@ -29,7 +29,7 @@ public:
 
     auto handle = mRegistry.findHandleByUuid<TAssetData>(uuid);
     if (handle) {
-      return AssetRef(&mRegistry, handle);
+      return AssetRef(&mRegistry.getMap<TAssetData>(), handle);
     }
 
     auto res = load<TAssetData>(uuid);
@@ -37,7 +37,8 @@ public:
       return res.error();
     }
 
-    return Result(AssetRef(&mRegistry, res.data()), res.warnings());
+    return Result(AssetRef(&mRegistry.getMap<TAssetData>(), res.data()),
+                  res.warnings());
   }
 
   template <typename TAssetData>

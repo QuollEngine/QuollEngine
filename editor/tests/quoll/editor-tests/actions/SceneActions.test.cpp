@@ -10,7 +10,7 @@ TEST_F(SceneSetStartingCameraActionTest, ExecutorSetsActiveCamera) {
   auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::SceneSetStartingCamera action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.activeCamera, entity);
   EXPECT_TRUE(res.saveScene);
@@ -24,9 +24,9 @@ TEST_F(SceneSetStartingCameraActionTest, UndoSetsPreviousActiveCamera) {
   state.scene.activeCamera = cameraEntity;
 
   quoll::editor::SceneSetStartingCamera action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.scene.activeCamera, cameraEntity);
   EXPECT_TRUE(res.saveScene);
@@ -39,7 +39,7 @@ TEST_F(SceneSetStartingCameraActionTest,
   state.scene.activeCamera = entity;
 
   quoll::editor::SceneSetStartingCamera action(entity);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(SceneSetStartingCameraActionTest,
@@ -47,7 +47,7 @@ TEST_F(SceneSetStartingCameraActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::SceneSetStartingCamera action(entity);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(SceneSetStartingCameraActionTest,
@@ -56,7 +56,7 @@ TEST_F(SceneSetStartingCameraActionTest,
   state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
 
   quoll::editor::SceneSetStartingCamera action(entity);
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 using SceneSetStartingEnvironmentActionTest = ActionTestBase;
@@ -65,7 +65,7 @@ TEST_F(SceneSetStartingEnvironmentActionTest, ExecutorSetsActiveEnvironment) {
   auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::SceneSetStartingEnvironment action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.activeEnvironment, entity);
   EXPECT_TRUE(res.saveScene);
@@ -80,9 +80,9 @@ TEST_F(SceneSetStartingEnvironmentActionTest,
   state.scene.activeEnvironment = environment;
 
   quoll::editor::SceneSetStartingEnvironment action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.scene.activeEnvironment, environment);
   EXPECT_TRUE(res.saveScene);
@@ -94,7 +94,7 @@ TEST_F(SceneSetStartingEnvironmentActionTest,
   state.scene.activeEnvironment = entity;
 
   quoll::editor::SceneSetStartingEnvironment action(entity);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(
@@ -103,7 +103,7 @@ TEST_F(
   auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::SceneSetStartingEnvironment action(entity);
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 using SceneRemoveStartingEnvironmentActionTest = ActionTestBase;
@@ -113,7 +113,7 @@ TEST_F(SceneRemoveStartingEnvironmentActionTest,
   state.scene.activeEnvironment = state.scene.entityDatabase.create();
 
   quoll::editor::SceneRemoveStartingEnvironment action;
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.activeEnvironment, state.scene.dummyEnvironment);
   EXPECT_TRUE(res.saveScene);
@@ -126,9 +126,9 @@ TEST_F(SceneRemoveStartingEnvironmentActionTest,
   state.scene.activeEnvironment = entity;
 
   quoll::editor::SceneRemoveStartingEnvironment action;
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.scene.activeEnvironment, entity);
   EXPECT_TRUE(res.saveScene);
@@ -137,7 +137,7 @@ TEST_F(SceneRemoveStartingEnvironmentActionTest,
 TEST_F(SceneRemoveStartingEnvironmentActionTest,
        PredicateReturnsFalseIfEnvironmentEntityIsDummy) {
   quoll::editor::SceneRemoveStartingEnvironment action;
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(SceneRemoveStartingEnvironmentActionTest,
@@ -146,5 +146,5 @@ TEST_F(SceneRemoveStartingEnvironmentActionTest,
   state.scene.activeEnvironment = entity;
 
   quoll::editor::SceneRemoveStartingEnvironment action;
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }

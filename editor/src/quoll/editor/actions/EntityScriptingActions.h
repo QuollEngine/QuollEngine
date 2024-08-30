@@ -10,12 +10,12 @@ public:
   EntityCreateScript(Entity entity, AssetHandle<LuaScriptAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mEntity;
@@ -27,12 +27,12 @@ public:
   EntitySetScript(Entity entity, AssetHandle<LuaScriptAsset> script);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mEntity;
@@ -46,12 +46,12 @@ public:
                           const LuaScriptInputVariable &value);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
   void setValue(LuaScriptInputVariable value);
 

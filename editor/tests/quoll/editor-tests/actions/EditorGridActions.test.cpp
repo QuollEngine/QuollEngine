@@ -10,7 +10,7 @@ TEST_F(GridSetAxisLinesActionTest,
   state.grid.y = 0;
 
   quoll::editor::SetGridAxisLines action(true);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
   EXPECT_EQ(state.grid.y, 1);
 }
 
@@ -19,7 +19,7 @@ TEST_F(GridSetAxisLinesActionTest,
   state.grid.y = 1;
 
   quoll::editor::SetGridAxisLines action(false);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
   EXPECT_EQ(state.grid.y, 0);
 }
 
@@ -28,13 +28,13 @@ TEST_F(GridSetAxisLinesActionTest,
   {
     state.grid.y = 0;
     quoll::editor::SetGridAxisLines action(false);
-    EXPECT_FALSE(action.predicate(state, assetRegistry));
+    EXPECT_FALSE(action.predicate(state, assetCache));
   }
 
   {
     state.grid.y = 1;
     quoll::editor::SetGridAxisLines action(true);
-    EXPECT_FALSE(action.predicate(state, assetRegistry));
+    EXPECT_FALSE(action.predicate(state, assetCache));
   }
 }
 
@@ -43,13 +43,13 @@ TEST_F(GridSetAxisLinesActionTest,
   {
     state.grid.y = 0;
     quoll::editor::SetGridAxisLines action(true);
-    EXPECT_TRUE(action.predicate(state, assetRegistry));
+    EXPECT_TRUE(action.predicate(state, assetCache));
   }
 
   {
     state.grid.y = 1;
     quoll::editor::SetGridAxisLines action(false);
-    EXPECT_TRUE(action.predicate(state, assetRegistry));
+    EXPECT_TRUE(action.predicate(state, assetCache));
   }
 }
 
@@ -59,7 +59,7 @@ TEST_F(GridSetLinesActionTest, ExecutorEnablesGridLinesIfArgumentIsTrue) {
   state.grid.x = 0;
 
   quoll::editor::SetGridLines action(true);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
   EXPECT_EQ(state.grid.x, 1);
 }
 
@@ -67,7 +67,7 @@ TEST_F(GridSetLinesActionTest, ExecutorDisablesGridLinesIfArgumentIsFalse) {
   state.grid.x = 1;
 
   quoll::editor::SetGridLines action(false);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
   EXPECT_EQ(state.grid.x, 0);
 }
 
@@ -76,13 +76,13 @@ TEST_F(GridSetLinesActionTest,
   {
     state.grid.x = 0;
     quoll::editor::SetGridLines action(false);
-    EXPECT_FALSE(action.predicate(state, assetRegistry));
+    EXPECT_FALSE(action.predicate(state, assetCache));
   }
 
   {
     state.grid.x = 1;
     quoll::editor::SetGridLines action(true);
-    EXPECT_FALSE(action.predicate(state, assetRegistry));
+    EXPECT_FALSE(action.predicate(state, assetCache));
   }
 }
 
@@ -91,12 +91,12 @@ TEST_F(GridSetLinesActionTest,
   {
     state.grid.x = 0;
     quoll::editor::SetGridLines action(false);
-    EXPECT_FALSE(action.predicate(state, assetRegistry));
+    EXPECT_FALSE(action.predicate(state, assetCache));
   }
 
   {
     state.grid.x = 1;
     quoll::editor::SetGridLines action(true);
-    EXPECT_FALSE(action.predicate(state, assetRegistry));
+    EXPECT_FALSE(action.predicate(state, assetCache));
   }
 }

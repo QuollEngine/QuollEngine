@@ -12,7 +12,7 @@ TEST_F(DeleteEntityActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Delete>(entity));
   ASSERT_EQ(res.entitiesToDelete.size(), 1);
@@ -25,7 +25,7 @@ TEST_F(DeleteEntityActionTest,
   state.selectedEntity = entity;
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
@@ -45,7 +45,7 @@ TEST_F(
   }
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
@@ -57,7 +57,7 @@ TEST_F(
   state.selectedEntity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
@@ -70,7 +70,7 @@ TEST_F(DeleteEntityActionTest,
   state.scene.activeCamera = entity;
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.activeCamera, state.scene.dummyCamera);
   EXPECT_TRUE(res.saveScene);
@@ -93,7 +93,7 @@ TEST_F(
   }
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.activeCamera, state.scene.dummyCamera);
   EXPECT_TRUE(res.saveScene);
@@ -108,7 +108,7 @@ TEST_F(
   auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_NE(state.scene.activeCamera, state.scene.dummyCamera);
   EXPECT_FALSE(res.saveScene);
@@ -122,7 +122,7 @@ TEST_F(DeleteEntityActionTest,
   state.activeCamera = entity;
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.activeCamera, state.camera);
 }
@@ -144,7 +144,7 @@ TEST_F(
   }
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.activeCamera, state.camera);
 }
@@ -158,7 +158,7 @@ TEST_F(
   auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_NE(state.activeCamera, state.camera);
 }
@@ -171,7 +171,7 @@ TEST_F(DeleteEntityActionTest,
   state.scene.activeEnvironment = entity;
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.activeEnvironment, state.scene.dummyEnvironment);
 }
@@ -193,7 +193,7 @@ TEST_F(
   }
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.activeEnvironment, state.scene.dummyEnvironment);
   EXPECT_TRUE(res.saveScene);
@@ -208,7 +208,7 @@ TEST_F(
   auto entity = state.scene.entityDatabase.create();
 
   quoll::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_NE(state.scene.activeEnvironment, state.scene.dummyEnvironment);
   EXPECT_FALSE(res.saveScene);

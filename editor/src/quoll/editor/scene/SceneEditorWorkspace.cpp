@@ -18,7 +18,7 @@ SceneEditorWorkspace::SceneEditorWorkspace(
     MainEngineModules &engineModules, EditorCamera &editorCamera,
     WorkspaceManager &workspaceManager)
     : mAssetManager(assetManager), mState{project},
-      mActionExecutor(mState, mAssetManager.getAssetRegistry()),
+      mActionExecutor(mState, mAssetManager.getCache()),
       mSceneAssetHandle(scene),
       mSceneWriter(mState.scene, mAssetManager.getAssetRegistry()),
       mSceneIO(mAssetManager.getAssetRegistry(), mState.scene),

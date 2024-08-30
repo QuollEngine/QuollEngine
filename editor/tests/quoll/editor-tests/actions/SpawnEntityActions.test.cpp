@@ -24,7 +24,7 @@ TEST_F(SpawnEmptyEntityAtViewActionTest, ExecutorSpawnsEmptyEntityAtView) {
   state.camera = camera;
 
   quoll::editor::SpawnEmptyEntityAtView action;
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_NE(res.entitiesToSave.at(0), quoll::Entity::Null);
@@ -52,8 +52,8 @@ TEST_F(SpawnEmptyEntityAtViewActionTest, UndoRemovesSpawnedEntity) {
   state.camera = camera;
 
   quoll::editor::SpawnEmptyEntityAtView action;
-  auto execRes = action.onExecute(state, assetRegistry);
-  auto undoRes = action.onUndo(state, assetRegistry);
+  auto execRes = action.onExecute(state, assetCache);
+  auto undoRes = action.onUndo(state, assetCache);
 
   EXPECT_EQ(execRes.entitiesToSave.size(), 1);
   EXPECT_EQ(undoRes.entitiesToDelete.size(), 1);
@@ -69,10 +69,10 @@ TEST_F(SpawnEmptyEntityAtViewActionTest,
   state.camera = camera;
 
   quoll::editor::SpawnEmptyEntityAtView action;
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
   state.selectedEntity = res.entitiesToSave.at(0);
 
-  action.onUndo(state, assetRegistry);
+  action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
@@ -85,7 +85,7 @@ TEST_F(
   state.camera = camera;
 
   quoll::editor::SpawnEmptyEntityAtView action;
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   auto entity = res.entitiesToSave.at(0);
 
@@ -98,7 +98,7 @@ TEST_F(
     state.selectedEntity = e2;
   }
 
-  action.onUndo(state, assetRegistry);
+  action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
@@ -111,8 +111,8 @@ TEST_F(SpawnEmptyEntityAtViewActionTest,
   state.selectedEntity = state.scene.entityDatabase.create();
 
   quoll::editor::SpawnEmptyEntityAtView action;
-  action.onExecute(state, assetRegistry);
-  action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  action.onUndo(state, assetCache);
 
   EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
@@ -124,7 +124,7 @@ TEST_F(SpawnEmptyEntityAtViewActionTest,
   state.camera = camera;
 
   quoll::editor::SpawnEmptyEntityAtView action;
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 TEST_F(SpawnEmptyEntityAtViewActionTest,
@@ -133,7 +133,7 @@ TEST_F(SpawnEmptyEntityAtViewActionTest,
   state.camera = camera;
 
   quoll::editor::SpawnEmptyEntityAtView action;
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 using SpawnPrefabAtViewActionTest = ActionTestBase;
@@ -152,10 +152,10 @@ TEST_F(SpawnPrefabAtViewActionTest, ExecutorSpawnsPrefabAtView) {
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
 
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = assetCache.getRegistry().add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   ASSERT_EQ(res.entitiesToSave.size(), 3);
   EXPECT_NE(res.entitiesToSave.at(0), quoll::Entity::Null);
@@ -184,12 +184,12 @@ TEST_F(SpawnPrefabAtViewActionTest, UndoRemovesRootNode) {
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
 
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = assetCache.getRegistry().add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
-  auto execRes = action.onExecute(state, assetRegistry);
+  auto execRes = action.onExecute(state, assetCache);
 
-  auto undoRes = action.onUndo(state, assetRegistry);
+  auto undoRes = action.onUndo(state, assetCache);
 
   ASSERT_EQ(execRes.entitiesToSave.size(), 3);
   ASSERT_EQ(undoRes.entitiesToDelete.size(), 1);
@@ -208,15 +208,15 @@ TEST_F(SpawnPrefabAtViewActionTest,
 
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = assetCache.getRegistry().add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   auto entity = res.entitiesToSave.at(0);
   state.selectedEntity = entity;
 
-  action.onUndo(state, assetRegistry);
+  action.onUndo(state, assetCache);
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
@@ -228,14 +228,14 @@ TEST_F(SpawnPrefabAtViewActionTest,
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = assetCache.getRegistry().add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   state.selectedEntity = res.entitiesToSave.back();
 
-  action.onUndo(state, assetRegistry);
+  action.onUndo(state, assetCache);
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
@@ -248,14 +248,14 @@ TEST_F(
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = assetCache.getRegistry().add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   state.selectedEntity = quoll::Entity{25};
 
-  action.onUndo(state, assetRegistry);
+  action.onUndo(state, assetCache);
   EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
 
@@ -267,10 +267,10 @@ TEST_F(
 
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = assetCache.getRegistry().add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 TEST_F(SpawnPrefabAtViewActionTest,
@@ -279,17 +279,17 @@ TEST_F(SpawnPrefabAtViewActionTest,
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
   quoll::editor::SpawnPrefabAtView action(
       quoll::AssetHandle<quoll::PrefabAsset>{15}, camera);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(SpawnPrefabAtViewActionTest, PredicateReturnsFalseIfPrefabAssetIsEmpty) {
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
   quoll::AssetData<quoll::PrefabAsset> asset{};
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = assetCache.getRegistry().add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(SpawnPrefabAtViewActionTest,
@@ -298,10 +298,10 @@ TEST_F(SpawnPrefabAtViewActionTest,
 
   quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = assetCache.getRegistry().add(asset);
 
   quoll::editor::SpawnPrefabAtView action(prefab, camera);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 using SpawnSpriteAtViewActionTest = ActionTestBase;
@@ -310,7 +310,7 @@ TEST_F(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.name = "my-texture";
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.add(data);
+  auto textureAsset = assetCache.getRegistry().add(data);
 
   auto camera = state.scene.entityDatabase.create();
   glm::mat4 viewMatrix =
@@ -323,7 +323,7 @@ TEST_F(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
   state.camera = camera;
 
   quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_NE(res.entitiesToSave.at(0), quoll::Entity::Null);
@@ -344,15 +344,15 @@ TEST_F(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
 TEST_F(SpawnSpriteAtViewActionTest, UndoRemovesSpawnedEntity) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.add(data);
+  auto textureAsset = assetCache.getRegistry().add(data);
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
   quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
-  auto execRes = action.onExecute(state, assetRegistry);
-  auto undoRes = action.onUndo(state, assetRegistry);
+  auto execRes = action.onExecute(state, assetCache);
+  auto undoRes = action.onUndo(state, assetCache);
 
   EXPECT_EQ(execRes.entitiesToSave.size(), 1);
   EXPECT_EQ(undoRes.entitiesToDelete.size(), 1);
@@ -365,7 +365,7 @@ TEST_F(SpawnSpriteAtViewActionTest,
        UndoSetsSelectedEntityToNullIfSpawnedEntityIsSelected) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.add(data);
+  auto textureAsset = assetCache.getRegistry().add(data);
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
@@ -373,10 +373,10 @@ TEST_F(SpawnSpriteAtViewActionTest,
 
   quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
 
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
   state.selectedEntity = res.entitiesToSave.at(0);
 
-  action.onUndo(state, assetRegistry);
+  action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
@@ -386,14 +386,14 @@ TEST_F(
     UndoSetsSelectedEntityToNullIfSelectedEntityIsADescendantOfSpawnedEntity) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.add(data);
+  auto textureAsset = assetCache.getRegistry().add(data);
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
   quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
   state.selectedEntity = res.entitiesToSave.at(0);
 
   auto entity = res.entitiesToSave.at(0);
@@ -407,7 +407,7 @@ TEST_F(
     state.selectedEntity = e2;
   }
 
-  action.onUndo(state, assetRegistry);
+  action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
@@ -416,7 +416,7 @@ TEST_F(SpawnSpriteAtViewActionTest,
        UndoDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotSpawnedEntity) {
   quoll::AssetData<quoll::TextureAsset> data{};
   data.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto textureAsset = assetRegistry.add(data);
+  auto textureAsset = assetCache.getRegistry().add(data);
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
@@ -425,15 +425,15 @@ TEST_F(SpawnSpriteAtViewActionTest,
 
   quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
 
-  action.onExecute(state, assetRegistry);
-  action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  action.onUndo(state, assetCache);
 
   EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_F(SpawnSpriteAtViewActionTest,
        PredicateReturnsTrueIfCameraEntityHasCameraAndAssetExists) {
-  auto textureAsset = assetRegistry.add<quoll::TextureAsset>({});
+  auto textureAsset = assetCache.getRegistry().add<quoll::TextureAsset>({});
 
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
@@ -441,19 +441,19 @@ TEST_F(SpawnSpriteAtViewActionTest,
 
   quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
 
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 TEST_F(SpawnSpriteAtViewActionTest,
        PredicateReturnsFalseIfCameraEntityHasNoCamera) {
-  auto textureAsset = assetRegistry.add<quoll::TextureAsset>({});
+  auto textureAsset = assetCache.getRegistry().add<quoll::TextureAsset>({});
 
   auto camera = state.scene.entityDatabase.create();
   state.camera = camera;
 
   quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
 
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(SpawnSpriteAtViewActionTest, PredicateReturnsFalseIfAssetDoesNotExist) {
@@ -464,5 +464,5 @@ TEST_F(SpawnSpriteAtViewActionTest, PredicateReturnsFalseIfAssetDoesNotExist) {
   quoll::editor::SpawnSpriteAtView action(
       quoll::AssetHandle<quoll::TextureAsset>{45}, camera);
 
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }

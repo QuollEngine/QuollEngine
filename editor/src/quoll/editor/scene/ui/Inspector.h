@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/asset/AssetCache.h"
 #include "EntityPanel.h"
 
 namespace quoll::editor {
@@ -9,14 +10,14 @@ private:
   struct Tab {
     String name;
     String icon;
-    std::function<void(WorkspaceState &, AssetRegistry &, ActionExecutor &)>
+    std::function<void(WorkspaceState &, AssetCache &, ActionExecutor &)>
         renderFn;
   };
 
 public:
   Inspector();
 
-  void render(WorkspaceState &state, AssetRegistry &assetRegistry,
+  void render(WorkspaceState &state, AssetCache &assetCache,
               ActionExecutor &actionExecutor);
 
 private:

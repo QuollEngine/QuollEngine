@@ -9,7 +9,7 @@ EntitySetAudio::EntitySetAudio(Entity entity, AssetHandle<AudioAsset> audio)
     : mEntity(entity), mAudio(audio) {}
 
 ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state,
-                                               AssetRegistry &assetRegistry) {
+                                               AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldAudio = scene.entityDatabase.get<AudioSource>(mEntity).source;
@@ -21,7 +21,7 @@ ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult EntitySetAudio::onUndo(WorkspaceState &state,
-                                            AssetRegistry &assetRegistry) {
+                                            AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set<AudioSource>(mEntity, {mOldAudio});
@@ -31,33 +31,31 @@ ActionExecutorResult EntitySetAudio::onUndo(WorkspaceState &state,
   return res;
 }
 
-bool EntitySetAudio::predicate(WorkspaceState &state,
-                               AssetRegistry &assetRegistry) {
-  return assetRegistry.has(mAudio);
+bool EntitySetAudio::predicate(WorkspaceState &state, AssetCache &assetCache) {
+  return assetCache.getRegistry().has(mAudio);
 }
 
 EntityCreateAudio::EntityCreateAudio(Entity entity,
                                      AssetHandle<AudioAsset> handle)
     : mEntity(entity), mHandle(handle) {}
 
-ActionExecutorResult
-EntityCreateAudio::onExecute(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+ActionExecutorResult EntityCreateAudio::onExecute(WorkspaceState &state,
+                                                  AssetCache &assetCache) {
   return EntityCreateComponent<AudioSource>(mEntity, {mHandle})
-      .onExecute(state, assetRegistry);
+      .onExecute(state, assetCache);
 }
 
 ActionExecutorResult EntityCreateAudio::onUndo(WorkspaceState &state,
-                                               AssetRegistry &assetRegistry) {
+                                               AssetCache &assetCache) {
   return EntityCreateComponent<AudioSource>(mEntity, {mHandle})
-      .onUndo(state, assetRegistry);
+      .onUndo(state, assetCache);
 }
 
 bool EntityCreateAudio::predicate(WorkspaceState &state,
-                                  AssetRegistry &assetRegistry) {
+                                  AssetCache &assetCache) {
   auto &scene = state.scene;
   return !scene.entityDatabase.has<AudioSource>(mEntity) &&
-         assetRegistry.has(mHandle);
+         assetCache.getRegistry().has(mHandle);
 }
 
 } // namespace quoll::editor

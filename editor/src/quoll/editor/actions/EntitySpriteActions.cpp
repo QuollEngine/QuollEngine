@@ -10,7 +10,7 @@ EntitySetSprite::EntitySetSprite(Entity entity,
     : mEntity(entity), mSprite(handle) {}
 
 ActionExecutorResult EntitySetSprite::onExecute(WorkspaceState &state,
-                                                AssetRegistry &assetRegistry) {
+                                                AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldSprite = scene.entityDatabase.get<Sprite>(mEntity).handle;
@@ -22,7 +22,7 @@ ActionExecutorResult EntitySetSprite::onExecute(WorkspaceState &state,
 }
 
 ActionExecutorResult EntitySetSprite::onUndo(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set<Sprite>(mEntity, {mOldSprite});
@@ -32,33 +32,31 @@ ActionExecutorResult EntitySetSprite::onUndo(WorkspaceState &state,
   return res;
 }
 
-bool EntitySetSprite::predicate(WorkspaceState &state,
-                                AssetRegistry &assetRegistry) {
-  return assetRegistry.has(mSprite);
+bool EntitySetSprite::predicate(WorkspaceState &state, AssetCache &assetCache) {
+  return assetCache.getRegistry().has(mSprite);
 }
 
 EntityCreateSprite::EntityCreateSprite(Entity entity,
                                        AssetHandle<TextureAsset> handle)
     : mEntity(entity), mHandle(handle) {}
 
-ActionExecutorResult
-EntityCreateSprite::onExecute(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) {
+ActionExecutorResult EntityCreateSprite::onExecute(WorkspaceState &state,
+                                                   AssetCache &assetCache) {
   return EntityCreateComponent<Sprite>(mEntity, {mHandle})
-      .onExecute(state, assetRegistry);
+      .onExecute(state, assetCache);
 }
 
 ActionExecutorResult EntityCreateSprite::onUndo(WorkspaceState &state,
-                                                AssetRegistry &assetRegistry) {
+                                                AssetCache &assetCache) {
   return EntityCreateComponent<Sprite>(mEntity, {mHandle})
-      .onUndo(state, assetRegistry);
+      .onUndo(state, assetCache);
 }
 
 bool EntityCreateSprite::predicate(WorkspaceState &state,
-                                   AssetRegistry &assetRegistry) {
+                                   AssetCache &assetCache) {
   auto &scene = state.scene;
   return !scene.entityDatabase.has<Sprite>(mEntity) &&
-         assetRegistry.has(mHandle);
+         assetCache.getRegistry().has(mHandle);
 }
 
 } // namespace quoll::editor

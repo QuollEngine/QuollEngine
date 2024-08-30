@@ -6,6 +6,8 @@
 
 class ActionTestBase : public ::testing::Test {
 public:
-  quoll::AssetRegistry assetRegistry;
+  ActionTestBase();
+
+  quoll::AssetCache assetCache;
   quoll::editor::WorkspaceState state{};
 };

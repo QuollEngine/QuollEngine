@@ -9,12 +9,12 @@ public:
   EntitySetAudio(Entity entity, AssetHandle<AudioAsset> audio);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mEntity;
@@ -27,12 +27,12 @@ public:
   EntityCreateAudio(Entity entity, AssetHandle<AudioAsset> handle);
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
+                                 AssetCache &assetCache) override;
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
+                              AssetCache &assetCache) override;
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override;
 
 private:
   Entity mEntity;

@@ -8,13 +8,12 @@ bool SetGridLines::isShown(WorkspaceState &state) { return state.grid.x == 1; }
 SetGridLines::SetGridLines(bool show) : mShow(show) {}
 
 ActionExecutorResult SetGridLines::onExecute(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   state.grid.x = mShow ? 1 : 0;
   return ActionExecutorResult();
 }
 
-bool SetGridLines::predicate(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+bool SetGridLines::predicate(WorkspaceState &state, AssetCache &assetCache) {
   return state.grid.x != static_cast<u32>(mShow);
 }
 
@@ -25,13 +24,13 @@ bool SetGridAxisLines::isShown(WorkspaceState &state) {
 SetGridAxisLines::SetGridAxisLines(bool show) : mShow(show) {}
 
 ActionExecutorResult SetGridAxisLines::onExecute(WorkspaceState &state,
-                                                 AssetRegistry &assetRegistry) {
+                                                 AssetCache &assetCache) {
   state.grid.y = mShow ? 1 : 0;
   return ActionExecutorResult();
 }
 
 bool SetGridAxisLines::predicate(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) {
+                                 AssetCache &assetCache) {
   return state.grid.y != static_cast<u32>(mShow);
 }
 

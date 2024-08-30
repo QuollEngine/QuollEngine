@@ -13,7 +13,7 @@ TEST_F(EntityCreatePerspectiveLensActionTest,
        ExecutorCreatesLensCameraAndAutoAspectRatioForEntity) {
   auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntityCreatePerspectiveLens action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::PerspectiveLens>(entity));
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::Camera>(entity));
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::AutoAspectRatio>(entity));
@@ -31,7 +31,7 @@ TEST_F(EntityCreatePerspectiveLensActionTest,
   state.scene.entityDatabase.set<quoll::AutoAspectRatio>(entity, {});
 
   quoll::editor::EntityCreatePerspectiveLens action(entity);
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::PerspectiveLens>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
@@ -41,14 +41,14 @@ TEST_F(EntityCreatePerspectiveLensActionTest,
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
   EXPECT_FALSE(quoll::editor::EntityCreatePerspectiveLens(entity).predicate(
-      state, assetRegistry));
+      state, assetCache));
 }
 
 TEST_F(EntityCreatePerspectiveLensActionTest,
        PredicateReturnsTrueIfComponentDoesNotExist) {
   auto entity = state.scene.entityDatabase.create();
   EXPECT_TRUE(quoll::editor::EntityCreatePerspectiveLens(entity).predicate(
-      state, assetRegistry));
+      state, assetCache));
 }
 
 using EntityDeletePerspectiveLensActionTest = ActionTestBase;
@@ -64,7 +64,7 @@ TEST_F(EntityDeletePerspectiveLensActionTest,
   state.scene.entityDatabase.set<quoll::AutoAspectRatio>(entity, {});
 
   quoll::editor::EntityDeletePerspectiveLens action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Camera>(entity));
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::AutoAspectRatio>(entity));
@@ -79,9 +79,9 @@ TEST_F(EntityDeletePerspectiveLensActionTest, UndoCreatesCameraComponent) {
   state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
 
   quoll::editor::EntityDeletePerspectiveLens action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   // Camera will be created even if it does
   // not exist on the entity
@@ -99,9 +99,9 @@ TEST_F(EntityDeletePerspectiveLensActionTest,
   state.scene.entityDatabase.set<quoll::AutoAspectRatio>(entity, {});
 
   quoll::editor::EntityDeletePerspectiveLens action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_TRUE(state.scene.entityDatabase.has<quoll::AutoAspectRatio>(entity));
 
@@ -116,9 +116,9 @@ TEST_F(EntityDeletePerspectiveLensActionTest,
   state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
 
   quoll::editor::EntityDeletePerspectiveLens action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::AutoAspectRatio>(entity));
 
@@ -137,7 +137,7 @@ TEST_F(EntityDeletePerspectiveLensActionTest,
   state.scene.entityDatabase.set<quoll::Camera>(entity, {});
 
   quoll::editor::EntityDeletePerspectiveLens action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::PerspectiveLens>(entity));
 
@@ -158,9 +158,9 @@ TEST_F(EntityDeletePerspectiveLensActionTest,
   state.scene.entityDatabase.set<quoll::Camera>(entity, {});
 
   quoll::editor::EntityDeletePerspectiveLens action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -179,7 +179,7 @@ TEST_F(EntityDeletePerspectiveLensActionTest,
   state.scene.entityDatabase.set<quoll::Camera>(entity, {});
 
   quoll::editor::EntityDeletePerspectiveLens action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::PerspectiveLens>(entity));
 
@@ -200,9 +200,9 @@ TEST_F(EntityDeletePerspectiveLensActionTest,
   state.scene.entityDatabase.set<quoll::Camera>(entity, {});
 
   quoll::editor::EntityDeletePerspectiveLens action(entity);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);

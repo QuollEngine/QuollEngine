@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/asset/AssetCache.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
 
 namespace quoll::editor {
@@ -20,13 +21,12 @@ public:
   virtual ~Action() = default;
 
   virtual ActionExecutorResult onExecute(WorkspaceState &state,
-                                         AssetRegistry &assetRegistry) = 0;
+                                         AssetCache &assetCache) = 0;
 
   virtual ActionExecutorResult onUndo(WorkspaceState &state,
-                                      AssetRegistry &assetRegistry);
+                                      AssetCache &assetCache);
 
-  virtual bool predicate(WorkspaceState &state,
-                         AssetRegistry &assetRegistry) = 0;
+  virtual bool predicate(WorkspaceState &state, AssetCache &assetCache) = 0;
 };
 
 } // namespace quoll::editor

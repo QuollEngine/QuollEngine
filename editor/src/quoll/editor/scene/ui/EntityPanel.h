@@ -23,7 +23,7 @@ namespace quoll::editor {
 
 class EntityPanel {
 public:
-  void renderContent(WorkspaceState &state, AssetRegistry &assetRegistry,
+  void renderContent(WorkspaceState &state, AssetCache &assetCache,
                      ActionExecutor &actionExecutor);
 
 private:
@@ -40,25 +40,24 @@ private:
 
   void renderTransform(Scene &scene, ActionExecutor &actionExecutor);
 
-  void renderSprite(Scene &scene, AssetRegistry &assetRegistry,
+  void renderSprite(Scene &scene, AssetCache &assetCache,
                     ActionExecutor &actionExecutor);
 
   void renderUICanvas(Scene &scene, ActionExecutor &actionExecutor);
 
-  void renderMesh(Scene &scene, AssetRegistry &assetRegistry,
+  void renderMesh(Scene &scene, AssetCache &assetCache,
                   ActionExecutor &actionExecutor);
 
-  void renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
+  void renderMeshRenderer(Scene &scene, AssetCache &assetCache,
                           ActionExecutor &actionExecutor);
 
-  void renderSkinnedMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
+  void renderSkinnedMeshRenderer(Scene &scene, AssetCache &assetCache,
                                  ActionExecutor &actionExecutor);
 
   void renderAnimation(WorkspaceState &state, Scene &scene,
-                       AssetRegistry &assetRegistry,
-                       ActionExecutor &actionExecutor);
+                       AssetCache &assetCache, ActionExecutor &actionExecutor);
 
-  void renderSkeleton(Scene &scene, AssetRegistry &assetRegistry,
+  void renderSkeleton(Scene &scene, AssetCache &assetCache,
                       ActionExecutor &actionExecutor);
 
   void renderJointAttachment(Scene &scene, ActionExecutor &actionExecutor);
@@ -67,30 +66,30 @@ private:
 
   void renderRigidBody(Scene &scene, ActionExecutor &actionExecutor);
 
-  void renderText(Scene &scene, AssetRegistry &assetRegistry,
+  void renderText(Scene &scene, AssetCache &assetCache,
                   ActionExecutor &actionExecutor);
 
-  void renderAudio(Scene &scene, AssetRegistry &assetRegistry,
+  void renderAudio(Scene &scene, AssetCache &assetCache,
                    ActionExecutor &actionExecutor);
 
-  void renderScripting(Scene &scene, AssetRegistry &assetRegistry,
+  void renderScripting(Scene &scene, AssetCache &assetCache,
                        ActionExecutor &actionExecutor);
 
-  void renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
+  void renderSkybox(Scene &scene, AssetCache &assetCache,
                     ActionExecutor &actionExecutor);
 
-  void renderInput(Scene &scene, AssetRegistry &assetRegistry,
+  void renderInput(Scene &scene, AssetCache &assetCache,
                    ActionExecutor &actionExecutor);
 
-  void renderEnvironmentLighting(Scene &scene, AssetRegistry &assetRegistry,
+  void renderEnvironmentLighting(Scene &scene, AssetCache &assetCache,
                                  ActionExecutor &actionExecutor);
 
   void renderDebug();
 
-  void renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
+  void renderAddComponent(Scene &scene, AssetCache &assetCache,
                           ActionExecutor &actionExecutor);
 
-  void handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
+  void handleDragAndDrop(Scene &scene, AssetCache &assetCache,
                          ActionExecutor &actionExecutor);
 
   bool shouldDelete(const char *component);

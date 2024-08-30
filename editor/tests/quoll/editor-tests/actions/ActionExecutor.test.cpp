@@ -23,15 +23,19 @@ public:
   bool syncedScene = false;
 };
 
+const quoll::Path CachePath = std::filesystem::current_path() / "cache";
+
 class ActionExecutorTest : public ::testing::Test {
 public:
+  ActionExecutorTest() : assetCache(CachePath) {}
+
   void SetUp() override { executor.setAssetSyncer(&assetSyncer); }
 
 public:
-  quoll::AssetRegistry assetRegistry;
+  quoll::AssetCache assetCache;
   quoll::editor::WorkspaceState state{};
   TestAssetSyncer assetSyncer;
-  quoll::editor::ActionExecutor executor{state, assetRegistry};
+  quoll::editor::ActionExecutor executor{state, assetCache};
 };
 
 struct TestActionData {
@@ -50,7 +54,7 @@ public:
 
   quoll::editor::ActionExecutorResult
   onExecute(quoll::editor::WorkspaceState &state,
-            quoll::AssetRegistry &assetRegistry) override {
+            quoll::AssetCache &assetCache) override {
     mData->called = true;
 
     quoll::editor::ActionExecutorResult res{};
@@ -65,7 +69,7 @@ public:
 
   quoll::editor::ActionExecutorResult
   onUndo(quoll::editor::WorkspaceState &state,
-         quoll::AssetRegistry &assetRegistry) override {
+         quoll::AssetCache &assetCache) override {
     mData->undoCalled = true;
 
     quoll::editor::ActionExecutorResult res{};
@@ -78,7 +82,7 @@ public:
   }
 
   bool predicate(quoll::editor::WorkspaceState &state,
-                 quoll::AssetRegistry &assetRegistry) override {
+                 quoll::AssetCache &assetCache) override {
     return mData->mPredicate;
   }
 

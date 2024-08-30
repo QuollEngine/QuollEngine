@@ -9,7 +9,7 @@ EntitySetSkinnedMeshRendererMaterial::EntitySetSkinnedMeshRendererMaterial(
 
 ActionExecutorResult
 EntitySetSkinnedMeshRendererMaterial::onExecute(WorkspaceState &state,
-                                                AssetRegistry &assetRegistry) {
+                                                AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldMaterial =
@@ -26,7 +26,7 @@ EntitySetSkinnedMeshRendererMaterial::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 EntitySetSkinnedMeshRendererMaterial::onUndo(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(mSlot) =
@@ -37,8 +37,8 @@ EntitySetSkinnedMeshRendererMaterial::onUndo(WorkspaceState &state,
   return result;
 }
 
-bool EntitySetSkinnedMeshRendererMaterial::predicate(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+bool EntitySetSkinnedMeshRendererMaterial::predicate(WorkspaceState &state,
+                                                     AssetCache &assetCache) {
   auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {
@@ -50,7 +50,7 @@ bool EntitySetSkinnedMeshRendererMaterial::predicate(
     return false;
   }
 
-  return assetRegistry.has(mNewMaterial);
+  return assetCache.getRegistry().has(mNewMaterial);
 }
 
 EntityAddSkinnedMeshRendererMaterialSlot::
@@ -58,8 +58,9 @@ EntityAddSkinnedMeshRendererMaterialSlot::
                                              AssetHandle<MaterialAsset> handle)
     : mEntity(entity), mNewMaterial(handle) {}
 
-ActionExecutorResult EntityAddSkinnedMeshRendererMaterialSlot::onExecute(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+ActionExecutorResult
+EntityAddSkinnedMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
+                                                    AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.push_back(
@@ -73,7 +74,7 @@ ActionExecutorResult EntityAddSkinnedMeshRendererMaterialSlot::onExecute(
 
 ActionExecutorResult
 EntityAddSkinnedMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
-                                                 AssetRegistry &assetRegistry) {
+                                                 AssetCache &assetCache) {
 
   auto &scene = state.scene;
 
@@ -85,14 +86,14 @@ EntityAddSkinnedMeshRendererMaterialSlot::onUndo(WorkspaceState &state,
 }
 
 bool EntityAddSkinnedMeshRendererMaterialSlot::predicate(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+    WorkspaceState &state, AssetCache &assetCache) {
   auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {
     return false;
   }
 
-  return assetRegistry.has(mNewMaterial);
+  return assetCache.getRegistry().has(mNewMaterial);
 }
 
 EntityRemoveLastSkinnedMeshRendererMaterialSlot::
@@ -100,7 +101,7 @@ EntityRemoveLastSkinnedMeshRendererMaterialSlot::
     : mEntity(entity) {}
 
 ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onExecute(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+    WorkspaceState &state, AssetCache &assetCache) {
   auto &scene = state.scene;
 
   mOldMaterial =
@@ -115,7 +116,7 @@ ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onExecute(
 }
 
 ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onUndo(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+    WorkspaceState &state, AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.push_back(
@@ -127,7 +128,7 @@ ActionExecutorResult EntityRemoveLastSkinnedMeshRendererMaterialSlot::onUndo(
 }
 
 bool EntityRemoveLastSkinnedMeshRendererMaterialSlot::predicate(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+    WorkspaceState &state, AssetCache &assetCache) {
   auto &scene = state.scene;
 
   if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mEntity)) {

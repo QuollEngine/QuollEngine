@@ -8,7 +8,7 @@ namespace quoll::editor {
 DeleteEntity::DeleteEntity(Entity entity) : mEntity(entity) {}
 
 ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   auto &scene = state.scene;
 
   scene.entityDatabase.set<Delete>(mEntity, {});
@@ -86,8 +86,7 @@ ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
   return res;
 }
 
-bool DeleteEntity::predicate(WorkspaceState &state,
-                             AssetRegistry &assetRegistry) {
+bool DeleteEntity::predicate(WorkspaceState &state, AssetCache &assetCache) {
   return true;
 }
 

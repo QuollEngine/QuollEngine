@@ -17,7 +17,7 @@ void EntitySetLocalTransformContinuous::setNewComponent(
 
 ActionExecutorResult
 EntitySetLocalTransformContinuous::onExecute(WorkspaceState &state,
-                                             AssetRegistry &assetRegistry) {
+                                             AssetCache &assetCache) {
   auto &scene = state.scene;
   scene.entityDatabase.set(mEntity, mNewLocalTransform.value());
   if (!scene.entityDatabase.has<WorldTransform>(mEntity)) {
@@ -32,7 +32,7 @@ EntitySetLocalTransformContinuous::onExecute(WorkspaceState &state,
 
 ActionExecutorResult
 EntitySetLocalTransformContinuous::onUndo(WorkspaceState &state,
-                                          AssetRegistry &assetRegistry) {
+                                          AssetCache &assetCache) {
   auto &scene = state.scene;
 
   if (mOldLocalTransform.has_value()) {
@@ -52,8 +52,8 @@ EntitySetLocalTransformContinuous::onUndo(WorkspaceState &state,
   return res;
 }
 
-bool EntitySetLocalTransformContinuous::predicate(
-    WorkspaceState &state, AssetRegistry &assetRegistry) {
+bool EntitySetLocalTransformContinuous::predicate(WorkspaceState &state,
+                                                  AssetCache &assetCache) {
   return mNewLocalTransform.has_value();
 }
 

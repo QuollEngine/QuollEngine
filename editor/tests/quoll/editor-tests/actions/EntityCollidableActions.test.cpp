@@ -17,7 +17,7 @@ TEST_F(EntitySetCollidableTypeActionTest,
 
   quoll::editor::EntitySetCollidableType action(
       entity, quoll::PhysicsGeometryType::Sphere);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   const auto &collidableNew =
       state.scene.entityDatabase.get<quoll::Collidable>(entity);
@@ -45,9 +45,9 @@ TEST_F(EntitySetCollidableTypeActionTest,
 
   quoll::editor::EntitySetCollidableType action(
       entity, quoll::PhysicsGeometryType::Sphere);
-  action.onExecute(state, assetRegistry);
+  action.onExecute(state, assetCache);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   const auto &collidableNew =
       state.scene.entityDatabase.get<quoll::Collidable>(entity);
@@ -67,7 +67,7 @@ TEST_F(EntitySetCollidableTypeActionTest,
 
   quoll::editor::EntitySetCollidableType action(
       entity, quoll::PhysicsGeometryType::Sphere);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntitySetCollidableTypeActionTest,
@@ -77,7 +77,7 @@ TEST_F(EntitySetCollidableTypeActionTest,
 
   quoll::editor::EntitySetCollidableType action(
       entity, quoll::PhysicsGeometryType::Box);
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntitySetCollidableTypeActionTest,
@@ -87,5 +87,5 @@ TEST_F(EntitySetCollidableTypeActionTest,
 
   quoll::editor::EntitySetCollidableType action(
       entity, quoll::PhysicsGeometryType::Sphere);
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }

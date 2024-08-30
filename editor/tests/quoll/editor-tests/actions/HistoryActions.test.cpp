@@ -17,7 +17,7 @@ public:
 
   quoll::editor::ActionExecutorResult
   onExecute(quoll::editor::WorkspaceState &state,
-            quoll::AssetRegistry &assetRegistry) override {
+            quoll::AssetCache &assetCache) override {
     mData->called = true;
 
     quoll::editor::ActionExecutorResult res;
@@ -27,14 +27,14 @@ public:
 
   quoll::editor::ActionExecutorResult
   onUndo(quoll::editor::WorkspaceState &state,
-         quoll::AssetRegistry &assetRegistry) override {
+         quoll::AssetCache &assetCache) override {
     mData->undoCalled = true;
 
     return {};
   }
 
   bool predicate(quoll::editor::WorkspaceState &state,
-                 quoll::AssetRegistry &assetRegistry) override {
+                 quoll::AssetCache &assetCache) override {
     return true;
   }
 
@@ -48,7 +48,7 @@ TEST_F(UndoActionTest, ExecutorCallsActionExecutorUndo) {
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  quoll::editor::ActionExecutor executor(state, assetRegistry);
+  quoll::editor::ActionExecutor executor(state, assetCache);
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
@@ -65,19 +65,19 @@ TEST_F(UndoActionTest,
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  quoll::editor::ActionExecutor executor(state, assetRegistry);
+  quoll::editor::ActionExecutor executor(state, assetCache);
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
-  EXPECT_TRUE(quoll::editor::Undo(executor).predicate(state, assetRegistry));
+  EXPECT_TRUE(quoll::editor::Undo(executor).predicate(state, assetCache));
 }
 
 TEST_F(UndoActionTest, PredicateReturnsFalseIfActionExecutorUndoStackIsEmpty) {
-  quoll::editor::ActionExecutor executor(state, assetRegistry);
+  quoll::editor::ActionExecutor executor(state, assetCache);
 
-  EXPECT_FALSE(quoll::editor::Undo(executor).predicate(state, assetRegistry));
+  EXPECT_FALSE(quoll::editor::Undo(executor).predicate(state, assetCache));
 }
 
 using RedoActionTest = ActionTestBase;
@@ -86,7 +86,7 @@ TEST_F(RedoActionTest, ExecutorCallsActionExecutor) {
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  quoll::editor::ActionExecutor executor(state, assetRegistry);
+  quoll::editor::ActionExecutor executor(state, assetCache);
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
@@ -108,7 +108,7 @@ TEST_F(RedoActionTest,
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  quoll::editor::ActionExecutor executor(state, assetRegistry);
+  quoll::editor::ActionExecutor executor(state, assetCache);
 
   executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
@@ -116,11 +116,11 @@ TEST_F(RedoActionTest,
   executor.undo();
   EXPECT_TRUE(actionData->undoCalled);
 
-  EXPECT_TRUE(quoll::editor::Redo(executor).predicate(state, assetRegistry));
+  EXPECT_TRUE(quoll::editor::Redo(executor).predicate(state, assetCache));
 }
 
 TEST_F(RedoActionTest, PredicateReturnsFalseIfActionExecutorRedoStackIsEmpty) {
-  quoll::editor::ActionExecutor executor(state, assetRegistry);
+  quoll::editor::ActionExecutor executor(state, assetCache);
 
-  EXPECT_FALSE(quoll::editor::Redo(executor).predicate(state, assetRegistry));
+  EXPECT_FALSE(quoll::editor::Redo(executor).predicate(state, assetCache));
 }

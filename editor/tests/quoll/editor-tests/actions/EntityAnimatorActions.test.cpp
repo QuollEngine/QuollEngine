@@ -11,7 +11,7 @@ TEST_F(EntityCreateAnimatorActionTest, ExecutorCreatesAnimatorSourceComponent) {
 
   quoll::editor::EntityCreateAnimator action(
       entity, quoll::AssetHandle<quoll::AnimatorAsset>{15});
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Animator>(entity).asset,
             quoll::AssetHandle<quoll::AnimatorAsset>{15});
@@ -26,7 +26,7 @@ TEST_F(EntityCreateAnimatorActionTest, UndoDeletesAnimatorSourceComponet) {
 
   quoll::editor::EntityCreateAnimator action(
       entity, quoll::AssetHandle<quoll::AnimatorAsset>{15});
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Animator>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -37,7 +37,7 @@ TEST_F(EntityCreateAnimatorActionTest,
   auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntityCreateAnimator action(
       entity, quoll::AssetHandle<quoll::AnimatorAsset>{15});
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntityCreateAnimatorActionTest,
@@ -45,16 +45,16 @@ TEST_F(EntityCreateAnimatorActionTest,
   auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntityCreateAnimator action(
       entity, quoll::AssetHandle<quoll::AnimatorAsset>{15});
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntityCreateAnimatorActionTest,
        PredicateReturnsTrueIfAnimatorDoesNotExistAndAssetIsValid) {
   auto entity = state.scene.entityDatabase.create();
-  auto handle = assetRegistry.add<quoll::AnimatorAsset>({});
+  auto handle = assetCache.getRegistry().add<quoll::AnimatorAsset>({});
 
   quoll::editor::EntityCreateAnimator action(entity, handle);
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 using EntitySetAnimatorActionTest = ActionTestBase;
@@ -65,7 +65,7 @@ TEST_F(EntitySetAnimatorActionTest, ExecutorSetsAnimatorForEntity) {
 
   quoll::editor::EntitySetAnimator action(
       entity, quoll::AssetHandle<quoll::AnimatorAsset>{15});
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Animator>(entity).asset,
             quoll::AssetHandle<quoll::AnimatorAsset>{15});
@@ -80,8 +80,8 @@ TEST_F(EntitySetAnimatorActionTest, UndoSetsPreviousAnimatorForEntity) {
 
   quoll::editor::EntitySetAnimator action(
       entity, quoll::AssetHandle<quoll::AnimatorAsset>{15});
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::Animator>(entity).asset,
             quoll::AssetHandle<quoll::AnimatorAsset>{25});
@@ -92,13 +92,13 @@ TEST_F(EntitySetAnimatorActionTest, PredicateReturnsFalseIfAnimatorIsInvalid) {
   auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntitySetAnimator action(
       entity, quoll::AssetHandle<quoll::AnimatorAsset>{15});
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntitySetAnimatorActionTest, PredicateReturnsTrueIfAnimatorExists) {
   auto entity = state.scene.entityDatabase.create();
-  auto handle = assetRegistry.add<quoll::AnimatorAsset>({});
+  auto handle = assetCache.getRegistry().add<quoll::AnimatorAsset>({});
 
   quoll::editor::EntitySetAnimator action(entity, handle);
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }

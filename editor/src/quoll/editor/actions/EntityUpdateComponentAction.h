@@ -16,7 +16,7 @@ public:
   }
 
   ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override {
+                                 AssetCache &assetCache) override {
     auto &scene = state.scene;
 
     scene.entityDatabase.set(mEntity, mNewComponent.value());
@@ -29,7 +29,7 @@ public:
   }
 
   ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override {
+                              AssetCache &assetCache) override {
     auto &scene = state.scene;
 
     scene.entityDatabase.set(mEntity, mOldComponent);
@@ -39,7 +39,7 @@ public:
     return res;
   }
 
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
+  bool predicate(WorkspaceState &state, AssetCache &assetCache) override {
     auto &scene = state.scene;
 
     return mNewComponent.has_value() &&

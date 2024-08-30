@@ -12,7 +12,7 @@ TEST_F(EntitySetParentTest, ExecutorSetsParentForEntityAndChildrenForParent) {
   auto parent = state.scene.entityDatabase.create();
 
   quoll::editor::EntitySetParent action(entity, parent);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 2);
@@ -43,7 +43,7 @@ TEST_F(
   state.scene.entityDatabase.set<quoll::Children>(p1, {{entity}});
 
   quoll::editor::EntitySetParent action(entity, p2);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 3);
@@ -79,7 +79,7 @@ TEST_F(
   state.scene.entityDatabase.set<quoll::Children>(p2, {{}});
 
   quoll::editor::EntitySetParent action(entity, p2);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 3);
@@ -110,8 +110,8 @@ TEST_F(EntitySetParentTest, UndoRemovesEntityParentIfEntityDidNotHaveParent) {
   auto parent = state.scene.entityDatabase.create();
 
   quoll::editor::EntitySetParent action(entity, parent);
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(res.entitiesToSave.size(), 2);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -132,8 +132,8 @@ TEST_F(
   state.scene.entityDatabase.set<quoll::Children>(p1, {{entity}});
 
   quoll::editor::EntitySetParent action(entity, p2);
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(res.entitiesToSave.size(), 3);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -168,8 +168,8 @@ TEST_F(
   state.scene.entityDatabase.set<quoll::Children>(p2, {{child0}});
 
   quoll::editor::EntitySetParent action(entity, p2);
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(res.entitiesToSave.size(), 3);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -198,7 +198,7 @@ TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentDoesNotExist) {
   auto entity = state.scene.entityDatabase.create();
 
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, quoll::Entity{25})
-                   .predicate(state, assetRegistry));
+                   .predicate(state, assetCache));
 }
 
 TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
@@ -208,7 +208,7 @@ TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
   state.scene.entityDatabase.set<quoll::Parent>(child0, {entity});
 
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, child0)
-                   .predicate(state, assetRegistry));
+                   .predicate(state, assetCache));
 }
 
 TEST_F(EntitySetParentTest,
@@ -221,7 +221,7 @@ TEST_F(EntitySetParentTest,
   state.scene.entityDatabase.set<quoll::Parent>(child0, {entity});
 
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, child1)
-                   .predicate(state, assetRegistry));
+                   .predicate(state, assetCache));
 }
 
 TEST_F(EntitySetParentTest,
@@ -231,14 +231,14 @@ TEST_F(EntitySetParentTest,
 
   state.scene.entityDatabase.set<quoll::Parent>(entity, {parent});
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, parent)
-                   .predicate(state, assetRegistry));
+                   .predicate(state, assetCache));
 }
 
 TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsEntityItself) {
   auto entity = state.scene.entityDatabase.create();
 
   EXPECT_FALSE(quoll::editor::EntitySetParent(entity, entity)
-                   .predicate(state, assetRegistry));
+                   .predicate(state, assetCache));
 }
 
 TEST_F(EntitySetParentTest, PredicateReturnsTrueIfEntityParentIsValid) {
@@ -246,7 +246,7 @@ TEST_F(EntitySetParentTest, PredicateReturnsTrueIfEntityParentIsValid) {
   auto parent = state.scene.entityDatabase.create();
 
   EXPECT_TRUE(quoll::editor::EntitySetParent(entity, parent)
-                  .predicate(state, assetRegistry));
+                  .predicate(state, assetCache));
 }
 
 using EntityRemoveParentTest = ActionTestBase;
@@ -264,7 +264,7 @@ TEST_F(EntityRemoveParentTest,
                                                   {{c1, entity, c2, c3}});
 
   quoll::editor::EntityRemoveParent action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 1);
@@ -292,7 +292,7 @@ TEST_F(
   state.scene.entityDatabase.set<quoll::Children>(parent, {{entity}});
 
   quoll::editor::EntityRemoveParent action(entity);
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
 
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 1);
@@ -315,8 +315,8 @@ TEST_F(EntityRemoveParentTest,
                                                   {{c1, entity, c2, c3}});
 
   quoll::editor::EntityRemoveParent action(entity);
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -346,8 +346,8 @@ TEST_F(EntityRemoveParentTest,
   state.scene.entityDatabase.set<quoll::Children>(parent, {{entity}});
 
   quoll::editor::EntityRemoveParent action(entity);
-  action.onExecute(state, assetRegistry);
-  auto res = action.onUndo(state, assetRegistry);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
 
   EXPECT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -370,13 +370,13 @@ TEST_F(EntityRemoveParentTest, PredicateReturnsTrueIfEntityHasParent) {
   auto parent = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Parent>(entity, {parent});
 
-  EXPECT_TRUE(quoll::editor::EntityRemoveParent(entity).predicate(
-      state, assetRegistry));
+  EXPECT_TRUE(
+      quoll::editor::EntityRemoveParent(entity).predicate(state, assetCache));
 }
 
 TEST_F(EntityRemoveParentTest, PredicateReturnsFalseIfEntityDoesNotHaveParent) {
   auto entity = state.scene.entityDatabase.create();
 
-  EXPECT_FALSE(quoll::editor::EntityRemoveParent(entity).predicate(
-      state, assetRegistry));
+  EXPECT_FALSE(
+      quoll::editor::EntityRemoveParent(entity).predicate(state, assetCache));
 }

@@ -18,7 +18,7 @@ TEST_F(EntitySetLocalTransformContinousActionTest,
                                                           startTransform);
   action.setNewComponent(finalTransform);
 
-  auto res = action.onExecute(state, assetRegistry);
+  auto res = action.onExecute(state, assetCache);
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::LocalTransform>(entity)
                 .localPosition,
             glm::vec3(5.5f));
@@ -36,7 +36,7 @@ TEST_F(EntitySetLocalTransformContinousActionTest,
   quoll::editor::EntitySetLocalTransformContinuous action(entity,
                                                           startTransform);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
   EXPECT_EQ(state.scene.entityDatabase.get<quoll::LocalTransform>(entity)
                 .localPosition,
             glm::vec3(2.5f));
@@ -50,7 +50,7 @@ TEST_F(EntitySetLocalTransformContinousActionTest,
   state.scene.entityDatabase.set<quoll::LocalTransform>(entity, {});
   quoll::editor::EntitySetLocalTransformContinuous action(entity, std::nullopt);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::LocalTransform>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
@@ -63,7 +63,7 @@ TEST_F(EntitySetLocalTransformContinousActionTest,
   state.scene.entityDatabase.set<quoll::WorldTransform>(entity, {});
   quoll::editor::EntitySetLocalTransformContinuous action(entity, std::nullopt);
 
-  auto res = action.onUndo(state, assetRegistry);
+  auto res = action.onUndo(state, assetCache);
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::LocalTransform>(entity));
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::WorldTransform>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -75,7 +75,7 @@ TEST_F(EntitySetLocalTransformContinousActionTest,
   quoll::editor::EntitySetLocalTransformContinuous action(
       entity, {}, quoll::LocalTransform{glm::vec3{5.5f}});
 
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
+  EXPECT_TRUE(action.predicate(state, assetCache));
 }
 
 TEST_F(EntitySetLocalTransformContinousActionTest,
@@ -83,5 +83,5 @@ TEST_F(EntitySetLocalTransformContinousActionTest,
   auto entity = state.scene.entityDatabase.create();
   quoll::editor::EntitySetLocalTransformContinuous action(entity, {});
 
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
+  EXPECT_FALSE(action.predicate(state, assetCache));
 }
