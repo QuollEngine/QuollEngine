@@ -6,12 +6,9 @@
 namespace quoll {
 
 MainEngineModules::MainEngineModules(InputDeviceManager &deviceManager,
-                                     Window &window,
-                                     AssetRegistry &assetRegistry)
-    : mWindow(window), mInputMapSystem(deviceManager, assetRegistry),
-      mScriptingSystem(assetRegistry), mAnimationSystem(assetRegistry),
-      mPhysicsSystem(new PhysxBackend), mAudioSystem(assetRegistry),
-      mAssetRegistry(assetRegistry) {}
+                                     Window &window, AssetCache &assetCache)
+    : mWindow(window), mInputMapSystem(deviceManager),
+      mScriptingSystem(assetCache), mPhysicsSystem(new PhysxBackend) {}
 
 void MainEngineModules::prepare(SystemView &view) {
   mEntityDeleter.update(view);
@@ -41,7 +38,7 @@ void MainEngineModules::update(f32 dt, SystemView &view) {
 }
 
 void MainEngineModules::render(SystemView &view) {
-  mUICanvasUpdater.render(view, mAssetRegistry);
+  mUICanvasUpdater.render(view);
 }
 
 SystemView MainEngineModules::createSystemView(Scene &scene) {

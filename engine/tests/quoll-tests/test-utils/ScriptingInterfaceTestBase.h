@@ -19,12 +19,23 @@ public:
 
   sol::state_view call(quoll::Entity entity, const quoll::String &functionName);
 
-  quoll::AssetHandle<quoll::LuaScriptAsset>
-  loadScript(quoll::String scriptName);
+  quoll::AssetRef<quoll::LuaScriptAsset> loadScript(quoll::String scriptName);
 
   void SetUp() override;
 
   void TearDown() override;
+
+  template <typename TAssetData>
+  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
+    quoll::AssetData<TAssetData> info{};
+    info.type = quoll::AssetCache::getAssetType<TAssetData>();
+    info.uuid = quoll::Uuid::generate();
+    info.data = data;
+
+    assetCache.getRegistry().add(info);
+
+    return assetCache.request<TAssetData>(info.uuid).data();
+  }
 
 protected:
   quoll::Scene scene;

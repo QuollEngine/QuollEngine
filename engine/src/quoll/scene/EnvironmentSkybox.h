@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/AssetHandle.h"
+#include "quoll/asset/AssetRef.h"
 #include "quoll/rhi/RenderHandle.h"
 #include "EnvironmentAsset.h"
 

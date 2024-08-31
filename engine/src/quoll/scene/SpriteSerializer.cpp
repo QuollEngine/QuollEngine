@@ -6,29 +6,25 @@
 namespace quoll {
 
 void SpriteSerializer::serialize(YAML::Node &node,
-                                 EntityDatabase &entityDatabase, Entity entity,
-                                 AssetRegistry &assetRegistry) {
+                                 EntityDatabase &entityDatabase,
+                                 Entity entity) {
   if (entityDatabase.has<Sprite>(entity)) {
-    auto handle = entityDatabase.get<Sprite>(entity).handle;
-    if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.getMeta(handle).uuid;
-
-      node["sprite"] = uuid;
+    auto texture = entityDatabase.get<Sprite>(entity).handle;
+    if (texture) {
+      node["sprite"] = texture.meta().uuid;
     }
   }
 }
 
 void SpriteSerializer::deserialize(const YAML::Node &node,
                                    EntityDatabase &entityDatabase,
-                                   Entity entity,
-                                   AssetRegistry &assetRegistry) {
+                                   Entity entity, AssetCache &assetCache) {
   if (node["sprite"]) {
     auto uuid = node["sprite"].as<Uuid>(Uuid{});
 
-    auto handle = assetRegistry.findHandleByUuid<TextureAsset>(uuid);
-
-    if (handle) {
-      entityDatabase.set<Sprite>(entity, {handle});
+    auto texture = assetCache.request<TextureAsset>(uuid);
+    if (texture) {
+      entityDatabase.set<Sprite>(entity, {texture});
     }
   }
 }

@@ -28,9 +28,7 @@ TEST_F(EntitySpawnerLuaTableTest,
 }
 
 TEST_F(EntitySpawnerLuaTableTest, SpawnPrefabReturnsNullIfPrefabIsEmpty) {
-  auto prefab = assetCache.getRegistry().add<quoll::PrefabAsset>({});
-  ASSERT_EQ(prefab, quoll::AssetHandle<quoll::PrefabAsset>{1});
-
+  auto prefab = createAsset<quoll::PrefabAsset>();
   auto entity = entityDatabase.create();
 
   auto state = call(entity, "entitySpawnerSpawnPrefab");
@@ -39,13 +37,11 @@ TEST_F(EntitySpawnerLuaTableTest, SpawnPrefabReturnsNullIfPrefabIsEmpty) {
 
 TEST_F(EntitySpawnerLuaTableTest,
        SpawnPrefabCreatesPrefabEntityAndReturnsEntityTableForRootNode) {
-  quoll::AssetData<quoll::PrefabAsset> asset{};
-  asset.data.transforms.push_back(
+  quoll::PrefabAsset assetData{};
+  assetData.transforms.push_back(
       {0, quoll::PrefabTransformData{glm::vec3{5.0f}}});
 
-  auto prefab = assetCache.getRegistry().add(asset);
-  ASSERT_EQ(prefab, quoll::AssetHandle<quoll::PrefabAsset>{1});
-
+  auto prefab = createAsset(assetData);
   auto entity = entityDatabase.create();
 
   auto state = call(entity, "entitySpawnerSpawnPrefab");
@@ -76,9 +72,7 @@ TEST_F(EntitySpawnerLuaTableTest, SpawnSpriteReturnsNullIfTextureDoesNotExist) {
 
 TEST_F(EntitySpawnerLuaTableTest,
        SpawnSpriteCreatesSpriteEntityAndReturnsEntityTable) {
-  auto texture = assetCache.getRegistry().add<quoll::TextureAsset>({});
-  ASSERT_EQ(texture, quoll::AssetHandle<quoll::TextureAsset>{1});
-
+  auto texture = createAsset<quoll::TextureAsset>();
   auto entity = entityDatabase.create();
 
   auto state = call(entity, "entitySpawnerSpawnSprite");

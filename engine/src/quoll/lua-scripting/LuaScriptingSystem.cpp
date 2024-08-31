@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/core/Profiler.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/Scene.h"
 #include "quoll/system/SystemView.h"
@@ -10,15 +10,15 @@
 
 namespace quoll {
 
-LuaScriptingSystem::LuaScriptingSystem(AssetRegistry &assetRegistry)
-    : mAssetRegistry(assetRegistry) {}
+LuaScriptingSystem::LuaScriptingSystem(AssetCache &assetCache)
+    : mAssetCache(assetCache) {}
 
 void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
                                WindowSignals &windowSignals) {
   auto &entityDatabase = view.scene->entityDatabase;
 
   ScriptGlobals scriptGlobals{windowSignals, entityDatabase, physicsSystem,
-                              mAssetRegistry, mScriptLoop};
+                              mAssetCache, mScriptLoop};
   QUOLL_PROFILE_EVENT("LuaScriptingSystem::start");
   lua::ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
@@ -29,7 +29,7 @@ void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
     }
 
     bool valid = true;
-    auto &script = mAssetRegistry.get(component.handle);
+    auto &script = component.handle.get();
     for (auto &[key, value] : script.variables) {
       auto it = component.variables.find(key);
       if (it == component.variables.end() || !it->second.isType(value.type)) {

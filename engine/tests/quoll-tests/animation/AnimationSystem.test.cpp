@@ -20,7 +20,7 @@ public:
 
   quoll::SystemView view{&scene};
 
-  AnimationSystemTest() : assetCache("/"), system(assetCache.getRegistry()) {}
+  AnimationSystemTest() : assetCache("/") {}
 
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {

@@ -781,7 +781,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   for (auto [entity, sprite, world] :
        entityDatabase.view<Sprite, WorldTransform>()) {
-    auto handle = mAssetRegistry.get(sprite.handle).deviceHandle;
+    auto handle = sprite.handle->deviceHandle;
     frameData.addSprite(entity, handle, world.worldTransform);
   }
 

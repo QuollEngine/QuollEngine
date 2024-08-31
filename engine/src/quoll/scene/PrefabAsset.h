@@ -2,7 +2,6 @@
 
 #include "quoll/animation/AnimationAsset.h"
 #include "quoll/animation/Animator.h"
-#include "quoll/asset/AssetHandle.h"
 #include "quoll/asset/AssetRef.h"
 #include "quoll/renderer/MeshAsset.h"
 #include "quoll/renderer/MeshRenderer.h"

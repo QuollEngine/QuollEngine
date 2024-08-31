@@ -6,10 +6,10 @@ namespace quoll {
 LuaScriptInputVariable::LuaScriptInputVariable(String value)
     : mValue(value), mType(LuaScriptVariableType::String) {}
 
-LuaScriptInputVariable::LuaScriptInputVariable(AssetHandle<PrefabAsset> value)
+LuaScriptInputVariable::LuaScriptInputVariable(AssetRef<PrefabAsset> value)
     : mValue(value), mType(LuaScriptVariableType::AssetPrefab) {}
 
-LuaScriptInputVariable::LuaScriptInputVariable(AssetHandle<TextureAsset> value)
+LuaScriptInputVariable::LuaScriptInputVariable(AssetRef<TextureAsset> value)
     : mValue(value), mType(LuaScriptVariableType::AssetTexture) {}
 
 } // namespace quoll

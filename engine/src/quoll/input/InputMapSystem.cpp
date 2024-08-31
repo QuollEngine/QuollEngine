@@ -7,9 +7,8 @@
 
 namespace quoll {
 
-InputMapSystem::InputMapSystem(InputDeviceManager &deviceManager,
-                               AssetRegistry &assetRegistry)
-    : mDeviceManager(deviceManager), mAssetRegistry(assetRegistry) {}
+InputMapSystem::InputMapSystem(InputDeviceManager &deviceManager)
+    : mDeviceManager(deviceManager) {}
 
 void InputMapSystem::update(SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;

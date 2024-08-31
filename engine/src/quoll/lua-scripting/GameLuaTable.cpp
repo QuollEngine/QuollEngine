@@ -28,7 +28,8 @@ sol::object GameLuaTable::getService(String name) {
   }
 
   if (name == "UI") {
-    return sol::make_object(state, UILuaTable::create(state));
+    return sol::make_object(
+        state, UILuaTable::create(state, mScriptGlobals.assetCache));
   }
 
   if (name == "Logger") {

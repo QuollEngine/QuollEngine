@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/asset/AssetHandle.h"
 #include "quoll/renderer/TextureAsset.h"
 #include "quoll/ui/UILuaTable.h"
@@ -7,13 +8,17 @@
 
 namespace quoll {
 
-sol::table UILuaTable::create(sol::state_view state) {
+sol::table UILuaTable::create(sol::state_view state, AssetCache &assetCache) {
   auto uiImage = state.new_usertype<UIImage>("UIImage", sol::no_constructor);
-  uiImage["texture"] =
-      sol::property([](UIImage &image) { return image.texture.getRawId(); },
-                    [](UIImage &image, AssetHandleType value) {
-                      image.texture = AssetHandle<TextureAsset>(value);
-                    });
+  uiImage["texture"] = sol::property(
+      [](UIImage &image) { return image.texture.handle().getRawId(); },
+      [&](UIImage &image, AssetHandleType value) {
+        AssetHandle<TextureAsset> handle(value);
+        if (assetCache.getRegistry().has(handle)) {
+          image.texture = AssetRef<TextureAsset>(
+              &assetCache.getRegistry().getMap<TextureAsset>(), handle);
+        }
+      });
 
   auto uiText = state.new_usertype<UIText>("UIText", sol::no_constructor);
   uiText["content"] = &UIText::content;
@@ -23,9 +28,17 @@ sol::table UILuaTable::create(sol::state_view state) {
 
   auto ui = state.create_table();
 
-  ui["image"] = [](sol::table props) {
-    return UIImage{.texture = AssetHandle<TextureAsset>(
-                       props.get<AssetHandleType>("texture"))};
+  ui["image"] = [&](sol::table props) {
+    AssetHandle<TextureAsset> handle(props.get<AssetHandleType>("texture"));
+
+    AssetRef<TextureAsset> texture;
+
+    if (assetCache.getRegistry().has(handle)) {
+      texture = AssetRef<TextureAsset>(
+          &assetCache.getRegistry().getMap<TextureAsset>(), handle);
+    }
+
+    return UIImage{.texture = texture};
   };
 
   ui["text"] = [](sol::table props) {

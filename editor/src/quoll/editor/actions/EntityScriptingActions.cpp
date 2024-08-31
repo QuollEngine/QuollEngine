@@ -44,12 +44,12 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state,
     return false;
   }
 
-  auto scriptHandle = scene.entityDatabase.get<LuaScript>(mEntity).handle;
-  if (!assetCache.getRegistry().has(scriptHandle)) {
+  const auto &scriptAsset = scene.entityDatabase.get<LuaScript>(mEntity).handle;
+  if (!scriptAsset) {
     return false;
   }
 
-  const auto &variables = assetCache.getRegistry().get(scriptHandle).variables;
+  const auto &variables = scriptAsset->variables;
 
   auto it = variables.find(mName);
   if (it == variables.end()) {
@@ -60,11 +60,14 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state,
     return false;
   }
 
-  if (mValue.isType(LuaScriptVariableType::AssetPrefab)) {
-    auto handle = mValue.get<AssetHandle<PrefabAsset>>();
-    if (!assetCache.getRegistry().has(handle)) {
-      return false;
-    }
+  if (mValue.isType(LuaScriptVariableType::AssetPrefab) &&
+      !mValue.get<AssetRef<PrefabAsset>>()) {
+    return false;
+  }
+
+  if (mValue.isType(LuaScriptVariableType::AssetTexture) &&
+      !mValue.get<AssetRef<TextureAsset>>()) {
+    return false;
   }
 
   return true;

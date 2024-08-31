@@ -10,17 +10,17 @@ namespace quoll {
 
 static constexpr f32 ImageSize = 50.0f;
 
-void renderView(UIComponent component, YGNodeRef node,
-                AssetRegistry &assetRegistry) {
+void renderView(UIComponent component, YGNodeRef node) {
   f32 left = YGNodeLayoutGetLeft(node);
   f32 top = YGNodeLayoutGetTop(node);
 
   ImGui::SetCursorPos({left, top});
 
   if (auto *image = std::get_if<UIImage>(&component)) {
-    auto texture = assetRegistry.get(image->texture).deviceHandle;
-
-    imgui::image(texture, ImVec2(ImageSize, ImageSize));
+    if (image->texture) {
+      auto texture = image->texture->deviceHandle;
+      imgui::image(texture, ImVec2(ImageSize, ImageSize));
+    }
   } else if (auto *text = std::get_if<UIText>(&component)) {
     ImGui::Text("%s", text->content.c_str());
   } else if (auto *view = std::get_if<UIView>(&component)) {
@@ -36,7 +36,7 @@ void renderView(UIComponent component, YGNodeRef node,
     for (usize i = 0; i < view->children.size(); ++i) {
       const auto &childView = view->children.at(i);
       YGNodeRef childNode = YGNodeGetChild(node, static_cast<u32>(i));
-      renderView(childView, childNode, assetRegistry);
+      renderView(childView, childNode);
     }
     ImGui::EndChild();
     ImGui::PopStyleColor();
@@ -104,7 +104,7 @@ void updateLayout(EntityDatabase &entityDatabase, const glm::vec2 &size) {
   entityDatabase.destroyComponents<UICanvasRenderRequest>();
 }
 
-void UICanvasUpdater::render(SystemView &view, AssetRegistry &assetRegistry) {
+void UICanvasUpdater::render(SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;
   updateLayout(entityDatabase, mSize);
 
@@ -130,7 +130,7 @@ void UICanvasUpdater::render(SystemView &view, AssetRegistry &assetRegistry) {
 
     if (ImGui::Begin(std::to_string(static_cast<u32>(entity)).c_str(), nullptr,
                      WindowFlags)) {
-      renderView(canvas.rootView, canvas.flexRoot, assetRegistry);
+      renderView(canvas.rootView, canvas.flexRoot);
       ImGui::End();
     }
 

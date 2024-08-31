@@ -131,7 +131,7 @@ void EditorScreen::start(const Project &rawProject) {
       });
 
   MainEngineModules engineModules(mDeviceManager, mWindow,
-                                  assetManager.getAssetRegistry());
+                                  assetManager.getCache());
 
   mWindow.maximize();
 

@@ -9,7 +9,7 @@ const quoll::String LuaScriptingInterfaceTestBase::ScriptName =
 
 LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
     const quoll::String &scriptName)
-    : assetCache(CachePath), scriptingSystem(assetCache.getRegistry()),
+    : assetCache(CachePath), scriptingSystem(assetCache),
       mScriptName(scriptName), physicsSystem(physicsBackend) {}
 
 sol::state_view LuaScriptingInterfaceTestBase::start(quoll::Entity entity) {
@@ -40,13 +40,13 @@ LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
   return state;
 }
 
-quoll::AssetHandle<quoll::LuaScriptAsset>
+quoll::AssetRef<quoll::LuaScriptAsset>
 LuaScriptingInterfaceTestBase::loadScript(quoll::String scriptName) {
   auto uuid = quoll::Uuid::generate();
   assetCache.createFromSource<quoll::LuaScriptAsset>(FixturesPath / scriptName,
                                                      uuid);
 
-  auto res = assetCache.load<quoll::LuaScriptAsset>(uuid);
+  auto res = assetCache.request<quoll::LuaScriptAsset>(uuid);
   QuollAssert(res, "Error loading script");
   return res;
 }

@@ -47,8 +47,7 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
 
   NameSerializer::serialize(components, mEntityDatabase, entity);
   TransformSerializer::serialize(components, mEntityDatabase, entity);
-  SpriteSerializer::serialize(components, mEntityDatabase, entity,
-                              mAssetRegistry);
+  SpriteSerializer::serialize(components, mEntityDatabase, entity);
   MeshSerializer::serialize(components, mEntityDatabase, entity);
   LightSerializer::serialize(components, mEntityDatabase, entity);
   CameraSerializer::serialize(components, mEntityDatabase, entity);
@@ -66,8 +65,7 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
   SkinnedMeshRendererSerializer::serialize(components, mEntityDatabase, entity);
 
   AudioSerializer::serialize(components, mEntityDatabase, entity);
-  ScriptSerializer::serialize(components, mEntityDatabase, entity,
-                              mAssetRegistry);
+  ScriptSerializer::serialize(components, mEntityDatabase, entity);
   TextSerializer::serialize(components, mEntityDatabase, entity);
   InputMapSerializer::serialize(components, mEntityDatabase, entity);
   UICanvasSerializer::serialize(components, mEntityDatabase, entity);

@@ -9,14 +9,11 @@ struct SystemView;
 
 class AnimationSystem {
 public:
-  AnimationSystem(AssetRegistry &assetRegistry);
-
   void prepare(SystemView &view);
 
   void update(f32 dt, SystemView &view);
 
 private:
-  AssetRegistry &mAssetRegistry;
   KeyframeInterpolator mKeyframeInterpolator;
 };
 

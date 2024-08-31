@@ -50,7 +50,7 @@ private:
 
 class AudioSystemTest : public ::testing::Test {
 public:
-  AudioSystemTest() : audioSystem(assetCache.getRegistry()), assetCache("/") {
+  AudioSystemTest() : assetCache("/") {
     audioSystem.createSystemViewData(view);
   }
 

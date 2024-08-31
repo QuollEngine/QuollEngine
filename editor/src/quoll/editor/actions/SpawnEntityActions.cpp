@@ -39,8 +39,8 @@ ActionExecutorResult SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
 
   auto transform = getTransformFromView(viewMatrix);
 
-  mSpawnedEntity = EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
-                       .spawnEmpty(transform);
+  mSpawnedEntity =
+      EntitySpawner(scene.entityDatabase, assetCache).spawnEmpty(transform);
 
   EntityUpdateComponent<Name>(mSpawnedEntity, {}, Name{"New entity"})
       .onExecute(state, assetCache);
@@ -98,8 +98,8 @@ ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state,
 
   ActionExecutorResult res{};
   res.entitiesToSave =
-      EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
-          .spawnPrefab(mPrefab.handle(), getTransformFromView(viewMatrix));
+      EntitySpawner(scene.entityDatabase, assetCache)
+          .spawnPrefab(mPrefab, getTransformFromView(viewMatrix));
   res.addToHistory = true;
 
   mSpawnedRootEntity = res.entitiesToSave.back();
@@ -153,9 +153,8 @@ ActionExecutorResult SpawnSpriteAtView::onExecute(WorkspaceState &state,
   const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
 
   ActionExecutorResult res{};
-  mSpawnedEntity =
-      EntitySpawner(scene.entityDatabase, assetCache.getRegistry())
-          .spawnSprite(mTexture.handle(), getTransformFromView(viewMatrix));
+  mSpawnedEntity = EntitySpawner(scene.entityDatabase, assetCache)
+                       .spawnSprite(mTexture, getTransformFromView(viewMatrix));
 
   res.entitiesToSave.push_back(mSpawnedEntity);
   res.addToHistory = true;

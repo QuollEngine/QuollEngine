@@ -5,16 +5,14 @@
 namespace quoll {
 
 void ScriptSerializer::serialize(YAML::Node &node,
-                                 EntityDatabase &entityDatabase, Entity entity,
-                                 AssetRegistry &assetRegistry) {
+                                 EntityDatabase &entityDatabase,
+                                 Entity entity) {
   if (entityDatabase.has<LuaScript>(entity)) {
     const auto &script = entityDatabase.get<LuaScript>(entity);
-    if (assetRegistry.has(script.handle)) {
-      const auto &asset = assetRegistry.get(script.handle);
+    if (script.handle) {
+      const auto &asset = script.handle.get();
 
-      auto uuid = assetRegistry.getMeta(script.handle).uuid;
-
-      node["script"]["asset"] = uuid;
+      node["script"]["asset"] = script.handle.meta().uuid;
 
       for (auto &[name, value] : script.variables) {
         auto it = asset.variables.find(name);
@@ -26,20 +24,17 @@ void ScriptSerializer::serialize(YAML::Node &node,
           node["script"]["variables"][name]["type"] = "string";
           node["script"]["variables"][name]["value"] = value.get<String>();
         } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
-          auto handle = value.get<AssetHandle<PrefabAsset>>();
-          if (assetRegistry.has(handle)) {
-            auto uuid = assetRegistry.getMeta(handle).uuid;
+          const auto &prefab = value.get<AssetRef<PrefabAsset>>();
+          if (prefab) {
 
             node["script"]["variables"][name]["type"] = "prefab";
-            node["script"]["variables"][name]["value"] = uuid;
+            node["script"]["variables"][name]["value"] = prefab.meta().uuid;
           }
         } else if (value.isType(LuaScriptVariableType::AssetTexture)) {
-          auto handle = value.get<AssetHandle<TextureAsset>>();
-          if (assetRegistry.has(handle)) {
-            auto uuid = assetRegistry.getMeta(handle).uuid;
-
+          const auto &texture = value.get<AssetRef<TextureAsset>>();
+          if (texture) {
             node["script"]["variables"][name]["type"] = "texture";
-            node["script"]["variables"][name]["value"] = uuid;
+            node["script"]["variables"][name]["value"] = texture.meta().uuid;
           }
         }
       }
@@ -49,49 +44,53 @@ void ScriptSerializer::serialize(YAML::Node &node,
 
 void ScriptSerializer::deserialize(const YAML::Node &node,
                                    EntityDatabase &entityDatabase,
-                                   Entity entity,
-                                   AssetRegistry &assetRegistry) {
+                                   Entity entity, AssetCache &assetCache) {
   if (node["script"]) {
-    LuaScript script{};
     Uuid uuid;
     if (node["script"].IsScalar()) {
       uuid = node["script"].as<Uuid>(Uuid{});
     } else if (node["script"].IsMap()) {
       uuid = node["script"]["asset"].as<Uuid>(Uuid{});
+    }
 
-      if (node["script"]["variables"] && node["script"]["variables"].IsMap()) {
-        for (const auto &var : node["script"]["variables"]) {
-          if (!var.second.IsMap()) {
-            continue;
-          }
-          auto name = var.first.as<String>("");
-          auto type = var.second["type"].as<String>("");
+    auto asset = assetCache.request<LuaScriptAsset>(uuid);
+    if (!asset) {
+      return;
+    }
+
+    LuaScript script{asset};
+
+    if (node["script"].IsMap() && node["script"]["variables"] &&
+        node["script"]["variables"].IsMap()) {
+      for (const auto &var : node["script"]["variables"]) {
+        if (!var.second.IsMap()) {
+          continue;
+        }
+        auto name = var.first.as<String>("");
+        auto type = var.second["type"].as<String>("");
+
+        if (type == "string") {
           auto value = var.second["value"].as<String>("");
+          script.variables.insert_or_assign(name, value);
+        } else if (type == "prefab") {
+          auto value = var.second["value"].as<Uuid>(Uuid{});
+          auto prefab = assetCache.request<PrefabAsset>(value);
 
-          if (type == "string") {
-            script.variables.insert_or_assign(name, value);
-          } else if (type == "prefab") {
-            auto handle =
-                assetRegistry.findHandleByUuid<PrefabAsset>(Uuid(value));
-            if (handle) {
-              script.variables.insert_or_assign(name, handle);
-            }
-          } else if (type == "texture") {
-            auto handle =
-                assetRegistry.findHandleByUuid<TextureAsset>(Uuid(value));
-            if (handle) {
-              script.variables.insert_or_assign(name, handle);
-            }
+          if (prefab) {
+            script.variables.insert_or_assign(name, prefab.data());
+          }
+        } else if (type == "texture") {
+          auto value = var.second["value"].as<Uuid>(Uuid{});
+          auto texture = assetCache.request<TextureAsset>(value);
+
+          if (texture) {
+            script.variables.insert_or_assign(name, texture.data());
           }
         }
       }
     }
 
-    script.handle = assetRegistry.findHandleByUuid<LuaScriptAsset>(uuid);
-
-    if (script.handle) {
-      entityDatabase.set(entity, script);
-    }
+    entityDatabase.set(entity, script);
   }
 }
 
