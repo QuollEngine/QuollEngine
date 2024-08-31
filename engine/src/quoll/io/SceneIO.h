@@ -8,12 +8,12 @@
 
 namespace quoll {
 
-class AssetRegistry;
+class AssetCache;
 struct Scene;
 
 class SceneIO {
 public:
-  SceneIO(AssetRegistry &assetRegistry, Scene &scene);
+  SceneIO(AssetCache &assetCache, Scene &scene);
 
   std::vector<Entity> loadScene(AssetHandle<SceneAsset> scene);
 
@@ -24,7 +24,7 @@ private:
 
 private:
   Scene &mScene;
-  AssetRegistry &mAssetRegistry;
+  AssetCache &mAssetCache;
 
   std::unordered_map<u64, Entity> mEntityIdCache;
 };

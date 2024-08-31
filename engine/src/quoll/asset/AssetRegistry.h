@@ -45,7 +45,7 @@ class AssetRegistry : NoCopyMove {
 
   struct DefaultObjects {
     AssetHandle<MeshAsset> cube;
-    AssetHandle<MaterialAsset> defaultMaterial;
+    AssetRef<MaterialAsset> defaultMaterial;
     AssetHandle<FontAsset> defaultFont;
   };
 

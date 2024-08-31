@@ -90,11 +90,15 @@ void loadMaterials(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createFromData(material);
-    auto handle = assetCache.load<MaterialAsset>(material.uuid);
-    importData.materials.map.insert_or_assign(i, handle);
+    auto ref = assetCache.request<MaterialAsset>(material.uuid);
+    if (ref) {
+      importData.materials.map.insert_or_assign(i, ref.data());
 
-    importData.outputUuids.insert_or_assign(
-        assetName, assetCache.getRegistry().getMeta(handle.data()).uuid);
+      importData.outputUuids.insert_or_assign(assetName,
+                                              ref.data().meta().uuid);
+    } else {
+      importData.warnings.push_back(ref.error());
+    }
   }
 }
 

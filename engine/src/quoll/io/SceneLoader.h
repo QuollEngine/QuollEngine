@@ -6,7 +6,7 @@
 namespace quoll {
 
 class EntityDatabase;
-class AssetRegistry;
+class AssetCache;
 
 } // namespace quoll
 
@@ -16,7 +16,7 @@ using EntityIdCache = std::unordered_map<u64, Entity>;
 
 class SceneLoader {
 public:
-  SceneLoader(AssetRegistry &assetRegistry, EntityDatabase &entityDatabase);
+  SceneLoader(AssetCache &assetCache, EntityDatabase &entityDatabase);
 
   Result<void> loadComponents(const YAML::Node &node, Entity entity,
                               EntityIdCache &entityIdCache);
@@ -28,7 +28,7 @@ public:
                                  EntityIdCache &entityIdCache);
 
 private:
-  AssetRegistry &mAssetRegistry;
+  AssetCache &mAssetCache;
   EntityDatabase &mEntityDatabase;
 };
 

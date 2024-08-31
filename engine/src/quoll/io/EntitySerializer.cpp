@@ -66,10 +66,8 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
 
   RigidBodySerializer::serialize(components, mEntityDatabase, entity);
   CollidableSerializer::serialize(components, mEntityDatabase, entity);
-  MeshRendererSerializer::serialize(components, mEntityDatabase, entity,
-                                    mAssetRegistry);
-  SkinnedMeshRendererSerializer::serialize(components, mEntityDatabase, entity,
-                                           mAssetRegistry);
+  MeshRendererSerializer::serialize(components, mEntityDatabase, entity);
+  SkinnedMeshRendererSerializer::serialize(components, mEntityDatabase, entity);
 
   AudioSerializer::serialize(components, mEntityDatabase, entity,
                              mAssetRegistry);

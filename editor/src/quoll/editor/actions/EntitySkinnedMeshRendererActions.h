@@ -21,7 +21,7 @@ public:
 private:
   Entity mEntity;
   usize mSlot;
-  AssetHandle<MaterialAsset> mOldMaterial;
+  AssetRef<MaterialAsset> mOldMaterial;
   AssetRef<MaterialAsset> mNewMaterial;
 };
 
@@ -57,7 +57,7 @@ public:
 
 private:
   Entity mEntity;
-  AssetHandle<MaterialAsset> mOldMaterial;
+  AssetRef<MaterialAsset> mOldMaterial;
 };
 
 } // namespace quoll::editor

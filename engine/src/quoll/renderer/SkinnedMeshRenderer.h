@@ -1,12 +1,12 @@
 #pragma once
 
-#include "quoll/asset/AssetHandle.h"
+#include "quoll/asset/AssetRef.h"
 #include "MaterialAsset.h"
 
 namespace quoll {
 
 struct SkinnedMeshRenderer {
-  std::vector<AssetHandle<MaterialAsset>> materials;
+  std::vector<AssetRef<MaterialAsset>> materials;
 };
 
 } // namespace quoll

@@ -5,8 +5,7 @@ namespace quoll {
 
 void SkinnedMeshRendererSerializer::serialize(YAML::Node &node,
                                               EntityDatabase &entityDatabase,
-                                              Entity entity,
-                                              AssetRegistry &assetRegistry) {
+                                              Entity entity) {
   if (entityDatabase.has<SkinnedMeshRenderer>(entity)) {
     const auto &renderer = entityDatabase.get<SkinnedMeshRenderer>(entity);
 
@@ -14,9 +13,9 @@ void SkinnedMeshRendererSerializer::serialize(YAML::Node &node,
         YAML::Node(YAML::NodeType::Sequence);
 
     for (auto material : renderer.materials) {
-      if (assetRegistry.has(material)) {
-        auto uuid = assetRegistry.getMeta(material).uuid;
-        node["skinnedMeshRenderer"]["materials"].push_back(uuid);
+      if (material) {
+        node["skinnedMeshRenderer"]["materials"].push_back(
+            material.meta().uuid);
       }
     }
   }
@@ -25,7 +24,7 @@ void SkinnedMeshRendererSerializer::serialize(YAML::Node &node,
 void SkinnedMeshRendererSerializer::deserialize(const YAML::Node &node,
                                                 EntityDatabase &entityDatabase,
                                                 Entity entity,
-                                                AssetRegistry &assetRegistry) {
+                                                AssetCache &assetCache) {
   if (node["skinnedMeshRenderer"] && node["skinnedMeshRenderer"].IsMap()) {
     SkinnedMeshRenderer renderer{};
     auto materials = node["skinnedMeshRenderer"]["materials"];
@@ -33,12 +32,12 @@ void SkinnedMeshRendererSerializer::deserialize(const YAML::Node &node,
     if (materials.IsSequence()) {
       for (auto material : materials) {
         auto uuid = material.as<Uuid>(Uuid{});
-        auto handle = assetRegistry.findHandleByUuid<MaterialAsset>(uuid);
-        if (!handle) {
+        auto asset = assetCache.request<MaterialAsset>(uuid);
+        if (!asset) {
           continue;
         }
 
-        renderer.materials.push_back(handle);
+        renderer.materials.push_back(asset);
       }
     }
 

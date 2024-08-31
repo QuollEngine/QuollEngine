@@ -19,10 +19,10 @@ SceneSimulatorWorkspace::SceneSimulatorWorkspace(
     : mAssetManager(assetManager), mState{project},
       mActionExecutor(mState, mAssetManager.getCache()),
       mSceneAssetHandle(scene),
-      mSceneIO(mAssetManager.getAssetRegistry(), mState.scene),
-      mRenderer(renderer), mSceneRenderer(sceneRenderer),
-      mEditorRenderer(editorRenderer), mMousePickingGraph(mousePickingGraph),
-      mEngineModules(engineModules), mEditorCamera(editorCamera) {
+      mSceneIO(mAssetManager.getCache(), mState.scene), mRenderer(renderer),
+      mSceneRenderer(sceneRenderer), mEditorRenderer(editorRenderer),
+      mMousePickingGraph(mousePickingGraph), mEngineModules(engineModules),
+      mEditorCamera(editorCamera) {
 
   sourceScene.entityDatabase.duplicate(mState.scene.entityDatabase);
   mState.scene.dummyCamera = sourceScene.dummyCamera;

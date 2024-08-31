@@ -16,7 +16,7 @@ EntitySetSkinnedMeshRendererMaterial::onExecute(WorkspaceState &state,
       scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(
           mSlot);
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.at(mSlot) =
-      mNewMaterial.handle();
+      mNewMaterial;
 
   ActionExecutorResult result{};
   result.addToHistory = true;
@@ -64,7 +64,7 @@ EntityAddSkinnedMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
   auto &scene = state.scene;
 
   scene.entityDatabase.get<SkinnedMeshRenderer>(mEntity).materials.push_back(
-      mNewMaterial.handle());
+      mNewMaterial);
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);

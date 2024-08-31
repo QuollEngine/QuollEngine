@@ -489,13 +489,13 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
 
   for (const auto &renderer : prefab.meshRenderers) {
     for (auto material : renderer.value.materials) {
-      addMaterialEntry(material);
+      addMaterialEntry(material.handle());
     }
   }
 
   for (const auto &renderer : prefab.skinnedMeshRenderers) {
     for (auto material : renderer.value.materials) {
-      addMaterialEntry(material);
+      addMaterialEntry(material.handle());
     }
   }
 

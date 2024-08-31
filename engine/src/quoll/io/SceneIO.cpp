@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Id.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/scene/Camera.h"
 #include "quoll/scene/PerspectiveLens.h"
 #include "quoll/scene/Scene.h"
@@ -9,15 +9,15 @@
 
 namespace quoll {
 
-SceneIO::SceneIO(AssetRegistry &assetRegistry, Scene &scene)
-    : mScene(scene), mAssetRegistry(assetRegistry) {
+SceneIO::SceneIO(AssetCache &assetCache, Scene &scene)
+    : mScene(scene), mAssetCache(assetCache) {
   reset();
 }
 
 std::vector<Entity> SceneIO::loadScene(AssetHandle<SceneAsset> scene) {
-  detail::SceneLoader sceneLoader(mAssetRegistry, mScene.entityDatabase);
+  detail::SceneLoader sceneLoader(mAssetCache, mScene.entityDatabase);
 
-  const auto &root = mAssetRegistry.get(scene).data;
+  const auto &root = mAssetCache.getRegistry().get(scene).data;
 
   auto currentZone = root["zones"][0];
 

@@ -42,7 +42,7 @@ struct GLTFImportData {
 
   GLTFToAsset<AssetRef<TextureAsset>> textures;
 
-  GLTFToAsset<AssetHandle<MaterialAsset>> materials;
+  GLTFToAsset<AssetRef<MaterialAsset>> materials;
 
   SkeletonData skeletons;
 
@@ -50,7 +50,7 @@ struct GLTFImportData {
 
   GLTFToAsset<AssetRef<MeshAsset>> meshes;
 
-  std::map<AssetHandle<MeshAsset>, std::vector<AssetHandle<MaterialAsset>>>
+  std::map<AssetHandle<MeshAsset>, std::vector<AssetRef<MaterialAsset>>>
       meshMaterials;
 
   GLTFToAsset<DirectionalLight> directionalLights;
