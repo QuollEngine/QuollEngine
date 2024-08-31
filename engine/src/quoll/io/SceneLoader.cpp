@@ -26,9 +26,8 @@
 
 namespace quoll::detail {
 
-SceneLoader::SceneLoader(AssetRegistry &assetRegistry,
-                         EntityDatabase &entityDatabase)
-    : mAssetRegistry(assetRegistry), mEntityDatabase(entityDatabase) {}
+SceneLoader::SceneLoader(AssetCache &assetCache, EntityDatabase &entityDatabase)
+    : mAssetCache(assetCache), mEntityDatabase(entityDatabase) {}
 
 Result<void> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                          EntityIdCache &entityIdCache) {
@@ -36,33 +35,38 @@ Result<void> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   NameSerializer::deserialize(node, mEntityDatabase, entity, entityIdCache);
   TransformSerializer::deserialize(node, mEntityDatabase, entity,
                                    entityIdCache);
-  SpriteSerializer::deserialize(node, mEntityDatabase, entity, mAssetRegistry);
-  MeshSerializer::deserialize(node, mEntityDatabase, entity, mAssetRegistry);
+  SpriteSerializer::deserialize(node, mEntityDatabase, entity,
+                                mAssetCache.getRegistry());
+  MeshSerializer::deserialize(node, mEntityDatabase, entity,
+                              mAssetCache.getRegistry());
   LightSerializer::deserialize(node, mEntityDatabase, entity);
   CameraSerializer::deserialize(node, mEntityDatabase, entity);
   SkeletonSerializer::deserialize(node, mEntityDatabase, entity,
-                                  mAssetRegistry);
+                                  mAssetCache.getRegistry());
   EnvironmentLightingSerializer::deserialize(node, mEntityDatabase, entity);
   EnvironmentSkyboxSerializer::deserialize(node, mEntityDatabase, entity,
-                                           mAssetRegistry);
+                                           mAssetCache.getRegistry());
 
   JointAttachmentSerializer::deserialize(node, mEntityDatabase, entity);
 
   AnimatorSerializer::deserialize(node, mEntityDatabase, entity,
-                                  mAssetRegistry);
+                                  mAssetCache.getRegistry());
 
   RigidBodySerializer::deserialize(node, mEntityDatabase, entity);
   CollidableSerializer::deserialize(node, mEntityDatabase, entity);
   MeshRendererSerializer::deserialize(node, mEntityDatabase, entity,
-                                      mAssetRegistry);
+                                      mAssetCache);
   SkinnedMeshRendererSerializer::deserialize(node, mEntityDatabase, entity,
-                                             mAssetRegistry);
+                                             mAssetCache);
 
-  AudioSerializer::deserialize(node, mEntityDatabase, entity, mAssetRegistry);
-  ScriptSerializer::deserialize(node, mEntityDatabase, entity, mAssetRegistry);
-  TextSerializer::deserialize(node, mEntityDatabase, entity, mAssetRegistry);
+  AudioSerializer::deserialize(node, mEntityDatabase, entity,
+                               mAssetCache.getRegistry());
+  ScriptSerializer::deserialize(node, mEntityDatabase, entity,
+                                mAssetCache.getRegistry());
+  TextSerializer::deserialize(node, mEntityDatabase, entity,
+                              mAssetCache.getRegistry());
   InputMapSerializer::deserialize(node, mEntityDatabase, entity,
-                                  mAssetRegistry);
+                                  mAssetCache.getRegistry());
   UICanvasSerializer::deserialize(node, mEntityDatabase, entity);
 
   return Ok();

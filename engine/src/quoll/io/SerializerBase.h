@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/yaml/Yaml.h"
 

@@ -776,8 +776,8 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                           entityDatabase.get<PerspectiveLens>(camera));
 
   frameData.setDefaultMaterial(
-      mAssetRegistry.get(mAssetRegistry.getDefaultObjects().defaultMaterial)
-          .deviceHandle->getAddress());
+      mAssetRegistry.getDefaultObjects()
+          .defaultMaterial->deviceHandle->getAddress());
 
   for (auto [entity, sprite, world] :
        entityDatabase.view<Sprite, WorldTransform>()) {
@@ -792,8 +792,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
-      materials.push_back(
-          mAssetRegistry.get(material).deviceHandle->getAddress());
+      materials.push_back(material->deviceHandle->getAddress());
     }
 
     frameData.addMesh(mesh.handle, entity, world.worldTransform, materials);
@@ -807,8 +806,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
-      materials.push_back(
-          mAssetRegistry.get(material).deviceHandle->getAddress());
+      materials.push_back(material->deviceHandle->getAddress());
     }
 
     frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,

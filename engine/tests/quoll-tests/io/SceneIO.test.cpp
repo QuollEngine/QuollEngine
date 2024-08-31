@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Id.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/io/EntitySerializer.h"
 #include "quoll/io/SceneIO.h"
@@ -18,7 +18,7 @@ const quoll::Path ScenePath =
 class SceneIOTest : public ::testing::Test {
 
 public:
-  SceneIOTest() : sceneIO(assetRegistry, scene) {}
+  SceneIOTest() : sceneIO(assetCache, scene), assetCache("/") {}
 
   void SetUp() override {
     TearDown();
@@ -75,15 +75,15 @@ public:
     asset.name = "Scene";
     asset.data.data = root;
 
-    return assetRegistry.add(asset);
+    return assetCache.getRegistry().add(asset);
   }
 
   YAML::Node getSceneYaml(quoll::AssetHandle<quoll::SceneAsset> handle) {
-    return assetRegistry.get(handle).data;
+    return assetCache.getRegistry().get(handle).data;
   }
 
 public:
-  quoll::AssetRegistry assetRegistry;
+  quoll::AssetCache assetCache;
   quoll::Scene scene;
   quoll::SceneIO sceneIO;
 };
@@ -207,7 +207,7 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
     scene.entityDatabase.set<quoll::Id>(entity, {3});
     scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
 
-    quoll::detail::EntitySerializer serializer(assetRegistry,
+    quoll::detail::EntitySerializer serializer(assetCache.getRegistry(),
                                                scene.entityDatabase);
 
     auto entityNode = serializer.serialize(entity);

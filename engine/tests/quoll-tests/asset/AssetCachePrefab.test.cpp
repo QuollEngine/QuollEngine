@@ -68,12 +68,12 @@ public:
       asset.data.pointLights.push_back({i, light});
     }
 
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials(
-        numMaterials);
+    std::vector<quoll::AssetRef<quoll::MaterialAsset>> materials(numMaterials);
     for (u32 i = 0; i < numMaterials; ++i) {
       quoll::AssetData<quoll::MaterialAsset> material;
-      material.uuid = quoll::Uuid("material-" + std::to_string(i));
-      materials.at(i) = cache.getRegistry().add(material);
+      material.uuid = quoll::Uuid::generate();
+      cache.getRegistry().add(material);
+      materials.at(i) = cache.request<quoll::MaterialAsset>(material.uuid);
     }
 
     for (u32 i = 0; i < numMeshes; ++i) {
@@ -342,10 +342,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
 
       for (usize mi = 0; mi < materialIndices.size(); ++mi) {
         auto materialIndex = materialIndices.at(mi);
-        auto handle = expected.materials.at(mi);
-
-        auto uuid = actualMaterials.at(materialIndex);
-        EXPECT_EQ(uuid, cache.getRegistry().getMeta(handle).uuid);
+        auto expectedMaterial = expected.materials.at(mi).meta().uuid;
+        EXPECT_EQ(expectedMaterial, actualMaterials.at(materialIndex));
       }
     }
   }
@@ -371,10 +369,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
 
       for (usize mi = 0; mi < materialIndices.size(); ++mi) {
         auto materialIndex = materialIndices.at(mi);
-        auto handle = expected.materials.at(mi);
-
-        auto uuid = actualMaterials.at(materialIndex);
-        EXPECT_EQ(uuid, cache.getRegistry().getMeta(handle).uuid);
+        auto expectedMaterial = expected.materials.at(mi).meta().uuid;
+        EXPECT_EQ(expectedMaterial, actualMaterials.at(materialIndex));
       }
     }
   }

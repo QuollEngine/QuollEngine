@@ -12,7 +12,9 @@ void AssetRegistry::createDefaultObjects() {
   auto mesh = default_objects::createCube();
   mDefaultObjects.cube = mMeshes.addAsset(mesh);
   mDefaultObjects.defaultMaterial =
-      mMaterials.addAsset(default_objects::createDefaultMaterial());
+      AssetRef(&mMaterials,
+               mMaterials.addAsset(default_objects::createDefaultMaterial()));
+
   mDefaultObjects.defaultFont =
       mFonts.addAsset(default_objects::createDefaultFont());
 }

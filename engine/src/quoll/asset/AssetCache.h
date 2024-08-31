@@ -189,7 +189,6 @@ public:
 
   Path getPathFromUuid(const Uuid &uuid) const;
 
-private:
   template <typename TAssetData> static constexpr AssetType getAssetType() {
     if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
       return AssetType::Texture;
@@ -220,6 +219,7 @@ private:
     }
   }
 
+private:
   Result<TextureAsset> loadTexture(const Path &path);
   Result<void> createTextureFromData(const TextureAsset &data,
                                      const Path &assetPath);

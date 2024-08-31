@@ -4,7 +4,7 @@
 #include "quoll/core/Name.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/animation/AnimatorEvent.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/audio/AudioSource.h"
 #include "quoll/audio/AudioStart.h"
 #include "quoll/audio/AudioStatus.h"
@@ -43,7 +43,8 @@
 
 class SceneLoaderTest : public ::testing::Test {
 public:
-  SceneLoaderTest() : sceneLoader(assetRegistry, entityDatabase) {}
+  SceneLoaderTest()
+      : sceneLoader(assetCache, entityDatabase), assetCache("/") {}
 
   std::pair<YAML::Node, quoll::Entity> createNode(bool create = true) {
     auto id = lastId++;
@@ -63,8 +64,20 @@ public:
     return {node, quoll::Entity::Null};
   }
 
+  template <typename TAssetData>
+  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
+    quoll::AssetData<TAssetData> info{};
+    info.type = quoll::AssetCache::getAssetType<TAssetData>();
+    info.uuid = quoll::Uuid::generate();
+    info.data = data;
+
+    assetCache.getRegistry().add(info);
+
+    return assetCache.request<TAssetData>(info.uuid).data();
+  }
+
 public:
-  quoll::AssetRegistry assetRegistry;
+  quoll::AssetCache assetCache;
   quoll::EntityDatabase entityDatabase;
   quoll::detail::EntityIdCache entityIdCache;
   quoll::detail::SceneLoader sceneLoader;
@@ -252,16 +265,14 @@ TEST_F(SceneLoaderSpriteTest,
 }
 
 TEST_F(SceneLoaderSpriteTest, CreatesSpriteComponentWithFileDataIfValidField) {
-  quoll::AssetData<quoll::TextureAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  auto texture = createAsset<quoll::TextureAsset>();
 
   auto [node, entity] = createNode();
-  node["sprite"] = data.uuid;
+  node["sprite"] = texture.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Sprite>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(entity).handle, handle);
+  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(entity).handle, texture.handle());
 }
 
 using SceneLoaderMeshTest = SceneLoaderTest;
@@ -289,11 +300,6 @@ TEST_F(SceneLoaderMeshTest, DoesNotCreateMeshComponentIfMeshFieldIsInvalid) {
 
 TEST_F(SceneLoaderMeshTest,
        DoesNotCreateMeshComponentIfNoMeshHandleInRegistry) {
-  quoll::AssetData<quoll::MeshAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  data.type = quoll::AssetType::Mesh;
-  auto handle = assetRegistry.add(data);
-
   auto [node, entity] = createNode();
   node["mesh"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache);
@@ -302,32 +308,26 @@ TEST_F(SceneLoaderMeshTest,
 }
 
 TEST_F(SceneLoaderMeshTest, CreatesMeshComponentIfValidAssetTypeIsMesh) {
-  quoll::AssetData<quoll::MeshAsset> data{};
-  data.type = quoll::AssetType::Mesh;
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  auto mesh1 = createAsset<quoll::MeshAsset>();
 
   auto [node, entity] = createNode();
-  node["mesh"] = data.uuid;
+  node["mesh"] = mesh1.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Mesh>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).handle, handle);
+  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).handle, mesh1.handle());
 }
 
 TEST_F(SceneLoaderMeshTest,
        CreatesSkinnedMeshComponentIfValidAssetTypeIsSkinnedMesh) {
-  quoll::AssetData<quoll::MeshAsset> data{};
-  data.type = quoll::AssetType::Mesh;
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  auto mesh1 = createAsset<quoll::MeshAsset>();
 
   auto [node, entity] = createNode();
-  node["mesh"] = data.uuid;
+  node["mesh"] = mesh1.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Mesh>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).handle, handle);
+  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).handle, mesh1.handle());
 }
 
 using SceneLoaderMeshRendererTest = SceneLoaderTest;
@@ -353,25 +353,20 @@ TEST_F(SceneLoaderMeshRendererTest, DoesNotCreateComponentIfFieldIsInvalid) {
 }
 
 TEST_F(SceneLoaderMeshRendererTest, CreatesComponentWithMaterialsIfValid) {
-  quoll::AssetData<quoll::MaterialAsset> material1{};
-  material1.uuid = quoll::Uuid("material1");
-  auto handle1 = assetRegistry.add(material1);
-
-  quoll::AssetData<quoll::MaterialAsset> material2{};
-  material2.uuid = quoll::Uuid("material2");
-  auto handle2 = assetRegistry.add(material2);
+  auto material1 = createAsset<quoll::MaterialAsset>();
+  auto material2 = createAsset<quoll::MaterialAsset>();
 
   auto [node, entity] = createNode();
-  node["meshRenderer"]["materials"].push_back("material1");
-  node["meshRenderer"]["materials"].push_back("material2");
+  node["meshRenderer"]["materials"].push_back(material1.meta().uuid);
+  node["meshRenderer"]["materials"].push_back(material2.meta().uuid);
 
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   EXPECT_TRUE(entityDatabase.has<quoll::MeshRenderer>(entity));
   const auto &renderer = entityDatabase.get<quoll::MeshRenderer>(entity);
   EXPECT_EQ(renderer.materials.size(), 2);
-  EXPECT_EQ(renderer.materials.at(0), handle1);
-  EXPECT_EQ(renderer.materials.at(1), handle2);
+  EXPECT_EQ(renderer.materials.at(0).handle(), material1.handle());
+  EXPECT_EQ(renderer.materials.at(1).handle(), material2.handle());
 }
 
 TEST_F(SceneLoaderMeshRendererTest,
@@ -380,13 +375,11 @@ TEST_F(SceneLoaderMeshRendererTest,
       YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
       YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
 
-  quoll::AssetData<quoll::MaterialAsset> material1{};
-  material1.uuid = quoll::Uuid("material1");
-  auto handle1 = assetRegistry.add(material1);
+  auto material1 = createAsset<quoll::MaterialAsset>();
 
   auto [node, entity] = createNode();
   // Valid node
-  node["meshRenderer"]["materials"].push_back("material1");
+  node["meshRenderer"]["materials"].push_back(material1.meta().uuid);
 
   // Non-existent node
   node["meshRenderer"]["materials"].push_back("material25");
@@ -401,7 +394,7 @@ TEST_F(SceneLoaderMeshRendererTest,
   EXPECT_TRUE(entityDatabase.has<quoll::MeshRenderer>(entity));
   const auto &renderer = entityDatabase.get<quoll::MeshRenderer>(entity);
   EXPECT_EQ(renderer.materials.size(), 1);
-  EXPECT_EQ(renderer.materials.at(0), handle1);
+  EXPECT_EQ(renderer.materials.at(0).handle(), material1.handle());
 }
 
 TEST_F(SceneLoaderMeshRendererTest, CreatesComponentWithNoMaterials) {
@@ -453,25 +446,20 @@ TEST_F(SceneLoaderSkinnedMeshRendererTest,
 
 TEST_F(SceneLoaderSkinnedMeshRendererTest,
        CreatesComponentWithMaterialsIfValid) {
-  quoll::AssetData<quoll::MaterialAsset> material1{};
-  material1.uuid = quoll::Uuid("material1");
-  auto handle1 = assetRegistry.add(material1);
-
-  quoll::AssetData<quoll::MaterialAsset> material2{};
-  material2.uuid = quoll::Uuid("material2");
-  auto handle2 = assetRegistry.add(material2);
+  auto material1 = createAsset<quoll::MaterialAsset>();
+  auto material2 = createAsset<quoll::MaterialAsset>();
 
   auto [node, entity] = createNode();
-  node["skinnedMeshRenderer"]["materials"].push_back("material1");
-  node["skinnedMeshRenderer"]["materials"].push_back("material2");
+  node["skinnedMeshRenderer"]["materials"].push_back(material1.meta().uuid);
+  node["skinnedMeshRenderer"]["materials"].push_back(material2.meta().uuid);
 
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   EXPECT_TRUE(entityDatabase.has<quoll::SkinnedMeshRenderer>(entity));
   const auto &renderer = entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
   EXPECT_EQ(renderer.materials.size(), 2);
-  EXPECT_EQ(renderer.materials.at(0), handle1);
-  EXPECT_EQ(renderer.materials.at(1), handle2);
+  EXPECT_EQ(renderer.materials.at(0).handle(), material1.handle());
+  EXPECT_EQ(renderer.materials.at(1).handle(), material2.handle());
 }
 
 TEST_F(SceneLoaderSkinnedMeshRendererTest,
@@ -480,13 +468,11 @@ TEST_F(SceneLoaderSkinnedMeshRendererTest,
       YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
       YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
 
-  quoll::AssetData<quoll::MaterialAsset> material1{};
-  material1.uuid = quoll::Uuid("material1");
-  auto handle1 = assetRegistry.add(material1);
+  auto material1 = createAsset<quoll::MaterialAsset>();
 
   auto [node, entity] = createNode();
   // Valid node
-  node["skinnedMeshRenderer"]["materials"].push_back("material1");
+  node["skinnedMeshRenderer"]["materials"].push_back(material1.meta().uuid);
 
   // Non-existent node
   node["skinnedMeshRenderer"]["materials"].push_back("material25");
@@ -501,7 +487,7 @@ TEST_F(SceneLoaderSkinnedMeshRendererTest,
   EXPECT_TRUE(entityDatabase.has<quoll::SkinnedMeshRenderer>(entity));
   const auto &renderer = entityDatabase.get<quoll::SkinnedMeshRenderer>(entity);
   EXPECT_EQ(renderer.materials.size(), 1);
-  EXPECT_EQ(renderer.materials.at(0), handle1);
+  EXPECT_EQ(renderer.materials.at(0).handle(), material1.handle());
 }
 
 TEST_F(SceneLoaderSkinnedMeshRendererTest, CreatesComponentWithNoMaterials) {
@@ -555,11 +541,6 @@ TEST_F(SceneLoaderSkeletonTest,
 
 TEST_F(SceneLoaderSkeletonTest,
        DoesNotCreateSkeletonComponentIfNoSkeletonHandleInRegistry) {
-  quoll::AssetData<quoll::SkeletonAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-
-  auto handle = assetRegistry.add(data);
-
   auto [node, entity] = createNode();
   node["skeleton"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache);
@@ -584,8 +565,10 @@ TEST_F(SceneLoaderSkeletonTest,
     data.data.jointNames.push_back("J" + std::to_string(i));
   }
 
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  data.uuid = quoll::Uuid::generate();
+  assetCache.getRegistry().add(data);
+
+  auto asset = assetCache.request<quoll::SkeletonAsset>(data.uuid).data();
 
   auto [node, entity] = createNode();
   node["skeleton"] = data.uuid;
@@ -594,7 +577,7 @@ TEST_F(SceneLoaderSkeletonTest,
   ASSERT_TRUE(entityDatabase.has<quoll::Skeleton>(entity));
 
   const auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
-  EXPECT_EQ(skeleton.assetHandle, handle);
+  EXPECT_EQ(skeleton.assetHandle, asset.handle());
 
   EXPECT_EQ(skeleton.numJoints, NumJoints);
   for (u32 i = 0; i < NumJoints; ++i) {
@@ -717,22 +700,19 @@ TEST_F(SceneLoaderAnimatorTest,
 }
 
 TEST_F(SceneLoaderAnimatorTest, CreatesAnimatorComponentIfAllFieldsAreValid) {
-  quoll::AssetData<quoll::AnimatorAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  data.data.initialState = 5;
-  auto handle = assetRegistry.add(data);
+  auto animator1 = createAsset<quoll::AnimatorAsset>({.initialState = 5});
 
   auto [node, entity] = createNode();
-  node["animator"]["asset"] = data.uuid;
+  node["animator"]["asset"] = animator1.meta().uuid;
 
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Animator>(entity));
 
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.asset, handle);
-  EXPECT_EQ(animator.currentState, std::numeric_limits<usize>::max());
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  const auto &component = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(component.asset, animator1.handle());
+  EXPECT_EQ(component.currentState, std::numeric_limits<usize>::max());
+  EXPECT_EQ(component.normalizedTime, 0.0f);
 }
 
 using SceneLoaderLightTest = SceneLoaderTest;
@@ -1571,11 +1551,6 @@ TEST_F(SceneLoaderAudioTest,
 
 TEST_F(SceneLoaderAudioTest,
        DoesNotCreateAudioComponentIfNoAudioHandleInRegistry) {
-  quoll::AssetData<quoll::AudioAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-
-  auto handle = assetRegistry.add(data);
-
   auto [node, entity] = createNode();
   node["audio"]["source"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache);
@@ -1584,17 +1559,15 @@ TEST_F(SceneLoaderAudioTest,
 }
 
 TEST_F(SceneLoaderAudioTest, CreatesAudioComponentWithFileDataIfValidField) {
-  quoll::AssetData<quoll::AudioAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-
-  auto handle = assetRegistry.add(data);
+  auto audio = createAsset<quoll::AudioAsset>();
 
   auto [node, entity] = createNode();
-  node["audio"]["source"] = data.uuid;
+  node["audio"]["source"] = audio.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::AudioSource>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::AudioSource>(entity).source, handle);
+  EXPECT_EQ(entityDatabase.get<quoll::AudioSource>(entity).source,
+            audio.handle());
 }
 
 using SceneLoaderScriptTest = SceneLoaderTest;
@@ -1624,11 +1597,6 @@ TEST_F(SceneLoaderScriptTest,
 
 TEST_F(SceneLoaderScriptTest,
        DoesNotCreateScriptComponentIfNoScriptHandleInRegistry) {
-  quoll::AssetData<quoll::LuaScriptAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-
-  auto handle = assetRegistry.add(data);
-
   auto [node, entity] = createNode();
   node["script"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache);
@@ -1638,66 +1606,59 @@ TEST_F(SceneLoaderScriptTest,
 
 TEST_F(SceneLoaderScriptTest,
        CreatesScriptComponentWithFileDataIfStringFieldWithValidPath) {
-  quoll::AssetData<quoll::LuaScriptAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  auto script = createAsset<quoll::LuaScriptAsset>();
 
   auto [node, entity] = createNode();
-  node["script"] = data.uuid;
+  node["script"] = script.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::LuaScript>(entity).handle, handle);
+  EXPECT_EQ(entityDatabase.get<quoll::LuaScript>(entity).handle,
+            script.handle());
 }
 
 TEST_F(SceneLoaderScriptTest,
        CreatesScriptComponentWithFileAndVariablesIfMapWithValidPath) {
-  quoll::AssetData<quoll::LuaScriptAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
-
-  quoll::AssetData<quoll::PrefabAsset> prefabData{};
-  prefabData.uuid = quoll::Uuid("my-prefab");
-  auto prefabHandle = assetRegistry.add(prefabData);
-
-  quoll::AssetData<quoll::TextureAsset> textureData{};
-  textureData.uuid = quoll::Uuid("my-texture");
-  auto textureHandle = assetRegistry.add(textureData);
+  auto script = createAsset<quoll::LuaScriptAsset>();
+  auto prefab = createAsset<quoll::PrefabAsset>();
+  auto texture = createAsset<quoll::TextureAsset>();
 
   auto [node, entity] = createNode();
-  node["script"]["asset"] = data.uuid;
+  node["script"]["asset"] = script.meta().uuid;
   node["script"]["variables"]["test_str"]["type"] = "string";
   node["script"]["variables"]["test_str"]["value"] = "Test string";
 
   node["script"]["variables"]["test_valid_prefab"]["type"] = "prefab";
-  node["script"]["variables"]["test_valid_prefab"]["value"] = prefabData.uuid;
+  node["script"]["variables"]["test_valid_prefab"]["value"] =
+      prefab.meta().uuid;
   node["script"]["variables"]["test_invalid_prefab"]["type"] = "prefab";
   node["script"]["variables"]["test_invalid_prefab"]["value"] =
       "unknown-prefab-file.prefab";
 
   node["script"]["variables"]["test_valid_texture"]["type"] = "texture";
-  node["script"]["variables"]["test_valid_texture"]["value"] = textureData.uuid;
+  node["script"]["variables"]["test_valid_texture"]["value"] =
+      texture.meta().uuid;
 
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
-  const auto &script = entityDatabase.get<quoll::LuaScript>(entity);
+  const auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  EXPECT_EQ(script.handle, handle);
+  EXPECT_EQ(component.handle, script.handle());
 
   // Invalid prefab and texture are ignored
-  EXPECT_FALSE(script.variables.contains("test_invalid_prefab"));
-  EXPECT_FALSE(script.variables.contains("test_invalid_texture"));
+  EXPECT_FALSE(component.variables.contains("test_invalid_prefab"));
+  EXPECT_FALSE(component.variables.contains("test_invalid_texture"));
 
-  EXPECT_EQ(script.variables.at("test_str").get<quoll::String>(),
+  EXPECT_EQ(component.variables.at("test_str").get<quoll::String>(),
             "Test string");
-  EXPECT_EQ(script.variables.at("test_valid_prefab")
+  EXPECT_EQ(component.variables.at("test_valid_prefab")
                 .get<quoll::AssetHandle<quoll::PrefabAsset>>(),
-            prefabHandle);
+            prefab.handle());
 
-  EXPECT_EQ(script.variables.at("test_valid_texture")
+  EXPECT_EQ(component.variables.at("test_valid_texture")
                 .get<quoll::AssetHandle<quoll::TextureAsset>>(),
-            textureHandle);
+            texture.handle());
 }
 
 using SceneLoaderTextTest = SceneLoaderTest;
@@ -1737,10 +1698,6 @@ TEST_F(SceneLoaderTextTest, DoesNotCreateTextComponentIfTextFontIsInvalid) {
 
 TEST_F(SceneLoaderScriptTest,
        DoesNotCreateTextComponentIfNoFontHandleInRegistry) {
-  quoll::AssetData<quoll::FontAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
-
   auto [node, entity] = createNode();
   node["text"]["font"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache);
@@ -1755,9 +1712,7 @@ TEST_F(SceneLoaderScriptTest,
       YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
       YAML::Node(YAML::NodeType::Scalar)};
 
-  quoll::AssetData<quoll::FontAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  auto font = createAsset<quoll::FontAsset>();
 
   quoll::Text defaults{};
 
@@ -1768,7 +1723,7 @@ TEST_F(SceneLoaderScriptTest,
     auto [node, entity] = createNode();
     node["text"]["lineHeight"] = invalidNode;
     node["text"]["content"] = validContent;
-    node["text"]["font"] = data.uuid;
+    node["text"]["font"] = font.meta().uuid;
 
     sceneLoader.loadComponents(node, entity, entityIdCache);
     ASSERT_TRUE(entityDatabase.has<quoll::Text>(entity));
@@ -1782,7 +1737,7 @@ TEST_F(SceneLoaderScriptTest,
     auto [node, entity] = createNode();
     node["text"]["lineHeight"] = validLineHeight;
     node["text"]["content"] = invalidNode;
-    node["text"]["font"] = data.uuid;
+    node["text"]["font"] = font.meta().uuid;
 
     sceneLoader.loadComponents(node, entity, entityIdCache);
     ASSERT_TRUE(entityDatabase.has<quoll::Text>(entity));
@@ -1799,9 +1754,7 @@ TEST_F(SceneLoaderTextTest, CreatesTextComponentWithFileDataIfValidField) {
       YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
       YAML::Node(YAML::NodeType::Scalar)};
 
-  quoll::AssetData<quoll::FontAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  auto font = createAsset<quoll::FontAsset>();
 
   quoll::Text defaults{};
 
@@ -1811,7 +1764,7 @@ TEST_F(SceneLoaderTextTest, CreatesTextComponentWithFileDataIfValidField) {
   auto [node, entity] = createNode();
   node["text"]["lineHeight"] = validLineHeight;
   node["text"]["content"] = validContent;
-  node["text"]["font"] = data.uuid;
+  node["text"]["font"] = font.meta().uuid;
 
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
@@ -1820,7 +1773,7 @@ TEST_F(SceneLoaderTextTest, CreatesTextComponentWithFileDataIfValidField) {
 
   EXPECT_EQ(text.content, validContent);
   EXPECT_EQ(text.lineHeight, validLineHeight);
-  EXPECT_EQ(text.font, handle);
+  EXPECT_EQ(text.font, font.handle());
 }
 
 using SceneLoaderRigidBodyTest = SceneLoaderTest;
@@ -2584,19 +2537,16 @@ TEST_F(SceneLoaderSkyboxTest,
 
 TEST_F(SceneLoaderSkyboxTest,
        AddsTextureSkyboxIfTypeIsTextureAndTextureExists) {
-  quoll::AssetData<quoll::EnvironmentAsset> data{};
-  data.uuid = quoll::Uuid("test-uuid.uuid");
-
-  auto handle = assetRegistry.add(data);
+  auto environment = createAsset<quoll::EnvironmentAsset>();
 
   auto [node, entity] = createNode();
   node["skybox"]["type"] = "texture";
-  node["skybox"]["texture"] = "test-uuid.uuid";
+  node["skybox"]["texture"] = environment.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
   ASSERT_TRUE(entityDatabase.has<quoll::EnvironmentSkybox>(entity));
   const auto &component = entityDatabase.get<quoll::EnvironmentSkybox>(entity);
   EXPECT_EQ(component.type, quoll::EnvironmentSkyboxType::Texture);
-  EXPECT_EQ(component.texture, handle);
+  EXPECT_EQ(component.texture, environment.handle());
 }
 
 TEST_F(SceneLoaderSkyboxTest,
@@ -2636,11 +2586,6 @@ TEST_F(SceneLoaderSkyboxTest,
 }
 
 TEST_F(SceneLoaderSkyboxTest, AddsColorSkyboxIfTypeIsColorAndColorIsDefined) {
-  quoll::AssetData<quoll::EnvironmentAsset> data{};
-  data.uuid = quoll::Uuid("test-uuid.uuid");
-
-  auto handle = assetRegistry.add(data);
-
   auto [node, entity] = createNode();
   node["skybox"]["type"] = "color";
   node["skybox"]["color"] = glm::vec4(0.4f, 0.2f, 0.5f, 0.2f);
@@ -2780,11 +2725,6 @@ TEST_F(SceneLoaderInputMapTest,
 
 TEST_F(SceneLoaderInputMapTest,
        DoesNotCreateInputMapComponentIfNoInputMapHandleInRegistry) {
-  quoll::AssetData<quoll::InputMapAsset> data{};
-  data.uuid = quoll::Uuid("hello");
-  data.type = quoll::AssetType::InputMap;
-  auto handle = assetRegistry.add(data);
-
   auto [node, entity] = createNode();
   node["inputMap"]["asset"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache);
@@ -2793,27 +2733,22 @@ TEST_F(SceneLoaderInputMapTest,
 }
 
 TEST_F(SceneLoaderInputMapTest, CreatesInputMapComponentIfInputMapAssetExists) {
-  quoll::AssetData<quoll::InputMapAsset> data{};
-  data.type = quoll::AssetType::InputMap;
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  auto inputMap = createAsset<quoll::InputMapAsset>();
 
   auto [node, entity] = createNode();
-  node["inputMap"]["asset"] = data.uuid;
+  node["inputMap"]["asset"] = inputMap.meta().uuid;
   node["inputMap"]["defaultScheme"] = 1;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).handle, handle);
+  EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).handle,
+            inputMap.handle());
   EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).defaultScheme,
             1);
 }
 
 TEST_F(SceneLoaderInputMapTest, SetsInputMapDefaultSchemeToZeroIfInvalidField) {
-  quoll::AssetData<quoll::InputMapAsset> data{};
-  data.type = quoll::AssetType::InputMap;
-  data.uuid = quoll::Uuid("hello");
-  auto handle = assetRegistry.add(data);
+  auto inputMap = createAsset<quoll::InputMapAsset>();
 
   std::vector<YAML::Node> invalidNodes{
       YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
@@ -2822,7 +2757,7 @@ TEST_F(SceneLoaderInputMapTest, SetsInputMapDefaultSchemeToZeroIfInvalidField) {
 
   for (auto invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
-    node["inputMap"]["asset"] = data.uuid;
+    node["inputMap"]["asset"] = inputMap.meta().uuid;
     node["inputMap"]["defaultScheme"] = invalidNode;
     sceneLoader.loadComponents(node, entity, entityIdCache);
 

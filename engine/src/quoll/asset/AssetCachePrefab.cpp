@@ -26,22 +26,22 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
 
     for (auto &component : data.meshRenderers) {
       for (auto material : component.value.materials) {
-        if (localMaterialMap.find(material) == localMaterialMap.end()) {
-          auto uuid = mRegistry.getMeta(material).uuid;
+        if (localMaterialMap.find(material.handle()) ==
+            localMaterialMap.end()) {
           localMaterialMap.insert_or_assign(
-              material, static_cast<u32>(assetPaths.size()));
-          assetPaths.push_back(uuid);
+              material.handle(), static_cast<u32>(assetPaths.size()));
+          assetPaths.push_back(material.meta().uuid);
         }
       }
     }
 
     for (auto &component : data.skinnedMeshRenderers) {
       for (auto material : component.value.materials) {
-        if (localMaterialMap.find(material) == localMaterialMap.end()) {
-          auto uuid = mRegistry.getMeta(material).uuid;
+        if (localMaterialMap.find(material.handle()) ==
+            localMaterialMap.end()) {
           localMaterialMap.insert_or_assign(
-              material, static_cast<u32>(assetPaths.size()));
-          assetPaths.push_back(uuid);
+              material.handle(), static_cast<u32>(assetPaths.size()));
+          assetPaths.push_back(material.meta().uuid);
         }
       }
     }
@@ -163,8 +163,8 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
       file.write(component.entity);
 
       file.write(static_cast<u32>(component.value.materials.size()));
-      for (auto handle : component.value.materials) {
-        file.write(localMaterialMap.at(handle));
+      for (auto material : component.value.materials) {
+        file.write(localMaterialMap.at(material.handle()));
       }
     }
   }
@@ -176,8 +176,8 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
       file.write(component.entity);
 
       file.write(static_cast<u32>(component.value.materials.size()));
-      for (auto handle : component.value.materials) {
-        file.write(localMaterialMap.at(handle));
+      for (auto material : component.value.materials) {
+        file.write(localMaterialMap.at(material.handle()));
       }
     }
   }
@@ -249,19 +249,19 @@ Result<PrefabAsset> AssetCache::loadPrefab(const Path &path) {
 
   PrefabAsset prefab{};
 
-  std::vector<AssetHandle<MaterialAsset>> localMaterialMap;
+  std::vector<AssetRef<MaterialAsset>> localMaterialMap;
   {
     u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localMaterialMap.resize(numAssets, AssetHandle<MaterialAsset>());
+    localMaterialMap.resize(numAssets);
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       auto res = request<MaterialAsset>(assetUuid);
       if (res) {
-        localMaterialMap.at(i) = res.data().handle();
+        localMaterialMap.at(i) = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {

@@ -37,8 +37,7 @@ TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -61,8 +60,7 @@ TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -92,8 +90,7 @@ TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -109,8 +106,7 @@ TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -125,8 +121,7 @@ TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -145,8 +140,7 @@ TEST_F(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -170,8 +164,7 @@ TEST_F(EntityAddSkinnedMeshRendererMaterialSlotActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -229,8 +222,7 @@ TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -252,8 +244,7 @@ TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   {
-    std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-        mat1.handle(), mat2.handle()};
+    std::vector materials{mat1, mat2};
     quoll::SkinnedMeshRenderer renderer{materials};
     state.scene.entityDatabase.set(entity, renderer);
   }
@@ -293,8 +284,7 @@ TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
        PredicateReturnsTrueIfSkinnedMeshRendererHasMaterials) {
   auto entity = state.scene.entityDatabase.create();
 
-  std::vector<quoll::AssetHandle<quoll::MaterialAsset>> materials{
-      mat1.handle()};
+  std::vector materials{mat1};
   quoll::SkinnedMeshRenderer renderer{materials};
   state.scene.entityDatabase.set(entity, renderer);
 

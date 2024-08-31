@@ -24,7 +24,6 @@ void MeshSerializer::deserialize(const YAML::Node &node,
     auto handle = assetRegistry.findHandleByUuid<MeshAsset>(uuid);
 
     if (handle) {
-      auto type = assetRegistry.getMeta(handle).type;
       entityDatabase.set<Mesh>(entity, {handle});
     }
   }

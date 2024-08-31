@@ -101,7 +101,7 @@ void Runtime::start() {
     return;
   }
 
-  SceneIO sceneIO(assetCache.getRegistry(), scene);
+  SceneIO sceneIO(assetCache, scene);
   sceneIO.loadScene(handle);
 
   auto systemView = engineModules.createSystemView(scene);

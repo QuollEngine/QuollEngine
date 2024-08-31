@@ -4,7 +4,7 @@
 #include "quoll/core/Name.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/animation/AnimatorEvent.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/audio/AudioSource.h"
 #include "quoll/audio/AudioStart.h"
 #include "quoll/audio/AudioStatus.h"
@@ -44,10 +44,24 @@
 
 class EntitySerializerTest : public ::testing::Test {
 public:
-  EntitySerializerTest() : entitySerializer(assetRegistry, entityDatabase) {}
+  EntitySerializerTest()
+      : entitySerializer(assetCache.getRegistry(), entityDatabase),
+        assetCache("/") {}
+
+  template <typename TAssetData>
+  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
+    quoll::AssetData<TAssetData> info{};
+    info.type = quoll::AssetCache::getAssetType<TAssetData>();
+    info.uuid = quoll::Uuid::generate();
+    info.data = data;
+
+    assetCache.getRegistry().add(info);
+
+    return assetCache.request<TAssetData>(info.uuid).data();
+  }
 
 public:
-  quoll::AssetRegistry assetRegistry;
+  quoll::AssetCache assetCache;
   quoll::EntityDatabase entityDatabase;
   quoll::detail::EntitySerializer entitySerializer;
 };
@@ -174,16 +188,14 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
-  quoll::AssetData<quoll::TextureAsset> texture{};
-  texture.uuid = quoll::Uuid("texture.tex");
-  auto handle = assetRegistry.add(texture);
+  auto texture = createAsset<quoll::TextureAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Sprite>(entity, {handle});
+  entityDatabase.set<quoll::Sprite>(entity, {texture.handle()});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["sprite"]);
-  EXPECT_EQ(node["sprite"].as<quoll::String>(""), "texture.tex");
+  EXPECT_EQ(node["sprite"].as<quoll::Uuid>(), texture.meta().uuid);
 }
 
 // Mesh
@@ -206,17 +218,14 @@ TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
 }
 
 TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
-  quoll::AssetData<quoll::MeshAsset> mesh{};
-  mesh.uuid = quoll::Uuid("mesh.asset");
-
-  auto handle = assetRegistry.add(mesh);
+  auto mesh = createAsset<quoll::MeshAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Mesh>(entity, {handle});
+  entityDatabase.set<quoll::Mesh>(entity, {mesh.handle()});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["mesh"]);
-  EXPECT_EQ(node["mesh"].as<quoll::String>(""), "mesh.asset");
+  EXPECT_EQ(node["mesh"].as<quoll::Uuid>(quoll::Uuid{}), mesh.meta().uuid);
 }
 
 // Mesh renderer
@@ -228,44 +237,37 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesMeshRendererFieldWithMaterials) {
-  quoll::AssetData<quoll::MaterialAsset> material1{};
-  material1.uuid = quoll::Uuid("material1.asset");
-
-  quoll::AssetData<quoll::MaterialAsset> material2{};
-  material2.uuid = quoll::Uuid("material2.asset");
-
-  auto handle1 = assetRegistry.add(material1);
-  auto handle2 = assetRegistry.add(material2);
+  auto material1 = createAsset<quoll::MaterialAsset>();
+  auto material2 = createAsset<quoll::MaterialAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::MeshRenderer>(entity, {{handle1, handle2}});
+  entityDatabase.set<quoll::MeshRenderer>(entity, {{material1, material2}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["meshRenderer"]);
   EXPECT_TRUE(node["meshRenderer"]["materials"]);
   EXPECT_EQ(node["meshRenderer"]["materials"].size(), 2);
-  EXPECT_EQ(node["meshRenderer"]["materials"][0].as<quoll::String>(""),
-            "material1.asset");
-  EXPECT_EQ(node["meshRenderer"]["materials"][1].as<quoll::String>(""),
-            "material2.asset");
+  EXPECT_EQ(node["meshRenderer"]["materials"][0].as<quoll::Uuid>(quoll::Uuid{}),
+            material1.meta().uuid);
+  EXPECT_EQ(node["meshRenderer"]["materials"][1].as<quoll::Uuid>(quoll::Uuid{}),
+            material2.meta().uuid);
 }
 
 TEST_F(EntitySerializerTest,
        CreatesMeshRendererAndIgnoresNonExistentMaterials) {
-  quoll::AssetData<quoll::MaterialAsset> material1{};
-  material1.uuid = quoll::Uuid("material1.asset");
-  auto handle1 = assetRegistry.add(material1);
+
+  auto material1 = createAsset<quoll::MaterialAsset>();
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::MeshRenderer>(
-      entity, {{handle1, quoll::AssetHandle<quoll::MaterialAsset>{25}}});
+      entity, {{material1, quoll::AssetRef<quoll::MaterialAsset>()}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["meshRenderer"]);
   EXPECT_TRUE(node["meshRenderer"]["materials"]);
   EXPECT_EQ(node["meshRenderer"]["materials"].size(), 1);
-  EXPECT_EQ(node["meshRenderer"]["materials"][0].as<quoll::String>(""),
-            "material1.asset");
+  EXPECT_EQ(node["meshRenderer"]["materials"][0].as<quoll::Uuid>(quoll::Uuid{}),
+            material1.meta().uuid);
 }
 
 TEST_F(EntitySerializerTest, CreatesMeshRendererWithNoMaterials) {
@@ -288,44 +290,40 @@ TEST_F(
 }
 
 TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererFieldWithMaterials) {
-  quoll::AssetData<quoll::MaterialAsset> material1{};
-  material1.uuid = quoll::Uuid("material1.asset");
-
-  quoll::AssetData<quoll::MaterialAsset> material2{};
-  material2.uuid = quoll::Uuid("material2.asset");
-
-  auto handle1 = assetRegistry.add(material1);
-  auto handle2 = assetRegistry.add(material2);
+  auto material1 = createAsset<quoll::MaterialAsset>();
+  auto material2 = createAsset<quoll::MaterialAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::SkinnedMeshRenderer>(entity, {{handle1, handle2}});
+  entityDatabase.set<quoll::SkinnedMeshRenderer>(entity,
+                                                 {{material1, material2}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMeshRenderer"]);
   EXPECT_TRUE(node["skinnedMeshRenderer"]["materials"]);
   EXPECT_EQ(node["skinnedMeshRenderer"]["materials"].size(), 2);
-  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][0].as<quoll::String>(""),
-            "material1.asset");
-  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][1].as<quoll::String>(""),
-            "material2.asset");
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][0].as<quoll::Uuid>(
+                quoll::Uuid{}),
+            material1.meta().uuid);
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][1].as<quoll::Uuid>(
+                quoll::Uuid{}),
+            material2.meta().uuid);
 }
 
 TEST_F(EntitySerializerTest,
        CreatesSkinnedMeshRendererAndIgnoresNonExistentMaterials) {
-  quoll::AssetData<quoll::MaterialAsset> material1{};
-  material1.uuid = quoll::Uuid("material1.asset");
-  auto handle1 = assetRegistry.add(material1);
+  auto material1 = createAsset<quoll::MaterialAsset>();
 
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::SkinnedMeshRenderer>(
-      entity, {{handle1, quoll::AssetHandle<quoll::MaterialAsset>{25}}});
+      entity, {{material1, quoll::AssetRef<quoll::MaterialAsset>()}});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMeshRenderer"]);
   EXPECT_TRUE(node["skinnedMeshRenderer"]["materials"]);
   EXPECT_EQ(node["skinnedMeshRenderer"]["materials"].size(), 1);
-  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][0].as<quoll::String>(""),
-            "material1.asset");
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][0].as<quoll::Uuid>(
+                quoll::Uuid{}),
+            material1.meta().uuid);
 }
 
 TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererWithNoMaterials) {
@@ -361,19 +359,18 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
-  quoll::AssetData<quoll::SkeletonAsset> skeleton{};
-  skeleton.uuid = quoll::Uuid("skeleton.skel");
-  auto handle = assetRegistry.add(skeleton);
+  auto skeleton = createAsset<quoll::SkeletonAsset>();
 
   auto entity = entityDatabase.create();
   quoll::Skeleton component{};
-  component.assetHandle = handle;
+  component.assetHandle = skeleton.handle();
 
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skeleton"]);
-  EXPECT_EQ(node["skeleton"].as<quoll::String>(), "skeleton.skel");
+  EXPECT_EQ(node["skeleton"].as<quoll::Uuid>(quoll::Uuid{}),
+            skeleton.meta().uuid);
 }
 
 // Joint attachment
@@ -419,12 +416,10 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
-  quoll::AssetData<quoll::AnimatorAsset> animator{};
-  animator.uuid = quoll::Uuid("test.animator");
-  auto handle = assetRegistry.add(animator);
+  auto animator = createAsset<quoll::AnimatorAsset>();
 
   quoll::Animator component{};
-  component.asset = handle;
+  component.asset = animator.handle();
   component.currentState = 0;
 
   auto entity = entityDatabase.create();
@@ -432,7 +427,8 @@ TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["animator"]);
-  EXPECT_EQ(node["animator"]["asset"].as<quoll::String>(), "test.animator");
+  EXPECT_EQ(node["animator"]["asset"].as<quoll::Uuid>(quoll::Uuid{}),
+            animator.meta().uuid);
 }
 
 // Directional light
@@ -606,17 +602,16 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
-  quoll::AssetData<quoll::AudioAsset> audio{};
-  audio.uuid = quoll::Uuid("bark.wav");
-  auto handle = assetRegistry.add(audio);
+  auto audio = createAsset<quoll::AudioAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {handle});
+  entityDatabase.set<quoll::AudioSource>(entity, {audio.handle()});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["audio"]);
   EXPECT_TRUE(node["audio"].IsMap());
-  EXPECT_EQ(node["audio"]["source"].as<quoll::String>(""), "bark.wav");
+  EXPECT_EQ(node["audio"]["source"].as<quoll::Uuid>(quoll::Uuid{}),
+            audio.meta().uuid);
 }
 
 // Script
@@ -640,41 +635,33 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
-  quoll::AssetData<quoll::LuaScriptAsset> script{};
-  script.uuid = quoll::Uuid("script.lua");
-  script.data.variables.insert_or_assign(
-      "test_str",
-      quoll::LuaScriptVariable{quoll::LuaScriptVariableType::String});
-  script.data.variables.insert_or_assign(
-      "test_prefab",
-      quoll::LuaScriptVariable{quoll::LuaScriptVariableType::AssetPrefab});
-  script.data.variables.insert_or_assign(
-      "test_texture",
-      quoll::LuaScriptVariable{quoll::LuaScriptVariableType::AssetTexture});
-  auto handle = assetRegistry.add(script);
+  std::unordered_map<quoll::String, quoll::LuaScriptVariable> variables{
+      {"test_str",
+       quoll::LuaScriptVariable{quoll::LuaScriptVariableType::String}},
+      {"test_prefab",
+       quoll::LuaScriptVariable{quoll::LuaScriptVariableType::AssetPrefab}},
+      {"test_texture",
+       quoll::LuaScriptVariable{quoll::LuaScriptVariableType::AssetTexture}}};
 
-  quoll::AssetData<quoll::PrefabAsset> prefab{};
-  prefab.uuid = quoll::Uuid("test.prefab");
-  auto prefabHandle = assetRegistry.add(prefab);
-
-  quoll::AssetData<quoll::TextureAsset> texture{};
-  texture.uuid = quoll::Uuid("test.ktx2");
-  auto textureHandle = assetRegistry.add(texture);
+  auto script = createAsset<quoll::LuaScriptAsset>({.variables = variables});
+  auto prefab = createAsset<quoll::PrefabAsset>();
+  auto texture = createAsset<quoll::TextureAsset>();
 
   auto entity = entityDatabase.create();
 
-  quoll::LuaScript component{handle};
+  quoll::LuaScript component{script.handle()};
   component.variables.insert_or_assign("test_str",
                                        quoll::String("hello world"));
   component.variables.insert_or_assign("test_str_invalid",
                                        quoll::String("hello world"));
-  component.variables.insert_or_assign("test_prefab", prefabHandle);
-  component.variables.insert_or_assign("test_texture", textureHandle);
+  component.variables.insert_or_assign("test_prefab", prefab.handle());
+  component.variables.insert_or_assign("test_texture", texture.handle());
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["script"]);
-  EXPECT_EQ(node["script"]["asset"].as<quoll::String>(""), "script.lua");
+  EXPECT_EQ(node["script"]["asset"].as<quoll::Uuid>(quoll::Uuid{}),
+            script.meta().uuid);
   EXPECT_TRUE(node["script"]["variables"]);
 
   EXPECT_FALSE(node["script"]["variables"]["test_str_invalid"]);
@@ -688,17 +675,17 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   EXPECT_EQ(
       node["script"]["variables"]["test_prefab"]["type"].as<quoll::String>(""),
       "prefab");
-  EXPECT_EQ(
-      node["script"]["variables"]["test_prefab"]["value"].as<quoll::String>(""),
-      "test.prefab");
+  EXPECT_EQ(node["script"]["variables"]["test_prefab"]["value"].as<quoll::Uuid>(
+                quoll::Uuid{}),
+            prefab.meta().uuid);
 
   EXPECT_EQ(
       node["script"]["variables"]["test_texture"]["type"].as<quoll::String>(""),
       "texture");
   EXPECT_EQ(
-      node["script"]["variables"]["test_texture"]["value"].as<quoll::String>(
-          ""),
-      "test.ktx2");
+      node["script"]["variables"]["test_texture"]["value"].as<quoll::Uuid>(
+          quoll::Uuid{}),
+      texture.meta().uuid);
 }
 
 // Text
@@ -710,14 +697,12 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
-  quoll::AssetData<quoll::FontAsset> font{};
-  font.uuid = quoll::Uuid("Roboto.ttf");
-  auto handle = assetRegistry.add(font);
+  auto font = createAsset<quoll::FontAsset>();
 
   auto entity = entityDatabase.create();
   quoll::Text component{};
   component.content = "";
-  component.font = handle;
+  component.font = font.handle();
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["text"]);
@@ -739,15 +724,13 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
 
 TEST_F(EntitySerializerTest,
        CreatesTextFieldIfTextContentsAreNotEmptyAndFontAssetIsInRegistry) {
-  quoll::AssetData<quoll::FontAsset> font{};
-  font.uuid = quoll::Uuid("Roboto.ttf");
-  auto handle = assetRegistry.add(font);
+  auto font = createAsset<quoll::FontAsset>();
 
   auto entity = entityDatabase.create();
   quoll::Text component{};
   component.content = "Hello world";
   component.lineHeight = 2.0f;
-  component.font = handle;
+  component.font = font.handle();
 
   entityDatabase.set(entity, component);
 
@@ -756,7 +739,8 @@ TEST_F(EntitySerializerTest,
   EXPECT_TRUE(node["text"].IsMap());
   EXPECT_EQ(node["text"]["content"].as<quoll::String>(""), "Hello world");
   EXPECT_EQ(node["text"]["lineHeight"].as<f32>(-1.0f), component.lineHeight);
-  EXPECT_EQ(node["text"]["font"].as<quoll::String>(""), "Roboto.ttf");
+  EXPECT_EQ(node["text"]["font"].as<quoll::Uuid>(quoll::Uuid{}),
+            font.meta().uuid);
 }
 
 // Rigid body
@@ -1026,20 +1010,19 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        CreatesSkyboxWithTextureColorIfTypeIsTextureAndAssetExists) {
-  quoll::AssetData<quoll::EnvironmentAsset> data{};
-  data.uuid = quoll::Uuid("uuid.env");
-  auto handle = assetRegistry.add(data);
+  auto environment = createAsset<quoll::EnvironmentAsset>();
 
   auto entity = entityDatabase.create();
 
   quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Texture,
-                                     handle};
+                                     environment.handle()};
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skybox"]);
   EXPECT_EQ(node["skybox"]["type"].as<quoll::String>(""), "texture");
-  EXPECT_EQ(node["skybox"]["texture"].as<quoll::String>(""), "uuid.env");
+  EXPECT_EQ(node["skybox"]["texture"].as<quoll::Uuid>(quoll::Uuid{}),
+            environment.meta().uuid);
   EXPECT_FALSE(node["skybox"]["color"]);
 }
 
@@ -1101,17 +1084,15 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        CreatesInputMapFieldIfComponentExistsAndAssetIsValid) {
-  quoll::AssetData<quoll::InputMapAsset> asset{};
-  asset.uuid = quoll::Uuid("inputMap.asset");
-
-  auto handle = assetRegistry.add(asset);
+  auto inputMap = createAsset<quoll::InputMapAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::InputMapAssetRef>(entity, {handle, 0});
+  entityDatabase.set<quoll::InputMapAssetRef>(entity, {inputMap.handle(), 0});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["inputMap"]);
-  EXPECT_EQ(node["inputMap"]["asset"].as<quoll::String>(""), "inputMap.asset");
+  EXPECT_EQ(node["inputMap"]["asset"].as<quoll::Uuid>(quoll::Uuid{}),
+            inputMap.meta().uuid);
   EXPECT_EQ(node["inputMap"]["defaultScheme"].as<u32>(999), 0);
 }
 

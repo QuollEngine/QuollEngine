@@ -110,16 +110,24 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     asset.data.meshes.push_back(mesh);
   }
 
+  std::vector<quoll::AssetRef<quoll::MaterialAsset>> materials;
+  for (u32 i = 0; i < 3; ++i) {
+    quoll::AssetData<quoll::MaterialAsset> data{};
+    data.type = quoll::AssetType::Material;
+    data.uuid = quoll::Uuid::generate();
+    assetCache.getRegistry().add(data);
+
+    auto material = assetCache.request<quoll::MaterialAsset>(data.uuid).data();
+    materials.push_back(material);
+  }
+
   // Create two mesh renderers with 3 materials each
   for (u32 i = 0; i < 2; ++i) {
     quoll::PrefabComponent<quoll::MeshRenderer> renderer{};
     renderer.entity = i;
-    renderer.value.materials.push_back(
-        quoll::AssetHandle<quoll::MaterialAsset>{1});
-    renderer.value.materials.push_back(
-        quoll::AssetHandle<quoll::MaterialAsset>{2});
-    renderer.value.materials.push_back(
-        quoll::AssetHandle<quoll::MaterialAsset>{3});
+    renderer.value.materials.push_back(materials.at(0));
+    renderer.value.materials.push_back(materials.at(1));
+    renderer.value.materials.push_back(materials.at(2));
     asset.data.meshRenderers.push_back(renderer);
   }
 
@@ -127,10 +135,8 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (u32 i = 0; i < 3; ++i) {
     quoll::PrefabComponent<quoll::SkinnedMeshRenderer> renderer{};
     renderer.entity = i;
-    renderer.value.materials.push_back(
-        quoll::AssetHandle<quoll::MaterialAsset>{1});
-    renderer.value.materials.push_back(
-        quoll::AssetHandle<quoll::MaterialAsset>{2});
+    renderer.value.materials.push_back(materials.at(0));
+    renderer.value.materials.push_back(materials.at(1));
     asset.data.skinnedMeshRenderers.push_back(renderer);
   }
 

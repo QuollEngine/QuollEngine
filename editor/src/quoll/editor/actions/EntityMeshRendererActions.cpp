@@ -15,7 +15,7 @@ EntitySetMeshRendererMaterial::onExecute(WorkspaceState &state,
   mOldMaterial =
       scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot);
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.at(mSlot) =
-      mNewMaterial.handle();
+      mNewMaterial;
 
   ActionExecutorResult result{};
   result.addToHistory = true;
@@ -62,7 +62,7 @@ EntityAddMeshRendererMaterialSlot::onExecute(WorkspaceState &state,
   auto &scene = state.scene;
 
   scene.entityDatabase.get<MeshRenderer>(mEntity).materials.push_back(
-      mNewMaterial.handle());
+      mNewMaterial);
 
   ActionExecutorResult result{};
   result.entitiesToSave.push_back(mEntity);

@@ -706,13 +706,12 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetCache &assetCache,
 
     if (auto table = widgets::Table("TableMaterials", 2)) {
       for (usize i = 0; i < renderer.materials.size(); ++i) {
-        auto material = renderer.materials.at(i);
-        const auto &asset = assetRegistry.get(material);
+        const auto &material = renderer.materials.at(i);
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::Text("Slot %d", static_cast<u32>(i));
         ImGui::TableNextColumn();
-        widgets::Button(assetRegistry.getMeta(material).name.c_str());
+        widgets::Button(material.meta().name.c_str());
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
@@ -779,13 +778,12 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
 
     if (auto table = widgets::Table("TableMaterials", 2)) {
       for (usize i = 0; i < renderer.materials.size(); ++i) {
-        auto material = renderer.materials.at(i);
-        const auto &asset = assetRegistry.get(material);
+        const auto &material = renderer.materials.at(i);
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
         ImGui::Text("Slot %d", static_cast<u32>(i));
         ImGui::TableNextColumn();
-        widgets::Button(assetRegistry.getMeta(material).name.c_str());
+        widgets::Button(material.meta().name.c_str());
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {

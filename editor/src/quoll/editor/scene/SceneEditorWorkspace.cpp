@@ -21,11 +21,10 @@ SceneEditorWorkspace::SceneEditorWorkspace(
       mActionExecutor(mState, mAssetManager.getCache()),
       mSceneAssetHandle(scene),
       mSceneWriter(mState.scene, mAssetManager.getAssetRegistry()),
-      mSceneIO(mAssetManager.getAssetRegistry(), mState.scene),
-      mRenderer(renderer), mSceneRenderer(sceneRenderer),
-      mEditorRenderer(editorRenderer), mMousePickingGraph(mousePickingGraph),
-      mEngineModules(engineModules), mEditorCamera(editorCamera),
-      mWorkspaceManager(workspaceManager) {
+      mSceneIO(mAssetManager.getCache(), mState.scene), mRenderer(renderer),
+      mSceneRenderer(sceneRenderer), mEditorRenderer(editorRenderer),
+      mMousePickingGraph(mousePickingGraph), mEngineModules(engineModules),
+      mEditorCamera(editorCamera), mWorkspaceManager(workspaceManager) {
   mSceneIO.loadScene(scene);
 
   mSceneWriter.open(scenePath);
