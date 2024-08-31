@@ -152,13 +152,25 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
             if (entry.isDirectory) {
               setCurrentFetch(entry.path);
             } else if (entry.assetType == AssetType::Prefab) {
-              actionExecutor.execute<SpawnPrefabAtView>(
-                  static_cast<AssetHandle<PrefabAsset>>(entry.asset),
-                  state.camera);
+              auto prefab =
+                  assetManager.getCache().request<PrefabAsset>(entry.uuid);
+
+              if (prefab) {
+                actionExecutor.execute<SpawnPrefabAtView>(prefab.data(),
+                                                          state.camera);
+              } else {
+                // TODO: Handle error
+              }
             } else if (entry.assetType == AssetType::Texture) {
-              actionExecutor.execute<SpawnSpriteAtView>(
-                  static_cast<AssetHandle<TextureAsset>>(entry.asset),
-                  state.camera);
+              auto texture =
+                  assetManager.getCache().request<TextureAsset>(entry.uuid);
+              if (texture) {
+                actionExecutor.execute<SpawnSpriteAtView>(texture.data(),
+                                                          state.camera);
+              } else {
+                // TODO: Handle error
+              }
+
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
                   static_cast<AssetHandle<MaterialAsset>>(entry.asset));
@@ -181,9 +193,10 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
         if (dndAllowed) {
           if (ImGui::BeginDragDropSource()) {
+            auto uuid = entry.uuid.toString();
             ImGui::SetDragDropPayload(
-                getAssetTypeString(entry.assetType).c_str(), &entry.asset,
-                sizeof(u32));
+                getAssetTypeString(entry.assetType).c_str(), uuid.c_str(),
+                uuid.length() + 1);
             renderEntry(entry);
             ImGui::EndDragDropSource();
           }

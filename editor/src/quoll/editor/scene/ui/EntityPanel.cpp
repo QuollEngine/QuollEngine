@@ -37,20 +37,17 @@
 #include "quoll/text/Text.h"
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
-#include "quoll/editor/actions/EntityAnimatorActions.h"
-#include "quoll/editor/actions/EntityAudioActions.h"
 #include "quoll/editor/actions/EntityCameraActions.h"
 #include "quoll/editor/actions/EntityCollidableActions.h"
 #include "quoll/editor/actions/EntityCreateComponentAction.h"
 #include "quoll/editor/actions/EntityDeleteComponentAction.h"
 #include "quoll/editor/actions/EntityLightActions.h"
-#include "quoll/editor/actions/EntityMeshActions.h"
 #include "quoll/editor/actions/EntityMeshRendererActions.h"
 #include "quoll/editor/actions/EntityScriptingActions.h"
 #include "quoll/editor/actions/EntitySkeletonActions.h"
 #include "quoll/editor/actions/EntitySkinnedMeshRendererActions.h"
-#include "quoll/editor/actions/EntitySpriteActions.h"
 #include "quoll/editor/actions/EntityTransformActions.h"
+#include "quoll/editor/actions/EntityUpdateImmediateComponentAction.h"
 #include "quoll/editor/actions/SceneActions.h"
 #include "quoll/editor/ui/FontAwesome.h"
 #include "quoll/editor/ui/Widgets.h"
@@ -106,11 +103,16 @@ static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
                                        g.LastItemData.ID)) {
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Environment).c_str())) {
-      auto asset = *static_cast<AssetHandle<EnvironmentAsset> *>(payload->Data);
-      auto newSkybox = skybox;
-      newSkybox.texture = asset;
-      actionExecutor.execute<EntityUpdateComponent<EnvironmentSkybox>>(
-          entity, skybox, newSkybox);
+      auto uuid = Uuid(static_cast<const char *>(payload->Data));
+
+      auto environment = assetCache.request<EnvironmentAsset>(uuid);
+      if (environment) {
+        auto newSkybox = skybox;
+        newSkybox.texture = environment.data().handle();
+        actionExecutor
+            .execute<EntityUpdateImmediateComponent<EnvironmentSkybox>>(
+                entity, newSkybox);
+      }
     }
   }
 }
@@ -683,7 +685,7 @@ void EntityPanel::renderMesh(Scene &scene, AssetCache &assetCache,
     }
 
     if (shouldDelete("Mesh")) {
-      actionExecutor.execute<EntityDeleteMesh>(mSelectedEntity);
+      actionExecutor.execute<EntityDeleteComponent<Mesh>>(mSelectedEntity);
     }
   }
 }
@@ -714,10 +716,13 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetCache &assetCache,
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
-            auto asset =
-                *static_cast<AssetHandle<MaterialAsset> *>(payload->Data);
-            actionExecutor.execute<EntitySetMeshRendererMaterial>(
-                mSelectedEntity, i, asset);
+            auto uuid = Uuid(static_cast<const char *>(payload->Data));
+            auto material = assetCache.request<quoll::MaterialAsset>(uuid);
+
+            if (material) {
+              actionExecutor.execute<EntitySetMeshRendererMaterial>(
+                  mSelectedEntity, i, material.data());
+            }
           }
           ImGui::EndDragDropTarget();
         }
@@ -728,10 +733,13 @@ void EntityPanel::renderMeshRenderer(Scene &scene, AssetCache &assetCache,
       if (ImGui::BeginDragDropTarget()) {
         if (auto *payload = ImGui::AcceptDragDropPayload(
                 getAssetTypeString(AssetType::Material).c_str())) {
-          auto asset =
-              *static_cast<AssetHandle<MaterialAsset> *>(payload->Data);
-          actionExecutor.execute<EntityAddMeshRendererMaterialSlot>(
-              mSelectedEntity, asset);
+          auto uuid = Uuid(static_cast<const char *>(payload->Data));
+          auto material = assetCache.request<quoll::MaterialAsset>(uuid);
+
+          if (material) {
+            actionExecutor.execute<EntityAddMeshRendererMaterialSlot>(
+                mSelectedEntity, material.data());
+          }
         }
         ImGui::EndDragDropTarget();
       }
@@ -781,10 +789,13 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
         if (ImGui::BeginDragDropTarget()) {
           if (auto *payload = ImGui::AcceptDragDropPayload(
                   getAssetTypeString(AssetType::Material).c_str())) {
-            auto asset =
-                *static_cast<AssetHandle<MaterialAsset> *>(payload->Data);
-            actionExecutor.execute<EntitySetSkinnedMeshRendererMaterial>(
-                mSelectedEntity, i, asset);
+            auto uuid = Uuid(static_cast<const char *>(payload->Data));
+            auto material = assetCache.request<quoll::MaterialAsset>(uuid);
+
+            if (material) {
+              actionExecutor.execute<EntitySetSkinnedMeshRendererMaterial>(
+                  mSelectedEntity, i, material.data());
+            }
           }
           ImGui::EndDragDropTarget();
         }
@@ -795,10 +806,13 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
       if (ImGui::BeginDragDropTarget()) {
         if (auto *payload = ImGui::AcceptDragDropPayload(
                 getAssetTypeString(AssetType::Material).c_str())) {
-          auto asset =
-              *static_cast<AssetHandle<MaterialAsset> *>(payload->Data);
-          actionExecutor.execute<EntityAddSkinnedMeshRendererMaterialSlot>(
-              mSelectedEntity, asset);
+          auto uuid = Uuid(static_cast<const char *>(payload->Data));
+          auto material = assetCache.request<quoll::MaterialAsset>(uuid);
+
+          if (material) {
+            actionExecutor.execute<EntityAddSkinnedMeshRendererMaterialSlot>(
+                mSelectedEntity, material.data());
+          }
         }
         ImGui::EndDragDropTarget();
       }
@@ -1450,10 +1464,13 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
             if (ImGui::BeginDragDropTarget()) {
               if (auto *payload = ImGui::AcceptDragDropPayload(
                       getAssetTypeString(AssetType::Prefab).c_str())) {
-                auto handle =
-                    *static_cast<AssetHandle<PrefabAsset> *>(payload->Data);
-                mSetScriptVariable.reset(
-                    new EntitySetScriptVariable(mSelectedEntity, name, handle));
+                auto uuid = Uuid(static_cast<const char *>(payload->Data));
+                auto prefab = assetCache.request<quoll::PrefabAsset>(uuid);
+
+                if (prefab) {
+                  mSetScriptVariable.reset(new EntitySetScriptVariable(
+                      mSelectedEntity, name, prefab.data().handle()));
+                }
               }
             }
           } else if (variable.type == LuaScriptVariableType::AssetTexture) {
@@ -1476,10 +1493,13 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
             if (ImGui::BeginDragDropTarget()) {
               if (auto *payload = ImGui::AcceptDragDropPayload(
                       getAssetTypeString(AssetType::Texture).c_str())) {
-                auto handle =
-                    *static_cast<AssetHandle<TextureAsset> *>(payload->Data);
-                mSetScriptVariable.reset(
-                    new EntitySetScriptVariable(mSelectedEntity, name, handle));
+                auto uuid = Uuid(static_cast<const char *>(payload->Data));
+                auto texture = assetCache.request<quoll::TextureAsset>(uuid);
+
+                if (texture) {
+                  mSetScriptVariable.reset(new EntitySetScriptVariable(
+                      mSelectedEntity, name, texture.data().handle()));
+                }
               }
             }
           }
@@ -1853,51 +1873,78 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
   if (ImGui::BeginDragDropTarget()) {
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Mesh).c_str())) {
-      auto asset = *static_cast<AssetHandle<MeshAsset> *>(payload->Data);
-      actionExecutor.execute<EntitySetMesh>(mSelectedEntity, asset);
+      const char *data = static_cast<const char *>(payload->Data);
+
+      auto uuid = Uuid(static_cast<const char *>(payload->Data));
+      auto asset = assetCache.request<quoll::MeshAsset>(uuid);
+      if (asset) {
+        if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
+          actionExecutor.execute<EntityUpdateImmediateComponent<Mesh>>(
+              mSelectedEntity, Mesh{asset.data().handle()});
+        } else {
+          actionExecutor.execute<EntityCreateComponent<Mesh>>(
+              mSelectedEntity, Mesh{asset.data().handle()});
+        }
+      }
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Audio).c_str())) {
-      auto asset = *static_cast<AssetHandle<AudioAsset> *>(payload->Data);
-
-      if (scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
-        actionExecutor.execute<EntitySetAudio>(mSelectedEntity, asset);
-      } else {
-        actionExecutor.execute<EntityCreateAudio>(mSelectedEntity, asset);
+      auto uuid = Uuid(static_cast<const char *>(payload->Data));
+      auto asset = assetCache.request<AudioAsset>(uuid);
+      if (asset) {
+        if (scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
+          actionExecutor.execute<EntityUpdateImmediateComponent<AudioSource>>(
+              mSelectedEntity, AudioSource{asset.data().handle()});
+        } else {
+          actionExecutor.execute<EntityCreateComponent<AudioSource>>(
+              mSelectedEntity, AudioSource{asset.data().handle()});
+        }
       }
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::LuaScript).c_str())) {
-      auto asset = *static_cast<AssetHandle<LuaScriptAsset> *>(payload->Data);
-
-      if (scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
-        actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
-      } else {
-        actionExecutor.execute<EntityCreateScript>(mSelectedEntity, asset);
+      auto uuid = Uuid(static_cast<const char *>(payload->Data));
+      auto asset = assetCache.request<quoll::LuaScriptAsset>(uuid);
+      if (asset) {
+        if (scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
+          actionExecutor.execute<EntityUpdateImmediateComponent<LuaScript>>(
+              mSelectedEntity, LuaScript{asset.data().handle()});
+        } else {
+          actionExecutor.execute<EntityCreateComponent<LuaScript>>(
+              mSelectedEntity, LuaScript{asset.data().handle()});
+        }
       }
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Animator).c_str())) {
-      auto asset = *static_cast<AssetHandle<AnimatorAsset> *>(payload->Data);
-
-      if (scene.entityDatabase.has<Animator>(mSelectedEntity)) {
-        actionExecutor.execute<EntitySetAnimator>(mSelectedEntity, asset);
-      } else {
-        actionExecutor.execute<EntityCreateAnimator>(mSelectedEntity, asset);
+      auto uuid = Uuid(static_cast<const char *>(payload->Data));
+      auto asset = assetCache.request<quoll::AnimatorAsset>(uuid);
+      if (asset) {
+        if (scene.entityDatabase.has<Animator>(mSelectedEntity)) {
+          actionExecutor.execute<EntityUpdateImmediateComponent<Animator>>(
+              mSelectedEntity, Animator{asset.data().handle()});
+        } else {
+          actionExecutor.execute<EntityCreateComponent<Animator>>(
+              mSelectedEntity, Animator{asset.data().handle()});
+        }
       }
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Texture).c_str())) {
-      auto asset = *static_cast<AssetHandle<TextureAsset> *>(payload->Data);
-
-      if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
-        actionExecutor.execute<EntitySetSprite>(mSelectedEntity, asset);
-      } else {
-        actionExecutor.execute<EntityCreateSprite>(mSelectedEntity, asset);
+      auto uuid = Uuid(static_cast<const char *>(payload->Data));
+      auto asset = assetCache.request<quoll::TextureAsset>(uuid);
+      if (asset) {
+        if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
+          actionExecutor.execute<EntityUpdateImmediateComponent<Sprite>>(
+              mSelectedEntity, Sprite{asset.data().handle()});
+        } else {
+          actionExecutor.execute<EntityCreateComponent<Sprite>>(
+              mSelectedEntity, Sprite{asset.data().handle()});
+        }
       }
     }
 

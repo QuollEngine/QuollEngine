@@ -5,62 +5,6 @@
 
 namespace quoll::editor {
 
-EntityCreateScript::EntityCreateScript(Entity entity,
-                                       AssetHandle<LuaScriptAsset> handle)
-    : mEntity(entity), mHandle(handle) {}
-
-ActionExecutorResult EntityCreateScript::onExecute(WorkspaceState &state,
-                                                   AssetCache &assetCache) {
-  return EntityCreateComponent<LuaScript>(mEntity, {mHandle})
-      .onExecute(state, assetCache);
-}
-
-ActionExecutorResult EntityCreateScript::onUndo(WorkspaceState &state,
-                                                AssetCache &assetCache) {
-  return EntityCreateComponent<LuaScript>(mEntity, {mHandle})
-      .onUndo(state, assetCache);
-}
-
-bool EntityCreateScript::predicate(WorkspaceState &state,
-                                   AssetCache &assetCache) {
-  auto &scene = state.scene;
-  return !scene.entityDatabase.has<LuaScript>(mEntity) &&
-         assetCache.getRegistry().has(mHandle);
-}
-
-EntitySetScript::EntitySetScript(Entity entity,
-                                 AssetHandle<LuaScriptAsset> script)
-    : mEntity(entity), mScript(script) {}
-
-ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state,
-                                                AssetCache &assetCache) {
-  auto &scene = state.scene;
-
-  mOldScript = scene.entityDatabase.get<LuaScript>(mEntity).handle;
-
-  scene.entityDatabase.set<LuaScript>(mEntity, {mScript});
-
-  ActionExecutorResult res{};
-  res.entitiesToSave.push_back(mEntity);
-  res.addToHistory = true;
-  return res;
-}
-
-ActionExecutorResult EntitySetScript::onUndo(WorkspaceState &state,
-                                             AssetCache &assetCache) {
-  auto &scene = state.scene;
-
-  scene.entityDatabase.set<LuaScript>(mEntity, {mOldScript});
-
-  ActionExecutorResult res{};
-  res.entitiesToSave.push_back(mEntity);
-  return res;
-}
-
-bool EntitySetScript::predicate(WorkspaceState &state, AssetCache &assetCache) {
-  return assetCache.getRegistry().has(mScript);
-}
-
 EntitySetScriptVariable::EntitySetScriptVariable(
     Entity entity, const String &name, const LuaScriptInputVariable &value)
     : mEntity(entity), mName(name), mValue(value) {}
