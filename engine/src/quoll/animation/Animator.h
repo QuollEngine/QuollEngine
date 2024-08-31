@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/AssetHandle.h"
+#include "quoll/asset/AssetRef.h"
 #include "AnimatorAsset.h"
 
 namespace quoll {
@@ -14,7 +14,7 @@ namespace quoll {
  * in range of [0.0, 1.0].
  */
 struct Animator {
-  AssetHandle<AnimatorAsset> asset;
+  AssetRef<AnimatorAsset> asset;
 
   usize currentState = std::numeric_limits<usize>::max();
 

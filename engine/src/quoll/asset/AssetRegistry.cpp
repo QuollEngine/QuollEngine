@@ -16,7 +16,7 @@ void AssetRegistry::createDefaultObjects() {
                mMaterials.addAsset(default_objects::createDefaultMaterial()));
 
   mDefaultObjects.defaultFont =
-      mFonts.addAsset(default_objects::createDefaultFont());
+      AssetRef(&mFonts, mFonts.addAsset(default_objects::createDefaultFont()));
 }
 
 void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {

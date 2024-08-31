@@ -30,8 +30,7 @@ sol_maybe<AnimationStateLuaTable> AnimatorLuaTable::getCurrentState() {
   }
 
   const auto &animator = mScriptGlobals.entityDatabase.get<Animator>(mEntity);
-  auto &state = mScriptGlobals.assetRegistry.get(animator.asset)
-                    .states.at(animator.currentState);
+  auto &state = animator.asset->states.at(animator.currentState);
 
   return AnimationStateLuaTable(state);
 }

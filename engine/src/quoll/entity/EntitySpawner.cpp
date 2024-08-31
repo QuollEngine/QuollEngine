@@ -112,7 +112,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
 
   for (const auto &pMesh : asset.meshes) {
     auto entity = getOrCreateEntity(pMesh.entity);
-    mEntityDatabase.set<Mesh>(entity, {pMesh.value.handle()});
+    mEntityDatabase.set<Mesh>(entity, {pMesh.value});
   }
 
   for (const auto &pRenderer : asset.meshRenderers) {
@@ -132,7 +132,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
     usize numJoints = asset.jointLocalPositions.size();
 
     Skeleton skeleton{};
-    skeleton.assetHandle = pSkeleton.value.handle();
+    skeleton.assetHandle = pSkeleton.value;
     skeleton.numJoints = static_cast<u32>(numJoints);
     skeleton.jointNames.resize(numJoints);
     skeleton.jointParents.resize(numJoints);
@@ -160,7 +160,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
     auto entity = getOrCreateEntity(item.entity);
 
     Animator animator{};
-    animator.asset = item.value.handle();
+    animator.asset = item.value;
     animator.currentState = item.value->initialState;
     mEntityDatabase.set(entity, animator);
   }

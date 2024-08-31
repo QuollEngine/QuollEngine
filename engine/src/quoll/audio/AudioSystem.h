@@ -54,8 +54,8 @@ public:
         if (entityDatabase.has<AudioStatus>(entity)) {
           continue;
         }
-        const auto &asset = mAssetRegistry.get(source.source);
-        void *sound = mBackend.playSound(asset);
+
+        void *sound = mBackend.playSound(source.source.get());
 
         entityDatabase.set<AudioStatus>(entity, {sound});
       }

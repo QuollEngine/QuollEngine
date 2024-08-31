@@ -6,30 +6,26 @@ namespace quoll {
 
 void SkeletonSerializer::serialize(YAML::Node &node,
                                    EntityDatabase &entityDatabase,
-                                   Entity entity,
-                                   AssetRegistry &assetRegistry) {
+                                   Entity entity) {
   if (entityDatabase.has<Skeleton>(entity)) {
-    auto handle = entityDatabase.get<Skeleton>(entity).assetHandle;
-    if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.getMeta(handle).uuid;
-
-      node["skeleton"] = uuid;
+    const auto &asset = entityDatabase.get<Skeleton>(entity).assetHandle;
+    if (asset) {
+      node["skeleton"] = asset.meta().uuid;
     }
   }
 }
 
 void SkeletonSerializer::deserialize(const YAML::Node &node,
                                      EntityDatabase &entityDatabase,
-                                     Entity entity,
-                                     AssetRegistry &assetRegistry) {
+                                     Entity entity, AssetCache &assetCache) {
   if (node["skeleton"]) {
     auto uuid = node["skeleton"].as<Uuid>(Uuid{});
-    auto handle = assetRegistry.findHandleByUuid<SkeletonAsset>(uuid);
 
-    if (handle) {
-      const auto &skeleton = assetRegistry.get(handle);
-
+    auto res = assetCache.request<SkeletonAsset>(uuid);
+    if (res) {
+      const auto &skeleton = res.data().get();
       Skeleton skeletonComponent{};
+      skeletonComponent.assetHandle = res.data();
       skeletonComponent.jointLocalPositions = skeleton.jointLocalPositions;
       skeletonComponent.jointLocalRotations = skeleton.jointLocalRotations;
       skeletonComponent.jointLocalScales = skeleton.jointLocalScales;
@@ -37,7 +33,6 @@ void SkeletonSerializer::deserialize(const YAML::Node &node,
       skeletonComponent.jointInverseBindMatrices =
           skeleton.jointInverseBindMatrices;
       skeletonComponent.jointNames = skeleton.jointNames;
-      skeletonComponent.assetHandle = handle;
       skeletonComponent.numJoints =
           static_cast<u32>(skeleton.jointLocalPositions.size());
       skeletonComponent.jointFinalTransforms.resize(skeletonComponent.numJoints,

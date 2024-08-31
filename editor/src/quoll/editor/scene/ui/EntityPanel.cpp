@@ -108,7 +108,7 @@ static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
       auto environment = assetCache.request<EnvironmentAsset>(uuid);
       if (environment) {
         auto newSkybox = skybox;
-        newSkybox.texture = environment.data().handle();
+        newSkybox.texture = environment.data();
         actionExecutor
             .execute<EntityUpdateImmediateComponent<EnvironmentSkybox>>(
                 entity, newSkybox);
@@ -674,13 +674,11 @@ void EntityPanel::renderMesh(Scene &scene, AssetCache &assetCache,
 
   if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
     if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto handle = scene.entityDatabase.get<Mesh>(mSelectedEntity).handle;
-
-      const auto &asset = assetRegistry.get(handle);
+      auto asset = scene.entityDatabase.get<Mesh>(mSelectedEntity).handle;
 
       if (auto table = widgets::Table("TableMesh", 2)) {
-        table.row("Name", assetRegistry.getMeta(handle).name);
-        table.row("Geometries", static_cast<u32>(asset.geometries.size()));
+        table.row("Name", asset.meta().name);
+        table.row("Geometries", static_cast<u32>(asset->geometries.size()));
       }
     }
 
@@ -847,12 +845,10 @@ void EntityPanel::renderSkeleton(Scene &scene, AssetCache &assetCache,
 
     const auto &skeleton = scene.entityDatabase.get<Skeleton>(mSelectedEntity);
 
-    auto handle = skeleton.assetHandle;
-
-    const auto &asset = assetRegistry.get(handle);
+    const auto &asset = skeleton.assetHandle;
 
     if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
-      table.row("Name", assetRegistry.getMeta(handle).name);
+      table.row("Name", asset.meta().name);
       table.row("Number of joints",
                 static_cast<u32>(skeleton.jointNames.size()));
     }
@@ -934,7 +930,7 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component = scene.entityDatabase.get<Animator>(mSelectedEntity);
-    const auto &animatorAsset = assetRegistry.get(component.asset);
+    const auto &animatorAsset = component.asset.get();
 
     auto currentStateIndex =
         component.currentState < animatorAsset.states.size()
@@ -1305,8 +1301,8 @@ void EntityPanel::renderText(Scene &scene, AssetCache &assetCache,
     }
 
     ImGui::Text("Select font");
-    if (ImGui::BeginCombo("###SelectFont", fonts.at(text.font).name.c_str(),
-                          0)) {
+    if (ImGui::BeginCombo("###SelectFont",
+                          fonts.at(text.font.handle()).name.c_str(), 0)) {
       for (const auto &[handle, data] : fonts) {
         bool selectable = handle == text.font;
 
@@ -1318,7 +1314,7 @@ void EntityPanel::renderText(Scene &scene, AssetCache &assetCache,
                 mSelectedEntity, text);
           }
 
-          text.font = handle;
+          text.font = assetCache.request<FontAsset>(data.uuid);
         }
       }
       ImGui::EndCombo();
@@ -1348,9 +1344,8 @@ void EntityPanel::renderAudio(Scene &scene, AssetCache &assetCache,
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     const auto &audio = scene.entityDatabase.get<AudioSource>(mSelectedEntity);
-    const auto &assetName = assetRegistry.getMeta(audio.source).name;
 
-    ImGui::Text("Name: %s", assetName.c_str());
+    ImGui::Text("Name: %s", audio.source.meta().name.c_str());
   }
 
   if (shouldDelete("Audio")) {
@@ -1531,10 +1526,9 @@ void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
     auto &component =
         scene.entityDatabase.get<InputMapAssetRef>(mSelectedEntity);
 
-    if (assetRegistry.has(component.handle)) {
-      const auto &assetName = assetRegistry.getMeta(component.handle).name;
-
-      widgets::Button(assetName.c_str(), ImVec2(width, height));
+    if (component.handle) {
+      widgets::Button(component.handle.meta().name.c_str(),
+                      ImVec2(width, height));
     } else {
       widgets::Button("Drag input map here", ImVec2(width, height));
     }
@@ -1550,17 +1544,18 @@ void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
                                          g.LastItemData.ID)) {
       if (auto *payload = ImGui::AcceptDragDropPayload(
               getAssetTypeString(AssetType::InputMap).c_str())) {
-        auto newHandle =
-            *static_cast<AssetHandle<InputMapAsset> *>(payload->Data);
+        auto uuid = Uuid(static_cast<const char *>(payload->Data));
+        auto asset = assetCache.request<InputMapAsset>(uuid);
+
         auto newComponent = component;
-        newComponent.handle = newHandle;
+        newComponent.handle = asset;
         actionExecutor.execute<EntityUpdateComponent<InputMapAssetRef>>(
             mSelectedEntity, component, newComponent);
       }
     }
 
-    if (assetRegistry.has(component.handle)) {
-      const auto &asset = assetRegistry.get(component.handle);
+    if (component.handle) {
+      const auto &asset = component.handle.get();
 
       const auto *schemeName =
           component.defaultScheme < asset.schemes.size()
@@ -1589,9 +1584,8 @@ void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
       const auto &inputMap =
           scene.entityDatabase.get<InputMap>(mSelectedEntity);
 
-      const auto *schemeName = assetRegistry.get(component.handle)
-                                   .schemes.at(inputMap.activeScheme)
-                                   .name.c_str();
+      const auto *schemeName =
+          component.handle->schemes.at(inputMap.activeScheme).name.c_str();
 
       ImGui::Text("Debug");
       ImGui::Text("Active scheme: %s", schemeName);
@@ -1676,8 +1670,8 @@ void EntityPanel::renderSkybox(Scene &scene, AssetCache &assetCache,
       }
 
     } else if (skybox.type == EnvironmentSkyboxType::Texture) {
-      if (assetRegistry.has(skybox.texture)) {
-        auto envAssetPreview = assetRegistry.getMeta(skybox.texture).preview;
+      if (skybox.texture) {
+        auto envAssetPreview = skybox.texture.meta().preview;
 
         imgui::image(envAssetPreview, ImVec2(width, height), ImVec2(0, 0),
                      ImVec2(1, 1), ImGui::GetID("environment-texture-drop"));
@@ -1877,10 +1871,10 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
       if (asset) {
         if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
           actionExecutor.execute<EntityUpdateImmediateComponent<Mesh>>(
-              mSelectedEntity, Mesh{asset.data().handle()});
+              mSelectedEntity, Mesh{asset.data()});
         } else {
           actionExecutor.execute<EntityCreateComponent<Mesh>>(
-              mSelectedEntity, Mesh{asset.data().handle()});
+              mSelectedEntity, Mesh{asset.data()});
         }
       }
     }
@@ -1892,10 +1886,10 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
       if (asset) {
         if (scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
           actionExecutor.execute<EntityUpdateImmediateComponent<AudioSource>>(
-              mSelectedEntity, AudioSource{asset.data().handle()});
+              mSelectedEntity, AudioSource{asset.data()});
         } else {
           actionExecutor.execute<EntityCreateComponent<AudioSource>>(
-              mSelectedEntity, AudioSource{asset.data().handle()});
+              mSelectedEntity, AudioSource{asset.data()});
         }
       }
     }
@@ -1922,10 +1916,10 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
       if (asset) {
         if (scene.entityDatabase.has<Animator>(mSelectedEntity)) {
           actionExecutor.execute<EntityUpdateImmediateComponent<Animator>>(
-              mSelectedEntity, Animator{asset.data().handle()});
+              mSelectedEntity, Animator{asset.data()});
         } else {
           actionExecutor.execute<EntityCreateComponent<Animator>>(
-              mSelectedEntity, Animator{asset.data().handle()});
+              mSelectedEntity, Animator{asset.data()});
         }
       }
     }

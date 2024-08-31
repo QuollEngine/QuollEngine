@@ -22,6 +22,18 @@ public:
 
   AnimationSystemTest() : assetCache("/"), system(assetCache.getRegistry()) {}
 
+  template <typename TAssetData>
+  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
+    quoll::AssetData<TAssetData> info{};
+    info.type = quoll::AssetCache::getAssetType<TAssetData>();
+    info.uuid = quoll::Uuid::generate();
+    info.data = data;
+
+    assetCache.getRegistry().add(info);
+
+    return assetCache.request<TAssetData>(info.uuid).data();
+  }
+
   quoll::Entity
   create(quoll::AssetRef<quoll::AnimationAsset> animation, bool playing = true,
          f32 speed = 1.0f,
@@ -29,19 +41,20 @@ public:
     auto entity = entityDatabase.create();
     entityDatabase.set<quoll::LocalTransform>(entity, {});
 
-    quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
-    animatorAsset.uuid = quoll::Uuid::generate();
-    animatorAsset.data.initialState = 0;
-    animatorAsset.data.states.push_back({.name = "Animation",
-                                         .animation = animation,
-                                         .speed = speed,
-                                         .loopMode = loopMode});
+    quoll::AssetData<quoll::AnimatorAsset> info{};
+    info.uuid = quoll::Uuid::generate();
+    info.data.initialState = 0;
 
-    auto animatorHandle = assetCache.getRegistry().add(animatorAsset);
+    std::vector states{quoll::AnimationState{.name = "Animation",
+                                             .animation = animation,
+                                             .speed = speed,
+                                             .loopMode = loopMode}};
+
+    auto asset = createAsset<quoll::AnimatorAsset>({.states = states});
 
     quoll::Animator animator{};
     animator.playing = playing;
-    animator.asset = animatorHandle;
+    animator.asset = asset;
     entityDatabase.set(entity, animator);
 
     return entity;
@@ -130,19 +143,15 @@ TEST_F(
   state1.name = "Animation1";
   state1.animation = animation;
 
-  quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
-  animatorAsset.data.initialState = 0;
-  animatorAsset.data.states.push_back(state0);
-  animatorAsset.data.states.push_back(state1);
-
-  auto animatorHandle = assetCache.getRegistry().add(animatorAsset);
+  auto animatorAsset = createAsset<quoll::AnimatorAsset>(
+      {.initialState = 0, .states = {state0, state1}});
 
   auto entity = entityDatabase.create();
 
   {
     quoll::Animator animator{};
     animator.normalizedTime = 0.5f;
-    animator.asset = animatorHandle;
+    animator.asset = animatorAsset;
     animator.currentState = 0;
     entityDatabase.set(entity, animator);
     entityDatabase.set<quoll::LocalTransform>(entity, {});
@@ -188,19 +197,15 @@ TEST_F(
   state1.name = "Animation1";
   state1.animation = animation;
 
-  quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
-  animatorAsset.data.initialState = 0;
-  animatorAsset.data.states.push_back(state0);
-  animatorAsset.data.states.push_back(state1);
-
-  auto animatorHandle = assetCache.getRegistry().add(animatorAsset);
+  auto animatorAsset = createAsset<quoll::AnimatorAsset>(
+      {.initialState = 0, .states = {state0, state1}});
 
   auto entity = entityDatabase.create();
 
   {
     quoll::Animator animator{};
     animator.normalizedTime = 0.5f;
-    animator.asset = animatorHandle;
+    animator.asset = animatorAsset;
     animator.currentState = 0;
     entityDatabase.set(entity, animator);
     entityDatabase.set<quoll::LocalTransform>(entity, {});

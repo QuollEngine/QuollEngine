@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/audio/AudioAsset.h"
 #include "quoll/audio/AudioSystem.h"
 #include "quoll/system/SystemView.h"
@@ -49,19 +50,22 @@ private:
 
 class AudioSystemTest : public ::testing::Test {
 public:
-  AudioSystemTest() : audioSystem(assetRegistry) {
+  AudioSystemTest() : audioSystem(assetCache.getRegistry()), assetCache("/") {
     audioSystem.createSystemViewData(view);
   }
 
-  quoll::AssetHandle<quoll::AudioAsset> createFakeAudio() {
-    std::vector<char> bytes;
+  quoll::AssetRef<quoll::AudioAsset> createFakeAudio() {
     quoll::AssetData<quoll::AudioAsset> asset{};
-    asset.data.bytes = bytes;
+    asset.uuid = quoll::Uuid::generate();
+    asset.data.bytes = {};
     asset.data.format = quoll::AudioAssetFormat::Wav;
-    return assetRegistry.add(asset);
+
+    assetCache.getRegistry().add(asset);
+
+    return assetCache.request<quoll::AudioAsset>(asset.uuid).data();
   }
 
-  quoll::AssetRegistry assetRegistry;
+  quoll::AssetCache assetCache;
   quoll::AudioSystem<TestAudioBackend> audioSystem;
   quoll::Scene scene;
   quoll::SystemView view{&scene};

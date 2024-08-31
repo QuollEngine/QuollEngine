@@ -6,6 +6,17 @@
 
 class AnimatorLuaTableTest : public LuaScriptingInterfaceTestBase {
 public:
+  template <typename TAssetData>
+  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
+    quoll::AssetData<TAssetData> info{};
+    info.type = quoll::AssetCache::getAssetType<TAssetData>();
+    info.uuid = quoll::Uuid::generate();
+    info.data = data;
+
+    assetCache.getRegistry().add(info);
+
+    return assetCache.request<TAssetData>(info.uuid).data();
+  }
 };
 
 TEST_F(AnimatorLuaTableTest, TriggerAddsAnimatorEventComponent) {
@@ -21,12 +32,12 @@ TEST_F(AnimatorLuaTableTest, PropertiesReturnAnimatorDataIfAnimatorExists) {
   animatorAsset.states.push_back({.name = "StateA"});
   animatorAsset.states.push_back({.name = "StateB"});
 
-  auto handle = assetCache.getRegistry().add<quoll::AnimatorAsset>(
-      {.data = animatorAsset});
+  auto asset = createAsset<quoll::AnimatorAsset>(
+      {.states = {{.name = "StateA"}, {.name = "StateB"}}});
 
   auto entity = entityDatabase.create();
   quoll::Animator animator{};
-  animator.asset = handle;
+  animator.asset = asset;
   animator.normalizedTime = 0.4f;
   animator.currentState = 1;
   entityDatabase.set(entity, animator);

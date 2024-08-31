@@ -6,18 +6,16 @@ namespace quoll {
 
 void EnvironmentSkyboxSerializer::serialize(YAML::Node &node,
                                             EntityDatabase &entityDatabase,
-                                            Entity entity,
-                                            AssetRegistry &assetRegistry) {
+                                            Entity entity) {
   if (entityDatabase.has<EnvironmentSkybox>(entity)) {
     const auto &component = entityDatabase.get<EnvironmentSkybox>(entity);
     if (component.type == EnvironmentSkyboxType::Color) {
       node["skybox"]["type"] = "color";
       node["skybox"]["color"] = component.color;
     } else if (component.type == EnvironmentSkyboxType::Texture) {
-      if (assetRegistry.has(component.texture)) {
+      if (component.texture) {
         node["skybox"]["type"] = "texture";
-        node["skybox"]["texture"] =
-            assetRegistry.getMeta(component.texture).uuid;
+        node["skybox"]["texture"] = component.texture.meta().uuid;
       }
     }
   }
@@ -26,7 +24,7 @@ void EnvironmentSkyboxSerializer::serialize(YAML::Node &node,
 void EnvironmentSkyboxSerializer::deserialize(const YAML::Node &node,
                                               EntityDatabase &entityDatabase,
                                               Entity entity,
-                                              AssetRegistry &assetRegistry) {
+                                              AssetCache &assetCache) {
   if (node["skybox"] && node["skybox"].IsMap()) {
     EnvironmentSkybox skybox{};
     auto type = node["skybox"]["type"].as<String>("");
@@ -37,10 +35,11 @@ void EnvironmentSkyboxSerializer::deserialize(const YAML::Node &node,
       entityDatabase.set(entity, skybox);
     } else if (type == "texture") {
       auto uuid = node["skybox"]["texture"].as<Uuid>(Uuid{});
-      auto handle = assetRegistry.findHandleByUuid<EnvironmentAsset>(uuid);
-      if (handle) {
+
+      auto texture = assetCache.request<quoll::EnvironmentAsset>(uuid);
+      if (texture) {
         skybox.type = EnvironmentSkyboxType::Texture;
-        skybox.texture = handle;
+        skybox.texture = texture;
         entityDatabase.set(entity, skybox);
       }
     }

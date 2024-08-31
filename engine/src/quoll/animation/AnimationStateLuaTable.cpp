@@ -4,7 +4,7 @@
 
 namespace quoll {
 
-AnimationStateLuaTable::AnimationStateLuaTable(AnimationState &state)
+AnimationStateLuaTable::AnimationStateLuaTable(const AnimationState &state)
     : mState(state) {}
 
 String AnimationStateLuaTable::getName() { return mState.name; }

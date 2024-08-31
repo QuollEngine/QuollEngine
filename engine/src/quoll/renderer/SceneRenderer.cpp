@@ -788,35 +788,32 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   // Meshes
   for (auto [entity, world, mesh, renderer] :
        entityDatabase.view<WorldTransform, Mesh, MeshRenderer>()) {
-    const auto &asset = mAssetRegistry.get(mesh.handle);
-
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
       materials.push_back(material->deviceHandle->getAddress());
     }
 
-    frameData.addMesh(mesh.handle, entity, world.worldTransform, materials);
+    frameData.addMesh(mesh.handle.handle(), entity, world.worldTransform,
+                      materials);
   }
 
   // Skinned Meshes
   for (auto [entity, skeleton, world, mesh, renderer] :
        entityDatabase
            .view<Skeleton, WorldTransform, Mesh, SkinnedMeshRenderer>()) {
-    const auto &asset = mAssetRegistry.get(mesh.handle);
-
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
       materials.push_back(material->deviceHandle->getAddress());
     }
 
-    frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
+    frameData.addSkinnedMesh(mesh.handle.handle(), entity, world.worldTransform,
                              skeleton.jointFinalTransforms, materials);
   }
 
   // Texts
   for (auto [entity, text, world] :
        entityDatabase.view<Text, WorldTransform>()) {
-    const auto &font = mAssetRegistry.get(text.font);
+    const auto &font = text.font.get();
 
     std::vector<SceneRendererFrameData::GlyphData> glyphs(
         text.content.length());
@@ -870,7 +867,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       frameData.setSkyboxColor(environment.color);
     } else if (environment.type == EnvironmentSkyboxType::Texture &&
                environment.texture) {
-      const auto &asset = mAssetRegistry.get(environment.texture);
+      const auto &asset = environment.texture.get();
 
       specularMap = asset.specularMap->deviceHandle;
       irradianceMap = asset.irradianceMap->deviceHandle;

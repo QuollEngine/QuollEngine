@@ -1,5 +1,5 @@
 #include "quoll/core/Base.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/input/InputDeviceManager.h"
 #include "quoll/input/InputMapSystem.h"
@@ -10,7 +10,7 @@
 
 class InputMapSystemTest : public ::testing::Test {
 public:
-  InputMapSystemTest() {
+  InputMapSystemTest() : assetCache("/") {
     deviceManager.addDevice({.type = quoll::InputDeviceType::Keyboard,
                              .name = "Test device",
                              .index = 0,
@@ -36,30 +36,30 @@ public:
   std::unordered_map<int, quoll::InputStateValue> inputStates;
 
   quoll::Entity createInputMap() {
-    quoll::AssetData<quoll::InputMapAsset> asset{};
-    asset.data.schemes.push_back({"Explore"});
-    asset.data.schemes.push_back({"Combat"});
+    quoll::AssetData<quoll::InputMapAsset> info{};
+    info.data.schemes.push_back({"Explore"});
+    info.data.schemes.push_back({"Combat"});
 
-    asset.data.commands.push_back({"Jump", quoll::InputDataType::Boolean});
-    asset.data.commands.push_back({"Move", quoll::InputDataType::Axis2d});
-    asset.data.commands.push_back({"Look", quoll::InputDataType::Axis2d});
-    asset.data.commands.push_back({"Aim", quoll::InputDataType::Axis2d});
-    asset.data.commands.push_back({"Shoot", quoll::InputDataType::Boolean});
-    asset.data.commands.push_back({"Pick", quoll::InputDataType::Boolean});
+    info.data.commands.push_back({"Jump", quoll::InputDataType::Boolean});
+    info.data.commands.push_back({"Move", quoll::InputDataType::Axis2d});
+    info.data.commands.push_back({"Look", quoll::InputDataType::Axis2d});
+    info.data.commands.push_back({"Aim", quoll::InputDataType::Axis2d});
+    info.data.commands.push_back({"Shoot", quoll::InputDataType::Boolean});
+    info.data.commands.push_back({"Pick", quoll::InputDataType::Boolean});
 
     // Null data for testing purposes
-    asset.data.bindings.push_back({0, 2, quoll::InputMapAxis2dValue{-1, -1}});
+    info.data.bindings.push_back({0, 2, quoll::InputMapAxis2dValue{-1, -1}});
 
     // Jump
-    asset.data.bindings.push_back({0, 0, quoll::input::get("GAMEPAD_SOUTH")});
-    asset.data.bindings.push_back({0, 0, quoll::input::get("KEY_SPACE")});
+    info.data.bindings.push_back({0, 0, quoll::input::get("GAMEPAD_SOUTH")});
+    info.data.bindings.push_back({0, 0, quoll::input::get("KEY_SPACE")});
 
     // Move
-    asset.data.bindings.push_back(
+    info.data.bindings.push_back(
         {0, 1,
          quoll::InputMapAxis2dValue{quoll::input::get("GAMEPAD_LEFT_X"),
                                     quoll::input::get("GAMEPAD_LEFT_Y")}});
-    asset.data.bindings.push_back(
+    info.data.bindings.push_back(
         {0, 1,
          quoll::InputMapAxis2dValue{
              quoll::InputMapAxisSegment{quoll::input::get("KEY_A"),
@@ -68,15 +68,15 @@ public:
                                         quoll::input::get("KEY_S")}}});
 
     // Look
-    asset.data.bindings.push_back({0, 2, quoll::input::get("MOUSE_MOVE")});
+    info.data.bindings.push_back({0, 2, quoll::input::get("MOUSE_MOVE")});
 
     // Aim
-    asset.data.bindings.push_back(
+    info.data.bindings.push_back(
         {1, 3,
          quoll::InputMapAxis2dValue{quoll::input::get("GAMEPAD_LEFT_X"),
                                     quoll::input::get("GAMEPAD_LEFT_Y")}});
 
-    asset.data.bindings.push_back(
+    info.data.bindings.push_back(
         {1, 3,
          quoll::InputMapAxis2dValue{
              quoll::InputMapAxisSegment{quoll::input::get("KEY_A"),
@@ -85,27 +85,29 @@ public:
                                         quoll::input::get("KEY_S")}}});
 
     // Shoot
-    asset.data.bindings.push_back({1, 4, quoll::input::get("MOUSE_LEFT")});
-    asset.data.bindings.push_back(
+    info.data.bindings.push_back({1, 4, quoll::input::get("MOUSE_LEFT")});
+    info.data.bindings.push_back(
         {1, 4, quoll::input::get("GAMEPAD_BUMPER_RIGHT")});
 
     // Shoot
-    asset.data.bindings.push_back({0, 5, quoll::input::get("MOUSE_LEFT")});
-    asset.data.bindings.push_back(
+    info.data.bindings.push_back({0, 5, quoll::input::get("MOUSE_LEFT")});
+    info.data.bindings.push_back(
         {0, 5, quoll::input::get("GAMEPAD_BUMPER_RIGHT")});
 
-    asset.uuid = quoll::Uuid::generate();
-    auto handle = registry.add(asset);
+    info.uuid = quoll::Uuid::generate();
+    assetCache.getRegistry().add(info);
+
+    auto asset = assetCache.request<quoll::InputMapAsset>(info.uuid).data();
 
     auto entity = db.create();
-    db.set<quoll::InputMapAssetRef>(entity, {handle});
+    db.set<quoll::InputMapAssetRef>(entity, {asset});
 
     return entity;
   }
 
-  quoll::AssetRegistry registry;
+  quoll::AssetCache assetCache;
   quoll::InputDeviceManager deviceManager;
-  quoll::InputMapSystem inputMapSystem{deviceManager, registry};
+  quoll::InputMapSystem inputMapSystem{deviceManager, assetCache.getRegistry()};
   quoll::Scene scene;
   quoll::EntityDatabase &db = scene.entityDatabase;
   quoll::SystemView view{&scene};
