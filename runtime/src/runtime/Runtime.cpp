@@ -36,8 +36,7 @@ void Runtime::start() {
   Window window(mConfig.name, Width, Height, deviceManager);
   AssetCache assetCache(std::filesystem::current_path() / "assets", true);
 
-  MainEngineModules engineModules(deviceManager, window,
-                                  assetCache.getRegistry());
+  MainEngineModules engineModules(deviceManager, window, assetCache);
 
   rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();

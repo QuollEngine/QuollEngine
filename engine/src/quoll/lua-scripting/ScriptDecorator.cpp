@@ -53,11 +53,11 @@ void ScriptDecorator::attachVariableInjectors(
     }
 
     if (value.isType(LuaScriptVariableType::AssetPrefab)) {
-      return value.get<AssetHandle<PrefabAsset>>().getRawId();
+      return value.get<AssetRef<PrefabAsset>>().handle().getRawId();
     }
 
     if (value.isType(LuaScriptVariableType::AssetTexture)) {
-      return value.get<AssetHandle<TextureAsset>>().getRawId();
+      return value.get<AssetRef<TextureAsset>>().handle().getRawId();
     }
 
     return sol::nil;

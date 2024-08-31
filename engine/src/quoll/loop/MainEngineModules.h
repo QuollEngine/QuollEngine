@@ -2,7 +2,7 @@
 
 #include "quoll/core/EntityDeleter.h"
 #include "quoll/animation/AnimationSystem.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/audio/AudioSystem.h"
 #include "quoll/input/InputMapSystem.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"
@@ -25,7 +25,7 @@ namespace quoll {
 class MainEngineModules {
 public:
   MainEngineModules(InputDeviceManager &deviceManager, Window &window,
-                    AssetRegistry &assetRegistry);
+                    AssetCache &assetCache);
 
   void prepare(SystemView &view);
   void cleanup(SystemView &view);
@@ -44,7 +44,6 @@ public:
   inline Window &getWindow() { return mWindow; }
 
 private:
-  AssetRegistry &mAssetRegistry;
   Window &mWindow;
 
   CameraAspectRatioUpdater mCameraAspectRatioUpdater;

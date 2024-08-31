@@ -21,11 +21,11 @@ std::variant<String, u32> InputVars::registerVar(String name,
   }
 
   if (value.isType(LuaScriptVariableType::AssetPrefab)) {
-    return static_cast<u32>(value.get<AssetHandle<PrefabAsset>>());
+    return value.get<AssetRef<PrefabAsset>>().handle().getRawId();
   }
 
   if (value.isType(LuaScriptVariableType::AssetTexture)) {
-    return static_cast<u32>(value.get<AssetHandle<TextureAsset>>());
+    return value.get<AssetRef<TextureAsset>>().handle().getRawId();
   }
 
   return 0u;

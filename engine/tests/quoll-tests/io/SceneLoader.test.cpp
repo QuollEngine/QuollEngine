@@ -1653,11 +1653,13 @@ TEST_F(SceneLoaderScriptTest,
   EXPECT_EQ(component.variables.at("test_str").get<quoll::String>(),
             "Test string");
   EXPECT_EQ(component.variables.at("test_valid_prefab")
-                .get<quoll::AssetHandle<quoll::PrefabAsset>>(),
+                .get<quoll::AssetRef<quoll::PrefabAsset>>()
+                .handle(),
             prefab.handle());
 
   EXPECT_EQ(component.variables.at("test_valid_texture")
-                .get<quoll::AssetHandle<quoll::TextureAsset>>(),
+                .get<quoll::AssetRef<quoll::TextureAsset>>()
+                .handle(),
             texture.handle());
 }
 

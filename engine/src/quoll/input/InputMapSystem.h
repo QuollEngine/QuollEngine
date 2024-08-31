@@ -4,14 +4,12 @@
 
 namespace quoll {
 
-class AssetRegistry;
 class InputDeviceManager;
 struct SystemView;
 
 class InputMapSystem {
 public:
-  InputMapSystem(InputDeviceManager &deviceManager,
-                 AssetRegistry &assetRegistry);
+  InputMapSystem(InputDeviceManager &deviceManager);
 
   void update(SystemView &view);
 
@@ -20,7 +18,6 @@ private:
 
 private:
   InputDeviceManager &mDeviceManager;
-  AssetRegistry &mAssetRegistry;
 };
 
 } // namespace quoll

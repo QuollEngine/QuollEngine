@@ -177,11 +177,8 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSpriteFieldIfTextureAssetIsNotInRegistry) {
-  static constexpr quoll::AssetHandle<quoll::TextureAsset>
-      NonExistentMeshHandle(45);
-
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Sprite>(entity, {NonExistentMeshHandle});
+  entityDatabase.set<quoll::Sprite>(entity, {});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["sprite"]);
@@ -191,7 +188,7 @@ TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
   auto texture = createAsset<quoll::TextureAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Sprite>(entity, {texture.handle()});
+  entityDatabase.set<quoll::Sprite>(entity, {texture});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["sprite"]);
@@ -344,9 +341,6 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkeletonFieldIfSkeletonAssetIsNotInRegistry) {
-  static constexpr quoll::AssetHandle<quoll::SkeletonAsset>
-      NonExistentSkeletonHandle{45};
-
   auto entity = entityDatabase.create();
   quoll::Skeleton component{};
   entityDatabase.set(entity, component);
@@ -400,9 +394,6 @@ TEST_F(EntitySerializerTest, CreatesJointAttachmentFieldWithJointId) {
 // Animator
 TEST_F(EntitySerializerTest,
        DoesNotCreateAnimatorFieldIfAnimatorAssetIsNotInRegistry) {
-  static constexpr quoll::AssetHandle<quoll::AnimatorAsset>
-      NonExistentAnimatorHandle{45};
-
   auto entity = entityDatabase.create();
   quoll::Animator component{};
   entityDatabase.set(entity, component);
@@ -618,11 +609,8 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateScriptFieldIfScriptAssetIsNotInRegistry) {
-  static constexpr quoll::AssetHandle<quoll::LuaScriptAsset> NonExistentHandle{
-      45};
-
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {NonExistentHandle});
+  entityDatabase.set<quoll::LuaScript>(entity, {});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["script"]);
@@ -643,13 +631,13 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
 
   auto entity = entityDatabase.create();
 
-  quoll::LuaScript component{script.handle()};
+  quoll::LuaScript component{script};
   component.variables.insert_or_assign("test_str",
                                        quoll::String("hello world"));
   component.variables.insert_or_assign("test_str_invalid",
                                        quoll::String("hello world"));
-  component.variables.insert_or_assign("test_prefab", prefab.handle());
-  component.variables.insert_or_assign("test_texture", texture.handle());
+  component.variables.insert_or_assign("test_prefab", prefab);
+  component.variables.insert_or_assign("test_texture", texture);
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -703,8 +691,6 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
 }
 
 TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
-  static constexpr quoll::AssetHandle<quoll::FontAsset> NonExistentHandle{45};
-
   auto entity = entityDatabase.create();
 
   quoll::Text component{};

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
 #include "quoll/entity/EntityDatabase.h"
 
 namespace quoll {
@@ -9,7 +8,7 @@ struct SystemView;
 
 class UICanvasUpdater {
 public:
-  void render(SystemView &view, AssetRegistry &assetRegistry);
+  void render(SystemView &view);
 
   void setViewport(f32 x, f32 y, f32 width, f32 height);
 

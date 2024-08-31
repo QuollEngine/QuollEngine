@@ -8,7 +8,7 @@
 
 namespace quoll {
 
-class AssetRegistry;
+class AssetCache;
 class WindowSignals;
 class PhysicsSystem;
 class EntityDatabase;
@@ -16,7 +16,7 @@ struct SystemView;
 
 class LuaScriptingSystem : NoCopyMove {
 public:
-  LuaScriptingSystem(AssetRegistry &assetRegistry);
+  LuaScriptingSystem(AssetCache &assetCache);
 
   ~LuaScriptingSystem() = default;
 
@@ -33,7 +33,7 @@ private:
   void destroyScriptingData(LuaScript &component);
 
 private:
-  AssetRegistry &mAssetRegistry;
+  AssetCache &mAssetCache;
   lua::Interpreter mLuaInterpreter;
   lua::ScriptLoop mScriptLoop;
 };

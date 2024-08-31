@@ -6,8 +6,16 @@
 using UILuaTableTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(UILuaTableTest, ImageReturnsTableForImageComponent) {
+  auto texture = createAsset<quoll::TextureAsset>();
+  ASSERT_EQ(texture.handle().getRawId(), 1);
   auto entity = entityDatabase.create();
   call(entity, "uiElementImage");
+}
+
+TEST_F(UILuaTableTest, InvalidImageReturnsTableWithNullTexture) {
+  auto texture = createAsset<quoll::TextureAsset>();
+  auto entity = entityDatabase.create();
+  call(entity, "uiElementImageInvalid");
 }
 
 TEST_F(UILuaTableTest, TextReturnsTableForTextComponent) {
@@ -16,6 +24,14 @@ TEST_F(UILuaTableTest, TextReturnsTableForTextComponent) {
 }
 
 TEST_F(UILuaTableTest, ViewReturnsTableForViewComponent) {
+  auto texture1 = createAsset<quoll::TextureAsset>();
+  auto texture2 = createAsset<quoll::TextureAsset>();
+  auto texture3 = createAsset<quoll::TextureAsset>();
+
+  ASSERT_EQ(texture1.handle().getRawId(), 1);
+  ASSERT_EQ(texture2.handle().getRawId(), 2);
+  ASSERT_EQ(texture3.handle().getRawId(), 3);
+
   auto entity = entityDatabase.create();
   call(entity, "uiElementView");
 }

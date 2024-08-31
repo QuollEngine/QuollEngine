@@ -430,8 +430,13 @@ end
 local ui = game:get("UI")
 
 function uiElementImage()
+  local image = ui.image{texture=1}
+  expectEq(image.texture, 1)
+end
+
+function uiElementImageInvalid()
   local image = ui.image{texture=10}
-  expectEq(image.texture, 10)
+  expectEq(image.texture, 0)
 end
 
 function uiElementText()
@@ -447,27 +452,27 @@ function tableLength(T)
 
 function uiElementView()
   local view = ui.view{children={
-    ui.image{texture=10},
+    ui.image{texture=1},
     ui.text{content="Hello"},
-    ui.image{texture=20},
+    ui.image{texture=2},
     ui.text{content="Test"},
     ui.view{
         children={
             ui.text{content="Child"},
-            ui.image{texture=30}
+            ui.image{texture=3}
         }
     },
     ui.view{}
   }}
 
   expectEq(tableLength(view.children), 6)
-  expectEq(view.children[1].texture, 10)
+  expectEq(view.children[1].texture, 1)
   expectEq(view.children[2].content, "Hello")
-  expectEq(view.children[3].texture, 20)
+  expectEq(view.children[3].texture, 2)
   expectEq(view.children[4].content, "Test")
   expectEq(tableLength(view.children[5].children), 2)
   expectEq(view.children[5].children[1].content, "Child")
-  expectEq(view.children[5].children[2].texture, 30)
+  expectEq(view.children[5].children[2].texture, 3)
   expectEq(tableLength(view.children[6].children), 0)
 end
 
@@ -501,14 +506,14 @@ end
 
 function uiCanvasRender()
     view = ui.view{children={
-        ui.image{texture=10},
+        ui.image{texture=1},
         ui.text{content="Hello"},
-        ui.image{texture=20},
+        ui.image{texture=2},
         ui.text{content="Test"},
         ui.view{
             children={
                 ui.text{content="Child"},
-                ui.image{texture=30}
+                ui.image{texture=3}
             }
         },
         ui.view{}

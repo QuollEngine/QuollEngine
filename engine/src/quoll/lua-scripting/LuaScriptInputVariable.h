@@ -12,9 +12,9 @@ public:
 
   LuaScriptInputVariable(String value);
 
-  LuaScriptInputVariable(AssetHandle<PrefabAsset> value);
+  LuaScriptInputVariable(AssetRef<PrefabAsset> value);
 
-  LuaScriptInputVariable(AssetHandle<TextureAsset> value);
+  LuaScriptInputVariable(AssetRef<TextureAsset> value);
 
   template <class TValue> inline const TValue &get() const {
     return std::get<TValue>(mValue);
@@ -24,8 +24,7 @@ public:
 
 private:
   LuaScriptVariableType mType = LuaScriptVariableType::Invalid;
-  std::variant<String, AssetHandle<PrefabAsset>, AssetHandle<TextureAsset>>
-      mValue;
+  std::variant<String, AssetRef<PrefabAsset>, AssetRef<TextureAsset>> mValue;
 };
 
 } // namespace quoll

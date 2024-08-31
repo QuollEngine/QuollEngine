@@ -7,7 +7,7 @@ namespace quoll {
 class WindowSignals;
 class EntityDatabase;
 class PhysicsSystem;
-class AssetRegistry;
+class AssetCache;
 
 struct ScriptGlobals {
   WindowSignals &windowSignals;
@@ -16,7 +16,7 @@ struct ScriptGlobals {
 
   PhysicsSystem &physicsSystem;
 
-  AssetRegistry &assetRegistry;
+  AssetCache &assetCache;
 
   lua::ScriptLoop &scriptLoop;
 };

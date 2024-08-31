@@ -4,7 +4,7 @@
 #include "quoll/core/Name.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/animation/AnimatorEvent.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/audio/AudioSource.h"
 #include "quoll/audio/AudioStart.h"
 #include "quoll/audio/AudioStatus.h"
@@ -43,8 +43,8 @@
 namespace quoll {
 
 EntitySpawner::EntitySpawner(EntityDatabase &entityDatabase,
-                             AssetRegistry &assetRegistry)
-    : mEntityDatabase(entityDatabase), mAssetRegistry(assetRegistry) {}
+                             AssetCache &assetCache)
+    : mEntityDatabase(entityDatabase), mAssetCache(assetCache) {}
 
 Entity EntitySpawner::spawnEmpty(LocalTransform transform) {
   auto entity = mEntityDatabase.create();
@@ -54,12 +54,12 @@ Entity EntitySpawner::spawnEmpty(LocalTransform transform) {
   return entity;
 }
 
-std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
+std::vector<Entity> EntitySpawner::spawnPrefab(AssetRef<PrefabAsset> prefab,
                                                LocalTransform transform) {
-  QuollAssert(mAssetRegistry.has(handle), "Prefab not found");
+  QuollAssert(prefab, "Prefab not found");
 
-  const auto &assetName = mAssetRegistry.getMeta(handle).name;
-  const auto &asset = mAssetRegistry.get(handle);
+  const auto &assetName = prefab.meta().name;
+  const auto &asset = prefab.get();
 
   std::unordered_map<u32, usize> entityMap;
   std::vector<Entity> entities;
@@ -206,16 +206,16 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
   return entities;
 }
 
-Entity EntitySpawner::spawnSprite(AssetHandle<TextureAsset> handle,
+Entity EntitySpawner::spawnSprite(AssetRef<TextureAsset> texture,
                                   LocalTransform transform) {
   auto entity = mEntityDatabase.create();
 
-  auto name = mAssetRegistry.getMeta(handle).name;
+  auto name = texture.meta().name;
 
   mEntityDatabase.set(entity, transform);
   mEntityDatabase.set<WorldTransform>(entity, {});
   mEntityDatabase.set(entity, Name{name});
-  mEntityDatabase.set<Sprite>(entity, {handle});
+  mEntityDatabase.set<Sprite>(entity, {texture});
 
   return entity;
 }

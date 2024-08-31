@@ -7,11 +7,11 @@ namespace quoll {
 class SpriteSerializer {
 public:
   static void serialize(YAML::Node &node, EntityDatabase &entityDatabase,
-                        Entity entity, AssetRegistry &assetRegistry);
+                        Entity entity);
 
   static void deserialize(const YAML::Node &node,
                           EntityDatabase &entityDatabase, Entity entity,
-                          AssetRegistry &assetRegistry);
+                          AssetCache &assetCache);
 };
 
 } // namespace quoll

@@ -632,15 +632,15 @@ void EntityPanel::renderSprite(Scene &scene, AssetCache &assetCache,
   if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
 
     if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto handle = scene.entityDatabase.get<Sprite>(mSelectedEntity).handle;
+      const auto &texture =
+          scene.entityDatabase.get<Sprite>(mSelectedEntity).handle;
 
-      const auto &asset = assetRegistry.get(handle);
       static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
       if (auto table = widgets::Table("TableSprite", 2)) {
-        table.row("Texture", assetRegistry.getMeta(handle).name);
+        table.row("Texture", texture.meta().name);
         table.column("Preview");
-        table.column(asset.deviceHandle, TextureSize);
+        table.column(texture->deviceHandle, TextureSize);
       }
     }
 
@@ -1365,8 +1365,8 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &script = scene.entityDatabase.get<LuaScript>(mSelectedEntity);
-    const auto &asset = assetRegistry.get(script.handle);
-    const auto &name = assetRegistry.getMeta(script.handle).name;
+    const auto &asset = script.handle.get();
+    const auto &name = script.handle.meta().name;
 
     ImGui::Text("Name: %s", name.c_str());
 
@@ -1396,14 +1396,14 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
             value = script.variables.at(name).get<String>();
           } else if (script.variables.at(name).isType(
                          LuaScriptVariableType::AssetPrefab)) {
-            auto handle =
-                script.variables.at(name).get<AssetHandle<PrefabAsset>>();
-            value = assetRegistry.getMeta(handle).name;
+            const auto &prefab =
+                script.variables.at(name).get<AssetRef<PrefabAsset>>();
+            value = prefab.meta().name;
           } else if (script.variables.at(name).isType(
                          LuaScriptVariableType::AssetTexture)) {
-            auto handle =
-                script.variables.at(name).get<AssetHandle<TextureAsset>>();
-            value = assetRegistry.getMeta(handle).name;
+            const auto &texture =
+                script.variables.at(name).get<AssetRef<TextureAsset>>();
+            value = texture.meta().name;
           }
 
           table.row(name, type, value);
@@ -1440,16 +1440,16 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
             ImGui::Text("%s", name.c_str());
             auto value =
                 existingVariable.isType(LuaScriptVariableType::AssetPrefab)
-                    ? existingVariable.get<AssetHandle<PrefabAsset>>()
-                    : AssetHandle<PrefabAsset>();
+                    ? existingVariable.get<AssetRef<PrefabAsset>>()
+                    : AssetRef<PrefabAsset>();
 
             const auto width = ImGui::GetWindowContentRegionWidth();
             const f32 halfWidth = width * 0.5f;
             if (!value) {
               widgets::Button("Drag prefab here", ImVec2(width, halfWidth));
             } else {
-              String buttonLabel = "Replace current prefab: " +
-                                   assetRegistry.getMeta(value).name;
+              String buttonLabel =
+                  "Replace current prefab: " + value.meta().name;
               widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
             }
 
@@ -1461,7 +1461,7 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
 
                 if (prefab) {
                   mSetScriptVariable.reset(new EntitySetScriptVariable(
-                      mSelectedEntity, name, prefab.data().handle()));
+                      mSelectedEntity, name, prefab.data()));
                 }
               }
             }
@@ -1469,16 +1469,16 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
             ImGui::Text("%s", name.c_str());
             auto value =
                 existingVariable.isType(LuaScriptVariableType::AssetTexture)
-                    ? existingVariable.get<AssetHandle<TextureAsset>>()
-                    : AssetHandle<TextureAsset>();
+                    ? existingVariable.get<AssetRef<TextureAsset>>()
+                    : AssetRef<TextureAsset>();
 
             const auto width = ImGui::GetWindowContentRegionWidth();
             const f32 halfWidth = width * 0.5f;
             if (!value) {
               widgets::Button("Drag texture here", ImVec2(width, halfWidth));
             } else {
-              String buttonLabel = "Replace current texture: " +
-                                   assetRegistry.getMeta(value).name;
+              String buttonLabel =
+                  "Replace current texture: " + value.meta().name;
               widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
             }
 
@@ -1490,7 +1490,7 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
 
                 if (texture) {
                   mSetScriptVariable.reset(new EntitySetScriptVariable(
-                      mSelectedEntity, name, texture.data().handle()));
+                      mSelectedEntity, name, texture.data()));
                 }
               }
             }
@@ -1901,10 +1901,10 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
       if (asset) {
         if (scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
           actionExecutor.execute<EntityUpdateImmediateComponent<LuaScript>>(
-              mSelectedEntity, LuaScript{asset.data().handle()});
+              mSelectedEntity, LuaScript{asset.data()});
         } else {
           actionExecutor.execute<EntityCreateComponent<LuaScript>>(
-              mSelectedEntity, LuaScript{asset.data().handle()});
+              mSelectedEntity, LuaScript{asset.data()});
         }
       }
     }
@@ -1931,10 +1931,10 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
       if (asset) {
         if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
           actionExecutor.execute<EntityUpdateImmediateComponent<Sprite>>(
-              mSelectedEntity, Sprite{asset.data().handle()});
+              mSelectedEntity, Sprite{asset.data()});
         } else {
           actionExecutor.execute<EntityCreateComponent<Sprite>>(
-              mSelectedEntity, Sprite{asset.data().handle()});
+              mSelectedEntity, Sprite{asset.data()});
         }
       }
     }

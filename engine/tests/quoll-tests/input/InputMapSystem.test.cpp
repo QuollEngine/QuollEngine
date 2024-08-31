@@ -107,7 +107,7 @@ public:
 
   quoll::AssetCache assetCache;
   quoll::InputDeviceManager deviceManager;
-  quoll::InputMapSystem inputMapSystem{deviceManager, assetCache.getRegistry()};
+  quoll::InputMapSystem inputMapSystem{deviceManager};
   quoll::Scene scene;
   quoll::EntityDatabase &db = scene.entityDatabase;
   quoll::SystemView view{&scene};

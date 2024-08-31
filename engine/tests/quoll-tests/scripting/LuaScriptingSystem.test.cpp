@@ -11,16 +11,27 @@
 
 class LuaScriptingSystemTest : public AssetCacheTestBase {
 public:
-  LuaScriptingSystemTest() : scriptingSystem(cache.getRegistry()) {
+  LuaScriptingSystemTest() : scriptingSystem(cache) {
     scriptingSystem.createSystemViewData(view);
   }
 
-  quoll::AssetHandle<quoll::LuaScriptAsset>
-  loadLuaScript(quoll::String filename) {
+  quoll::AssetRef<quoll::LuaScriptAsset> loadLuaScript(quoll::String filename) {
     auto uuid = quoll::Uuid::generate();
     cache.createFromSource<quoll::LuaScriptAsset>(FixturesPath / filename,
                                                   uuid);
-    return cache.load<quoll::LuaScriptAsset>(uuid);
+    return cache.request<quoll::LuaScriptAsset>(uuid);
+  }
+
+  template <typename TAssetData>
+  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
+    quoll::AssetData<TAssetData> info{};
+    info.type = quoll::AssetCache::getAssetType<TAssetData>();
+    info.uuid = quoll::Uuid::generate();
+    info.data = data;
+
+    cache.getRegistry().add(info);
+
+    return cache.request<TAssetData>(info.uuid).data();
   }
 
   quoll::Scene scene;
@@ -180,14 +191,14 @@ TEST_F(LuaScriptingSystemTest,
        RemovesScriptComponentIfInputVarTypesAreInvalid) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
+  auto prefab = createAsset<quoll::PrefabAsset>();
+  auto texture = createAsset<quoll::TextureAsset>();
+
   auto entity = entityDatabase.create();
   quoll::LuaScript script{handle};
-  script.variables.insert_or_assign("string_value",
-                                    quoll::AssetHandle<quoll::PrefabAsset>{15});
-  script.variables.insert_or_assign("prefab_value",
-                                    quoll::AssetHandle<quoll::PrefabAsset>{15});
-  script.variables.insert_or_assign(
-      "texture_value", quoll::AssetHandle<quoll::TextureAsset>{25});
+  script.variables.insert_or_assign("string_value", prefab);
+  script.variables.insert_or_assign("prefab_value", prefab);
+  script.variables.insert_or_assign("texture_value", texture);
   entityDatabase.set(entity, script);
 
   auto &component = entityDatabase.get<quoll::LuaScript>(entity);
@@ -199,49 +210,50 @@ TEST_F(LuaScriptingSystemTest,
 TEST_F(LuaScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
+  auto prefab = createAsset<quoll::PrefabAsset>();
+  auto texture = createAsset<quoll::TextureAsset>();
+
   auto entity = entityDatabase.create();
   quoll::LuaScript script{handle};
   script.variables.insert_or_assign("string_value",
                                     quoll::String("Hello world"));
-  script.variables.insert_or_assign("prefab_value",
-                                    quoll::AssetHandle<quoll::PrefabAsset>{15});
-  script.variables.insert_or_assign(
-      "texture_value", quoll::AssetHandle<quoll::TextureAsset>{25});
+  script.variables.insert_or_assign("prefab_value", prefab);
+  script.variables.insert_or_assign("texture_value", texture);
   entityDatabase.set(entity, script);
-
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
   ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
+  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
   auto state = sol::state_view(component.state);
 
   EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
-  EXPECT_EQ(state["var_prefab"].get<u32>(), 15);
-  EXPECT_EQ(state["var_texture"].get<u32>(), 25);
+  EXPECT_EQ(state["var_prefab"].get<u32>(), prefab.handle().getRawId());
+  EXPECT_EQ(state["var_texture"].get<u32>(), texture.handle().getRawId());
 }
 
 TEST_F(LuaScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
+  auto prefab = createAsset<quoll::PrefabAsset>();
+  auto texture = createAsset<quoll::TextureAsset>();
+
   auto entity = entityDatabase.create();
   quoll::LuaScript script{handle};
   script.variables.insert_or_assign("string_value",
                                     quoll::String("Hello world"));
-  script.variables.insert_or_assign("prefab_value",
-                                    quoll::AssetHandle<quoll::PrefabAsset>{15});
-  script.variables.insert_or_assign(
-      "texture_value", quoll::AssetHandle<quoll::TextureAsset>{25});
+  script.variables.insert_or_assign("prefab_value", prefab);
+  script.variables.insert_or_assign("texture_value", texture);
   entityDatabase.set(entity, script);
 
-  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
-
   scriptingSystem.start(view, physicsSystem, windowSignals);
+  ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
+  auto &component = entityDatabase.get<quoll::LuaScript>(entity);
   auto state = sol::state_view(component.state);
 
   EXPECT_EQ(state["var_string"].get<quoll::String>(), "Hello world");
-  EXPECT_EQ(state["var_prefab"].get<u32>(), 15);
-  EXPECT_EQ(state["var_texture"].get<u32>(), 25);
+  EXPECT_EQ(state["var_prefab"].get<u32>(), prefab.handle().getRawId());
+  EXPECT_EQ(state["var_texture"].get<u32>(), texture.handle().getRawId());
 
   EXPECT_TRUE(state["global_vars"].get_type() == sol::type::table);
   EXPECT_TRUE(state["entity"].is<quoll::EntityLuaTable>());

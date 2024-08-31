@@ -13,8 +13,6 @@ namespace quoll {
 
 template <class AudioBackend = DefaultAudioBackend> class AudioSystem {
 public:
-  AudioSystem(AssetRegistry &assetRegistry) : mAssetRegistry(assetRegistry) {}
-
   void createSystemViewData(SystemView &view) {
     view.audio.audioSourceRemoveObserver =
         view.scene->entityDatabase.observeRemove<AudioSource>();
@@ -93,7 +91,6 @@ public:
 
 private:
   AudioBackend mBackend;
-  AssetRegistry &mAssetRegistry;
 };
 
 } // namespace quoll

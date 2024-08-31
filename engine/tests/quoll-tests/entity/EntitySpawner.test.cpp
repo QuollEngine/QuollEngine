@@ -15,11 +15,24 @@
 class EntitySpawnerTest : public ::testing::Test {
 public:
   EntitySpawnerTest()
-      : entitySpawner(entityDatabase, assetRegistry), assetCache("/") {}
+      : entitySpawner(entityDatabase, assetCache), assetCache("/") {}
+
+  template <typename TAssetData>
+  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {},
+                                          quoll::String name = "") {
+    quoll::AssetData<TAssetData> info{};
+    info.type = quoll::AssetCache::getAssetType<TAssetData>();
+    info.uuid = quoll::Uuid::generate();
+    info.data = data;
+    info.name = name;
+
+    assetCache.getRegistry().add(info);
+
+    return assetCache.request<TAssetData>(info.uuid).data();
+  }
 
   quoll::EntityDatabase entityDatabase;
   quoll::AssetCache assetCache;
-  quoll::AssetRegistry &assetRegistry = assetCache.getRegistry();
   quoll::EntitySpawner entitySpawner;
 };
 
@@ -40,12 +53,12 @@ TEST_F(EntitySpawnerTest, SpawnEmptyCreatesEmptyEntity) {
 
 TEST_F(EntitySpawnerDeathTest, SpawnPrefabFailsIfPrefabDoesNotExist) {
   EXPECT_DEATH(
-      entitySpawner.spawnPrefab(quoll::AssetHandle<quoll::PrefabAsset>{15}, {}),
+      entitySpawner.spawnPrefab(quoll::AssetRef<quoll::PrefabAsset>(), {}),
       ".*");
 }
 
 TEST_F(EntitySpawnerDeathTest, SpawnPrefabReturnsEmptyListIfPrefabIsEmpty) {
-  auto prefab = assetRegistry.add<quoll::PrefabAsset>({});
+  auto prefab = createAsset<quoll::PrefabAsset>();
   EXPECT_DEATH(entitySpawner.spawnPrefab(prefab, {}), ".*");
 }
 
@@ -99,25 +112,15 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create two meshes
   for (u32 i = 0; i < 2; ++i) {
-    quoll::AssetData<quoll::MeshAsset> meshAsset{};
-    meshAsset.type = quoll::AssetType::Mesh;
-    meshAsset.uuid = quoll::Uuid::generate();
-    assetRegistry.add(meshAsset);
-
     quoll::PrefabComponent<quoll::AssetRef<quoll::MeshAsset>> mesh{};
     mesh.entity = i;
-    mesh.value = assetCache.request<quoll::MeshAsset>(meshAsset.uuid);
+    mesh.value = createAsset<quoll::MeshAsset>();
     asset.data.meshes.push_back(mesh);
   }
 
   std::vector<quoll::AssetRef<quoll::MaterialAsset>> materials;
   for (u32 i = 0; i < 3; ++i) {
-    quoll::AssetData<quoll::MaterialAsset> data{};
-    data.type = quoll::AssetType::Material;
-    data.uuid = quoll::Uuid::generate();
-    assetCache.getRegistry().add(data);
-
-    auto material = assetCache.request<quoll::MaterialAsset>(data.uuid).data();
+    auto material = createAsset<quoll::MaterialAsset>();
     materials.push_back(material);
   }
 
@@ -150,54 +153,30 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create three skinned meshes
   for (u32 i = 2; i < 5; ++i) {
-    quoll::AssetData<quoll::MeshAsset> meshAsset{};
-    meshAsset.type = quoll::AssetType::Mesh;
-    meshAsset.uuid = quoll::Uuid::generate();
-    assetRegistry.add(meshAsset);
-
     quoll::PrefabComponent<quoll::AssetRef<quoll::MeshAsset>> mesh{};
     mesh.entity = i;
-    mesh.value = assetCache.request<quoll::MeshAsset>(meshAsset.uuid);
+    mesh.value = createAsset<quoll::MeshAsset>();
     asset.data.meshes.push_back(mesh);
   }
 
   // create skeletons for skinned meshes
   for (u32 i = 2; i < 5; ++i) {
-    quoll::AssetData<quoll::SkeletonAsset> skeletonAsset{};
-    skeletonAsset.type = quoll::AssetType::Skeleton;
-    skeletonAsset.uuid = quoll::Uuid::generate();
-    assetRegistry.add(skeletonAsset);
-
     quoll::PrefabComponent<quoll::AssetRef<quoll::SkeletonAsset>> skeleton{};
     skeleton.entity = i;
-    skeleton.value =
-        assetCache.request<quoll::SkeletonAsset>(skeletonAsset.uuid);
+    skeleton.value = createAsset<quoll::SkeletonAsset>();
     asset.data.skeletons.push_back(skeleton);
   }
 
   for (u32 i = 2; i < 5; ++i) {
-    quoll::AssetData<quoll::AnimationAsset> animationAsset{};
-    animationAsset.type = quoll::AssetType::Animation;
-    animationAsset.uuid = quoll::Uuid::generate();
-    assetRegistry.add(animationAsset);
-    quoll::AssetRef<quoll::AnimationAsset> animation =
-        assetCache.request<quoll::AnimationAsset>(animationAsset.uuid);
-    asset.data.animations.push_back(animation);
+    asset.data.animations.push_back(createAsset<quoll::AnimationAsset>());
   }
 
   // create animators for skinned meshes
   // also create one additional animator
   for (u32 i = 2; i < 5; ++i) {
-    quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
-    animatorAsset.type = quoll::AssetType::Animator;
-    animatorAsset.uuid = quoll::Uuid::generate();
-    animatorAsset.data.initialState = i;
-    assetRegistry.add(animatorAsset);
-
     quoll::PrefabComponent<quoll::AssetRef<quoll::AnimatorAsset>> animator{};
     animator.entity = i;
-    animator.value =
-        assetCache.request<quoll::AnimatorAsset>(animatorAsset.uuid);
+    animator.value = createAsset<quoll::AnimatorAsset>({.initialState = i});
     asset.data.animators.push_back(animator);
   }
 
@@ -217,7 +196,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     asset.data.pointLights.push_back(light);
   }
 
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = createAsset<quoll::PrefabAsset>(asset.data);
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
@@ -308,9 +287,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     const auto &renderer = db.get<quoll::MeshRenderer>(entity);
 
     for (usize mi = 0; mi < renderer.materials.size(); ++mi) {
-      EXPECT_EQ(renderer.materials.at(mi),
-                quoll::AssetHandle<quoll::MaterialAsset>(
-                    static_cast<quoll::AssetHandleType>(mi) + 1));
+      EXPECT_EQ(renderer.materials.at(mi).handle().getRawId(), mi + 1);
     }
   }
 
@@ -320,9 +297,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     const auto &renderer = db.get<quoll::SkinnedMeshRenderer>(entity);
 
     for (usize mi = 0; mi < renderer.materials.size(); ++mi) {
-      EXPECT_EQ(renderer.materials.at(mi),
-                quoll::AssetHandle<quoll::MaterialAsset>(
-                    static_cast<quoll::AssetHandleType>(mi + 1)));
+      EXPECT_EQ(renderer.materials.at(mi).handle().getRawId(), mi + 1);
     }
   }
 
@@ -340,7 +315,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (u32 i = 2; i < 5; ++i) {
     auto entity = res.at(i);
     const auto &animator = db.get<quoll::Animator>(entity);
-    EXPECT_NE(animator.asset, quoll::AssetHandle<quoll::AnimatorAsset>());
+    EXPECT_TRUE(animator.asset);
     EXPECT_EQ(animator.currentState, i);
     EXPECT_EQ(animator.asset->initialState, animator.currentState);
     EXPECT_EQ(animator.normalizedTime, 0.0f);
@@ -360,16 +335,17 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 }
 
 TEST_F(EntitySpawnerTest, SpawnPrefabCreatesParentsBeforeChild) {
-  quoll::AssetData<quoll::PrefabAsset> asset{};
+  quoll::PrefabAsset assetData{};
 
   {
     quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
     transform.entity = 0;
     transform.value.parent = 1;
     transform.value.position = glm::vec3(0.2f);
-    asset.data.transforms.push_back(transform);
+    assetData.transforms.push_back(transform);
   }
-  auto prefab = assetRegistry.add(asset);
+
+  auto prefab = createAsset(assetData);
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
@@ -388,27 +364,20 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesParentsBeforeChild) {
 TEST_F(
     EntitySpawnerTest,
     SpawnPrefabWrapsAllSpawnedEntitiesInAParentIfPrefabHasMoreThanOneRootEntity) {
-  quoll::AssetData<quoll::PrefabAsset> asset{};
-  asset.uuid = quoll::Uuid("231231231");
-  asset.name = "my-prefab";
+  quoll::PrefabAsset assetData{};
 
   {
     quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
     transform.entity = 0;
     transform.value.parent = -1;
-    asset.data.transforms.push_back(transform);
-
-    quoll::AssetData<quoll::MeshAsset> meshData{};
-    meshData.type = quoll::AssetType::Mesh;
-    meshData.uuid = quoll::Uuid::generate();
-    assetRegistry.add(meshData);
+    assetData.transforms.push_back(transform);
 
     quoll::PrefabComponent<quoll::AssetRef<quoll::MeshAsset>> mesh{};
     mesh.entity = 1;
-    mesh.value = assetCache.request<quoll::MeshAsset>(meshData.uuid);
-    asset.data.meshes.push_back(mesh);
+    mesh.value = createAsset<quoll::MeshAsset>();
+    assetData.meshes.push_back(mesh);
   }
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = createAsset(assetData, "my-prefab");
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
@@ -435,7 +404,7 @@ TEST_F(
 
 TEST_F(EntitySpawnerTest,
        SpawnPrefabCreatesSingleEntityIfPrefabHasOneRootEntity) {
-  quoll::AssetData<quoll::PrefabAsset> asset{};
+  quoll::PrefabAsset assetData{};
   for (i32 i = 0; i < 2; ++i) {
     glm::vec3 position(static_cast<f32>(i));
     glm::quat rotation(static_cast<f32>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
@@ -447,9 +416,9 @@ TEST_F(EntitySpawnerTest,
     transform.value.rotation = rotation;
     transform.value.scale = scale;
     transform.value.parent = i - 1;
-    asset.data.transforms.push_back(transform);
+    assetData.transforms.push_back(transform);
   }
-  auto prefab = assetRegistry.add(asset);
+  auto prefab = createAsset(assetData);
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
@@ -467,11 +436,8 @@ TEST_F(EntitySpawnerTest,
 
 TEST_F(EntitySpawnerTest,
        SpawnSpriteCreatesEntityWithSpriteAndTransformComponents) {
-  quoll::AssetData<quoll::TextureAsset> asset{};
-  asset.uuid = quoll::Uuid("121311231");
-  asset.name = "my-sprite";
-  asset.data.deviceHandle = quoll::rhi::TextureHandle{25};
-  auto assetHandle = assetRegistry.add(asset);
+  auto assetHandle = createAsset<quoll::TextureAsset>(
+      {.deviceHandle = quoll::rhi::TextureHandle{25}}, "my-sprite");
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
 

@@ -10,9 +10,6 @@
 
 namespace quoll {
 
-AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
-    : mAssetRegistry(assetRegistry) {}
-
 void AnimationSystem::prepare(SystemView &view) {
   QUOLL_PROFILE_EVENT("AnimationSystem::prepare");
 

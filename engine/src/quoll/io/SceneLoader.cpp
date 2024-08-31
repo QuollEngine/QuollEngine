@@ -35,8 +35,7 @@ Result<void> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   NameSerializer::deserialize(node, mEntityDatabase, entity, entityIdCache);
   TransformSerializer::deserialize(node, mEntityDatabase, entity,
                                    entityIdCache);
-  SpriteSerializer::deserialize(node, mEntityDatabase, entity,
-                                mAssetCache.getRegistry());
+  SpriteSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   MeshSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   LightSerializer::deserialize(node, mEntityDatabase, entity);
   CameraSerializer::deserialize(node, mEntityDatabase, entity);
@@ -57,8 +56,7 @@ Result<void> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                              mAssetCache);
 
   AudioSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
-  ScriptSerializer::deserialize(node, mEntityDatabase, entity,
-                                mAssetCache.getRegistry());
+  ScriptSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   TextSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   InputMapSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   UICanvasSerializer::deserialize(node, mEntityDatabase, entity);
