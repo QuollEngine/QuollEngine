@@ -49,34 +49,27 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
   TransformSerializer::serialize(components, mEntityDatabase, entity);
   SpriteSerializer::serialize(components, mEntityDatabase, entity,
                               mAssetRegistry);
-  MeshSerializer::serialize(components, mEntityDatabase, entity,
-                            mAssetRegistry);
+  MeshSerializer::serialize(components, mEntityDatabase, entity);
   LightSerializer::serialize(components, mEntityDatabase, entity);
   CameraSerializer::serialize(components, mEntityDatabase, entity);
-  SkeletonSerializer::serialize(components, mEntityDatabase, entity,
-                                mAssetRegistry);
+  SkeletonSerializer::serialize(components, mEntityDatabase, entity);
   EnvironmentLightingSerializer::serialize(components, mEntityDatabase, entity);
-  EnvironmentSkyboxSerializer::serialize(components, mEntityDatabase, entity,
-                                         mAssetRegistry);
+  EnvironmentSkyboxSerializer::serialize(components, mEntityDatabase, entity);
 
   JointAttachmentSerializer::serialize(components, mEntityDatabase, entity);
 
-  AnimatorSerializer::serialize(components, mEntityDatabase, entity,
-                                mAssetRegistry);
+  AnimatorSerializer::serialize(components, mEntityDatabase, entity);
 
   RigidBodySerializer::serialize(components, mEntityDatabase, entity);
   CollidableSerializer::serialize(components, mEntityDatabase, entity);
   MeshRendererSerializer::serialize(components, mEntityDatabase, entity);
   SkinnedMeshRendererSerializer::serialize(components, mEntityDatabase, entity);
 
-  AudioSerializer::serialize(components, mEntityDatabase, entity,
-                             mAssetRegistry);
+  AudioSerializer::serialize(components, mEntityDatabase, entity);
   ScriptSerializer::serialize(components, mEntityDatabase, entity,
                               mAssetRegistry);
-  TextSerializer::serialize(components, mEntityDatabase, entity,
-                            mAssetRegistry);
-  InputMapSerializer::serialize(components, mEntityDatabase, entity,
-                                mAssetRegistry);
+  TextSerializer::serialize(components, mEntityDatabase, entity);
+  InputMapSerializer::serialize(components, mEntityDatabase, entity);
   UICanvasSerializer::serialize(components, mEntityDatabase, entity);
 
   return components;

@@ -5,28 +5,24 @@
 namespace quoll {
 
 void AudioSerializer::serialize(YAML::Node &node,
-                                EntityDatabase &entityDatabase, Entity entity,
-                                AssetRegistry &assetRegistry) {
+                                EntityDatabase &entityDatabase, Entity entity) {
   if (entityDatabase.has<AudioSource>(entity)) {
-    auto handle = entityDatabase.get<AudioSource>(entity).source;
-    if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.getMeta(handle).uuid;
-
-      node["audio"]["source"] = uuid;
+    const auto &asset = entityDatabase.get<AudioSource>(entity).source;
+    if (asset) {
+      node["audio"]["source"] = asset.meta().uuid;
     }
   }
 }
 
 void AudioSerializer::deserialize(const YAML::Node &node,
                                   EntityDatabase &entityDatabase, Entity entity,
-                                  AssetRegistry &assetRegistry) {
+                                  AssetCache &assetCache) {
   if (node["audio"] && node["audio"].IsMap()) {
     auto uuid = node["audio"]["source"].as<Uuid>(Uuid{});
+    auto asset = assetCache.request<AudioAsset>(uuid);
 
-    auto handle = assetRegistry.findHandleByUuid<AudioAsset>(uuid);
-
-    if (handle) {
-      entityDatabase.set<AudioSource>(entity, {handle});
+    if (asset) {
+      entityDatabase.set<AudioSource>(entity, {asset});
     }
   }
 }

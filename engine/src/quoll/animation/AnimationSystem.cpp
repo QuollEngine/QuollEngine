@@ -18,10 +18,10 @@ void AnimationSystem::prepare(SystemView &view) {
 
   auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, animator] : entityDatabase.view<Animator>()) {
-    const auto &animatorAsset = mAssetRegistry.get(animator.asset);
+    const auto &asset = animator.asset.get();
 
-    if (animator.currentState >= animatorAsset.states.size()) {
-      animator.currentState = animatorAsset.initialState;
+    if (animator.currentState >= asset.states.size()) {
+      animator.currentState = asset.initialState;
     }
   }
 }
@@ -32,8 +32,7 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, animator, animatorEvent] :
        entityDatabase.view<Animator, AnimatorEvent>()) {
-    const auto &state =
-        mAssetRegistry.get(animator.asset).states.at(animator.currentState);
+    const auto &state = animator.asset->states.at(animator.currentState);
 
     for (auto &transition : state.transitions) {
       if (transition.eventName == animatorEvent.eventName) {
@@ -49,9 +48,7 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
   for (auto [entity, transform, animator] :
        entityDatabase.view<LocalTransform, Animator>()) {
 
-    const auto &animatorAsset = mAssetRegistry.get(animator.asset);
-
-    const auto &state = animatorAsset.states.at(animator.currentState);
+    const auto &state = animator.asset->states.at(animator.currentState);
 
     const auto &animation = state.animation;
 

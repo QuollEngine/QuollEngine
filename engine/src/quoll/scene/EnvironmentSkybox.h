@@ -11,7 +11,7 @@ enum class EnvironmentSkyboxType { Color, Texture };
 struct EnvironmentSkybox {
   EnvironmentSkyboxType type = EnvironmentSkyboxType::Color;
 
-  AssetHandle<EnvironmentAsset> texture;
+  AssetRef<EnvironmentAsset> texture;
 
   glm::vec4 color{0.0f, 0.0f, 0.0f, 1.0f};
 };

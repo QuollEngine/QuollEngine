@@ -207,11 +207,9 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
-  static constexpr quoll::AssetHandle<quoll::MeshAsset> NonExistentMeshHandle{
-      45};
-
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Mesh>(entity, {NonExistentMeshHandle});
+  entityDatabase.set<quoll::Mesh>(entity,
+                                  {quoll::AssetRef<quoll::MeshAsset>()});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["mesh"]);
@@ -221,7 +219,7 @@ TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
   auto mesh = createAsset<quoll::MeshAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Mesh>(entity, {mesh.handle()});
+  entityDatabase.set<quoll::Mesh>(entity, {mesh});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["mesh"]);
@@ -351,7 +349,6 @@ TEST_F(EntitySerializerTest,
 
   auto entity = entityDatabase.create();
   quoll::Skeleton component{};
-  component.assetHandle = NonExistentSkeletonHandle;
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -363,7 +360,7 @@ TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
 
   auto entity = entityDatabase.create();
   quoll::Skeleton component{};
-  component.assetHandle = skeleton.handle();
+  component.assetHandle = skeleton;
 
   entityDatabase.set(entity, component);
 
@@ -408,7 +405,6 @@ TEST_F(EntitySerializerTest,
 
   auto entity = entityDatabase.create();
   quoll::Animator component{};
-  component.asset = NonExistentAnimatorHandle;
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -419,7 +415,7 @@ TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
   auto animator = createAsset<quoll::AnimatorAsset>();
 
   quoll::Animator component{};
-  component.asset = animator.handle();
+  component.asset = animator;
   component.currentState = 0;
 
   auto entity = entityDatabase.create();
@@ -592,10 +588,8 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateAudioFieldIfAudioAssetIsNotInRegistry) {
-  static constexpr quoll::AssetHandle<quoll::AudioAsset> NonExistentHandle{45};
-
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {NonExistentHandle});
+  entityDatabase.set<quoll::AudioSource>(entity, {});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["audio"]);
@@ -605,7 +599,7 @@ TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
   auto audio = createAsset<quoll::AudioAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::AudioSource>(entity, {audio.handle()});
+  entityDatabase.set<quoll::AudioSource>(entity, {audio});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["audio"]);
@@ -702,7 +696,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
   auto entity = entityDatabase.create();
   quoll::Text component{};
   component.content = "";
-  component.font = font.handle();
+  component.font = font;
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["text"]);
@@ -715,7 +709,6 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
 
   quoll::Text component{};
   component.content = "Hello world";
-  component.font = NonExistentHandle;
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -730,7 +723,7 @@ TEST_F(EntitySerializerTest,
   quoll::Text component{};
   component.content = "Hello world";
   component.lineHeight = 2.0f;
-  component.font = font.handle();
+  component.font = font;
 
   entityDatabase.set(entity, component);
 
@@ -995,13 +988,9 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateEnvironmentIfSkyboxIsTextureButAssetDoesNotExist) {
-  static constexpr quoll::AssetHandle<quoll::EnvironmentAsset>
-      NonExistentHandle{45};
-
   auto entity = entityDatabase.create();
 
-  quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Texture,
-                                     NonExistentHandle};
+  quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Texture};
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -1015,7 +1004,7 @@ TEST_F(EntitySerializerTest,
   auto entity = entityDatabase.create();
 
   quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Texture,
-                                     environment.handle()};
+                                     environment};
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -1030,10 +1019,9 @@ TEST_F(EntitySerializerTest,
        CreatesSkyboxWithColorTypeIfTypeIsColorAndAssetExists) {
   auto entity = entityDatabase.create();
 
-  quoll::EnvironmentSkybox component{
-      quoll::EnvironmentSkyboxType::Color,
-      quoll::AssetHandle<quoll::EnvironmentAsset>(),
-      glm::vec4(0.2f, 0.3f, 0.4f, 0.5f)};
+  quoll::EnvironmentSkybox component{quoll::EnvironmentSkyboxType::Color,
+                                     quoll::AssetRef<quoll::EnvironmentAsset>(),
+                                     glm::vec4(0.2f, 0.3f, 0.4f, 0.5f)};
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -1075,8 +1063,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest,
        DoesNotCreateInputMapFieldIfInputMapAssetDoesNotExist) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::InputMapAssetRef>(
-      entity, {quoll::AssetHandle<quoll::InputMapAsset>{25}});
+  entityDatabase.set<quoll::InputMapAssetRef>(entity, {});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["inputMap"]);
@@ -1087,7 +1074,7 @@ TEST_F(EntitySerializerTest,
   auto inputMap = createAsset<quoll::InputMapAsset>();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::InputMapAssetRef>(entity, {inputMap.handle(), 0});
+  entityDatabase.set<quoll::InputMapAssetRef>(entity, {inputMap, 0});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["inputMap"]);

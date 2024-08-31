@@ -5,26 +5,24 @@
 namespace quoll {
 
 void MeshSerializer::serialize(YAML::Node &node, EntityDatabase &entityDatabase,
-                               Entity entity, AssetRegistry &assetRegistry) {
+                               Entity entity) {
   if (entityDatabase.has<Mesh>(entity)) {
-    auto handle = entityDatabase.get<Mesh>(entity).handle;
-    if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.getMeta(handle).uuid;
-
-      node["mesh"] = uuid;
+    const auto &mesh = entityDatabase.get<Mesh>(entity);
+    if (mesh.handle) {
+      node["mesh"] = mesh.handle.meta().uuid;
     }
   }
 }
 
 void MeshSerializer::deserialize(const YAML::Node &node,
                                  EntityDatabase &entityDatabase, Entity entity,
-                                 AssetRegistry &assetRegistry) {
+                                 AssetCache &assetCache) {
   if (node["mesh"]) {
     auto uuid = node["mesh"].as<Uuid>(Uuid{});
-    auto handle = assetRegistry.findHandleByUuid<MeshAsset>(uuid);
+    auto asset = assetCache.request<MeshAsset>(uuid);
 
-    if (handle) {
-      entityDatabase.set<Mesh>(entity, {handle});
+    if (asset) {
+      entityDatabase.set<Mesh>(entity, {asset});
     }
   }
 }

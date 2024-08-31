@@ -501,29 +501,28 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       frameData.addSpriteOutline(world.worldTransform);
     } else if (entityDatabase.has<Mesh>(state.selectedEntity) &&
                entityDatabase.has<MeshRenderer>(state.selectedEntity)) {
-      auto handle = entityDatabase.get<Mesh>(state.selectedEntity).handle;
+      const auto &asset = entityDatabase.get<Mesh>(state.selectedEntity).handle;
 
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 
-      const auto &data = assetRegistry.get(handle);
-      frameData.addMeshOutline(data, world.worldTransform);
+      frameData.addMeshOutline(asset.get(), world.worldTransform);
     } else if (entityDatabase.has<Mesh>(state.selectedEntity) &&
                entityDatabase.has<SkinnedMeshRenderer>(state.selectedEntity) &&
                entityDatabase.has<Skeleton>(state.selectedEntity)) {
-      auto handle = entityDatabase.get<Mesh>(state.selectedEntity).handle;
+      const auto &asset = entityDatabase.get<Mesh>(state.selectedEntity).handle;
 
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
-      const auto &data = assetRegistry.get(handle);
 
       const auto &skeleton = entityDatabase.get<Skeleton>(state.selectedEntity)
                                  .jointFinalTransforms;
 
-      frameData.addSkinnedMeshOutline(data, skeleton, world.worldTransform);
+      frameData.addSkinnedMeshOutline(asset.get(), skeleton,
+                                      world.worldTransform);
     } else if (entityDatabase.has<Text>(state.selectedEntity)) {
       const auto &text = entityDatabase.get<Text>(state.selectedEntity);
-      const auto &font = assetRegistry.get(text.font);
+      const auto &font = text.font.get();
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 

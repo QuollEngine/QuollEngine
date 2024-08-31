@@ -37,20 +37,17 @@ Result<void> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                    entityIdCache);
   SpriteSerializer::deserialize(node, mEntityDatabase, entity,
                                 mAssetCache.getRegistry());
-  MeshSerializer::deserialize(node, mEntityDatabase, entity,
-                              mAssetCache.getRegistry());
+  MeshSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   LightSerializer::deserialize(node, mEntityDatabase, entity);
   CameraSerializer::deserialize(node, mEntityDatabase, entity);
-  SkeletonSerializer::deserialize(node, mEntityDatabase, entity,
-                                  mAssetCache.getRegistry());
+  SkeletonSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   EnvironmentLightingSerializer::deserialize(node, mEntityDatabase, entity);
   EnvironmentSkyboxSerializer::deserialize(node, mEntityDatabase, entity,
-                                           mAssetCache.getRegistry());
+                                           mAssetCache);
 
   JointAttachmentSerializer::deserialize(node, mEntityDatabase, entity);
 
-  AnimatorSerializer::deserialize(node, mEntityDatabase, entity,
-                                  mAssetCache.getRegistry());
+  AnimatorSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
 
   RigidBodySerializer::deserialize(node, mEntityDatabase, entity);
   CollidableSerializer::deserialize(node, mEntityDatabase, entity);
@@ -59,14 +56,11 @@ Result<void> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   SkinnedMeshRendererSerializer::deserialize(node, mEntityDatabase, entity,
                                              mAssetCache);
 
-  AudioSerializer::deserialize(node, mEntityDatabase, entity,
-                               mAssetCache.getRegistry());
+  AudioSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   ScriptSerializer::deserialize(node, mEntityDatabase, entity,
                                 mAssetCache.getRegistry());
-  TextSerializer::deserialize(node, mEntityDatabase, entity,
-                              mAssetCache.getRegistry());
-  InputMapSerializer::deserialize(node, mEntityDatabase, entity,
-                                  mAssetCache.getRegistry());
+  TextSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
+  InputMapSerializer::deserialize(node, mEntityDatabase, entity, mAssetCache);
   UICanvasSerializer::deserialize(node, mEntityDatabase, entity);
 
   return Ok();

@@ -5,32 +5,27 @@ namespace quoll {
 
 void AnimatorSerializer::serialize(YAML::Node &node,
                                    EntityDatabase &entityDatabase,
-                                   Entity entity,
-                                   AssetRegistry &assetRegistry) {
+                                   Entity entity) {
   if (entityDatabase.has<Animator>(entity)) {
-    auto handle = entityDatabase.get<Animator>(entity).asset;
+    const auto &asset = entityDatabase.get<Animator>(entity).asset;
 
-    if (assetRegistry.has(handle)) {
-      auto uuid = assetRegistry.getMeta(handle).uuid;
-
-      node["animator"]["asset"] = uuid;
+    if (asset) {
+      node["animator"]["asset"] = asset.meta().uuid;
     }
   }
 }
 
 void AnimatorSerializer::deserialize(const YAML::Node &node,
                                      EntityDatabase &entityDatabase,
-                                     Entity entity,
-                                     AssetRegistry &assetRegistry) {
+                                     Entity entity, AssetCache &assetCache) {
   if (node["animator"] && node["animator"].IsMap() &&
       node["animator"]["asset"]) {
-    auto assetUuid = node["animator"]["asset"].as<Uuid>(Uuid{});
-    auto handle = assetRegistry.findHandleByUuid<AnimatorAsset>(assetUuid);
+    auto uuid = node["animator"]["asset"].as<Uuid>(Uuid{});
+    auto asset = assetCache.request<AnimatorAsset>(uuid);
 
-    if (handle) {
-      const auto &asset = assetRegistry.get(handle);
+    if (asset) {
       Animator animator;
-      animator.asset = handle;
+      animator.asset = asset;
       entityDatabase.set(entity, animator);
     }
   }

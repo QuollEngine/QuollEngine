@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/AssetHandle.h"
+#include "quoll/asset/AssetRef.h"
 #include "Joint.h"
 #include "SkeletonAsset.h"
 
@@ -25,7 +25,7 @@ struct Skeleton {
 
   std::vector<String> jointNames;
 
-  AssetHandle<SkeletonAsset> assetHandle;
+  AssetRef<SkeletonAsset> assetHandle;
 };
 
 struct SkeletonDebug {

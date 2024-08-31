@@ -5,34 +5,34 @@
 namespace quoll {
 
 void TextSerializer::serialize(YAML::Node &node, EntityDatabase &entityDatabase,
-                               Entity entity, AssetRegistry &assetRegistry) {
+                               Entity entity) {
   if (entityDatabase.has<Text>(entity)) {
     const auto &text = entityDatabase.get<Text>(entity);
 
-    if (!text.content.empty() && assetRegistry.has(text.font)) {
+    if (!text.content.empty() && text.font) {
       node["text"]["content"] = text.content;
       node["text"]["lineHeight"] = text.lineHeight;
-      node["text"]["font"] = assetRegistry.getMeta(text.font).uuid;
+      node["text"]["font"] = text.font.meta().uuid;
     }
   }
 }
 
 void TextSerializer::deserialize(const YAML::Node &node,
                                  EntityDatabase &entityDatabase, Entity entity,
-                                 AssetRegistry &assetRegistry) {
+                                 AssetCache &assetCache) {
   if (node["text"] && node["text"].IsMap()) {
     auto uuid = node["text"]["font"].as<Uuid>(Uuid{});
-    auto handle = assetRegistry.findHandleByUuid<FontAsset>(uuid);
 
-    Text textComponent{};
-    textComponent.font = handle;
+    auto font = assetCache.request<FontAsset>(uuid);
 
-    if (handle) {
+    if (font) {
+      Text textComponent{};
+      textComponent.font = font;
+
       if (node["text"]["content"] && node["text"]["content"].IsScalar()) {
         textComponent.content =
             node["text"]["content"].as<String>(textComponent.content);
       }
-
       textComponent.lineHeight =
           node["text"]["lineHeight"].as<f32>(textComponent.lineHeight);
 

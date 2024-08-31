@@ -6,13 +6,12 @@ namespace quoll {
 
 void InputMapSerializer::serialize(YAML::Node &node,
                                    EntityDatabase &entityDatabase,
-                                   Entity entity,
-                                   AssetRegistry &assetRegistry) {
+                                   Entity entity) {
   if (entityDatabase.has<InputMapAssetRef>(entity)) {
     const auto &component = entityDatabase.get<InputMapAssetRef>(entity);
 
-    if (assetRegistry.has(component.handle)) {
-      node["inputMap"]["asset"] = assetRegistry.getMeta(component.handle).uuid;
+    if (component.handle) {
+      node["inputMap"]["asset"] = component.handle.meta().uuid;
       node["inputMap"]["defaultScheme"] = component.defaultScheme;
     }
   }
@@ -20,18 +19,15 @@ void InputMapSerializer::serialize(YAML::Node &node,
 
 void InputMapSerializer::deserialize(const YAML::Node &node,
                                      EntityDatabase &entityDatabase,
-                                     Entity entity,
-                                     AssetRegistry &assetRegistry) {
+                                     Entity entity, AssetCache &assetCache) {
 
   if (node["inputMap"] && node["inputMap"].IsMap()) {
     auto uuid = node["inputMap"]["asset"].as<Uuid>(Uuid{});
     auto defaultScheme = node["inputMap"]["defaultScheme"].as<usize>(0);
-    auto handle = assetRegistry.findHandleByUuid<InputMapAsset>(uuid);
 
-    if (handle) {
-      auto type = assetRegistry.getMeta(handle).type;
-
-      entityDatabase.set<InputMapAssetRef>(entity, {handle, defaultScheme});
+    auto asset = assetCache.request<InputMapAsset>(uuid);
+    if (asset) {
+      entityDatabase.set<InputMapAssetRef>(entity, {asset, defaultScheme});
     }
   }
 }
