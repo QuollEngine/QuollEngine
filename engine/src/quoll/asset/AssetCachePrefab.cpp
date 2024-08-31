@@ -56,11 +56,10 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
     assetPaths.reserve(data.meshes.size());
 
     for (auto &component : data.meshes) {
-      if (localMeshMap.find(component.value) == localMeshMap.end()) {
-        auto uuid = mRegistry.getMeta(component.value).uuid;
-        localMeshMap.insert_or_assign(component.value,
+      if (localMeshMap.find(component.value.handle()) == localMeshMap.end()) {
+        localMeshMap.insert_or_assign(component.value.handle(),
                                       static_cast<u32>(assetPaths.size()));
-        assetPaths.push_back(uuid);
+        assetPaths.push_back(component.value.meta().uuid);
       }
     }
 
@@ -74,12 +73,11 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
     assetPaths.reserve(data.skeletons.size());
 
     for (auto &component : data.skeletons) {
-      auto uuid = mRegistry.getMeta(component.value).uuid;
-
-      if (localSkeletonMap.find(component.value) == localSkeletonMap.end()) {
-        localSkeletonMap.insert_or_assign(component.value,
+      if (localSkeletonMap.find(component.value.handle()) ==
+          localSkeletonMap.end()) {
+        localSkeletonMap.insert_or_assign(component.value.handle(),
                                           static_cast<u32>(assetPaths.size()));
-        assetPaths.push_back(uuid);
+        assetPaths.push_back(component.value.meta().uuid);
       }
     }
 
@@ -92,13 +90,12 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
     std::vector<Uuid> assetPaths;
     assetPaths.reserve(data.animations.size());
 
-    for (auto handle : data.animations) {
-      auto uuid = mRegistry.getMeta(handle).uuid;
-
-      if (localAnimationMap.find(handle) == localAnimationMap.end()) {
-        localAnimationMap.insert_or_assign(handle,
+    for (auto &component : data.animations) {
+      if (localAnimationMap.find(component.handle()) ==
+          localAnimationMap.end()) {
+        localAnimationMap.insert_or_assign(component.handle(),
                                            static_cast<u32>(assetPaths.size()));
-        assetPaths.push_back(uuid);
+        assetPaths.push_back(component.meta().uuid);
       }
     }
 
@@ -112,12 +109,11 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
     assetPaths.reserve(data.animators.size());
 
     for (auto &component : data.animators) {
-      auto uuid = mRegistry.getMeta(component.value).uuid;
-
-      if (localAnimatorMap.find(component.value) == localAnimatorMap.end()) {
-        localAnimatorMap.insert_or_assign(component.value,
+      if (localAnimatorMap.find(component.value.handle()) ==
+          localAnimatorMap.end()) {
+        localAnimatorMap.insert_or_assign(component.value.handle(),
                                           static_cast<u32>(assetPaths.size()));
-        assetPaths.push_back(uuid);
+        assetPaths.push_back(component.value.meta().uuid);
       }
     }
 
@@ -156,7 +152,7 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
     file.write(numComponents);
     for (auto &component : data.meshes) {
       file.write(component.entity);
-      file.write(localMeshMap.at(component.value));
+      file.write(localMeshMap.at(component.value.handle()));
     }
   }
 
@@ -191,7 +187,7 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
     file.write(numComponents);
     for (auto &component : data.skeletons) {
       file.write(component.entity);
-      file.write(localSkeletonMap.at(component.value));
+      file.write(localSkeletonMap.at(component.value.handle()));
     }
   }
 
@@ -200,7 +196,7 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
     file.write(numComponents);
 
     for (auto &component : data.animations) {
-      file.write(localAnimationMap.at(component));
+      file.write(localAnimationMap.at(component.handle()));
     }
   }
 
@@ -210,7 +206,7 @@ Result<void> AssetCache::createPrefabFromData(const PrefabAsset &data,
 
     for (auto &component : data.animators) {
       file.write(component.entity);
-      file.write(localAnimatorMap.at(component.value));
+      file.write(localAnimatorMap.at(component.value.handle()));
     }
   }
 
@@ -274,19 +270,19 @@ Result<PrefabAsset> AssetCache::loadPrefab(const Path &path) {
     }
   }
 
-  std::vector<AssetHandle<MeshAsset>> localMeshMap;
+  std::vector<AssetRef<MeshAsset>> localMeshMap;
   {
     u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localMeshMap.resize(numAssets, AssetHandle<MeshAsset>());
+    localMeshMap.resize(numAssets);
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       auto res = request<MeshAsset>(assetUuid);
       if (res) {
-        localMeshMap.at(i) = res.data().handle();
+        localMeshMap.at(i) = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -295,19 +291,19 @@ Result<PrefabAsset> AssetCache::loadPrefab(const Path &path) {
     }
   }
 
-  std::vector<AssetHandle<SkeletonAsset>> localSkeletonMap;
+  std::vector<AssetRef<SkeletonAsset>> localSkeletonMap;
   {
     u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localSkeletonMap.resize(numAssets, AssetHandle<SkeletonAsset>());
+    localSkeletonMap.resize(numAssets);
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       auto res = request<SkeletonAsset>(assetUuid);
       if (res) {
-        localSkeletonMap.at(i) = res.data().handle();
+        localSkeletonMap.at(i) = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -316,19 +312,19 @@ Result<PrefabAsset> AssetCache::loadPrefab(const Path &path) {
     }
   }
 
-  std::vector<AssetHandle<AnimationAsset>> localAnimationMap;
+  std::vector<AssetRef<AnimationAsset>> localAnimationMap;
   {
     u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localAnimationMap.resize(numAssets, AssetHandle<AnimationAsset>());
+    localAnimationMap.resize(numAssets);
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       auto res = request<AnimationAsset>(assetUuid);
       if (res) {
-        localAnimationMap.at(i) = res.data().handle();
+        localAnimationMap.at(i) = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
 
@@ -338,19 +334,19 @@ Result<PrefabAsset> AssetCache::loadPrefab(const Path &path) {
     }
   }
 
-  std::vector<AssetHandle<AnimatorAsset>> localAnimatorMap;
+  std::vector<AssetRef<AnimatorAsset>> localAnimatorMap;
   {
     u32 numAssets = 0;
     stream.read(numAssets);
     std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
-    localAnimatorMap.resize(numAssets, AssetHandle<AnimatorAsset>());
+    localAnimatorMap.resize(numAssets);
 
     for (u32 i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
       auto res = request<AnimatorAsset>(assetUuid);
       if (res) {
-        localAnimatorMap.at(i) = res.data().handle();
+        localAnimatorMap.at(i) = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
 

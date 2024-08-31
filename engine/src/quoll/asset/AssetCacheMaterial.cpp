@@ -68,7 +68,7 @@ Result<MaterialAsset> AssetCache::loadMaterial(const Path &path) {
     if (textureUuid.isValid()) {
       auto res = request<TextureAsset>(textureUuid);
       if (res) {
-        material.baseColorTexture = res.data().handle();
+        material.baseColorTexture = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -86,7 +86,7 @@ Result<MaterialAsset> AssetCache::loadMaterial(const Path &path) {
     if (textureUuid.isValid()) {
       auto res = request<TextureAsset>(textureUuid);
       if (res) {
-        material.metallicRoughnessTexture = res.data().handle();
+        material.metallicRoughnessTexture = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -105,7 +105,7 @@ Result<MaterialAsset> AssetCache::loadMaterial(const Path &path) {
     if (textureUuid.isValid()) {
       auto res = request<TextureAsset>(textureUuid);
       if (res) {
-        material.normalTexture = res.data().handle();
+        material.normalTexture = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -123,7 +123,7 @@ Result<MaterialAsset> AssetCache::loadMaterial(const Path &path) {
     if (textureUuid.isValid()) {
       auto res = request<TextureAsset>(textureUuid);
       if (res) {
-        material.occlusionTexture = res.data().handle();
+        material.occlusionTexture = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {
@@ -141,7 +141,7 @@ Result<MaterialAsset> AssetCache::loadMaterial(const Path &path) {
     if (textureUuid.isValid()) {
       auto res = request<TextureAsset>(textureUuid);
       if (res) {
-        material.emissiveTexture = res.data().handle();
+        material.emissiveTexture = res.data();
         warnings.insert(warnings.end(), res.warnings().begin(),
                         res.warnings().end());
       } else {

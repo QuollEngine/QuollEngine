@@ -172,8 +172,13 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
               }
 
             } else if (entry.assetType == AssetType::Material) {
-              mMaterialViewer.open(
-                  static_cast<AssetHandle<MaterialAsset>>(entry.asset));
+              auto material =
+                  assetManager.getCache().request<MaterialAsset>(entry.uuid);
+              if (material) {
+                mMaterialViewer.open(material);
+              } else {
+                // TODO: Handle error
+              }
             } else {
               platform::FileOpener::openFile(entry.path);
             }
@@ -305,7 +310,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
   mStatusDialog.render();
 
-  mMaterialViewer.render(assetManager.getAssetRegistry());
+  mMaterialViewer.render();
 }
 
 void AssetBrowser::reload() { mNeedsRefresh = true; }
@@ -460,8 +465,8 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
       };
 
   std::unordered_map<AssetHandle<TextureAsset>, bool> textureCache;
-  auto addTextureEntryIfExists = [&](AssetHandle<TextureAsset> handle) {
-    addPrefabEntry(handle, textureCache);
+  auto addTextureEntryIfExists = [&](const AssetRef<TextureAsset> &texture) {
+    addPrefabEntry(texture.handle(), textureCache);
   };
 
   std::unordered_map<AssetHandle<MaterialAsset>, bool> materialCache;
@@ -479,7 +484,7 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
 
   std::unordered_map<AssetHandle<MeshAsset>, bool> meshCache;
   for (const auto &ref : prefab.meshes) {
-    addPrefabEntry(ref.value, meshCache);
+    addPrefabEntry(ref.value.handle(), meshCache);
   }
 
   for (const auto &renderer : prefab.meshRenderers) {
@@ -496,19 +501,18 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
 
   std::unordered_map<AssetHandle<SkeletonAsset>, bool> skeletonCache;
   for (const auto &ref : prefab.skeletons) {
-    addPrefabEntry(ref.value, skeletonCache);
+    addPrefabEntry(ref.value.handle(), skeletonCache);
   }
 
   std::unordered_map<AssetHandle<AnimatorAsset>, bool> animatorCache;
   for (const auto &ref : prefab.animators) {
-    addPrefabEntry(ref.value, animatorCache);
+    addPrefabEntry(ref.value.handle(), animatorCache);
   }
 
   std::unordered_map<AssetHandle<AnimationAsset>, bool> animationCache;
   for (const auto &ref : prefab.animators) {
-    const auto &animator = assetRegistry.get(ref.value);
-    for (const auto &state : animator.states) {
-      addPrefabEntry(state.animation, animationCache);
+    for (const auto &state : ref.value->states) {
+      addPrefabEntry(state.animation.handle(), animationCache);
     }
   }
 }

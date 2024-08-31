@@ -3,6 +3,7 @@
 #include "quoll/animation/AnimationAsset.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/asset/AssetHandle.h"
+#include "quoll/asset/AssetRef.h"
 #include "quoll/renderer/MeshAsset.h"
 #include "quoll/renderer/MeshRenderer.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
@@ -31,13 +32,13 @@ struct PrefabTransformData {
 struct PrefabAsset {
   std::vector<PrefabComponent<PrefabTransformData>> transforms;
 
-  std::vector<PrefabComponent<AssetHandle<MeshAsset>>> meshes;
+  std::vector<PrefabComponent<AssetRef<MeshAsset>>> meshes;
 
-  std::vector<PrefabComponent<AssetHandle<SkeletonAsset>>> skeletons;
+  std::vector<PrefabComponent<AssetRef<SkeletonAsset>>> skeletons;
 
-  std::vector<AssetHandle<AnimationAsset>> animations;
+  std::vector<AssetRef<AnimationAsset>> animations;
 
-  std::vector<PrefabComponent<AssetHandle<AnimatorAsset>>> animators;
+  std::vector<PrefabComponent<AssetRef<AnimatorAsset>>> animators;
 
   std::vector<PrefabComponent<PointLight>> pointLights;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/AssetHandle.h"
+#include "quoll/asset/AssetRef.h"
 #include "TextureAsset.h"
 
 namespace quoll {
@@ -8,13 +8,13 @@ namespace quoll {
 class Material;
 
 struct MaterialAsset {
-  AssetHandle<TextureAsset> baseColorTexture;
+  AssetRef<TextureAsset> baseColorTexture;
 
   i8 baseColorTextureCoord = -1;
 
   glm::vec4 baseColorFactor{};
 
-  AssetHandle<TextureAsset> metallicRoughnessTexture;
+  AssetRef<TextureAsset> metallicRoughnessTexture;
 
   i8 metallicRoughnessTextureCoord = -1;
 
@@ -22,19 +22,19 @@ struct MaterialAsset {
 
   f32 roughnessFactor = 0.0f;
 
-  AssetHandle<TextureAsset> normalTexture;
+  AssetRef<TextureAsset> normalTexture;
 
   i8 normalTextureCoord = -1;
 
   f32 normalScale = 0.0f;
 
-  AssetHandle<TextureAsset> occlusionTexture;
+  AssetRef<TextureAsset> occlusionTexture;
 
   i8 occlusionTextureCoord = -1;
 
   f32 occlusionStrength = 0.0f;
 
-  AssetHandle<TextureAsset> emissiveTexture;
+  AssetRef<TextureAsset> emissiveTexture;
 
   i8 emissiveTextureCoord = -1;
 

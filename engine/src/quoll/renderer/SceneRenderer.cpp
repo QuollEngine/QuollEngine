@@ -871,13 +871,13 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
     if (environment.type == EnvironmentSkyboxType::Color) {
       frameData.setSkyboxColor(environment.color);
     } else if (environment.type == EnvironmentSkyboxType::Texture &&
-               mAssetRegistry.has(environment.texture)) {
+               environment.texture) {
       const auto &asset = mAssetRegistry.get(environment.texture);
 
-      frameData.setSkyboxTexture(
-          mAssetRegistry.get(asset.specularMap).deviceHandle);
-      irradianceMap = mAssetRegistry.get(asset.irradianceMap).deviceHandle;
-      specularMap = mAssetRegistry.get(asset.specularMap).deviceHandle;
+      specularMap = asset.specularMap->deviceHandle;
+      irradianceMap = asset.irradianceMap->deviceHandle;
+
+      frameData.setSkyboxTexture(specularMap);
     }
 
     if (entityDatabase.has<EnvironmentLightingSkyboxSource>(entity)) {

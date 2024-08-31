@@ -31,13 +31,16 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   quoll::AssetData<quoll::AnimationAsset> animData{};
   animData.uuid = quoll::Uuid("idle");
-  auto idle = cache.getRegistry().add(animData);
+  cache.getRegistry().add(animData);
+  auto idle = cache.request<quoll::AnimationAsset>(animData.uuid);
 
   animData.uuid = quoll::Uuid("walk");
-  auto walk = cache.getRegistry().add(animData);
+  cache.getRegistry().add(animData);
+  auto walk = cache.request<quoll::AnimationAsset>(animData.uuid);
 
   animData.uuid = quoll::Uuid("run");
-  auto run = cache.getRegistry().add(animData);
+  cache.getRegistry().add(animData);
+  auto run = cache.request<quoll::AnimationAsset>(animData.uuid);
 
   quoll::AssetData<quoll::AnimatorAsset> asset{};
   asset.data.initialState = 1;

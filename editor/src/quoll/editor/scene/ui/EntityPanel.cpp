@@ -966,32 +966,31 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
       }
     }
 
-    if (isSimulation) {
-      if (assetRegistry.has(currentState.animation)) {
-        const auto &animationAsset = assetRegistry.get(currentState.animation);
+    if (isSimulation && currentState.animation) {
 
-        ImGui::Text("Time");
-        f32 animationTime = component.normalizedTime * animationAsset.time;
-        if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
-                               animationAsset.time)) {
-          component.normalizedTime = animationTime / animationAsset.time;
+      const auto &animationAsset = currentState.animation.get();
+
+      ImGui::Text("Time");
+      f32 animationTime = component.normalizedTime * animationAsset.time;
+      if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
+                             animationAsset.time)) {
+        component.normalizedTime = animationTime / animationAsset.time;
+      }
+
+      if (!component.playing) {
+        if (widgets::Button("Play")) {
+          component.playing = true;
         }
-
-        if (!component.playing) {
-          if (widgets::Button("Play")) {
-            component.playing = true;
-          }
-        } else {
-          if (widgets::Button("Pause")) {
-            component.playing = false;
-          }
+      } else {
+        if (widgets::Button("Pause")) {
+          component.playing = false;
         }
+      }
 
-        ImGui::SameLine();
+      ImGui::SameLine();
 
-        if (widgets::Button("Reset")) {
-          component.normalizedTime = 0.0f;
-        }
+      if (widgets::Button("Reset")) {
+        component.normalizedTime = 0.0f;
       }
     }
   }

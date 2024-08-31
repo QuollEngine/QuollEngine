@@ -16,13 +16,13 @@ struct SkeletonData {
 
   std::unordered_map<u32, u32> jointSkinMap;
 
-  GLTFToAsset<AssetHandle<SkeletonAsset>> skeletonMap;
+  GLTFToAsset<AssetRef<SkeletonAsset>> skeletonMap;
 };
 
 struct AnimationData {
-  std::map<u32, AssetHandle<AnimatorAsset>> nodeAnimatorMap;
+  std::map<u32, AssetRef<AnimatorAsset>> nodeAnimatorMap;
 
-  std::map<u32, AssetHandle<AnimatorAsset>> skinAnimatorMap;
+  std::map<u32, AssetRef<AnimatorAsset>> skinAnimatorMap;
 };
 
 struct GLTFImportData {
@@ -40,7 +40,7 @@ struct GLTFImportData {
 
   std::vector<String> warnings;
 
-  GLTFToAsset<AssetHandle<TextureAsset>> textures;
+  GLTFToAsset<AssetRef<TextureAsset>> textures;
 
   GLTFToAsset<AssetHandle<MaterialAsset>> materials;
 
@@ -48,7 +48,7 @@ struct GLTFImportData {
 
   AnimationData animations;
 
-  GLTFToAsset<AssetHandle<MeshAsset>> meshes;
+  GLTFToAsset<AssetRef<MeshAsset>> meshes;
 
   std::map<AssetHandle<MeshAsset>, std::vector<AssetHandle<MaterialAsset>>>
       meshMaterials;

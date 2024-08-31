@@ -1,17 +1,17 @@
 #pragma once
 
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 
 namespace quoll::editor {
 
 class MaterialViewer {
 public:
-  void render(AssetRegistry &assetRegistry);
+  void render();
 
-  void open(AssetHandle<MaterialAsset> handle);
+  void open(AssetRef<MaterialAsset> material);
 
 private:
-  AssetHandle<MaterialAsset> mHandle;
+  AssetRef<MaterialAsset> mMaterial;
 };
 
 } // namespace quoll::editor

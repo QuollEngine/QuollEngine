@@ -8,8 +8,6 @@
 
 namespace quoll {
 
-class InputBinaryStream;
-
 /**
  * Asset cache
  *
@@ -271,6 +269,15 @@ private:
     }
 
     return Uuid{};
+  }
+
+  template <typename TAssetData>
+  Uuid getAssetUuid(const AssetRef<TAssetData> &asset) {
+    if (asset) {
+      return asset.meta().uuid;
+    }
+
+    return Uuid();
   }
 
   Result<Path> createAssetMeta(AssetType type, String name, Path path);

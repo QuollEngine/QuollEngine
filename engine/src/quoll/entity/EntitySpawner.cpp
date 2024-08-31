@@ -112,11 +112,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
 
   for (const auto &pMesh : asset.meshes) {
     auto entity = getOrCreateEntity(pMesh.entity);
-
-    auto type = mAssetRegistry.getMeta(pMesh.value).type;
-    if (type == AssetType::Mesh) {
-      mEntityDatabase.set<Mesh>(entity, {pMesh.value});
-    }
+    mEntityDatabase.set<Mesh>(entity, {pMesh.value.handle()});
   }
 
   for (const auto &pRenderer : asset.meshRenderers) {
@@ -131,13 +127,12 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
 
   for (const auto &pSkeleton : asset.skeletons) {
     auto entity = getOrCreateEntity(pSkeleton.entity);
-
-    const auto &asset = mAssetRegistry.get(pSkeleton.value);
+    const auto &asset = pSkeleton.value.get();
 
     usize numJoints = asset.jointLocalPositions.size();
 
     Skeleton skeleton{};
-    skeleton.assetHandle = pSkeleton.value;
+    skeleton.assetHandle = pSkeleton.value.handle();
     skeleton.numJoints = static_cast<u32>(numJoints);
     skeleton.jointNames.resize(numJoints);
     skeleton.jointParents.resize(numJoints);
@@ -163,11 +158,10 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetHandle<PrefabAsset> handle,
 
   for (auto &item : asset.animators) {
     auto entity = getOrCreateEntity(item.entity);
-    const auto &asset = mAssetRegistry.get(item.value);
 
     Animator animator{};
-    animator.asset = item.value;
-    animator.currentState = asset.initialState;
+    animator.asset = item.value.handle();
+    animator.currentState = item.value->initialState;
     mEntityDatabase.set(entity, animator);
   }
 

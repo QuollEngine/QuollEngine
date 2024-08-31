@@ -4,14 +4,17 @@
 
 namespace quoll::editor {
 
+struct AnimationMapItem {
+  AssetRef<AnimationAsset> asset;
+  String name;
+};
+
 void loadAnimations(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
   const auto &model = importData.model;
 
-  std::map<u32, std::vector<std::pair<AssetHandle<AnimationAsset>, String>>>
-      nodeAnimationMap;
-  std::map<u32, std::vector<std::pair<AssetHandle<AnimationAsset>, String>>>
-      skinAnimationMap;
+  std::map<u32, std::vector<AnimationMapItem>> nodeAnimationMap;
+  std::map<u32, std::vector<AnimationMapItem>> skinAnimationMap;
 
   for (usize i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
@@ -223,24 +226,26 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto filePath = assetCache.createFromData(animation);
-    auto handle = assetCache.load<AnimationAsset>(animation.uuid);
-    importData.outputUuids.insert_or_assign(
-        assetName, assetCache.getRegistry().getMeta(handle.data()).uuid);
-
-    if (!animationValid) {
+    auto res = assetCache.request<AnimationAsset>(animation.uuid);
+    if (!res) {
       continue;
     }
+
+    auto animationAsset = res.data();
+
+    importData.outputUuids.insert_or_assign(assetName,
+                                            animationAsset.meta().uuid);
 
     if (targetSkin >= 0) {
       if (skinAnimationMap.find(targetSkin) == skinAnimationMap.end()) {
         skinAnimationMap.insert({static_cast<u32>(targetSkin), {}});
       }
-      skinAnimationMap.at(targetSkin).push_back({handle, assetName});
+      skinAnimationMap.at(targetSkin).push_back({animationAsset, assetName});
     } else {
       if (nodeAnimationMap.find(targetSkin) == nodeAnimationMap.end()) {
         nodeAnimationMap.insert({static_cast<u32>(targetNode), {}});
       }
-      nodeAnimationMap.at(targetNode).push_back({handle, assetName});
+      nodeAnimationMap.at(targetNode).push_back({animationAsset, assetName});
     }
   }
 
@@ -251,11 +256,10 @@ void loadAnimations(GLTFImportData &importData) {
     asset.name = getGLTFAssetName(importData, animatorName);
     asset.uuid = getOrCreateGLTFUuid(importData, animatorName);
 
-    for (auto [handle, assetName] : animations) {
+    for (auto anim : animations) {
       AnimationState state{};
-      state.name = assetName;
-
-      state.animation = handle;
+      state.name = anim.name;
+      state.animation = anim.asset;
       asset.data.states.push_back(state);
     }
 
@@ -276,11 +280,14 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createFromData(asset);
-    auto handle = assetCache.load<AnimatorAsset>(asset.uuid);
-    importData.animations.skinAnimatorMap.insert_or_assign(skin, handle);
-
-    importData.outputUuids.insert_or_assign(
-        animatorName, assetCache.getRegistry().getMeta(handle.data()).uuid);
+    auto animator = assetCache.request<AnimatorAsset>(asset.uuid);
+    if (animator) {
+      importData.animations.skinAnimatorMap.insert_or_assign(skin, animator);
+      importData.outputUuids.insert_or_assign(animatorName,
+                                              animator.data().meta().uuid);
+    } else {
+      importData.warnings.push_back(animator.error());
+    }
   }
 
   for (auto &[node, animations] : nodeAnimationMap) {
@@ -313,10 +320,15 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createFromData(asset);
-    auto handle = assetCache.load<AnimatorAsset>(asset.uuid);
-    importData.animations.nodeAnimatorMap.insert_or_assign(node, handle);
-    importData.outputUuids.insert_or_assign(
-        animatorName, assetCache.getRegistry().getMeta(handle.data()).uuid);
+    auto animator = assetCache.request<AnimatorAsset>(asset.uuid);
+    if (animator) {
+      importData.animations.nodeAnimatorMap.insert_or_assign(node,
+                                                             animator.data());
+      importData.outputUuids.insert_or_assign(animatorName,
+                                              animator.data().meta().uuid);
+    } else {
+      importData.warnings.push_back(animator.error());
+    }
   }
 }
 

@@ -3,9 +3,9 @@
 
 namespace quoll::editor {
 
-AssetHandle<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
-                                      GLTFTextureColorSpace colorSpace,
-                                      bool generateMipMaps) {
+AssetRef<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
+                                   GLTFTextureColorSpace colorSpace,
+                                   bool generateMipMaps) {
   if (importData.textures.map.find(index) != importData.textures.map.end()) {
     return importData.textures.map.at(index);
   }
@@ -29,7 +29,7 @@ AssetHandle<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
   if (format == rhi::Format::Undefined) {
     importData.warnings.push_back(assetName +
                                   " has 16-bit channels and cannot be loaded");
-    return AssetHandle<TextureAsset>();
+    return AssetRef<TextureAsset>();
   }
 
   auto prevUuid = getOrCreateUuidFromMap(importData.uuids, assetName);
@@ -42,16 +42,15 @@ AssetHandle<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
 
   if (!uuid) {
     importData.warnings.push_back(assetName + " could not be loaded");
-    return AssetHandle<TextureAsset>();
+    return AssetRef<TextureAsset>();
   }
 
-  auto handle = assetCache.getRegistry().findHandleByUuid<TextureAsset>(uuid);
+  auto texture = assetCache.request<TextureAsset>(uuid);
 
-  importData.outputUuids.insert_or_assign(
-      assetName, assetCache.getRegistry().getMeta(handle).uuid);
+  importData.outputUuids.insert_or_assign(assetName, uuid);
 
-  importData.textures.map.insert_or_assign(index, handle);
-  return handle;
+  importData.textures.map.insert_or_assign(index, texture);
+  return texture;
 }
 
 } // namespace quoll::editor

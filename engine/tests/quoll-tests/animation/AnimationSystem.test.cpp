@@ -3,7 +3,7 @@
 #include "quoll/animation/AnimationSystem.h"
 #include "quoll/animation/Animator.h"
 #include "quoll/animation/AnimatorEvent.h"
-#include "quoll/asset/AssetRegistry.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/LocalTransform.h"
 #include "quoll/scene/Scene.h"
@@ -15,28 +15,29 @@ class AnimationSystemTest : public ::testing::Test {
 public:
   quoll::Scene scene;
   quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
+  quoll::AssetCache assetCache;
   quoll::AnimationSystem system;
-  quoll::AssetRegistry assetRegistry;
+
   quoll::SystemView view{&scene};
 
-  AnimationSystemTest() : system(assetRegistry) {}
+  AnimationSystemTest() : assetCache("/"), system(assetCache.getRegistry()) {}
 
   quoll::Entity
-  create(quoll::AssetHandle<quoll::AnimationAsset> animIndex =
-             quoll::AssetHandle<quoll::AnimationAsset>{1},
-         bool playing = true, f32 speed = 1.0f,
+  create(quoll::AssetRef<quoll::AnimationAsset> animation, bool playing = true,
+         f32 speed = 1.0f,
          quoll::AnimationLoopMode loopMode = quoll::AnimationLoopMode::None) {
     auto entity = entityDatabase.create();
     entityDatabase.set<quoll::LocalTransform>(entity, {});
 
     quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
+    animatorAsset.uuid = quoll::Uuid::generate();
     animatorAsset.data.initialState = 0;
     animatorAsset.data.states.push_back({.name = "Animation",
-                                         .animation = animIndex,
+                                         .animation = animation,
                                          .speed = speed,
                                          .loopMode = loopMode});
 
-    auto animatorHandle = assetRegistry.add(animatorAsset);
+    auto animatorHandle = assetCache.getRegistry().add(animatorAsset);
 
     quoll::Animator animator{};
     animator.playing = playing;
@@ -47,10 +48,9 @@ public:
   }
 
   quoll::Entity
-  createEntityWithSkeleton(quoll::AssetHandle<quoll::AnimationAsset> animIndex =
-                               quoll::AssetHandle<quoll::AnimationAsset>{1},
+  createEntityWithSkeleton(quoll::AssetRef<quoll::AnimationAsset> animation,
                            bool playing = true) {
-    auto entity = create(animIndex, playing);
+    auto entity = create(animation, playing);
 
     quoll::Skeleton skeleton{};
     skeleton.jointFinalTransforms = {glm::mat4{1.0f}};
@@ -65,9 +65,10 @@ public:
     return entity;
   }
 
-  quoll::AssetHandle<quoll::AnimationAsset>
+  quoll::AssetRef<quoll::AnimationAsset>
   createAnimation(quoll::KeyframeSequenceAssetTarget target, f32 time) {
     quoll::AssetData<quoll::AnimationAsset> animation;
+    animation.uuid = quoll::Uuid::generate();
     animation.data.time = time;
 
     quoll::KeyframeSequenceAsset sequence;
@@ -80,13 +81,16 @@ public:
 
     animation.data.keyframes.push_back(sequence);
 
-    return assetRegistry.add(animation);
+    assetCache.getRegistry().add(animation);
+
+    return assetCache.request<quoll::AnimationAsset>(animation.uuid);
   }
 
-  quoll::AssetHandle<quoll::AnimationAsset>
+  quoll::AssetRef<quoll::AnimationAsset>
   createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget target, f32 time) {
     quoll::AssetData<quoll::AnimationAsset> animation;
     animation.data.time = time;
+    animation.uuid = quoll::Uuid::generate();
 
     quoll::KeyframeSequenceAsset sequence;
     sequence.target = target;
@@ -100,7 +104,8 @@ public:
 
     animation.data.keyframes.push_back(sequence);
 
-    return assetRegistry.add(animation);
+    assetCache.getRegistry().add(animation);
+    return assetCache.request<quoll::AnimationAsset>(animation.uuid);
   }
 };
 
@@ -109,7 +114,7 @@ using AnimationSystemDeathTest = AnimationSystemTest;
 TEST_F(
     AnimationSystemTest,
     UpdateChangesAnimationStateIfCurrentStateCanTransitionUsingAnimationEvent) {
-  auto animIndex =
+  auto animation =
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
 
   quoll::AnimationStateTransition transition0;
@@ -118,19 +123,19 @@ TEST_F(
 
   quoll::AnimationState state0{};
   state0.name = "Animation0";
-  state0.animation = animIndex;
+  state0.animation = animation;
   state0.transitions.push_back(transition0);
 
   quoll::AnimationState state1{};
   state1.name = "Animation1";
-  state1.animation = animIndex;
+  state1.animation = animation;
 
   quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
   animatorAsset.data.initialState = 0;
   animatorAsset.data.states.push_back(state0);
   animatorAsset.data.states.push_back(state1);
 
-  auto animatorHandle = assetRegistry.add(animatorAsset);
+  auto animatorHandle = assetCache.getRegistry().add(animatorAsset);
 
   auto entity = entityDatabase.create();
 
@@ -167,7 +172,7 @@ TEST_F(
 TEST_F(
     AnimationSystemTest,
     UpdateDoesNotChangeAnimationStateIfCurrentStateCannotTransitionUsingEvent) {
-  auto animIndex =
+  auto animation =
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
 
   quoll::AnimationStateTransition transition0;
@@ -176,19 +181,19 @@ TEST_F(
 
   quoll::AnimationState state0{};
   state0.name = "Animation0";
-  state0.animation = animIndex;
+  state0.animation = animation;
   state0.transitions.push_back(transition0);
 
   quoll::AnimationState state1{};
   state1.name = "Animation1";
-  state1.animation = animIndex;
+  state1.animation = animation;
 
   quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
   animatorAsset.data.initialState = 0;
   animatorAsset.data.states.push_back(state0);
   animatorAsset.data.states.push_back(state1);
 
-  auto animatorHandle = assetRegistry.add(animatorAsset);
+  auto animatorHandle = assetCache.getRegistry().add(animatorAsset);
 
   auto entity = entityDatabase.create();
 
@@ -224,9 +229,9 @@ TEST_F(
 }
 
 TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
-  auto animIndex =
+  auto animation =
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
-  auto entity = create(animIndex, false);
+  auto entity = create(animation, false);
 
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
@@ -236,8 +241,9 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
 }
 
 TEST_F(AnimationSystemTest, AdvancesAnimatorNormalizedTimeByDeltaTime) {
-  createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
-  auto entity = create();
+  auto animation =
+      createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
+  auto entity = create(animation);
 
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
@@ -248,9 +254,9 @@ TEST_F(AnimationSystemTest, AdvancesAnimatorNormalizedTimeByDeltaTime) {
 
 TEST_F(AnimationSystemTest,
        AdvancesAnimatorNormalizedTimeByDeltaTimeAndAnimationStateSpeed) {
-  auto anim0 =
+  auto animation =
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
-  auto entity = create(anim0, true, 0.5f);
+  auto entity = create(animation, true, 0.5f);
 
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
@@ -261,8 +267,9 @@ TEST_F(AnimationSystemTest,
 
 TEST_F(AnimationSystemTest,
        StaysAtTheEndIfEndOfAnimationIsReachedAndLoopModeIsNone) {
-  createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
-  auto entity = create();
+  auto animation =
+      createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
+  auto entity = create(animation);
   const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.prepare(view);
@@ -283,8 +290,9 @@ TEST_F(AnimationSystemTest,
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
-  createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
-  auto entity = create();
+  auto animation =
+      createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
+  auto entity = create(animation);
 
   const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
 
@@ -300,8 +308,9 @@ TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
-  createAnimation(quoll::KeyframeSequenceAssetTarget::Rotation, 1.0f);
-  auto entity = create();
+  auto animation =
+      createAnimation(quoll::KeyframeSequenceAssetTarget::Rotation, 1.0f);
+  auto entity = create(animation);
 
   const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
 
@@ -317,8 +326,9 @@ TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
-  createAnimation(quoll::KeyframeSequenceAssetTarget::Scale, 1.0f);
-  auto entity = create();
+  auto animation =
+      createAnimation(quoll::KeyframeSequenceAssetTarget::Scale, 1.0f);
+  auto entity = create(animation);
 
   const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
 
@@ -335,8 +345,9 @@ TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
 
 TEST_F(AnimationSystemTest,
        UpdateSkeletonPositionBasedOnPositionKeyframeWithJointTarget) {
-  createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
-  auto entity = createEntityWithSkeleton();
+  auto animation = createSkeletonAnimation(
+      quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
+  auto entity = createEntityWithSkeleton(animation);
 
   const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
 
@@ -359,8 +370,9 @@ TEST_F(AnimationSystemTest,
 
 TEST_F(AnimationSystemTest,
        UpdateSkeletonRotationBasedOnRotationKeyframeWithJointTarget) {
-  createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget::Rotation, 1.0f);
-  auto entity = createEntityWithSkeleton();
+  auto animation = createSkeletonAnimation(
+      quoll::KeyframeSequenceAssetTarget::Rotation, 1.0f);
+  auto entity = createEntityWithSkeleton(animation);
 
   const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
 
@@ -383,8 +395,9 @@ TEST_F(AnimationSystemTest,
 
 TEST_F(AnimationSystemTest,
        UpdateSkeletonScaleBasedOnScaleKeyframeWithJointTarget) {
-  createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget::Scale, 1.0f);
-  auto entity = createEntityWithSkeleton();
+  auto animation =
+      createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget::Scale, 1.0f);
+  auto entity = createEntityWithSkeleton(animation);
 
   const auto &transform = entityDatabase.get<quoll::LocalTransform>(entity);
 
@@ -406,7 +419,7 @@ TEST_F(AnimationSystemTest,
 }
 
 TEST_F(AnimationSystemTest, DoesNothingIfAnimationDoesNotExist) {
-  auto entity = create(quoll::AssetHandle<quoll::AnimationAsset>());
+  auto entity = create(quoll::AssetRef<quoll::AnimationAsset>());
   system.prepare(view);
   system.update(0.5f, view);
 }

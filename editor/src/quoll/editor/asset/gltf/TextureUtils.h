@@ -6,8 +6,8 @@ namespace quoll::editor {
 
 enum class GLTFTextureColorSpace { Linear, Srgb };
 
-AssetHandle<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
-                                      GLTFTextureColorSpace colorSpace,
-                                      bool generateMipMaps);
+AssetRef<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
+                                   GLTFTextureColorSpace colorSpace,
+                                   bool generateMipMaps);
 
 } // namespace quoll::editor

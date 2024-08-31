@@ -8,17 +8,14 @@ namespace quoll {
 
 Result<void> AssetCache::createEnvironmentFromData(const EnvironmentAsset &data,
                                                    const Path &assetPath) {
-  auto irradianceMapUuid = mRegistry.getMeta(data.irradianceMap).uuid;
-  auto specularMapUuid = mRegistry.getMeta(data.specularMap).uuid;
-
   OutputBinaryStream stream(assetPath);
   AssetFileHeader header{};
   header.type = AssetType::Environment;
   header.magic = AssetFileHeader::MagicConstant;
   stream.write(header);
 
-  stream.write(irradianceMapUuid);
-  stream.write(specularMapUuid);
+  stream.write(data.irradianceMap.meta().uuid);
+  stream.write(data.specularMap.meta().uuid);
 
   return Ok();
 }
@@ -51,8 +48,8 @@ Result<EnvironmentAsset> AssetCache::loadEnvironment(const Path &path) {
   }
 
   EnvironmentAsset environment{};
-  environment.irradianceMap = irradianceMapRes.data().handle();
-  environment.specularMap = specularMapRes.data().handle();
+  environment.irradianceMap = irradianceMapRes.data();
+  environment.specularMap = specularMapRes.data();
   return environment;
 }
 
