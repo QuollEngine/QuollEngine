@@ -34,8 +34,8 @@ TEST_F(AssetCacheEnvironmentTest, CreatesMetaFileFromAsset) {
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
   asset.name = "env-0";
   asset.uuid = quoll::Uuid::generate();
-  asset.data.irradianceMap = irradianceMap.data().handle();
-  asset.data.specularMap = irradianceMap.data().handle();
+  asset.data.irradianceMap = irradianceMap.data();
+  asset.data.specularMap = irradianceMap.data();
 
   auto filePath = cache.createFromData(asset);
   auto meta = cache.getAssetMeta(asset.uuid);
@@ -54,8 +54,8 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
   asset.name = "env-0";
   asset.uuid = quoll::Uuid::generate();
-  asset.data.irradianceMap = irradianceMap.data().handle();
-  asset.data.specularMap = specularMap.data().handle();
+  asset.data.irradianceMap = irradianceMap.data();
+  asset.data.specularMap = specularMap.data();
 
   auto filePath = cache.createFromData(asset);
   EXPECT_TRUE(filePath);
@@ -88,8 +88,8 @@ TEST_F(AssetCacheEnvironmentTest,
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
   asset.uuid = quoll::Uuid::generate();
-  asset.data.irradianceMap = irradianceMap.data().handle();
-  asset.data.specularMap = specularMap.data().handle();
+  asset.data.irradianceMap = irradianceMap.data();
+  asset.data.specularMap = specularMap.data();
   auto createRes = cache.createFromData(asset);
 
   cache.getRegistry().remove(irradianceMap.data().handle());
@@ -125,8 +125,8 @@ TEST_F(AssetCacheEnvironmentTest,
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
   asset.uuid = quoll::Uuid::generate();
-  asset.data.irradianceMap = irradianceMap.data().handle();
-  asset.data.specularMap = specularMap.data().handle();
+  asset.data.irradianceMap = irradianceMap.data();
+  asset.data.specularMap = specularMap.data();
   auto createRes = cache.createFromData(asset);
 
   cache.getRegistry().remove(irradianceMap.data().handle());
@@ -159,8 +159,8 @@ TEST_F(AssetCacheEnvironmentTest,
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
   asset.uuid = quoll::Uuid::generate();
-  asset.data.irradianceMap = irradianceMap.data().handle();
-  asset.data.specularMap = specularMap.data().handle();
+  asset.data.irradianceMap = irradianceMap.data();
+  asset.data.specularMap = specularMap.data();
   auto createRes = cache.createFromData(asset);
 
   EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 2);

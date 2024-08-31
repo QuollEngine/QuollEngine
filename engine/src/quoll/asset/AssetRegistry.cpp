@@ -67,12 +67,8 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
   }
 
   // Synchronize materials
-  auto getTextureFromRegistry = [this](AssetHandle<TextureAsset> handle) {
-    if (handle) {
-      return mTextures.getAsset(handle).data.deviceHandle;
-    }
-
-    return rhi::TextureHandle::Null;
+  auto getTextureFromRegistry = [this](const AssetRef<TextureAsset> &texture) {
+    return texture ? texture->deviceHandle : rhi::TextureHandle::Null;
   };
 
   for (auto &[_, asset] : mMaterials.getAssets()) {

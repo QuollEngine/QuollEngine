@@ -53,19 +53,17 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
 
     const auto &state = animatorAsset.states.at(animator.currentState);
 
-    auto handle = state.animation;
+    const auto &animation = state.animation;
 
-    if (!mAssetRegistry.has(handle)) {
-      return;
+    if (!animation) {
+      continue;
     }
-
-    const auto &animation = mAssetRegistry.get(handle);
 
     if (animator.playing) {
       animator.normalizedTime = std::min(
           // Divide delta time by animation time
           // to advance time at a constant speed
-          animator.normalizedTime + (dt * state.speed / animation.time), 1.0f);
+          animator.normalizedTime + (dt * state.speed / animation->time), 1.0f);
       if (animator.normalizedTime >= 1.0f &&
           state.loopMode == AnimationLoopMode::Linear) {
         animator.normalizedTime = 0.0f;
@@ -74,7 +72,7 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
 
     bool hasSkeleton = entityDatabase.has<Skeleton>(entity);
 
-    for (const auto &sequence : animation.keyframes) {
+    for (const auto &sequence : animation->keyframes) {
       if (sequence.jointTarget && hasSkeleton) {
         auto &skeleton = entityDatabase.get<Skeleton>(entity);
         if (sequence.target == KeyframeSequenceAssetTarget::Position) {

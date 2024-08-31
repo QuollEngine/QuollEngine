@@ -82,10 +82,9 @@ void loadPrefabs(GLTFImportData &importData) {
         {localEntityId, node.name.empty() ? "Untitled" : node.name});
 
     if (hasValidMesh) {
-      auto handle = importData.meshes.map.at(node.mesh);
-      const auto &asset = importData.assetCache.getRegistry().get(handle);
-      const auto &materials = importData.meshMaterials.at(handle);
-      prefab.data.meshes.push_back({localEntityId, handle});
+      const auto &asset = importData.meshes.map.at(node.mesh);
+      const auto &materials = importData.meshMaterials.at(asset.handle());
+      prefab.data.meshes.push_back({localEntityId, asset});
 
       if (node.skin >= 0) {
         SkinnedMeshRenderer renderer{materials};

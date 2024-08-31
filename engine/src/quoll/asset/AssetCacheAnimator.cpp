@@ -100,7 +100,7 @@ Result<AnimatorAsset> AssetCache::loadAnimator(const Path &path) {
       if (!animation.isEmpty()) {
         auto res = request<AnimationAsset>(animation);
         if (res) {
-          state.animation = res.data().handle();
+          state.animation = res.data();
         }
 
         state.speed = std::max(output["speed"].as<f32>(1.0f), 0.0f);
