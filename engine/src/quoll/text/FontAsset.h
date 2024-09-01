@@ -22,8 +22,6 @@ struct FontAsset {
 
   f32 fontScale = 1.0f;
 
-  rhi::TextureHandle deviceHandle = rhi::TextureHandle::Null;
-
   usize size = 0;
 };
 

@@ -20,8 +20,6 @@
 
 namespace quoll {
 
-class RenderStorage;
-
 /**
  * Registry of all the loaded assets
  *
@@ -44,7 +42,7 @@ class AssetRegistry : NoCopyMove {
   using SceneMap = AssetMap<SceneAsset>;
 
   struct DefaultObjects {
-    AssetHandle<MeshAsset> cube;
+    AssetRef<MeshAsset> cube;
     AssetRef<MaterialAsset> defaultMaterial;
     AssetRef<FontAsset> defaultFont;
   };
@@ -59,8 +57,6 @@ public:
   inline const DefaultObjects &getDefaultObjects() const {
     return mDefaultObjects;
   }
-
-  void syncWithDevice(RenderStorage &renderStorage);
 
   std::pair<AssetType, u32> getAssetByUuid(const Uuid &uuid);
 

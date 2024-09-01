@@ -164,6 +164,11 @@ void Table::column(rhi::TextureHandle handle, const glm::vec2 &size) {
   imgui::image(handle, ImVec2(size.x, size.y));
 }
 
+void Table::column(const AssetRef<TextureAsset> &asset, const glm::vec2 &size) {
+  ImGui::TableNextColumn();
+  imgui::image(asset, ImVec2(size.x, size.y));
+}
+
 Input::Input(String label, glm::vec3 &value, bool autoChange) {
   if (autoChange) {
     auto temp = value;

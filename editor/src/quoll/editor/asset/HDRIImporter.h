@@ -4,6 +4,12 @@
 #include "quoll/rhi/Descriptor.h"
 #include "UUIDMap.h"
 
+namespace quoll {
+
+class RenderStorage;
+
+} // namespace quoll
+
 namespace quoll::editor {
 
 class HDRIImporter {

@@ -8,7 +8,7 @@ namespace quoll {
 class TextureUtils {
 public:
   static void
-  copyDataToTexture(rhi::RenderDevice *device, void *source,
+  copyDataToTexture(rhi::RenderDevice *device, const void *source,
                     rhi::TextureHandle destination,
                     rhi::ImageLayout destinationLayout, u32 destinationLayers,
                     const std::vector<TextureAssetMipLevel> &destinationLevels);

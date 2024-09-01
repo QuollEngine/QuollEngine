@@ -640,7 +640,7 @@ void EntityPanel::renderSprite(Scene &scene, AssetCache &assetCache,
       if (auto table = widgets::Table("TableSprite", 2)) {
         table.row("Texture", texture.meta().name);
         table.column("Preview");
-        table.column(texture->deviceHandle, TextureSize);
+        table.column(texture, TextureSize);
       }
     }
 

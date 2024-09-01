@@ -8,6 +8,7 @@
 #include "quoll/renderer/Presenter.h"
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/Renderer.h"
+#include "quoll/renderer/RendererAssetRegistry.h"
 #include "quoll/editor/ui/FontAwesome.h"
 #include "quoll/editor/ui/MainMenuBar.h"
 #include "quoll/editor/ui/StyleStack.h"
@@ -32,7 +33,8 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   Renderer renderer(renderStorage, initialOptions);
 
-  ImguiRenderer imguiRenderer(mWindow, renderStorage);
+  quoll::RendererAssetRegistry rendererAssetRegistry(renderStorage);
+  ImguiRenderer imguiRenderer(mWindow, renderStorage, rendererAssetRegistry);
   Presenter presenter(renderStorage);
 
   ProjectManager projectManager;

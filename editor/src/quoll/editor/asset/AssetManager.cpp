@@ -127,13 +127,6 @@ void AssetManager::generatePreview(const Path &sourceAssetPath,
       asset.preview =
           mHDRIImporter.loadFromPathToDevice(sourceAssetPath, renderStorage);
     }
-  } else if (res.first == AssetType::Texture) {
-    auto &asset = mAssetCache.getRegistry().getMeta(
-        static_cast<quoll::AssetHandle<quoll::TextureAsset>>(handle));
-
-    if (!rhi::isHandleValid(asset.preview)) {
-      asset.preview = asset.data.deviceHandle;
-    }
   }
 }
 
@@ -273,7 +266,7 @@ AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
   QUOLL_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
   auto reloadRes = reloadAssets();
 
-  auto res = mAssetCache.preloadAssets(renderStorage);
+  auto res = mAssetCache.preloadAssets();
   auto warnings = res.warnings();
 
   if (!res)

@@ -12,6 +12,7 @@
 #include "quoll/renderer/Presenter.h"
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/Renderer.h"
+#include "quoll/renderer/RendererAssetRegistry.h"
 #include "quoll/renderer/SceneRenderer.h"
 #include "quoll/scene/Scene.h"
 #include "quoll/window/Window.h"
@@ -43,11 +44,12 @@ void Runtime::start() {
   MetricsCollector metricsCollector;
 
   RenderStorage renderStorage(device, metricsCollector);
+  RendererAssetRegistry rendererAssetRegistry(renderStorage);
 
   RendererOptions initialOptions{};
   initialOptions.framebufferSize = {Width, Height};
   Renderer renderer(renderStorage, initialOptions);
-  ImguiRenderer imguiRenderer(window, renderStorage);
+  ImguiRenderer imguiRenderer(window, renderStorage, rendererAssetRegistry);
 
   {
     static constexpr f32 FontSize = 18.0f;
@@ -58,9 +60,10 @@ void Runtime::start() {
     imguiRenderer.buildFonts();
   }
 
-  SceneRenderer sceneRenderer(assetCache.getRegistry(), renderStorage);
+  SceneRenderer sceneRenderer(assetCache.getRegistry(), renderStorage,
+                              rendererAssetRegistry);
 
-  auto res = assetCache.preloadAssets(renderStorage);
+  auto res = assetCache.preloadAssets();
 
   FPSCounter fpsCounter;
   MainLoop mainLoop(window, fpsCounter);

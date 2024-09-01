@@ -9,6 +9,8 @@ namespace quoll {
 
 class AssetRegistry;
 class RenderStorage;
+class RendererAssetRegistry;
+struct MeshDrawData;
 
 struct SceneRenderPassData {
   RenderGraphResource<rhi::TextureHandle> sceneColor;
@@ -26,7 +28,8 @@ class SceneRenderer {
   static constexpr glm::vec4 DefaultClearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
 public:
-  SceneRenderer(AssetRegistry &assetRegistry, RenderStorage &renderStorage);
+  SceneRenderer(AssetRegistry &assetRegistry, RenderStorage &renderStorage,
+                RendererAssetRegistry &rendererAssetRegistry);
 
   void setClearColor(const glm::vec4 &clearColor);
 
@@ -50,8 +53,9 @@ private:
                      rhi::PipelineHandle pipeline, u32 frameIndex);
 
   void renderGeometries(rhi::RenderCommandList &commandList,
-                        rhi::PipelineHandle pipeline, const MeshAsset &mesh,
-                        u32 instanceStart, u32 numInstances);
+                        rhi::PipelineHandle pipeline,
+                        const MeshDrawData *drawData, u32 instanceStart,
+                        u32 numInstances);
 
   void renderShadowsMesh(rhi::RenderCommandList &commandList,
                          rhi::PipelineHandle pipeline, u32 frameIndex);
@@ -61,7 +65,7 @@ private:
 
   void renderShadowsGeometries(rhi::RenderCommandList &commandList,
                                rhi::PipelineHandle pipeline,
-                               const MeshAsset &mesh, u32 instanceStart,
+                               const MeshDrawData *drawData, u32 instanceStart,
                                u32 numInstances);
 
   void renderText(rhi::RenderCommandList &commandList,
@@ -75,6 +79,8 @@ private:
   glm::vec4 mClearColor{DefaultClearColor};
   AssetRegistry &mAssetRegistry;
   RenderStorage &mRenderStorage;
+  RendererAssetRegistry &mRendererAssetRegistry;
+
   std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 
   rhi::SamplerHandle mBloomSampler;

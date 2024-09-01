@@ -13,6 +13,7 @@
 #include "quoll/scene/PointLight.h"
 #include "quoll/scene/WorldTransform.h"
 #include "MeshAsset.h"
+#include "MeshDrawData.h"
 
 namespace quoll {
 
@@ -155,6 +156,8 @@ public:
     std::vector<MaterialRange> materialRanges;
 
     std::vector<Entity> entities;
+
+    const MeshDrawData *drawData = nullptr;
   };
 
   struct SkinnedMeshData : public MeshData {
@@ -215,11 +218,12 @@ public:
 
   void setDefaultMaterial(rhi::DeviceAddress material);
 
-  void addMesh(AssetHandle<MeshAsset> handle, quoll::Entity entity,
-               const glm::mat4 &transform,
+  void addMesh(AssetHandle<MeshAsset> handle, const MeshDrawData &meshBuffers,
+               quoll::Entity entity, const glm::mat4 &transform,
                const std::vector<rhi::DeviceAddress> &materials);
 
-  void addSkinnedMesh(AssetHandle<MeshAsset> handle, Entity entity,
+  void addSkinnedMesh(AssetHandle<MeshAsset> handle,
+                      const MeshDrawData &meshBuffers, Entity entity,
                       const glm::mat4 &transform,
                       const std::vector<glm::mat4> &skeleton,
                       const std::vector<rhi::DeviceAddress> &materials);

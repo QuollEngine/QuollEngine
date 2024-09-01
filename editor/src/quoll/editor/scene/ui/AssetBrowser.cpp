@@ -541,12 +541,9 @@ void AssetBrowser::setDefaultProps(Entry &entry, AssetRegistry &assetRegistry) {
   // Icon and preview
   entry.icon = entry.isDirectory ? EditorIcon::Directory
                                  : getIconFromAssetType(entry.assetType);
+  entry.preview = IconRegistry::getIcon(entry.icon);
 
-  if (entry.assetType == AssetType::Texture) {
-    entry.preview =
-        assetRegistry.get(static_cast<AssetHandle<TextureAsset>>(entry.asset))
-            .deviceHandle;
-  } else if (entry.assetType == AssetType::Environment) {
+  if (entry.assetType == AssetType::Environment) {
     entry.preview =
         assetRegistry
             .getMeta(static_cast<AssetHandle<EnvironmentAsset>>(entry.asset))

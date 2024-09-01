@@ -1,7 +1,12 @@
 #pragma once
 
 #include "quoll/asset/Result.h"
-#include "quoll/rhi/RenderDevice.h"
+
+namespace quoll {
+
+class RenderStorage;
+
+} // namespace quoll
 
 namespace quoll::editor {
 

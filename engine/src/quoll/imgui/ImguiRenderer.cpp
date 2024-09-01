@@ -3,6 +3,7 @@
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/TextureUtils.h"
 #include "ImguiRenderer.h"
+#include "ImguiUtils.h"
 #include <imgui_impl_glfw.h>
 #include <implot.h>
 
@@ -20,8 +21,10 @@ static inline u64 getAlignedBufferSize(u64 size) {
 
 namespace quoll {
 
-ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage)
-    : mRenderStorage(renderStorage), mDevice(renderStorage.getDevice()) {
+ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage,
+                             RendererAssetRegistry &rendererAssetRegistry)
+    : mRenderStorage(renderStorage), mDevice(renderStorage.getDevice()),
+      mRendererAssetRegistry(rendererAssetRegistry) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
@@ -127,6 +130,7 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph,
 void ImguiRenderer::beginRendering() {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
+  imgui::setImguiAssetRegistry(mRendererAssetRegistry);
 }
 
 void ImguiRenderer::endRendering() { ImGui::Render(); }

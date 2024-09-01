@@ -436,8 +436,7 @@ TEST_F(EntitySpawnerTest,
 
 TEST_F(EntitySpawnerTest,
        SpawnSpriteCreatesEntityWithSpriteAndTransformComponents) {
-  auto asset = createAsset<quoll::TextureAsset>(
-      {.deviceHandle = quoll::rhi::TextureHandle{25}}, "my-sprite");
+  auto asset = createAsset<quoll::TextureAsset>({}, "my-sprite");
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
 

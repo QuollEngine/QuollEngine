@@ -14,7 +14,7 @@ AssetCache::AssetCache(const Path &assetsPath, bool createDefaultObjects)
   }
 }
 
-Result<void> AssetCache::preloadAssets(RenderStorage &renderStorage) {
+Result<void> AssetCache::preloadAssets() {
   QUOLL_PROFILE_EVENT("AssetCache::preloadAssets");
   std::vector<String> warnings;
 
@@ -33,8 +33,6 @@ Result<void> AssetCache::preloadAssets(RenderStorage &renderStorage) {
                       res.warnings().end());
     }
   }
-
-  mRegistry.syncWithDevice(renderStorage);
 
   return {warnings};
 }

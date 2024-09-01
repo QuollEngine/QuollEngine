@@ -4,6 +4,7 @@
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/MeshVertexLayout.h"
+#include "quoll/renderer/RendererAssetRegistry.h"
 #include "quoll/scene/Sprite.h"
 #include "quoll/skeleton/Skeleton.h"
 #include "quoll/text/Text.h"
@@ -13,11 +14,11 @@
 namespace quoll::editor {
 
 EditorRenderer::EditorRenderer(RenderStorage &renderStorage,
-                               rhi::RenderDevice *device)
+                               RendererAssetRegistry &rendererAssetRegistry)
     : mRenderStorage(renderStorage),
       mFrameData{EditorRendererFrameData(renderStorage),
                  EditorRendererFrameData(renderStorage)},
-      mDevice(device) {
+      mRendererAssetRegistry(rendererAssetRegistry) {
 
   createCollidableShapes();
 
@@ -506,7 +507,9 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 
-      frameData.addMeshOutline(asset.get(), world.worldTransform);
+      const auto &meshDrawData = mRendererAssetRegistry.get(asset);
+
+      frameData.addMeshOutline(meshDrawData, world.worldTransform);
     } else if (entityDatabase.has<Mesh>(state.selectedEntity) &&
                entityDatabase.has<SkinnedMeshRenderer>(state.selectedEntity) &&
                entityDatabase.has<Skeleton>(state.selectedEntity)) {
@@ -518,7 +521,9 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       const auto &skeleton = entityDatabase.get<Skeleton>(state.selectedEntity)
                                  .jointFinalTransforms;
 
-      frameData.addSkinnedMeshOutline(asset.get(), skeleton,
+      const auto &meshDrawData = mRendererAssetRegistry.get(asset);
+
+      frameData.addSkinnedMeshOutline(meshDrawData, skeleton,
                                       world.worldTransform);
     } else if (entityDatabase.has<Text>(state.selectedEntity)) {
       const auto &text = entityDatabase.get<Text>(state.selectedEntity);
@@ -551,7 +556,8 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
         advanceX += fontGlyph.advanceX;
       }
 
-      frameData.addTextOutline(font.deviceHandle, glyphs, world.worldTransform);
+      frameData.addTextOutline(mRendererAssetRegistry.get(text.font), glyphs,
+                               world.worldTransform);
     }
   }
 

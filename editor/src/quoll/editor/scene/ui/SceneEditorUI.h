@@ -6,7 +6,6 @@
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/SceneRenderer.h"
 #include "quoll/scene/CameraAspectRatioUpdater.h"
-#include "quoll/ui/UICanvasUpdater.h"
 #include "quoll/editor/ui/IconRegistry.h"
 #include "quoll/editor/ui/StatusBar.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"

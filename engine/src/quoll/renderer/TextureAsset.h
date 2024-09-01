@@ -33,8 +33,6 @@ struct TextureAsset {
   std::vector<u8> data;
 
   std::vector<TextureAssetMipLevel> levels;
-
-  rhi::TextureHandle deviceHandle = rhi::TextureHandle::Null;
 };
 
 } // namespace quoll

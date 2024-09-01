@@ -12,16 +12,19 @@
 #include "MeshRenderUtils.h"
 #include "MeshVertexLayout.h"
 #include "RenderStorage.h"
+#include "RendererAssetRegistry.h"
 #include "SceneRenderer.h"
 #include "StandardPushConstants.h"
 
 namespace quoll {
 
 SceneRenderer::SceneRenderer(AssetRegistry &assetRegistry,
-                             RenderStorage &renderStorage)
+                             RenderStorage &renderStorage,
+                             RendererAssetRegistry &rendererAssetRegistry)
     : mAssetRegistry(assetRegistry), mRenderStorage(renderStorage),
       mFrameData{SceneRendererFrameData(renderStorage),
-                 SceneRendererFrameData(renderStorage)} {
+                 SceneRendererFrameData(renderStorage)},
+      mRendererAssetRegistry(rendererAssetRegistry) {
 
   auto shadersPath = Engine::getShadersPath();
 
@@ -460,8 +463,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       commandList.bindDescriptor(
           pipeline, 1, frameData.getBindlessParams().getDescriptor(), offsets);
 
-      const auto &cube =
-          mAssetRegistry.get(mAssetRegistry.getDefaultObjects().cube);
+      const MeshDrawData &cube =
+          mRendererAssetRegistry.get(mAssetRegistry.getDefaultObjects().cube);
 
       std::array<u64, 1> vbOffsets{0};
       commandList.bindVertexBuffers(std::array{cube.vertexBuffers.at(0)},
@@ -469,7 +472,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       commandList.bindIndexBuffer(cube.indexBuffer, rhi::IndexType::Uint32);
 
       commandList.drawIndexed(
-          static_cast<u32>(cube.geometries.at(0).indices.size()), 0, 0);
+          static_cast<u32>(cube.geometries.at(0).numIndices), 0, 0);
     });
   } // skybox pass
 
@@ -776,12 +779,13 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                           entityDatabase.get<PerspectiveLens>(camera));
 
   frameData.setDefaultMaterial(
-      mAssetRegistry.getDefaultObjects()
-          .defaultMaterial->deviceHandle->getAddress());
+      mRendererAssetRegistry
+          .get(mAssetRegistry.getDefaultObjects().defaultMaterial)
+          ->getAddress());
 
   for (auto [entity, sprite, world] :
        entityDatabase.view<Sprite, WorldTransform>()) {
-    auto handle = sprite.texture->deviceHandle;
+    auto handle = mRendererAssetRegistry.get(sprite.texture);
     frameData.addSprite(entity, handle, world.worldTransform);
   }
 
@@ -790,11 +794,12 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
        entityDatabase.view<WorldTransform, Mesh, MeshRenderer>()) {
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
-      materials.push_back(material->deviceHandle->getAddress());
+      materials.push_back(mRendererAssetRegistry.get(material)->getAddress());
     }
 
-    frameData.addMesh(mesh.asset.handle(), entity, world.worldTransform,
-                      materials);
+    frameData.addMesh(mesh.asset.handle(),
+                      mRendererAssetRegistry.get(mesh.asset), entity,
+                      world.worldTransform, materials);
   }
 
   // Skinned Meshes
@@ -802,12 +807,13 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
        entityDatabase
            .view<Skeleton, WorldTransform, Mesh, SkinnedMeshRenderer>()) {
     std::vector<rhi::DeviceAddress> materials;
-    for (auto material : renderer.materials) {
-      materials.push_back(material->deviceHandle->getAddress());
+    for (const auto &material : renderer.materials) {
+      materials.push_back(mRendererAssetRegistry.get(material)->getAddress());
     }
 
-    frameData.addSkinnedMesh(mesh.asset.handle(), entity, world.worldTransform,
-                             skeleton.jointFinalTransforms, materials);
+    frameData.addSkinnedMesh(
+        mesh.asset.handle(), mRendererAssetRegistry.get(mesh.asset), entity,
+        world.worldTransform, skeleton.jointFinalTransforms, materials);
   }
 
   // Texts
@@ -840,7 +846,8 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       advanceX += fontGlyph.advanceX;
     }
 
-    frameData.addText(entity, font.deviceHandle, glyphs, world.worldTransform);
+    frameData.addText(entity, mRendererAssetRegistry.get(text.font), glyphs,
+                      world.worldTransform);
   }
 
   // Directional lights
@@ -869,8 +876,8 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                environment.texture) {
       const auto &asset = environment.texture.get();
 
-      specularMap = asset.specularMap->deviceHandle;
-      irradianceMap = asset.irradianceMap->deviceHandle;
+      specularMap = mRendererAssetRegistry.get(asset.specularMap);
+      irradianceMap = mRendererAssetRegistry.get(asset.irradianceMap);
 
       frameData.setSkyboxTexture(specularMap);
     }
@@ -894,12 +901,14 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-    const auto &mesh = mAssetRegistry.get(handle);
     u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
-    commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
-    commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
-    renderGeometries(commandList, pipeline, mesh, instanceStart, numInstances);
+    commandList.bindVertexBuffers(meshData.drawData->vertexBuffers,
+                                  meshData.drawData->vertexBufferOffsets);
+    commandList.bindIndexBuffer(meshData.drawData->indexBuffer,
+                                rhi::IndexType::Uint32);
+    renderGeometries(commandList, pipeline, meshData.drawData, instanceStart,
+                     numInstances);
     instanceStart += numInstances;
   }
 }
@@ -912,38 +921,36 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
   u32 instanceStart = 0;
 
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-    const auto &mesh = mAssetRegistry.get(handle);
     u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
-    commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
-    commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
+    commandList.bindVertexBuffers(meshData.drawData->vertexBuffers,
+                                  meshData.drawData->vertexBufferOffsets);
+    commandList.bindIndexBuffer(meshData.drawData->indexBuffer,
+                                rhi::IndexType::Uint32);
 
-    renderGeometries(commandList, pipeline, mesh, instanceStart, numInstances);
+    renderGeometries(commandList, pipeline, meshData.drawData, instanceStart,
+                     numInstances);
     instanceStart += numInstances;
   }
 }
 
 void SceneRenderer::renderGeometries(rhi::RenderCommandList &commandList,
                                      rhi::PipelineHandle pipeline,
-                                     const MeshAsset &mesh, u32 instanceStart,
-                                     u32 numInstances) {
+                                     const MeshDrawData *drawData,
+                                     u32 instanceStart, u32 numInstances) {
   i32 vertexOffset = 0;
   u32 indexOffset = 0;
-  for (usize g = 0; g < mesh.geometries.size(); ++g) {
-    auto &geometry = mesh.geometries.at(g);
-
+  for (usize g = 0; g < drawData->geometries.size(); ++g) {
+    auto &geometry = drawData->geometries.at(g);
     auto index = static_cast<u32>(g);
 
     commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
                               sizeof(u32), &index);
 
-    u32 indexCount = static_cast<u32>(mesh.geometries.at(g).indices.size());
-    i32 vertexCount = static_cast<i32>(mesh.geometries.at(g).positions.size());
-
-    commandList.drawIndexed(indexCount, indexOffset, vertexOffset, numInstances,
-                            instanceStart);
-    vertexOffset += vertexCount;
-    indexOffset += indexCount;
+    commandList.drawIndexed(geometry.numIndices, indexOffset, vertexOffset,
+                            numInstances, instanceStart);
+    vertexOffset += geometry.numVertices;
+    indexOffset += geometry.numIndices;
   }
 }
 
@@ -954,15 +961,15 @@ void SceneRenderer::renderShadowsMesh(rhi::RenderCommandList &commandList,
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-    const auto &mesh = mAssetRegistry.get(handle);
     u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(
-        MeshRenderUtils::getGeometryBuffers(mesh),
-        MeshRenderUtils::getGeometryBufferOffsets(mesh));
-    commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
-    renderShadowsGeometries(commandList, pipeline, mesh, instanceStart,
-                            numInstances);
+        MeshRenderUtils::getGeometryBuffers(meshData.drawData),
+        MeshRenderUtils::getGeometryBufferOffsets(meshData.drawData));
+    commandList.bindIndexBuffer(meshData.drawData->indexBuffer,
+                                rhi::IndexType::Uint32);
+    renderShadowsGeometries(commandList, pipeline, meshData.drawData,
+                            instanceStart, numInstances);
     instanceStart += numInstances;
   }
 }
@@ -974,36 +981,31 @@ void SceneRenderer::renderShadowsSkinnedMesh(
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-    const auto &mesh = mAssetRegistry.get(handle);
     u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(
-        MeshRenderUtils::getSkinnedGeometryBuffers(mesh),
-        MeshRenderUtils::getSkinnedGeometryBufferOffsets(mesh));
-    commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
-    renderShadowsGeometries(commandList, pipeline, mesh, instanceStart,
-                            numInstances);
+        MeshRenderUtils::getSkinnedGeometryBuffers(meshData.drawData),
+        MeshRenderUtils::getSkinnedGeometryBufferOffsets(meshData.drawData));
+    commandList.bindIndexBuffer(meshData.drawData->indexBuffer,
+                                rhi::IndexType::Uint32);
+    renderShadowsGeometries(commandList, pipeline, meshData.drawData,
+                            instanceStart, numInstances);
     instanceStart += numInstances;
   }
 }
 
 void SceneRenderer::renderShadowsGeometries(rhi::RenderCommandList &commandList,
                                             rhi::PipelineHandle pipeline,
-                                            const MeshAsset &mesh,
+                                            const MeshDrawData *drawData,
                                             u32 instanceStart,
                                             u32 numInstances) {
   i32 vertexOffset = 0;
   u32 indexOffset = 0;
-  for (usize g = 0; g < mesh.geometries.size(); ++g) {
-    auto &geometry = mesh.geometries.at(g);
-
-    u32 indexCount = static_cast<u32>(mesh.geometries.at(g).indices.size());
-    i32 vertexCount = static_cast<i32>(mesh.geometries.at(g).positions.size());
-
-    commandList.drawIndexed(indexCount, indexOffset, vertexOffset, numInstances,
-                            instanceStart);
-    vertexOffset += vertexCount;
-    indexOffset += indexCount;
+  for (const auto &geometry : drawData->geometries) {
+    commandList.drawIndexed(geometry.numIndices, indexOffset, vertexOffset,
+                            numInstances, instanceStart);
+    vertexOffset += geometry.numVertices;
+    indexOffset += geometry.numIndices;
   }
 }
 

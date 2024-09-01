@@ -229,8 +229,8 @@ void SceneRendererFrameData::setDefaultMaterial(rhi::DeviceAddress material) {
 }
 
 void SceneRendererFrameData::addMesh(
-    AssetHandle<MeshAsset> handle, quoll::Entity entity,
-    const glm::mat4 &transform,
+    AssetHandle<MeshAsset> handle, const MeshDrawData &meshDrawData,
+    quoll::Entity entity, const glm::mat4 &transform,
     const std::vector<rhi::DeviceAddress> &materials) {
   u32 start = static_cast<u32>(mFlatMaterials.size());
   for (const auto &material : materials) {
@@ -247,10 +247,12 @@ void SceneRendererFrameData::addMesh(
   mMeshGroups.at(handle).entities.push_back(entity);
   mMeshGroups.at(handle).transforms.push_back(transform);
   mMeshGroups.at(handle).materialRanges.push_back({start, end});
+  mMeshGroups.at(handle).drawData = &meshDrawData;
 }
 
 void SceneRendererFrameData::addSkinnedMesh(
-    AssetHandle<MeshAsset> handle, Entity entity, const glm::mat4 &transform,
+    AssetHandle<MeshAsset> handle, const MeshDrawData &meshDrawData,
+    Entity entity, const glm::mat4 &transform,
     const std::vector<glm::mat4> &skeleton,
     const std::vector<rhi::DeviceAddress> &materials) {
   u32 start = static_cast<u32>(mFlatMaterials.size());
@@ -269,6 +271,7 @@ void SceneRendererFrameData::addSkinnedMesh(
   group.entities.push_back(entity);
   group.transforms.push_back(transform);
   group.materialRanges.push_back({start, end});
+  group.drawData = &meshDrawData;
 
   usize currentOffset = group.lastSkeleton * MaxNumJoints;
   usize newSize = currentOffset + MaxNumJoints;

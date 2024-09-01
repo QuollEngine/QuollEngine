@@ -4,6 +4,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/physics/Collidable.h"
 #include "quoll/renderer/BindlessDrawParameters.h"
+#include "quoll/renderer/MeshDrawData.h"
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/SceneRendererFrameData.h"
 #include "quoll/rhi/RenderDevice.h"
@@ -80,9 +81,10 @@ public:
                  const std::vector<SceneRendererFrameData::GlyphData> &glyphs,
                  const glm::mat4 &worldTransform);
 
-  void addMeshOutline(const MeshAsset &mesh, const glm::mat4 &worldTransform);
+  void addMeshOutline(const MeshDrawData &drawData,
+                      const glm::mat4 &worldTransform);
 
-  void addSkinnedMeshOutline(const MeshAsset &mesh,
+  void addSkinnedMeshOutline(const MeshDrawData &drawData,
                              const std::vector<glm::mat4> &skeleton,
                              const glm::mat4 &worldTransform);
 

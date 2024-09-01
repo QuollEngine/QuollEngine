@@ -18,8 +18,7 @@ void renderView(UIComponent component, YGNodeRef node) {
 
   if (auto *image = std::get_if<UIImage>(&component)) {
     if (image->texture) {
-      auto texture = image->texture->deviceHandle;
-      imgui::image(texture, ImVec2(ImageSize, ImageSize));
+      imgui::image(image->texture, ImVec2(ImageSize, ImageSize));
     }
   } else if (auto *text = std::get_if<UIText>(&component)) {
     ImGui::Text("%s", text->content.c_str());

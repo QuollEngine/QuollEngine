@@ -95,6 +95,8 @@ public:
 
   void column(rhi::TextureHandle handle, const glm::vec2 &size);
 
+  void column(const AssetRef<TextureAsset> &asset, const glm::vec2 &size);
+
   template <class... TColumns> void row(const TColumns &...columns) {
     ImGui::TableNextRow();
 
