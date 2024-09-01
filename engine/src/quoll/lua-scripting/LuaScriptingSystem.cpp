@@ -29,7 +29,7 @@ void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
     }
 
     bool valid = true;
-    auto &script = component.handle.get();
+    auto &script = component.asset.get();
     for (auto &[key, value] : script.variables) {
       auto it = component.variables.find(key);
       if (it == component.variables.end() || !it->second.isType(value.type)) {

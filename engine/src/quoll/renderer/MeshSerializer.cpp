@@ -8,8 +8,8 @@ void MeshSerializer::serialize(YAML::Node &node, EntityDatabase &entityDatabase,
                                Entity entity) {
   if (entityDatabase.has<Mesh>(entity)) {
     const auto &mesh = entityDatabase.get<Mesh>(entity);
-    if (mesh.handle) {
-      node["mesh"] = mesh.handle.meta().uuid;
+    if (mesh.asset) {
+      node["mesh"] = mesh.asset.meta().uuid;
     }
   }
 }

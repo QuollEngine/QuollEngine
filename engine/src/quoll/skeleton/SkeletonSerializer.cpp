@@ -8,7 +8,7 @@ void SkeletonSerializer::serialize(YAML::Node &node,
                                    EntityDatabase &entityDatabase,
                                    Entity entity) {
   if (entityDatabase.has<Skeleton>(entity)) {
-    const auto &asset = entityDatabase.get<Skeleton>(entity).assetHandle;
+    const auto &asset = entityDatabase.get<Skeleton>(entity).asset;
     if (asset) {
       node["skeleton"] = asset.meta().uuid;
     }
@@ -25,7 +25,7 @@ void SkeletonSerializer::deserialize(const YAML::Node &node,
     if (res) {
       const auto &skeleton = res.data().get();
       Skeleton skeletonComponent{};
-      skeletonComponent.assetHandle = res.data();
+      skeletonComponent.asset = res.data();
       skeletonComponent.jointLocalPositions = skeleton.jointLocalPositions;
       skeletonComponent.jointLocalRotations = skeleton.jointLocalRotations;
       skeletonComponent.jointLocalScales = skeleton.jointLocalScales;

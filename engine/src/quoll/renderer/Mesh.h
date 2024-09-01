@@ -6,7 +6,7 @@
 namespace quoll {
 
 struct Mesh {
-  AssetRef<MeshAsset> handle;
+  AssetRef<MeshAsset> asset;
 };
 
 } // namespace quoll

@@ -6,7 +6,7 @@
 namespace quoll {
 
 struct AudioSource {
-  AssetRef<AudioAsset> source;
+  AssetRef<AudioAsset> asset;
 };
 
 } // namespace quoll

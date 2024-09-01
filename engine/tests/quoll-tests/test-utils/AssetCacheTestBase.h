@@ -10,6 +10,18 @@ public:
 public:
   AssetCacheTestBase();
 
+  template <typename TAssetData>
+  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
+    quoll::AssetData<TAssetData> info{};
+    info.type = quoll::AssetCache::getAssetType<TAssetData>();
+    info.uuid = quoll::Uuid::generate();
+    info.data = data;
+
+    cache.getRegistry().add(info);
+
+    return cache.request<TAssetData>(info.uuid).data();
+  }
+
   void SetUp() override;
 
   void TearDown() override;

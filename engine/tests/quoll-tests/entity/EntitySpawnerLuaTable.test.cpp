@@ -92,5 +92,5 @@ TEST_F(EntitySpawnerLuaTableTest,
       glm::vec3{0.0f});
   EXPECT_TRUE(entityDatabase.has<quoll::WorldTransform>(createdEntity));
   EXPECT_TRUE(entityDatabase.has<quoll::Sprite>(createdEntity));
-  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(createdEntity).handle, texture);
+  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(createdEntity).texture, texture);
 }

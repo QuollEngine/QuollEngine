@@ -132,7 +132,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetRef<PrefabAsset> prefab,
     usize numJoints = asset.jointLocalPositions.size();
 
     Skeleton skeleton{};
-    skeleton.assetHandle = pSkeleton.value;
+    skeleton.asset = pSkeleton.value;
     skeleton.numJoints = static_cast<u32>(numJoints);
     skeleton.jointNames.resize(numJoints);
     skeleton.jointParents.resize(numJoints);

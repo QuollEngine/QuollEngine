@@ -6,7 +6,7 @@
 namespace quoll {
 
 struct Sprite {
-  AssetRef<TextureAsset> handle;
+  AssetRef<TextureAsset> texture;
 };
 
 } // namespace quoll

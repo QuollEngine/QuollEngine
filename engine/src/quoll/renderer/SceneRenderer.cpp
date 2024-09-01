@@ -781,7 +781,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   for (auto [entity, sprite, world] :
        entityDatabase.view<Sprite, WorldTransform>()) {
-    auto handle = sprite.handle->deviceHandle;
+    auto handle = sprite.texture->deviceHandle;
     frameData.addSprite(entity, handle, world.worldTransform);
   }
 
@@ -793,7 +793,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       materials.push_back(material->deviceHandle->getAddress());
     }
 
-    frameData.addMesh(mesh.handle.handle(), entity, world.worldTransform,
+    frameData.addMesh(mesh.asset.handle(), entity, world.worldTransform,
                       materials);
   }
 
@@ -806,7 +806,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       materials.push_back(material->deviceHandle->getAddress());
     }
 
-    frameData.addSkinnedMesh(mesh.handle.handle(), entity, world.worldTransform,
+    frameData.addSkinnedMesh(mesh.asset.handle(), entity, world.worldTransform,
                              skeleton.jointFinalTransforms, materials);
   }
 

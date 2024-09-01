@@ -7,7 +7,7 @@ namespace quoll {
 void AudioSerializer::serialize(YAML::Node &node,
                                 EntityDatabase &entityDatabase, Entity entity) {
   if (entityDatabase.has<AudioSource>(entity)) {
-    const auto &asset = entityDatabase.get<AudioSource>(entity).source;
+    const auto &asset = entityDatabase.get<AudioSource>(entity).asset;
     if (asset) {
       node["audio"]["source"] = asset.meta().uuid;
     }

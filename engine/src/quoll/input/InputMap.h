@@ -7,7 +7,7 @@
 namespace quoll {
 
 struct InputMapAssetRef {
-  AssetRef<InputMapAsset> handle;
+  AssetRef<InputMapAsset> asset;
 
   usize defaultScheme = 0;
 };
