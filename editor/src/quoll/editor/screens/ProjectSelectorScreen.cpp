@@ -65,7 +65,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter,
-                             metricsCollector);
+                             metricsCollector, nullptr);
 
   mainLoop.setRenderFn([&]() mutable {
     if (presenter.requiresFramebufferUpdate()) {

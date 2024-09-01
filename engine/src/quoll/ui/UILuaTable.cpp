@@ -16,7 +16,7 @@ sol::table UILuaTable::create(sol::state_view state, AssetCache &assetCache) {
         AssetHandle<TextureAsset> handle(value);
         if (assetCache.getRegistry().has(handle)) {
           image.texture = AssetRef<TextureAsset>(
-              &assetCache.getRegistry().getMap<TextureAsset>(), handle);
+              assetCache.getRegistry().getMap<TextureAsset>(), handle);
         }
       });
 
@@ -35,7 +35,7 @@ sol::table UILuaTable::create(sol::state_view state, AssetCache &assetCache) {
 
     if (assetCache.getRegistry().has(handle)) {
       texture = AssetRef<TextureAsset>(
-          &assetCache.getRegistry().getMap<TextureAsset>(), handle);
+          assetCache.getRegistry().getMap<TextureAsset>(), handle);
     }
 
     return UIImage{.texture = texture};

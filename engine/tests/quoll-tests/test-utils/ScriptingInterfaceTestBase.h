@@ -38,10 +38,10 @@ public:
   }
 
 protected:
+  quoll::AssetCache assetCache;
   quoll::Scene scene;
   quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
   quoll::SystemView view{&scene};
-  quoll::AssetCache assetCache;
   quoll::LuaScriptingSystem scriptingSystem;
   TestPhysicsBackend *physicsBackend = new TestPhysicsBackend;
   quoll::PhysicsSystem physicsSystem;

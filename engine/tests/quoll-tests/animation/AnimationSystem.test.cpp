@@ -13,9 +13,9 @@
 
 class AnimationSystemTest : public ::testing::Test {
 public:
+  quoll::AssetCache assetCache;
   quoll::Scene scene;
   quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
-  quoll::AssetCache assetCache;
   quoll::AnimationSystem system;
 
   quoll::SystemView view{&scene};
@@ -40,10 +40,6 @@ public:
          quoll::AnimationLoopMode loopMode = quoll::AnimationLoopMode::None) {
     auto entity = entityDatabase.create();
     entityDatabase.set<quoll::LocalTransform>(entity, {});
-
-    quoll::AssetData<quoll::AnimatorAsset> info{};
-    info.uuid = quoll::Uuid::generate();
-    info.data.initialState = 0;
 
     std::vector states{quoll::AnimationState{.name = "Animation",
                                              .animation = animation,

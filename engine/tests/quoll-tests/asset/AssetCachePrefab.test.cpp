@@ -593,95 +593,99 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
 }
 
 TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
-  // Create texture
-  auto tempTexture = cache.request<quoll::TextureAsset>(textureUuid).data();
-  auto tempTextureAsset = tempTexture.meta();
-  cache.getRegistry().remove(tempTexture.handle());
+  auto meshUuid = quoll::Uuid::generate();
+  auto skeletonUuid = quoll::Uuid::generate();
+  auto animationUuid = quoll::Uuid::generate();
+  auto animatorUuid = quoll::Uuid::generate();
+  auto prefabUuid = quoll::Uuid::generate();
 
-  auto texturePath = cache.createFromData(tempTextureAsset).data();
-  auto texture = cache.request<quoll::TextureAsset>(textureUuid).data();
+  {
+    // Create texture
+    auto texture = cache.request<quoll::TextureAsset>(textureUuid).data();
 
-  // Create mesh
-  quoll::AssetData<quoll::MeshAsset> meshData{};
-  meshData.type = quoll::AssetType::Mesh;
-  meshData.uuid = quoll::Uuid::generate();
+    // Create mesh
+    quoll::AssetData<quoll::MeshAsset> meshData{};
+    meshData.type = quoll::AssetType::Mesh;
+    meshData.uuid = meshUuid;
 
-  quoll::BaseGeometryAsset geometry{};
-  geometry.positions.push_back({});
-  geometry.normals.push_back({});
-  geometry.tangents.push_back({});
-  geometry.texCoords0.push_back({});
-  geometry.texCoords1.push_back({});
-  geometry.joints.push_back({});
-  geometry.weights.push_back({});
+    quoll::BaseGeometryAsset geometry{};
+    geometry.positions.push_back({});
+    geometry.normals.push_back({});
+    geometry.tangents.push_back({});
+    geometry.texCoords0.push_back({});
+    geometry.texCoords1.push_back({});
+    geometry.joints.push_back({});
+    geometry.weights.push_back({});
 
-  geometry.indices.push_back(0);
-  meshData.data.geometries.push_back(geometry);
-  auto meshPath = cache.createFromData(meshData).data();
-  auto mesh = cache.request<quoll::MeshAsset>(meshData.uuid).data();
+    geometry.indices.push_back(0);
+    meshData.data.geometries.push_back(geometry);
+    auto meshPath = cache.createFromData(meshData).data();
+    auto mesh = cache.request<quoll::MeshAsset>(meshData.uuid).data();
 
-  // Create skeleton
-  quoll::AssetData<quoll::SkeletonAsset> skeletonData{};
-  skeletonData.uuid = quoll::Uuid::generate();
+    // Create skeleton
+    quoll::AssetData<quoll::SkeletonAsset> skeletonData{};
+    skeletonData.uuid = skeletonUuid;
 
-  auto skeletonPath = cache.createFromData(skeletonData);
-  auto skeleton = cache.request<quoll::SkeletonAsset>(skeletonData.uuid).data();
+    auto skeletonPath = cache.createFromData(skeletonData);
+    auto skeleton =
+        cache.request<quoll::SkeletonAsset>(skeletonData.uuid).data();
 
-  // Create animation
-  quoll::AssetData<quoll::AnimationAsset> animationData{};
-  animationData.data.time = 2.5;
-  animationData.uuid = quoll::Uuid::generate();
-  auto animationPath = cache.createFromData(animationData);
-  auto animation =
-      cache.request<quoll::AnimationAsset>(animationData.uuid).data();
+    // Create animation
+    quoll::AssetData<quoll::AnimationAsset> animationData{};
+    animationData.data.time = 2.5;
+    animationData.uuid = animationUuid;
+    auto animationPath = cache.createFromData(animationData);
+    auto animation =
+        cache.request<quoll::AnimationAsset>(animationData.uuid).data();
 
-  // Create animator
-  quoll::AssetData<quoll::AnimatorAsset> animatorData{};
-  animatorData.data.states.push_back({"INITIAL"});
-  animatorData.uuid = quoll::Uuid::generate();
-  auto animatorPath = cache.createFromData(animatorData);
-  auto animator = cache.request<quoll::AnimatorAsset>(animatorData.uuid).data();
+    // Create animator
+    quoll::AssetData<quoll::AnimatorAsset> animatorData{};
+    animatorData.data.states.push_back({"INITIAL"});
+    animatorData.uuid = animatorUuid;
+    auto animatorPath = cache.createFromData(animatorData);
+    auto animator =
+        cache.request<quoll::AnimatorAsset>(animatorData.uuid).data();
 
-  // Create prefab
-  quoll::AssetData<quoll::PrefabAsset> prefabData{};
-  prefabData.uuid = quoll::Uuid::generate();
-  prefabData.data.meshes.push_back({0U, mesh});
-  prefabData.data.skeletons.push_back({0U, skeleton});
-  prefabData.data.animations.push_back(animation);
-  prefabData.data.animators.push_back({0U, animator});
+    // Create prefab
+    quoll::AssetData<quoll::PrefabAsset> prefabData{};
+    prefabData.uuid = prefabUuid;
+    prefabData.data.meshes.push_back({0U, mesh});
+    prefabData.data.skeletons.push_back({0U, skeleton});
+    prefabData.data.animations.push_back(animation);
+    prefabData.data.animators.push_back({0U, animator});
 
-  auto prefabPath = cache.createFromData(prefabData);
+    cache.createFromData(prefabData);
+  }
 
-  // Delete all existing assets
-  cache.getRegistry().remove(texture.handle());
-  cache.getRegistry().remove(mesh.handle());
-  cache.getRegistry().remove(skeleton.handle());
-  cache.getRegistry().remove(animation.handle());
-  cache.getRegistry().remove(animator.handle());
+  cache.getRegistry().clear<quoll::TextureAsset>();
+  cache.getRegistry().clear<quoll::MeshAsset>();
+  cache.getRegistry().clear<quoll::SkeletonAsset>();
+  cache.getRegistry().clear<quoll::AnimationAsset>();
+  cache.getRegistry().clear<quoll::AnimatorAsset>();
 
-  auto res = cache.request<quoll::PrefabAsset>(prefabData.uuid);
+  auto res = cache.request<quoll::PrefabAsset>(prefabUuid);
   ASSERT_TRUE(res);
 
   auto newPrefab = res.data();
-  EXPECT_NE(newPrefab.handle(), quoll::AssetHandle<quoll::PrefabAsset>());
+  EXPECT_TRUE(newPrefab);
 
   // Validate mesh
   auto newMesh = newPrefab->meshes.at(0).value;
   EXPECT_TRUE(newMesh);
-  EXPECT_EQ(newMesh.meta().uuid, meshData.uuid);
+  EXPECT_EQ(newMesh.meta().uuid, meshUuid);
 
   // Validate skeleton
   auto &newSkeleton = newPrefab->skeletons.at(0).value;
   EXPECT_TRUE(newSkeleton);
-  EXPECT_EQ(newSkeleton.meta().uuid, skeletonData.uuid);
+  EXPECT_EQ(newSkeleton.meta().uuid, skeletonUuid);
 
   // Validate animation
   auto &newAnimation = newPrefab->animations.at(0);
   EXPECT_TRUE(newAnimation);
-  EXPECT_EQ(newAnimation.meta().uuid, animationData.uuid);
+  EXPECT_EQ(newAnimation.meta().uuid, animationUuid);
 
   // Validate animator
   auto &newAnimator = newPrefab->animators.at(0).value;
   EXPECT_TRUE(newAnimator);
-  EXPECT_EQ(newAnimator.meta().uuid, animatorData.uuid);
+  EXPECT_EQ(newAnimator.meta().uuid, animatorUuid);
 }

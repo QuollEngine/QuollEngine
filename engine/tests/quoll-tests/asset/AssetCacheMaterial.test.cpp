@@ -336,23 +336,24 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
   EXPECT_EQ(material->emissiveFactor, asset.data.emissiveFactor);
 }
 
-TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
-  auto texture = cache.request<quoll::TextureAsset>(textureUuid).data();
-  quoll::AssetData<quoll::MaterialAsset> material{};
-  material.uuid = quoll::Uuid::generate();
-  material.data.baseColorTexture = texture;
-  auto path = cache.createFromData(material);
+TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTextures) {
+  auto materialUuid = quoll::Uuid::generate();
 
-  cache.getRegistry().remove(texture.handle());
-  EXPECT_FALSE(cache.getRegistry().has(texture.handle()));
+  {
+    auto texture = cache.request<quoll::TextureAsset>(textureUuid).data();
+    quoll::AssetData<quoll::MaterialAsset> material{};
+    material.uuid = materialUuid;
+    material.data.baseColorTexture = texture;
+    auto path = cache.createFromData(material);
+  }
 
-  auto res = cache.request<quoll::MaterialAsset>(material.uuid);
+  cache.getRegistry().clear<quoll::TextureAsset>();
+
+  auto res = cache.request<quoll::MaterialAsset>(materialUuid);
   ASSERT_TRUE(res);
 
   auto newMaterial = res.data();
-
-  EXPECT_NE(newMaterial->baseColorTexture,
-            quoll::AssetHandle<quoll::TextureAsset>());
+  EXPECT_TRUE(newMaterial->baseColorTexture);
 
   auto &newTexture = newMaterial->baseColorTexture;
   EXPECT_EQ(newTexture.meta().uuid, textureUuid);
