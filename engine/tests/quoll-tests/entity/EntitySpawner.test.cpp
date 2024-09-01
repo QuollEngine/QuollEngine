@@ -31,8 +31,8 @@ public:
     return assetCache.request<TAssetData>(info.uuid).data();
   }
 
-  quoll::EntityDatabase entityDatabase;
   quoll::AssetCache assetCache;
+  quoll::EntityDatabase entityDatabase;
   quoll::EntitySpawner entitySpawner;
 };
 

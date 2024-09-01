@@ -35,7 +35,7 @@ EntitySpawnerLuaTable::spawnPrefab(AssetHandleType handle) {
   }
 
   AssetRef<PrefabAsset> prefab(
-      &mScriptGlobals.assetCache.getRegistry().getMap<PrefabAsset>(),
+      mScriptGlobals.assetCache.getRegistry().getMap<PrefabAsset>(),
       prefabHandle);
 
   if (isPrefabEmpty(prefab.get())) {
@@ -64,7 +64,7 @@ EntitySpawnerLuaTable::spawnSprite(AssetHandleType handle) {
   }
 
   AssetRef<TextureAsset> texture(
-      &mScriptGlobals.assetCache.getRegistry().getMap<TextureAsset>(),
+      mScriptGlobals.assetCache.getRegistry().getMap<TextureAsset>(),
       textureHandle);
 
   auto entity =

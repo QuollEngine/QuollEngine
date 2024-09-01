@@ -98,7 +98,7 @@ void EditorScreen::start(const Project &rawProject) {
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter,
-                             metricsCollector);
+                             metricsCollector, &assetManager.getCache());
 
   IconRegistry::loadIcons(renderStorage,
                           std::filesystem::current_path() / "assets" / "icons");

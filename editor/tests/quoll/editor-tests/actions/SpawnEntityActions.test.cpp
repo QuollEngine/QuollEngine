@@ -292,10 +292,8 @@ TEST_F(SpawnPrefabAtViewActionTest,
        PredicateReturnsFalseIfPrefabAssetDoesNotExist) {
   auto camera = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Camera>(camera, {});
-  quoll::editor::SpawnPrefabAtView action(
-      quoll::AssetRef<quoll::PrefabAsset>(
-          nullptr, quoll::AssetHandle<quoll::PrefabAsset>(0)),
-      camera);
+  quoll::editor::SpawnPrefabAtView action(quoll::AssetRef<quoll::PrefabAsset>(),
+                                          camera);
   EXPECT_FALSE(action.predicate(state, assetCache));
 }
 
@@ -494,9 +492,7 @@ TEST_F(SpawnSpriteAtViewActionTest, PredicateReturnsFalseIfAssetDoesNotExist) {
   state.camera = camera;
 
   quoll::editor::SpawnSpriteAtView action(
-      quoll::AssetRef<quoll::TextureAsset>(
-          nullptr, quoll::AssetHandle<quoll::TextureAsset>(0)),
-      camera);
+      quoll::AssetRef<quoll::TextureAsset>(), camera);
 
   EXPECT_FALSE(action.predicate(state, assetCache));
 }

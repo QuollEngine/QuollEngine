@@ -26,25 +26,26 @@ TEST_F(AssetCacheTextureTest, CreatesTextureFromSource) {
 }
 
 TEST_F(AssetCacheTextureTest, CreatesTextureFromAsset) {
-  auto uuid = quoll::Uuid::generate();
-  auto createdRes = cache.createFromSource<quoll::TextureAsset>(
-      FixturesPath / "1x1-2d.ktx", uuid);
-  auto res = cache.request<quoll::TextureAsset>(uuid);
-  ASSERT_TRUE(res);
+  auto textureUuid = quoll::Uuid::generate();
+  quoll::AssetData<quoll::TextureAsset> textureData{};
 
-  auto texture = res.data();
+  {
+    auto createdRes = cache.createFromSource<quoll::TextureAsset>(
+        FixturesPath / "1x1-2d.ktx", textureUuid);
+    auto res = cache.request<quoll::TextureAsset>(textureUuid);
+    ASSERT_TRUE(res);
+    textureData = res.data().meta();
+  }
 
-  auto data = texture.meta();
+  cache.getRegistry().clear<quoll::TextureAsset>();
 
-  cache.getRegistry().remove(texture.handle());
-
-  auto filePath = cache.createFromData(data);
+  auto filePath = cache.createFromData(textureData);
   EXPECT_TRUE(filePath);
   EXPECT_FALSE(filePath.hasWarnings());
 
   EXPECT_EQ(filePath.data().filename().string().size(), 38);
 
-  auto meta = cache.getAssetMeta(uuid);
+  auto meta = cache.getAssetMeta(textureUuid);
   EXPECT_EQ(meta.type, quoll::AssetType::Texture);
   EXPECT_EQ(meta.name, "1x1-2d.ktx");
 }

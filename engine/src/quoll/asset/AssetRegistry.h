@@ -30,18 +30,18 @@ class RenderStorage;
  */
 class AssetRegistry : NoCopyMove {
   using TextureMap = AssetMap<TextureAsset>;
-  using FontMap = AssetMap<FontAsset>;
   using MaterialMap = AssetMap<MaterialAsset>;
   using MeshMap = AssetMap<MeshAsset>;
   using SkeletonMap = AssetMap<SkeletonAsset>;
   using AnimationMap = AssetMap<AnimationAsset>;
   using AnimatorMap = AssetMap<AnimatorAsset>;
   using AudioMap = AssetMap<AudioAsset>;
-  using PrefabMap = AssetMap<PrefabAsset>;
+  using FontMap = AssetMap<FontAsset>;
   using LuaScriptMap = AssetMap<LuaScriptAsset>;
-  using EnvironmentMap = AssetMap<EnvironmentAsset>;
-  using SceneMap = AssetMap<SceneAsset>;
   using InputMapMap = AssetMap<InputMapAsset>;
+  using EnvironmentMap = AssetMap<EnvironmentAsset>;
+  using PrefabMap = AssetMap<PrefabAsset>;
+  using SceneMap = AssetMap<SceneAsset>;
 
   struct DefaultObjects {
     AssetHandle<MeshAsset> cube;
@@ -126,6 +126,10 @@ public:
 
   template <typename TAssetData> constexpr auto &getAll() {
     return getMap<TAssetData>().getAssets();
+  }
+
+  template <typename TAssetData> constexpr void clear() {
+    return getMap<TAssetData>().clear();
   }
 
   template <typename TAssetData> constexpr auto &getMap() {

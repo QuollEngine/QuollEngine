@@ -80,24 +80,27 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
 
 TEST_F(AssetCacheEnvironmentTest,
        DoesNotLoadEnvironmentAssetIfEnvironmentTexturesCouldNotBeLoaded) {
-  auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
-  auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
+  auto uuid = quoll::Uuid::generate();
 
-  ASSERT_TRUE(irradianceMap);
-  ASSERT_TRUE(specularMap);
+  {
+    auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
+    auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
 
-  quoll::AssetData<quoll::EnvironmentAsset> asset{};
-  asset.uuid = quoll::Uuid::generate();
-  asset.data.irradianceMap = irradianceMap.data();
-  asset.data.specularMap = specularMap.data();
-  auto createRes = cache.createFromData(asset);
+    ASSERT_TRUE(irradianceMap);
+    ASSERT_TRUE(specularMap);
 
-  cache.getRegistry().remove(irradianceMap.data().handle());
-  cache.getRegistry().remove(specularMap.data().handle());
+    quoll::AssetData<quoll::EnvironmentAsset> asset{};
+    asset.uuid = quoll::Uuid::generate();
+    asset.data.irradianceMap = irradianceMap.data();
+    asset.data.specularMap = specularMap.data();
+    cache.createFromData(asset);
+  }
+
+  cache.getRegistry().clear<quoll::TextureAsset>();
 
   {
     std::filesystem::remove(cache.getPathFromUuid(irradianceUuid));
-    auto res = cache.request<quoll::EnvironmentAsset>(asset.uuid);
+    auto res = cache.request<quoll::EnvironmentAsset>(uuid);
 
     EXPECT_FALSE(res);
     EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
@@ -108,7 +111,7 @@ TEST_F(AssetCacheEnvironmentTest,
         FixturesPath / "1x1-cubemap.ktx", irradianceUuid);
     std::filesystem::remove(cache.getPathFromUuid(specularUuid));
 
-    auto res = cache.request<quoll::EnvironmentAsset>(asset.uuid);
+    auto res = cache.request<quoll::EnvironmentAsset>(uuid);
 
     EXPECT_FALSE(res);
     EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
@@ -117,24 +120,27 @@ TEST_F(AssetCacheEnvironmentTest,
 
 TEST_F(AssetCacheEnvironmentTest,
        LoadsEnvironmentAssetWithTexturesIfTexturesAreNotLoaded) {
-  auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
-  auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
+  auto environmentUuid = quoll::Uuid::generate();
 
-  ASSERT_TRUE(irradianceMap);
-  ASSERT_TRUE(specularMap);
+  {
+    auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
+    auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
 
-  quoll::AssetData<quoll::EnvironmentAsset> asset{};
-  asset.uuid = quoll::Uuid::generate();
-  asset.data.irradianceMap = irradianceMap.data();
-  asset.data.specularMap = specularMap.data();
-  auto createRes = cache.createFromData(asset);
+    ASSERT_TRUE(irradianceMap);
+    ASSERT_TRUE(specularMap);
 
-  cache.getRegistry().remove(irradianceMap.data().handle());
-  cache.getRegistry().remove(specularMap.data().handle());
+    quoll::AssetData<quoll::EnvironmentAsset> asset{};
+    asset.uuid = environmentUuid;
+    asset.data.irradianceMap = irradianceMap.data();
+    asset.data.specularMap = specularMap.data();
+    cache.createFromData(asset);
+  }
+
+  cache.getRegistry().clear<quoll::TextureAsset>();
 
   EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
 
-  auto res = cache.request<quoll::EnvironmentAsset>(asset.uuid);
+  auto res = cache.request<quoll::EnvironmentAsset>(environmentUuid);
 
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
@@ -143,10 +149,8 @@ TEST_F(AssetCacheEnvironmentTest,
   EXPECT_GT(cache.getRegistry().count<quoll::EnvironmentAsset>(), 0);
 
   auto environment = res.data();
-  EXPECT_NE(environment->irradianceMap,
-            quoll::AssetHandle<quoll::TextureAsset>());
-  EXPECT_NE(environment->specularMap,
-            quoll::AssetHandle<quoll::TextureAsset>());
+  EXPECT_TRUE(environment->irradianceMap);
+  EXPECT_TRUE(environment->specularMap);
 }
 
 TEST_F(AssetCacheEnvironmentTest,
