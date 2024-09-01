@@ -10,7 +10,7 @@
 namespace quoll {
 
 struct LuaScript {
-  AssetRef<LuaScriptAsset> handle;
+  AssetRef<LuaScriptAsset> asset;
 
   bool started = false;
 

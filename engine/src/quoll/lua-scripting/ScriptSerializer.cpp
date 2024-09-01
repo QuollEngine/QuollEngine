@@ -9,10 +9,10 @@ void ScriptSerializer::serialize(YAML::Node &node,
                                  Entity entity) {
   if (entityDatabase.has<LuaScript>(entity)) {
     const auto &script = entityDatabase.get<LuaScript>(entity);
-    if (script.handle) {
-      const auto &asset = script.handle.get();
+    if (script.asset) {
+      const auto &asset = script.asset.get();
 
-      node["script"]["asset"] = script.handle.meta().uuid;
+      node["script"]["asset"] = script.asset.meta().uuid;
 
       for (auto &[name, value] : script.variables) {
         auto it = asset.variables.find(name);

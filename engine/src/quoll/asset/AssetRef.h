@@ -9,7 +9,8 @@ namespace quoll {
 template <class TAssetData> class AssetRef {
 public:
   constexpr AssetRef() = default;
-  constexpr AssetRef(AssetMap<TAssetData> *map, AssetHandle<TAssetData> handle)
+  constexpr explicit AssetRef(AssetMap<TAssetData> *map,
+                              AssetHandle<TAssetData> handle)
       : mMap(map), mHandle(handle) {}
 
   constexpr operator bool() const { return mHandle; }

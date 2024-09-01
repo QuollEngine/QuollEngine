@@ -354,7 +354,7 @@ TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
 
   auto entity = entityDatabase.create();
   quoll::Skeleton component{};
-  component.assetHandle = skeleton;
+  component.asset = skeleton;
 
   entityDatabase.set(entity, component);
 

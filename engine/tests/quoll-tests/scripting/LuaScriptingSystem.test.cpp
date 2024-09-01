@@ -22,18 +22,6 @@ public:
     return cache.request<quoll::LuaScriptAsset>(uuid);
   }
 
-  template <typename TAssetData>
-  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetData<TAssetData> info{};
-    info.type = quoll::AssetCache::getAssetType<TAssetData>();
-    info.uuid = quoll::Uuid::generate();
-    info.data = data;
-
-    cache.getRegistry().add(info);
-
-    return cache.request<TAssetData>(info.uuid).data();
-  }
-
   quoll::Scene scene;
   quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
   quoll::SystemView view{&scene};

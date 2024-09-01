@@ -10,8 +10,8 @@ void InputMapSerializer::serialize(YAML::Node &node,
   if (entityDatabase.has<InputMapAssetRef>(entity)) {
     const auto &component = entityDatabase.get<InputMapAssetRef>(entity);
 
-    if (component.handle) {
-      node["inputMap"]["asset"] = component.handle.meta().uuid;
+    if (component.asset) {
+      node["inputMap"]["asset"] = component.asset.meta().uuid;
       node["inputMap"]["defaultScheme"] = component.defaultScheme;
     }
   }

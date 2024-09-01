@@ -53,7 +53,7 @@ public:
           continue;
         }
 
-        void *sound = mBackend.playSound(source.source.get());
+        void *sound = mBackend.playSound(source.asset.get());
 
         entityDatabase.set<AudioStatus>(entity, {sound});
       }

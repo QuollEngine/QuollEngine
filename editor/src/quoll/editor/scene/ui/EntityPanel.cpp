@@ -633,7 +633,7 @@ void EntityPanel::renderSprite(Scene &scene, AssetCache &assetCache,
 
     if (auto _ = widgets::Section(SectionName.c_str())) {
       const auto &texture =
-          scene.entityDatabase.get<Sprite>(mSelectedEntity).handle;
+          scene.entityDatabase.get<Sprite>(mSelectedEntity).texture;
 
       static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
@@ -674,7 +674,7 @@ void EntityPanel::renderMesh(Scene &scene, AssetCache &assetCache,
 
   if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
     if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto asset = scene.entityDatabase.get<Mesh>(mSelectedEntity).handle;
+      const auto &asset = scene.entityDatabase.get<Mesh>(mSelectedEntity).asset;
 
       if (auto table = widgets::Table("TableMesh", 2)) {
         table.row("Name", asset.meta().name);
@@ -845,10 +845,8 @@ void EntityPanel::renderSkeleton(Scene &scene, AssetCache &assetCache,
 
     const auto &skeleton = scene.entityDatabase.get<Skeleton>(mSelectedEntity);
 
-    const auto &asset = skeleton.assetHandle;
-
     if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
-      table.row("Name", asset.meta().name);
+      table.row("Name", skeleton.asset.meta().name);
       table.row("Number of joints",
                 static_cast<u32>(skeleton.jointNames.size()));
     }
@@ -1345,7 +1343,7 @@ void EntityPanel::renderAudio(Scene &scene, AssetCache &assetCache,
   if (auto _ = widgets::Section(SectionName.c_str())) {
     const auto &audio = scene.entityDatabase.get<AudioSource>(mSelectedEntity);
 
-    ImGui::Text("Name: %s", audio.source.meta().name.c_str());
+    ImGui::Text("Name: %s", audio.asset.meta().name.c_str());
   }
 
   if (shouldDelete("Audio")) {
@@ -1365,8 +1363,8 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &script = scene.entityDatabase.get<LuaScript>(mSelectedEntity);
-    const auto &asset = script.handle.get();
-    const auto &name = script.handle.meta().name;
+    const auto &asset = script.asset.get();
+    const auto &name = script.asset.meta().name;
 
     ImGui::Text("Name: %s", name.c_str());
 
@@ -1526,8 +1524,8 @@ void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
     auto &component =
         scene.entityDatabase.get<InputMapAssetRef>(mSelectedEntity);
 
-    if (component.handle) {
-      widgets::Button(component.handle.meta().name.c_str(),
+    if (component.asset) {
+      widgets::Button(component.asset.meta().name.c_str(),
                       ImVec2(width, height));
     } else {
       widgets::Button("Drag input map here", ImVec2(width, height));
@@ -1548,14 +1546,14 @@ void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
         auto asset = assetCache.request<InputMapAsset>(uuid);
 
         auto newComponent = component;
-        newComponent.handle = asset;
+        newComponent.asset = asset;
         actionExecutor.execute<EntityUpdateComponent<InputMapAssetRef>>(
             mSelectedEntity, component, newComponent);
       }
     }
 
-    if (component.handle) {
-      const auto &asset = component.handle.get();
+    if (component.asset) {
+      const auto &asset = component.asset.get();
 
       const auto *schemeName =
           component.defaultScheme < asset.schemes.size()
@@ -1585,7 +1583,7 @@ void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
           scene.entityDatabase.get<InputMap>(mSelectedEntity);
 
       const auto *schemeName =
-          component.handle->schemes.at(inputMap.activeScheme).name.c_str();
+          component.asset->schemes.at(inputMap.activeScheme).name.c_str();
 
       ImGui::Text("Debug");
       ImGui::Text("Active scheme: %s", schemeName);

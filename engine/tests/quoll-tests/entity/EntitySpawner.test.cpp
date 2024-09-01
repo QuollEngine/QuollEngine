@@ -270,7 +270,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     auto entity = res.at(i);
 
     const auto &mesh = db.get<quoll::Mesh>(entity);
-    EXPECT_EQ(mesh.handle, asset.data.meshes.at(i).value);
+    EXPECT_EQ(mesh.asset, asset.data.meshes.at(i).value);
   }
 
   // Test skinned meshes
@@ -278,7 +278,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     auto entity = res.at(i);
 
     const auto &mesh = db.get<quoll::Mesh>(entity);
-    EXPECT_EQ(mesh.handle, asset.data.meshes.at(i).value);
+    EXPECT_EQ(mesh.asset, asset.data.meshes.at(i).value);
   }
 
   // Test mesh renderers
@@ -308,7 +308,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     const auto &skeleton = db.get<quoll::Skeleton>(entity);
 
     // Skeletons vector only has three items
-    EXPECT_EQ(skeleton.assetHandle, asset.data.skeletons.at(i - 2).value);
+    EXPECT_EQ(skeleton.asset, asset.data.skeletons.at(i - 2).value);
   }
 
   // Test animators
@@ -436,17 +436,17 @@ TEST_F(EntitySpawnerTest,
 
 TEST_F(EntitySpawnerTest,
        SpawnSpriteCreatesEntityWithSpriteAndTransformComponents) {
-  auto assetHandle = createAsset<quoll::TextureAsset>(
+  auto asset = createAsset<quoll::TextureAsset>(
       {.deviceHandle = quoll::rhi::TextureHandle{25}}, "my-sprite");
 
   quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
 
-  auto entity = entitySpawner.spawnSprite(assetHandle, transform);
+  auto entity = entitySpawner.spawnSprite(asset, transform);
   EXPECT_TRUE(entityDatabase.exists(entity));
   EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localPosition,
             transform.localPosition);
   EXPECT_TRUE(entityDatabase.has<quoll::WorldTransform>(entity));
   EXPECT_TRUE(entityDatabase.has<quoll::Sprite>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(entity).handle, assetHandle);
+  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(entity).texture, asset);
   EXPECT_EQ(entityDatabase.get<quoll::Name>(entity).name, "my-sprite");
 }

@@ -272,7 +272,8 @@ TEST_F(SceneLoaderSpriteTest, CreatesSpriteComponentWithFileDataIfValidField) {
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Sprite>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(entity).handle, texture.handle());
+  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(entity).texture,
+            texture.handle());
 }
 
 using SceneLoaderMeshTest = SceneLoaderTest;
@@ -315,7 +316,7 @@ TEST_F(SceneLoaderMeshTest, CreatesMeshComponentIfValidAssetTypeIsMesh) {
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Mesh>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).handle, mesh1.handle());
+  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).asset, mesh1.handle());
 }
 
 TEST_F(SceneLoaderMeshTest,
@@ -327,7 +328,7 @@ TEST_F(SceneLoaderMeshTest,
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Mesh>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).handle, mesh1.handle());
+  EXPECT_EQ(entityDatabase.get<quoll::Mesh>(entity).asset, mesh1.handle());
 }
 
 using SceneLoaderMeshRendererTest = SceneLoaderTest;
@@ -577,7 +578,7 @@ TEST_F(SceneLoaderSkeletonTest,
   ASSERT_TRUE(entityDatabase.has<quoll::Skeleton>(entity));
 
   const auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
-  EXPECT_EQ(skeleton.assetHandle, asset.handle());
+  EXPECT_EQ(skeleton.asset, asset.handle());
 
   EXPECT_EQ(skeleton.numJoints, NumJoints);
   for (u32 i = 0; i < NumJoints; ++i) {
@@ -1566,7 +1567,7 @@ TEST_F(SceneLoaderAudioTest, CreatesAudioComponentWithFileDataIfValidField) {
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::AudioSource>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::AudioSource>(entity).source,
+  EXPECT_EQ(entityDatabase.get<quoll::AudioSource>(entity).asset,
             audio.handle());
 }
 
@@ -1613,7 +1614,7 @@ TEST_F(SceneLoaderScriptTest,
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::LuaScript>(entity).handle,
+  EXPECT_EQ(entityDatabase.get<quoll::LuaScript>(entity).asset,
             script.handle());
 }
 
@@ -1644,7 +1645,7 @@ TEST_F(SceneLoaderScriptTest,
   ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
   const auto &component = entityDatabase.get<quoll::LuaScript>(entity);
 
-  EXPECT_EQ(component.handle, script.handle());
+  EXPECT_EQ(component.asset, script.handle());
 
   // Invalid prefab and texture are ignored
   EXPECT_FALSE(component.variables.contains("test_invalid_prefab"));
@@ -2743,7 +2744,7 @@ TEST_F(SceneLoaderInputMapTest, CreatesInputMapComponentIfInputMapAssetExists) {
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).handle,
+  EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).asset,
             inputMap.handle());
   EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).defaultScheme,
             1);

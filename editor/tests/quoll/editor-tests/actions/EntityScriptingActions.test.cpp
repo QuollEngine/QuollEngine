@@ -39,7 +39,7 @@ TEST_F(EntitySetScriptVariableActionTest,
   auto entity = state.scene.entityDatabase.create();
 
   quoll::LuaScript script;
-  script.handle = scriptAsset;
+  script.asset = scriptAsset;
   script.variables.insert({"var1", prefab1});
   state.scene.entityDatabase.set(entity, script);
 

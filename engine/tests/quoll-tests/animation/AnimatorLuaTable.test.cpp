@@ -4,20 +4,7 @@
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
 
-class AnimatorLuaTableTest : public LuaScriptingInterfaceTestBase {
-public:
-  template <typename TAssetData>
-  quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetData<TAssetData> info{};
-    info.type = quoll::AssetCache::getAssetType<TAssetData>();
-    info.uuid = quoll::Uuid::generate();
-    info.data = data;
-
-    assetCache.getRegistry().add(info);
-
-    return assetCache.request<TAssetData>(info.uuid).data();
-  }
-};
+using AnimatorLuaTableTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(AnimatorLuaTableTest, TriggerAddsAnimatorEventComponent) {
   auto entity = entityDatabase.create();

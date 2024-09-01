@@ -25,7 +25,7 @@ struct Skeleton {
 
   std::vector<String> jointNames;
 
-  AssetRef<SkeletonAsset> assetHandle;
+  AssetRef<SkeletonAsset> asset;
 };
 
 struct SkeletonDebug {

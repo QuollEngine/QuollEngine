@@ -44,7 +44,7 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state,
     return false;
   }
 
-  const auto &scriptAsset = scene.entityDatabase.get<LuaScript>(mEntity).handle;
+  const auto &scriptAsset = scene.entityDatabase.get<LuaScript>(mEntity).asset;
   if (!scriptAsset) {
     return false;
   }

@@ -9,7 +9,7 @@ void SpriteSerializer::serialize(YAML::Node &node,
                                  EntityDatabase &entityDatabase,
                                  Entity entity) {
   if (entityDatabase.has<Sprite>(entity)) {
-    auto texture = entityDatabase.get<Sprite>(entity).handle;
+    const auto &texture = entityDatabase.get<Sprite>(entity).texture;
     if (texture) {
       node["sprite"] = texture.meta().uuid;
     }

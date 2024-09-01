@@ -501,7 +501,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       frameData.addSpriteOutline(world.worldTransform);
     } else if (entityDatabase.has<Mesh>(state.selectedEntity) &&
                entityDatabase.has<MeshRenderer>(state.selectedEntity)) {
-      const auto &asset = entityDatabase.get<Mesh>(state.selectedEntity).handle;
+      const auto &asset = entityDatabase.get<Mesh>(state.selectedEntity).asset;
 
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
@@ -510,7 +510,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
     } else if (entityDatabase.has<Mesh>(state.selectedEntity) &&
                entityDatabase.has<SkinnedMeshRenderer>(state.selectedEntity) &&
                entityDatabase.has<Skeleton>(state.selectedEntity)) {
-      const auto &asset = entityDatabase.get<Mesh>(state.selectedEntity).handle;
+      const auto &asset = entityDatabase.get<Mesh>(state.selectedEntity).asset;
 
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
