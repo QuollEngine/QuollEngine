@@ -13,8 +13,6 @@ Result<Path> AssetLoader::loadFromPath(const Path &path,
   auto res = mAssetManager.importAsset(path, directory);
 
   if (res) {
-    mAssetManager.getAssetRegistry().syncWithDevice(
-        mAssetManager.getRenderStorage());
     mAssetManager.generatePreview(res, mAssetManager.getRenderStorage());
   }
 

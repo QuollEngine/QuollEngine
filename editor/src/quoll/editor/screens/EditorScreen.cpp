@@ -10,6 +10,7 @@
 #include "quoll/profiler/ImguiDebugLayer.h"
 #include "quoll/renderer/Presenter.h"
 #include "quoll/renderer/Renderer.h"
+#include "quoll/renderer/RendererAssetRegistry.h"
 #include "quoll/renderer/SceneRenderer.h"
 #include "quoll/renderer/StandardPushConstants.h"
 #include "quoll/ui/UICanvasUpdater.h"
@@ -46,6 +47,7 @@ void EditorScreen::start(const Project &rawProject) {
   quoll::MetricsCollector metricsCollector;
 
   RenderStorage renderStorage(mDevice, metricsCollector);
+  RendererAssetRegistry rendererAssetRegistry(renderStorage);
 
   quoll::RendererOptions initialOptions{};
   initialOptions.framebufferSize = mWindow.getFramebufferSize();
@@ -54,7 +56,7 @@ void EditorScreen::start(const Project &rawProject) {
   AssetManager assetManager(project.assetsPath, project.assetsCachePath,
                             renderStorage, true, true);
 
-  ImguiRenderer imguiRenderer(mWindow, renderStorage);
+  ImguiRenderer imguiRenderer(mWindow, renderStorage, rendererAssetRegistry);
 
   Presenter presenter(renderStorage);
 
@@ -103,8 +105,9 @@ void EditorScreen::start(const Project &rawProject) {
   IconRegistry::loadIcons(renderStorage,
                           std::filesystem::current_path() / "assets" / "icons");
 
-  SceneRenderer sceneRenderer(assetManager.getAssetRegistry(), renderStorage);
-  EditorRenderer editorRenderer(renderStorage, mDevice);
+  SceneRenderer sceneRenderer(assetManager.getAssetRegistry(), renderStorage,
+                              rendererAssetRegistry);
+  EditorRenderer editorRenderer(renderStorage, rendererAssetRegistry);
 
   renderer.setGraphBuilder([&](auto &graph, const auto &options) {
     auto scenePassGroup = sceneRenderer.attach(graph, options);
@@ -118,8 +121,8 @@ void EditorScreen::start(const Project &rawProject) {
   });
 
   MousePickingGraph mousePicking(sceneRenderer.getFrameData(),
-                                 assetManager.getAssetRegistry(),
-                                 renderStorage);
+                                 assetManager.getAssetRegistry(), renderStorage,
+                                 rendererAssetRegistry);
 
   mousePicking.setFramebufferSize(mWindow.getFramebufferSize());
 

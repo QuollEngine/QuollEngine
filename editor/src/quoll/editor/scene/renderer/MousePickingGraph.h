@@ -5,6 +5,12 @@
 #include "quoll/renderer/SceneRendererFrameData.h"
 #include "quoll/window/Window.h"
 
+namespace quoll {
+
+class RendererAssetRegistry;
+
+} // namespace quoll
+
 namespace quoll::editor {
 
 class MousePickingGraph {
@@ -14,7 +20,8 @@ class MousePickingGraph {
 
 public:
   MousePickingGraph(const std::array<SceneRendererFrameData, 2> &frameData,
-                    AssetRegistry &assetRegistry, RenderStorage &renderStorage);
+                    AssetRegistry &assetRegistry, RenderStorage &renderStorage,
+                    RendererAssetRegistry &rendererAssetRegistry);
 
   void execute(rhi::RenderCommandList &commandList, const glm::vec2 &mousePos,
                u32 frameIndex);
@@ -34,6 +41,7 @@ private:
 
 private:
   RenderStorage &mRenderStorage;
+  RendererAssetRegistry &mRendererAssetRegistry;
   RenderGraph mRenderGraph;
   const std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames>
       &mFrameData;

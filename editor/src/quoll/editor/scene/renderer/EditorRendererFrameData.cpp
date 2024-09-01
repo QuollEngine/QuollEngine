@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/renderer/MeshDrawData.h"
 #include "quoll/renderer/MeshRenderUtils.h"
 #include "EditorRendererFrameData.h"
 
@@ -133,35 +134,33 @@ void EditorRendererFrameData::addTextOutline(
   mOutlineTextEnd++;
 }
 
-void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
+void EditorRendererFrameData::addMeshOutline(const MeshDrawData &drawData,
                                              const glm::mat4 &worldTransform) {
   MeshOutline outline{};
-  outline.indexBuffer = mesh.indexBuffer;
+  outline.indexBuffer = drawData.indexBuffer;
   {
-    auto data = MeshRenderUtils::getGeometryBuffers(mesh);
+    auto data = MeshRenderUtils::getGeometryBuffers(&drawData);
     outline.vertexBuffers = std::vector(data.begin(), data.end());
   }
   {
-    auto data = MeshRenderUtils::getGeometryBufferOffsets(mesh);
+    auto data = MeshRenderUtils::getGeometryBufferOffsets(&drawData);
     outline.vertexBufferOffsets = std::vector(data.begin(), data.end());
   }
 
-  outline.indexCounts.resize(mesh.geometries.size());
-  outline.indexOffsets.resize(mesh.geometries.size());
-  outline.vertexOffsets.resize(mesh.geometries.size());
+  outline.indexCounts.resize(drawData.geometries.size());
+  outline.indexOffsets.resize(drawData.geometries.size());
+  outline.vertexOffsets.resize(drawData.geometries.size());
 
   mOutlineTransforms.push_back(worldTransform);
 
   u32 lastIndexOffset = 0;
   u32 lastVertexOffset = 0;
   for (usize i = 0; i < outline.indexCounts.size(); ++i) {
-    outline.indexCounts.at(i) =
-        static_cast<u32>(mesh.geometries.at(i).indices.size());
+    outline.indexCounts.at(i) = drawData.geometries.at(i).numIndices;
     outline.indexOffsets.at(i) = static_cast<u32>(lastIndexOffset);
     outline.vertexOffsets.at(i) = lastVertexOffset;
     lastIndexOffset += outline.indexCounts.at(i);
-    lastVertexOffset +=
-        static_cast<u32>(mesh.geometries.at(i).positions.size());
+    lastVertexOffset += drawData.geometries.at(i).numVertices;
   }
 
   mMeshOutlines.push_back(outline);
@@ -169,35 +168,33 @@ void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
 }
 
 void EditorRendererFrameData::addSkinnedMeshOutline(
-    const MeshAsset &mesh, const std::vector<glm::mat4> &skeleton,
+    const MeshDrawData &drawData, const std::vector<glm::mat4> &skeleton,
     const glm::mat4 &worldTransform) {
   MeshOutline outline{};
-  outline.indexBuffer = mesh.indexBuffer;
+  outline.indexBuffer = drawData.indexBuffer;
   {
-    auto data = MeshRenderUtils::getSkinnedGeometryBuffers(mesh);
+    auto data = MeshRenderUtils::getSkinnedGeometryBuffers(&drawData);
     outline.vertexBuffers = std::vector(data.begin(), data.end());
   }
   {
-    auto data = MeshRenderUtils::getSkinnedGeometryBufferOffsets(mesh);
+    auto data = MeshRenderUtils::getSkinnedGeometryBufferOffsets(&drawData);
     outline.vertexBufferOffsets = std::vector(data.begin(), data.end());
   }
 
-  outline.indexCounts.resize(mesh.geometries.size());
-  outline.indexOffsets.resize(mesh.geometries.size());
-  outline.vertexOffsets.resize(mesh.geometries.size());
+  outline.indexCounts.resize(drawData.geometries.size());
+  outline.indexOffsets.resize(drawData.geometries.size());
+  outline.vertexOffsets.resize(drawData.geometries.size());
 
   mOutlineTransforms.push_back(worldTransform);
 
   u32 lastIndexOffset = 0;
   u32 lastVertexOffset = 0;
   for (usize i = 0; i < outline.indexCounts.size(); ++i) {
-    outline.indexCounts.at(i) =
-        static_cast<u32>(mesh.geometries.at(i).indices.size());
+    outline.indexCounts.at(i) = drawData.geometries.at(i).numIndices;
     outline.indexOffsets.at(i) = static_cast<u32>(lastIndexOffset);
     outline.vertexOffsets.at(i) = lastVertexOffset;
     lastIndexOffset += outline.indexCounts.at(i);
-    lastVertexOffset +=
-        static_cast<u32>(mesh.geometries.at(i).positions.size());
+    lastVertexOffset += drawData.geometries.at(i).numVertices;
   }
 
   mMeshOutlines.push_back(outline);

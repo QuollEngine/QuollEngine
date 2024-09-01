@@ -5,8 +5,6 @@
 
 namespace quoll {
 
-class Material;
-
 struct MaterialAsset {
   AssetRef<TextureAsset> baseColorTexture;
 
@@ -39,8 +37,6 @@ struct MaterialAsset {
   i8 emissiveTextureCoord = -1;
 
   glm::vec3 emissiveFactor{};
-
-  SharedPtr<Material> deviceHandle;
 };
 
 } // namespace quoll

@@ -10,6 +10,7 @@
 namespace quoll {
 
 class RenderStorage;
+class RendererAssetRegistry;
 
 struct ImguiRenderPassData {
   RenderGraphPass &pass;
@@ -35,7 +36,8 @@ class ImguiRenderer : NoCopyMove {
   static constexpr const glm::vec4 DefaultClearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
 public:
-  ImguiRenderer(Window &window, RenderStorage &renderStorage);
+  ImguiRenderer(Window &window, RenderStorage &renderStorage,
+                RendererAssetRegistry &rendererAssetRegistry);
 
   ~ImguiRenderer();
 
@@ -62,6 +64,7 @@ private:
 
 private:
   RenderStorage &mRenderStorage;
+  RendererAssetRegistry &mRendererAssetRegistry;
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Null;
 
   std::array<FrameData, rhi::RenderDevice::NumFrames> mFrameData;

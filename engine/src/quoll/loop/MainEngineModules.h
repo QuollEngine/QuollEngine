@@ -50,7 +50,7 @@ private:
   EntityDeleter mEntityDeleter;
   SkeletonUpdater mSkeletonUpdater;
   SceneUpdater mSceneUpdater;
-  AnimationSystem mAnimationSystem;
+  AnimationSystem mAnimationSystem{};
   LuaScriptingSystem mScriptingSystem;
   PhysicsSystem mPhysicsSystem;
   AudioSystem<DefaultAudioBackend> mAudioSystem;

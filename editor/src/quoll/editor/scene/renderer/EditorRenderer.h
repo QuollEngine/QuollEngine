@@ -16,7 +16,8 @@ class EditorRenderer {
   };
 
 public:
-  EditorRenderer(RenderStorage &renderStorage, rhi::RenderDevice *device);
+  EditorRenderer(RenderStorage &renderStorage,
+                 RendererAssetRegistry &rendererAssetRegistry);
 
   void attach(RenderGraph &graph, const SceneRenderPassData &scenePassData,
               const RendererOptions &options);
@@ -44,7 +45,6 @@ private:
   void createCollidableShapes();
 
 private:
-  rhi::RenderDevice *mDevice;
   Entity mSelectedEntity = Entity::Null;
 
   CollidableShapeDraw mCollidableCube;
@@ -52,6 +52,7 @@ private:
   CollidableShapeDraw mCollidableCapsule;
 
   RenderStorage &mRenderStorage;
+  RendererAssetRegistry &mRendererAssetRegistry;
   std::array<EditorRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 
   rhi::SamplerHandle mTextOutlineSampler = rhi::SamplerHandle::Null;

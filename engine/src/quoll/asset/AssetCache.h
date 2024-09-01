@@ -11,9 +11,8 @@ namespace quoll {
 /**
  * Asset cache
  *
- * Loads and creates engine optimized
- * assets for usage within engine
- * functionality
+ * Loads and creates engine optimized assets
+ * for usage within engine functionality
  */
 class AssetCache {
 public:
@@ -183,7 +182,7 @@ public:
 
   inline const Path &getAssetsPath() const { return mAssetsPath; }
 
-  Result<void> preloadAssets(RenderStorage &renderStorage);
+  Result<void> preloadAssets();
 
   AssetMeta getAssetMeta(const Uuid &uuid) const;
 

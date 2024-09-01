@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/asset/AssetCache.h"
 #include "quoll/editor/actions/ActionExecutor.h"
 #include "quoll/editor/asset/AssetLoader.h"
 #include "quoll/editor/ui/AssetLoadStatusDialog.h"

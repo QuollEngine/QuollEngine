@@ -1,184 +1,19 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Profiler.h"
-#include "quoll/renderer/MaterialPBR.h"
-#include "quoll/renderer/RenderStorage.h"
-#include "quoll/renderer/TextureUtils.h"
 #include "AssetRegistry.h"
 #include "DefaultObjects.h"
 
 namespace quoll {
 
 void AssetRegistry::createDefaultObjects() {
-  auto mesh = default_objects::createCube();
-  mDefaultObjects.cube = mMeshes.addAsset(mesh);
+  mDefaultObjects.cube =
+      AssetRef(mMeshes, mMeshes.addAsset(default_objects::createCube()));
   mDefaultObjects.defaultMaterial =
       AssetRef(mMaterials,
                mMaterials.addAsset(default_objects::createDefaultMaterial()));
 
   mDefaultObjects.defaultFont =
       AssetRef(mFonts, mFonts.addAsset(default_objects::createDefaultFont()));
-}
-
-void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
-  QUOLL_PROFILE_EVENT("AssetRegistry::syncWithDevice");
-
-  // Synchronize textures
-  for (auto &[_, texture] : mTextures.getAssets()) {
-    if (texture.data.deviceHandle == rhi::TextureHandle::Null) {
-      rhi::TextureDescription description{};
-      description.width = texture.data.width;
-      description.mipLevelCount = static_cast<u32>(texture.data.levels.size());
-      description.layerCount = texture.data.layers;
-      description.height = texture.data.height;
-      description.usage = rhi::TextureUsage::Color |
-                          rhi::TextureUsage::TransferDestination |
-                          rhi::TextureUsage::Sampled;
-      description.type = texture.data.type == TextureAssetType::Cubemap
-                             ? rhi::TextureType::Cubemap
-                             : rhi::TextureType::Standard;
-      description.format = texture.data.format;
-      description.debugName = texture.name;
-
-      texture.data.deviceHandle = renderStorage.createTexture(description);
-      TextureUtils::copyDataToTexture(
-          renderStorage.getDevice(), texture.data.data.data(),
-          texture.data.deviceHandle, rhi::ImageLayout::ShaderReadOnlyOptimal,
-          texture.data.layers, texture.data.levels);
-    }
-  }
-
-  // Synchronize fonts
-  for (auto &[_, font] : mFonts.getAssets()) {
-    if (font.data.deviceHandle == rhi::TextureHandle::Null) {
-      rhi::TextureDescription description{};
-      description.width = font.data.atlasDimensions.x;
-      description.height = font.data.atlasDimensions.y;
-      description.usage = rhi::TextureUsage::Color |
-                          rhi::TextureUsage::TransferDestination |
-                          rhi::TextureUsage::Sampled;
-      description.format = rhi::Format::Rgba8Unorm;
-      description.debugName = font.name;
-
-      font.data.deviceHandle = renderStorage.createTexture(description);
-      TextureUtils::copyDataToTexture(
-          renderStorage.getDevice(), font.data.atlasBytes.data(),
-          font.data.deviceHandle, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
-          {{0, font.data.size, font.data.atlasDimensions.x,
-            font.data.atlasDimensions.y}});
-    }
-  }
-
-  // Synchronize materials
-  auto getTextureFromRegistry = [this](const AssetRef<TextureAsset> &texture) {
-    return texture ? texture->deviceHandle : rhi::TextureHandle::Null;
-  };
-
-  for (auto &[_, asset] : mMaterials.getAssets()) {
-    auto &material = asset.data;
-    if (!material.deviceHandle) {
-      quoll::MaterialPBR::Properties properties{};
-
-      properties.baseColorFactor = material.baseColorFactor;
-      properties.baseColorTexture =
-          getTextureFromRegistry(material.baseColorTexture);
-      properties.baseColorTextureCoord = material.baseColorTextureCoord;
-
-      properties.metallicFactor = material.metallicFactor;
-      properties.metallicRoughnessTexture =
-          getTextureFromRegistry(material.metallicRoughnessTexture);
-      properties.metallicRoughnessTextureCoord =
-          material.metallicRoughnessTextureCoord;
-      properties.roughnessFactor = material.roughnessFactor;
-
-      properties.normalScale = material.normalScale;
-      properties.normalTexture = getTextureFromRegistry(material.normalTexture);
-
-      properties.normalTextureCoord = material.normalTextureCoord;
-
-      properties.occlusionStrength = material.occlusionStrength;
-      properties.occlusionTexture =
-          getTextureFromRegistry(material.occlusionTexture);
-      properties.occlusionTextureCoord = material.occlusionTextureCoord;
-
-      properties.emissiveFactor = material.emissiveFactor;
-      properties.emissiveTexture =
-          getTextureFromRegistry(material.emissiveTexture);
-      properties.emissiveTextureCoord = material.emissiveTextureCoord;
-
-      material.deviceHandle.reset(
-          new MaterialPBR(asset.name, properties, renderStorage));
-    }
-  }
-
-  // Synchronize meshes
-  for (auto &[_, mesh] : mMeshes.getAssets()) {
-    if (!mesh.data.vertexBuffers.empty()) {
-      continue;
-    }
-
-    usize ibSize = 0;
-    for (auto &g : mesh.data.geometries) {
-      ibSize += g.indices.size() * sizeof(u32);
-    }
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CreateBuffer(FieldName, Type)                                          \
-  {                                                                            \
-    usize vbSize = 0;                                                          \
-    for (auto &g : mesh.data.geometries) {                                     \
-      usize vertexSize = g.FieldName.size();                                   \
-      vbSize += vertexSize * sizeof(Type);                                     \
-    }                                                                          \
-                                                                               \
-    if (vbSize > 0) {                                                          \
-      rhi::BufferDescription description;                                      \
-      description.usage = rhi::BufferUsage::Vertex;                            \
-      description.size = vbSize;                                               \
-      description.data = nullptr;                                              \
-      description.debugName = mesh.name + " " #FieldName;                      \
-      auto buffer = renderStorage.createBuffer(description);                   \
-      auto *data = static_cast<Type *>(buffer.map());                          \
-      mesh.data.vertexBufferOffsets.push_back(0);                              \
-      usize offset = 0;                                                        \
-      for (auto &g : mesh.data.geometries) {                                   \
-        memcpy(data + offset, g.FieldName.data(),                              \
-               g.FieldName.size() * sizeof(Type));                             \
-        offset += g.FieldName.size();                                          \
-      }                                                                        \
-      buffer.unmap();                                                          \
-      mesh.data.vertexBuffers.push_back(buffer.getHandle());                   \
-    }                                                                          \
-  }
-
-    CreateBuffer(positions, glm::vec3);
-    CreateBuffer(normals, glm::vec3);
-    CreateBuffer(tangents, glm::vec4);
-    CreateBuffer(texCoords0, glm::vec2);
-    CreateBuffer(texCoords1, glm::vec2);
-    CreateBuffer(joints, glm::uvec4);
-    CreateBuffer(weights, glm::vec4);
-
-    {
-      rhi::BufferDescription description;
-      description.usage = rhi::BufferUsage::Index;
-      description.size = ibSize;
-      description.data = nullptr;
-      description.debugName = mesh.name + " indices";
-
-      auto buffer = renderStorage.createBuffer(description);
-
-      auto *data = static_cast<u32 *>(buffer.map());
-      usize offset = 0;
-      for (auto &g : mesh.data.geometries) {
-        memcpy(data + offset, g.indices.data(), g.indices.size() * sizeof(u32));
-        offset += g.indices.size();
-      }
-
-      buffer.unmap();
-
-      mesh.data.indexBuffer = buffer.getHandle();
-    }
-  }
 }
 
 std::pair<AssetType, u32> AssetRegistry::getAssetByUuid(const Uuid &uuid) {

@@ -4,8 +4,9 @@
 namespace quoll {
 
 void TextureUtils::copyDataToTexture(
-    rhi::RenderDevice *device, void *source, rhi::TextureHandle destination,
-    rhi::ImageLayout destinationLayout, u32 destinationLayers,
+    rhi::RenderDevice *device, const void *source,
+    rhi::TextureHandle destination, rhi::ImageLayout destinationLayout,
+    u32 destinationLayers,
     const std::vector<TextureAssetMipLevel> &destinationLevels) {
 
   rhi::BufferDescription stagingBufferDesc{};

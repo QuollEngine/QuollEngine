@@ -24,12 +24,6 @@ struct BaseGeometryAsset {
 
 struct MeshAsset {
   std::vector<BaseGeometryAsset> geometries;
-
-  std::vector<rhi::BufferHandle> vertexBuffers;
-
-  std::vector<u64> vertexBufferOffsets;
-
-  rhi::BufferHandle indexBuffer = rhi::BufferHandle::Null;
 };
 
 } // namespace quoll

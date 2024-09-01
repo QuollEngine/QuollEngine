@@ -11,7 +11,7 @@ static void renderTextureIfExists(widgets::Table &table, const String &label,
 
   if (texture) {
     table.column(label);
-    table.column(texture->deviceHandle, TextureSize);
+    table.column(texture, TextureSize);
   }
 }
 

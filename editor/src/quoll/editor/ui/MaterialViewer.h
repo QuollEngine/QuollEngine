@@ -1,6 +1,7 @@
 #pragma once
 
-#include "quoll/asset/AssetCache.h"
+#include "quoll/asset/AssetRef.h"
+#include "quoll/renderer/MaterialAsset.h"
 
 namespace quoll::editor {
 

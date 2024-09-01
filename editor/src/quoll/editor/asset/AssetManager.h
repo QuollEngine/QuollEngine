@@ -6,6 +6,12 @@
 #include "ImageLoader.h"
 #include "UUIDMap.h"
 
+namespace quoll {
+
+class RenderStorage;
+
+} // namespace quoll
+
 namespace quoll::editor {
 
 /**

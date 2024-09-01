@@ -2,15 +2,18 @@
 #include "quoll/renderer/MeshRenderUtils.h"
 #include "quoll/renderer/MeshVertexLayout.h"
 #include "quoll/renderer/RenderStorage.h"
+#include "quoll/renderer/RendererAssetRegistry.h"
 #include "MousePickingGraph.h"
 
 namespace quoll::editor {
 
 MousePickingGraph::MousePickingGraph(
     const std::array<SceneRendererFrameData, 2> &frameData,
-    AssetRegistry &assetRegistry, RenderStorage &renderStorage)
+    AssetRegistry &assetRegistry, RenderStorage &renderStorage,
+    RendererAssetRegistry &rendererAssetRegistry)
     : mRenderStorage(renderStorage), mFrameData(frameData),
       mAssetRegistry(assetRegistry), mRenderGraph("MousePicking"),
+      mRendererAssetRegistry(rendererAssetRegistry),
       mBindlessParams{
           BindlessDrawParameters(renderStorage.getDevice()
                                      ->getDeviceInformation()
@@ -314,25 +317,21 @@ void MousePickingGraph::createRenderGraph() {
 
       u32 instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-        const auto &mesh = mAssetRegistry.get(handle);
-
         u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
         commandList.bindVertexBuffers(
-            MeshRenderUtils::getGeometryBuffers(mesh),
-            MeshRenderUtils::getGeometryBufferOffsets(mesh));
-        commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
+            MeshRenderUtils::getGeometryBuffers(meshData.drawData),
+            MeshRenderUtils::getGeometryBufferOffsets(meshData.drawData));
+        commandList.bindIndexBuffer(meshData.drawData->indexBuffer,
+                                    rhi::IndexType::Uint32);
 
         i32 vertexOffset = 0;
         u32 indexOffset = 0;
-        for (auto &geometry : mesh.geometries) {
-          u32 indexCount = static_cast<u32>(geometry.indices.size());
-          i32 vertexCount = static_cast<i32>(geometry.positions.size());
-
-          commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
-                                  numInstances, instanceStart);
-          vertexOffset += vertexCount;
-          indexOffset += indexCount;
+        for (const auto &geometry : meshData.drawData->geometries) {
+          commandList.drawIndexed(geometry.numIndices, indexOffset,
+                                  vertexOffset, numInstances, instanceStart);
+          vertexOffset += geometry.numVertices;
+          indexOffset += geometry.numIndices;
         }
         instanceStart += numInstances;
       }
@@ -348,25 +347,22 @@ void MousePickingGraph::createRenderGraph() {
 
       u32 instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-        const auto &mesh = mAssetRegistry.get(handle);
-
         u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
         commandList.bindVertexBuffers(
-            MeshRenderUtils::getSkinnedGeometryBuffers(mesh),
-            MeshRenderUtils::getSkinnedGeometryBufferOffsets(mesh));
-        commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
+            MeshRenderUtils::getSkinnedGeometryBuffers(meshData.drawData),
+            MeshRenderUtils::getSkinnedGeometryBufferOffsets(
+                meshData.drawData));
+        commandList.bindIndexBuffer(meshData.drawData->indexBuffer,
+                                    rhi::IndexType::Uint32);
 
         i32 vertexOffset = 0;
         u32 indexOffset = 0;
-        for (auto &geometry : mesh.geometries) {
-          u32 indexCount = static_cast<u32>(geometry.indices.size());
-          i32 vertexCount = static_cast<i32>(geometry.positions.size());
-
-          commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
-                                  numInstances, instanceStart);
-          vertexOffset += vertexCount;
-          indexOffset += indexCount;
+        for (const auto &geometry : meshData.drawData->geometries) {
+          commandList.drawIndexed(geometry.numIndices, indexOffset,
+                                  vertexOffset, numInstances, instanceStart);
+          vertexOffset += geometry.numVertices;
+          indexOffset += geometry.numIndices;
         }
         instanceStart += numInstances;
       }
