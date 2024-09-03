@@ -33,7 +33,7 @@ static void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
 
 static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
                           ActionExecutor &actionExecutor,
-                          AssetHandle<SceneAsset> sceneHandle,
+                          const AssetRef<SceneAsset> &sceneAsset,
                           Renderer &renderer, SceneRenderer &sceneRenderer,
                           EditorRenderer &editorRenderer,
                           MousePickingGraph &mousePickingGraph,
@@ -44,7 +44,7 @@ static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
     if (toolbar.item("Play the scene", fa::Play, false)) {
 
       auto *workspace = new SceneSimulatorWorkspace(
-          state.project, assetManager, sceneHandle, state.scene, renderer,
+          state.project, assetManager, sceneAsset, state.scene, renderer,
           sceneRenderer, editorRenderer, mousePickingGraph, engineModules,
           editorCamera);
 
@@ -70,7 +70,7 @@ static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
 
 void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
                            ActionExecutor &actionExecutor,
-                           AssetHandle<SceneAsset> sceneHandle,
+                           const AssetRef<SceneAsset> &sceneAsset,
                            Renderer &renderer, SceneRenderer &sceneRenderer,
                            EditorRenderer &editorRenderer,
                            MousePickingGraph &mousePickingGraph,
@@ -85,7 +85,7 @@ void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
     }
   }
 
-  renderToolbar(state, assetManager, actionExecutor, sceneHandle, renderer,
+  renderToolbar(state, assetManager, actionExecutor, sceneAsset, renderer,
                 sceneRenderer, editorRenderer, mousePickingGraph, engineModules,
                 editorCamera, workspaceManager);
 

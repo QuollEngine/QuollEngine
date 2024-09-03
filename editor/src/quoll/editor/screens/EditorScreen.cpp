@@ -62,15 +62,14 @@ void EditorScreen::start(const Project &rawProject) {
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
+  auto sceneUuid = assetManager.findRootAssetUuid(project.assetsPath /
+                                                  "scenes" / "main.scene");
+
   auto res = assetManager.validateAndPreloadAssets(renderStorage);
 
-  AssetHandle<SceneAsset> sceneAsset;
-  for (auto [handle, data] :
-       assetManager.getAssetRegistry().getAll<SceneAsset>()) {
-    sceneAsset = handle;
-    project.startingScene = data.uuid;
-  }
+  project.startingScene = sceneUuid;
 
+  auto sceneAsset = assetManager.getCache().request<SceneAsset>(sceneUuid);
   QuollAssert(sceneAsset, "Scene asset does not exist");
   if (!sceneAsset) {
     return;

@@ -95,16 +95,15 @@ void Runtime::start() {
             0.0f, 0.0f, static_cast<f32>(width), static_cast<f32>(height));
       });
 
-  auto handle = assetCache.getRegistry().findHandleByUuid<SceneAsset>(
-      mConfig.startingScene);
+  auto sceneAsset = assetCache.request<SceneAsset>(mConfig.startingScene);
 
-  QuollAssert(handle, "Scene not found");
-  if (!handle) {
+  QuollAssert(sceneAsset, "Scene not found");
+  if (!sceneAsset) {
     return;
   }
 
   SceneIO sceneIO(assetCache, scene);
-  sceneIO.loadScene(handle);
+  sceneIO.loadScene(sceneAsset);
 
   auto systemView = engineModules.createSystemView(scene);
 

@@ -25,7 +25,7 @@ class SceneEditorUI {
 public:
   void render(WorkspaceState &state, AssetManager &assetManager,
               ActionExecutor &actionExecutor,
-              AssetHandle<SceneAsset> sceneHandle, Renderer &renderer,
+              const AssetRef<SceneAsset> &sceneAsset, Renderer &renderer,
               SceneRenderer &sceneRenderer, EditorRenderer &editorRenderer,
               MousePickingGraph &mousePickingGraph,
               MainEngineModules &engineModules, EditorCamera &editorCamera,

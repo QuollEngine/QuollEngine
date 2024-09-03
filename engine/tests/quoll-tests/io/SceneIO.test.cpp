@@ -58,7 +58,7 @@ public:
     stream.close();
   }
 
-  quoll::AssetHandle<quoll::SceneAsset>
+  quoll::AssetRef<quoll::SceneAsset>
   createSceneAsset(const std::vector<YAML::Node> &entities = {}) {
     YAML::Node root;
     root["name"] = "TestScene";
@@ -74,8 +74,10 @@ public:
     quoll::AssetData<quoll::SceneAsset> asset{};
     asset.name = "Scene";
     asset.data.data = root;
+    asset.uuid = quoll::Uuid::generate();
+    assetCache.getRegistry().add(asset);
 
-    return assetCache.getRegistry().add(asset);
+    return assetCache.request<quoll::SceneAsset>(asset.uuid).data();
   }
 
   YAML::Node getSceneYaml(quoll::AssetHandle<quoll::SceneAsset> handle) {
@@ -91,8 +93,8 @@ public:
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfNodeDoesNotHaveId) {
   YAML::Node node;
 
-  auto handle = createSceneAsset({node});
-  sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset({node});
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
 }
@@ -110,8 +112,8 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsInvalid) {
     YAML::Node node;
     node["id"] = invalidNode;
 
-    auto handle = createSceneAsset({node});
-    sceneIO.loadScene(handle);
+    auto sceneAsset = createSceneAsset({node});
+    sceneIO.loadScene(sceneAsset);
 
     EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
   }
@@ -121,8 +123,8 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsZero) {
   YAML::Node node;
   node["id"] = 0;
 
-  auto handle = createSceneAsset({node});
-  sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset({node});
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
 }
@@ -131,8 +133,8 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsNegative) {
   YAML::Node node;
   node["id"] = -1;
 
-  auto handle = createSceneAsset({node});
-  sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset({node});
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
 }
@@ -141,8 +143,8 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdAlreadyExists) {
   YAML::Node node;
   node["id"] = 50;
 
-  auto handle = createSceneAsset({node, node});
-  sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset({node, node});
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), 3);
 }
@@ -158,8 +160,8 @@ TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
     nodes.push_back(node);
   }
 
-  auto handle = createSceneAsset(nodes);
-  const auto &entities = sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset(nodes);
+  const auto &entities = sceneIO.loadScene(sceneAsset);
 
   EXPECT_GT(scene.entityDatabase.getEntityCount(), NumEntities);
   EXPECT_GT(scene.entityDatabase.getEntityCount(), entities.size() + 1);
@@ -184,8 +186,8 @@ TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
     nodes.push_back(node);
   }
 
-  auto handle = createSceneAsset(nodes);
-  const auto &entities = sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset(nodes);
+  const auto &entities = sceneIO.loadScene(sceneAsset);
 
   EXPECT_GT(scene.entityDatabase.getEntityCount(), entities.size() + 1);
   EXPECT_EQ(scene.entityDatabase.getEntityCountForComponent<quoll::Parent>(),
@@ -200,8 +202,6 @@ TEST_F(SceneIOTest, CreatesDummyCameraComponentOnConstruct) {
 }
 
 TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
-  auto handle = createSceneAsset();
-
   {
     auto entity = scene.entityDatabase.create();
     scene.entityDatabase.set<quoll::Id>(entity, {3});
@@ -215,7 +215,8 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
     createSceneFileWithEntity({entityNode});
   }
 
-  sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset();
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeCamera));
   EXPECT_TRUE(
@@ -224,15 +225,15 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
 
 TEST_F(SceneIOTest,
        SetsDummyCameraAsTheActiveCameraOnLoadIfNoCameraExistsForTheScene) {
-  auto handle = createSceneAsset();
-  sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset();
+  sceneIO.loadScene(sceneAsset);
   EXPECT_EQ(scene.activeCamera, scene.dummyCamera);
 }
 
 TEST_F(SceneIOTest,
        CreatesEmptyEnvironmentEntityOnLoadIfSceneEnvironmentDoesNotExist) {
-  auto handle = createSceneAsset();
-  sceneIO.loadScene(handle);
+  auto sceneAsset = createSceneAsset();
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
   EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
@@ -243,8 +244,8 @@ TEST_F(SceneIOTest,
 
 TEST_F(SceneIOTest,
        CreatesEmptyEnvironmentEntityOnLoadIfSceneEnvironmentIsInvalid) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
+  auto sceneAsset = createSceneAsset();
+  auto zoneNode = sceneAsset->data["zones"][0];
 
   std::vector<YAML::Node> invalidNodes{
       YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
@@ -253,7 +254,7 @@ TEST_F(SceneIOTest,
 
   for (const auto &invalidNode : invalidNodes) {
     zoneNode["environment"] = invalidNode;
-    sceneIO.loadScene(handle);
+    sceneIO.loadScene(sceneAsset);
 
     EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
     EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
@@ -267,11 +268,11 @@ TEST_F(SceneIOTest,
 TEST_F(
     SceneIOTest,
     CreatesEmptyEnvironmentEntityOnLoadIfEnvironmentDoesNotPointToValidEntity) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
+  auto sceneAsset = createSceneAsset();
+  auto zoneNode = sceneAsset->data["zones"][0];
   zoneNode["environment"] = 100;
 
-  sceneIO.loadScene(handle);
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
   EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
@@ -286,13 +287,11 @@ TEST_F(
   YAML::Node envEntity;
   envEntity["id"] = 125;
 
-  auto handle = createSceneAsset({envEntity});
-  auto sceneNode = getSceneYaml(handle);
-
-  auto zoneNode = sceneNode["zones"][0];
+  auto sceneAsset = createSceneAsset({envEntity});
+  auto zoneNode = sceneAsset->data["zones"][0];
 
   zoneNode["environment"] = 125;
-  sceneIO.loadScene(handle);
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
   EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
@@ -307,13 +306,11 @@ TEST_F(
   YAML::Node envEntity;
   envEntity["id"] = 125;
 
-  auto handle = createSceneAsset({envEntity});
-  auto sceneNode = getSceneYaml(handle);
-
-  auto zoneNode = sceneNode["zones"][0];
+  auto sceneAsset = createSceneAsset({envEntity});
+  auto zoneNode = sceneAsset->data["zones"][0];
 
   zoneNode["environment"] = 125;
-  sceneIO.loadScene(handle);
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
   EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
@@ -329,13 +326,11 @@ TEST_F(
   envEntity["id"] = 125;
   envEntity["environmentLighting"]["source"] = "skybox";
 
-  auto handle = createSceneAsset({envEntity});
-  auto sceneNode = getSceneYaml(handle);
-
-  auto zoneNode = sceneNode["zones"][0];
+  auto sceneAsset = createSceneAsset({envEntity});
+  auto zoneNode = sceneAsset->data["zones"][0];
 
   zoneNode["environment"] = 125;
-  sceneIO.loadScene(handle);
+  sceneIO.loadScene(sceneAsset);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
   EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
