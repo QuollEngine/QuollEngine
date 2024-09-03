@@ -14,10 +14,10 @@ SceneIO::SceneIO(AssetCache &assetCache, Scene &scene)
   reset();
 }
 
-std::vector<Entity> SceneIO::loadScene(AssetHandle<SceneAsset> scene) {
+std::vector<Entity> SceneIO::loadScene(const AssetRef<SceneAsset> &scene) {
   detail::SceneLoader sceneLoader(mAssetCache, mScene.entityDatabase);
 
-  const auto &root = mAssetCache.getRegistry().get(scene).data;
+  const auto &root = scene->data;
 
   auto currentZone = root["zones"][0];
 

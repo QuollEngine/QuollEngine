@@ -21,7 +21,7 @@ namespace quoll::editor {
 class SceneEditorWorkspace : public Workspace {
 public:
   SceneEditorWorkspace(Project project, AssetManager &assetManager,
-                       AssetHandle<SceneAsset> scene, Path scenePath,
+                       const AssetRef<SceneAsset> &sceneAsset, Path scenePath,
                        Renderer &renderer, SceneRenderer &sceneRenderer,
                        EditorRenderer &editorRenderer,
                        MousePickingGraph &mousePickingGraph,
@@ -55,7 +55,7 @@ private:
   AssetManager &mAssetManager;
   WorkspaceState mState;
   SceneWriter mSceneWriter;
-  AssetHandle<SceneAsset> mSceneAssetHandle;
+  AssetRef<SceneAsset> mSceneAsset;
   ActionExecutor mActionExecutor;
   SceneIO mSceneIO;
   ShortcutsManager mShortcutsManager;

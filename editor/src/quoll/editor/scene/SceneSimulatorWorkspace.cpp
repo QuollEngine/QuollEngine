@@ -12,17 +12,17 @@
 namespace quoll::editor {
 
 SceneSimulatorWorkspace::SceneSimulatorWorkspace(
-    Project project, AssetManager &assetManager, AssetHandle<SceneAsset> scene,
-    Scene &sourceScene, Renderer &renderer, SceneRenderer &sceneRenderer,
+    Project project, AssetManager &assetManager,
+    const AssetRef<SceneAsset> &sceneAsset, Scene &sourceScene,
+    Renderer &renderer, SceneRenderer &sceneRenderer,
     EditorRenderer &editorRenderer, MousePickingGraph &mousePickingGraph,
     MainEngineModules &engineModules, EditorCamera &editorCamera)
     : mAssetManager(assetManager), mState{project},
       mActionExecutor(mState, mAssetManager.getCache()),
-      mSceneAssetHandle(scene),
-      mSceneIO(mAssetManager.getCache(), mState.scene), mRenderer(renderer),
-      mSceneRenderer(sceneRenderer), mEditorRenderer(editorRenderer),
-      mMousePickingGraph(mousePickingGraph), mEngineModules(engineModules),
-      mEditorCamera(editorCamera) {
+      mSceneAsset(sceneAsset), mSceneIO(mAssetManager.getCache(), mState.scene),
+      mRenderer(renderer), mSceneRenderer(sceneRenderer),
+      mEditorRenderer(editorRenderer), mMousePickingGraph(mousePickingGraph),
+      mEngineModules(engineModules), mEditorCamera(editorCamera) {
 
   sourceScene.entityDatabase.duplicate(mState.scene.entityDatabase);
   mState.scene.dummyCamera = sourceScene.dummyCamera;
@@ -117,7 +117,7 @@ void SceneSimulatorWorkspace::updateFrameData(
 
 WorkspaceMatchParams SceneSimulatorWorkspace::getMatchParams() const {
   return {.type = "SceneSimulator",
-          .asset = mSceneAssetHandle.getRawId(),
+          .asset = mSceneAsset.handle().getRawId(),
           .assetType = AssetType::Scene};
 }
 

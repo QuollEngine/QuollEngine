@@ -15,7 +15,7 @@ class SceneIO {
 public:
   SceneIO(AssetCache &assetCache, Scene &scene);
 
-  std::vector<Entity> loadScene(AssetHandle<SceneAsset> scene);
+  std::vector<Entity> loadScene(const AssetRef<SceneAsset> &scene);
 
   void reset();
 

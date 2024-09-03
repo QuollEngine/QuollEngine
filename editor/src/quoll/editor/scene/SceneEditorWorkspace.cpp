@@ -12,20 +12,20 @@
 namespace quoll::editor {
 
 SceneEditorWorkspace::SceneEditorWorkspace(
-    Project project, AssetManager &assetManager, AssetHandle<SceneAsset> scene,
-    Path scenePath, Renderer &renderer, SceneRenderer &sceneRenderer,
-    EditorRenderer &editorRenderer, MousePickingGraph &mousePickingGraph,
-    MainEngineModules &engineModules, EditorCamera &editorCamera,
-    WorkspaceManager &workspaceManager)
+    Project project, AssetManager &assetManager,
+    const AssetRef<SceneAsset> &sceneAsset, Path scenePath, Renderer &renderer,
+    SceneRenderer &sceneRenderer, EditorRenderer &editorRenderer,
+    MousePickingGraph &mousePickingGraph, MainEngineModules &engineModules,
+    EditorCamera &editorCamera, WorkspaceManager &workspaceManager)
     : mAssetManager(assetManager), mState{project},
       mActionExecutor(mState, mAssetManager.getCache()),
-      mSceneAssetHandle(scene),
+      mSceneAsset(sceneAsset),
       mSceneWriter(mState.scene, mAssetManager.getAssetRegistry()),
       mSceneIO(mAssetManager.getCache(), mState.scene), mRenderer(renderer),
       mSceneRenderer(sceneRenderer), mEditorRenderer(editorRenderer),
       mMousePickingGraph(mousePickingGraph), mEngineModules(engineModules),
       mEditorCamera(editorCamera), mWorkspaceManager(workspaceManager) {
-  mSceneIO.loadScene(scene);
+  mSceneIO.loadScene(sceneAsset);
 
   mSceneWriter.open(scenePath);
   mActionExecutor.setAssetSyncer(&mSceneWriter);
@@ -89,8 +89,8 @@ void SceneEditorWorkspace::update(f32 dt) {
 void SceneEditorWorkspace::render() {
   renderLayout();
 
-  mUIRoot.render(mState, mAssetManager, mActionExecutor, mSceneAssetHandle,
-                 mRenderer, mSceneRenderer, mEditorRenderer, mMousePickingGraph,
+  mUIRoot.render(mState, mAssetManager, mActionExecutor, mSceneAsset, mRenderer,
+                 mSceneRenderer, mEditorRenderer, mMousePickingGraph,
                  mEngineModules, mEditorCamera, mWorkspaceManager);
   mMouseClicked = mUIRoot.renderSceneView(
       mState, mAssetManager, mActionExecutor, mRenderer.getSceneTexture(),
@@ -129,7 +129,7 @@ void SceneEditorWorkspace::updateFrameData(rhi::RenderCommandList &commandList,
 
 WorkspaceMatchParams SceneEditorWorkspace::getMatchParams() const {
   return {.type = "SceneEditor",
-          .asset = mSceneAssetHandle.getRawId(),
+          .asset = mSceneAsset.handle().getRawId(),
           .assetType = AssetType::Scene};
 }
 
