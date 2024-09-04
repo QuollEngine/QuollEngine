@@ -1,23 +1,24 @@
 #pragma once
 
-#include "quoll/asset/AssetCache.h"
-#include "EntityPanel.h"
-
 namespace quoll::editor {
+
+class AssetManager;
+class ActionExecutor;
+struct WorkspaceState;
 
 class Inspector {
 private:
   struct Tab {
     String name;
     String icon;
-    std::function<void(WorkspaceState &, AssetCache &, ActionExecutor &)>
+    std::function<void(WorkspaceState &, AssetManager &, ActionExecutor &)>
         renderFn;
   };
 
 public:
   Inspector();
 
-  void render(WorkspaceState &state, AssetCache &assetCache,
+  void render(WorkspaceState &state, AssetManager &assetManager,
               ActionExecutor &actionExecutor);
 
 private:

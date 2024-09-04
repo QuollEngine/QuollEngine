@@ -488,7 +488,6 @@ void EditorRenderer::attach(RenderGraph &graph,
 
 void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                      Entity camera, WorkspaceState &state,
-                                     AssetRegistry &assetRegistry,
                                      u32 frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 

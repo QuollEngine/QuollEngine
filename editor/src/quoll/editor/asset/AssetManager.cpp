@@ -114,25 +114,28 @@ Result<Path> AssetManager::importAsset(const Path &source,
   return {targetAssetPath, res.warnings()};
 }
 
-void AssetManager::generatePreview(const Path &sourceAssetPath,
-                                   RenderStorage &renderStorage) {
-  const auto &uuid = findRootAssetUuid(sourceAssetPath);
-  const auto &res = mAssetCache.getRegistry().getAssetByUuid(uuid);
-  auto handle = res.second;
-
-  if (res.first == AssetType::Environment) {
-    auto &asset = mAssetCache.getRegistry().getMeta(
-        static_cast<quoll::AssetHandle<quoll::EnvironmentAsset>>(handle));
-    if (!rhi::isHandleValid(asset.preview)) {
-      asset.preview =
-          mHDRIImporter.loadFromPathToDevice(sourceAssetPath, renderStorage);
-    }
+rhi::TextureHandle AssetManager::generatePreview(const Uuid &uuid) {
+  if (mPreviews.contains(uuid)) {
+    return mPreviews.at(uuid);
   }
+
+  rhi::TextureHandle preview = rhi::TextureHandle::Null;
+
+  const auto &meta = mAssetCache.getAssetMeta(uuid);
+  if (meta.type == AssetType::Environment) {
+    auto sourceAssetPath = mUuidToSources.at(uuid);
+    preview =
+        mHDRIImporter.loadFromPathToDevice(sourceAssetPath, mRenderStorage);
+  }
+
+  mPreviews.insert_or_assign(uuid, preview);
+
+  return preview;
 }
 
 Uuid AssetManager::findRootAssetUuid(const Path &sourceAssetPath) {
-  auto it = mAssetCacheMap.find(sourceAssetPath.string());
-  if (it != mAssetCacheMap.end()) {
+  auto it = mSourceToRootUuids.find(sourceAssetPath.string());
+  if (it != mSourceToRootUuids.end()) {
     return it->second;
   }
 
@@ -148,8 +151,9 @@ Uuid AssetManager::findRootAssetUuid(const Path &sourceAssetPath) {
 
   auto uuid = node["uuid"]["root"].as<Uuid>(Uuid{});
 
-  mAssetCacheMap.insert_or_assign(
-      std::filesystem::canonical(sourceAssetPath).string(), uuid);
+  auto canonicalPath = std::filesystem::canonical(sourceAssetPath);
+  mSourceToRootUuids.insert_or_assign(canonicalPath, uuid);
+  mUuidToSources.insert_or_assign(uuid, canonicalPath);
 
   return uuid;
 }
@@ -271,15 +275,6 @@ AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
 
   if (!res)
     return res;
-
-  for (const auto &entry :
-       std::filesystem::recursive_directory_iterator(mAssetsPath)) {
-    if (!entry.is_regular_file()) {
-      continue;
-    }
-
-    generatePreview(entry.path(), renderStorage);
-  }
 
   warnings.insert(warnings.end(), res.warnings().begin(), res.warnings().end());
 
@@ -552,7 +547,8 @@ Result<Path> AssetManager::createMetaFile(const Path &sourceAssetPath,
   stream << node;
   stream.close();
 
-  mAssetCacheMap.erase(std::filesystem::canonical(sourceAssetPath).string());
+  mSourceToRootUuids.erase(std::filesystem::canonical(sourceAssetPath));
+  mUuidToSources.erase(node["uuid"]["root"].as<Uuid>());
 
   return metaFilePath;
 }
@@ -578,7 +574,7 @@ bool AssetManager::isAssetChanged(const Path &assetFilePath) const {
   auto revision = AssetRevision{node["revision"].as<u32>(0)};
 
   if (!node["uuid"] || !node["uuid"].IsMap()) {
-    return {};
+    return true;
   }
 
   for (const auto &pair : node["uuid"]) {

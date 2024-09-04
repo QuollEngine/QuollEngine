@@ -119,8 +119,7 @@ void EditorScreen::start(const Project &rawProject) {
                             scenePassGroup.finalColor};
   });
 
-  MousePickingGraph mousePicking(sceneRenderer.getFrameData(),
-                                 assetManager.getAssetRegistry(), renderStorage,
+  MousePickingGraph mousePicking(sceneRenderer.getFrameData(), renderStorage,
                                  rendererAssetRegistry);
 
   mousePicking.setFramebufferSize(mWindow.getFramebufferSize());

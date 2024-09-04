@@ -70,13 +70,13 @@ public:
 
   inline const Path &getAssetsPath() const { return mAssetsPath; }
 
-  inline const Path &getCachePath() const {
-    return mAssetCache.getAssetsPath();
-  }
+  Result<void> reloadAssets();
+
+  Result<void> validateAndPreloadAssets(RenderStorage &renderStorage);
 
   inline AssetCache &getCache() { return mAssetCache; }
 
-  void generatePreview(const Path &path, RenderStorage &renderStorage);
+  rhi::TextureHandle generatePreview(const Uuid &uuid);
 
   Uuid findRootAssetUuid(const Path &sourceAssetPath);
 
@@ -88,13 +88,7 @@ public:
 
   Result<Path> createInputMap(const Path &assetPath);
 
-  Result<void> reloadAssets();
-
-  Result<void> validateAndPreloadAssets(RenderStorage &renderStorage);
-
   Result<UUIDMap> loadSourceIfChanged(const Path &sourceAssetPath);
-
-  inline RenderStorage &getRenderStorage() { return mRenderStorage; }
 
   static AssetType getAssetTypeFromExtension(const Path &path);
 
@@ -168,7 +162,9 @@ private:
 
   HDRIImporter mHDRIImporter;
 
-  std::unordered_map<String, Uuid> mAssetCacheMap;
+  std::unordered_map<Path, Uuid> mSourceToRootUuids;
+  std::unordered_map<Uuid, Path> mUuidToSources;
+  std::unordered_map<Uuid, rhi::TextureHandle> mPreviews;
 };
 
 } // namespace quoll::editor

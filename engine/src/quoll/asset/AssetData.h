@@ -13,8 +13,6 @@ template <class TData> struct AssetData {
   Uuid uuid;
 
   String name;
-
-  rhi::TextureHandle preview = rhi::TextureHandle::Null;
 };
 
 } // namespace quoll

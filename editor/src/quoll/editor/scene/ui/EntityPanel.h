@@ -17,13 +17,14 @@
 #include "quoll/editor/actions/EntityScriptingActions.h"
 #include "quoll/editor/actions/EntityTransformActions.h"
 #include "quoll/editor/actions/EntityUpdateComponentAction.h"
+#include "quoll/editor/asset/AssetManager.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
 
 namespace quoll::editor {
 
 class EntityPanel {
 public:
-  void renderContent(WorkspaceState &state, AssetCache &assetCache,
+  void renderContent(WorkspaceState &state, AssetManager &assetManager,
                      ActionExecutor &actionExecutor);
 
 private:
@@ -75,7 +76,7 @@ private:
   void renderScripting(Scene &scene, AssetCache &assetCache,
                        ActionExecutor &actionExecutor);
 
-  void renderSkybox(Scene &scene, AssetCache &assetCache,
+  void renderSkybox(Scene &scene, AssetManager &assetManager,
                     ActionExecutor &actionExecutor);
 
   void renderInput(Scene &scene, AssetCache &assetCache,
