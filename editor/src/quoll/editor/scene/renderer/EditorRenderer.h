@@ -23,8 +23,7 @@ public:
               const RendererOptions &options);
 
   void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
-                       WorkspaceState &state, AssetRegistry &assetRegistry,
-                       u32 frameIndex);
+                       WorkspaceState &state, u32 frameIndex);
 
 private:
   void renderSpriteOutlines(rhi::RenderCommandList &commandList,

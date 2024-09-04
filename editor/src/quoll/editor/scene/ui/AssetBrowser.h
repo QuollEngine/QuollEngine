@@ -1,12 +1,14 @@
 #pragma once
 
-#include "quoll/editor/actions/ActionExecutor.h"
-#include "quoll/editor/asset/AssetLoader.h"
 #include "quoll/editor/ui/AssetLoadStatusDialog.h"
 #include "quoll/editor/ui/IconRegistry.h"
 #include "quoll/editor/ui/MaterialViewer.h"
 
 namespace quoll::editor {
+
+struct WorkspaceState;
+class AssetManager;
+class ActionExecutor;
 
 class AssetBrowser {
   struct Entry {
@@ -16,7 +18,6 @@ class AssetBrowser {
     String truncatedName;
     f32 textWidth = 0.0f;
     bool isDirectory = false;
-    EditorIcon icon = EditorIcon::Unknown;
     rhi::TextureHandle preview = rhi::TextureHandle::Null;
     AssetType assetType = AssetType::None;
     u32 asset = 0;
@@ -40,7 +41,7 @@ private:
 
   void fetchPrefab(AssetHandle<PrefabAsset> handle, AssetManager &assetManager);
 
-  void setDefaultProps(Entry &entry, AssetRegistry &assetRegistry);
+  void setDefaultProps(Entry &entry, AssetManager &assetManager);
 
   void setCurrentFetch(std::variant<Path, AssetHandle<PrefabAsset>> fetch);
 

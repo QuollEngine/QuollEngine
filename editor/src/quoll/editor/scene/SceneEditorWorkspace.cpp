@@ -108,8 +108,7 @@ void SceneEditorWorkspace::updateFrameData(rhi::RenderCommandList &commandList,
   mSceneRenderer.updateFrameData(scene.entityDatabase, mState.activeCamera,
                                  frameIndex);
   mEditorRenderer.updateFrameData(scene.entityDatabase, mState.activeCamera,
-                                  mState, mAssetManager.getAssetRegistry(),
-                                  frameIndex);
+                                  mState, frameIndex);
 
   if (mMousePickingGraph.isSelectionPerformedInFrame(frameIndex)) {
     auto entity = mMousePickingGraph.getSelectedEntity();

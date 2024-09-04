@@ -96,8 +96,7 @@ void SceneSimulatorWorkspace::updateFrameData(
   mSceneRenderer.updateFrameData(mState.scene.entityDatabase,
                                  mState.activeCamera, frameIndex);
   mEditorRenderer.updateFrameData(mState.scene.entityDatabase,
-                                  mState.activeCamera, mState,
-                                  mAssetManager.getAssetRegistry(), frameIndex);
+                                  mState.activeCamera, mState, frameIndex);
 
   if (mMousePickingGraph.isSelectionPerformedInFrame(frameIndex)) {
     auto entity = mMousePickingGraph.getSelectedEntity();

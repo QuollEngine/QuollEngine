@@ -129,12 +129,15 @@ static String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
   return "None";
 }
 
-void EntityPanel::renderContent(WorkspaceState &state, AssetCache &assetCache,
+void EntityPanel::renderContent(WorkspaceState &state,
+                                AssetManager &assetManager,
                                 ActionExecutor &actionExecutor) {
   if (state.selectedEntity == Entity::Null) {
     ImGui::Text("Select an entity in the scene to see properties");
     return;
   }
+
+  auto &assetCache = assetManager.getCache();
 
   auto &scene = state.scene;
   setSelectedEntity(scene, state.selectedEntity);
@@ -158,7 +161,7 @@ void EntityPanel::renderContent(WorkspaceState &state, AssetCache &assetCache,
     renderScripting(scene, assetCache, actionExecutor);
     renderInput(scene, assetCache, actionExecutor);
     renderUICanvas(scene, actionExecutor);
-    renderSkybox(scene, assetCache, actionExecutor);
+    renderSkybox(scene, assetManager, actionExecutor);
     renderEnvironmentLighting(scene, assetCache, actionExecutor);
 
 #ifdef QUOLL_DEBUG
@@ -1610,10 +1613,8 @@ void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
   }
 }
 
-void EntityPanel::renderSkybox(Scene &scene, AssetCache &assetCache,
+void EntityPanel::renderSkybox(Scene &scene, AssetManager &assetManager,
                                ActionExecutor &actionExecutor) {
-  auto &assetRegistry = assetCache.getRegistry();
-
   if (!scene.entityDatabase.has<EnvironmentSkybox>(mSelectedEntity)) {
     return;
   }
@@ -1669,13 +1670,14 @@ void EntityPanel::renderSkybox(Scene &scene, AssetCache &assetCache,
 
     } else if (skybox.type == EnvironmentSkyboxType::Texture) {
       if (skybox.texture) {
-        auto envAssetPreview = skybox.texture.meta().preview;
+        auto envAssetPreview =
+            assetManager.generatePreview(skybox.texture.meta().uuid);
 
         imgui::image(envAssetPreview, ImVec2(width, height), ImVec2(0, 0),
                      ImVec2(1, 1), ImGui::GetID("environment-texture-drop"));
 
         dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor,
-                            assetCache);
+                            assetManager.getCache());
 
         if (widgets::Button(fa::Times)) {
           auto newSkybox = skybox;
@@ -1687,7 +1689,7 @@ void EntityPanel::renderSkybox(Scene &scene, AssetCache &assetCache,
       } else {
         widgets::Button("Drag environment asset here", ImVec2(width, height));
         dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor,
-                            assetCache);
+                            assetManager.getCache());
       }
     }
 

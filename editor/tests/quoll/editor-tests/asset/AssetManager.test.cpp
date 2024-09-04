@@ -57,9 +57,7 @@ std::vector<std::tuple<quoll::String, quoll::String>>
 mapExtensions(const std::vector<quoll::String> &extensions, T &&fn) {
   std::vector<std::tuple<quoll::String, quoll::String>> temp(extensions.size());
   std::transform(extensions.begin(), extensions.end(), temp.begin(),
-                 [&fn](auto str) {
-                   return std::tuple{str, fn(str)};
-                 });
+                 [&fn](auto str) { return std::tuple{str, fn(str)}; });
   return temp;
 }
 
@@ -73,7 +71,8 @@ mapExtensions(const std::vector<quoll::String> &extensions, T &&fn) {
 TEST_F(AssetManagerTest, SetsProvidedAssetsAndCachePathsOnConstruct) {
   EXPECT_EQ(manager.getAssetsPath(),
             std::filesystem::current_path() / "assets");
-  EXPECT_EQ(manager.getCachePath(), std::filesystem::current_path() / "cache");
+  EXPECT_EQ(manager.getCache().getAssetsPath(),
+            std::filesystem::current_path() / "cache");
 }
 
 TEST_F(AssetManagerTest, CreatesScriptFileAndLoadsIt) {
@@ -112,7 +111,7 @@ TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
   EXPECT_TRUE(engineUuidBefore.isValid());
 
   std::filesystem::remove(
-      (manager.getCachePath() / (engineUuidBefore.toString()))
+      (manager.getCache().getAssetsPath() / (engineUuidBefore.toString()))
           .replace_extension("asset"));
 
   manager.loadSourceIfChanged(sourcePath);
@@ -135,8 +134,9 @@ TEST_F(
   auto engineUuidBefore = manager.findRootAssetUuid(sourcePath);
   EXPECT_TRUE(engineUuidBefore.isValid());
 
-  std::filesystem::remove((manager.getCachePath() / engineUuidBefore.toString())
-                              .replace_extension("asset"));
+  std::filesystem::remove(
+      (manager.getCache().getAssetsPath() / engineUuidBefore.toString())
+          .replace_extension("asset"));
 
   manager.validateAndPreloadAssets(renderStorage);
 

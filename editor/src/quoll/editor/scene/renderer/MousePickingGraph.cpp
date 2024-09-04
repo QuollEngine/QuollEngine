@@ -9,10 +9,9 @@ namespace quoll::editor {
 
 MousePickingGraph::MousePickingGraph(
     const std::array<SceneRendererFrameData, 2> &frameData,
-    AssetRegistry &assetRegistry, RenderStorage &renderStorage,
-    RendererAssetRegistry &rendererAssetRegistry)
+    RenderStorage &renderStorage, RendererAssetRegistry &rendererAssetRegistry)
     : mRenderStorage(renderStorage), mFrameData(frameData),
-      mAssetRegistry(assetRegistry), mRenderGraph("MousePicking"),
+      mRenderGraph("MousePicking"),
       mRendererAssetRegistry(rendererAssetRegistry),
       mBindlessParams{
           BindlessDrawParameters(renderStorage.getDevice()

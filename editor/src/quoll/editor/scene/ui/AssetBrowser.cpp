@@ -3,7 +3,10 @@
 #include "quoll/imgui/Imgui.h"
 #include "quoll/imgui/ImguiUtils.h"
 #include "quoll/platform/tools/FileOpener.h"
+#include "quoll/editor/actions/ActionExecutor.h"
 #include "quoll/editor/actions/SpawnEntityActions.h"
+#include "quoll/editor/asset/AssetLoader.h"
+#include "quoll/editor/asset/AssetManager.h"
 #include "quoll/editor/ui/Widgets.h"
 #include "AssetBrowser.h"
 
@@ -244,7 +247,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
         ImGui::TableNextColumn();
 
-        imgui::image(IconRegistry::getIcon(mStagingEntry.icon), IconSize);
+        imgui::image(mStagingEntry.preview, IconSize);
         ImGui::PushItemWidth(ItemWidth);
 
         if (!mInitialFocusSet) {
@@ -275,14 +278,14 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
         if (ImGui::MenuItem("Create directory")) {
           mHasStagingEntry = true;
-          mStagingEntry.icon = EditorIcon::Directory;
+          mStagingEntry.preview = IconRegistry::getIcon(EditorIcon::Directory);
           mStagingEntry.isDirectory = true;
           mStagingEntry.isEditable = true;
         }
 
         if (ImGui::MenuItem("Create Lua script")) {
           mHasStagingEntry = true;
-          mStagingEntry.icon = EditorIcon::LuaScript;
+          mStagingEntry.preview = IconRegistry::getIcon(EditorIcon::LuaScript);
           mStagingEntry.isDirectory = false;
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::LuaScript;
@@ -290,7 +293,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
         if (ImGui::MenuItem("Create animator")) {
           mHasStagingEntry = true;
-          mStagingEntry.icon = EditorIcon::Animator;
+          mStagingEntry.preview = IconRegistry::getIcon(EditorIcon::Animator);
           mStagingEntry.isDirectory = false;
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::Animator;
@@ -298,7 +301,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
         if (ImGui::MenuItem("Create input map")) {
           mHasStagingEntry = true;
-          mStagingEntry.icon = EditorIcon::InputMap;
+          mStagingEntry.preview = IconRegistry::getIcon(EditorIcon::InputMap);
           mStagingEntry.isDirectory = false;
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::InputMap;
@@ -404,7 +407,7 @@ void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
     entry.uuid = engineAssetUuid;
     entry.asset = pair.second;
 
-    setDefaultProps(entry, assetManager.getAssetRegistry());
+    setDefaultProps(entry, assetManager);
     mEntries.push_back(entry);
   }
 
@@ -446,7 +449,7 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
         entry.assetType = asset.type;
         entry.uuid = asset.uuid;
         entry.asset = handle.getRawId();
-        setDefaultProps(entry, assetManager.getAssetRegistry());
+        setDefaultProps(entry, assetManager);
 
         return entry;
       };
@@ -517,7 +520,7 @@ void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
   }
 }
 
-void AssetBrowser::setDefaultProps(Entry &entry, AssetRegistry &assetRegistry) {
+void AssetBrowser::setDefaultProps(Entry &entry, AssetManager &assetManager) {
   // Name
   String ellipsis = "..";
   auto calculateTextWidth = [&ellipsis](const String &name) {
@@ -538,18 +541,11 @@ void AssetBrowser::setDefaultProps(Entry &entry, AssetRegistry &assetRegistry) {
     entry.truncatedName += ellipsis;
   }
 
-  // Icon and preview
-  entry.icon = entry.isDirectory ? EditorIcon::Directory
-                                 : getIconFromAssetType(entry.assetType);
-  entry.preview = IconRegistry::getIcon(entry.icon);
-
-  if (entry.assetType == AssetType::Environment) {
-    entry.preview =
-        assetRegistry
-            .getMeta(static_cast<AssetHandle<EnvironmentAsset>>(entry.asset))
-            .preview;
-  } else {
-    entry.preview = IconRegistry::getIcon(entry.icon);
+  entry.preview = assetManager.generatePreview(entry.uuid);
+  if (!rhi::isHandleValid(entry.preview)) {
+    auto icon = entry.isDirectory ? EditorIcon::Directory
+                                  : getIconFromAssetType(entry.assetType);
+    entry.preview = IconRegistry::getIcon(icon);
   }
 }
 

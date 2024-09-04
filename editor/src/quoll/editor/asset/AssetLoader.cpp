@@ -10,13 +10,7 @@ AssetLoader::AssetLoader(AssetManager &assetManager)
 
 Result<Path> AssetLoader::loadFromPath(const Path &path,
                                        const Path &directory) {
-  auto res = mAssetManager.importAsset(path, directory);
-
-  if (res) {
-    mAssetManager.generatePreview(res, mAssetManager.getRenderStorage());
-  }
-
-  return res;
+  return mAssetManager.importAsset(path, directory);
 }
 
 Result<void> AssetLoader::loadFromFileDialog(const Path &directory) {

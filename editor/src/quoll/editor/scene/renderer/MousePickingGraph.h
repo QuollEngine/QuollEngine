@@ -20,7 +20,7 @@ class MousePickingGraph {
 
 public:
   MousePickingGraph(const std::array<SceneRendererFrameData, 2> &frameData,
-                    AssetRegistry &assetRegistry, RenderStorage &renderStorage,
+                    RenderStorage &renderStorage,
                     RendererAssetRegistry &rendererAssetRegistry);
 
   void execute(rhi::RenderCommandList &commandList, const glm::vec2 &mousePos,
@@ -50,8 +50,6 @@ private:
 
   std::array<MousePickingFrameData, rhi::RenderDevice::NumFrames>
       mMousePickingFrameData;
-
-  AssetRegistry &mAssetRegistry;
 
   rhi::Buffer mSpriteEntitiesBuffer;
   rhi::Buffer mMeshEntitiesBuffer;

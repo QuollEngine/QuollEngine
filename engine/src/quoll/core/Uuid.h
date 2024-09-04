@@ -28,3 +28,9 @@ private:
 };
 
 } // namespace quoll
+
+template <> struct std::hash<quoll::Uuid> {
+  size_t operator()(const auto &data) const {
+    return std::hash<quoll::String>{}(data.toString());
+  }
+};

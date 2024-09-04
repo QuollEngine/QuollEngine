@@ -4,20 +4,21 @@
 #include "quoll/editor/ui/StyleStack.h"
 #include "quoll/editor/ui/Theme.h"
 #include "quoll/editor/ui/Widgets.h"
+#include "EntityPanel.h"
 #include "Inspector.h"
 
 namespace quoll::editor {
 
 Inspector::Inspector() {
   mTabs.push_back({"Entity", fa::Wrench,
-                   [this](WorkspaceState &state, AssetCache &assetCache,
+                   [this](WorkspaceState &state, AssetManager &assetManager,
                           ActionExecutor &actionExecutor) {
-                     mEntityPanel.renderContent(state, assetCache,
+                     mEntityPanel.renderContent(state, assetManager,
                                                 actionExecutor);
                    }});
 }
 
-void Inspector::render(WorkspaceState &state, AssetCache &assetCache,
+void Inspector::render(WorkspaceState &state, AssetManager &assetManager,
                        ActionExecutor &actionExecutor) {
   StyleStack stack;
   stack.pushStyle(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -78,7 +79,7 @@ void Inspector::render(WorkspaceState &state, AssetCache &assetCache,
         stack.pushStyle(ImGuiStyleVar_ChildRounding,
                         Theme::getStyles().childRounding);
 
-        mTabs.at(mSelectedIndex).renderFn(state, assetCache, actionExecutor);
+        mTabs.at(mSelectedIndex).renderFn(state, assetManager, actionExecutor);
       }
       ImGui::EndChild();
     }
