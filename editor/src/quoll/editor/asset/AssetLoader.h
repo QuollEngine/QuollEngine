@@ -1,8 +1,10 @@
 #pragma once
 
-#include "AssetManager.h"
+#include "quoll/asset/Result.h"
 
 namespace quoll::editor {
+
+class AssetManager;
 
 class AssetLoader {
 public:

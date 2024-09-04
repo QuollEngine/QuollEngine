@@ -1,7 +1,6 @@
 #pragma once
 
 #include "quoll/editor/ui/AssetLoadStatusDialog.h"
-#include "quoll/editor/ui/IconRegistry.h"
 #include "quoll/editor/ui/MaterialViewer.h"
 
 namespace quoll::editor {
@@ -11,16 +10,17 @@ class AssetManager;
 class ActionExecutor;
 
 class AssetBrowser {
+  enum class PathType { Directory, ComplexAsset, SimpleAsset };
+
   struct Entry {
+    PathType pathType;
     Path path;
     Uuid uuid;
     String name;
     String truncatedName;
     f32 textWidth = 0.0f;
-    bool isDirectory = false;
     rhi::TextureHandle preview = rhi::TextureHandle::Null;
     AssetType assetType = AssetType::None;
-    u32 asset = 0;
     bool isEditable = false;
   };
 
@@ -39,13 +39,11 @@ private:
 
   void fetchAssetDirectory(Path path, AssetManager &assetManager);
 
-  void fetchPrefab(AssetHandle<PrefabAsset> handle, AssetManager &assetManager);
+  void fetchAssetContents(Path path, AssetManager &assetManager);
 
   void setDefaultProps(Entry &entry, AssetManager &assetManager);
 
-  void setCurrentFetch(std::variant<Path, AssetHandle<PrefabAsset>> fetch);
-
-  const Path &getCurrentFetchPath() const;
+  void setCurrentFetch(Path path, PathType pathType);
 
 private:
   Entry mStagingEntry;
@@ -53,11 +51,11 @@ private:
   bool mInitialFocusSet = false;
 
   bool mNeedsRefresh = true;
-  std::variant<Path, AssetHandle<PrefabAsset>> mCurrentFetch;
 
   std::vector<Entry> mEntries;
-  Path mCurrentDirectory;
-  Path mPrefabDirectory;
+  Path mCurrentPath;
+  PathType mCurrentPathType;
+
   usize mSelected = std::numeric_limits<usize>::max();
 
   AssetLoadStatusDialog mStatusDialog{"AssetLoadStatus"};

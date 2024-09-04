@@ -57,7 +57,9 @@ std::vector<std::tuple<quoll::String, quoll::String>>
 mapExtensions(const std::vector<quoll::String> &extensions, T &&fn) {
   std::vector<std::tuple<quoll::String, quoll::String>> temp(extensions.size());
   std::transform(extensions.begin(), extensions.end(), temp.begin(),
-                 [&fn](auto str) { return std::tuple{str, fn(str)}; });
+                 [&fn](auto str) {
+                   return std::tuple{str, fn(str)};
+                 });
   return temp;
 }
 
@@ -99,7 +101,7 @@ TEST_F(AssetManagerTest, CreatesInputMapFileAndLoadsIt) {
   EXPECT_TRUE(fs::exists(InnerPathInAssets / "test.inputmap"));
 }
 
-TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
+TEST_F(AssetManagerTest, ReloadsAssetIfChangedDoesNotCreateFileWithNewUUID) {
   fs::create_directories(InnerPathInAssets);
 
   auto animatorPath = InnerPathInAssets / "test.animator";
@@ -121,9 +123,8 @@ TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
   EXPECT_EQ(engineUuidBefore, engineUuidAfter);
 }
 
-TEST_F(
-    AssetManagerTest,
-    ValidateAndPreloadDoesNotCreateFileWithNewUUIDIfFileContentsHaveChanged) {
+TEST_F(AssetManagerTest,
+       SyncDoesNotCreateFileWithNewUUIDIfFileContentsHaveChanged) {
   fs::create_directories(InnerPathInAssets);
 
   auto animatorPath = InnerPathInAssets / "test.animator";
@@ -138,22 +139,21 @@ TEST_F(
       (manager.getCache().getAssetsPath() / engineUuidBefore.toString())
           .replace_extension("asset"));
 
-  manager.validateAndPreloadAssets(renderStorage);
+  manager.syncAssets();
 
   auto engineUuidAfter = manager.findRootAssetUuid(sourcePath);
   EXPECT_TRUE(engineUuidAfter.isValid());
   EXPECT_EQ(engineUuidBefore, engineUuidAfter);
 }
 
-TEST_F(AssetManagerTest,
-       ValidateAndPreloadDeletesCacheFileIfAssetFileDoesNotExist) {
+TEST_F(AssetManagerTest, SyncDeletesCacheFileIfAssetFileDoesNotExist) {
   auto texturePath = CachePath / "test.asset";
 
   createEmptyFile(texturePath);
 
   EXPECT_TRUE(fs::exists(texturePath));
 
-  manager.validateAndPreloadAssets(renderStorage);
+  manager.syncAssets();
 
   EXPECT_FALSE(fs::exists(texturePath));
 }

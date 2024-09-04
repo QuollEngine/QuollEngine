@@ -62,19 +62,7 @@ void EditorScreen::start(const Project &rawProject) {
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
-  auto sceneUuid = assetManager.findRootAssetUuid(project.assetsPath /
-                                                  "scenes" / "main.scene");
-
-  auto res = assetManager.validateAndPreloadAssets(renderStorage);
-
-  project.startingScene = sceneUuid;
-
-  auto sceneAsset = assetManager.getCache().request<SceneAsset>(sceneUuid);
-  QuollAssert(sceneAsset, "Scene asset does not exist");
-  if (!sceneAsset) {
-    return;
-  }
-
+  auto res = assetManager.syncAssets();
   AssetLoadStatusDialog loadStatusDialog("Loaded with warnings");
 
   if (res.hasWarnings()) {
@@ -84,6 +72,16 @@ void EditorScreen::start(const Project &rawProject) {
 
     loadStatusDialog.setMessages(res.warnings());
     loadStatusDialog.show();
+  }
+
+  auto sceneUuid = assetManager.findRootAssetUuid(project.assetsPath /
+                                                  "scenes" / "main.scene");
+  project.startingScene = sceneUuid;
+
+  auto sceneAsset = assetManager.getCache().request<SceneAsset>(sceneUuid);
+  QuollAssert(sceneAsset, "Scene asset does not exist");
+  if (!sceneAsset) {
+    return;
   }
 
   Theme::apply();

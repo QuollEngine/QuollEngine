@@ -7,6 +7,7 @@
 #include "quoll/editor/actions/SpawnEntityActions.h"
 #include "quoll/editor/asset/AssetLoader.h"
 #include "quoll/editor/asset/AssetManager.h"
+#include "quoll/editor/ui/IconRegistry.h"
 #include "quoll/editor/ui/Widgets.h"
 #include "AssetBrowser.h"
 
@@ -86,17 +87,16 @@ static EditorIcon getIconFromAssetType(AssetType type) {
 void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
                           ActionExecutor &actionExecutor) {
 
-  if (mCurrentDirectory.empty()) {
-    setCurrentFetch(assetManager.getAssetsPath());
+  if (mCurrentPath.empty()) {
+    setCurrentFetch(assetManager.getAssetsPath(), PathType::Directory);
   }
 
   if (mNeedsRefresh) {
     mEntries.clear();
-    if (const auto *path = std::get_if<Path>(&mCurrentFetch)) {
-      fetchAssetDirectory(*path, assetManager);
-    } else if (const auto *handle =
-                   std::get_if<AssetHandle<PrefabAsset>>(&mCurrentFetch)) {
-      fetchPrefab(*handle, assetManager);
+    if (mCurrentPathType == PathType::Directory) {
+      fetchAssetDirectory(mCurrentPath, assetManager);
+    } else if (mCurrentPathType == PathType::ComplexAsset) {
+      fetchAssetContents(mCurrentPath, assetManager);
     }
 
     mNeedsRefresh = false;
@@ -109,14 +109,12 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
     if (itemsPerRow == 0)
       itemsPerRow = 1;
 
-    const auto &currentFetchPath = getCurrentFetchPath();
+    auto relativePath =
+        std::filesystem::relative(mCurrentPath, assetManager.getAssetsPath());
 
-    auto relativePath = std::filesystem::relative(currentFetchPath,
-                                                  assetManager.getAssetsPath());
-
-    if (currentFetchPath != assetManager.getAssetsPath()) {
+    if (mCurrentPath != assetManager.getAssetsPath()) {
       if (widgets::Button("Back")) {
-        setCurrentFetch(currentFetchPath.parent_path());
+        setCurrentFetch(mCurrentPath.parent_path(), PathType::Directory);
       }
       ImGui::SameLine();
     }
@@ -142,8 +140,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
         ImGui::TableNextColumn();
 
-        String id = "###" + std::to_string(entry.asset) + "-" +
-                    std::to_string(static_cast<u32>(entry.assetType));
+        String id = "###" + std::to_string(i);
         if (ImGui::Selectable(id.c_str(), mSelected == i,
                               ImGuiSelectableFlags_AllowDoubleClick,
                               ImVec2(ItemWidth, ItemHeight))) {
@@ -152,8 +149,8 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
           // Double click opens the file/directory
           if (ImGui::IsMouseDoubleClicked(0)) {
-            if (entry.isDirectory) {
-              setCurrentFetch(entry.path);
+            if (entry.pathType == PathType::Directory) {
+              setCurrentFetch(entry.path, entry.pathType);
             } else if (entry.assetType == AssetType::Prefab) {
               auto prefab =
                   assetManager.getCache().request<PrefabAsset>(entry.uuid);
@@ -216,15 +213,15 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
           ImGui::EndTooltip();
         }
 
-        if (!entry.isDirectory &&
+        if (entry.pathType != PathType::Directory &&
             ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
           ImGui::OpenPopup(id.c_str(), ImGuiPopupFlags_MouseButtonRight);
         }
 
         if (ImGui::BeginPopup(id.c_str())) {
-          if (entry.assetType == AssetType::Prefab &&
+          if (entry.pathType == PathType::ComplexAsset &&
               ImGui::MenuItem("View contents")) {
-            setCurrentFetch(static_cast<AssetHandle<PrefabAsset>>(entry.asset));
+            setCurrentFetch(entry.path, entry.pathType);
           }
 
           if (ImGui::MenuItem("Copy UUID")) {
@@ -266,7 +263,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
     ImGui::EndTable();
 
-    if (std::get_if<Path>(&mCurrentFetch) != nullptr) {
+    if (mCurrentPathType == PathType::Directory) {
       if (ImGui::BeginPopupContextWindow(
               "AssetBrowserPopup",
               ImGuiPopupFlags_NoOpenOverItems |
@@ -279,14 +276,14 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
         if (ImGui::MenuItem("Create directory")) {
           mHasStagingEntry = true;
           mStagingEntry.preview = IconRegistry::getIcon(EditorIcon::Directory);
-          mStagingEntry.isDirectory = true;
+          mStagingEntry.pathType = PathType::Directory;
           mStagingEntry.isEditable = true;
         }
 
         if (ImGui::MenuItem("Create Lua script")) {
           mHasStagingEntry = true;
           mStagingEntry.preview = IconRegistry::getIcon(EditorIcon::LuaScript);
-          mStagingEntry.isDirectory = false;
+          mStagingEntry.pathType = PathType::SimpleAsset;
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::LuaScript;
         }
@@ -294,7 +291,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
         if (ImGui::MenuItem("Create animator")) {
           mHasStagingEntry = true;
           mStagingEntry.preview = IconRegistry::getIcon(EditorIcon::Animator);
-          mStagingEntry.isDirectory = false;
+          mStagingEntry.pathType = PathType::SimpleAsset;
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::Animator;
         }
@@ -302,7 +299,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
         if (ImGui::MenuItem("Create input map")) {
           mHasStagingEntry = true;
           mStagingEntry.preview = IconRegistry::getIcon(EditorIcon::InputMap);
-          mStagingEntry.isDirectory = false;
+          mStagingEntry.pathType = PathType::SimpleAsset;
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::InputMap;
         }
@@ -319,7 +316,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 void AssetBrowser::reload() { mNeedsRefresh = true; }
 
 void AssetBrowser::handleAssetImport(AssetManager &assetManager) {
-  auto res = AssetLoader(assetManager).loadFromFileDialog(mCurrentDirectory);
+  auto res = AssetLoader(assetManager).loadFromFileDialog(mCurrentPath);
 
   if (!res) {
     mStatusDialog.setTitle("Import failed");
@@ -346,8 +343,8 @@ void AssetBrowser::handleAssetImport(AssetManager &assetManager) {
 
 void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
   if (!mStagingEntry.name.empty()) {
-    auto path = mCurrentDirectory / mStagingEntry.name;
-    if (mStagingEntry.isDirectory) {
+    auto path = mCurrentPath / mStagingEntry.name;
+    if (mStagingEntry.pathType == PathType::Directory) {
       assetManager.createDirectory(path);
     } else if (mStagingEntry.assetType == AssetType::LuaScript) {
       assetManager.createLuaScript(path);
@@ -360,7 +357,7 @@ void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
 
   // Reset values and hide staging
   mStagingEntry.name = "";
-  mStagingEntry.isDirectory = false;
+  mStagingEntry.pathType = PathType::SimpleAsset;
   mHasStagingEntry = false;
   mInitialFocusSet = false;
 
@@ -387,7 +384,7 @@ void AssetBrowser::renderEntry(const Entry &entry) {
 }
 
 void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
-  mCurrentDirectory = path;
+  mCurrentPath = path;
 
   for (auto &directoryEntry : std::filesystem::directory_iterator(path)) {
     auto filePath = directoryEntry.path();
@@ -395,128 +392,54 @@ void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
       continue;
     }
 
-    const auto &engineAssetUuid = assetManager.findRootAssetUuid(filePath);
-    const auto &pair =
-        assetManager.getAssetRegistry().getAssetByUuid(engineAssetUuid);
-
     Entry entry;
-    entry.isDirectory = directoryEntry.is_directory();
     entry.path = filePath;
     entry.name = filePath.filename().string();
-    entry.assetType = pair.first;
-    entry.uuid = engineAssetUuid;
-    entry.asset = pair.second;
+
+    if (!directoryEntry.is_directory()) {
+      const auto &sourceInfo = assetManager.getSourceInfo(filePath);
+      const auto &engineAssetUuid = assetManager.findRootAssetUuid(filePath);
+
+      entry.assetType = sourceInfo.type;
+      entry.uuid = sourceInfo.uuid;
+      if (sourceInfo.hasContents) {
+        entry.pathType = PathType::ComplexAsset;
+      } else {
+        entry.pathType = PathType::SimpleAsset;
+      }
+    } else {
+      entry.pathType = PathType::Directory;
+    }
 
     setDefaultProps(entry, assetManager);
     mEntries.push_back(entry);
   }
 
   std::sort(mEntries.begin(), mEntries.end(), [](const auto &a, const auto &b) {
-    if (a.isDirectory != b.isDirectory) {
-      return a.isDirectory > b.isDirectory;
+    if ((a.pathType == PathType::Directory ||
+         b.pathType == PathType::Directory) &&
+        a.pathType != b.pathType) {
+      return a.pathType > b.pathType;
     }
 
     return a.name < b.name;
   });
 }
 
-void AssetBrowser::fetchPrefab(AssetHandle<PrefabAsset> handle,
-                               AssetManager &assetManager) {
-  auto &assetRegistry = assetManager.getAssetRegistry();
-  const auto &prefabMeta = assetRegistry.getMeta(handle);
-  const auto &prefab = assetRegistry.get(handle);
+void AssetBrowser::fetchAssetContents(Path path, AssetManager &assetManager) {
+  mCurrentPath = path;
+  const auto &contentInfos = assetManager.getSourceContentInfos(path);
 
-  mPrefabDirectory = mCurrentDirectory / prefabMeta.name;
+  for (const auto &info : contentInfos) {
+    Entry entry;
+    entry.pathType = PathType::SimpleAsset;
+    entry.path = path / info.name;
+    entry.assetType = info.type;
+    entry.uuid = info.uuid;
+    entry.name = info.name;
 
-  auto prefabName = prefabMeta.name + "/";
-
-  auto removePrefabName = [&prefabName](String name) {
-    auto index = name.find(prefabName);
-    if (index == 0) {
-      auto length = prefabName.length();
-      return name.substr(length);
-    }
-    return name;
-  };
-
-  auto createPrefabEntry =
-      [&]<typename AssetData>(AssetHandle<AssetData> handle) {
-        const auto &asset = assetRegistry.getMeta<AssetData>(handle);
-        Entry entry;
-        entry.isDirectory = false;
-        entry.path = assetManager.getCache().getPathFromUuid(asset.uuid);
-        entry.name = removePrefabName(asset.name);
-        entry.assetType = asset.type;
-        entry.uuid = asset.uuid;
-        entry.asset = handle.getRawId();
-        setDefaultProps(entry, assetManager);
-
-        return entry;
-      };
-
-  auto addPrefabEntry =
-      [&]<typename AssetData>(
-          AssetHandle<AssetData> handle,
-          std::unordered_map<AssetHandle<AssetData>, bool> &cache) {
-        if (handle && !cache.contains(handle)) {
-          cache.insert_or_assign(handle, true);
-          mEntries.push_back(createPrefabEntry(handle));
-          return true;
-        }
-
-        return false;
-      };
-
-  std::unordered_map<AssetHandle<TextureAsset>, bool> textureCache;
-  auto addTextureEntryIfExists = [&](const AssetRef<TextureAsset> &texture) {
-    addPrefabEntry(texture.handle(), textureCache);
-  };
-
-  std::unordered_map<AssetHandle<MaterialAsset>, bool> materialCache;
-  auto addMaterialEntry = [&](AssetHandle<MaterialAsset> handle) {
-    if (addPrefabEntry(handle, materialCache)) {
-      const auto &material = assetRegistry.get(handle);
-
-      addTextureEntryIfExists(material.baseColorTexture);
-      addTextureEntryIfExists(material.metallicRoughnessTexture);
-      addTextureEntryIfExists(material.normalTexture);
-      addTextureEntryIfExists(material.occlusionTexture);
-      addTextureEntryIfExists(material.emissiveTexture);
-    }
-  };
-
-  std::unordered_map<AssetHandle<MeshAsset>, bool> meshCache;
-  for (const auto &ref : prefab.meshes) {
-    addPrefabEntry(ref.value.handle(), meshCache);
-  }
-
-  for (const auto &renderer : prefab.meshRenderers) {
-    for (auto material : renderer.value.materials) {
-      addMaterialEntry(material.handle());
-    }
-  }
-
-  for (const auto &renderer : prefab.skinnedMeshRenderers) {
-    for (auto material : renderer.value.materials) {
-      addMaterialEntry(material.handle());
-    }
-  }
-
-  std::unordered_map<AssetHandle<SkeletonAsset>, bool> skeletonCache;
-  for (const auto &ref : prefab.skeletons) {
-    addPrefabEntry(ref.value.handle(), skeletonCache);
-  }
-
-  std::unordered_map<AssetHandle<AnimatorAsset>, bool> animatorCache;
-  for (const auto &ref : prefab.animators) {
-    addPrefabEntry(ref.value.handle(), animatorCache);
-  }
-
-  std::unordered_map<AssetHandle<AnimationAsset>, bool> animationCache;
-  for (const auto &ref : prefab.animators) {
-    for (const auto &state : ref.value->states) {
-      addPrefabEntry(state.animation.handle(), animationCache);
-    }
+    setDefaultProps(entry, assetManager);
+    mEntries.push_back(entry);
   }
 }
 
@@ -543,24 +466,17 @@ void AssetBrowser::setDefaultProps(Entry &entry, AssetManager &assetManager) {
 
   entry.preview = assetManager.generatePreview(entry.uuid);
   if (!rhi::isHandleValid(entry.preview)) {
-    auto icon = entry.isDirectory ? EditorIcon::Directory
-                                  : getIconFromAssetType(entry.assetType);
+    auto icon = entry.pathType == PathType::Directory
+                    ? EditorIcon::Directory
+                    : getIconFromAssetType(entry.assetType);
     entry.preview = IconRegistry::getIcon(icon);
   }
 }
 
-void AssetBrowser::setCurrentFetch(
-    std::variant<Path, AssetHandle<PrefabAsset>> fetch) {
-  mCurrentFetch = fetch;
+void AssetBrowser::setCurrentFetch(Path path, PathType pathType) {
+  mCurrentPath = path;
+  mCurrentPathType = pathType;
   reload();
-}
-
-const Path &AssetBrowser::getCurrentFetchPath() const {
-  if (std::get_if<AssetHandle<PrefabAsset>>(&mCurrentFetch)) {
-    return mPrefabDirectory;
-  }
-
-  return mCurrentDirectory;
 }
 
 } // namespace quoll::editor
