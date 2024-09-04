@@ -12,7 +12,7 @@ ActionExecutorResult ExportAsGame::onExecute(WorkspaceState &state,
                                              AssetCache &assetCache) {
   auto path = platform::FileDialog::getFilePathFromCreateDialog({});
 
-  mAssetManager.reloadAssets();
+  mAssetManager.syncAssets();
 
   GameExporter exporter;
   exporter.exportGame(state.project, path);

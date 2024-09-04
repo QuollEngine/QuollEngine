@@ -14,29 +14,6 @@ AssetCache::AssetCache(const Path &assetsPath, bool createDefaultObjects)
   }
 }
 
-Result<void> AssetCache::preloadAssets() {
-  QUOLL_PROFILE_EVENT("AssetCache::preloadAssets");
-  std::vector<String> warnings;
-
-  for (const auto &entry :
-       std::filesystem::recursive_directory_iterator(mAssetsPath)) {
-    if (!entry.is_regular_file() || entry.path().extension() == ".assetmeta") {
-      continue;
-    }
-
-    auto res = loadAsset(entry.path());
-
-    if (!res) {
-      warnings.push_back(res.error());
-    } else {
-      warnings.insert(warnings.end(), res.warnings().begin(),
-                      res.warnings().end());
-    }
-  }
-
-  return {warnings};
-}
-
 AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
   AssetMeta meta{};
   auto typePath =

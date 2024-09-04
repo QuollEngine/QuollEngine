@@ -63,8 +63,6 @@ void Runtime::start() {
   SceneRenderer sceneRenderer(assetCache.getRegistry(), renderStorage,
                               rendererAssetRegistry);
 
-  auto res = assetCache.preloadAssets();
-
   FPSCounter fpsCounter;
   MainLoop mainLoop(window, fpsCounter);
 

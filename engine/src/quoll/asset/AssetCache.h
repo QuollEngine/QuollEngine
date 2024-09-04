@@ -182,8 +182,6 @@ public:
 
   inline const Path &getAssetsPath() const { return mAssetsPath; }
 
-  Result<void> preloadAssets();
-
   AssetMeta getAssetMeta(const Uuid &uuid) const;
 
   Path getPathFromUuid(const Uuid &uuid) const;

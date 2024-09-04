@@ -59,6 +59,17 @@ public:
   static const std::vector<String> EnvironmentExtensions;
 
 public:
+  struct SourceInfo {
+    Uuid uuid;
+
+    String name;
+
+    AssetType type;
+
+    bool hasContents;
+  };
+
+public:
   AssetManager(const Path &assetsPath, const Path &assetsCachePath,
                RenderStorage &renderStorage, bool optimize,
                bool createDefaultObjects);
@@ -70,13 +81,15 @@ public:
 
   inline const Path &getAssetsPath() const { return mAssetsPath; }
 
-  Result<void> reloadAssets();
-
-  Result<void> validateAndPreloadAssets(RenderStorage &renderStorage);
+  Result<void> syncAssets();
 
   inline AssetCache &getCache() { return mAssetCache; }
 
   rhi::TextureHandle generatePreview(const Uuid &uuid);
+
+  const SourceInfo &getSourceInfo(const Path &path);
+
+  const std::vector<SourceInfo> &getSourceContentInfos(const Path &path);
 
   Uuid findRootAssetUuid(const Path &sourceAssetPath);
 
@@ -164,6 +177,8 @@ private:
 
   std::unordered_map<Path, Uuid> mSourceToRootUuids;
   std::unordered_map<Uuid, Path> mUuidToSources;
+  std::unordered_map<Path, SourceInfo> mSourceInfos;
+  std::unordered_map<Path, std::vector<SourceInfo>> mSourceContentInfos;
   std::unordered_map<Uuid, rhi::TextureHandle> mPreviews;
 };
 

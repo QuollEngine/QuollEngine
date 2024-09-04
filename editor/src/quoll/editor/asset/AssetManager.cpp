@@ -133,6 +133,50 @@ rhi::TextureHandle AssetManager::generatePreview(const Uuid &uuid) {
   return preview;
 }
 
+const AssetManager::SourceInfo &AssetManager::getSourceInfo(const Path &path) {
+  if (mSourceInfos.contains(path)) {
+    return mSourceInfos.at(path);
+  }
+
+  const auto &uuid = findRootAssetUuid(path);
+  const auto &meta = mAssetCache.getAssetMeta(uuid);
+
+  SourceInfo info{};
+  info.type = meta.type;
+  info.uuid = uuid;
+  info.hasContents = getUuidsFromMeta(path).size() > 1;
+
+  mSourceInfos.insert_or_assign(path, std::move(info));
+  return mSourceInfos.at(path);
+}
+
+const std::vector<AssetManager::SourceInfo> &
+AssetManager::getSourceContentInfos(const Path &path) {
+  if (mSourceContentInfos.contains(path)) {
+    return mSourceContentInfos.at(path);
+  }
+
+  const auto &uuids = getUuidsFromMeta(path);
+  std::vector<SourceInfo> sourceInfos;
+  sourceInfos.reserve(uuids.size() - 1);
+  for (const auto &[name, uuid] : uuids) {
+    if (name == "root")
+      continue;
+
+    const auto &meta = mAssetCache.getAssetMeta(uuid);
+
+    SourceInfo info{};
+    info.type = meta.type;
+    info.uuid = uuid;
+    info.name = name;
+    info.hasContents = false;
+    sourceInfos.push_back(std::move(info));
+  }
+
+  mSourceContentInfos.insert_or_assign(path, std::move(sourceInfos));
+  return mSourceContentInfos.at(path);
+}
+
 Uuid AssetManager::findRootAssetUuid(const Path &sourceAssetPath) {
   auto it = mSourceToRootUuids.find(sourceAssetPath.string());
   if (it != mSourceToRootUuids.end()) {
@@ -218,7 +262,7 @@ Result<Path> AssetManager::createInputMap(const Path &assetPath) {
   return {sourceAssetPath, res.warnings()};
 }
 
-Result<void> AssetManager::reloadAssets() {
+Result<void> AssetManager::syncAssets() {
   QUOLL_PROFILE_EVENT("AssetManager::reloadAssets");
 
   std::vector<String> warnings;
@@ -261,22 +305,6 @@ Result<void> AssetManager::reloadAssets() {
                          " is removed because it did not refer to any asset");
     }
   }
-
-  return {warnings};
-}
-
-Result<void>
-AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
-  QUOLL_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
-  auto reloadRes = reloadAssets();
-
-  auto res = mAssetCache.preloadAssets();
-  auto warnings = res.warnings();
-
-  if (!res)
-    return res;
-
-  warnings.insert(warnings.end(), res.warnings().begin(), res.warnings().end());
 
   return {warnings};
 }

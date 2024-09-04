@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/platform/tools/FileDialog.h"
 #include "AssetLoader.h"
+#include "AssetManager.h"
 #include "GLTFImporter.h"
 
 namespace quoll::editor {
