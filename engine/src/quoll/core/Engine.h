@@ -1,8 +1,15 @@
 #pragma once
 
 #include "quoll/logger/Logger.h"
+#include "quoll/threads/ThreadPool.h"
 
 namespace quoll {
+
+struct EngineDescription {
+  Path path;
+
+  u32 numThreads = 0;
+};
 
 /**
  * Singleton with values that are set once
@@ -10,12 +17,10 @@ namespace quoll {
  * modules
  */
 class Engine {
-private:
-  // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-  static Engine engine;
-
 public:
-  static void setEnginePath(const Path &path);
+  static void create(EngineDescription description);
+
+  static void destroy();
 
   static const Path getShadersPath();
 
@@ -29,16 +34,16 @@ public:
 
   static void resetLoggers();
 
-private:
-  Engine();
+  static ThreadPool &getThreadPool();
 
 private:
-  Path mAssetsPath;
+  Engine(EngineDescription description);
+
+private:
   Path mEnginePath;
-
   Logger mSystemLogger;
-
   Logger mUserLogger;
+  ThreadPool mThreadPool;
 };
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)

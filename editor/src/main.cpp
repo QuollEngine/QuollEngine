@@ -8,7 +8,7 @@ int main() {
   static constexpr u32 InitialWidth = 1024;
   static constexpr u32 InitialHeight = 768;
 
-  quoll::Engine::setEnginePath(std::filesystem::current_path() / "engine");
+  quoll::Engine::create({.path = std::filesystem::current_path() / "engine"});
 
   quoll::InputDeviceManager deviceManager;
   quoll::Window window("Quoll Engine", InitialWidth, InitialHeight,
@@ -29,6 +29,8 @@ int main() {
     quoll::editor::EditorScreen editor(window, deviceManager, device);
     editor.start(project.value());
   }
+
+  quoll::Engine::destroy();
 
   return 0;
 }

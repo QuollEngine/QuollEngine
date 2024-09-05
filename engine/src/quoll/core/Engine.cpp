@@ -5,28 +5,36 @@
 namespace quoll {
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-Engine Engine::engine;
+Engine *sEngine = nullptr;
 
-Engine::Engine() { resetLoggers(); }
-
-void Engine::setEnginePath(const Path &path) {
-  engine.mEnginePath = path;
-  engine.mAssetsPath = engine.mEnginePath / "assets";
+void Engine::create(EngineDescription description) {
+  sEngine = new Engine(description);
 }
 
-const Path Engine::getShadersPath() { return engine.mAssetsPath / "shaders"; }
+void Engine::destroy() { delete sEngine; }
 
-const Path Engine::getFontsPath() { return engine.mAssetsPath / "fonts"; }
+Engine::Engine(EngineDescription description)
+    : mEnginePath(description.path), mThreadPool(description.numThreads) {
+  resetLoggers();
+}
 
-const Path Engine::getEnginePath() { return engine.mEnginePath; }
+const Path Engine::getShadersPath() {
+  return sEngine->mEnginePath / "assets" / "shaders";
+}
 
-Logger &Engine::getLogger() { return engine.mSystemLogger; }
+const Path Engine::getFontsPath() {
+  return sEngine->mEnginePath / "assets" / "fonts";
+}
 
-Logger &Engine::getUserLogger() { return engine.mUserLogger; }
+const Path Engine::getEnginePath() { return sEngine->mEnginePath; }
+
+Logger &Engine::getLogger() { return sEngine->mSystemLogger; }
+
+Logger &Engine::getUserLogger() { return sEngine->mUserLogger; }
 
 void Engine::resetLoggers() {
-  engine.mSystemLogger.setTransport(createStreamTransport(std::cout));
-  engine.mUserLogger.setTransport(createStreamTransport(std::cout));
+  sEngine->mSystemLogger.setTransport(createStreamTransport(std::cout));
+  sEngine->mUserLogger.setTransport(createStreamTransport(std::cout));
 }
 
 } // namespace quoll

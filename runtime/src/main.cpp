@@ -7,7 +7,7 @@
 int main() {
   auto gamePath = std::filesystem::current_path();
 
-  quoll::Engine::setEnginePath(gamePath / "engine");
+  quoll::Engine::create({.path = std::filesystem::current_path() / "engine"});
 
   auto launchPath = gamePath / "launch.yml";
 
@@ -29,6 +29,8 @@ int main() {
   quoll::runtime::Runtime runtime(launchConfig);
 
   runtime.start();
+
+  quoll::Engine::destroy();
 
   return 0;
 }
