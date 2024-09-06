@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/editor/actions/EditorGridActions.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include "ActionTestBase.h"
 
 using GridSetAxisLinesActionTest = ActionTestBase;

@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Name.h"
 #include "quoll/editor/actions/EntityUpdateImmediateComponentAction.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include "ActionTestBase.h"
 
 using EntityUpdateImmediateComponentActionTest = ActionTestBase;

@@ -17,59 +17,22 @@ public:
     asset.type = quoll::AssetType::Material;
     asset.data.baseColorFactor = glm::vec4(2.5f, 0.2f, 0.5f, 5.2f);
     asset.data.baseColorTextureCoord = 2;
-
-    if (createTextures) {
-      quoll::AssetData<quoll::TextureAsset> texture;
-      texture.uuid = quoll::Uuid("base");
-      cache.getRegistry().add(texture);
-
-      asset.data.baseColorTexture =
-          cache.request<quoll::TextureAsset>(texture.uuid).data();
-    }
-
     asset.data.metallicFactor = 1.0f;
     asset.data.roughnessFactor = 2.5f;
     asset.data.metallicRoughnessTextureCoord = 3;
-    if (createTextures) {
-      quoll::AssetData<quoll::TextureAsset> texture;
-      texture.uuid = quoll::Uuid("mr");
-      cache.getRegistry().add(texture);
-
-      asset.data.metallicRoughnessTexture =
-          cache.request<quoll::TextureAsset>(texture.uuid).data();
-    }
-
     asset.data.normalScale = 0.6f;
     asset.data.normalTextureCoord = 4;
-    if (createTextures) {
-      quoll::AssetData<quoll::TextureAsset> texture;
-      texture.uuid = quoll::Uuid("normal");
-      cache.getRegistry().add(texture);
-
-      asset.data.normalTexture =
-          cache.request<quoll::TextureAsset>(texture.uuid).data();
-    }
-
     asset.data.occlusionStrength = 0.4f;
     asset.data.occlusionTextureCoord = 5;
-    if (createTextures) {
-      quoll::AssetData<quoll::TextureAsset> texture;
-      texture.uuid = quoll::Uuid("occlusion");
-      cache.getRegistry().add(texture);
-
-      asset.data.occlusionTexture =
-          cache.request<quoll::TextureAsset>(texture.uuid).data();
-    }
-
     asset.data.emissiveFactor = glm::vec3(0.5f, 0.6f, 2.5f);
     asset.data.emissiveTextureCoord = 6;
-    if (createTextures) {
-      quoll::AssetData<quoll::TextureAsset> texture;
-      texture.uuid = quoll::Uuid("emissive");
-      cache.getRegistry().add(texture);
 
-      asset.data.emissiveTexture =
-          cache.request<quoll::TextureAsset>(texture.uuid).data();
+    if (createTextures) {
+      asset.data.baseColorTexture = createAsset<quoll::TextureAsset>();
+      asset.data.metallicRoughnessTexture = createAsset<quoll::TextureAsset>();
+      asset.data.normalTexture = createAsset<quoll::TextureAsset>();
+      asset.data.occlusionTexture = createAsset<quoll::TextureAsset>();
+      asset.data.emissiveTexture = createAsset<quoll::TextureAsset>();
     }
 
     return asset;
@@ -110,16 +73,16 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     file.read(header);
 
     // Base color
-    quoll::String baseTexturePath;
-    file.read(baseTexturePath);
+    quoll::Uuid baseTextureUuid;
+    file.read(baseTextureUuid);
     i8 baseTextureCoord = -1;
     file.read(baseTextureCoord);
     glm::vec4 baseColorFactor;
     file.read(baseColorFactor);
 
     // Metallic roughness
-    quoll::String metallicRoughnessTexturePath;
-    file.read(metallicRoughnessTexturePath);
+    quoll::Uuid metallicRoughnessUuid;
+    file.read(metallicRoughnessUuid);
     i8 metallicRoughnessTextureCoord = -1;
     file.read(metallicRoughnessTextureCoord);
     f32 metallicFactor = 0.0f;
@@ -128,43 +91,44 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     file.read(roughnessFactor);
 
     // Normal
-    quoll::String normalTexturePath;
-    file.read(normalTexturePath);
+    quoll::Uuid normalTextureUuid;
+    file.read(normalTextureUuid);
     i8 normalTextureCoord = -1;
     file.read(normalTextureCoord);
     f32 normalScale = 0.0f;
     file.read(normalScale);
 
     // Occlusion
-    quoll::String occlusionTexturePath;
-    file.read(occlusionTexturePath);
+    quoll::Uuid occlusionTextureUuid;
+    file.read(occlusionTextureUuid);
     i8 occlusionTextureCoord = -1;
     file.read(occlusionTextureCoord);
     f32 occlusionStrength = 0.0f;
     file.read(occlusionStrength);
 
     // Emissive
-    quoll::String emissiveTexturePath;
-    file.read(emissiveTexturePath);
+    quoll::Uuid emissiveTextureUuid;
+    file.read(emissiveTextureUuid);
     i8 emissiveTextureCoord = -1;
     file.read(emissiveTextureCoord);
     glm::vec3 emissiveFactor;
     file.read(emissiveFactor);
 
-    EXPECT_EQ(baseTexturePath, "base");
+    EXPECT_EQ(baseTextureUuid, asset.data.baseColorTexture.meta().uuid);
     EXPECT_EQ(baseTextureCoord, 2);
     EXPECT_EQ(baseColorFactor, glm::vec4(2.5f, 0.2f, 0.5f, 5.2f));
-    EXPECT_EQ(metallicRoughnessTexturePath, "mr");
+    EXPECT_EQ(metallicRoughnessUuid,
+              asset.data.metallicRoughnessTexture.meta().uuid);
     EXPECT_EQ(metallicRoughnessTextureCoord, 3);
     EXPECT_EQ(metallicFactor, 1.0f);
     EXPECT_EQ(roughnessFactor, 2.5f);
-    EXPECT_EQ(normalTexturePath, "normal");
+    EXPECT_EQ(normalTextureUuid, asset.data.normalTexture.meta().uuid);
     EXPECT_EQ(normalTextureCoord, 4);
     EXPECT_EQ(normalScale, 0.6f);
-    EXPECT_EQ(occlusionTexturePath, "occlusion");
+    EXPECT_EQ(occlusionTextureUuid, asset.data.occlusionTexture.meta().uuid);
     EXPECT_EQ(occlusionTextureCoord, 5);
     EXPECT_EQ(occlusionStrength, 0.4f);
-    EXPECT_EQ(emissiveTexturePath, "emissive");
+    EXPECT_EQ(emissiveTextureUuid, asset.data.emissiveTexture.meta().uuid);
     EXPECT_EQ(emissiveTextureCoord, 6);
     EXPECT_EQ(emissiveFactor, glm::vec3(0.5f, 0.6f, 2.5f));
   }

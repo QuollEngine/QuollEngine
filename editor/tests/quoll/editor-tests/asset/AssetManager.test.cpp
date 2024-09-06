@@ -5,7 +5,7 @@
 #include "quoll/rhi-mock/MockRenderDevice.h"
 #include "quoll/yaml/Yaml.h"
 #include "quoll/editor/asset/AssetManager.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include <cryptopp/files.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/sha.h>
@@ -14,7 +14,6 @@ namespace fs = std::filesystem;
 
 static const quoll::Path AssetsPath = fs::current_path() / "assets";
 static const quoll::Path CachePath = fs::current_path() / "cache";
-static const quoll::Path FixturesPath = fs::current_path() / "fixtures";
 static const quoll::Path TempPath = fs::current_path() / "temp";
 static const quoll::Path InnerPathInAssets = AssetsPath / "inner-1" / "inner-2";
 

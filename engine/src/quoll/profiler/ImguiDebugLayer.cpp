@@ -191,7 +191,7 @@ template <typename TAssetData> static void renderAssetMap(AssetCache *cache) {
         ImGui::Text("Ref count");
       }
 
-      for (auto &[handle, asset] : map.getAssets()) {
+      for (auto &[handle, asset] : map.getMetas()) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("%s", asset.uuid.toString().c_str());

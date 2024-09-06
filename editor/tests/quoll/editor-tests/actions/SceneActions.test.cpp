@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/scene/PerspectiveLens.h"
 #include "quoll/editor/actions/SceneActions.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include "ActionTestBase.h"
 
 using SceneSetStartingCameraActionTest = ActionTestBase;

@@ -14,7 +14,7 @@ public:
   void update(SystemView &view);
 
 private:
-  InputMap createInputMap(InputMapAsset &asset, usize defaultScheme);
+  InputMap createInputMap(const InputMapAsset &asset, usize defaultScheme);
 
 private:
   InputDeviceManager &mDeviceManager;

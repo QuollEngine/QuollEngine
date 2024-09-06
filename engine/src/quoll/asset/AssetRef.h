@@ -63,37 +63,16 @@ public:
   }
 
   constexpr operator bool() const { return mHandle; }
-  constexpr TAssetData *operator->() {
-    QuollAssert(mHandle, "Handle is null");
-    QuollAssert(mMap->hasAsset(mHandle), "Handle does not exist in map");
-    return &get();
-  }
-  constexpr const TAssetData *operator->() const {
-    QuollAssert(mHandle, "Handle is null");
-    QuollAssert(mMap->hasAsset(mHandle), "Handle does not exist in map");
-    return &get();
-  }
+  constexpr const TAssetData *operator->() const { return &get(); }
 
-  constexpr TAssetData &get() {
-    QuollAssert(mHandle, "Handle is null");
-    QuollAssert(mMap->hasAsset(mHandle), "Handle does not exist in map");
-    return mMap->getAsset(mHandle).data;
-  }
   constexpr const TAssetData &get() const {
     QuollAssert(mHandle, "Handle is null");
-    QuollAssert(mMap->hasAsset(mHandle), "Handle does not exist in map");
-    return mMap->getAsset(mHandle).data;
+    return mMap->get(mHandle);
   }
 
-  constexpr AssetData<TAssetData> &meta() {
+  constexpr const AssetMeta &meta() const {
     QuollAssert(mHandle, "Handle is null");
-    QuollAssert(mMap->hasAsset(mHandle), "Handle does not exist in map");
-    return mMap->getAsset(mHandle);
-  }
-  constexpr const AssetData<TAssetData> &meta() const {
-    QuollAssert(mHandle, "Handle is null");
-    QuollAssert(mMap->hasAsset(mHandle), "Handle does not exist in map");
-    return mMap->getAsset(mHandle);
+    return mMap->getMeta(mHandle);
   }
 
   constexpr const AssetHandle<TAssetData> &handle() const { return mHandle; }

@@ -129,7 +129,8 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
 
   if (!specularCubemap) {
     device->destroyTexture(unfilteredCubemap.texture);
-    mAssetCache.getRegistry().remove(irradianceCubemap.data().handle());
+    mAssetCache.getRegistry().destroy<TextureAsset>(
+        irradianceCubemap.data().meta().uuid);
 
     return specularCubemap.error();
   }

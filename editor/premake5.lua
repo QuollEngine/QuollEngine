@@ -59,6 +59,7 @@ project "QuollEditorTest"
 
     includedirs {
         "../editor/tests",
+        "../engine/tests",
         "../editor/src",
         "../engine/src",
         "../rhi/mock/include"

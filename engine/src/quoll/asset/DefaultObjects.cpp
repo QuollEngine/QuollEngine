@@ -7,7 +7,7 @@
 
 namespace quoll::default_objects {
 
-AssetData<MeshAsset> createCube() {
+MeshAsset createCube() {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
   std::vector<glm::vec3> positions;
@@ -153,34 +153,21 @@ AssetData<MeshAsset> createCube() {
   geometry.texCoords0 = texCoords;
   geometry.texCoords1 = texCoords;
 
-  AssetData<MeshAsset> mesh;
-  mesh.name = "Cube";
-  mesh.uuid = Uuid("quoll::engine/meshes/cube");
-  mesh.data.geometries.push_back(geometry);
-
+  MeshAsset mesh;
+  mesh.geometries.push_back(geometry);
   return mesh;
 
   // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
-AssetData<MaterialAsset> createDefaultMaterial() {
-  AssetData<MaterialAsset> material;
-  material.name = "Default material";
-  material.uuid = Uuid("quoll::engine/materials/default");
+MaterialAsset createDefaultMaterial() { return {}; }
 
-  return material;
-}
-
-AssetData<FontAsset> createDefaultFont() {
+FontAsset createDefaultFont() {
   MsdfLoader loader;
-
   auto font =
       loader.loadFontData(Engine::getFontsPath() / "Roboto-Regular.ttf").data();
 
-  font.name = "Roboto (default)";
-  font.uuid = Uuid("quoll::engine/fonts/Roboto-Regular");
-
-  return font;
+  return font.data;
 }
 
 } // namespace quoll::default_objects

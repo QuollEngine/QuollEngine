@@ -24,14 +24,14 @@ public:
 
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetData<TAssetData> info{};
-    info.type = quoll::AssetCache::getAssetType<TAssetData>();
-    info.uuid = quoll::Uuid::generate();
-    info.data = data;
+    quoll::AssetMeta meta{};
+    meta.type = quoll::AssetCache::getAssetType<TAssetData>();
+    meta.uuid = quoll::Uuid::generate();
 
-    assetCache.getRegistry().add(info);
+    auto handle = assetCache.getRegistry().allocate<TAssetData>(meta);
+    assetCache.getRegistry().store(handle, data);
 
-    return assetCache.request<TAssetData>(info.uuid).data();
+    return assetCache.request<TAssetData>(meta.uuid).data();
   }
 
   quoll::Entity
@@ -76,9 +76,8 @@ public:
 
   quoll::AssetRef<quoll::AnimationAsset>
   createAnimation(quoll::KeyframeSequenceAssetTarget target, f32 time) {
-    quoll::AssetData<quoll::AnimationAsset> animation;
-    animation.uuid = quoll::Uuid::generate();
-    animation.data.time = time;
+    quoll::AnimationAsset animation;
+    animation.time = time;
 
     quoll::KeyframeSequenceAsset sequence;
     sequence.target = target;
@@ -88,18 +87,15 @@ public:
     sequence.keyframeValues = {glm::vec4(0.0f), glm::vec4(0.5f),
                                glm::vec4(1.0f)};
 
-    animation.data.keyframes.push_back(sequence);
+    animation.keyframes.push_back(sequence);
 
-    assetCache.getRegistry().add(animation);
-
-    return assetCache.request<quoll::AnimationAsset>(animation.uuid);
+    return createAsset(animation);
   }
 
   quoll::AssetRef<quoll::AnimationAsset>
   createSkeletonAnimation(quoll::KeyframeSequenceAssetTarget target, f32 time) {
-    quoll::AssetData<quoll::AnimationAsset> animation;
-    animation.data.time = time;
-    animation.uuid = quoll::Uuid::generate();
+    quoll::AnimationAsset animation;
+    animation.time = time;
 
     quoll::KeyframeSequenceAsset sequence;
     sequence.target = target;
@@ -111,10 +107,9 @@ public:
     sequence.keyframeValues = {glm::vec4(0.0f), glm::vec4(0.5f),
                                glm::vec4(1.0f)};
 
-    animation.data.keyframes.push_back(sequence);
+    animation.keyframes.push_back(sequence);
 
-    assetCache.getRegistry().add(animation);
-    return assetCache.request<quoll::AnimationAsset>(animation.uuid);
+    return createAsset(animation);
   }
 };
 

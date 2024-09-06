@@ -27,14 +27,14 @@ public:
 
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetData<TAssetData> info{};
-    info.type = quoll::AssetCache::getAssetType<TAssetData>();
-    info.uuid = quoll::Uuid::generate();
-    info.data = data;
+    quoll::AssetMeta meta{};
+    meta.type = quoll::AssetCache::getAssetType<TAssetData>();
+    meta.uuid = quoll::Uuid::generate();
 
-    assetCache.getRegistry().add(info);
+    auto handle = assetCache.getRegistry().allocate<TAssetData>(meta);
+    assetCache.getRegistry().store(handle, data);
 
-    return assetCache.request<TAssetData>(info.uuid).data();
+    return assetCache.request<TAssetData>(meta.uuid).data();
   }
 
 protected:

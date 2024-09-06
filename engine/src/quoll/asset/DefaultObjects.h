@@ -7,10 +7,10 @@
 
 namespace quoll::default_objects {
 
-AssetData<MeshAsset> createCube();
+MeshAsset createCube();
 
-AssetData<MaterialAsset> createDefaultMaterial();
+MaterialAsset createDefaultMaterial();
 
-AssetData<FontAsset> createDefaultFont();
+FontAsset createDefaultFont();
 
 } // namespace quoll::default_objects

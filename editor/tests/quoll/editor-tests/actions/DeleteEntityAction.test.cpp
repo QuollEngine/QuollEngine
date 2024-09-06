@@ -2,7 +2,7 @@
 #include "quoll/core/Delete.h"
 #include "quoll/scene/Parent.h"
 #include "quoll/editor/actions/DeleteEntityAction.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include "ActionTestBase.h"
 
 using DeleteEntityActionTest = ActionTestBase;

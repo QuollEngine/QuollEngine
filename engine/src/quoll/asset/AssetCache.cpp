@@ -28,6 +28,7 @@ AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
   }
 
   stream.read(meta);
+  meta.uuid = uuid;
   return meta;
 }
 

@@ -1,6 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/editor/actions/TransformOperationActions.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include "ActionTestBase.h"
 
 using TO = quoll::editor::TransformOperation;
