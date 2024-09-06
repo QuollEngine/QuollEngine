@@ -8,6 +8,8 @@ struct AssetMeta {
   AssetType type;
 
   String name;
+
+  Uuid uuid;
 };
 
 } // namespace quoll

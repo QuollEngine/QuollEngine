@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/physics/Collidable.h"
 #include "quoll/editor/actions/EntityCollidableActions.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include "ActionTestBase.h"
 #include "DefaultEntityTests.h"
 

@@ -34,7 +34,10 @@ TEST_F(AssetCacheTextureTest, CreatesTextureFromAsset) {
         FixturesPath / "1x1-2d.ktx", textureUuid);
     auto res = cache.request<quoll::TextureAsset>(textureUuid);
     ASSERT_TRUE(res);
-    textureData = res.data().meta();
+    textureData.uuid = res.data().meta().uuid;
+    textureData.name = res.data().meta().name;
+    textureData.type = res.data().meta().type;
+    textureData.data = res.data().get();
   }
 
   cache.getRegistry().clear<quoll::TextureAsset>();

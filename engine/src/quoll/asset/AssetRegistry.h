@@ -48,80 +48,60 @@ class AssetRegistry : NoCopyMove {
   };
 
 public:
-  AssetRegistry() = default;
-
-  ~AssetRegistry() = default;
-
   void createDefaultObjects();
 
   inline const DefaultObjects &getDefaultObjects() const {
     return mDefaultObjects;
   }
 
-  std::pair<AssetType, u32> getAssetByUuid(const Uuid &uuid);
-
   template <typename TAssetData>
   constexpr const TAssetData &get(AssetHandle<TAssetData> handle) const {
-    auto &map = getMap<TAssetData>();
-    return map.getAsset(handle).data;
-  }
-
-  template <typename TAssetData>
-  constexpr TAssetData &get(AssetHandle<TAssetData> handle) {
-    auto &map = getMap<TAssetData>();
-    return map.getAsset(handle).data;
+    const auto &map = getMap<TAssetData>();
+    return map.get(handle);
   }
 
   template <typename TAssetData>
   constexpr const AssetData<TAssetData> &
   getMeta(AssetHandle<TAssetData> handle) const {
-    auto &map = getMap<TAssetData>();
-    return map.getAsset(handle);
+    const auto &map = getMap<TAssetData>();
+    return map.getMeta(handle);
   }
 
   template <typename TAssetData>
-  constexpr AssetData<TAssetData> &getMeta(AssetHandle<TAssetData> handle) {
-    auto &map = getMap<TAssetData>();
-    return map.getAsset(handle);
+  constexpr bool has(AssetHandle<TAssetData> handle) const {
+    const auto &map = getMap<TAssetData>();
+    return map.contains(handle);
   }
 
   template <typename TAssetData>
-  constexpr bool has(AssetHandle<TAssetData> handle) {
+  constexpr AssetHandle<TAssetData> allocate(const AssetMeta &meta) {
     auto &map = getMap<TAssetData>();
-    return map.hasAsset(handle);
+    return map.allocate(meta);
+  }
+
+  template <typename TAssetData> constexpr void destroy(const Uuid &uuid) {
+    auto &map = getMap<TAssetData>();
+    return map.destroy(uuid);
   }
 
   template <typename TAssetData>
-  constexpr void remove(AssetHandle<TAssetData> handle) {
+  constexpr void store(AssetHandle<TAssetData> handle, const TAssetData &data) {
     auto &map = getMap<TAssetData>();
-    map.removeAsset(handle);
-  }
-
-  template <typename TAssetData>
-  constexpr AssetHandle<TAssetData> add(const AssetData<TAssetData> &data) {
-    auto &map = getMap<TAssetData>();
-    return map.addAsset(data);
-  }
-
-  template <typename TAssetData>
-  constexpr void update(AssetHandle<TAssetData> handle,
-                        const AssetData<TAssetData> &data) {
-    auto &map = getMap<TAssetData>();
-    map.updateAsset(handle, data);
+    map.store(handle, data);
   }
 
   template <typename TAssetData>
   constexpr AssetHandle<TAssetData> findHandleByUuid(const Uuid &uuid) {
-    auto &map = getMap<TAssetData>();
+    const auto &map = getMap<TAssetData>();
     return map.findHandleByUuid(uuid);
   }
 
-  template <typename TAssetData> constexpr usize count() {
-    return getMap<TAssetData>().getAssets().size();
+  template <typename TAssetData> constexpr usize count() const {
+    return getMap<TAssetData>().getMetas().size();
   }
 
-  template <typename TAssetData> constexpr auto &getAll() {
-    return getMap<TAssetData>().getAssets();
+  template <typename TAssetData> constexpr auto &getAll() const {
+    return getMap<TAssetData>().getMetas();
   }
 
   template <typename TAssetData> constexpr void clear() {
@@ -129,6 +109,36 @@ public:
   }
 
   template <typename TAssetData> constexpr auto &getMap() {
+    if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
+      return mTextures;
+    } else if constexpr (std::is_same_v<TAssetData, FontAsset>) {
+      return mFonts;
+    } else if constexpr (std::is_same_v<TAssetData, MaterialAsset>) {
+      return mMaterials;
+    } else if constexpr (std::is_same_v<TAssetData, MeshAsset>) {
+      return mMeshes;
+    } else if constexpr (std::is_same_v<TAssetData, SkeletonAsset>) {
+      return mSkeletons;
+    } else if constexpr (std::is_same_v<TAssetData, AnimationAsset>) {
+      return mAnimations;
+    } else if constexpr (std::is_same_v<TAssetData, AnimatorAsset>) {
+      return mAnimators;
+    } else if constexpr (std::is_same_v<TAssetData, AudioAsset>) {
+      return mAudios;
+    } else if constexpr (std::is_same_v<TAssetData, PrefabAsset>) {
+      return mPrefabs;
+    } else if constexpr (std::is_same_v<TAssetData, LuaScriptAsset>) {
+      return mLuaScripts;
+    } else if constexpr (std::is_same_v<TAssetData, EnvironmentAsset>) {
+      return mEnvironments;
+    } else if constexpr (std::is_same_v<TAssetData, SceneAsset>) {
+      return mScenes;
+    } else if constexpr (std::is_same_v<TAssetData, InputMapAsset>) {
+      return mInputMaps;
+    }
+  }
+
+  template <typename TAssetData> constexpr auto &getMap() const {
     if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
       return mTextures;
     } else if constexpr (std::is_same_v<TAssetData, FontAsset>) {

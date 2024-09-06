@@ -7,7 +7,7 @@
 #include "quoll/scene/PerspectiveLens.h"
 #include "quoll/yaml/Yaml.h"
 #include "quoll/editor/scene/asset/SceneWriter.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 
 static quoll::Path TmpPath = std::filesystem::current_path() / "tmp";
 static quoll::Path ScenePath = TmpPath / "main.scene";

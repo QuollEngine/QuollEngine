@@ -70,18 +70,13 @@ public:
 
     std::vector<quoll::AssetRef<quoll::MaterialAsset>> materials(numMaterials);
     for (u32 i = 0; i < numMaterials; ++i) {
-      quoll::AssetData<quoll::MaterialAsset> material;
-      material.uuid = quoll::Uuid::generate();
-      cache.getRegistry().add(material);
-      materials.at(i) = cache.request<quoll::MaterialAsset>(material.uuid);
+      auto ref = createAsset<quoll::MaterialAsset>();
+      materials.at(i) = ref;
     }
 
     for (u32 i = 0; i < numMeshes; ++i) {
-      quoll::AssetData<quoll::MeshAsset> mesh;
-      mesh.uuid = quoll::Uuid::generate();
-      cache.getRegistry().add(mesh);
-      auto res = cache.request<quoll::MeshAsset>(mesh.uuid);
-      asset.data.meshes.push_back({i, res.data()});
+      auto ref = createAsset<quoll::MeshAsset>();
+      asset.data.meshes.push_back({i, ref});
     }
 
     for (u32 i = 0; i < numMeshRenderers; ++i) {
@@ -110,12 +105,8 @@ public:
     }
 
     for (u32 i = 0; i < numSkeletons; ++i) {
-      quoll::AssetData<quoll::SkeletonAsset> skeleton;
-      skeleton.uuid = quoll::Uuid::generate();
-      cache.getRegistry().add(skeleton);
-      auto res = cache.request<quoll::SkeletonAsset>(skeleton.uuid);
-
-      asset.data.skeletons.push_back({i, res.data()});
+      auto ref = createAsset<quoll::SkeletonAsset>();
+      asset.data.skeletons.push_back({i, ref});
     }
 
     // Add two more entities that point to the same
@@ -127,21 +118,13 @@ public:
     }
 
     for (u32 i = 0; i < numAnimations; ++i) {
-      quoll::AssetData<quoll::AnimationAsset> animation;
-      animation.uuid = quoll::Uuid::generate();
-      cache.getRegistry().add(animation);
-      auto res = cache.request<quoll::AnimationAsset>(animation.uuid);
-
-      asset.data.animations.push_back(res.data());
+      auto ref = createAsset<quoll::AnimationAsset>();
+      asset.data.animations.push_back(ref);
     }
 
     for (u32 i = 0; i < numAnimators; ++i) {
-      quoll::AssetData<quoll::AnimatorAsset> animation;
-      animation.uuid = quoll::Uuid::generate();
-      cache.getRegistry().add(animation);
-      auto res = cache.request<quoll::AnimatorAsset>(animation.uuid);
-
-      asset.data.animators.push_back({i, res.data()});
+      auto ref = createAsset<quoll::AnimatorAsset>();
+      asset.data.animators.push_back({i, ref});
     }
 
     // Add two more entities that point to same animations

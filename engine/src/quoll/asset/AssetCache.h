@@ -39,65 +39,6 @@ public:
   }
 
   template <typename TAssetData>
-  Result<AssetHandle<TAssetData>> load(const Uuid &uuid) {
-    Result<TAssetData> data;
-
-    auto meta = getAssetMeta(uuid);
-    if (meta.type != getAssetType<TAssetData>()) {
-      return Error("Asset type is not " +
-                   getAssetTypeString(getAssetType<TAssetData>()));
-    }
-
-    auto path = getPathFromUuid(uuid);
-
-    if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
-      data = loadTexture(path);
-    } else if constexpr (std::is_same_v<TAssetData, FontAsset>) {
-      data = loadFont(path);
-    } else if constexpr (std::is_same_v<TAssetData, MaterialAsset>) {
-      data = loadMaterial(path);
-    } else if constexpr (std::is_same_v<TAssetData, MeshAsset>) {
-      data = loadMesh(path);
-    } else if constexpr (std::is_same_v<TAssetData, SkeletonAsset>) {
-      data = loadSkeleton(path);
-    } else if constexpr (std::is_same_v<TAssetData, AnimationAsset>) {
-      data = loadAnimation(path);
-    } else if constexpr (std::is_same_v<TAssetData, AnimatorAsset>) {
-      data = loadAnimator(path);
-    } else if constexpr (std::is_same_v<TAssetData, AudioAsset>) {
-      data = loadAudio(path);
-    } else if constexpr (std::is_same_v<TAssetData, PrefabAsset>) {
-      data = loadPrefab(path);
-    } else if constexpr (std::is_same_v<TAssetData, LuaScriptAsset>) {
-      data = loadLuaScript(path);
-    } else if constexpr (std::is_same_v<TAssetData, EnvironmentAsset>) {
-      data = loadEnvironment(path);
-    } else if constexpr (std::is_same_v<TAssetData, SceneAsset>) {
-      data = loadScene(path);
-    } else if constexpr (std::is_same_v<TAssetData, InputMapAsset>) {
-      data = loadInputMap(path);
-    }
-
-    if (!data) {
-      return data.error();
-    }
-
-    AssetData<TAssetData> asset;
-    asset.uuid = uuid;
-    asset.name = meta.name;
-    asset.type = meta.type;
-    asset.data = data.data();
-
-    auto existing = mRegistry.findHandleByUuid<TAssetData>(uuid);
-    if (existing) {
-      mRegistry.update(existing, asset);
-      return {existing, data.warnings()};
-    }
-
-    return {mRegistry.add(asset), data.warnings()};
-  }
-
-  template <typename TAssetData>
   Result<Path> createFromSource(const Path &sourcePath, const Uuid &uuid) {
     if (uuid.isEmpty()) {
       QuollAssert(false, "Invalid uuid provided");
@@ -217,6 +158,56 @@ public:
   }
 
 private:
+  template <typename TAssetData>
+  Result<AssetHandle<TAssetData>> load(const Uuid &uuid) {
+    Result<TAssetData> data;
+
+    auto meta = getAssetMeta(uuid);
+    if (meta.type != getAssetType<TAssetData>()) {
+      return Error("Asset type is not " +
+                   getAssetTypeString(getAssetType<TAssetData>()));
+    }
+
+    auto path = getPathFromUuid(uuid);
+
+    if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
+      data = loadTexture(path);
+    } else if constexpr (std::is_same_v<TAssetData, FontAsset>) {
+      data = loadFont(path);
+    } else if constexpr (std::is_same_v<TAssetData, MaterialAsset>) {
+      data = loadMaterial(path);
+    } else if constexpr (std::is_same_v<TAssetData, MeshAsset>) {
+      data = loadMesh(path);
+    } else if constexpr (std::is_same_v<TAssetData, SkeletonAsset>) {
+      data = loadSkeleton(path);
+    } else if constexpr (std::is_same_v<TAssetData, AnimationAsset>) {
+      data = loadAnimation(path);
+    } else if constexpr (std::is_same_v<TAssetData, AnimatorAsset>) {
+      data = loadAnimator(path);
+    } else if constexpr (std::is_same_v<TAssetData, AudioAsset>) {
+      data = loadAudio(path);
+    } else if constexpr (std::is_same_v<TAssetData, PrefabAsset>) {
+      data = loadPrefab(path);
+    } else if constexpr (std::is_same_v<TAssetData, LuaScriptAsset>) {
+      data = loadLuaScript(path);
+    } else if constexpr (std::is_same_v<TAssetData, EnvironmentAsset>) {
+      data = loadEnvironment(path);
+    } else if constexpr (std::is_same_v<TAssetData, SceneAsset>) {
+      data = loadScene(path);
+    } else if constexpr (std::is_same_v<TAssetData, InputMapAsset>) {
+      data = loadInputMap(path);
+    }
+
+    if (!data) {
+      return data.error();
+    }
+
+    auto handle = mRegistry.allocate<TAssetData>(meta);
+    mRegistry.store(handle, data.data());
+
+    return {handle, data.warnings()};
+  }
+
   Result<TextureAsset> loadTexture(const Path &path);
   Result<void> createTextureFromData(const TextureAsset &data,
                                      const Path &assetPath);

@@ -2,7 +2,8 @@
 
 #include "quoll/editor/actions/Action.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 
 class ActionTestBase : public ::testing::Test {
 public:
@@ -10,14 +11,7 @@ public:
 
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetData<TAssetData> info{};
-    info.type = quoll::AssetCache::getAssetType<TAssetData>();
-    info.uuid = quoll::Uuid::generate();
-    info.data = data;
-
-    assetCache.getRegistry().add(info);
-
-    return assetCache.request<TAssetData>(info.uuid).data();
+    return createAssetInCache(assetCache, data);
   }
 
   quoll::AssetCache assetCache;

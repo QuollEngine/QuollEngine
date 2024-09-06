@@ -109,7 +109,7 @@ void InputMapSystem::update(SystemView &view) {
   }
 }
 
-InputMap InputMapSystem::createInputMap(InputMapAsset &asset,
+InputMap InputMapSystem::createInputMap(const InputMapAsset &asset,
                                         usize defaultScheme) {
   InputMap inputMap{};
 

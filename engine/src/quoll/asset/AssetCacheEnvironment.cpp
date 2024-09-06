@@ -43,7 +43,7 @@ Result<EnvironmentAsset> AssetCache::loadEnvironment(const Path &path) {
 
   auto specularMapRes = request<TextureAsset>(specularMapUuid);
   if (!specularMapRes) {
-    mRegistry.remove(irradianceMapRes.data().handle());
+    mRegistry.destroy<TextureAsset>(irradianceMapUuid);
     return specularMapRes.error();
   }
 

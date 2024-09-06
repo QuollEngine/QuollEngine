@@ -252,7 +252,7 @@ static tinygltf::Primitive createPrimitive(tinygltf::Model &model,
 
 static GLTFTestPrimitive createCubePrimitive() {
   auto asset = quoll::default_objects::createCube();
-  const auto &g = asset.data.geometries.at(0);
+  const auto &g = asset.geometries.at(0);
 
   GLTFTestPrimitive primitive;
   primitive.positions.data.resize(g.positions.size());

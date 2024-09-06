@@ -40,6 +40,7 @@
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 
 class SceneLoaderTest : public ::testing::Test {
 public:
@@ -66,14 +67,7 @@ public:
 
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetData<TAssetData> info{};
-    info.type = quoll::AssetCache::getAssetType<TAssetData>();
-    info.uuid = quoll::Uuid::generate();
-    info.data = data;
-
-    assetCache.getRegistry().add(info);
-
-    return assetCache.request<TAssetData>(info.uuid).data();
+    return createAssetInCache(assetCache, data);
   }
 
 public:
@@ -551,28 +545,25 @@ TEST_F(SceneLoaderSkeletonTest,
 
 TEST_F(SceneLoaderSkeletonTest,
        CreatesSkeletonComponentWithFileDataIfValidField) {
-  quoll::AssetData<quoll::SkeletonAsset> data{};
+  quoll::SkeletonAsset data{};
 
   static constexpr u32 NumJoints = 5;
 
   for (u32 i = 0; i < NumJoints; ++i) {
     f32 fi = static_cast<f32>(i);
 
-    data.data.jointLocalPositions.push_back(glm::vec3(fi));
-    data.data.jointLocalRotations.push_back(glm::quat(fi, fi, fi, fi));
-    data.data.jointLocalScales.push_back(glm::vec3(fi * 5.0f));
-    data.data.jointParents.push_back(i - 1);
-    data.data.jointInverseBindMatrices.push_back(glm::mat4(fi));
-    data.data.jointNames.push_back("J" + std::to_string(i));
+    data.jointLocalPositions.push_back(glm::vec3(fi));
+    data.jointLocalRotations.push_back(glm::quat(fi, fi, fi, fi));
+    data.jointLocalScales.push_back(glm::vec3(fi * 5.0f));
+    data.jointParents.push_back(i - 1);
+    data.jointInverseBindMatrices.push_back(glm::mat4(fi));
+    data.jointNames.push_back("J" + std::to_string(i));
   }
 
-  data.uuid = quoll::Uuid::generate();
-  assetCache.getRegistry().add(data);
-
-  auto asset = assetCache.request<quoll::SkeletonAsset>(data.uuid).data();
+  auto asset = createAssetInCache(assetCache, data);
 
   auto [node, entity] = createNode();
-  node["skeleton"] = data.uuid;
+  node["skeleton"] = asset.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   ASSERT_TRUE(entityDatabase.has<quoll::Skeleton>(entity));
@@ -585,15 +576,14 @@ TEST_F(SceneLoaderSkeletonTest,
     f32 fi = static_cast<f32>(i);
 
     EXPECT_EQ(skeleton.jointLocalPositions.at(i),
-              data.data.jointLocalPositions.at(i));
+              asset->jointLocalPositions.at(i));
     EXPECT_EQ(skeleton.jointLocalRotations.at(i),
-              data.data.jointLocalRotations.at(i));
-    EXPECT_EQ(skeleton.jointLocalScales.at(i),
-              data.data.jointLocalScales.at(i));
-    EXPECT_EQ(skeleton.jointParents.at(i), data.data.jointParents.at(i));
+              asset->jointLocalRotations.at(i));
+    EXPECT_EQ(skeleton.jointLocalScales.at(i), asset->jointLocalScales.at(i));
+    EXPECT_EQ(skeleton.jointParents.at(i), asset->jointParents.at(i));
     EXPECT_EQ(skeleton.jointInverseBindMatrices.at(i),
-              data.data.jointInverseBindMatrices.at(i));
-    EXPECT_EQ(skeleton.jointNames.at(i), data.data.jointNames.at(i));
+              asset->jointInverseBindMatrices.at(i));
+    EXPECT_EQ(skeleton.jointNames.at(i), asset->jointNames.at(i));
 
     EXPECT_EQ(skeleton.jointFinalTransforms.at(i), glm::mat4{1.0f});
     EXPECT_EQ(skeleton.jointWorldTransforms.at(i), glm::mat4{1.0f});

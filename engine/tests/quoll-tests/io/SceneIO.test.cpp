@@ -11,6 +11,7 @@
 #include "quoll/scene/PerspectiveLens.h"
 #include "quoll/scene/Scene.h"
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 
 const quoll::Path ScenePath =
     std::filesystem::current_path() / "scene-io-test" / "main.scene";
@@ -71,13 +72,7 @@ public:
     root["zones"][0] = zoneNode;
     root["entities"] = entities;
 
-    quoll::AssetData<quoll::SceneAsset> asset{};
-    asset.name = "Scene";
-    asset.data.data = root;
-    asset.uuid = quoll::Uuid::generate();
-    assetCache.getRegistry().add(asset);
-
-    return assetCache.request<quoll::SceneAsset>(asset.uuid).data();
+    return createAssetInCache(assetCache, quoll::SceneAsset{.data = root});
   }
 
   YAML::Node getSceneYaml(quoll::AssetHandle<quoll::SceneAsset> handle) {

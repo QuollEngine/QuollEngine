@@ -41,6 +41,7 @@
 #include "quoll/ui/UICanvas.h"
 #include "quoll/ui/UICanvasRenderRequest.h"
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 
 class EntitySerializerTest : public ::testing::Test {
 public:
@@ -50,14 +51,7 @@ public:
 
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetData<TAssetData> info{};
-    info.type = quoll::AssetCache::getAssetType<TAssetData>();
-    info.uuid = quoll::Uuid::generate();
-    info.data = data;
-
-    assetCache.getRegistry().add(info);
-
-    return assetCache.request<TAssetData>(info.uuid).data();
+    return createAssetInCache(assetCache, data);
   }
 
 public:

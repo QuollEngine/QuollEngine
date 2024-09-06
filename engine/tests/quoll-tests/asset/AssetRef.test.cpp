@@ -9,11 +9,19 @@ struct Data {
 class AssetRefTest : public ::testing::Test {
 public:
   quoll::AssetMap<Data> map;
+
+  quoll::AssetHandle<Data>
+  allocateAndStore(const Data &data,
+                   quoll::Uuid uuid = quoll::Uuid::generate()) {
+    auto handle = map.allocate({.uuid = uuid});
+    map.store(handle, data);
+    return handle;
+  }
 };
 
 TEST_F(AssetRefTest, ConstructorSetsHandle) {
   auto uuid = quoll::Uuid::generate();
-  auto handle = map.addAsset({.data = {.value = 25}, .uuid = uuid});
+  auto handle = allocateAndStore({.value = 25}, uuid);
   quoll::AssetRef<Data> ref(map, handle);
 
   EXPECT_TRUE(ref);
@@ -30,14 +38,16 @@ TEST_F(AssetRefTest, DefaultConstructorSetsHandleToNull) {
   EXPECT_EQ(ref.handle(), quoll::AssetHandle<Data>());
 }
 TEST_F(AssetRefTest, ConstructorIncrementsRefCount) {
-  auto handle = map.addAsset({});
+  auto handle = allocateAndStore({});
+
   quoll::AssetRef<Data> ref(map, handle);
 
   EXPECT_EQ(map.getRefCount(handle), 1);
 }
 
 TEST_F(AssetRefTest, DestructorDecrementsRefCount) {
-  auto handle = map.addAsset({});
+  auto handle = allocateAndStore({});
+
   { quoll::AssetRef<Data> ref(map, handle); }
 
   EXPECT_EQ(map.getRefCount(handle), 0);
@@ -49,7 +59,7 @@ TEST_F(AssetRefTest, DestructorDoesNothingIfHandleIsNull) {
 
 TEST_F(AssetRefTest, CopyConstructorSetsHandle) {
   auto uuid = quoll::Uuid::generate();
-  auto handle = map.addAsset({.data = {.value = 25}, .uuid = uuid});
+  auto handle = allocateAndStore({.value = 25}, uuid);
   quoll::AssetRef<Data> ref1(map, handle);
   auto ref2 = ref1;
 
@@ -59,7 +69,7 @@ TEST_F(AssetRefTest, CopyConstructorSetsHandle) {
 }
 
 TEST_F(AssetRefTest, CopyConstructorIncrementsRefCount) {
-  auto handle = map.addAsset({});
+  auto handle = allocateAndStore({});
   quoll::AssetRef<Data> ref1(map, handle);
   auto ref2 = ref1;
 
@@ -75,8 +85,8 @@ TEST_F(AssetRefTest, CopyConstructorDoesNothingIfHandleIsNull) {
 }
 
 TEST_F(AssetRefTest, CopyAssignmentSetsRefFromOther) {
-  auto handle1 = map.addAsset({});
-  auto handle2 = map.addAsset({});
+  auto handle1 = allocateAndStore({});
+  auto handle2 = allocateAndStore({});
 
   quoll::AssetRef<Data> ref1(map, handle1);
   quoll::AssetRef<Data> ref2(map, handle2);
@@ -91,8 +101,8 @@ TEST_F(AssetRefTest, CopyAssignmentSetsRefFromOther) {
 
 TEST_F(AssetRefTest,
        CopyAssignmentDecrementsRefCountOfSelfAndIncrementsRefCountOfOther) {
-  auto handle1 = map.addAsset({});
-  auto handle2 = map.addAsset({});
+  auto handle1 = allocateAndStore({});
+  auto handle2 = allocateAndStore({});
 
   quoll::AssetRef<Data> ref1(map, handle1);
   quoll::AssetRef<Data> ref2(map, handle2);
@@ -105,7 +115,7 @@ TEST_F(AssetRefTest,
 
 TEST_F(AssetRefTest,
        CopyAssignmentOnlyDecrementsRefCountOfSelfIfOtherRefHasNullHandle) {
-  auto handle = map.addAsset({});
+  auto handle = allocateAndStore({});
 
   quoll::AssetRef<Data> ref1(map, handle);
   quoll::AssetRef<Data> ref2;
@@ -120,7 +130,7 @@ TEST_F(AssetRefTest,
 
 TEST_F(AssetRefTest,
        CopyAssignmentOnlyIncrementsRefCountOfOtherIfSelfHasNullHandle) {
-  auto handle = map.addAsset({});
+  auto handle = allocateAndStore({});
 
   quoll::AssetRef<Data> ref1;
   quoll::AssetRef<Data> ref2(map, handle);
@@ -141,7 +151,7 @@ TEST_F(AssetRefTest, CopyAssignmentHasNoEffectIfBothSidesHaveNullHandles) {
 
 TEST_F(AssetRefTest, MoveConstructorSetsHandleOfSelfAndClearsHandleOfOther) {
   auto uuid = quoll::Uuid::generate();
-  auto handle = map.addAsset({.data = {.value = 25}, .uuid = uuid});
+  auto handle = allocateAndStore({.value = 25}, uuid);
   quoll::AssetRef<Data> ref1(map, handle);
   auto ref2 = std::move(ref1);
 
@@ -150,7 +160,7 @@ TEST_F(AssetRefTest, MoveConstructorSetsHandleOfSelfAndClearsHandleOfOther) {
 }
 
 TEST_F(AssetRefTest, MoveConstructorDoesNotIncrementRefCount) {
-  auto handle = map.addAsset({});
+  auto handle = allocateAndStore({});
   quoll::AssetRef<Data> ref1(map, handle);
 
   EXPECT_EQ(map.getRefCount(handle), 1);
@@ -169,8 +179,8 @@ TEST_F(AssetRefTest, MoveConstructorDoesNothingIfHandleIsNull) {
 }
 
 TEST_F(AssetRefTest, MoveAssignmentSetsHandleOfSelfAndClearsHandleOfOther) {
-  auto handle1 = map.addAsset({});
-  auto handle2 = map.addAsset({});
+  auto handle1 = allocateAndStore({});
+  auto handle2 = allocateAndStore({});
 
   quoll::AssetRef<Data> ref1(map, handle1);
   quoll::AssetRef<Data> ref2(map, handle2);
@@ -184,8 +194,8 @@ TEST_F(AssetRefTest, MoveAssignmentSetsHandleOfSelfAndClearsHandleOfOther) {
 TEST_F(
     AssetRefTest,
     MoveAssignmentDecrementsRefCountOfSelfButDoesNotIncrementRefCountOfOther) {
-  auto handle1 = map.addAsset({});
-  auto handle2 = map.addAsset({});
+  auto handle1 = allocateAndStore({});
+  auto handle2 = allocateAndStore({});
 
   quoll::AssetRef<Data> ref1(map, handle1);
   quoll::AssetRef<Data> ref2(map, handle2);
@@ -200,7 +210,7 @@ TEST_F(
 }
 
 TEST_F(AssetRefTest, MoveAssignmentDoesNotAffectRefCountIfSelfHasNullHandle) {
-  auto handle = map.addAsset({});
+  auto handle = allocateAndStore({});
 
   quoll::AssetRef<Data> ref1;
   quoll::AssetRef<Data> ref2(map, handle);
@@ -214,7 +224,7 @@ TEST_F(AssetRefTest, MoveAssignmentDoesNotAffectRefCountIfSelfHasNullHandle) {
 
 TEST_F(AssetRefTest,
        MoveAssignmentOnlyDecrementsRefCountOfSelfIfOtherRefHasNullHandle) {
-  auto handle = map.addAsset({});
+  auto handle = allocateAndStore({});
 
   quoll::AssetRef<Data> ref1(map, handle);
   quoll::AssetRef<Data> ref2;

@@ -1,26 +1,15 @@
 #include "quoll/core/Base.h"
 #include "quoll/editor/actions/EntitySkinnedMeshRendererActions.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include "ActionTestBase.h"
 #include "DefaultEntityTests.h"
 
 class EntitySkinnedMeshRendererActionTestBase : public ActionTestBase {
 public:
   EntitySkinnedMeshRendererActionTestBase() {
-    quoll::AssetData<quoll::MaterialAsset> m1;
-    m1.uuid = quoll::Uuid::generate();
-    assetCache.getRegistry().add(m1);
-    mat1 = assetCache.request<quoll::MaterialAsset>(m1.uuid).data();
-
-    quoll::AssetData<quoll::MaterialAsset> m2;
-    m2.uuid = quoll::Uuid::generate();
-    assetCache.getRegistry().add(m2);
-    mat2 = assetCache.request<quoll::MaterialAsset>(m1.uuid).data();
-
-    quoll::AssetData<quoll::MaterialAsset> m3;
-    m3.uuid = quoll::Uuid::generate();
-    assetCache.getRegistry().add(m3);
-    mat3 = assetCache.request<quoll::MaterialAsset>(m1.uuid).data();
+    mat1 = createAsset<quoll::MaterialAsset>();
+    mat2 = createAsset<quoll::MaterialAsset>();
+    mat3 = createAsset<quoll::MaterialAsset>();
   }
 
   quoll::AssetRef<quoll::MaterialAsset> mat1;
@@ -95,7 +84,6 @@ TEST_F(EntitySetSkinnedMeshRendererMaterialActionTest,
     state.scene.entityDatabase.set(entity, renderer);
   }
 
-  auto material = assetCache.getRegistry().add<quoll::MaterialAsset>({});
   EXPECT_FALSE(
       quoll::editor::EntitySetSkinnedMeshRendererMaterial(entity, 5, mat3)
           .predicate(state, assetCache));
@@ -264,7 +252,6 @@ TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
 TEST_F(EntityRemoveLastSkinnedMeshRendererMaterialSlotActionTest,
        PredicateReturnsFalseIfNoSkinnedMeshRenderer) {
   auto entity = state.scene.entityDatabase.create();
-  auto material = assetCache.getRegistry().add<quoll::MaterialAsset>({});
   EXPECT_FALSE(
       quoll::editor::EntityRemoveLastSkinnedMeshRendererMaterialSlot(entity)
           .predicate(state, assetCache));

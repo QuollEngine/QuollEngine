@@ -20,15 +20,15 @@ public:
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {},
                                           quoll::String name = "") {
-    quoll::AssetData<TAssetData> info{};
-    info.type = quoll::AssetCache::getAssetType<TAssetData>();
-    info.uuid = quoll::Uuid::generate();
-    info.data = data;
-    info.name = name;
+    quoll::AssetMeta meta{};
+    meta.type = quoll::AssetCache::getAssetType<TAssetData>();
+    meta.uuid = quoll::Uuid::generate();
+    meta.name = name;
 
-    assetCache.getRegistry().add(info);
+    auto handle = assetCache.getRegistry().allocate<TAssetData>(meta);
+    assetCache.getRegistry().store(handle, data);
 
-    return assetCache.request<TAssetData>(info.uuid).data();
+    return assetCache.request<TAssetData>(meta.uuid).data();
   }
 
   quoll::AssetCache assetCache;

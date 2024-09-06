@@ -4,6 +4,7 @@
 #include "quoll/audio/AudioSystem.h"
 #include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 
 struct FakeAudioData {};
 
@@ -55,14 +56,11 @@ public:
   }
 
   quoll::AssetRef<quoll::AudioAsset> createFakeAudio() {
-    quoll::AssetData<quoll::AudioAsset> asset{};
-    asset.uuid = quoll::Uuid::generate();
-    asset.data.bytes = {};
-    asset.data.format = quoll::AudioAssetFormat::Wav;
+    quoll::AudioAsset asset{};
+    asset.bytes = {};
+    asset.format = quoll::AudioAssetFormat::Wav;
 
-    assetCache.getRegistry().add(asset);
-
-    return assetCache.request<quoll::AudioAsset>(asset.uuid).data();
+    return createAssetInCache(assetCache, asset);
   }
 
   quoll::AssetCache assetCache;

@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Engine.h"
 #include "quoll/editor/asset/GLTFImporter.h"
-#include "quoll/editor-tests/Testing.h"
+#include "quoll-tests/Testing.h"
 #include "GLTFImporterTestBase.h"
 
 template <class T> using TestFn = std::function<void(T, T)>;
