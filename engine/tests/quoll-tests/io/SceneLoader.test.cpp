@@ -516,7 +516,7 @@ TEST_F(SceneLoaderSkeletonTest,
   auto [node, entity] = createNode();
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::SkeletonAssetRef>(entity));
 }
 
 TEST_F(SceneLoaderSkeletonTest,
@@ -530,7 +530,7 @@ TEST_F(SceneLoaderSkeletonTest,
     auto [node, entity] = createNode();
     node["skeleton"] = invalidNode;
     sceneLoader.loadComponents(node, entity, entityIdCache);
-    EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::SkeletonAssetRef>(entity));
   }
 }
 
@@ -540,7 +540,7 @@ TEST_F(SceneLoaderSkeletonTest,
   node["skeleton"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::SkeletonAssetRef>(entity));
 }
 
 TEST_F(SceneLoaderSkeletonTest,
@@ -566,28 +566,10 @@ TEST_F(SceneLoaderSkeletonTest,
   node["skeleton"] = asset.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  ASSERT_TRUE(entityDatabase.has<quoll::Skeleton>(entity));
+  ASSERT_TRUE(entityDatabase.has<quoll::SkeletonAssetRef>(entity));
 
-  const auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
+  const auto &skeleton = entityDatabase.get<quoll::SkeletonAssetRef>(entity);
   EXPECT_EQ(skeleton.asset, asset.handle());
-
-  EXPECT_EQ(skeleton.numJoints, NumJoints);
-  for (u32 i = 0; i < NumJoints; ++i) {
-    f32 fi = static_cast<f32>(i);
-
-    EXPECT_EQ(skeleton.jointLocalPositions.at(i),
-              asset->jointLocalPositions.at(i));
-    EXPECT_EQ(skeleton.jointLocalRotations.at(i),
-              asset->jointLocalRotations.at(i));
-    EXPECT_EQ(skeleton.jointLocalScales.at(i), asset->jointLocalScales.at(i));
-    EXPECT_EQ(skeleton.jointParents.at(i), asset->jointParents.at(i));
-    EXPECT_EQ(skeleton.jointInverseBindMatrices.at(i),
-              asset->jointInverseBindMatrices.at(i));
-    EXPECT_EQ(skeleton.jointNames.at(i), asset->jointNames.at(i));
-
-    EXPECT_EQ(skeleton.jointFinalTransforms.at(i), glm::mat4{1.0f});
-    EXPECT_EQ(skeleton.jointWorldTransforms.at(i), glm::mat4{1.0f});
-  }
 }
 
 using SceneLoaderJointAttachmentTest = SceneLoaderTest;
@@ -610,7 +592,7 @@ TEST_F(SceneLoaderJointAttachmentTest,
     auto [node, entity] = createNode();
     node["jointAttachment"] = invalidNode;
     sceneLoader.loadComponents(node, entity, entityIdCache);
-    EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::SkeletonAssetRef>(entity));
   }
 }
 

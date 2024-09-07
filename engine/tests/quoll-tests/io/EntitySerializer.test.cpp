@@ -334,20 +334,20 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest,
-       DoesNotCreateSkeletonFieldIfSkeletonAssetIsNotInRegistry) {
+       DoesNotCreateSkeletonFieldIfSkeletonAssetDoesNotExist) {
   auto entity = entityDatabase.create();
-  quoll::Skeleton component{};
+  quoll::SkeletonAssetRef component{};
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skeleton"]);
 }
 
-TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
+TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetExists) {
   auto skeleton = createAsset<quoll::SkeletonAsset>();
 
   auto entity = entityDatabase.create();
-  quoll::Skeleton component{};
+  quoll::SkeletonAssetRef component{};
   component.asset = skeleton;
 
   entityDatabase.set(entity, component);

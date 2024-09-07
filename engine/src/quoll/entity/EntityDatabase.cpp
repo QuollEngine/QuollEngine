@@ -65,8 +65,10 @@ EntityDatabase::EntityDatabase() {
   reg<AudioStart>();
   reg<AudioStatus>();
   reg<Skeleton>();
-  reg<JointAttachment>();
+  reg<SkeletonAssetRef>();
+  reg<SkeletonCurrentAsset>();
   reg<SkeletonDebug>();
+  reg<JointAttachment>();
   reg<RigidBody>();
   reg<Collidable>();
   reg<PhysxInstance>();

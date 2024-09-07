@@ -18,11 +18,16 @@ public:
     auto handle = it != mAssetUuids.end() ? it->second : getNewHandle();
     mAssetMetas.insert_or_assign(handle, meta);
     mAssetUuids.insert_or_assign(meta.uuid, handle);
+
+    if (!mAssetReferenceCounts.contains(handle)) {
+      mAssetReferenceCounts.insert_or_assign(handle, 0);
+    }
+
     return handle;
   }
 
   void destroy(const Uuid &uuid) {
-    QuollAssert(!mAssetUuids.contains(uuid), "Asset already allocated");
+    QuollAssert(!mAssetUuids.contains(uuid), "Asset does not exist");
 
     auto handle = mAssetUuids.at(uuid);
     mAssetMetas.erase(handle);
@@ -34,10 +39,6 @@ public:
   void store(Handle handle, const TData &data) {
     QuollAssert(mAssetMetas.contains(handle), "Asset does not exist");
     mAssetData.insert_or_assign(handle, data);
-
-    if (!mAssetReferenceCounts.contains(handle)) {
-      mAssetReferenceCounts.insert_or_assign(handle, 0);
-    }
   }
 
   const TData &get(Handle handle) const {
@@ -62,7 +63,6 @@ public:
 
   void take(Handle handle) {
     QuollAssert(mAssetMetas.contains(handle), "Asset does not exist");
-    QuollAssert(mAssetData.contains(handle), "Asset has no data");
 
     auto it = mAssetReferenceCounts.find(handle);
     it->second = it->second + 1;
@@ -70,7 +70,6 @@ public:
 
   void release(Handle handle) {
     QuollAssert(mAssetMetas.contains(handle), "Asset does not exist");
-    QuollAssert(mAssetData.contains(handle), "Asset has no data");
 
     auto it = mAssetReferenceCounts.find(handle);
     QuollAssert(it->second > 0, "Asset cannot have reference count of zero");

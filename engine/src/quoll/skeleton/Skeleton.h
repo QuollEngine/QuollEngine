@@ -6,6 +6,14 @@
 
 namespace quoll {
 
+struct SkeletonAssetRef {
+  AssetRef<SkeletonAsset> asset;
+};
+
+struct SkeletonCurrentAsset {
+  AssetHandle<SkeletonAsset> handle;
+};
+
 struct Skeleton {
   u32 numJoints = 0;
 
@@ -24,8 +32,6 @@ struct Skeleton {
   std::vector<glm::mat4> jointFinalTransforms;
 
   std::vector<String> jointNames;
-
-  AssetRef<SkeletonAsset> asset;
 };
 
 struct SkeletonDebug {

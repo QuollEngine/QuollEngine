@@ -31,7 +31,7 @@ EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state,
 
   scene.entityDatabase.set(mEntity, skeletonDebug);
 
-  return ActionExecutorResult();
+  return {};
 }
 
 bool EntityToggleSkeletonDebugBones::predicate(WorkspaceState &state,
@@ -47,9 +47,16 @@ ActionExecutorResult EntityDeleteSkeleton::onExecute(WorkspaceState &state,
                                                      AssetCache &assetCache) {
   auto &scene = state.scene;
 
-  mOldComponent = scene.entityDatabase.get<Skeleton>(mEntity);
+  mOldComponent = scene.entityDatabase.get<SkeletonAssetRef>(mEntity);
 
-  scene.entityDatabase.remove<Skeleton>(mEntity);
+  if (scene.entityDatabase.has<Skeleton>(mEntity)) {
+    scene.entityDatabase.remove<Skeleton>(mEntity);
+  }
+
+  if (scene.entityDatabase.has<SkeletonCurrentAsset>(mEntity)) {
+    scene.entityDatabase.remove<SkeletonCurrentAsset>(mEntity);
+  }
+  scene.entityDatabase.remove<SkeletonAssetRef>(mEntity);
 
   if (scene.entityDatabase.has<SkeletonDebug>(mEntity)) {
     mOldSkeletonDebug = scene.entityDatabase.get<SkeletonDebug>(mEntity);
@@ -80,7 +87,7 @@ bool EntityDeleteSkeleton::predicate(WorkspaceState &state,
                                      AssetCache &assetCache) {
   auto &scene = state.scene;
 
-  return scene.entityDatabase.has<Skeleton>(mEntity);
+  return scene.entityDatabase.has<SkeletonAssetRef>(mEntity);
 }
 
 } // namespace quoll::editor

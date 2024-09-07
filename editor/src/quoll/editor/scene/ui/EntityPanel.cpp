@@ -837,25 +837,55 @@ void EntityPanel::renderSkeleton(Scene &scene, AssetCache &assetCache,
                                  ActionExecutor &actionExecutor) {
   auto &assetRegistry = assetCache.getRegistry();
 
-  if (!scene.entityDatabase.has<Skeleton>(mSelectedEntity)) {
+  if (!scene.entityDatabase.has<SkeletonAssetRef>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Bone) + "  Skeleton";
 
-  if (auto _ = widgets::Section(SectionName.c_str())) {
-    bool showBones = scene.entityDatabase.has<SkeletonDebug>(mSelectedEntity);
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    f32 width = section.getClipRect().GetWidth();
+    const f32 height = width * 0.2f;
 
-    const auto &skeleton = scene.entityDatabase.get<Skeleton>(mSelectedEntity);
+    auto &component =
+        scene.entityDatabase.get<SkeletonAssetRef>(mSelectedEntity);
 
-    if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
-      table.row("Name", skeleton.asset.meta().name);
-      table.row("Number of joints",
-                static_cast<u32>(skeleton.jointNames.size()));
+    if (component.asset) {
+      widgets::Button(component.asset.meta().name.c_str(),
+                      ImVec2(width, height));
+    } else {
+      widgets::Button("Drag skeleton here", ImVec2(width, height));
     }
 
-    if (ImGui::Checkbox("Show bones", &showBones)) {
-      actionExecutor.execute<EntityToggleSkeletonDebugBones>(mSelectedEntity);
+    static constexpr f32 DropBorderWidth = 3.5f;
+    auto &g = *ImGui::GetCurrentContext();
+
+    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                   g.LastItemData.Rect.Min.y + DropBorderWidth);
+    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                   g.LastItemData.Rect.Max.y - DropBorderWidth);
+    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
+                                         g.LastItemData.ID)) {
+      if (auto *payload = ImGui::AcceptDragDropPayload(
+              getAssetTypeString(AssetType::Skeleton).c_str())) {
+        auto uuid = Uuid(static_cast<const char *>(payload->Data));
+        auto asset = assetCache.request<SkeletonAsset>(uuid);
+
+        if (asset) {
+          auto newComponent = component;
+          newComponent.asset = asset;
+          actionExecutor.execute<EntityUpdateComponent<SkeletonAssetRef>>(
+              mSelectedEntity, component, newComponent);
+        }
+      }
+    }
+
+    if (component.asset) {
+      bool showBones = scene.entityDatabase.has<SkeletonDebug>(mSelectedEntity);
+
+      if (ImGui::Checkbox("Show bones", &showBones)) {
+        actionExecutor.execute<EntityToggleSkeletonDebugBones>(mSelectedEntity);
+      }
     }
   }
 
@@ -1772,6 +1802,12 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetCache &assetCache,
     if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
         ImGui::Selectable("Rigid body")) {
       actionExecutor.execute<EntityCreateComponent<RigidBody>>(mSelectedEntity);
+    }
+
+    if (!scene.entityDatabase.has<SkeletonAssetRef>(mSelectedEntity) &&
+        ImGui::Selectable("Skeleton")) {
+      actionExecutor.execute<EntityCreateComponent<SkeletonAssetRef>>(
+          mSelectedEntity);
     }
 
     if (!scene.entityDatabase.has<Collidable>(mSelectedEntity) &&

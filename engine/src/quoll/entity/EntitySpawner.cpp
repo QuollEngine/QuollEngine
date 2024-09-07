@@ -131,29 +131,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetRef<PrefabAsset> prefab,
 
     usize numJoints = asset.jointLocalPositions.size();
 
-    Skeleton skeleton{};
-    skeleton.asset = pSkeleton.value;
-    skeleton.numJoints = static_cast<u32>(numJoints);
-    skeleton.jointNames.resize(numJoints);
-    skeleton.jointParents.resize(numJoints);
-    skeleton.jointLocalPositions.resize(numJoints);
-    skeleton.jointLocalRotations.resize(numJoints);
-    skeleton.jointLocalScales.resize(numJoints);
-    skeleton.jointInverseBindMatrices.resize(numJoints);
-    skeleton.jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
-    skeleton.jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
-
-    for (usize i = 0; i < numJoints; ++i) {
-      skeleton.jointNames.at(i) = asset.jointNames.at(i);
-      skeleton.jointParents.at(i) = asset.jointParents.at(i);
-      skeleton.jointLocalPositions.at(i) = asset.jointLocalPositions.at(i);
-      skeleton.jointLocalRotations.at(i) = asset.jointLocalRotations.at(i);
-      skeleton.jointLocalScales.at(i) = asset.jointLocalScales.at(i);
-      skeleton.jointInverseBindMatrices.at(i) =
-          asset.jointInverseBindMatrices.at(i);
-    }
-
-    mEntityDatabase.set(entity, skeleton);
+    mEntityDatabase.set(entity, SkeletonAssetRef{pSkeleton.value});
   }
 
   for (auto &item : asset.animators) {

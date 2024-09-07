@@ -28,7 +28,7 @@ TEST_F(AssetMapTest, AllocateFailsIfInvalidUuid) {
   EXPECT_DEATH(map.allocate({}), ".*");
 }
 
-TEST_F(AssetMapTest, AllocateStoresAssetMetadata) {
+TEST_F(AssetMapTest, AllocateStoresAssetMetadataAndRefCount) {
   auto meta = createMeta("test");
   auto handle = map.allocate(meta);
 
@@ -37,6 +37,7 @@ TEST_F(AssetMapTest, AllocateStoresAssetMetadata) {
   EXPECT_EQ(map.getMeta(handle).name, "test");
   EXPECT_EQ(map.getMeta(handle).uuid, meta.uuid);
   EXPECT_EQ(map.getMeta(handle).type, meta.type);
+  EXPECT_EQ(map.getRefCount(handle), 0);
 }
 
 TEST_F(AssetMapTest, AllocateUpdatesExistingMetadata) {
@@ -76,7 +77,6 @@ TEST_F(AssetMapTest, StoresCreatesAssetDataForAllocatedAsset) {
   map.store(handle, {.data = 25});
   EXPECT_TRUE(map.hasData(handle));
   EXPECT_EQ(map.get(handle).data, 25);
-  EXPECT_EQ(map.getRefCount(handle), 0);
 }
 
 TEST_F(AssetMapTest, StoreUpdatesExistingDataForAllocatedAsset) {
@@ -88,7 +88,6 @@ TEST_F(AssetMapTest, StoreUpdatesExistingDataForAllocatedAsset) {
   map.store(handle, {.data = 35});
   EXPECT_TRUE(map.hasData(handle));
   EXPECT_EQ(map.get(handle).data, 35);
-  EXPECT_EQ(map.getRefCount(handle), 0);
 }
 
 TEST_F(AssetMapTest, TaksFailsIfAssetIsNotAllocated) {
@@ -96,17 +95,9 @@ TEST_F(AssetMapTest, TaksFailsIfAssetIsNotAllocated) {
   EXPECT_DEATH(map.take(handle), ".*");
 }
 
-TEST_F(AssetMapTest, TakeFailsIfAssetHasNoData) {
-  auto meta = createMeta("test");
-  auto handle = map.allocate(meta);
-
-  EXPECT_DEATH(map.take(handle), ".*");
-}
-
 TEST_F(AssetMapTest, TakeIncreasesReferenceCountOfAsset) {
   auto meta = createMeta("test");
   auto handle = map.allocate(meta);
-  map.store(handle, {.data = 25});
   map.take(handle);
 
   EXPECT_EQ(map.getRefCount(handle), 1);
@@ -114,13 +105,6 @@ TEST_F(AssetMapTest, TakeIncreasesReferenceCountOfAsset) {
 
 TEST_F(AssetMapTest, ReleaseFailsIfAssetIsNotAllocated) {
   quoll::AssetHandle<TestAsset> handle(25);
-  EXPECT_DEATH(map.release(handle), ".*");
-}
-
-TEST_F(AssetMapTest, ReleaseFailsIfAssetHasNoData) {
-  auto meta = createMeta("test");
-  auto handle = map.allocate(meta);
-
   EXPECT_DEATH(map.release(handle), ".*");
 }
 
@@ -135,7 +119,6 @@ TEST_F(AssetMapTest, ReleaseFailsIfAssetReferenceCountIsAlreadyZero) {
 TEST_F(AssetMapTest, ReleaseDecreasesReferenceCountOfAsset) {
   auto meta = createMeta("test");
   auto handle = map.allocate(meta);
-  map.store(handle, {.data = 25});
 
   map.take(handle);
   map.take(handle);

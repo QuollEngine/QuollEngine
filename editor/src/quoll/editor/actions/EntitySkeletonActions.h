@@ -32,7 +32,7 @@ public:
 
 private:
   Entity mEntity;
-  Skeleton mOldComponent;
+  SkeletonAssetRef mOldComponent;
   std::optional<SkeletonDebug> mOldSkeletonDebug;
 };
 

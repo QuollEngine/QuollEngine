@@ -1,26 +1,18 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/skeleton/Skeleton.h"
 #include "quoll/skeleton/SkeletonUpdater.h"
 #include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 
 struct SkeletonUpdaterTest : public ::testing::Test {
-  quoll::Scene scene;
-  quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
-  quoll::SkeletonUpdater skeletonUpdater;
-  quoll::SystemView view{&scene};
 
-  std::tuple<quoll::Skeleton &, quoll::SkeletonDebug &, quoll::Entity>
-  createSkeleton(u32 numJoints) {
-    auto entity = entityDatabase.create();
+  SkeletonUpdaterTest() : assetCache("/") {}
 
-    quoll::Skeleton skeleton;
-
-    skeleton.jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
-    skeleton.jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
-    skeleton.numJoints = numJoints;
-
+  auto createSkeletonAsset(u32 numJoints) {
+    quoll::SkeletonAsset skeleton;
     for (u32 i = 0; i < numJoints; ++i) {
       f32 value = static_cast<f32>(i) + 1.2f;
       skeleton.jointLocalPositions.push_back(glm::vec3(value));
@@ -32,22 +24,28 @@ struct SkeletonUpdaterTest : public ::testing::Test {
       skeleton.jointNames.push_back("Joint " + std::to_string(i));
     }
 
-    entityDatabase.set(entity, skeleton);
+    return createAssetInCache(assetCache, skeleton);
+  }
+
+  quoll::Entity createSkeletonEntity(u32 numJoints) {
+    auto entity = entityDatabase.create();
+
+    auto ref = createSkeletonAsset(numJoints);
+    entityDatabase.set(entity, quoll::SkeletonAssetRef{ref});
 
     quoll::SkeletonDebug skeletonDebug{};
-    auto numBones = skeleton.numJoints * 2;
+    auto numBones = ref->jointNames.size() * 2;
     skeletonDebug.bones.reserve(numBones);
 
-    for (u32 joint = 0; joint < skeleton.numJoints; ++joint) {
-      skeletonDebug.bones.push_back(skeleton.jointParents.at(joint));
+    for (u32 joint = 0; joint < ref->jointNames.size(); ++joint) {
+      skeletonDebug.bones.push_back(ref->jointParents.at(joint));
       skeletonDebug.bones.push_back(joint);
     }
 
     skeletonDebug.boneTransforms.resize(numBones, glm::mat4{1.0f});
-
     entityDatabase.set(entity, skeletonDebug);
 
-    return {getSkeleton(entity), getDebugSkeleton(entity), entity};
+    return entity;
   }
 
   quoll::Skeleton &getSkeleton(quoll::Entity entity) {
@@ -68,19 +66,88 @@ struct SkeletonUpdaterTest : public ::testing::Test {
   template <class T> std::vector<T> createItems(u32 numJoints) {
     return std::vector<T>(numJoints);
   }
+
+  quoll::AssetCache assetCache;
+  quoll::Scene scene;
+  quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
+  quoll::SkeletonUpdater skeletonUpdater;
+  quoll::SystemView view{&scene};
 };
 
 using SkeletonUpdaterDeathTest = SkeletonUpdaterTest;
 
-TEST_F(SkeletonUpdaterTest, UpdatesWorldTransformsOnUpdate) {
-  const auto &[skeleton, _, _2] = createSkeleton(3);
+TEST_F(SkeletonUpdaterTest,
+       DoesNotCreateSkeletonIfNoSkeletonAssetRefComponent) {
+  auto asset = createSkeletonAsset(1);
 
-  EXPECT_EQ(skeleton.jointWorldTransforms.at(0), glm::mat4(1.0f));
-  EXPECT_EQ(skeleton.jointWorldTransforms.at(1), glm::mat4(1.0f));
-  EXPECT_EQ(skeleton.jointWorldTransforms.at(2), glm::mat4(1.0f));
+  auto entity = entityDatabase.create();
+  EXPECT_FALSE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
 
   skeletonUpdater.update(view);
 
+  EXPECT_FALSE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+}
+
+TEST_F(SkeletonUpdaterTest, DoesNotCreateSkeletonIfNoSkeletonAssetHasNoData) {
+  auto asset = createAssetInCacheWithoutData<quoll::SkeletonAsset>(assetCache);
+
+  auto entity = entityDatabase.create();
+  EXPECT_FALSE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+
+  skeletonUpdater.update(view);
+
+  EXPECT_FALSE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+}
+
+TEST_F(SkeletonUpdaterTest, CreatesSkeletonIfHasSkeletonAssetRef) {
+  auto asset = createSkeletonAsset(3);
+
+  auto entity = entityDatabase.create();
+  EXPECT_FALSE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+
+  entityDatabase.set<quoll::SkeletonAssetRef>(entity, {asset});
+
+  skeletonUpdater.update(view);
+
+  ASSERT_TRUE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::Skeleton>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::SkeletonCurrentAsset>(entity).handle,
+            asset.handle());
+}
+
+TEST_F(SkeletonUpdaterTest, CreatesNewSkeletonComponentIfAssetRefHasChanged) {
+  auto asset1 = createSkeletonAsset(1);
+  auto asset2 = createSkeletonAsset(1);
+
+  auto entity = entityDatabase.create();
+  EXPECT_FALSE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Skeleton>(entity));
+
+  entityDatabase.set<quoll::SkeletonAssetRef>(entity, {asset1});
+  skeletonUpdater.update(view);
+  EXPECT_TRUE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::Skeleton>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::SkeletonCurrentAsset>(entity).handle,
+            asset1.handle());
+
+  entityDatabase.set<quoll::SkeletonAssetRef>(entity, {asset2});
+  skeletonUpdater.update(view);
+  EXPECT_TRUE(entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::Skeleton>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::SkeletonCurrentAsset>(entity).handle,
+            asset2.handle());
+}
+TEST_F(SkeletonUpdaterTest, UpdatesWorldTransformsOnUpdate) {
+  auto entity = createSkeletonEntity(3);
+
+  skeletonUpdater.update(view);
+
+  auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
   EXPECT_EQ(skeleton.jointWorldTransforms.at(0),
             getLocalTransform(skeleton, 0));
   EXPECT_EQ(skeleton.jointWorldTransforms.at(1),
@@ -92,14 +159,11 @@ TEST_F(SkeletonUpdaterTest, UpdatesWorldTransformsOnUpdate) {
 }
 
 TEST_F(SkeletonUpdaterTest, UpdatesFinalTransformOnUpdate) {
-  const auto &[skeleton, _, _2] = createSkeleton(3);
-
-  EXPECT_EQ(skeleton.jointFinalTransforms.at(0), glm::mat4(1.0f));
-  EXPECT_EQ(skeleton.jointFinalTransforms.at(1), glm::mat4(1.0f));
-  EXPECT_EQ(skeleton.jointFinalTransforms.at(2), glm::mat4(1.0f));
+  auto entity = createSkeletonEntity(3);
 
   skeletonUpdater.update(view);
 
+  auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
   EXPECT_EQ(skeleton.jointFinalTransforms.at(0),
             skeleton.jointWorldTransforms.at(0) *
                 skeleton.jointInverseBindMatrices.at(0));
@@ -112,13 +176,12 @@ TEST_F(SkeletonUpdaterTest, UpdatesFinalTransformOnUpdate) {
 }
 
 TEST_F(SkeletonUpdaterTest, UpdatesDebugBonesOnUpdate) {
-  const auto &[skeleton, skeletonDebug, _2] = createSkeleton(2);
-
-  for (auto &transform : skeletonDebug.boneTransforms) {
-    EXPECT_EQ(transform, glm::mat4{1.0f});
-  }
+  auto entity = createSkeletonEntity(2);
 
   skeletonUpdater.update(view);
+
+  auto &skeleton = entityDatabase.get<quoll::Skeleton>(entity);
+  auto &skeletonDebug = entityDatabase.get<quoll::SkeletonDebug>(entity);
 
   for (usize i = 0; i < skeletonDebug.bones.size(); ++i) {
     EXPECT_EQ(skeletonDebug.boneTransforms.at(i),
@@ -128,8 +191,7 @@ TEST_F(SkeletonUpdaterTest, UpdatesDebugBonesOnUpdate) {
 
 TEST_F(SkeletonUpdaterDeathTest,
        FailsIfDebugBoneSizeIsNotTwiceTheNumberOfJoints) {
-  const auto &[skeleton, _, entity] = createSkeleton(2);
-
+  auto entity = createSkeletonEntity(2);
   entityDatabase.set<quoll::SkeletonDebug>(entity, {});
 
   EXPECT_DEATH(skeletonUpdater.update(view), ".*");

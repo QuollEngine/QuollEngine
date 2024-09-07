@@ -37,6 +37,13 @@ TEST_F(AssetRefTest, DefaultConstructorSetsHandleToNull) {
   EXPECT_FALSE(ref);
   EXPECT_EQ(ref.handle(), quoll::AssetHandle<Data>());
 }
+
+TEST_F(AssetRefTest, ValidReturnsFalseIfAssetIsAllocatedButIsEmpty) {
+  auto handle = map.allocate({.uuid = quoll::Uuid::generate()});
+  quoll::AssetRef<Data> ref(map, handle);
+  EXPECT_FALSE(ref);
+}
+
 TEST_F(AssetRefTest, ConstructorIncrementsRefCount) {
   auto handle = allocateAndStore({});
 
