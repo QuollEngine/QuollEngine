@@ -49,6 +49,10 @@ public:
       QUOLL_PROFILE_EVENT("Start audios");
       for (auto [entity, source, play] :
            entityDatabase.view<AudioSource, AudioStart>()) {
+        if (!source.asset) {
+          continue;
+        }
+
         if (entityDatabase.has<AudioStatus>(entity)) {
           continue;
         }

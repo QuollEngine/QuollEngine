@@ -629,27 +629,57 @@ void EntityPanel::renderTransform(Scene &scene,
 
 void EntityPanel::renderSprite(Scene &scene, AssetCache &assetCache,
                                ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
+    return;
+  }
+
   auto &assetRegistry = assetCache.getRegistry();
   static const String SectionName = String(fa::Image) + "  Sprite";
 
-  if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
+  static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
-    if (auto _ = widgets::Section(SectionName.c_str())) {
-      const auto &texture =
-          scene.entityDatabase.get<Sprite>(mSelectedEntity).texture;
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    f32 width = section.getClipRect().GetWidth();
 
-      static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
+    auto &component = scene.entityDatabase.get<Sprite>(mSelectedEntity);
 
-      if (auto table = widgets::Table("TableSprite", 2)) {
-        table.row("Texture", texture.meta().name);
-        table.column("Preview");
-        table.column(texture, TextureSize);
+    if (component.texture) {
+      auto w = component.texture->width;
+      auto h = component.texture->height;
+
+      auto height = width * (static_cast<f32>(h) / static_cast<f32>(w));
+
+      imgui::image(component.texture, ImVec2(width, height), ImVec2(0, 0),
+                   ImVec2(1, 1), ImGui::GetID("sprite-texture-drop"));
+    } else {
+      const f32 height = width * 0.2f;
+      widgets::Button("Drag texture here", ImVec2(width, height));
+    }
+
+    static constexpr f32 DropBorderWidth = 3.5f;
+    auto &g = *ImGui::GetCurrentContext();
+
+    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                   g.LastItemData.Rect.Min.y + DropBorderWidth);
+    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                   g.LastItemData.Rect.Max.y - DropBorderWidth);
+    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
+                                         g.LastItemData.ID)) {
+      if (auto *payload = ImGui::AcceptDragDropPayload(
+              getAssetTypeString(AssetType::Texture).c_str())) {
+        auto uuid = Uuid(static_cast<const char *>(payload->Data));
+        auto asset = assetCache.request<TextureAsset>(uuid);
+
+        auto newComponent = component;
+        newComponent.texture = asset;
+        actionExecutor.execute<EntityUpdateComponent<Sprite>>(
+            mSelectedEntity, component, newComponent);
       }
     }
+  }
 
-    if (shouldDelete("Texture")) {
-      actionExecutor.execute<EntityDeleteComponent<Sprite>>(mSelectedEntity);
-    }
+  if (shouldDelete("Texture")) {
+    actionExecutor.execute<EntityDeleteComponent<Sprite>>(mSelectedEntity);
   }
 }
 
@@ -671,23 +701,51 @@ void EntityPanel::renderUICanvas(Scene &scene, ActionExecutor &actionExecutor) {
 
 void EntityPanel::renderMesh(Scene &scene, AssetCache &assetCache,
                              ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
+    return;
+  }
+
   auto &assetRegistry = assetCache.getRegistry();
 
   static const String SectionName = String(fa::Cubes) + "  Mesh";
 
-  if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
-    if (auto _ = widgets::Section(SectionName.c_str())) {
-      const auto &asset = scene.entityDatabase.get<Mesh>(mSelectedEntity).asset;
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    f32 width = section.getClipRect().GetWidth();
+    const f32 height = width * 0.2f;
 
-      if (auto table = widgets::Table("TableMesh", 2)) {
-        table.row("Name", asset.meta().name);
-        table.row("Geometries", static_cast<u32>(asset->geometries.size()));
+    auto &component = scene.entityDatabase.get<Mesh>(mSelectedEntity);
+
+    if (component.asset) {
+      widgets::Button(component.asset.meta().name.c_str(),
+                      ImVec2(width, height));
+    } else {
+      widgets::Button("Drag mesh here", ImVec2(width, height));
+    }
+
+    static constexpr f32 DropBorderWidth = 3.5f;
+    auto &g = *ImGui::GetCurrentContext();
+
+    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                   g.LastItemData.Rect.Min.y + DropBorderWidth);
+    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                   g.LastItemData.Rect.Max.y - DropBorderWidth);
+    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
+                                         g.LastItemData.ID)) {
+      if (auto *payload = ImGui::AcceptDragDropPayload(
+              getAssetTypeString(AssetType::Mesh).c_str())) {
+        auto uuid = Uuid(static_cast<const char *>(payload->Data));
+        auto asset = assetCache.request<MeshAsset>(uuid);
+
+        auto newComponent = component;
+        newComponent.asset = asset;
+        actionExecutor.execute<EntityUpdateComponent<Mesh>>(
+            mSelectedEntity, component, newComponent);
       }
     }
+  }
 
-    if (shouldDelete("Mesh")) {
-      actionExecutor.execute<EntityDeleteComponent<Mesh>>(mSelectedEntity);
-    }
+  if (shouldDelete("Mesh")) {
+    actionExecutor.execute<EntityDeleteComponent<Mesh>>(mSelectedEntity);
   }
 }
 
@@ -1373,10 +1431,39 @@ void EntityPanel::renderAudio(Scene &scene, AssetCache &assetCache,
 
   static const String SectionName = String(fa::Music) + "  Audio";
 
-  if (auto _ = widgets::Section(SectionName.c_str())) {
-    const auto &audio = scene.entityDatabase.get<AudioSource>(mSelectedEntity);
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    f32 width = section.getClipRect().GetWidth();
+    const f32 height = width * 0.2f;
 
-    ImGui::Text("Name: %s", audio.asset.meta().name.c_str());
+    auto &component = scene.entityDatabase.get<AudioSource>(mSelectedEntity);
+
+    if (component.asset) {
+      widgets::Button(component.asset.meta().name.c_str(),
+                      ImVec2(width, height));
+    } else {
+      widgets::Button("Drag audio asset here", ImVec2(width, height));
+    }
+
+    static constexpr f32 DropBorderWidth = 3.5f;
+    auto &g = *ImGui::GetCurrentContext();
+
+    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                   g.LastItemData.Rect.Min.y + DropBorderWidth);
+    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                   g.LastItemData.Rect.Max.y - DropBorderWidth);
+    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
+                                         g.LastItemData.ID)) {
+      if (auto *payload = ImGui::AcceptDragDropPayload(
+              getAssetTypeString(AssetType::Audio).c_str())) {
+        auto uuid = Uuid(static_cast<const char *>(payload->Data));
+        auto asset = assetCache.request<AudioAsset>(uuid);
+
+        auto newComponent = component;
+        newComponent.asset = asset;
+        actionExecutor.execute<EntityUpdateComponent<AudioSource>>(
+            mSelectedEntity, component, newComponent);
+      }
+    }
   }
 
   if (shouldDelete("Audio")) {
@@ -1816,6 +1903,11 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetCache &assetCache,
           mSelectedEntity);
     }
 
+    if (!scene.entityDatabase.has<Mesh>(mSelectedEntity) &&
+        ImGui::Selectable("Mesh")) {
+      actionExecutor.execute<EntityCreateComponent<Mesh>>(mSelectedEntity);
+    }
+
     if (!scene.entityDatabase.has<MeshRenderer>(mSelectedEntity) &&
         ImGui::Selectable("Mesh renderer")) {
       actionExecutor.execute<EntityCreateComponent<MeshRenderer>>(
@@ -1826,6 +1918,11 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetCache &assetCache,
         ImGui::Selectable("Skinned mesh renderer")) {
       actionExecutor.execute<EntityCreateComponent<SkinnedMeshRenderer>>(
           mSelectedEntity);
+    }
+
+    if (!scene.entityDatabase.has<Sprite>(mSelectedEntity) &&
+        ImGui::Selectable("Sprite")) {
+      actionExecutor.execute<EntityCreateComponent<Sprite>>(mSelectedEntity);
     }
 
     if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
@@ -1886,6 +1983,12 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetCache &assetCache,
                                                               UICanvas{});
     }
 
+    if (!scene.entityDatabase.has<AudioSource>(mSelectedEntity) &&
+        ImGui::Selectable("Audio")) {
+      actionExecutor.execute<EntityCreateComponent<AudioSource>>(
+          mSelectedEntity, AudioSource{});
+    }
+
     ImGui::EndPopup();
   }
 }
@@ -1898,38 +2001,6 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
   widgets::Button("Drag asset here", ImVec2(width, halfWidth));
 
   if (ImGui::BeginDragDropTarget()) {
-    if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::Mesh).c_str())) {
-      const char *data = static_cast<const char *>(payload->Data);
-
-      auto uuid = Uuid(static_cast<const char *>(payload->Data));
-      auto asset = assetCache.request<quoll::MeshAsset>(uuid);
-      if (asset) {
-        if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
-          actionExecutor.execute<EntityUpdateImmediateComponent<Mesh>>(
-              mSelectedEntity, Mesh{asset.data()});
-        } else {
-          actionExecutor.execute<EntityCreateComponent<Mesh>>(
-              mSelectedEntity, Mesh{asset.data()});
-        }
-      }
-    }
-
-    if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::Audio).c_str())) {
-      auto uuid = Uuid(static_cast<const char *>(payload->Data));
-      auto asset = assetCache.request<AudioAsset>(uuid);
-      if (asset) {
-        if (scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
-          actionExecutor.execute<EntityUpdateImmediateComponent<AudioSource>>(
-              mSelectedEntity, AudioSource{asset.data()});
-        } else {
-          actionExecutor.execute<EntityCreateComponent<AudioSource>>(
-              mSelectedEntity, AudioSource{asset.data()});
-        }
-      }
-    }
-
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::LuaScript).c_str())) {
       auto uuid = Uuid(static_cast<const char *>(payload->Data));
@@ -1956,21 +2027,6 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
         } else {
           actionExecutor.execute<EntityCreateComponent<Animator>>(
               mSelectedEntity, Animator{asset.data()});
-        }
-      }
-    }
-
-    if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::Texture).c_str())) {
-      auto uuid = Uuid(static_cast<const char *>(payload->Data));
-      auto asset = assetCache.request<quoll::TextureAsset>(uuid);
-      if (asset) {
-        if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
-          actionExecutor.execute<EntityUpdateImmediateComponent<Sprite>>(
-              mSelectedEntity, Sprite{asset.data()});
-        } else {
-          actionExecutor.execute<EntityCreateComponent<Sprite>>(
-              mSelectedEntity, Sprite{asset.data()});
         }
       }
     }

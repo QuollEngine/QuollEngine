@@ -785,13 +785,18 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   for (auto [entity, sprite, world] :
        entityDatabase.view<Sprite, WorldTransform>()) {
-    auto handle = mRendererAssetRegistry.get(sprite.texture);
-    frameData.addSprite(entity, handle, world.worldTransform);
+    if (sprite.texture) {
+      auto handle = mRendererAssetRegistry.get(sprite.texture);
+      frameData.addSprite(entity, handle, world.worldTransform);
+    }
   }
 
   // Meshes
   for (auto [entity, world, mesh, renderer] :
        entityDatabase.view<WorldTransform, Mesh, MeshRenderer>()) {
+    if (!mesh.asset)
+      continue;
+
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
       materials.push_back(mRendererAssetRegistry.get(material)->getAddress());
@@ -806,6 +811,9 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   for (auto [entity, skeleton, world, mesh, renderer] :
        entityDatabase
            .view<Skeleton, WorldTransform, Mesh, SkinnedMeshRenderer>()) {
+    if (!mesh.asset)
+      continue;
+
     std::vector<rhi::DeviceAddress> materials;
     for (const auto &material : renderer.materials) {
       materials.push_back(mRendererAssetRegistry.get(material)->getAddress());
