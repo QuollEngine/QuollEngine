@@ -49,7 +49,7 @@ static String getNodeName(const String &name, Entity entity,
     return getNameAndIcon(name, fa::Font);
   }
 
-  if (entityDatabase.has<Skeleton>(entity)) {
+  if (entityDatabase.has<SkeletonAssetRef>(entity)) {
     return getNameAndIcon(name, fa::Bone);
   }
 

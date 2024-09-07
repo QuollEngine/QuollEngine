@@ -7,14 +7,37 @@
 
 namespace quoll {
 
-void SkeletonUpdater::update(SystemView &view) {
-  QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
+static void updateSkeletonAssets(SystemView &view) {
+  auto &entityDatabase = view.scene->entityDatabase;
+  for (auto [entity, ref] : entityDatabase.view<SkeletonAssetRef>()) {
+    if (entityDatabase.has<SkeletonCurrentAsset>(entity) &&
+        entityDatabase.get<SkeletonCurrentAsset>(entity).handle ==
+            ref.asset.handle()) {
+      continue;
+    }
 
-  updateSkeletons(view);
-  updateDebugBones(view);
+    if (!ref.asset) {
+      continue;
+    }
+
+    const auto &asset = ref.asset.get();
+    Skeleton skeleton{};
+    skeleton.jointLocalPositions = asset.jointLocalPositions;
+    skeleton.jointLocalRotations = asset.jointLocalRotations;
+    skeleton.jointLocalScales = asset.jointLocalScales;
+    skeleton.jointParents = asset.jointParents;
+    skeleton.jointInverseBindMatrices = asset.jointInverseBindMatrices;
+    skeleton.jointNames = asset.jointNames;
+    skeleton.numJoints = static_cast<u32>(asset.jointLocalPositions.size());
+    skeleton.jointFinalTransforms.resize(skeleton.numJoints, glm::mat4{1.0f});
+    skeleton.jointWorldTransforms.resize(skeleton.numJoints, glm::mat4{1.0f});
+
+    entityDatabase.set(entity, skeleton);
+    entityDatabase.set(entity, SkeletonCurrentAsset(ref.asset.handle()));
+  }
 }
 
-void SkeletonUpdater::updateSkeletons(SystemView &view) {
+static void updateSkeletons(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
 
   auto &entityDatabase = view.scene->entityDatabase;
@@ -48,7 +71,7 @@ void SkeletonUpdater::updateSkeletons(SystemView &view) {
   }
 }
 
-void SkeletonUpdater::updateDebugBones(SystemView &view) {
+static void updateDebugBones(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::updateDebug");
 
   auto &entityDatabase = view.scene->entityDatabase;
@@ -62,6 +85,14 @@ void SkeletonUpdater::updateDebugBones(SystemView &view) {
           skeleton.jointWorldTransforms.at(debug.bones.at(i));
     }
   }
+}
+
+void SkeletonUpdater::update(SystemView &view) {
+  QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
+
+  updateSkeletonAssets(view);
+  updateSkeletons(view);
+  updateDebugBones(view);
 }
 
 } // namespace quoll

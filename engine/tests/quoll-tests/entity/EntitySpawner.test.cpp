@@ -305,7 +305,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (u32 i = 2; i < 5; ++i) {
     auto entity = res.at(i);
 
-    const auto &skeleton = db.get<quoll::Skeleton>(entity);
+    const auto &skeleton = db.get<quoll::SkeletonAssetRef>(entity);
 
     // Skeletons vector only has three items
     EXPECT_EQ(skeleton.asset, asset.data.skeletons.at(i - 2).value);

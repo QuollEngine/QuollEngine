@@ -62,7 +62,7 @@ public:
     }
   }
 
-  constexpr operator bool() const { return mHandle; }
+  constexpr operator bool() const { return mHandle && mMap->hasData(mHandle); }
   constexpr const TAssetData *operator->() const { return &get(); }
 
   constexpr const TAssetData &get() const {

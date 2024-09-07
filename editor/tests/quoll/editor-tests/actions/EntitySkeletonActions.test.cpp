@@ -51,28 +51,57 @@ TEST_F(EntityToggleSkeletonDebugBonesActionTest,
 using EntityDeleteSkeletonActionTest = ActionTestBase;
 
 InitDefaultDeleteComponentTests(EntityDeleteSkeletonActionTest,
-                                EntityDeleteSkeleton, Skeleton);
+                                EntityDeleteSkeleton, SkeletonAssetRef);
 
-TEST_F(EntityDeleteSkeletonActionTest,
-       ExecutorDeletesSkeletonDebugComponentFromEntity) {
+TEST_F(EntityDeleteSkeletonActionTest, ExecutorDeletesAllSkeletonComponents) {
+  auto asset = createAsset<quoll::SkeletonAsset>();
+
   auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<quoll::SkeletonAssetRef>(entity, {asset});
+  state.scene.entityDatabase.set<quoll::SkeletonCurrentAsset>(entity,
+                                                              {asset.handle()});
   state.scene.entityDatabase.set<quoll::Skeleton>(entity, {});
   state.scene.entityDatabase.set<quoll::SkeletonDebug>(entity, {});
 
   quoll::editor::EntityDeleteSkeleton action(entity);
   auto res = action.onExecute(state, assetCache);
 
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::SkeletonAssetRef>(entity));
+  EXPECT_FALSE(
+      state.scene.entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Skeleton>(entity));
   EXPECT_FALSE(state.scene.entityDatabase.has<quoll::SkeletonDebug>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
-TEST_F(
-    EntityDeleteSkeletonActionTest,
-    UndoDoesNotCreateSkeletonDebugComponentForEntityIfItDidNotExistDuringExecution) {
+TEST_F(EntityDeleteSkeletonActionTest, UndoRecoversAssetRefComponent) {
+  auto asset = createAsset<quoll::SkeletonAsset>();
+
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<quoll::Skeleton>(entity, {});
+  state.scene.entityDatabase.set<quoll::SkeletonAssetRef>(entity, {asset});
+  state.scene.entityDatabase.set<quoll::SkeletonCurrentAsset>(entity,
+                                                              {asset.handle()});
+
+  quoll::editor::EntityDeleteSkeleton action(entity);
+  action.onExecute(state, assetCache);
+  auto res = action.onUndo(state, assetCache);
+
+  EXPECT_FALSE(state.scene.entityDatabase.has<quoll::Skeleton>(entity));
+  EXPECT_FALSE(
+      state.scene.entityDatabase.has<quoll::SkeletonCurrentAsset>(entity));
+
+  ASSERT_TRUE(state.scene.entityDatabase.has<quoll::SkeletonAssetRef>(entity));
+  EXPECT_EQ(
+      state.scene.entityDatabase.get<quoll::SkeletonAssetRef>(entity).asset,
+      asset);
+}
+
+TEST_F(EntityDeleteSkeletonActionTest,
+       UndoDoesNotCreateSkeletonDebugComponentIfItDidNotExistDuringExecution) {
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<quoll::SkeletonAssetRef>(entity, {});
 
   quoll::editor::EntityDeleteSkeleton action(entity);
   action.onExecute(state, assetCache);
@@ -84,9 +113,9 @@ TEST_F(
 }
 
 TEST_F(EntityDeleteSkeletonActionTest,
-       UndoCretesSkeletonDebugComponentForEntityIfItExistedDuringExecution) {
+       UndoCreatesSkeletonDebugComponentForEntityIfItExistedDuringExecution) {
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::Skeleton>(entity, {});
+  state.scene.entityDatabase.set<quoll::SkeletonAssetRef>(entity, {});
   state.scene.entityDatabase.set<quoll::SkeletonDebug>(entity, {});
 
   quoll::editor::EntityDeleteSkeleton action(entity);
