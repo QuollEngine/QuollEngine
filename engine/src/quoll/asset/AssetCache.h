@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/core/Engine.h"
 #include "AssetHandle.h"
 #include "AssetMeta.h"
 #include "AssetRef.h"
@@ -29,13 +30,16 @@ public:
       return AssetRef(mRegistry.getMap<TAssetData>(), handle);
     }
 
-    auto res = load<TAssetData>(uuid);
-    if (!res) {
-      return res.error();
-    }
+    auto meta = getAssetMeta(uuid);
 
-    return Result(AssetRef(mRegistry.getMap<TAssetData>(), res.data()),
-                  res.warnings());
+    auto newHandle = mRegistry.allocate<TAssetData>(meta);
+
+    auto res = Engine::getThreadPool().enqueue(
+        [this, newHandle, uuid] { return load<TAssetData>(newHandle, uuid); });
+
+    mQueuedLoads.push_back(std::move(res));
+
+    return Result(AssetRef(mRegistry.getMap<TAssetData>(), newHandle));
   }
 
   template <typename TAssetData>
@@ -64,7 +68,7 @@ public:
 
     auto handle = mRegistry.findHandleByUuid<TAssetData>(uuid);
     if (handle) {
-      auto loadRes = load<TAssetData>(uuid);
+      auto loadRes = load<TAssetData>(handle, uuid);
       if (!loadRes) {
         return loadRes.error();
       }
@@ -110,7 +114,7 @@ public:
 
     auto handle = mRegistry.findHandleByUuid<TAssetData>(info.uuid);
     if (handle) {
-      auto loadRes = load<TAssetData>(info.uuid);
+      auto loadRes = load<TAssetData>(handle, info.uuid);
       if (!loadRes) {
         return res.error();
       }
@@ -157,18 +161,13 @@ public:
     }
   }
 
+  std::vector<String> waitForAssetsToBeLoaded();
+
 private:
   template <typename TAssetData>
-  Result<AssetHandle<TAssetData>> load(const Uuid &uuid) {
-    Result<TAssetData> data;
-
-    auto meta = getAssetMeta(uuid);
-    if (meta.type != getAssetType<TAssetData>()) {
-      return Error("Asset type is not " +
-                   getAssetTypeString(getAssetType<TAssetData>()));
-    }
-
+  Result<void> load(AssetHandle<TAssetData> handle, const Uuid &uuid) {
     auto path = getPathFromUuid(uuid);
+    Result<TAssetData> data;
 
     if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
       data = loadTexture(path);
@@ -202,10 +201,9 @@ private:
       return data.error();
     }
 
-    auto handle = mRegistry.allocate<TAssetData>(meta);
     mRegistry.store(handle, data.data());
 
-    return {handle, data.warnings()};
+    return Ok(data.warnings());
   }
 
   Result<TextureAsset> loadTexture(const Path &path);
@@ -270,11 +268,11 @@ private:
 
   Result<Path> createAssetMeta(AssetType type, String name, Path path);
 
-  Result<void> loadAsset(const Path &path);
-
 private:
   AssetRegistry mRegistry;
   Path mAssetsPath;
+
+  std::vector<std::future<Result<Result<void>>>> mQueuedLoads;
 };
 
 } // namespace quoll

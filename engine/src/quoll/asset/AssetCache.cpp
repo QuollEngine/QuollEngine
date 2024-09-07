@@ -32,130 +32,6 @@ AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
   return meta;
 }
 
-Result<void> AssetCache::loadAsset(const Path &path) {
-  auto uuid = Uuid(path.stem().string());
-  auto meta = getAssetMeta(uuid);
-
-  if (meta.type == AssetType::Texture) {
-    auto res = load<TextureAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::LuaScript) {
-    auto res = load<LuaScriptAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Animator) {
-    auto res = load<AnimatorAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::InputMap) {
-    auto res = load<InputMapAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Audio) {
-    auto res = load<AudioAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Font) {
-    auto res = load<FontAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Scene) {
-    auto res = load<SceneAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Material) {
-    auto res = load<MaterialAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Mesh) {
-    auto res = load<MeshAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Skeleton) {
-    auto res = load<SkeletonAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Animation) {
-    auto res = load<AnimationAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Prefab) {
-    auto res = load<PrefabAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Environment) {
-    auto res = load<EnvironmentAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  return Error("Unknown asset file: " + path.stem().string());
-}
-
 Result<Path> AssetCache::createAssetMeta(AssetType type, String name,
                                          Path path) {
   auto metaPath = path.replace_extension("assetmeta");
@@ -173,6 +49,27 @@ Result<Path> AssetCache::createAssetMeta(AssetType type, String name,
 
 Path AssetCache::getPathFromUuid(const Uuid &uuid) const {
   return (mAssetsPath / uuid.toString()).replace_extension("asset");
+}
+
+std::vector<String> AssetCache::waitForAssetsToBeLoaded() {
+  std::vector<String> warnings;
+
+  for (auto &future : mQueuedLoads) {
+    auto taskResult = future.get();
+    if (taskResult) {
+      auto loadResult = taskResult.data();
+      if (loadResult && loadResult.hasWarnings()) {
+        warnings.insert(warnings.end(), loadResult.warnings().begin(),
+                        loadResult.warnings().end());
+      } else {
+        warnings.push_back(loadResult.error());
+      }
+    } else {
+      warnings.push_back(taskResult.error());
+    }
+  }
+
+  return std::move(warnings);
 }
 
 } // namespace quoll

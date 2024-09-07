@@ -9,14 +9,13 @@ Engine *sEngine = nullptr;
 
 void Engine::create(EngineDescription description) {
   sEngine = new Engine(description);
+  resetLoggers();
 }
 
 void Engine::destroy() { delete sEngine; }
 
 Engine::Engine(EngineDescription description)
-    : mEnginePath(description.path), mThreadPool(description.numThreads) {
-  resetLoggers();
-}
+    : mEnginePath(description.path), mThreadPool(description.numThreads) {}
 
 const Path Engine::getShadersPath() {
   return sEngine->mEnginePath / "assets" / "shaders";
@@ -36,5 +35,7 @@ void Engine::resetLoggers() {
   sEngine->mSystemLogger.setTransport(createStreamTransport(std::cout));
   sEngine->mUserLogger.setTransport(createStreamTransport(std::cout));
 }
+
+ThreadPool &Engine::getThreadPool() { return sEngine->mThreadPool; }
 
 } // namespace quoll
