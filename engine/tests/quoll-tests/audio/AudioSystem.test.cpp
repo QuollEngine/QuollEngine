@@ -83,13 +83,24 @@ TEST_F(AudioSystemTest,
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
 }
 
+TEST_F(AudioSystemTest, DoesNothingIfAudioSourceAssetHasNoData) {
+  auto ref = createAssetInCacheWithoutData<quoll::AudioAsset>(assetCache);
+  auto e1 = entityDatabase.create();
+
+  entityDatabase.set<quoll::AudioSource>(e1, {ref});
+  entityDatabase.set<quoll::AudioStart>(e1, {});
+  audioSystem.output(view);
+
+  EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
+}
+
 TEST_F(AudioSystemTest,
        DoesNothingIfThereAreNoEntitiesWithAudioStartComponents) {
-  auto handle = createFakeAudio();
+  auto ref = createFakeAudio();
 
   auto e1 = entityDatabase.create();
 
-  entityDatabase.set<quoll::AudioSource>(e1, {handle});
+  entityDatabase.set<quoll::AudioSource>(e1, {ref});
   audioSystem.output(view);
 
   EXPECT_FALSE(entityDatabase.has<quoll::AudioStatus>(e1));
