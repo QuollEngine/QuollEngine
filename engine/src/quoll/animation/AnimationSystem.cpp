@@ -14,12 +14,37 @@ void AnimationSystem::prepare(SystemView &view) {
   QUOLL_PROFILE_EVENT("AnimationSystem::prepare");
 
   auto &entityDatabase = view.scene->entityDatabase;
-  for (auto [entity, animator] : entityDatabase.view<Animator>()) {
-    const auto &asset = animator.asset.get();
 
-    if (animator.currentState >= asset.states.size()) {
-      animator.currentState = asset.initialState;
+  for (auto [entity, ref] : entityDatabase.view<AnimatorAssetRef>()) {
+    if (entityDatabase.has<AnimatorCurrentAsset>(entity) &&
+        entityDatabase.get<AnimatorCurrentAsset>(entity).handle ==
+            ref.asset.handle()) {
+      continue;
     }
+
+    if (!ref.asset) {
+      continue;
+    }
+
+    bool stop = false;
+    for (const auto &state : ref.asset->states) {
+      if (!state.animation) {
+        stop = true;
+        break;
+      }
+    }
+
+    if (stop) {
+      continue;
+    }
+
+    Animator animator{.asset = ref.asset,
+                      .currentState = ref.asset->initialState,
+                      .normalizedTime = 0.0f,
+                      .playing = true};
+
+    entityDatabase.set(entity, animator);
+    entityDatabase.set(entity, AnimatorCurrentAsset{ref.asset.handle()});
   }
 }
 

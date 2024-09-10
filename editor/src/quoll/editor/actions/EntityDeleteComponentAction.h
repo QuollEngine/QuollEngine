@@ -4,7 +4,15 @@
 
 namespace quoll::editor {
 
-template <class TComponent> class EntityDeleteComponent : public Action {
+/**
+ * @brief Delete entity components
+ *
+ * @tparam TComponent Main component to delete. Restored during undo.
+ * @tparam TOtherComponents Other components to delete. Are not restored during
+ * undo.
+ */
+template <typename TComponent, typename... TOtherComponents>
+class EntityDeleteComponent : public Action {
 public:
   EntityDeleteComponent(Entity entity) : mEntity(entity) {}
 
@@ -15,6 +23,7 @@ public:
     mOldComponent = scene.entityDatabase.get<TComponent>(mEntity);
 
     scene.entityDatabase.remove<TComponent>(mEntity);
+    removeOtherComponents<TOtherComponents...>(scene);
 
     ActionExecutorResult res{};
     res.entitiesToSave.push_back(mEntity);
@@ -39,6 +48,22 @@ public:
     auto &scene = state.scene;
 
     return scene.entityDatabase.has<TComponent>(mEntity);
+  }
+
+private:
+  template <typename... TRest>
+  requires(sizeof...(TRest) == 0)
+  void removeOtherComponents(Scene &) {
+    // Base case. Does nothing
+  }
+
+  template <typename TFirst, typename... TRest>
+  void removeOtherComponents(Scene &scene) {
+    if (scene.entityDatabase.has<TFirst>(mEntity)) {
+      scene.entityDatabase.remove<TFirst>(mEntity);
+    }
+
+    removeOtherComponents<TRest...>(scene);
   }
 
 private:

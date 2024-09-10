@@ -5,14 +5,14 @@
 
 namespace quoll {
 
-/**
- * Animator component that handles
- * entity specific state machine
- * for controlling animations
- *
- * The animator works with normalized time
- * in range of [0.0, 1.0].
- */
+struct AnimatorAssetRef {
+  AssetRef<AnimatorAsset> asset;
+};
+
+struct AnimatorCurrentAsset {
+  AssetHandle<AnimatorAsset> handle;
+};
+
 struct Animator {
   AssetRef<AnimatorAsset> asset;
 

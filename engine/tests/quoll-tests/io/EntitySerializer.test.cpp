@@ -387,21 +387,18 @@ TEST_F(EntitySerializerTest, CreatesJointAttachmentFieldWithJointId) {
 
 // Animator
 TEST_F(EntitySerializerTest,
-       DoesNotCreateAnimatorFieldIfAnimatorAssetIsNotInRegistry) {
+       DoesNotCreateAnimatorFieldIfAnimatorAssetIsNotValid) {
   auto entity = entityDatabase.create();
-  quoll::Animator component{};
+  quoll::AnimatorAssetRef component{};
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["animator"]);
 }
 
-TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
-  auto animator = createAsset<quoll::AnimatorAsset>();
-
-  quoll::Animator component{};
-  component.asset = animator;
-  component.currentState = 0;
+TEST_F(EntitySerializerTest, CreatesAnimatorIfAssetIsValid) {
+  auto asset = createAsset<quoll::AnimatorAsset>();
+  quoll::AnimatorAssetRef component{asset};
 
   auto entity = entityDatabase.create();
   entityDatabase.set(entity, component);
@@ -409,7 +406,7 @@ TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["animator"]);
   EXPECT_EQ(node["animator"]["asset"].as<quoll::Uuid>(quoll::Uuid{}),
-            animator.meta().uuid);
+            asset.meta().uuid);
 }
 
 // Directional light

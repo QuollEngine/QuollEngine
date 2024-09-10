@@ -640,7 +640,7 @@ TEST_F(SceneLoaderAnimatorTest,
   auto [node, entity] = createNode();
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorAssetRef>(entity));
 }
 
 TEST_F(SceneLoaderAnimatorTest,
@@ -653,7 +653,7 @@ TEST_F(SceneLoaderAnimatorTest,
     auto [node, entity] = createNode();
     node["animator"] = invalidNode;
     sceneLoader.loadComponents(node, entity, entityIdCache);
-    EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::AnimatorAssetRef>(entity));
   }
 }
 
@@ -668,7 +668,7 @@ TEST_F(SceneLoaderAnimatorTest,
     auto [node, entity] = createNode();
     node["animator"]["asset"] = invalidNode;
     sceneLoader.loadComponents(node, entity, entityIdCache);
-    EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::AnimatorAssetRef>(entity));
   }
 }
 
@@ -680,12 +680,10 @@ TEST_F(SceneLoaderAnimatorTest, CreatesAnimatorComponentIfAllFieldsAreValid) {
 
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  ASSERT_TRUE(entityDatabase.has<quoll::Animator>(entity));
+  ASSERT_TRUE(entityDatabase.has<quoll::AnimatorAssetRef>(entity));
 
-  const auto &component = entityDatabase.get<quoll::Animator>(entity);
+  const auto &component = entityDatabase.get<quoll::AnimatorAssetRef>(entity);
   EXPECT_EQ(component.asset, animator1.handle());
-  EXPECT_EQ(component.currentState, std::numeric_limits<usize>::max());
-  EXPECT_EQ(component.normalizedTime, 0.0f);
 }
 
 using SceneLoaderLightTest = SceneLoaderTest;

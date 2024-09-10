@@ -152,7 +152,7 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderDirectionalLight(scene, actionExecutor);
     renderPointLight(scene, actionExecutor);
     renderCamera(state, scene, actionExecutor);
-    renderAnimation(state, scene, assetCache, actionExecutor);
+    renderAnimator(state, scene, assetCache, actionExecutor);
     renderSkeleton(scene, assetCache, actionExecutor);
     renderJointAttachment(scene, actionExecutor);
     renderCollidable(scene, actionExecutor);
@@ -1006,38 +1006,71 @@ void EntityPanel::renderJointAttachment(Scene &scene,
   }
 }
 
-void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
-                                  AssetCache &assetCache,
-                                  ActionExecutor &actionExecutor) {
+void EntityPanel::renderAnimator(WorkspaceState &state, Scene &scene,
+                                 AssetCache &assetCache,
+                                 ActionExecutor &actionExecutor) {
   auto &assetRegistry = assetCache.getRegistry();
 
-  if (!scene.entityDatabase.has<Animator>(mSelectedEntity)) {
+  if (!scene.entityDatabase.has<AnimatorAssetRef>(mSelectedEntity)) {
     return;
   }
 
-  static const String SectionName = String(fa::Circle) + " Animator";
+  static const String SectionName = String(fa::ForwardStep) + " Animator";
 
-  if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &component = scene.entityDatabase.get<Animator>(mSelectedEntity);
-    const auto &animatorAsset = component.asset.get();
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    {
+      auto &component =
+          scene.entityDatabase.get<AnimatorAssetRef>(mSelectedEntity);
 
-    auto currentStateIndex =
-        component.currentState < animatorAsset.states.size()
-            ? component.currentState
-            : animatorAsset.initialState;
+      f32 width = section.getClipRect().GetWidth();
+      const f32 height = width * 0.2f;
 
-    const auto &currentState = animatorAsset.states.at(currentStateIndex);
+      if (component.asset) {
+        widgets::Button(component.asset.meta().name.c_str(),
+                        ImVec2(width, height));
+      } else {
+        widgets::Button("Drag animator here", ImVec2(width, height));
+      }
 
-    bool isSimulation = state.mode == WorkspaceMode::Simulation;
+      static constexpr f32 DropBorderWidth = 3.5f;
+      auto &g = *ImGui::GetCurrentContext();
 
-    ImGui::Text("Current state: %s", currentState.name.c_str());
-    if (auto table = widgets::Table("Transitions", isSimulation ? 3 : 2)) {
-      table.row("Event", "Target");
-      for (auto &transition : currentState.transitions) {
-        table.row(transition.eventName,
-                  animatorAsset.states.at(transition.target).name);
+      ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                     g.LastItemData.Rect.Min.y + DropBorderWidth);
+      ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                     g.LastItemData.Rect.Max.y - DropBorderWidth);
+      if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
+                                           g.LastItemData.ID)) {
+        if (auto *payload = ImGui::AcceptDragDropPayload(
+                getAssetTypeString(AssetType::Animator).c_str())) {
+          auto uuid = Uuid(static_cast<const char *>(payload->Data));
+          auto asset = assetCache.request<AnimatorAsset>(uuid);
 
-        if (isSimulation) {
+          if (asset) {
+            auto newComponent = component;
+            newComponent.asset = asset;
+            actionExecutor.execute<EntityUpdateComponent<AnimatorAssetRef>>(
+                mSelectedEntity, component, newComponent);
+          }
+        }
+      }
+    }
+
+    if (scene.entityDatabase.has<Animator>(mSelectedEntity) &&
+        state.mode == WorkspaceMode::Simulation) {
+      auto &component = scene.entityDatabase.get<Animator>(mSelectedEntity);
+
+      const auto &asset = component.asset.get();
+
+      const auto &currentState = asset.states.at(component.currentState);
+      ImGui::Text("Current state: %s", currentState.name.c_str());
+
+      if (auto table = widgets::Table("Transitions", 3)) {
+        table.row("Event", "Target");
+        for (auto &transition : currentState.transitions) {
+          table.row(transition.eventName,
+                    asset.states.at(transition.target).name);
+
           ImGui::TableNextColumn();
           ImGui::PushID(transition.eventName.c_str());
           if (widgets::Button("Toggle")) {
@@ -1047,17 +1080,12 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
           ImGui::PopID();
         }
       }
-    }
 
-    if (isSimulation && currentState.animation) {
-
-      const auto &animationAsset = currentState.animation.get();
-
+      const auto &animation = currentState.animation.get();
       ImGui::Text("Time");
-      f32 animationTime = component.normalizedTime * animationAsset.time;
-      if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
-                             animationAsset.time)) {
-        component.normalizedTime = animationTime / animationAsset.time;
+      f32 time = component.normalizedTime * animation.time;
+      if (ImGui::SliderFloat("###AnimationTime", &time, 0.0f, animation.time)) {
+        component.normalizedTime = time / animation.time;
       }
 
       if (!component.playing) {
@@ -1079,7 +1107,8 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
   }
 
   if (shouldDelete("Animator")) {
-    actionExecutor.execute<EntityDeleteComponent<Animator>>(mSelectedEntity);
+    actionExecutor.execute<EntityDeleteComponent<
+        AnimatorAssetRef, AnimatorCurrentAsset, Animator>>(mSelectedEntity);
   }
 }
 
@@ -1865,16 +1894,6 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetCache &assetCache,
     return;
   }
 
-  bool hasAllComponents =
-      scene.entityDatabase.has<LocalTransform>(mSelectedEntity) &&
-      scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
-      scene.entityDatabase.has<Collidable>(mSelectedEntity) &&
-      scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
-      scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity);
-
-  if (hasAllComponents)
-    return;
-
   if (widgets::Button("Add component")) {
     ImGui::OpenPopup("AddComponentPopup");
   }
@@ -1957,6 +1976,12 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetCache &assetCache,
           mSelectedEntity, JointAttachment{});
     }
 
+    if (!scene.entityDatabase.has<AnimatorAssetRef>(mSelectedEntity) &&
+        ImGui::Selectable("Animator")) {
+      actionExecutor.execute<EntityCreateComponent<AnimatorAssetRef>>(
+          mSelectedEntity, AnimatorAssetRef{});
+    }
+
     if (!scene.entityDatabase.has<InputMapAssetRef>(mSelectedEntity) &&
         ImGui::Selectable("Input map")) {
       actionExecutor.execute<EntityCreateComponent<InputMapAssetRef>>(
@@ -2012,21 +2037,6 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
         } else {
           actionExecutor.execute<EntityCreateComponent<LuaScript>>(
               mSelectedEntity, LuaScript{asset.data()});
-        }
-      }
-    }
-
-    if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::Animator).c_str())) {
-      auto uuid = Uuid(static_cast<const char *>(payload->Data));
-      auto asset = assetCache.request<quoll::AnimatorAsset>(uuid);
-      if (asset) {
-        if (scene.entityDatabase.has<Animator>(mSelectedEntity)) {
-          actionExecutor.execute<EntityUpdateImmediateComponent<Animator>>(
-              mSelectedEntity, Animator{asset.data()});
-        } else {
-          actionExecutor.execute<EntityCreateComponent<Animator>>(
-              mSelectedEntity, Animator{asset.data()});
         }
       }
     }

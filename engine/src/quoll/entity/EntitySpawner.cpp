@@ -137,9 +137,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetRef<PrefabAsset> prefab,
   for (auto &item : asset.animators) {
     auto entity = getOrCreateEntity(item.entity);
 
-    Animator animator{};
-    animator.asset = item.value;
-    animator.currentState = item.value->initialState;
+    AnimatorAssetRef animator{item.value};
     mEntityDatabase.set(entity, animator);
   }
 

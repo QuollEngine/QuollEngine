@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/core/Uuid.h"
 #include "quoll/entity/Entity.h"
 
 static const quoll::Path FixturesPath =
@@ -28,6 +29,10 @@ namespace quoll {
 
 static void PrintTo(Entity entity, std::ostream *out) {
   *out << static_cast<u32>(entity);
+}
+
+static void PrintTo(const Uuid &uuid, std::ostream *out) {
+  *out << uuid.toString();
 }
 
 } // namespace quoll

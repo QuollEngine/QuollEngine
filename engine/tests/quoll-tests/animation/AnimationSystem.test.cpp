@@ -10,13 +10,14 @@
 #include "quoll/skeleton/Skeleton.h"
 #include "quoll/system/SystemView.h"
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 
 class AnimationSystemTest : public ::testing::Test {
 public:
   quoll::AssetCache assetCache;
   quoll::Scene scene;
   quoll::EntityDatabase &entityDatabase = scene.entityDatabase;
-  quoll::AnimationSystem system;
+  quoll::AnimationSystem system{};
 
   quoll::SystemView view{&scene};
 
@@ -24,14 +25,7 @@ public:
 
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetMeta meta{};
-    meta.type = quoll::AssetCache::getAssetType<TAssetData>();
-    meta.uuid = quoll::Uuid::generate();
-
-    auto handle = assetCache.getRegistry().allocate<TAssetData>(meta);
-    assetCache.getRegistry().store(handle, data);
-
-    return assetCache.request<TAssetData>(meta.uuid).data();
+    return createAssetInCache(assetCache, data);
   }
 
   quoll::Entity
@@ -48,10 +42,9 @@ public:
 
     auto asset = createAsset<quoll::AnimatorAsset>({.states = states});
 
-    quoll::Animator animator{};
-    animator.playing = playing;
-    animator.asset = asset;
-    entityDatabase.set(entity, animator);
+    quoll::AnimatorAssetRef animatorRef{};
+    animatorRef.asset = asset;
+    entityDatabase.set(entity, animatorRef);
 
     return entity;
   }
@@ -115,6 +108,167 @@ public:
 
 using AnimationSystemDeathTest = AnimationSystemTest;
 
+TEST_F(AnimationSystemTest, PrepareDoesNotCreateAnimatorIfNoRefComponent) {
+  auto entity = entityDatabase.create();
+
+  system.prepare(view);
+
+  EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorAssetRef>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorCurrentAsset>(entity));
+}
+
+TEST_F(AnimationSystemTest, PrepareDoesNotCreateAnimatorIfAssetHasNoData) {
+  auto ref = createAssetInCacheWithoutData<quoll::AnimatorAsset>(assetCache);
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::AnimatorAssetRef>(entity, {ref});
+
+  system.prepare(view);
+
+  EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorCurrentAsset>(entity));
+}
+
+TEST_F(AnimationSystemTest,
+       PrepareDoesNotCreateAnimatorIfAssetAnimationDoesNotHaveData) {
+  auto anim0 = createAssetInCacheWithoutData<quoll::AnimationAsset>(assetCache);
+  auto anim1 = createAssetInCache<quoll::AnimationAsset>(assetCache);
+
+  auto states = {
+      quoll::AnimationState{.animation = anim0},
+      quoll::AnimationState{.animation = anim1},
+  };
+
+  auto ref =
+      createAssetInCache<quoll::AnimatorAsset>(assetCache, {.states = states});
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::AnimatorAssetRef>(entity, {ref});
+
+  system.prepare(view);
+
+  EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorCurrentAsset>(entity));
+}
+
+TEST_F(AnimationSystemTest,
+       PrepareCreatesAnimatorIfAnimatorAssetAndItsAnimationsAreFullyLoaded) {
+  auto anim0 = createAssetInCache<quoll::AnimationAsset>(assetCache);
+  auto anim1 = createAssetInCache<quoll::AnimationAsset>(assetCache);
+
+  auto states = {
+      quoll::AnimationState{.animation = anim0},
+      quoll::AnimationState{.animation = anim1},
+  };
+
+  auto ref = createAssetInCache<quoll::AnimatorAsset>(
+      assetCache, {.initialState = 1, .states = states});
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::AnimatorAssetRef>(entity, {ref});
+
+  system.prepare(view);
+
+  ASSERT_TRUE(entityDatabase.has<quoll::Animator>(entity));
+  ASSERT_TRUE(entityDatabase.has<quoll::AnimatorCurrentAsset>(entity));
+
+  auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(animator.asset, ref);
+  EXPECT_EQ(animator.currentState, 1);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  EXPECT_EQ(animator.playing, true);
+
+  EXPECT_EQ(entityDatabase.get<quoll::AnimatorCurrentAsset>(entity).handle,
+            ref.handle());
+}
+
+TEST_F(AnimationSystemTest, PrepareDoesNotUpdateAnimatorIfAssetHasNotChanged) {
+  auto anim0 = createAssetInCache<quoll::AnimationAsset>(assetCache);
+  auto anim1 = createAssetInCache<quoll::AnimationAsset>(assetCache);
+
+  auto states = {
+      quoll::AnimationState{.animation = anim0},
+      quoll::AnimationState{.animation = anim1},
+  };
+
+  auto ref =
+      createAssetInCache<quoll::AnimatorAsset>(assetCache, {.states = states});
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::AnimatorAssetRef>(entity, {ref});
+
+  system.prepare(view);
+
+  {
+    auto &animator = entityDatabase.get<quoll::Animator>(entity);
+    animator.currentState = 1;
+    animator.normalizedTime = 0.5f;
+    animator.playing = false;
+  }
+
+  entityDatabase.set<quoll::AnimatorAssetRef>(entity, {ref});
+
+  system.prepare(view);
+
+  ASSERT_TRUE(entityDatabase.has<quoll::Animator>(entity));
+  ASSERT_TRUE(entityDatabase.has<quoll::AnimatorCurrentAsset>(entity));
+
+  auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(animator.asset, ref);
+  EXPECT_EQ(animator.currentState, 1);
+  EXPECT_EQ(animator.normalizedTime, 0.5f);
+  EXPECT_EQ(animator.playing, false);
+
+  EXPECT_EQ(entityDatabase.get<quoll::AnimatorCurrentAsset>(entity).handle,
+            ref.handle());
+}
+
+TEST_F(AnimationSystemTest, PrepareUpdatesAnimatorIfAssetHasChanged) {
+  auto anim0 = createAssetInCache<quoll::AnimationAsset>(assetCache);
+  auto anim1 = createAssetInCache<quoll::AnimationAsset>(assetCache);
+
+  auto states = {
+      quoll::AnimationState{.animation = anim0},
+      quoll::AnimationState{.animation = anim1},
+  };
+
+  auto ref1 =
+      createAssetInCache<quoll::AnimatorAsset>(assetCache, {.states = states});
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::AnimatorAssetRef>(entity, {ref1});
+
+  system.prepare(view);
+
+  {
+    auto &animator = entityDatabase.get<quoll::Animator>(entity);
+    animator.currentState = 1;
+    animator.normalizedTime = 0.5f;
+    animator.playing = false;
+  }
+
+  // Note: It does not matter if animator asset has the same states
+  // as long as it is a new asset, it will be treated as a new one
+  auto ref2 =
+      createAssetInCache<quoll::AnimatorAsset>(assetCache, {.states = states});
+  entityDatabase.set<quoll::AnimatorAssetRef>(entity, {ref2});
+
+  system.prepare(view);
+
+  ASSERT_TRUE(entityDatabase.has<quoll::Animator>(entity));
+  ASSERT_TRUE(entityDatabase.has<quoll::AnimatorCurrentAsset>(entity));
+
+  auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  EXPECT_EQ(animator.asset, ref2);
+  EXPECT_EQ(animator.currentState, 0);
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
+  EXPECT_EQ(animator.playing, true);
+
+  EXPECT_EQ(entityDatabase.get<quoll::AnimatorCurrentAsset>(entity).handle,
+            ref2.handle());
+}
+
 TEST_F(
     AnimationSystemTest,
     UpdateChangesAnimationStateIfCurrentStateCanTransitionUsingAnimationEvent) {
@@ -140,16 +294,14 @@ TEST_F(
   auto entity = entityDatabase.create();
 
   {
-    quoll::Animator animator{};
-    animator.normalizedTime = 0.5f;
+    quoll::AnimatorAssetRef animator{};
     animator.asset = animatorAsset;
-    animator.currentState = 0;
     entityDatabase.set(entity, animator);
     entityDatabase.set<quoll::LocalTransform>(entity, {});
   }
 
   system.prepare(view);
-  system.update(0.0f, view);
+  system.update(1.0f, view);
 
   {
     const auto &animator = entityDatabase.get<quoll::Animator>(entity);
@@ -229,9 +381,10 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = create(animation, false);
 
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.prepare(view);
+  auto &animator = entityDatabase.get<quoll::Animator>(entity);
+  animator.playing = false;
+
   system.update(0.5f, view);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
 }
@@ -241,10 +394,9 @@ TEST_F(AnimationSystemTest, AdvancesAnimatorNormalizedTimeByDeltaTime) {
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = create(animation);
 
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.prepare(view);
   system.update(0.5f, view);
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.25f);
 }
 
@@ -254,10 +406,9 @@ TEST_F(AnimationSystemTest,
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = create(animation, true, 0.5f);
 
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.prepare(view);
   system.update(0.5f, view);
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.125f);
 }
 
@@ -266,10 +417,9 @@ TEST_F(AnimationSystemTest,
   auto animation =
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = create(animation);
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.prepare(view);
   system.update(1.0f, view);
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 1.0f);
 }
 
@@ -278,10 +428,9 @@ TEST_F(AnimationSystemTest,
   auto animation =
       createAnimation(quoll::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = create(animation, true, 1.0f, quoll::AnimationLoopMode::Linear);
-  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
-  EXPECT_EQ(animator.normalizedTime, 0.0f);
   system.prepare(view);
   system.update(1.0f, view);
+  const auto &animator = entityDatabase.get<quoll::Animator>(entity);
   EXPECT_EQ(animator.normalizedTime, 0.0f);
 }
 

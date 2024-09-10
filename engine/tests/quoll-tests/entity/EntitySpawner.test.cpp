@@ -11,6 +11,7 @@
 #include "quoll/scene/WorldTransform.h"
 #include "quoll/skeleton/Skeleton.h"
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 
 class EntitySpawnerTest : public ::testing::Test {
 public:
@@ -20,15 +21,7 @@ public:
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {},
                                           quoll::String name = "") {
-    quoll::AssetMeta meta{};
-    meta.type = quoll::AssetCache::getAssetType<TAssetData>();
-    meta.uuid = quoll::Uuid::generate();
-    meta.name = name;
-
-    auto handle = assetCache.getRegistry().allocate<TAssetData>(meta);
-    assetCache.getRegistry().store(handle, data);
-
-    return assetCache.request<TAssetData>(meta.uuid).data();
+    return createAssetInCache(assetCache, data, name);
   }
 
   quoll::AssetCache assetCache;
@@ -314,11 +307,8 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   // Test animators
   for (u32 i = 2; i < 5; ++i) {
     auto entity = res.at(i);
-    const auto &animator = db.get<quoll::Animator>(entity);
+    const auto &animator = db.get<quoll::AnimatorAssetRef>(entity);
     EXPECT_TRUE(animator.asset);
-    EXPECT_EQ(animator.currentState, i);
-    EXPECT_EQ(animator.asset->initialState, animator.currentState);
-    EXPECT_EQ(animator.normalizedTime, 0.0f);
   }
 
   for (u32 i = 1; i < 3; ++i) {

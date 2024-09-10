@@ -77,6 +77,8 @@ public:
 
   constexpr const AssetHandle<TAssetData> &handle() const { return mHandle; }
 
+  constexpr bool valid() const { return mHandle; }
+
 private:
   AssetHandle<TAssetData> mHandle;
   AssetMap<TAssetData> *mMap = nullptr;
