@@ -6,7 +6,7 @@
 namespace quoll {
 
 struct LuaScriptingSystemView {
-  EntityDatabaseObserver<LuaScript> scriptRemoveObserver;
+  EntityDatabaseObserver<LuaScriptAssetRef> scriptRemoveObserver;
 };
 
 } // namespace quoll

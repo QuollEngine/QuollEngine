@@ -11,10 +11,10 @@ TEST_F(ScriptLuaTableTest, GetReturnsScriptVariableIfExistsInScript) {
 
   auto target = entityDatabase.create();
   entityDatabase.set<quoll::Name>(target, {"target"});
-  entityDatabase.set<quoll::LuaScript>(target, {handleTarget});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(target, {handleTarget});
 
   auto source = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(source, {handleSource});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(source, {handleSource});
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
 
@@ -29,10 +29,10 @@ TEST_F(ScriptLuaTableTest, GetReturnsNilIfVariableDoesNotExistInScript) {
 
   auto target = entityDatabase.create();
   entityDatabase.set<quoll::Name>(target, {"target"});
-  entityDatabase.set<quoll::LuaScript>(target, {handleTarget});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(target, {handleTarget});
 
   auto source = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(source, {handleSource});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(source, {handleSource});
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
 
@@ -47,10 +47,10 @@ TEST_F(ScriptLuaTableTest, SetAssignsValueToTargetScript) {
 
   auto target = entityDatabase.create();
   entityDatabase.set<quoll::Name>(target, {"target"});
-  entityDatabase.set<quoll::LuaScript>(target, {handleTarget});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(target, {handleTarget});
 
   auto source = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(source, {handleSource});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(source, {handleSource});
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
 
@@ -66,11 +66,11 @@ TEST_F(ScriptLuaTableTest,
 
   // Source is intentionally added first
   auto source = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(source, {handleSource});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(source, {handleSource});
 
   auto target = entityDatabase.create();
   entityDatabase.set<quoll::Name>(target, {"target"});
-  entityDatabase.set<quoll::LuaScript>(target, {handleTarget});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(target, {handleTarget});
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
 

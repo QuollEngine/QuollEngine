@@ -1548,7 +1548,7 @@ TEST_F(SceneLoaderScriptTest,
   auto [node, entity] = createNode();
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::LuaScriptAssetRef>(entity));
 }
 
 TEST_F(SceneLoaderScriptTest,
@@ -1562,7 +1562,7 @@ TEST_F(SceneLoaderScriptTest,
     auto [node, entity] = createNode();
     node["script"] = invalidNode;
     sceneLoader.loadComponents(node, entity, entityIdCache);
-    EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::LuaScriptAssetRef>(entity));
   }
 }
 
@@ -1572,7 +1572,7 @@ TEST_F(SceneLoaderScriptTest,
   node["script"] = "bye";
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  EXPECT_FALSE(entityDatabase.has<quoll::LuaScript>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::LuaScriptAssetRef>(entity));
 }
 
 TEST_F(SceneLoaderScriptTest,
@@ -1583,8 +1583,8 @@ TEST_F(SceneLoaderScriptTest,
   node["script"] = script.meta().uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
-  EXPECT_EQ(entityDatabase.get<quoll::LuaScript>(entity).asset,
+  ASSERT_TRUE(entityDatabase.has<quoll::LuaScriptAssetRef>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::LuaScriptAssetRef>(entity).asset,
             script.handle());
 }
 
@@ -1612,8 +1612,8 @@ TEST_F(SceneLoaderScriptTest,
 
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
-  ASSERT_TRUE(entityDatabase.has<quoll::LuaScript>(entity));
-  const auto &component = entityDatabase.get<quoll::LuaScript>(entity);
+  ASSERT_TRUE(entityDatabase.has<quoll::LuaScriptAssetRef>(entity));
+  const auto &component = entityDatabase.get<quoll::LuaScriptAssetRef>(entity);
 
   EXPECT_EQ(component.asset, script.handle());
 

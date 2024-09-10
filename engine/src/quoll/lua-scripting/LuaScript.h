@@ -9,11 +9,17 @@
 
 namespace quoll {
 
-struct LuaScript {
+struct LuaScriptAssetRef {
   AssetRef<LuaScriptAsset> asset;
 
-  bool started = false;
+  std::unordered_map<String, LuaScriptInputVariable> variables;
+};
 
+struct LuaScriptCurrentAsset {
+  AssetHandle<LuaScriptAsset> handle;
+};
+
+struct LuaScript {
   lua_State *state;
 
   std::unordered_map<String, LuaScriptInputVariable> variables;

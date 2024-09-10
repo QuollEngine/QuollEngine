@@ -2,7 +2,6 @@
 
 #include "quoll/core/EntityDeleter.h"
 #include "quoll/animation/AnimationSystem.h"
-#include "quoll/asset/AssetCache.h"
 #include "quoll/audio/AudioSystem.h"
 #include "quoll/input/InputMapSystem.h"
 #include "quoll/lua-scripting/LuaScriptingSystem.h"
@@ -14,6 +13,8 @@
 #include "quoll/window/Window.h"
 
 namespace quoll {
+
+class AssetCache;
 
 /**
  * Main engine modules

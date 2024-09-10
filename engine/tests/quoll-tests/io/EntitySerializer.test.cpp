@@ -601,7 +601,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest,
        DoesNotCreateScriptFieldIfScriptAssetIsNotInRegistry) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::LuaScript>(entity, {});
+  entityDatabase.set<quoll::LuaScriptAssetRef>(entity, {});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["script"]);
@@ -622,7 +622,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
 
   auto entity = entityDatabase.create();
 
-  quoll::LuaScript component{script};
+  quoll::LuaScriptAssetRef component{script};
   component.variables.insert_or_assign("test_str",
                                        quoll::String("hello world"));
   component.variables.insert_or_assign("test_str_invalid",

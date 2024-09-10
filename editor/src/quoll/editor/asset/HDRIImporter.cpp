@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetCache.h"
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/TextureUtils.h"
 #include "HDRIImporter.h"

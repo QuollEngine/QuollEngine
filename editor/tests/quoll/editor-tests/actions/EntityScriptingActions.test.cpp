@@ -11,14 +11,16 @@ TEST_F(EntitySetScriptVariableActionTest, ExecutorSetsScriptVariableForEntity) {
   auto prefab = createAsset<quoll::PrefabAsset>();
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::LuaScript>(entity, {scriptAsset});
+  state.scene.entityDatabase.set<quoll::LuaScriptAssetRef>(entity,
+                                                           {scriptAsset});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var1", prefab);
 
   auto res = action.onExecute(state, assetCache);
 
   const auto &variables =
-      state.scene.entityDatabase.get<quoll::LuaScript>(entity).variables;
+      state.scene.entityDatabase.get<quoll::LuaScriptAssetRef>(entity)
+          .variables;
 
   EXPECT_EQ(variables.size(), 1);
   EXPECT_EQ(
@@ -38,7 +40,7 @@ TEST_F(EntitySetScriptVariableActionTest,
 
   auto entity = state.scene.entityDatabase.create();
 
-  quoll::LuaScript script;
+  quoll::LuaScriptAssetRef script;
   script.asset = scriptAsset;
   script.variables.insert({"var1", prefab1});
   state.scene.entityDatabase.set(entity, script);
@@ -49,7 +51,8 @@ TEST_F(EntitySetScriptVariableActionTest,
   auto res = action.onUndo(state, assetCache);
 
   const auto &variables =
-      state.scene.entityDatabase.get<quoll::LuaScript>(entity).variables;
+      state.scene.entityDatabase.get<quoll::LuaScriptAssetRef>(entity)
+          .variables;
 
   EXPECT_EQ(variables.size(), 1);
   EXPECT_EQ(
@@ -75,7 +78,8 @@ TEST_F(EntitySetScriptVariableActionTest,
   auto scriptAsset = createAsset<quoll::LuaScriptAsset>();
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::LuaScript>(entity, {scriptAsset});
+  state.scene.entityDatabase.set<quoll::LuaScriptAssetRef>(entity,
+                                                           {scriptAsset});
 
   quoll::editor::EntitySetScriptVariable action(entity, "test",
                                                 quoll::String("Hello world"));
@@ -92,7 +96,8 @@ TEST_F(EntitySetScriptVariableActionTest,
   auto scriptAsset = createAsset<quoll::LuaScriptAsset>(assetData);
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::LuaScript>(entity, {scriptAsset});
+  state.scene.entityDatabase.set<quoll::LuaScriptAssetRef>(entity,
+                                                           {scriptAsset});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var2",
                                                 quoll::String("Hello world"));
@@ -108,7 +113,8 @@ TEST_F(EntitySetScriptVariableActionTest,
   auto scriptAsset = createAsset<quoll::LuaScriptAsset>(assetData);
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::LuaScript>(entity, {scriptAsset});
+  state.scene.entityDatabase.set<quoll::LuaScriptAssetRef>(entity,
+                                                           {scriptAsset});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var1",
                                                 quoll::String("Test value"));
@@ -125,7 +131,8 @@ TEST_F(EntitySetScriptVariableActionTest,
   auto scriptAsset = createAsset<quoll::LuaScriptAsset>(assetData);
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::LuaScript>(entity, {scriptAsset});
+  state.scene.entityDatabase.set<quoll::LuaScriptAssetRef>(entity,
+                                                           {scriptAsset});
 
   quoll::editor::EntitySetScriptVariable action(
       entity, "var1", quoll::AssetRef<quoll::PrefabAsset>());
@@ -142,7 +149,8 @@ TEST_F(EntitySetScriptVariableActionTest,
   auto scriptAsset = createAsset<quoll::LuaScriptAsset>(assetData);
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::LuaScript>(entity, {scriptAsset});
+  state.scene.entityDatabase.set<quoll::LuaScriptAssetRef>(entity,
+                                                           {scriptAsset});
 
   quoll::editor::EntitySetScriptVariable action(
       entity, "var1", quoll::AssetRef<quoll::TextureAsset>());
@@ -158,7 +166,8 @@ TEST_F(EntitySetScriptVariableActionTest, PredicateReturnsTrueIfValidVariable) {
   auto prefab = createAsset<quoll::PrefabAsset>();
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<quoll::LuaScript>(entity, {scriptAsset});
+  state.scene.entityDatabase.set<quoll::LuaScriptAssetRef>(entity,
+                                                           {scriptAsset});
 
   quoll::editor::EntitySetScriptVariable action(entity, "var1", prefab);
   EXPECT_TRUE(action.predicate(state, assetCache));

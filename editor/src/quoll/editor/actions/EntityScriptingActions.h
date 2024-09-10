@@ -28,7 +28,7 @@ private:
   Entity mEntity;
   String mName;
   LuaScriptInputVariable mValue;
-  LuaScript mOldScript{};
+  LuaScriptAssetRef mOldScript{};
 };
 
 } // namespace quoll::editor
