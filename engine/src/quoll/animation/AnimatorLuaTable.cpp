@@ -40,6 +40,14 @@ void AnimatorLuaTable::trigger(String event) {
 }
 
 void AnimatorLuaTable::deleteThis() {
+  if (mScriptGlobals.entityDatabase.has<AnimatorAssetRef>(mEntity)) {
+    mScriptGlobals.entityDatabase.remove<AnimatorAssetRef>(mEntity);
+  }
+
+  if (mScriptGlobals.entityDatabase.has<AnimatorCurrentAsset>(mEntity)) {
+    mScriptGlobals.entityDatabase.remove<AnimatorCurrentAsset>(mEntity);
+  }
+
   if (mScriptGlobals.entityDatabase.has<Animator>(mEntity)) {
     mScriptGlobals.entityDatabase.remove<Animator>(mEntity);
   }

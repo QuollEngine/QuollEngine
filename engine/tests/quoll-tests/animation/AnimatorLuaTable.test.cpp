@@ -45,10 +45,14 @@ TEST_F(AnimatorLuaTableTest, DeleteDoesNothingIfComponentDoesNotExist) {
   EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
 }
 
-TEST_F(AnimatorLuaTableTest, DeleteRemovesAnimatorSourceComponentFromEntity) {
+TEST_F(AnimatorLuaTableTest, DeleteRemovesAllAnimatorComponentsFromEntity) {
   auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::AnimatorAssetRef>(entity, {});
+  entityDatabase.set<quoll::AnimatorCurrentAsset>(entity, {});
   entityDatabase.set<quoll::Animator>(entity, {});
 
   call(entity, "animatorDelete");
+  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorAssetRef>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorCurrentAsset>(entity));
   EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
 }

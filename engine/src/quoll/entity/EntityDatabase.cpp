@@ -61,6 +61,8 @@ EntityDatabase::EntityDatabase() {
   reg<EnvironmentLightingSkyboxSource>();
   reg<Animator>();
   reg<AnimatorEvent>();
+  reg<AnimatorAssetRef>();
+  reg<AnimatorCurrentAsset>();
   reg<AudioSource>();
   reg<AudioStart>();
   reg<AudioStatus>();

@@ -9,7 +9,7 @@ void SkeletonSerializer::serialize(YAML::Node &node,
                                    Entity entity) {
   if (entityDatabase.has<SkeletonAssetRef>(entity)) {
     const auto &asset = entityDatabase.get<SkeletonAssetRef>(entity).asset;
-    if (asset) {
+    if (asset.valid()) {
       node["skeleton"] = asset.meta().uuid;
     }
   }

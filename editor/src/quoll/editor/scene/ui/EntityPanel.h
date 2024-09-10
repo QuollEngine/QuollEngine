@@ -55,8 +55,8 @@ private:
   void renderSkinnedMeshRenderer(Scene &scene, AssetCache &assetCache,
                                  ActionExecutor &actionExecutor);
 
-  void renderAnimation(WorkspaceState &state, Scene &scene,
-                       AssetCache &assetCache, ActionExecutor &actionExecutor);
+  void renderAnimator(WorkspaceState &state, Scene &scene,
+                      AssetCache &assetCache, ActionExecutor &actionExecutor);
 
   void renderSkeleton(Scene &scene, AssetCache &assetCache,
                       ActionExecutor &actionExecutor);
