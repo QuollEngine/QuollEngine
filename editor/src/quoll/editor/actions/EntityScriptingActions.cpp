@@ -14,7 +14,7 @@ EntitySetScriptVariable::onExecute(WorkspaceState &state,
                                    AssetCache &assetCache) {
   auto &scene = state.scene;
 
-  auto &script = scene.entityDatabase.get<LuaScript>(mEntity);
+  auto &script = scene.entityDatabase.get<LuaScriptAssetRef>(mEntity);
   mOldScript = script;
 
   script.variables.insert_or_assign(mName, mValue);
@@ -40,11 +40,12 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state,
                                         AssetCache &assetCache) {
   auto &scene = state.scene;
 
-  if (!scene.entityDatabase.has<LuaScript>(mEntity)) {
+  if (!scene.entityDatabase.has<LuaScriptAssetRef>(mEntity)) {
     return false;
   }
 
-  const auto &scriptAsset = scene.entityDatabase.get<LuaScript>(mEntity).asset;
+  const auto &scriptAsset =
+      scene.entityDatabase.get<LuaScriptAssetRef>(mEntity).asset;
   if (!scriptAsset) {
     return false;
   }

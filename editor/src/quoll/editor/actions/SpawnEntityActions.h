@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/scene/PrefabAsset.h"
 #include "Action.h"
 
 namespace quoll::editor {

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "quoll/asset/AssetCache.h"
 #include "quoll/rhi/Descriptor.h"
 #include "UUIDMap.h"
 
 namespace quoll {
 
 class RenderStorage;
+class AssetCache;
 
 } // namespace quoll
 

@@ -7,8 +7,8 @@ namespace quoll {
 void ScriptSerializer::serialize(YAML::Node &node,
                                  EntityDatabase &entityDatabase,
                                  Entity entity) {
-  if (entityDatabase.has<LuaScript>(entity)) {
-    const auto &script = entityDatabase.get<LuaScript>(entity);
+  if (entityDatabase.has<LuaScriptAssetRef>(entity)) {
+    const auto &script = entityDatabase.get<LuaScriptAssetRef>(entity);
     if (script.asset) {
       const auto &asset = script.asset.get();
 
@@ -58,7 +58,7 @@ void ScriptSerializer::deserialize(const YAML::Node &node,
       return;
     }
 
-    LuaScript script{asset};
+    LuaScriptAssetRef script{asset};
 
     if (node["script"].IsMap() && node["script"]["variables"] &&
         node["script"]["variables"].IsMap()) {

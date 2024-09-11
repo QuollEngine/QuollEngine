@@ -9,7 +9,6 @@
 #include "quoll/audio/AudioStart.h"
 #include "quoll/audio/AudioStatus.h"
 #include "quoll/input/InputMap.h"
-#include "quoll/lua-scripting/LuaScript.h"
 #include "quoll/physics/Collidable.h"
 #include "quoll/physics/Force.h"
 #include "quoll/physics/RigidBody.h"

@@ -15,39 +15,65 @@ LuaScriptingSystem::LuaScriptingSystem(AssetCache &assetCache)
 
 void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
                                WindowSignals &windowSignals) {
+  QUOLL_PROFILE_EVENT("LuaScriptingSystem::start");
   auto &entityDatabase = view.scene->entityDatabase;
 
   ScriptGlobals scriptGlobals{windowSignals, entityDatabase, physicsSystem,
                               mAssetCache, mScriptLoop};
-  QUOLL_PROFILE_EVENT("LuaScriptingSystem::start");
+
   lua::ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
   std::vector<lua::DeferredLoader *> loaders;
-  for (auto [entity, component] : entityDatabase.view<LuaScript>()) {
-    if (component.started) {
+
+  for (auto [entity, ref] : entityDatabase.view<LuaScriptAssetRef>()) {
+    if (entityDatabase.has<LuaScriptCurrentAsset>(entity) &&
+        entityDatabase.get<LuaScriptCurrentAsset>(entity).handle ==
+            ref.asset.handle()) {
       continue;
     }
 
     bool valid = true;
-    auto &script = component.asset.get();
-    for (auto &[key, value] : script.variables) {
-      auto it = component.variables.find(key);
-      if (it == component.variables.end() || !it->second.isType(value.type)) {
-        // TODO: Throw error here
+    auto &asset = ref.asset.get();
+    for (auto &[key, value] : asset.variables) {
+      auto it = ref.variables.find(key);
+      if (it == ref.variables.end() || !it->second.isType(value.type)) {
         valid = false;
         break;
       }
     }
 
     if (!valid) {
-      deleteList.push_back(entity);
       continue;
     }
 
-    component.loader = [this, scriptGlobals, &scriptDecorator, &script,
-                        entity]() {
+    LuaScript script{
+        .variables = ref.variables,
+    };
+
+    script.loader = [this, scriptGlobals, &scriptDecorator, &ref, entity]() {
+      bool loaded = false;
+      while (!loaded) {
+        loaded = true;
+        if (ref.asset) {
+          continue;
+        }
+
+        for (const auto &[key, value] : ref.variables) {
+          if (value.isType(LuaScriptVariableType::AssetTexture) &&
+              !value.get<AssetRef<TextureAsset>>()) {
+            loaded = false;
+            break;
+          }
+
+          if (value.isType(LuaScriptVariableType::AssetPrefab) &&
+              !value.get<AssetRef<PrefabAsset>>()) {
+            loaded = false;
+            break;
+          }
+        }
+      }
+
       auto &component = scriptGlobals.entityDatabase.get<LuaScript>(entity);
-      component.started = true;
 
       if (component.state) {
         mLuaInterpreter.destroyState(component.state);
@@ -58,19 +84,22 @@ void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
       scriptDecorator.attachToScope(state, entity, scriptGlobals);
       scriptDecorator.attachVariableInjectors(state, component.variables);
 
-      mLuaInterpreter.evaluate(script.bytes, component.state);
+      mLuaInterpreter.evaluate(ref.asset->bytes, component.state);
       scriptDecorator.removeVariableInjectors(state);
     };
 
-    loaders.push_back(&component.loader);
+    if (entityDatabase.has<LuaScript>(entity)) {
+      destroyScriptingData(entityDatabase.get<LuaScript>(entity));
+    }
+
+    entityDatabase.set(entity, script);
+    entityDatabase.set(entity, LuaScriptCurrentAsset{ref.asset.handle()});
+
+    loaders.push_back(&entityDatabase.get<LuaScript>(entity).loader);
   }
 
   for (auto *loader : loaders) {
     loader->wait();
-  }
-
-  for (auto entity : deleteList) {
-    entityDatabase.remove<LuaScript>(entity);
   }
 }
 
@@ -78,7 +107,14 @@ void LuaScriptingSystem::update(f32 dt, SystemView &view) {
   QUOLL_PROFILE_EVENT("LuaScriptingSystem::update");
 
   for (auto [entity, script] : view.luaScripting.scriptRemoveObserver) {
-    destroyScriptingData(script);
+    if (view.scene->entityDatabase.has<LuaScript>(entity)) {
+      destroyScriptingData(view.scene->entityDatabase.get<LuaScript>(entity));
+      view.scene->entityDatabase.remove<LuaScript>(entity);
+    }
+
+    if (view.scene->entityDatabase.has<LuaScriptCurrentAsset>(entity)) {
+      view.scene->entityDatabase.remove<LuaScriptCurrentAsset>(entity);
+    }
   }
   view.luaScripting.scriptRemoveObserver.clear();
 
@@ -92,11 +128,12 @@ void LuaScriptingSystem::cleanup(SystemView &view) {
   }
 
   entityDatabase.destroyComponents<LuaScript>();
+  entityDatabase.destroyComponents<LuaScriptCurrentAsset>();
 }
 
 void LuaScriptingSystem::createSystemViewData(SystemView &view) {
   view.luaScripting.scriptRemoveObserver =
-      view.scene->entityDatabase.observeRemove<LuaScript>();
+      view.scene->entityDatabase.observeRemove<LuaScriptAssetRef>();
 }
 
 void LuaScriptingSystem::destroyScriptingData(LuaScript &component) {

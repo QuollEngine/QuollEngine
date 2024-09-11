@@ -9,6 +9,7 @@
 namespace quoll {
 
 class RenderStorage;
+class AssetCache;
 
 } // namespace quoll
 

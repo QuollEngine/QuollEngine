@@ -1,7 +1,12 @@
 #pragma once
 
-#include "quoll/asset/AssetCache.h"
 #include "quoll/editor/workspace/WorkspaceState.h"
+
+namespace quoll {
+
+class AssetCache;
+
+}
 
 namespace quoll::editor {
 

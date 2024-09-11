@@ -73,7 +73,7 @@ private:
   void renderAudio(Scene &scene, AssetCache &assetCache,
                    ActionExecutor &actionExecutor);
 
-  void renderScripting(Scene &scene, AssetCache &assetCache,
+  void renderLuaScript(Scene &scene, AssetCache &assetCache,
                        ActionExecutor &actionExecutor);
 
   void renderSkybox(Scene &scene, AssetManager &assetManager,
@@ -89,9 +89,6 @@ private:
 
   void renderAddComponent(Scene &scene, AssetCache &assetCache,
                           ActionExecutor &actionExecutor);
-
-  void handleDragAndDrop(Scene &scene, AssetCache &assetCache,
-                         ActionExecutor &actionExecutor);
 
   bool shouldDelete(const char *component);
 

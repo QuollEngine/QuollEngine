@@ -117,6 +117,49 @@ static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
   }
 }
 
+template <typename AssetType, typename ComponentType>
+static void dndComponentAsset(const widgets::Section &section, Scene &scene,
+                              AssetCache &assetCache,
+                              ActionExecutor &actionExecutor,
+                              Entity selectedEntity) {
+  auto type = AssetCache::getAssetType<AssetType>();
+
+  auto &component = scene.entityDatabase.get<ComponentType>(selectedEntity);
+
+  f32 width = section.getClipRect().GetWidth();
+  const f32 height = width * 0.2f;
+
+  if (component.asset) {
+    widgets::Button(component.asset.meta().name.c_str(), ImVec2(width, height));
+  } else {
+    String label = "Drag " + getAssetTypeString(type) + " here";
+    widgets::Button(label.c_str(), ImVec2(width, height));
+  }
+
+  static constexpr f32 DropBorderWidth = 3.5f;
+  auto &g = *ImGui::GetCurrentContext();
+
+  ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                 g.LastItemData.Rect.Min.y + DropBorderWidth);
+  ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                 g.LastItemData.Rect.Max.y - DropBorderWidth);
+  if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
+                                       g.LastItemData.ID)) {
+    if (auto *payload =
+            ImGui::AcceptDragDropPayload(getAssetTypeString(type).c_str())) {
+      auto uuid = Uuid(static_cast<const char *>(payload->Data));
+      auto asset = assetCache.request<AssetType>(uuid);
+
+      if (asset) {
+        auto newComponent = component;
+        newComponent.asset = asset;
+        actionExecutor.execute<EntityUpdateComponent<ComponentType>>(
+            selectedEntity, component, newComponent);
+      }
+    }
+  }
+}
+
 static String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
   if (type == EnvironmentSkyboxType::Color) {
     return "Color";
@@ -158,7 +201,7 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderCollidable(scene, actionExecutor);
     renderRigidBody(scene, actionExecutor);
     renderAudio(scene, assetCache, actionExecutor);
-    renderScripting(scene, assetCache, actionExecutor);
+    renderLuaScript(scene, assetCache, actionExecutor);
     renderInput(scene, assetCache, actionExecutor);
     renderUICanvas(scene, actionExecutor);
     renderSkybox(scene, assetManager, actionExecutor);
@@ -168,7 +211,6 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderDebug();
 #endif
     renderAddComponent(scene, assetCache, actionExecutor);
-    handleDragAndDrop(scene, assetCache, actionExecutor);
   }
 }
 
@@ -710,38 +752,8 @@ void EntityPanel::renderMesh(Scene &scene, AssetCache &assetCache,
   static const String SectionName = String(fa::Cubes) + "  Mesh";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    f32 width = section.getClipRect().GetWidth();
-    const f32 height = width * 0.2f;
-
-    auto &component = scene.entityDatabase.get<Mesh>(mSelectedEntity);
-
-    if (component.asset) {
-      widgets::Button(component.asset.meta().name.c_str(),
-                      ImVec2(width, height));
-    } else {
-      widgets::Button("Drag mesh here", ImVec2(width, height));
-    }
-
-    static constexpr f32 DropBorderWidth = 3.5f;
-    auto &g = *ImGui::GetCurrentContext();
-
-    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
-                   g.LastItemData.Rect.Min.y + DropBorderWidth);
-    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
-                   g.LastItemData.Rect.Max.y - DropBorderWidth);
-    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
-                                         g.LastItemData.ID)) {
-      if (auto *payload = ImGui::AcceptDragDropPayload(
-              getAssetTypeString(AssetType::Mesh).c_str())) {
-        auto uuid = Uuid(static_cast<const char *>(payload->Data));
-        auto asset = assetCache.request<MeshAsset>(uuid);
-
-        auto newComponent = component;
-        newComponent.asset = asset;
-        actionExecutor.execute<EntityUpdateComponent<Mesh>>(
-            mSelectedEntity, component, newComponent);
-      }
-    }
+    dndComponentAsset<MeshAsset, Mesh>(section, scene, assetCache,
+                                       actionExecutor, mSelectedEntity);
   }
 
   if (shouldDelete("Mesh")) {
@@ -902,41 +914,11 @@ void EntityPanel::renderSkeleton(Scene &scene, AssetCache &assetCache,
   static const String SectionName = String(fa::Bone) + "  Skeleton";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    f32 width = section.getClipRect().GetWidth();
-    const f32 height = width * 0.2f;
+    dndComponentAsset<SkeletonAsset, SkeletonAssetRef>(
+        section, scene, assetCache, actionExecutor, mSelectedEntity);
 
     auto &component =
         scene.entityDatabase.get<SkeletonAssetRef>(mSelectedEntity);
-
-    if (component.asset) {
-      widgets::Button(component.asset.meta().name.c_str(),
-                      ImVec2(width, height));
-    } else {
-      widgets::Button("Drag skeleton here", ImVec2(width, height));
-    }
-
-    static constexpr f32 DropBorderWidth = 3.5f;
-    auto &g = *ImGui::GetCurrentContext();
-
-    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
-                   g.LastItemData.Rect.Min.y + DropBorderWidth);
-    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
-                   g.LastItemData.Rect.Max.y - DropBorderWidth);
-    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
-                                         g.LastItemData.ID)) {
-      if (auto *payload = ImGui::AcceptDragDropPayload(
-              getAssetTypeString(AssetType::Skeleton).c_str())) {
-        auto uuid = Uuid(static_cast<const char *>(payload->Data));
-        auto asset = assetCache.request<SkeletonAsset>(uuid);
-
-        if (asset) {
-          auto newComponent = component;
-          newComponent.asset = asset;
-          actionExecutor.execute<EntityUpdateComponent<SkeletonAssetRef>>(
-              mSelectedEntity, component, newComponent);
-        }
-      }
-    }
 
     if (component.asset) {
       bool showBones = scene.entityDatabase.has<SkeletonDebug>(mSelectedEntity);
@@ -1018,43 +1000,8 @@ void EntityPanel::renderAnimator(WorkspaceState &state, Scene &scene,
   static const String SectionName = String(fa::ForwardStep) + " Animator";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    {
-      auto &component =
-          scene.entityDatabase.get<AnimatorAssetRef>(mSelectedEntity);
-
-      f32 width = section.getClipRect().GetWidth();
-      const f32 height = width * 0.2f;
-
-      if (component.asset) {
-        widgets::Button(component.asset.meta().name.c_str(),
-                        ImVec2(width, height));
-      } else {
-        widgets::Button("Drag animator here", ImVec2(width, height));
-      }
-
-      static constexpr f32 DropBorderWidth = 3.5f;
-      auto &g = *ImGui::GetCurrentContext();
-
-      ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
-                     g.LastItemData.Rect.Min.y + DropBorderWidth);
-      ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
-                     g.LastItemData.Rect.Max.y - DropBorderWidth);
-      if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
-                                           g.LastItemData.ID)) {
-        if (auto *payload = ImGui::AcceptDragDropPayload(
-                getAssetTypeString(AssetType::Animator).c_str())) {
-          auto uuid = Uuid(static_cast<const char *>(payload->Data));
-          auto asset = assetCache.request<AnimatorAsset>(uuid);
-
-          if (asset) {
-            auto newComponent = component;
-            newComponent.asset = asset;
-            actionExecutor.execute<EntityUpdateComponent<AnimatorAssetRef>>(
-                mSelectedEntity, component, newComponent);
-          }
-        }
-      }
-    }
+    dndComponentAsset<AnimatorAsset, AnimatorAssetRef>(
+        section, scene, assetCache, actionExecutor, mSelectedEntity);
 
     if (scene.entityDatabase.has<Animator>(mSelectedEntity) &&
         state.mode == WorkspaceMode::Simulation) {
@@ -1461,38 +1408,8 @@ void EntityPanel::renderAudio(Scene &scene, AssetCache &assetCache,
   static const String SectionName = String(fa::Music) + "  Audio";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    f32 width = section.getClipRect().GetWidth();
-    const f32 height = width * 0.2f;
-
-    auto &component = scene.entityDatabase.get<AudioSource>(mSelectedEntity);
-
-    if (component.asset) {
-      widgets::Button(component.asset.meta().name.c_str(),
-                      ImVec2(width, height));
-    } else {
-      widgets::Button("Drag audio asset here", ImVec2(width, height));
-    }
-
-    static constexpr f32 DropBorderWidth = 3.5f;
-    auto &g = *ImGui::GetCurrentContext();
-
-    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
-                   g.LastItemData.Rect.Min.y + DropBorderWidth);
-    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
-                   g.LastItemData.Rect.Max.y - DropBorderWidth);
-    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
-                                         g.LastItemData.ID)) {
-      if (auto *payload = ImGui::AcceptDragDropPayload(
-              getAssetTypeString(AssetType::Audio).c_str())) {
-        auto uuid = Uuid(static_cast<const char *>(payload->Data));
-        auto asset = assetCache.request<AudioAsset>(uuid);
-
-        auto newComponent = component;
-        newComponent.asset = asset;
-        actionExecutor.execute<EntityUpdateComponent<AudioSource>>(
-            mSelectedEntity, component, newComponent);
-      }
-    }
+    dndComponentAsset<AudioAsset, AudioSource>(section, scene, assetCache,
+                                               actionExecutor, mSelectedEntity);
   }
 
   if (shouldDelete("Audio")) {
@@ -1500,151 +1417,155 @@ void EntityPanel::renderAudio(Scene &scene, AssetCache &assetCache,
   }
 }
 
-void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
+void EntityPanel::renderLuaScript(Scene &scene, AssetCache &assetCache,
                                   ActionExecutor &actionExecutor) {
   auto &assetRegistry = assetCache.getRegistry();
 
-  if (!scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
+  if (!scene.entityDatabase.has<LuaScriptAssetRef>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Scroll) + " Lua script";
 
-  if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &script = scene.entityDatabase.get<LuaScript>(mSelectedEntity);
-    const auto &asset = script.asset.get();
-    const auto &name = script.asset.meta().name;
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    dndComponentAsset<LuaScriptAsset, LuaScriptAssetRef>(
+        section, scene, assetCache, actionExecutor, mSelectedEntity);
 
-    ImGui::Text("Name: %s", name.c_str());
+    auto &script = scene.entityDatabase.get<LuaScriptAssetRef>(mSelectedEntity);
 
-    if (!asset.variables.empty()) {
-      ImGui::Text("Variables");
+    if (script.asset) {
+      const auto &asset = script.asset.get();
 
-      if (script.started) {
-        widgets::Table table("scriptVariables", 3);
-        table.row("Name", "Type", "Value");
-        for (const auto &[name, variable] : asset.variables) {
+      if (!asset.variables.empty()) {
+        ImGui::Text("Variables");
 
-          String type = "Unknown";
-          if (variable.type == LuaScriptVariableType::String) {
-            type = "String";
-          } else if (variable.type == LuaScriptVariableType::AssetPrefab) {
-            type = "Prefab";
-          } else if (variable.type == LuaScriptVariableType::AssetTexture) {
-            type = "Texture";
+        if (scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
+          widgets::Table table("scriptVariables", 3);
+          table.row("Name", "Type", "Value");
+          for (const auto &[name, variable] : asset.variables) {
+
+            String type = "Unknown";
+            if (variable.type == LuaScriptVariableType::String) {
+              type = "String";
+            } else if (variable.type == LuaScriptVariableType::AssetPrefab) {
+              type = "Prefab";
+            } else if (variable.type == LuaScriptVariableType::AssetTexture) {
+              type = "Texture";
+            }
+
+            String value;
+            if (!script.variables.contains(name) ||
+                !script.variables.at(name).isType(variable.type)) {
+              // Do nothing
+            } else if (script.variables.at(name).isType(
+                           LuaScriptVariableType::String)) {
+              value = script.variables.at(name).get<String>();
+            } else if (script.variables.at(name).isType(
+                           LuaScriptVariableType::AssetPrefab)) {
+              const auto &prefab =
+                  script.variables.at(name).get<AssetRef<PrefabAsset>>();
+              value = prefab.meta().name;
+            } else if (script.variables.at(name).isType(
+                           LuaScriptVariableType::AssetTexture)) {
+              const auto &texture =
+                  script.variables.at(name).get<AssetRef<TextureAsset>>();
+              value = texture.meta().name;
+            }
+
+            table.row(name, type, value);
           }
+        } else {
+          for (const auto &[name, variable] : asset.variables) {
+            LuaScriptInputVariable existingVariable;
+            if (mSetScriptVariable &&
+                mSetScriptVariable->getValue().isType(variable.type) &&
+                mSetScriptVariable->getName() == name) {
+              existingVariable = mSetScriptVariable->getValue();
+            } else if (script.variables.contains(name) &&
+                       script.variables.at(name).isType(variable.type)) {
+              existingVariable = script.variables.at(name);
+            }
 
-          String value;
-          if (!script.variables.contains(name) ||
-              !script.variables.at(name).isType(variable.type)) {
-            // Do nothing
-          } else if (script.variables.at(name).isType(
-                         LuaScriptVariableType::String)) {
-            value = script.variables.at(name).get<String>();
-          } else if (script.variables.at(name).isType(
-                         LuaScriptVariableType::AssetPrefab)) {
-            const auto &prefab =
-                script.variables.at(name).get<AssetRef<PrefabAsset>>();
-            value = prefab.meta().name;
-          } else if (script.variables.at(name).isType(
-                         LuaScriptVariableType::AssetTexture)) {
-            const auto &texture =
-                script.variables.at(name).get<AssetRef<TextureAsset>>();
-            value = texture.meta().name;
-          }
+            if (variable.type == LuaScriptVariableType::String) {
+              auto it = script.variables.find(name);
 
-          table.row(name, type, value);
-        }
-      } else {
-        for (const auto &[name, variable] : asset.variables) {
-          LuaScriptInputVariable existingVariable;
-          if (mSetScriptVariable &&
-              mSetScriptVariable->getValue().isType(variable.type) &&
-              mSetScriptVariable->getName() == name) {
-            existingVariable = mSetScriptVariable->getValue();
-          } else if (script.variables.contains(name) &&
-                     script.variables.at(name).isType(variable.type)) {
-            existingVariable = script.variables.at(name);
-          }
+              auto value =
+                  existingVariable.isType(LuaScriptVariableType::String)
+                      ? existingVariable.get<String>()
+                      : "";
 
-          if (variable.type == LuaScriptVariableType::String) {
-            auto it = script.variables.find(name);
+              if (widgets::Input(name, value, false)) {
+                if (!mSetScriptVariable) {
+                  mSetScriptVariable.reset(new EntitySetScriptVariable(
+                      mSelectedEntity, name, value));
+                }
 
-            auto value = existingVariable.isType(LuaScriptVariableType::String)
-                             ? existingVariable.get<String>()
-                             : "";
-
-            if (widgets::Input(name, value, false)) {
-              if (!mSetScriptVariable) {
-                mSetScriptVariable.reset(
-                    new EntitySetScriptVariable(mSelectedEntity, name, value));
+                mSetScriptVariable->setValue(value);
               }
 
-              mSetScriptVariable->setValue(value);
-            }
+            } else if (variable.type == LuaScriptVariableType::AssetPrefab) {
+              ImGui::Text("%s", name.c_str());
+              auto value =
+                  existingVariable.isType(LuaScriptVariableType::AssetPrefab)
+                      ? existingVariable.get<AssetRef<PrefabAsset>>()
+                      : AssetRef<PrefabAsset>();
 
-          } else if (variable.type == LuaScriptVariableType::AssetPrefab) {
-            ImGui::Text("%s", name.c_str());
-            auto value =
-                existingVariable.isType(LuaScriptVariableType::AssetPrefab)
-                    ? existingVariable.get<AssetRef<PrefabAsset>>()
-                    : AssetRef<PrefabAsset>();
+              const auto width = ImGui::GetWindowContentRegionWidth();
+              const f32 halfWidth = width * 0.5f;
+              if (!value) {
+                widgets::Button("Drag prefab here", ImVec2(width, halfWidth));
+              } else {
+                String buttonLabel =
+                    "Replace current prefab: " + value.meta().name;
+                widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
+              }
 
-            const auto width = ImGui::GetWindowContentRegionWidth();
-            const f32 halfWidth = width * 0.5f;
-            if (!value) {
-              widgets::Button("Drag prefab here", ImVec2(width, halfWidth));
-            } else {
-              String buttonLabel =
-                  "Replace current prefab: " + value.meta().name;
-              widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
-            }
+              if (ImGui::BeginDragDropTarget()) {
+                if (auto *payload = ImGui::AcceptDragDropPayload(
+                        getAssetTypeString(AssetType::Prefab).c_str())) {
+                  auto uuid = Uuid(static_cast<const char *>(payload->Data));
+                  auto prefab = assetCache.request<quoll::PrefabAsset>(uuid);
 
-            if (ImGui::BeginDragDropTarget()) {
-              if (auto *payload = ImGui::AcceptDragDropPayload(
-                      getAssetTypeString(AssetType::Prefab).c_str())) {
-                auto uuid = Uuid(static_cast<const char *>(payload->Data));
-                auto prefab = assetCache.request<quoll::PrefabAsset>(uuid);
+                  if (prefab) {
+                    mSetScriptVariable.reset(new EntitySetScriptVariable(
+                        mSelectedEntity, name, prefab.data()));
+                  }
+                }
+              }
+            } else if (variable.type == LuaScriptVariableType::AssetTexture) {
+              ImGui::Text("%s", name.c_str());
+              auto value =
+                  existingVariable.isType(LuaScriptVariableType::AssetTexture)
+                      ? existingVariable.get<AssetRef<TextureAsset>>()
+                      : AssetRef<TextureAsset>();
 
-                if (prefab) {
-                  mSetScriptVariable.reset(new EntitySetScriptVariable(
-                      mSelectedEntity, name, prefab.data()));
+              const auto width = ImGui::GetWindowContentRegionWidth();
+              const f32 halfWidth = width * 0.5f;
+              if (!value) {
+                widgets::Button("Drag texture here", ImVec2(width, halfWidth));
+              } else {
+                String buttonLabel =
+                    "Replace current texture: " + value.meta().name;
+                widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
+              }
+
+              if (ImGui::BeginDragDropTarget()) {
+                if (auto *payload = ImGui::AcceptDragDropPayload(
+                        getAssetTypeString(AssetType::Texture).c_str())) {
+                  auto uuid = Uuid(static_cast<const char *>(payload->Data));
+                  auto texture = assetCache.request<quoll::TextureAsset>(uuid);
+
+                  if (texture) {
+                    mSetScriptVariable.reset(new EntitySetScriptVariable(
+                        mSelectedEntity, name, texture.data()));
+                  }
                 }
               }
             }
-          } else if (variable.type == LuaScriptVariableType::AssetTexture) {
-            ImGui::Text("%s", name.c_str());
-            auto value =
-                existingVariable.isType(LuaScriptVariableType::AssetTexture)
-                    ? existingVariable.get<AssetRef<TextureAsset>>()
-                    : AssetRef<TextureAsset>();
 
-            const auto width = ImGui::GetWindowContentRegionWidth();
-            const f32 halfWidth = width * 0.5f;
-            if (!value) {
-              widgets::Button("Drag texture here", ImVec2(width, halfWidth));
-            } else {
-              String buttonLabel =
-                  "Replace current texture: " + value.meta().name;
-              widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
+            if (mSetScriptVariable) {
+              actionExecutor.execute(std::move(mSetScriptVariable));
             }
-
-            if (ImGui::BeginDragDropTarget()) {
-              if (auto *payload = ImGui::AcceptDragDropPayload(
-                      getAssetTypeString(AssetType::Texture).c_str())) {
-                auto uuid = Uuid(static_cast<const char *>(payload->Data));
-                auto texture = assetCache.request<quoll::TextureAsset>(uuid);
-
-                if (texture) {
-                  mSetScriptVariable.reset(new EntitySetScriptVariable(
-                      mSelectedEntity, name, texture.data()));
-                }
-              }
-            }
-          }
-
-          if (mSetScriptVariable) {
-            actionExecutor.execute(std::move(mSetScriptVariable));
           }
         }
       }
@@ -1652,7 +1573,8 @@ void EntityPanel::renderScripting(Scene &scene, AssetCache &assetCache,
   }
 
   if (shouldDelete("Lua script")) {
-    actionExecutor.execute<EntityDeleteComponent<LuaScript>>(mSelectedEntity);
+    actionExecutor.execute<EntityDeleteComponent<LuaScriptAssetRef>>(
+        mSelectedEntity);
   }
 }
 
@@ -1667,39 +1589,11 @@ void EntityPanel::renderInput(Scene &scene, AssetCache &assetCache,
   static const String SectionName = String(fa::Keyboard) + "  Input map";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    f32 width = section.getClipRect().GetWidth();
-    const f32 height = width * 0.2f;
+    dndComponentAsset<InputMapAsset, InputMapAssetRef>(
+        section, scene, assetCache, actionExecutor, mSelectedEntity);
 
     auto &component =
         scene.entityDatabase.get<InputMapAssetRef>(mSelectedEntity);
-
-    if (component.asset) {
-      widgets::Button(component.asset.meta().name.c_str(),
-                      ImVec2(width, height));
-    } else {
-      widgets::Button("Drag input map here", ImVec2(width, height));
-    }
-
-    static constexpr f32 DropBorderWidth = 3.5f;
-    auto &g = *ImGui::GetCurrentContext();
-
-    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
-                   g.LastItemData.Rect.Min.y + DropBorderWidth);
-    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
-                   g.LastItemData.Rect.Max.y - DropBorderWidth);
-    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
-                                         g.LastItemData.ID)) {
-      if (auto *payload = ImGui::AcceptDragDropPayload(
-              getAssetTypeString(AssetType::InputMap).c_str())) {
-        auto uuid = Uuid(static_cast<const char *>(payload->Data));
-        auto asset = assetCache.request<InputMapAsset>(uuid);
-
-        auto newComponent = component;
-        newComponent.asset = asset;
-        actionExecutor.execute<EntityUpdateComponent<InputMapAssetRef>>(
-            mSelectedEntity, component, newComponent);
-      }
-    }
 
     if (component.asset) {
       const auto &asset = component.asset.get();
@@ -2014,34 +1908,13 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetCache &assetCache,
           mSelectedEntity, AudioSource{});
     }
 
-    ImGui::EndPopup();
-  }
-}
-
-void EntityPanel::handleDragAndDrop(Scene &scene, AssetCache &assetCache,
-                                    ActionExecutor &actionExecutor) {
-  const auto width = ImGui::GetWindowContentRegionWidth();
-  const f32 halfWidth = width * 0.5f;
-
-  widgets::Button("Drag asset here", ImVec2(width, halfWidth));
-
-  if (ImGui::BeginDragDropTarget()) {
-    if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::LuaScript).c_str())) {
-      auto uuid = Uuid(static_cast<const char *>(payload->Data));
-      auto asset = assetCache.request<quoll::LuaScriptAsset>(uuid);
-      if (asset) {
-        if (scene.entityDatabase.has<LuaScript>(mSelectedEntity)) {
-          actionExecutor.execute<EntityUpdateImmediateComponent<LuaScript>>(
-              mSelectedEntity, LuaScript{asset.data()});
-        } else {
-          actionExecutor.execute<EntityCreateComponent<LuaScript>>(
-              mSelectedEntity, LuaScript{asset.data()});
-        }
-      }
+    if (!scene.entityDatabase.has<LuaScriptAssetRef>(mSelectedEntity) &&
+        ImGui::Selectable("Lua script")) {
+      actionExecutor.execute<EntityCreateComponent<LuaScriptAssetRef>>(
+          mSelectedEntity, LuaScriptAssetRef{});
     }
 
-    ImGui::EndDragDropTarget();
+    ImGui::EndPopup();
   }
 }
 

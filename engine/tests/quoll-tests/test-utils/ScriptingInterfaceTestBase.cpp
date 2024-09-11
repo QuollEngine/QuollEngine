@@ -13,8 +13,8 @@ LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
       mScriptName(scriptName), physicsSystem(physicsBackend) {}
 
 sol::state_view LuaScriptingInterfaceTestBase::start(quoll::Entity entity) {
-  auto handle = loadScript(mScriptName);
-  entityDatabase.set<quoll::LuaScript>(entity, {handle});
+  auto ref = loadScript(mScriptName);
+  entityDatabase.set<quoll::LuaScriptAssetRef>(entity, {ref});
 
   scriptingSystem.start(view, physicsSystem, windowSignals);
 

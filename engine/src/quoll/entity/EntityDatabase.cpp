@@ -79,6 +79,8 @@ EntityDatabase::EntityDatabase() {
   reg<Torque>();
   reg<RigidBodyClear>();
   reg<LuaScript>();
+  reg<LuaScriptAssetRef>();
+  reg<LuaScriptCurrentAsset>();
   reg<Text>();
   reg<MeshRenderer>();
   reg<SkinnedMeshRenderer>();
