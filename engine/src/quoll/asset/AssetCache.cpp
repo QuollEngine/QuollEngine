@@ -32,130 +32,6 @@ AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
   return meta;
 }
 
-Result<void> AssetCache::loadAsset(const Path &path) {
-  auto uuid = Uuid(path.stem().string());
-  auto meta = getAssetMeta(uuid);
-
-  if (meta.type == AssetType::Texture) {
-    auto res = load<TextureAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::LuaScript) {
-    auto res = load<LuaScriptAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Animator) {
-    auto res = load<AnimatorAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::InputMap) {
-    auto res = load<InputMapAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Audio) {
-    auto res = load<AudioAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Font) {
-    auto res = load<FontAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Scene) {
-    auto res = load<SceneAsset>(uuid);
-    if (!res) {
-      return res.error();
-    }
-
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Material) {
-    auto res = load<MaterialAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Mesh) {
-    auto res = load<MeshAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Skeleton) {
-    auto res = load<SkeletonAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Animation) {
-    auto res = load<AnimationAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Prefab) {
-    auto res = load<PrefabAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  if (meta.type == AssetType::Environment) {
-    auto res = load<EnvironmentAsset>(uuid);
-
-    if (!res) {
-      return res.error();
-    }
-    return {res.warnings()};
-  }
-
-  return Error("Unknown asset file: " + path.stem().string());
-}
-
 Result<Path> AssetCache::createAssetMeta(AssetType type, String name,
                                          Path path) {
   auto metaPath = path.replace_extension("assetmeta");
@@ -173,6 +49,54 @@ Result<Path> AssetCache::createAssetMeta(AssetType type, String name,
 
 Path AssetCache::getPathFromUuid(const Uuid &uuid) const {
   return (mAssetsPath / uuid.toString()).replace_extension("asset");
+}
+
+std::unordered_map<Uuid, Result<void>> AssetCache::waitForIdle() {
+  // Note: We have two points of synchronization for assets.
+  //   1. Current state of loads in the our loading waterfall using
+  //       mutex, conditional variable, and atomic counter
+  //   2. The futures that store the results of an async operation
+  //
+  // The current state of waterfall increments the atomic counter when an item
+  // is being loaded and decrements it when loading is finished (error or
+  // success) It also notifies the conditional variable.
+  //
+  // When waitForIdle is called (typically from main thread), the conditional
+  // variable waits until the atomic counter is zero, meaning all assets up
+  // until waitForIdle are loaded.
+  //
+  // At this point, we know that it is safe to release the lock (hence the
+  // scope), and wait for the futures to be finished.
+
+  {
+    std::unique_lock<std::mutex> lock(mFuturesMutex);
+    mLoadComplete.wait(lock, [this] { return mLoadCount == 0; });
+  }
+
+  std::unordered_map<Uuid, Result<void>> results;
+  for (auto &[uuid, future] : mLoadFutures) {
+    results.insert_or_assign(uuid, future.get());
+  }
+
+  mLoadFutures.clear();
+
+  return results;
+}
+
+Result<void> AssetCache::waitForIdle(const Uuid &uuid) {
+  {
+    std::unique_lock<std::mutex> lock(mFuturesMutex);
+    mLoadComplete.wait(lock, [this] { return mLoadCount == 0; });
+  }
+
+  auto it = mLoadFutures.find(uuid);
+  if (it != mLoadFutures.end()) {
+    auto res = it->second.get();
+    mLoadFutures.erase(it);
+    return res;
+  }
+
+  return Error("Uuid is not queued for loading");
 }
 
 } // namespace quoll

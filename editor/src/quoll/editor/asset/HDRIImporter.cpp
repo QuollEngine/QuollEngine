@@ -144,25 +144,13 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
   environment.data.irradianceMap = irradianceCubemap.data();
 
   auto createdFileRes = mAssetCache.createFromData(environment);
-
   if (!createdFileRes) {
     return createdFileRes.error();
   }
 
-  auto res = mAssetCache.request<EnvironmentAsset>(environment.uuid);
-  if (!res) {
-    return res.error();
-  }
-
-  auto env = res.data();
-
-  auto &registry = mAssetCache.getRegistry();
-
-  UUIDMap output{{"root", env.meta().uuid},
-                 {"irradiance", environment.data.irradianceMap.meta().uuid},
-                 {"specular", environment.data.specularMap.meta().uuid}};
-
-  return output;
+  return {UUIDMap{{"root", environment.uuid},
+                  {"irradiance", environment.data.irradianceMap.meta().uuid},
+                  {"specular", environment.data.specularMap.meta().uuid}}};
 }
 
 rhi::TextureHandle

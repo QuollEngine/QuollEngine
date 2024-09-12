@@ -118,7 +118,7 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   auto asset = createRandomizedAnimation();
 
   auto filePath = cache.createFromData(asset);
-  auto res = cache.request<quoll::AnimationAsset>(asset.uuid);
+  auto res = requestAndWait<quoll::AnimationAsset>(asset.uuid);
   EXPECT_TRUE(res);
 
   auto animation = res.data();

@@ -827,7 +827,10 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   // Texts
   for (auto [entity, text, world] :
        entityDatabase.view<Text, WorldTransform>()) {
-    const auto &font = text.font.get();
+    const auto &asset =
+        text.font ? text.font : mAssetRegistry.getDefaultObjects().defaultFont;
+
+    const auto &font = asset.get();
 
     std::vector<SceneRendererFrameData::GlyphData> glyphs(
         text.content.length());
@@ -854,7 +857,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       advanceX += fontGlyph.advanceX;
     }
 
-    frameData.addText(entity, mRendererAssetRegistry.get(text.font), glyphs,
+    frameData.addText(entity, mRendererAssetRegistry.get(asset), glyphs,
                       world.worldTransform);
   }
 

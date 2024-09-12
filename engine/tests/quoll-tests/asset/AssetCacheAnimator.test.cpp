@@ -191,7 +191,7 @@ TEST_F(AssetCacheAnimatorTest,
     stream << node;
     stream.close();
 
-    auto res = cache.request<quoll::AnimatorAsset>(uuid);
+    auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
     EXPECT_FALSE(res);
   }
 
@@ -208,7 +208,7 @@ TEST_F(AssetCacheAnimatorTest,
     stream << node;
     stream.close();
 
-    auto res = cache.request<quoll::AnimatorAsset>(uuid);
+    auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
     EXPECT_FALSE(res);
   }
 
@@ -225,7 +225,7 @@ TEST_F(AssetCacheAnimatorTest,
     stream << node;
     stream.close();
 
-    auto res = cache.request<quoll::AnimatorAsset>(uuid);
+    auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
     EXPECT_FALSE(res);
   }
 }
@@ -255,7 +255,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
 
   ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
-  auto res = cache.request<quoll::AnimatorAsset>(uuid);
+  auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
   EXPECT_TRUE(res.hasWarnings());
 
@@ -296,7 +296,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
 
   ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
-  auto res = cache.request<quoll::AnimatorAsset>(uuid);
+  auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
   EXPECT_TRUE(res.hasWarnings());
 
@@ -331,7 +331,7 @@ TEST_F(AssetCacheAnimatorTest,
 
     ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
-    auto res = cache.request<quoll::AnimatorAsset>(uuid);
+    auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
     EXPECT_TRUE(res);
     EXPECT_TRUE(res.hasWarnings());
     EXPECT_EQ(res.warnings().size(), 1);
@@ -359,7 +359,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorSetsInitialState) {
 
   ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
-  auto res = cache.request<quoll::AnimatorAsset>(uuid);
+  auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
@@ -398,7 +398,7 @@ TEST_F(AssetCacheAnimatorTest,
 
   ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
-  auto res = cache.request<quoll::AnimatorAsset>(uuid);
+  auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
@@ -475,7 +475,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
 
   ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
-  auto res = cache.request<quoll::AnimatorAsset>(uuid);
+  auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
   EXPECT_TRUE(res.hasWarnings());
   EXPECT_EQ(res.warnings().size(), 9);
@@ -510,7 +510,7 @@ TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
 
   ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
-  auto res = cache.request<quoll::AnimatorAsset>(uuid);
+  auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
@@ -545,7 +545,7 @@ TEST_F(AssetCacheAnimatorTest,
   auto uuid = quoll::Uuid::generate();
   ASSERT_TRUE(cache.createFromSource<quoll::AnimatorAsset>(FilePath, uuid));
 
-  auto res = cache.request<quoll::AnimatorAsset>(uuid);
+  auto res = requestAndWait<quoll::AnimatorAsset>(uuid);
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
@@ -569,7 +569,7 @@ TEST_F(AssetCacheAnimatorTest,
   animData.data.states.push_back({});
   auto animatorPath = cache.createFromData(animData);
 
-  auto result = cache.request<quoll::AnimatorAsset>(animData.uuid);
+  auto result = requestAndWait<quoll::AnimatorAsset>(animData.uuid);
   EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
 
@@ -579,8 +579,9 @@ TEST_F(AssetCacheAnimatorTest,
 
   animData.name = "new-name";
   cache.createFromData(animData);
+  cache.waitForIdle();
 
-  auto res = cache.request<quoll::AnimatorAsset>(animData.uuid);
+  auto res = requestAndWait<quoll::AnimatorAsset>(animData.uuid);
 
   auto newAnimator = res.data();
   EXPECT_EQ(newAnimator.handle(), oldAnimator.handle());

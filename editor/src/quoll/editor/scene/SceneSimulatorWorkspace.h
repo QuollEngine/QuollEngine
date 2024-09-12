@@ -6,7 +6,6 @@
 #include "quoll/renderer/SceneRenderer.h"
 #include "quoll/system/SystemView.h"
 #include "quoll/editor/actions/ActionExecutor.h"
-#include "quoll/editor/asset/AssetManager.h"
 #include "quoll/editor/ui/ShortcutsManager.h"
 #include "quoll/editor/workspace/Workspace.h"
 #include "quoll/editor/workspace/WorkspaceMatchParams.h"
@@ -16,6 +15,8 @@
 #include "ui/SceneSimulatorUI.h"
 
 namespace quoll::editor {
+
+class AssetManager;
 
 class SceneSimulatorWorkspace : public Workspace {
 public:

@@ -124,17 +124,22 @@ void loadSkeletons(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createFromData(asset);
-    auto skeleton = assetCache.request<SkeletonAsset>(asset.uuid);
+    auto ref = assetCache.request<SkeletonAsset>(asset.uuid);
 
-    if (skeleton) {
-      importData.skeletons.skeletonMap.map.insert_or_assign(
-          static_cast<usize>(si), skeleton.data());
-
-      importData.outputUuids.insert_or_assign(assetName,
-                                              skeleton.data().meta().uuid);
-    } else {
-      importData.warnings.push_back(skeleton.error());
+    if (!ref) {
+      importData.warnings.push_back(ref.error());
+      return;
     }
+
+    auto res = assetCache.waitForIdle(asset.uuid);
+    if (!res) {
+      importData.warnings.push_back(res.error());
+      return;
+    }
+
+    importData.skeletons.skeletonMap.map.insert_or_assign(
+        static_cast<usize>(si), ref.data());
+    importData.outputUuids.insert_or_assign(assetName, asset.uuid);
   }
 }
 

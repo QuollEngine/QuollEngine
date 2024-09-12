@@ -7,6 +7,7 @@
 #include "quoll/system/SystemView.h"
 #include "quoll/window/WindowSignals.h"
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheUtils.h"
 #include "TestPhysicsBackend.h"
 
 class LuaScriptingInterfaceTestBase : public ::testing::Test {
@@ -27,14 +28,7 @@ public:
 
   template <typename TAssetData>
   quoll::AssetRef<TAssetData> createAsset(TAssetData data = {}) {
-    quoll::AssetMeta meta{};
-    meta.type = quoll::AssetCache::getAssetType<TAssetData>();
-    meta.uuid = quoll::Uuid::generate();
-
-    auto handle = assetCache.getRegistry().allocate<TAssetData>(meta);
-    assetCache.getRegistry().store(handle, data);
-
-    return assetCache.request<TAssetData>(meta.uuid).data();
+    return createAssetInCache(assetCache, data);
   }
 
 protected:

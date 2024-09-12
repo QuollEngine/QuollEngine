@@ -3,6 +3,7 @@
 #include "quoll/editor/actions/HistoryActions.h"
 #include "quoll/editor/actions/SpawnEntityActions.h"
 #include "quoll/editor/actions/TypedActionCreator.h"
+#include "quoll/editor/asset/AssetManager.h"
 #include "quoll/editor/core/CameraLookAt.h"
 #include "quoll/editor/workspace/WorkspaceIO.h"
 #include "quoll/editor/workspace/WorkspaceLayoutRenderer.h"

@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetCache.h"
 #include "Skeleton.h"
 #include "SkeletonSerializer.h"
 

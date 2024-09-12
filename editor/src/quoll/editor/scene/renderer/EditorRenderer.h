@@ -6,6 +6,12 @@
 #include "quoll/editor/workspace/WorkspaceState.h"
 #include "EditorRendererFrameData.h"
 
+namespace quoll {
+
+class AssetRegistry;
+
+}
+
 namespace quoll::editor {
 
 class EditorRenderer {
@@ -16,7 +22,7 @@ class EditorRenderer {
   };
 
 public:
-  EditorRenderer(RenderStorage &renderStorage,
+  EditorRenderer(AssetRegistry &assetRegistry, RenderStorage &renderStorage,
                  RendererAssetRegistry &rendererAssetRegistry);
 
   void attach(RenderGraph &graph, const SceneRenderPassData &scenePassData,
@@ -55,6 +61,8 @@ private:
   std::array<EditorRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 
   rhi::SamplerHandle mTextOutlineSampler = rhi::SamplerHandle::Null;
+
+  AssetRegistry &mAssetRegistry;
 };
 
 } // namespace quoll::editor

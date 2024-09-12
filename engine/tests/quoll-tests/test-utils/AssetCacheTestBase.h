@@ -16,6 +16,28 @@ public:
     return createAssetInCache(cache, data);
   }
 
+  template <typename TAssetData>
+  quoll::Result<quoll::AssetRef<TAssetData>> requestAndWait(quoll::Uuid uuid) {
+    auto res = cache.request<TAssetData>(uuid);
+    if (!res) {
+      return res;
+    }
+
+    const auto &futures = cache.waitForIdle();
+
+    auto it = futures.find(uuid);
+    if (it == futures.end()) {
+      return res;
+    }
+
+    auto loadRes = it->second;
+    if (!loadRes) {
+      return loadRes.error();
+    }
+
+    return {res.data(), loadRes.warnings()};
+  }
+
   void SetUp() override;
 
   void TearDown() override;

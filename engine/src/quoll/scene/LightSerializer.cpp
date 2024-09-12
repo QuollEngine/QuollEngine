@@ -1,6 +1,8 @@
 #include "quoll/core/Base.h"
 #include "CascadedShadowMap.h"
+#include "DirectionalLight.h"
 #include "LightSerializer.h"
+#include "PointLight.h"
 
 namespace quoll {
 

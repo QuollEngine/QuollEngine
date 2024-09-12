@@ -47,9 +47,14 @@ AssetRef<TextureAsset> loadTexture(GLTFImportData &importData, usize index,
 
   auto texture = assetCache.request<TextureAsset>(uuid);
 
-  importData.outputUuids.insert_or_assign(assetName, uuid);
+  auto res = assetCache.waitForIdle(uuid);
+  if (!res) {
+    importData.warnings.push_back(res.error());
+  }
 
+  importData.outputUuids.insert_or_assign(assetName, uuid);
   importData.textures.map.insert_or_assign(index, texture);
+
   return texture;
 }
 

@@ -29,7 +29,7 @@ TEST_F(AssetCacheAudioTest, LoadsWavAudioFileIntoRegistry) {
   auto uuid = quoll::Uuid::generate();
 
   auto filePath = cache.createFromSource<quoll::AudioAsset>(audioPath, uuid);
-  auto result = cache.request<quoll::AudioAsset>(uuid);
+  auto result = requestAndWait<quoll::AudioAsset>(uuid);
 
   EXPECT_TRUE(result);
   EXPECT_FALSE(result.hasWarnings());
@@ -47,6 +47,6 @@ TEST_F(AssetCacheAudioTest, LoadsWavAudioFileIntoRegistry) {
 TEST_F(AssetCacheAudioTest, FileReturnsErrorIfAudioFileCannotBeOpened) {
   auto uuid = quoll::Uuid::generate();
 
-  auto result = cache.request<quoll::AudioAsset>(uuid);
+  auto result = requestAndWait<quoll::AudioAsset>(uuid);
   EXPECT_FALSE(result);
 }

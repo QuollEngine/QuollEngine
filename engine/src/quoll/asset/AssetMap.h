@@ -13,6 +13,8 @@ public:
 
 public:
   Handle allocate(const AssetMeta &meta) {
+    std::lock_guard lock(mAllocateMutex);
+
     QuollAssert(!meta.uuid.isEmpty(), "Invalid uuid provided");
     auto it = mAssetUuids.find(meta.uuid);
     auto handle = it != mAssetUuids.end() ? it->second : getNewHandle();
@@ -37,6 +39,8 @@ public:
   }
 
   void store(Handle handle, const TData &data) {
+    std::lock_guard lock(mStoreMutex);
+
     QuollAssert(mAssetMetas.contains(handle), "Asset does not exist");
     mAssetData.insert_or_assign(handle, data);
   }
@@ -112,6 +116,9 @@ private:
   std::unordered_map<Handle, AssetMeta> mAssetMetas;
   std::unordered_map<Handle, TData> mAssetData;
   std::unordered_map<Handle, u32> mAssetReferenceCounts;
+
+  std::mutex mStoreMutex;
+  std::mutex mAllocateMutex;
 };
 
 } // namespace quoll

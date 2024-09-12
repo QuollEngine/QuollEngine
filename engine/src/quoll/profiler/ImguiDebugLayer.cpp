@@ -200,7 +200,7 @@ template <typename TAssetData> static void renderAssetMap(AssetCache *cache) {
         ImGui::Text("%s", asset.name.c_str());
 
         ImGui::TableSetColumnIndex(2);
-        ImGui::Text("Yes");
+        ImGui::Text("%s", map.hasData(handle) ? "Yes" : "No");
 
         ImGui::TableSetColumnIndex(3);
         ImGui::Text("%d", map.getRefCount(handle));

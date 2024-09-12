@@ -6,9 +6,9 @@
 
 namespace quoll::editor {
 
-class ProjectSelectorScreen {
+class ProjectSelectorWindow {
 public:
-  ProjectSelectorScreen(Window &window, rhi::RenderDevice *device);
+  ProjectSelectorWindow(Window &window, rhi::RenderDevice *device);
 
   std::optional<Project> start();
 

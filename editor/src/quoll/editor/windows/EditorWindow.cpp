@@ -27,16 +27,16 @@
 #include "quoll/editor/ui/Widgets.h"
 #include "quoll/editor/workspace/WorkspaceManager.h"
 #include "quoll/editor/workspace/WorkspaceTabs.h"
-#include "EditorScreen.h"
+#include "EditorWindow.h"
 #include "ImGuizmo.h"
 
 namespace quoll::editor {
 
-EditorScreen::EditorScreen(Window &window, InputDeviceManager &deviceManager,
+EditorWindow::EditorWindow(Window &window, InputDeviceManager &deviceManager,
                            rhi::RenderDevice *device)
     : mDeviceManager(deviceManager), mWindow(window), mDevice(device) {}
 
-void EditorScreen::start(const Project &rawProject) {
+void EditorWindow::start(const Project &rawProject) {
   auto project = rawProject;
 
   LogMemoryStorage userLogStorage;
@@ -104,7 +104,8 @@ void EditorScreen::start(const Project &rawProject) {
 
   SceneRenderer sceneRenderer(assetManager.getAssetRegistry(), renderStorage,
                               rendererAssetRegistry);
-  EditorRenderer editorRenderer(renderStorage, rendererAssetRegistry);
+  EditorRenderer editorRenderer(assetManager.getAssetRegistry(), renderStorage,
+                                rendererAssetRegistry);
 
   renderer.setGraphBuilder([&](auto &graph, const auto &options) {
     auto scenePassGroup = sceneRenderer.attach(graph, options);
@@ -131,8 +132,6 @@ void EditorScreen::start(const Project &rawProject) {
 
   MainEngineModules engineModules(mDeviceManager, mWindow,
                                   assetManager.getCache());
-
-  mWindow.maximize();
 
   // Workspace manager
   WorkspaceManager workspaceManager;
@@ -254,10 +253,12 @@ void EditorScreen::start(const Project &rawProject) {
     metricsCollector.markForCollection();
   });
 
+  mWindow.maximize();
   mainLoop.run();
   Engine::resetLoggers();
 
   mDevice->waitForIdle();
+  assetManager.getCache().waitForIdle();
 }
 
 } // namespace quoll::editor
