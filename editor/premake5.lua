@@ -1,15 +1,28 @@
 project "QuollEditor"
     basedir "../workspace/editor"
+    kind "StaticLib"
+
+    includedirs {
+        "./lib",
+    }
+
+    loadSourceFiles("lib")
+
+project "QuollEditorApp"
+    basedir "../workspace/editor-app"
     kind "ConsoleApp"
     targetname "QuollEditor"
 
     includedirs {
-        "./src",
+        "./lib",
     }
 
-    loadSourceFiles{}
+    files {
+        "app/main.cpp"
+    }
+
     linkTracy{}
-    linkDependenciesWith{"QuollEngine", "imguizmo", "meshoptimizer"}
+    linkDependenciesWith{"QuollEditor", "QuollEngine", "imguizmo", "meshoptimizer"}
     linkSuffixed { "mikktspace" }
 
     linkVulkanRHI{}
@@ -60,22 +73,17 @@ project "QuollEditorTest"
     includedirs {
         "../editor/tests",
         "../engine/tests",
-        "../editor/src",
-        "../engine/src",
+        "../editor/lib",
+        "../engine/lib",
         "../rhi/mock/include"
     }
 
     files {
-        "src/**.cpp",
         "tests/**.cpp",
         "tests/**.h"
     }
 
-    removefiles {
-        "src/main.cpp"
-    }
-
-    linkDependenciesWith{"QuollEngine", "QuollRHIMock", "QuollRHICore", "imguizmo", "meshoptimizer"}
+    linkDependenciesWith{"QuollEditor", "QuollEngine", "QuollRHIMock", "QuollRHICore", "imguizmo", "meshoptimizer"}
     linkSuffixed { "mikktspace" }
 
     linkGoogleTest{}

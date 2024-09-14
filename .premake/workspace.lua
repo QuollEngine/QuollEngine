@@ -14,7 +14,7 @@ workspace "QuollEngine"
     setupTestingOptions{}
     
     includedirs {
-        "../engine/src",
+        "../engine/lib",
         "../rhi/core/include",
         "../platform/base/include"
     }

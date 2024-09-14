@@ -1,9 +1,11 @@
 -- Load all source and shader files into project
-function loadSourceFiles()
+function loadSourceFiles(src, assets)
+    assetsPath = assets or "assets"
+
     files {
-        "src/**.cpp",
-        "src/**.h",
-        "assets/**.vert",
-        "assets/**.frag"
+        src .. "/**.cpp",
+        src .. "/**.h",
+        assetsPath .. "/**.vert",
+        assetsPath .. "/**.frag"
     }
 end

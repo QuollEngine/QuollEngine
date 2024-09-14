@@ -57,6 +57,6 @@ function setupToolsetOptions()
     filter{}
 
     -- Disable edit and continue feature
-    -- in all toolset
+    -- in all toolsets
     editandcontinue "Off"
 end
