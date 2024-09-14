@@ -204,7 +204,7 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto res = cache.request<quoll::SkeletonAsset>(asset.uuid);
+  auto res = requestAndWait<quoll::SkeletonAsset>(asset.uuid);
   ASSERT_TRUE(res);
 
   auto skeleton = res.data();

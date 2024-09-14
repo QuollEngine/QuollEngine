@@ -52,8 +52,9 @@ public:
     stream.close();
 
     cache.createFromSource<quoll::InputMapAsset>(FilePath, uuid);
+    cache.waitForIdle();
 
-    return cache.request<quoll::InputMapAsset>(uuid);
+    return requestAndWait<quoll::InputMapAsset>(uuid);
   };
 };
 

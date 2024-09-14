@@ -226,15 +226,21 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto filePath = assetCache.createFromData(animation);
-    auto res = assetCache.request<AnimationAsset>(animation.uuid);
-    if (!res) {
+    auto ref = assetCache.request<AnimationAsset>(animation.uuid);
+    if (!ref) {
+      importData.warnings.push_back(ref.error());
       continue;
     }
 
-    auto animationAsset = res.data();
+    auto res = assetCache.waitForIdle(animation.uuid);
+    if (!res) {
+      importData.warnings.push_back(res.error());
+      continue;
+    }
 
-    importData.outputUuids.insert_or_assign(assetName,
-                                            animationAsset.meta().uuid);
+    auto animationAsset = ref.data();
+
+    importData.outputUuids.insert_or_assign(assetName, animation.uuid);
 
     if (targetSkin >= 0) {
       if (skinAnimationMap.find(targetSkin) == skinAnimationMap.end()) {
@@ -280,14 +286,21 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createFromData(asset);
-    auto animator = assetCache.request<AnimatorAsset>(asset.uuid);
-    if (animator) {
-      importData.animations.skinAnimatorMap.insert_or_assign(skin, animator);
-      importData.outputUuids.insert_or_assign(animatorName,
-                                              animator.data().meta().uuid);
-    } else {
-      importData.warnings.push_back(animator.error());
+    auto ref = assetCache.request<AnimatorAsset>(asset.uuid);
+
+    if (!ref) {
+      importData.warnings.push_back(ref.error());
+      continue;
     }
+
+    auto res = assetCache.waitForIdle(asset.uuid);
+    if (!res) {
+      importData.warnings.push_back(res.error());
+      continue;
+    }
+
+    importData.animations.skinAnimatorMap.insert_or_assign(skin, ref);
+    importData.outputUuids.insert_or_assign(animatorName, asset.uuid);
   }
 
   for (auto &[node, animations] : nodeAnimationMap) {
@@ -320,15 +333,21 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createFromData(asset);
-    auto animator = assetCache.request<AnimatorAsset>(asset.uuid);
-    if (animator) {
-      importData.animations.nodeAnimatorMap.insert_or_assign(node,
-                                                             animator.data());
-      importData.outputUuids.insert_or_assign(animatorName,
-                                              animator.data().meta().uuid);
-    } else {
-      importData.warnings.push_back(animator.error());
+    auto ref = assetCache.request<AnimatorAsset>(asset.uuid);
+
+    if (!ref) {
+      importData.warnings.push_back(ref.error());
+      continue;
     }
+
+    auto res = assetCache.waitForIdle(asset.uuid);
+    if (!res) {
+      importData.warnings.push_back(res.error());
+      continue;
+    }
+
+    importData.animations.nodeAnimatorMap.insert_or_assign(node, ref);
+    importData.outputUuids.insert_or_assign(animatorName, asset.uuid);
   }
 }
 

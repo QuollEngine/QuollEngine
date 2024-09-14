@@ -1,9 +1,10 @@
 #pragma once
 
-#include "quoll/editor/asset/AssetManager.h"
 #include "Action.h"
 
 namespace quoll::editor {
+
+class AssetManager;
 
 class ExportAsGame : public Action {
 public:

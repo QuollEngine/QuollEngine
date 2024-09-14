@@ -93,12 +93,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
     return createdFileRes.error();
   }
 
-  auto loadRes = mAssetCache.request<TextureAsset>(asset.uuid);
-  if (!loadRes) {
-    return loadRes.error();
-  }
-
-  return loadRes.data().meta().uuid;
+  return asset.uuid;
 }
 
 std::vector<u8> ImageLoader::generateMipMapsFromTextureData(

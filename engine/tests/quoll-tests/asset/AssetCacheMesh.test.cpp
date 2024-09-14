@@ -205,7 +205,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoVertices) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid);
+  auto mesh = requestAndWait<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(mesh);
 }
 
@@ -216,14 +216,14 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoIndices) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid);
+  auto mesh = requestAndWait<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(mesh);
 }
 
 TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = cache.createFromData(asset);
-  auto res = cache.request<quoll::MeshAsset>(asset.uuid);
+  auto res = requestAndWait<quoll::MeshAsset>(asset.uuid);
   ASSERT_TRUE(res);
 
   auto mesh = res.data();
@@ -366,7 +366,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoVertices) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid);
+  auto mesh = requestAndWait<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(mesh);
 }
 
@@ -377,7 +377,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
   }
 
   auto filePath = cache.createFromData(asset);
-  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid);
+  auto mesh = requestAndWait<quoll::MeshAsset>(asset.uuid);
   EXPECT_FALSE(mesh);
 }
 
@@ -385,7 +385,7 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
   auto filePath = cache.createFromData(asset);
-  auto mesh = cache.request<quoll::MeshAsset>(asset.uuid).data();
+  auto mesh = requestAndWait<quoll::MeshAsset>(asset.uuid).data();
   EXPECT_NE(mesh.handle(), quoll::AssetHandle<quoll::MeshAsset>());
   EXPECT_EQ(mesh.meta().name, asset.name);
 

@@ -52,6 +52,7 @@ function setupToolsetOptions()
         debugdir "$(TargetDir)"
         flags { "MultiProcessorCompile" }
         defines { "_CRT_SECURE_NO_WARNINGS" }
+        buildoptions { "/bigobj" }
 
     filter{}
 

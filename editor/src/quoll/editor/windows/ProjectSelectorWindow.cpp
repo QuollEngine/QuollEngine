@@ -14,15 +14,15 @@
 #include "quoll/editor/ui/StyleStack.h"
 #include "quoll/editor/ui/Theme.h"
 #include "quoll/editor/ui/Widgets.h"
-#include "ProjectSelectorScreen.h"
+#include "ProjectSelectorWindow.h"
 
 namespace quoll::editor {
 
-ProjectSelectorScreen::ProjectSelectorScreen(Window &window,
+ProjectSelectorWindow::ProjectSelectorWindow(Window &window,
                                              rhi::RenderDevice *device)
     : mWindow(window), mDevice(device) {}
 
-std::optional<Project> ProjectSelectorScreen::start() {
+std::optional<Project> ProjectSelectorWindow::start() {
   EntityDatabase entityDatabase;
   AssetRegistry assetRegistry;
   MetricsCollector metricsCollector;

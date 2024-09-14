@@ -459,14 +459,14 @@ TEST_F(AssetCachePrefabTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
 
   auto filePath = cache.createFromData(asset);
 
-  auto prefab = cache.request<quoll::PrefabAsset>(asset.uuid);
+  auto prefab = requestAndWait<quoll::PrefabAsset>(asset.uuid);
   EXPECT_FALSE(prefab);
 }
 
 TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
   auto filePath = cache.createFromData(asset);
-  auto res = cache.request<quoll::PrefabAsset>(asset.uuid);
+  auto res = requestAndWait<quoll::PrefabAsset>(asset.uuid);
   ASSERT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
 
@@ -584,7 +584,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   {
     // Create texture
-    auto texture = cache.request<quoll::TextureAsset>(textureUuid).data();
+    auto texture = requestAndWait<quoll::TextureAsset>(textureUuid).data();
 
     // Create mesh
     quoll::AssetData<quoll::MeshAsset> meshData{};
@@ -603,7 +603,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
     geometry.indices.push_back(0);
     meshData.data.geometries.push_back(geometry);
     auto meshPath = cache.createFromData(meshData).data();
-    auto mesh = cache.request<quoll::MeshAsset>(meshData.uuid).data();
+    auto mesh = requestAndWait<quoll::MeshAsset>(meshData.uuid).data();
 
     // Create skeleton
     quoll::AssetData<quoll::SkeletonAsset> skeletonData{};
@@ -611,7 +611,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
     auto skeletonPath = cache.createFromData(skeletonData);
     auto skeleton =
-        cache.request<quoll::SkeletonAsset>(skeletonData.uuid).data();
+        requestAndWait<quoll::SkeletonAsset>(skeletonData.uuid).data();
 
     // Create animation
     quoll::AssetData<quoll::AnimationAsset> animationData{};
@@ -619,7 +619,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
     animationData.uuid = animationUuid;
     auto animationPath = cache.createFromData(animationData);
     auto animation =
-        cache.request<quoll::AnimationAsset>(animationData.uuid).data();
+        requestAndWait<quoll::AnimationAsset>(animationData.uuid).data();
 
     // Create animator
     quoll::AssetData<quoll::AnimatorAsset> animatorData{};
@@ -627,7 +627,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
     animatorData.uuid = animatorUuid;
     auto animatorPath = cache.createFromData(animatorData);
     auto animator =
-        cache.request<quoll::AnimatorAsset>(animatorData.uuid).data();
+        requestAndWait<quoll::AnimatorAsset>(animatorData.uuid).data();
 
     // Create prefab
     quoll::AssetData<quoll::PrefabAsset> prefabData{};
@@ -646,7 +646,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   cache.getRegistry().clear<quoll::AnimationAsset>();
   cache.getRegistry().clear<quoll::AnimatorAsset>();
 
-  auto res = cache.request<quoll::PrefabAsset>(prefabUuid);
+  auto res = requestAndWait<quoll::PrefabAsset>(prefabUuid);
   ASSERT_TRUE(res);
 
   auto newPrefab = res.data();

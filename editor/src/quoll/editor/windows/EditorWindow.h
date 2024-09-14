@@ -6,9 +6,9 @@
 
 namespace quoll::editor {
 
-class EditorScreen {
+class EditorWindow {
 public:
-  EditorScreen(Window &window, InputDeviceManager &deviceManager,
+  EditorWindow(Window &window, InputDeviceManager &deviceManager,
                rhi::RenderDevice *device);
 
   void start(const Project &project);

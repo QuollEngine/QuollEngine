@@ -61,8 +61,7 @@ public:
   }
 
   template <typename TAssetData>
-  constexpr const AssetData<TAssetData> &
-  getMeta(AssetHandle<TAssetData> handle) const {
+  constexpr const AssetMeta &getMeta(AssetHandle<TAssetData> handle) const {
     const auto &map = getMap<TAssetData>();
     return map.getMeta(handle);
   }

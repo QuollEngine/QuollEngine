@@ -17,7 +17,6 @@ void loadMaterials(GLTFImportData &importData) {
     assetName += ".mat";
 
     AssetData<MaterialAsset> material;
-
     material.name = getGLTFAssetName(importData, assetName);
     material.uuid = getOrCreateGLTFUuid(importData, assetName);
     material.type = AssetType::Material;
@@ -91,14 +90,20 @@ void loadMaterials(GLTFImportData &importData) {
 
     auto path = assetCache.createFromData(material);
     auto ref = assetCache.request<MaterialAsset>(material.uuid);
-    if (ref) {
-      importData.materials.map.insert_or_assign(i, ref.data());
 
-      importData.outputUuids.insert_or_assign(assetName,
-                                              ref.data().meta().uuid);
-    } else {
+    if (!ref) {
       importData.warnings.push_back(ref.error());
+      return;
     }
+
+    auto res = assetCache.waitForIdle(material.uuid);
+    if (!res) {
+      importData.warnings.push_back(res.error());
+      return;
+    }
+
+    importData.materials.map.insert_or_assign(i, ref.data());
+    importData.outputUuids.insert_or_assign(assetName, material.uuid);
   }
 }
 

@@ -25,8 +25,8 @@ public:
 };
 
 TEST_F(AssetCacheEnvironmentTest, CreatesMetaFileFromAsset) {
-  auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
-  auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
+  auto irradianceMap = requestAndWait<quoll::TextureAsset>(irradianceUuid);
+  auto specularMap = requestAndWait<quoll::TextureAsset>(specularUuid);
 
   ASSERT_TRUE(irradianceMap);
   ASSERT_TRUE(specularMap);
@@ -45,8 +45,8 @@ TEST_F(AssetCacheEnvironmentTest, CreatesMetaFileFromAsset) {
 }
 
 TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
-  auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
-  auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
+  auto irradianceMap = requestAndWait<quoll::TextureAsset>(irradianceUuid);
+  auto specularMap = requestAndWait<quoll::TextureAsset>(specularUuid);
 
   ASSERT_TRUE(irradianceMap);
   ASSERT_TRUE(specularMap);
@@ -83,8 +83,8 @@ TEST_F(AssetCacheEnvironmentTest,
   auto uuid = quoll::Uuid::generate();
 
   {
-    auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
-    auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
+    auto irradianceMap = requestAndWait<quoll::TextureAsset>(irradianceUuid);
+    auto specularMap = requestAndWait<quoll::TextureAsset>(specularUuid);
 
     ASSERT_TRUE(irradianceMap);
     ASSERT_TRUE(specularMap);
@@ -100,7 +100,7 @@ TEST_F(AssetCacheEnvironmentTest,
 
   {
     std::filesystem::remove(cache.getPathFromUuid(irradianceUuid));
-    auto res = cache.request<quoll::EnvironmentAsset>(uuid);
+    auto res = requestAndWait<quoll::EnvironmentAsset>(uuid);
 
     EXPECT_FALSE(res);
     EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
@@ -111,7 +111,7 @@ TEST_F(AssetCacheEnvironmentTest,
         FixturesPath / "1x1-cubemap.ktx", irradianceUuid);
     std::filesystem::remove(cache.getPathFromUuid(specularUuid));
 
-    auto res = cache.request<quoll::EnvironmentAsset>(uuid);
+    auto res = requestAndWait<quoll::EnvironmentAsset>(uuid);
 
     EXPECT_FALSE(res);
     EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
@@ -123,8 +123,8 @@ TEST_F(AssetCacheEnvironmentTest,
   auto environmentUuid = quoll::Uuid::generate();
 
   {
-    auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
-    auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
+    auto irradianceMap = requestAndWait<quoll::TextureAsset>(irradianceUuid);
+    auto specularMap = requestAndWait<quoll::TextureAsset>(specularUuid);
 
     ASSERT_TRUE(irradianceMap);
     ASSERT_TRUE(specularMap);
@@ -140,7 +140,7 @@ TEST_F(AssetCacheEnvironmentTest,
 
   EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 0);
 
-  auto res = cache.request<quoll::EnvironmentAsset>(environmentUuid);
+  auto res = requestAndWait<quoll::EnvironmentAsset>(environmentUuid);
 
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());
@@ -155,8 +155,8 @@ TEST_F(AssetCacheEnvironmentTest,
 
 TEST_F(AssetCacheEnvironmentTest,
        LoadsEnvironmentAssetWithExistingTexturesIfTexturesAreLoaded) {
-  auto irradianceMap = cache.request<quoll::TextureAsset>(irradianceUuid);
-  auto specularMap = cache.request<quoll::TextureAsset>(specularUuid);
+  auto irradianceMap = requestAndWait<quoll::TextureAsset>(irradianceUuid);
+  auto specularMap = requestAndWait<quoll::TextureAsset>(specularUuid);
 
   ASSERT_TRUE(irradianceMap);
   ASSERT_TRUE(specularMap);
@@ -169,7 +169,7 @@ TEST_F(AssetCacheEnvironmentTest,
 
   EXPECT_EQ(cache.getRegistry().count<quoll::TextureAsset>(), 2);
 
-  auto res = cache.request<quoll::EnvironmentAsset>(asset.uuid);
+  auto res = requestAndWait<quoll::EnvironmentAsset>(asset.uuid);
 
   EXPECT_TRUE(res);
   EXPECT_FALSE(res.hasWarnings());

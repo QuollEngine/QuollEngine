@@ -438,16 +438,21 @@ void loadMeshes(GLTFImportData &importData) {
 
     auto path = assetCache.createFromData(mesh);
 
-    auto asset = assetCache.request<MeshAsset>(mesh.uuid);
-    if (asset) {
-      importData.meshes.map.insert_or_assign(i, asset.data());
-      importData.meshMaterials.insert_or_assign(asset.data().handle(),
-                                                materials);
-      importData.outputUuids.insert_or_assign(assetName,
-                                              asset.data().meta().uuid);
-    } else {
-      importData.warnings.push_back(asset.error());
+    auto ref = assetCache.request<MeshAsset>(mesh.uuid);
+    if (!ref) {
+      importData.warnings.push_back(ref.error());
+      return;
     }
+
+    auto res = assetCache.waitForIdle(mesh.uuid);
+    if (!res) {
+      importData.warnings.push_back(res.error());
+      return;
+    }
+
+    importData.meshes.map.insert_or_assign(i, ref.data());
+    importData.meshMaterials.insert_or_assign(ref.data().handle(), materials);
+    importData.outputUuids.insert_or_assign(assetName, mesh.uuid);
   }
 }
 

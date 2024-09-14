@@ -157,26 +157,6 @@ TEST_F(AssetManagerTest, SyncDeletesCacheFileIfAssetFileDoesNotExist) {
   EXPECT_FALSE(fs::exists(texturePath));
 }
 
-TEST_P(AssetTest, FailedImportDoesNotCreateAssetInCache) {
-  auto extension = std::get<0>(GetParam());
-  // Lua scripts are not compiled at load stage
-  // They are only compiled on start by the scripting
-  // manager
-  if (extension == "lua") {
-    return;
-  }
-
-  auto filename = "empty-asset." + extension;
-
-  std::ofstream stream(TempPath / filename, std::ios::binary);
-  stream.close();
-
-  auto res = manager.importAsset(TempPath / filename, AssetsPath);
-
-  EXPECT_FALSE(res);
-  EXPECT_FALSE(fs::exists(AssetsPath / filename));
-}
-
 TEST_P(AssetTest, ImportCopiesSourceToAssets) {
   auto extension = std::get<0>(GetParam());
   auto filename = "valid-asset." + extension;

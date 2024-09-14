@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetCache.h"
 #include "EnvironmentSkybox.h"
 #include "EnvironmentSkyboxSerializer.h"
 

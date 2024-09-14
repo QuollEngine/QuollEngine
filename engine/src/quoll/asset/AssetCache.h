@@ -29,13 +29,16 @@ public:
       return AssetRef(mRegistry.getMap<TAssetData>(), handle);
     }
 
-    auto res = load<TAssetData>(uuid);
-    if (!res) {
-      return res.error();
+    auto meta = getAssetMeta(uuid);
+    if (meta.type != getAssetType<TAssetData>()) {
+      return Error("Asset type is not " +
+                   getAssetTypeString(getAssetType<TAssetData>()));
     }
 
-    return Result(AssetRef(mRegistry.getMap<TAssetData>(), res.data()),
-                  res.warnings());
+    handle = mRegistry.allocate<TAssetData>(meta);
+    loadAsync(handle);
+
+    return Result(AssetRef(mRegistry.getMap<TAssetData>(), handle));
   }
 
   template <typename TAssetData>
@@ -64,10 +67,10 @@ public:
 
     auto handle = mRegistry.findHandleByUuid<TAssetData>(uuid);
     if (handle) {
-      auto loadRes = load<TAssetData>(uuid);
-      if (!loadRes) {
-        return loadRes.error();
-      }
+      const auto &meta = getAssetMeta(uuid);
+      handle = mRegistry.allocate<TAssetData>(meta);
+
+      loadAsync(handle);
     }
 
     return path;
@@ -110,10 +113,9 @@ public:
 
     auto handle = mRegistry.findHandleByUuid<TAssetData>(info.uuid);
     if (handle) {
-      auto loadRes = load<TAssetData>(info.uuid);
-      if (!loadRes) {
-        return res.error();
-      }
+      const auto &meta = getAssetMeta(info.uuid);
+      handle = mRegistry.allocate<TAssetData>(meta);
+      loadAsync(handle);
     }
 
     return path;
@@ -157,18 +159,33 @@ public:
     }
   }
 
+  std::unordered_map<Uuid, Result<void>> waitForIdle();
+
+  Result<void> waitForIdle(const Uuid &uuid);
+
 private:
   template <typename TAssetData>
-  Result<AssetHandle<TAssetData>> load(const Uuid &uuid) {
-    Result<TAssetData> data;
+  void loadAsync(AssetHandle<TAssetData> handle) {
+    mLoadCount++;
+    auto res = std::async([this, handle]() {
+      auto ret = load<TAssetData>(handle);
+      mLoadCount--;
+      mLoadComplete.notify_all();
+      return ret;
+    });
 
-    auto meta = getAssetMeta(uuid);
-    if (meta.type != getAssetType<TAssetData>()) {
-      return Error("Asset type is not " +
-                   getAssetTypeString(getAssetType<TAssetData>()));
-    }
+    std::lock_guard<std::mutex> lock(mFuturesMutex);
 
+    const auto &uuid = mRegistry.getMeta(handle).uuid;
+    mLoadFutures.insert_or_assign(uuid, std::move(res));
+  }
+
+  template <typename TAssetData>
+  Result<void> load(AssetHandle<TAssetData> handle) {
+    const auto &uuid = mRegistry.getMeta(handle).uuid;
     auto path = getPathFromUuid(uuid);
+
+    Result<TAssetData> data;
 
     if constexpr (std::is_same_v<TAssetData, TextureAsset>) {
       data = loadTexture(path);
@@ -202,10 +219,9 @@ private:
       return data.error();
     }
 
-    auto handle = mRegistry.allocate<TAssetData>(meta);
     mRegistry.store(handle, data.data());
 
-    return {handle, data.warnings()};
+    return Ok(data.warnings());
   }
 
   Result<TextureAsset> loadTexture(const Path &path);
@@ -251,15 +267,6 @@ private:
 
 private:
   template <typename TAssetData>
-  Uuid getAssetUuid(AssetHandle<TAssetData> handle) {
-    if (handle) {
-      return mRegistry.getMeta<TAssetData>(handle).uuid;
-    }
-
-    return Uuid{};
-  }
-
-  template <typename TAssetData>
   Uuid getAssetUuid(const AssetRef<TAssetData> &asset) {
     if (asset) {
       return asset.meta().uuid;
@@ -270,11 +277,14 @@ private:
 
   Result<Path> createAssetMeta(AssetType type, String name, Path path);
 
-  Result<void> loadAsset(const Path &path);
-
 private:
   AssetRegistry mRegistry;
   Path mAssetsPath;
+
+  std::unordered_map<Uuid, std::future<Result<void>>> mLoadFutures;
+  std::mutex mFuturesMutex;
+  std::condition_variable mLoadComplete;
+  std::atomic<u32> mLoadCount{0};
 };
 
 } // namespace quoll

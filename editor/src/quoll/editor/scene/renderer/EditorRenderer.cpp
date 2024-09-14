@@ -13,9 +13,10 @@
 
 namespace quoll::editor {
 
-EditorRenderer::EditorRenderer(RenderStorage &renderStorage,
+EditorRenderer::EditorRenderer(AssetRegistry &assetRegistry,
+                               RenderStorage &renderStorage,
                                RendererAssetRegistry &rendererAssetRegistry)
-    : mRenderStorage(renderStorage),
+    : mAssetRegistry(assetRegistry), mRenderStorage(renderStorage),
       mFrameData{EditorRendererFrameData(renderStorage),
                  EditorRendererFrameData(renderStorage)},
       mRendererAssetRegistry(rendererAssetRegistry) {
@@ -531,7 +532,13 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       }
     } else if (entityDatabase.has<Text>(state.selectedEntity)) {
       const auto &text = entityDatabase.get<Text>(state.selectedEntity);
-      const auto &font = text.font.get();
+
+      const auto &asset = text.font
+                              ? text.font
+                              : mAssetRegistry.getDefaultObjects().defaultFont;
+
+      const auto &font = asset.get();
+
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 
@@ -560,7 +567,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
         advanceX += fontGlyph.advanceX;
       }
 
-      frameData.addTextOutline(mRendererAssetRegistry.get(text.font), glyphs,
+      frameData.addTextOutline(mRendererAssetRegistry.get(asset), glyphs,
                                world.worldTransform);
     }
   }

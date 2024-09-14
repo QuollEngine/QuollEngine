@@ -136,35 +136,35 @@ private:
                               AssetRevision revision);
 
 private:
-  Result<UUIDMap> loadSourceAsset(const Path &sourceAssetPath,
-                                  const UUIDMap &uuids);
-
-  Result<UUIDMap> loadSourceTexture(const Path &sourceAssetPath,
+  Result<UUIDMap> createEngineAsset(const Path &sourceAssetPath,
                                     const UUIDMap &uuids);
 
-  Result<UUIDMap> loadSourceAudio(const Path &sourceAssetPath,
-                                  const UUIDMap &uuids);
+  Result<UUIDMap> createEngineTexture(const Path &sourceAssetPath,
+                                      const UUIDMap &uuids);
 
-  Result<UUIDMap> loadSourceScript(const Path &sourceAssetPath,
-                                   const UUIDMap &uuids);
+  Result<UUIDMap> createEngineAudio(const Path &sourceAssetPath,
+                                    const UUIDMap &uuids);
 
-  Result<UUIDMap> loadSourceFont(const Path &sourceAssetPath,
-                                 const UUIDMap &uuid);
-
-  Result<UUIDMap> loadSourceAnimator(const Path &sourceAssetPath,
-                                     const UUIDMap &uuids);
-
-  Result<UUIDMap> loadSourceInputMap(const Path &sourceAssetPath,
-                                     const UUIDMap &uuids);
-
-  Result<UUIDMap> loadSourcePrefab(const Path &sourceAssetPath,
-                                   const UUIDMap &uuids);
-
-  Result<UUIDMap> loadSourceEnvironment(const Path &sourceAssetPath,
+  Result<UUIDMap> createEngineLuaScript(const Path &sourceAssetPath,
                                         const UUIDMap &uuids);
 
-  Result<UUIDMap> loadSourceScene(const Path &sourceAssetPath,
-                                  const UUIDMap &uuids);
+  Result<UUIDMap> createEngineFont(const Path &sourceAssetPath,
+                                   const UUIDMap &uuid);
+
+  Result<UUIDMap> createEngineAnimator(const Path &sourceAssetPath,
+                                       const UUIDMap &uuids);
+
+  Result<UUIDMap> createEngineInputMap(const Path &sourceAssetPath,
+                                       const UUIDMap &uuids);
+
+  Result<UUIDMap> createEnginePrefab(const Path &sourceAssetPath,
+                                     const UUIDMap &uuids);
+
+  Result<UUIDMap> createEngineEnvironment(const Path &sourceAssetPath,
+                                          const UUIDMap &uuids);
+
+  Result<UUIDMap> createEngineScene(const Path &sourceAssetPath,
+                                    const UUIDMap &uuids);
 
 private:
   RenderStorage &mRenderStorage;

@@ -1,4 +1,6 @@
 #include "quoll/core/Base.h"
+#include "quoll/asset/AssetCache.h"
+#include "SkinnedMeshRenderer.h"
 #include "SkinnedMeshRendererSerializer.h"
 
 namespace quoll {
