@@ -19,7 +19,7 @@ project "QuollRuntime"
         "./src"
     }
 
-    loadSourceFiles{}
+    loadSourceFiles("src")
     linkDependenciesWith{"QuollEngine"}
     linkVulkanRHI{}
     linkTracy{}

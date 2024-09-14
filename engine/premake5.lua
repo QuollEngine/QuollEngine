@@ -37,15 +37,15 @@ project "QuollEngine"
     basedir "../workspace/engine"
     kind "StaticLib"
 
-    pchheader "../../engine/src/quoll/core/Base.h"
+    pchheader "../../engine/lib/quoll/core/Base.h"
 
     filter { "toolset:msc-*" }
         pchheader "quoll/core/Base.h"
-        pchsource "src/quoll/core/Base.cpp"
+        pchsource "lib/quoll/core/Base.cpp"
 
     filter{}
 
-    loadSourceFiles{}
+    loadSourceFiles("lib")
 
 project "QuollEngineTest"
     basedir "../workspace/engine-test"
@@ -57,7 +57,7 @@ project "QuollEngineTest"
 
     includedirs {
         "../engine/tests",
-        "../engine/src",
+        "../engine/lib",
         "../rhi/mock/include"
     }
 
