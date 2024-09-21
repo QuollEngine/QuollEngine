@@ -27,6 +27,7 @@ namespace quoll {
 template <class TData> class SparseSet {
   static constexpr usize SparseDataSize = 100;
 
+public:
   static constexpr usize Empty = std::numeric_limits<usize>::max();
   using Iterator = typename std::vector<TData>::iterator;
 
@@ -48,7 +49,8 @@ public:
   }
 
   void erase(usize key) {
-    QuollAssert(key < mSparseData.size(), "Index out of bounds");
+    QuollAssert(key < mSparseData.size(),
+                "Key is out of bounds: " + std::to_string(key));
 
     auto lastKey = size() - 1;
 
