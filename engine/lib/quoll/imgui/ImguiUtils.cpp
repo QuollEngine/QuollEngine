@@ -18,6 +18,7 @@ constexpr ImVec2 &operator+=(ImVec2 &a, const ImVec2 &b) {
 
 namespace quoll::imgui {
 
+// NOLINTNEXTLINE
 static RendererAssetRegistry *ImguiAssetRegistry = nullptr;
 
 inline ImTextureID getImguiTexture(quoll::rhi::TextureHandle handle) {

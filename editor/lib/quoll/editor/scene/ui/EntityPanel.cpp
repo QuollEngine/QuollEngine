@@ -1723,7 +1723,7 @@ void EntityPanel::renderSkybox(Scene &scene, AssetManager &assetManager,
 
         if (widgets::Button(fa::Times)) {
           auto newSkybox = skybox;
-          newSkybox.texture;
+          newSkybox.texture = AssetRef<EnvironmentAsset>();
           actionExecutor.execute<EntityUpdateComponent<EnvironmentSkybox>>(
               mSelectedEntity, skybox, newSkybox);
         }

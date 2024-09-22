@@ -960,7 +960,7 @@ void SceneRenderer::renderGeometries(rhi::RenderCommandList &commandList,
 
     commandList.drawIndexed(geometry.numIndices, indexOffset, vertexOffset,
                             numInstances, instanceStart);
-    vertexOffset += geometry.numVertices;
+    vertexOffset += static_cast<i32>(geometry.numVertices);
     indexOffset += geometry.numIndices;
   }
 }
@@ -1015,7 +1015,7 @@ void SceneRenderer::renderShadowsGeometries(rhi::RenderCommandList &commandList,
   for (const auto &geometry : drawData->geometries) {
     commandList.drawIndexed(geometry.numIndices, indexOffset, vertexOffset,
                             numInstances, instanceStart);
-    vertexOffset += geometry.numVertices;
+    vertexOffset += static_cast<i32>(geometry.numVertices);
     indexOffset += geometry.numIndices;
   }
 }

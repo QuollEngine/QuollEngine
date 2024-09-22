@@ -7,7 +7,7 @@ LogStream::LogStream(LogSeverity severity, LogTimestamp timestamp,
                      const LogTransport transport)
     : mSeverity(severity), mTimestamp(timestamp), mTransport(transport) {}
 
-LogStream::LogStream(LogStream &&rhs)
+LogStream::LogStream(LogStream &&rhs) noexcept
     : mSeverity(rhs.mSeverity), mTimestamp(rhs.mTimestamp),
       mTransport(rhs.mTransport), mStream(std::move(rhs.mStream)) {}
 
