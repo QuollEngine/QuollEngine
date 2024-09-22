@@ -15,7 +15,7 @@ public:
   explicit LogStream(LogSeverity severity, LogTimestamp timestamp,
                      LogTransport transport);
 
-  explicit LogStream(LogStream &&rhs);
+  explicit LogStream(LogStream &&rhs) noexcept;
 
   ~LogStream();
 

@@ -87,6 +87,8 @@ function Build-Header-Args {
     }
 }
 
+$global:GlobalExitCode = 0
+
 function Start-Clang-Tidy {
     param (
         $Path,
@@ -103,7 +105,7 @@ function Start-Clang-Tidy {
     
             clang-tidy --p=file --quiet $_.FullName -- --std=c++20 `
                 Create-Header-Paths $using:HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS
-        } -ThrottleLimit $Threads
+        } -ThrottleLimit $Threads 
     }
     else {
         if ($IsLinux) {
@@ -113,9 +115,9 @@ function Start-Clang-Tidy {
         Get-ChildItem -Recurse -Path $Path -Filter $Filter | ForEach-Object {
             clang-tidy --p=file --quiet $_.FullName -- --std=c++20 `
                 Create-Header-Paths $HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS
+            $global:GlobalExitCode = $global:GlobalExitCode -bor $LASTEXITCODE 
         } 
     }
-
 }
 
 if ($LintRHICore) {
@@ -152,4 +154,8 @@ if ($LintRuntime) {
     Write-Output "Checking Runtime files"
 
     Start-Clang-Tidy -Path "runtime/src" -Headers "./runtime/src", "./engine/lib", "./rhi/core/include", "./rhi/vulkan/include", "./platform/base/include"
+}
+
+if ($global:GlobalExitCode -gt 0) {
+    exit $global:GlobalExitCode
 }
