@@ -29,6 +29,7 @@ workspace "QuollEngine"
 
     filter {"configurations:Debug or configurations:Test"}
         defines { "QUOLL_DEBUG" }
+        optimize "Off"
         symbols "On"
 
     filter {"configurations:Release or configurations:Profile"}

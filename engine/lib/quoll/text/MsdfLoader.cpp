@@ -36,14 +36,12 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   }
 
   TightAtlasPacker packer;
-  packer.setDimensionsConstraint(
-      TightAtlasPacker::DimensionsConstraint::SQUARE);
-  packer.setDimensionsConstraint(
-      TightAtlasPacker::DimensionsConstraint::POWER_OF_TWO_SQUARE);
+  packer.setDimensionsConstraint(DimensionsConstraint::SQUARE);
+  packer.setDimensionsConstraint(DimensionsConstraint::POWER_OF_TWO_SQUARE);
   packer.setMinimumScale(GlyphScale);
   packer.setPixelRange(PixelRange);
   packer.setMiterLimit(1.0);
-  packer.setPadding(0);
+  packer.setSpacing(0);
   packer.pack(msdfGlyphs.data(), static_cast<int>(msdfGlyphs.size()));
 
   int width = 0, height = 0;

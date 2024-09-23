@@ -3,9 +3,7 @@
 #include "VulkanError.h"
 #include "VulkanMapping.h"
 #include "VulkanShader.h"
-
-#define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
-#include <spirv_reflect.h>
+#include <spirv-reflect/spirv_reflect.h>
 
 namespace quoll::rhi {
 
@@ -95,7 +93,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
         const SpvReflectBlockVariable &reflectBlock = *blk;
         VkPushConstantRange range{};
         range.offset = reflectBlock.offset;
-        range.size = reflectBlock.size;
+        range.size = reflectBlock.size - range.offset;
         range.stageFlags = mStage;
 
         mReflectionData.pushConstantRanges.push_back(range);

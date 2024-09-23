@@ -2,8 +2,8 @@
   "dependencies": [
     {
       "name": "msdf-atlas-gen",
-      "url": "https://github.com/Chlumsky/msdf-atlas-gen/archive/3cf874b39a2ea0acd316651cf10f5d13f75371fd.zip",
-      "buildSource": "msdf-atlas-gen-3cf874b39a2ea0acd316651cf10f5d13f75371fd",
+      "url": "https://github.com/Chlumsky/msdf-atlas-gen/archive/refs/tags/v1.3.zip",
+      "buildSource": "msdf-atlas-gen-1.3",
       "cmd": [
         {
           "type": "cmake",

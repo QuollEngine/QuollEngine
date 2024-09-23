@@ -315,9 +315,9 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
 
   };
 
-  commandList.pushConstants(
-      pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-      static_cast<u32>(sizeof(f32) * mvp.size()), mvp.data());
+  commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
+                            static_cast<u32>(sizeof(f32) * mvp.size()),
+                            mvp.data());
 }
 
 void ImguiRenderer::setClearColor(const glm::vec4 &clearColor) {

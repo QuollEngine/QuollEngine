@@ -21,42 +21,49 @@ runs:
   steps:
     - name: Install dependencies
       if: runner.os == 'Linux'
-      shell: bash
+      shell: pwsh
       run: |
-        # For GLFW
-        sudo apt-get update
-        sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev mono-complete 
 
     - uses: ./.github/actions/setup-vcpkg
     - name: Check vcpkg version
-      shell: bash
+      shell: pwsh
       run: ./vcpkg/vcpkg version
     - name: Setup Nuget as binary source provider
-      shell: bash
+      shell: pwsh
       env:
-        NUGET_SOURCE: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+        NUGET_SOURCE: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"	
       run: |
-        alias nuget="${{ inputs.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`"
-        nuget sources remove -name nuget.org
+        function nuget() {
+            $nugetPath = & ./vcpkg/vcpkg fetch nuget | Select-Object -Last 1
+            & ${{ inputs.mono }} $nugetPath @args
+        }
 
-        nuget sources add \
-          -name "GitHub" \
-          -source "$NUGET_SOURCE" \
-          -username "${{ github.repository_owner }}" \
-          -password "${{ inputs.token }}" \
-          -storepasswordincleartext 
+        nuget sources remove -name "nuget.org"
 
-        nuget setapikey "${{ inputs.token }}" -source "$NUGET_SOURCE"
+        nuget sources add `
+            -name "GitHub" `
+            -source $env:NUGET_SOURCE `
+            -username "${{ github.repository_owner }}" `
+            -password "${{ inputs.token }}" `
+            -storepasswordincleartext
 
+        nuget setapikey "${{ inputs.token }}" -source $env:NUGET_SOURCE
+    
     - name: Install packages
-      shell: bash
+      shell: pwsh
       env:
         VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,${{ inputs.cacheAction }}"
         VCPKG_USE_NUGET_CACHE: true
         DEBUG_INSTALL: false
       run: |
-        if [ $DEBUG_INSTALL == 'true' ]; then
-          ./vcpkg/vcpkg Install --triplet ${{ inputs.triplet }} --debug 
-        else
-          ./vcpkg/vcpkg Install --triplet ${{ inputs.triplet }} 
-        fi
+        if ($env:DEBUG_INSTALL -eq 'true') {
+         ./vcpkg/vcpkg install --triplet ${{ inputs.triplet }} --debug
+        } else {
+         ./vcpkg/vcpkg install --triplet ${{ inputs.triplet }}
+        }
+    - name: Install other dependencies (deprecated)
+      shell: pwsh
+      run: |
+        python3 project.py

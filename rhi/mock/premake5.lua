@@ -1,5 +1,5 @@
 project "QuollRHIMock"
-    basedir "../../../workspace/rhi-mock"
+    basedir "../../workspace/rhi-mock"
     kind "StaticLib"
 
     includedirs {
