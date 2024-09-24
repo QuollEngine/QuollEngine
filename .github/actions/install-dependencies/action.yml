@@ -24,7 +24,7 @@ runs:
       shell: pwsh
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y -qq libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev mono-complete 
+        sudo apt-get install -y -qq libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev mono-complete
 
     - uses: ./.github/actions/setup-vcpkg
     - name: Check vcpkg version
@@ -33,7 +33,7 @@ runs:
     - name: Setup Nuget as binary source provider
       shell: pwsh
       env:
-        NUGET_SOURCE: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"	
+        NUGET_SOURCE: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
       run: |
         function nuget() {
             $nugetPath = & ./vcpkg/vcpkg fetch nuget | Select-Object -Last 1
@@ -50,7 +50,7 @@ runs:
             -storepasswordincleartext
 
         nuget setapikey "${{ inputs.token }}" -source $env:NUGET_SOURCE
-    
+
     - name: Install packages
       shell: pwsh
       env:

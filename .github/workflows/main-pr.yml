@@ -126,7 +126,7 @@ jobs:
           premake5 vs2022
           msbuild .\workspace\QuollEngine.sln /p:configuration=Test
 
-      - name: Test 
+      - name: Test
         if: runner.os == 'Windows'
         run: |
           ./scripts/run-tests.ps1
