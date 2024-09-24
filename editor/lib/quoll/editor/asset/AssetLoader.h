@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/Result.h"
+#include "quoll/core/Result.h"
 
 namespace quoll::editor {
 

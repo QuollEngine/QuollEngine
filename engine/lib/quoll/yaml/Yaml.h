@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/asset/Result.h"
 #include <yaml-cpp/yaml.h>
 
 namespace YAML {
