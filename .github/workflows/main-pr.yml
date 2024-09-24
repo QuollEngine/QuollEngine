@@ -1,5 +1,9 @@
 name: Pull request checks
 
+defaults:
+  run:
+    shell: pwsh
+
 on:
   pull_request:
     branches: [main]
@@ -7,7 +11,7 @@ on:
 jobs:
   format-check:
     name: Format Check
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -15,7 +19,6 @@ jobs:
         uses: ./.github/actions/setup-compiler
 
       - name: Verify Clang Format
-        shell: pwsh
         run: ./scripts/clang-format-all.ps1 -Op verify
 
   build-dependencies:
@@ -25,7 +28,7 @@ jobs:
         system: [linux, windows]
         include:
           - system: linux
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             triplet: x64-linux
             mono: "mono"
           - system: windows
@@ -52,7 +55,7 @@ jobs:
         system: [linux]
         include:
           - system: linux
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             triplet: x64-linux
             mono: "mono"
     runs-on: ${{ matrix.os }}
@@ -72,13 +75,7 @@ jobs:
           mono: ${{ matrix.mono }}
           token: ${{ secrets.PACKAGES_DEPLOY_TOKEN }}
 
-      # Deprecated: Remove after full migration
-      - name: Install other dependencies (deprecated)
-        run: |
-          python3 project.py
-
       - name: Static Analysis
-        shell: pwsh
         run: |
           ./scripts/clang-tidy-all.ps1 -Threads 1
 
@@ -90,7 +87,7 @@ jobs:
         system: [linux, windows]
         include:
           - system: linux
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             triplet: x64-linux
             mono: "mono"
           - system: windows
@@ -99,12 +96,6 @@ jobs:
             mono: ""
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install lcov
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install lcov
-
       - uses: actions/checkout@v4
 
       - name: Setup compiler
@@ -123,16 +114,11 @@ jobs:
           mono: ${{ matrix.mono }}
           token: ${{ secrets.PACKAGES_DEPLOY_TOKEN }}
 
-      # Deprecated: Remove after full migration
-      - name: Install other dependencies (deprecated)
-        run: |
-          python3 project.py
-
       - name: Build (Makefile)
         if: runner.os == 'Linux'
         run: |
-          premake5 gmake
-          make --directory workspace -j$(nproc) config=test
+          premake5 gmake --cc=clang
+          make --directory workspace -j(nproc) config=test
 
       - name: Build (Visual studio)
         if: runner.os == 'Windows'
@@ -140,28 +126,22 @@ jobs:
           premake5 vs2022
           msbuild .\workspace\QuollEngine.sln /p:configuration=Test
 
-      - name: Test engine
+      - name: Test 
+        if: runner.os == 'Windows'
         run: |
-          cd workspace/engine-test/bin/Test
-          ./QuollEngineTest
+          ./scripts/run-tests.ps1
 
-      - name: Test editor
-        run: |
-          cd workspace/editor-test/bin/Test
-          ./QuollEditorTest
-
-      - name: Coverage
+      - name: Test and generate coverage report
         if: runner.os == 'Linux'
-        shell: pwsh
         run: |
-          ./scripts/generate-coverage-report.ps1
+          ./scripts/run-tests.ps1 -Coverage lcov
 
       - name: Upload to Codecov
         if: runner.os == 'Linux'
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/report.info
-          flags: engine-unit
+          files: ./coverage/QuollEngineTest.info,./coverage/QuollEditorTest.info
+          flags: all-tests
           verbose: true
           fail_ci_if_error: true

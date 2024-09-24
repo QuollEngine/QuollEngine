@@ -7,7 +7,6 @@
 #include "VulkanResourceAllocator.h"
 #include "VulkanResourceRegistry.h"
 #include "VulkanUploadContext.h"
-#include <vk_mem_alloc.h>
 
 namespace quoll::rhi {
 

@@ -4,11 +4,10 @@ runs:
   using: composite
   steps:
     - if: runner.os == 'Linux'
-      shell: bash
+      shell: pwsh
       run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh 16 all
+        sudo apt-get update -qq
+        sudo apt-get -y -qq install llvm-16 clang-16 clang-format-16 clang-tidy-16 lcov
 
         sudo update-alternatives --remove-all clang
         sudo update-alternatives --remove-all clang++
@@ -16,10 +15,11 @@ runs:
         sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-16 0
         sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-16 0
 
-        rm ./llvm.sh
-
         clang -v
         clang++ -v
+
+        Write-Output "CC=clang" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+        Write-Output "CXX=clang++" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
     - if: runner.os == 'Windows'
       uses: microsoft/setup-msbuild@v1.1

@@ -1,5 +1,9 @@
 name: Main push
 
+defaults:
+  run:
+    shell: pwsh
+
 on:
   push:
     branches: [main]
@@ -36,11 +40,6 @@ jobs:
           triplet: ${{ matrix.triplet }}
           mono: ${{ matrix.mono }}
           token: ${{ secrets.PACKAGES_DEPLOY_TOKEN }}
-
-      # Deprecated: Remove after full migration
-      - name: Install other dependencies (deprecated)
-        run: |
-          python3 project.py
 
       - name: Build
         run: |

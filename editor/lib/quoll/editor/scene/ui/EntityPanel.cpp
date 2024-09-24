@@ -1512,7 +1512,7 @@ void EntityPanel::renderLuaScript(Scene &scene, AssetCache &assetCache,
                       ? existingVariable.get<AssetRef<PrefabAsset>>()
                       : AssetRef<PrefabAsset>();
 
-              const auto width = ImGui::GetWindowContentRegionWidth();
+              const auto width = ImGui::GetContentRegionAvail().x;
               const f32 halfWidth = width * 0.5f;
               if (!value) {
                 widgets::Button("Drag prefab here", ImVec2(width, halfWidth));
@@ -1541,7 +1541,7 @@ void EntityPanel::renderLuaScript(Scene &scene, AssetCache &assetCache,
                       ? existingVariable.get<AssetRef<TextureAsset>>()
                       : AssetRef<TextureAsset>();
 
-              const auto width = ImGui::GetWindowContentRegionWidth();
+              const auto width = ImGui::GetContentRegionAvail().x;
               const f32 halfWidth = width * 0.5f;
               if (!value) {
                 widgets::Button("Drag texture here", ImVec2(width, halfWidth));

@@ -7,7 +7,6 @@
 #include "VulkanHeaders.h"
 #include "VulkanQueue.h"
 #include "VulkanSwapchain.h"
-#include <vk_mem_alloc.h>
 
 namespace quoll::rhi {
 

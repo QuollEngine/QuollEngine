@@ -1,5 +1,5 @@
 project "QuollRHIVulkan"
-    basedir "../../../workspace/rhi-vulkan"
+    basedir "../../workspace/rhi-vulkan"
     kind "StaticLib"
 
     includedirs {
@@ -14,6 +14,6 @@ project "QuollRHIVulkan"
     }
 
 function linkVulkanRHI()
-    links { "QuollRHIVulkan", "QuollRHICore", "volk", "spirv-reflect" }
+    links { "QuollRHIVulkan", "QuollRHICore", "volk", "spirv-reflect-static" }
     includedirs { "../rhi/vulkan/include" }
 end

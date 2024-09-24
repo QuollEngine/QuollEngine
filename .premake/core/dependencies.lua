@@ -46,7 +46,7 @@ function linkDependenciesWith(...)
     }
 
     links {
-        "spirv-reflect",
+        "spirv-reflect-static",
         "lua",
         "glfw3",
         "cryptopp",
@@ -54,8 +54,8 @@ function linkDependenciesWith(...)
         "zstd",
         "yogacore",
         "flecs_static",
-        "brotlidec-static",
-        "brotlicommon-static",
+        "brotlidec",
+        "brotlicommon",
         "PhysX_static_64",
         "PhysXPvdSDK_static_64",
         "PhysXExtensions_static_64",
