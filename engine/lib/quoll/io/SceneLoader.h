@@ -1,6 +1,6 @@
 #pragma once
 
-#include "quoll/asset/Result.h"
+#include "quoll/core/Result.h"
 #include "quoll/yaml/Yaml.h"
 
 namespace quoll {

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "quoll/core/Result.h"
 #include "quoll/asset/AssetHandle.h"
-#include "quoll/asset/Result.h"
 #include "quoll/entity/Entity.h"
 #include "quoll/scene/SceneAsset.h"
 #include "quoll/yaml/Yaml.h"
