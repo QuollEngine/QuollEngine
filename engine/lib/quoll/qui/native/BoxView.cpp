@@ -3,6 +3,12 @@
 
 namespace qui {
 
+void BoxView::render() {
+  if (mChild) {
+    mChild->render();
+  }
+}
+
 LayoutOutput BoxView::layout(const LayoutInput &input) {
   if (!mChild) {
     glm::vec2 size{};

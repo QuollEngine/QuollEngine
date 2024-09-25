@@ -15,6 +15,7 @@ public:
   constexpr void setHeight(f32 height) { mHeight = height; }
   constexpr void setBorderRadius(f32 radius) { mBorderRadius = radius; }
 
+  void render() override;
   LayoutOutput layout(const LayoutInput &input) override;
 
 public:
