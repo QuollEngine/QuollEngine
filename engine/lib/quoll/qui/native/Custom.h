@@ -5,7 +5,6 @@
 #include "../component/Element.h"
 #include "../reactive/Scope.h"
 
-
 namespace qui {
 
 class Custom : public Component {
@@ -15,7 +14,7 @@ class Custom : public Component {
 
 public:
   template <typename TFunction>
-  Custom(TFunction &&func, ArgTypes<TFunction> args) {
+  Custom(TFunction &func, ArgTypes<TFunction> args) {
     if constexpr (traits::tuple_is_first_same_v<
                       typename traits::function_traits<TFunction>::ArgTypes,
                       Scope>) {
@@ -44,13 +43,13 @@ template <typename TFunction> class CustomComponentFactory {
                                                    Scope>;
 
 public:
-  explicit CustomComponentFactory(TFunction &&func)
+  explicit constexpr CustomComponentFactory(TFunction &&func)
       : mFunc(std::forward<TFunction>(func)) {}
 
-  template <typename... Args> Element operator()(Args &&...args) {
+  template <typename... Args> Element operator()(Args &&...args) const {
     ArgTypes tuple = std::make_tuple(std::forward<Args>(args)...);
 
-    return std::move(Custom(std::forward<TFunction>(mFunc), tuple));
+    return std::move(Custom(mFunc, tuple));
   }
 
 private:

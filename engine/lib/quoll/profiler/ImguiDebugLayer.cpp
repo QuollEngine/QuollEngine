@@ -2,9 +2,14 @@
 #include "quoll/core/Property.h"
 #include "quoll/asset/AssetCache.h"
 #include "quoll/imgui/Imgui.h"
+#include "quoll/qui/Components.h"
 #include "ImguiDebugLayer.h"
 
 namespace quoll {
+
+static constexpr auto DemoQui = qui::component([]() -> qui::Element {
+  return qui::Text("Red text").color(qui::Color::Red);
+});
 
 ImguiDebugLayer::ImguiDebugLayer(
     const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
@@ -12,7 +17,9 @@ ImguiDebugLayer::ImguiDebugLayer(
     MetricsCollector &metricsCollector, AssetCache *assetCache)
     : mPhysicalDeviceInfo(physicalDeviceInfo), mFpsCounter(fpsCounter),
       mMetricsCollector(metricsCollector), mDeviceStats(deviceStats),
-      mAssetCache(assetCache) {}
+      mAssetCache(assetCache) {
+  mDemoTree = qui::Qui::createTree(DemoQui());
+}
 
 void ImguiDebugLayer::renderMenu() {
   if (ImGui::BeginMenu("Debug")) {
@@ -26,6 +33,7 @@ void ImguiDebugLayer::renderMenu() {
       ImGui::MenuItem("Assets", nullptr, &mAssetsVisible);
     }
     ImGui::MenuItem("Imgui demo", nullptr, &mDemoWindowVisible);
+    ImGui::MenuItem("Qui demo", nullptr, &mQuiVisible);
     ImGui::EndMenu();
   }
 }
@@ -36,6 +44,7 @@ void ImguiDebugLayer::render() {
   renderPerformanceMetrics();
   renderAssets();
   renderDemoWindow();
+  renderQui();
 }
 
 void ImguiDebugLayer::renderPerformanceMetrics() {
@@ -253,6 +262,18 @@ void ImguiDebugLayer::renderTableRow(StringView header, StringView value) {
   ImGui::Text("%s", String(header).c_str());
   ImGui::TableSetColumnIndex(1);
   ImGui::Text("%s", String(value).c_str());
+}
+
+void ImguiDebugLayer::renderQui() {
+  if (!mQuiVisible)
+    return;
+
+  if (ImGui::Begin("Qui", &mQuiVisible, ImGuiWindowFlags_NoDocking)) {
+    auto size = ImGui::GetWindowSize();
+    auto pos = ImGui::GetCursorScreenPos();
+    qui::Qui::render(mDemoTree, {pos.x, pos.y}, {size.x, size.y});
+  }
+  ImGui::End();
 }
 
 } // namespace quoll

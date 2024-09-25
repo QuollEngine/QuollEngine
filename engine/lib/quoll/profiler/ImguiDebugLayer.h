@@ -1,5 +1,6 @@
 #pragma once
 
+#include "quoll/qui/Qui.h"
 #include "quoll/rhi/DeviceStats.h"
 #include "quoll/rhi/PhysicalDeviceInformation.h"
 #include "FPSCounter.h"
@@ -33,6 +34,8 @@ private:
 
   void renderTableRow(StringView header, StringView value);
 
+  void renderQui();
+
 private:
   rhi::PhysicalDeviceInformation mPhysicalDeviceInfo;
   const FPSCounter &mFpsCounter;
@@ -45,6 +48,9 @@ private:
   bool mPerformanceMetricsVisible = false;
   bool mAssetsVisible = false;
   bool mDemoWindowVisible = false;
+  bool mQuiVisible = false;
+
+  qui::Tree mDemoTree;
 };
 
 } // namespace quoll

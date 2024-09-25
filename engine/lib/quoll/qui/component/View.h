@@ -32,6 +32,8 @@ class View {
 public:
   virtual ~View() = default;
 
+  virtual constexpr void render() {}
+
   virtual LayoutOutput layout(const LayoutInput &input) = 0;
 };
 

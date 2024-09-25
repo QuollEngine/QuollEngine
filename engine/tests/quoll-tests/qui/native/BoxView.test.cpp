@@ -9,6 +9,10 @@ public:
 
   qui::LayoutOutput output;
 
+  u32 rendered = 0;
+
+  void render() override { rendered++; }
+
   qui::LayoutOutput layout(const qui::LayoutInput &input) override {
     this->input = input;
     return output;
@@ -270,4 +274,13 @@ TEST_F(
   auto output = view.layout({constraints});
 
   EXPECT_EQ(output.size, glm::vec2(100.0f, 120.0f));
+}
+
+TEST_F(QuiBoxViewTest, RenderWorksIfNoChildRender) { view.render(); }
+
+TEST_F(QuiBoxViewTest, RenderCallsChildRender) {
+  view.setChild(&child);
+  view.render();
+
+  EXPECT_EQ(child.rendered, 1);
 }
