@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../component/Element.h"
 #include "Computation.h"
 #include "Signal.h"
 
@@ -31,6 +32,10 @@ public:
   constexpr Value(const char *data)
   requires std::same_as<TData, quoll::String>
       : mData(quoll::String(data)) {}
+
+  template <std::derived_from<Component> TComp>
+  requires std::same_as<TData, Element>
+  constexpr Value(TComp comp) : mData(Element(comp)) {}
 
   constexpr Value(Signal<TData> signal) : mData(signal.getNode()) {}
 

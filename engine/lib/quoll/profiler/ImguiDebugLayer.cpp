@@ -7,8 +7,16 @@
 
 namespace quoll {
 
-static constexpr auto DemoQui = qui::component([]() -> qui::Element {
-  return qui::Text("Red text").color(qui::Color::Red);
+static constexpr auto DemoQui = qui::component([]() {
+  static const f32 BorderRadius = 5.0f;
+  static const f32 Padding = 5.0f;
+
+  return qui::Box(qui::Text("Red text on a yellow background")
+                      .color(qui::Color::Red))
+      .padding(qui::EdgeInsets(Padding))
+      .background(qui::Color::Yellow)
+      .width(100.0f)
+      .borderRadius(BorderRadius);
 });
 
 ImguiDebugLayer::ImguiDebugLayer(

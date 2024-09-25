@@ -25,14 +25,19 @@ public:
   constexpr f32 getWidth() { return mWidth; }
   constexpr f32 getHeight() { return mHeight; }
   constexpr f32 getBorderRadius() { return mBorderRadius; }
+  constexpr glm::vec2 getPosition() { return mPosition; }
+  constexpr glm::vec2 getSize() { return mSize; }
 
 private:
   View *mChild = nullptr;
-  Color mBackground;
+  Color mBackground{Color::Transparent};
   EdgeInsets mPadding;
   f32 mWidth{0};
   f32 mHeight{0};
   f32 mBorderRadius{0};
+
+  glm::vec2 mPosition;
+  glm::vec2 mSize;
 };
 
 } // namespace qui

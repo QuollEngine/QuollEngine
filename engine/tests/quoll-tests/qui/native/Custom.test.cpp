@@ -33,7 +33,7 @@ private:
 };
 
 TEST_F(QuiCustomComponentTest, ComponentWithoutPropsCreatesElementOnCall) {
-  auto Test = qui::component([]() -> qui::Element { return Person("John"); });
+  auto Test = qui::component([]() { return Person("John"); });
 
   auto element = Test();
 
@@ -45,10 +45,8 @@ TEST_F(QuiCustomComponentTest, ComponentWithoutPropsCreatesElementOnCall) {
 }
 
 TEST_F(QuiCustomComponentTest, ComponentWithPropsCreatesElementOnCall) {
-  auto Test =
-      qui::component([](qui::Value<quoll::String> name) -> qui::Element {
-        return Person(name);
-      });
+  auto Test = qui::component(
+      [](qui::Value<quoll::String> name) { return Person(name); });
 
   auto element = Test("John");
 
@@ -60,7 +58,7 @@ TEST_F(QuiCustomComponentTest, ComponentWithPropsCreatesElementOnCall) {
 }
 
 TEST_F(QuiCustomComponentTest, ComponentWithScopeCreatesElementOnCall) {
-  auto Test = qui::component([](qui::Scope &scope) -> qui::Element {
+  auto Test = qui::component([](qui::Scope &scope) {
     auto name = scope.signal("John");
     return Person(name);
   });
@@ -75,8 +73,8 @@ TEST_F(QuiCustomComponentTest, ComponentWithScopeCreatesElementOnCall) {
 }
 
 TEST_F(QuiCustomComponentTest, ComponentWithScopeAndPropsCreatesElementOnCall) {
-  auto Test = qui::component(
-      [](qui::Scope &scope, qui::Value<quoll::String> name) -> qui::Element {
+  auto Test =
+      qui::component([](qui::Scope &scope, qui::Value<quoll::String> name) {
         auto fullName = scope.computation([name] { return name() + " Doe"; });
 
         return Person(fullName);
@@ -92,7 +90,7 @@ TEST_F(QuiCustomComponentTest, ComponentWithScopeAndPropsCreatesElementOnCall) {
 }
 
 TEST_F(QuiCustomComponentTest, BuildingComponnetBuildsTheResult) {
-  auto Test = qui::component([]() -> qui::Element { return Person("John"); });
+  auto Test = qui::component([]() { return Person("John"); });
 
   auto element = Test();
 
@@ -106,7 +104,7 @@ TEST_F(QuiCustomComponentTest, BuildingComponnetBuildsTheResult) {
 }
 
 TEST_F(QuiCustomComponentTest, GettingViewReturnsViewOfResult) {
-  auto Test = qui::component([]() -> qui::Element { return Person("John"); });
+  auto Test = qui::component([]() { return Person("John"); });
 
   auto element = Test();
 

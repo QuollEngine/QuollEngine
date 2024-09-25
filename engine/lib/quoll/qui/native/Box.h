@@ -52,7 +52,7 @@ public:
 
 private:
   Value<Element> mChild;
-  Value<Color> mBackground;
+  Value<Color> mBackground{Color::Transparent};
   Value<EdgeInsets> mPadding;
   Value<f32> mWidth{0};
   Value<f32> mHeight{0};
