@@ -1,24 +1,39 @@
 #include "quoll/core/Base.h"
 #include "BoxView.h"
+#include <imgui.h>
 
 namespace qui {
 
 void BoxView::render() {
+  if (mBackground != Color::Transparent) {
+    auto *drawList = ImGui::GetWindowDrawList();
+
+    drawList->AddRectFilled(
+        ImVec2(mPosition.x, mPosition.y),
+        ImVec2(mPosition.x + mSize.x, mPosition.y + mSize.y),
+        ImColor(mBackground.value.x, mBackground.value.y, mBackground.value.z,
+                mBackground.value.w),
+        mBorderRadius);
+  }
+
   if (mChild) {
+    ImGui::PushClipRect({mPosition.x, mPosition.y},
+                        {mPosition.x + mSize.x, mPosition.y + mSize.y}, true);
     mChild->render();
+    ImGui::PopClipRect();
   }
 }
 
 LayoutOutput BoxView::layout(const LayoutInput &input) {
+  mPosition = input.position;
+
   if (!mChild) {
-    glm::vec2 size{};
+    mSize.x = mWidth > 0 ? input.constraints.clampWidth(mWidth)
+                         : input.constraints.maxWidth;
+    mSize.y = mHeight > 0 ? input.constraints.clampHeight(mHeight)
+                          : input.constraints.maxHeight;
 
-    size.x = mWidth > 0 ? input.constraints.clampWidth(mWidth)
-                        : input.constraints.maxWidth;
-    size.y = mHeight > 0 ? input.constraints.clampHeight(mHeight)
-                         : input.constraints.maxHeight;
-
-    return {size};
+    return {mSize};
   }
 
   Constraints childConstraints = input.constraints;
@@ -56,10 +71,12 @@ LayoutOutput BoxView::layout(const LayoutInput &input) {
 
   auto output = mChild->layout({childConstraints, position});
 
-  output.size.x = constraints.clampWidth(output.size.x);
-  output.size.y = constraints.clampHeight(output.size.y);
+  mSize.x = constraints.clampWidth(output.size.x + mPadding.horizontal.start +
+                                   mPadding.horizontal.end);
+  mSize.y = constraints.clampHeight(output.size.y + mPadding.vertical.start +
+                                    mPadding.vertical.end);
 
-  return output;
+  return {mSize};
 }
 
 } // namespace qui

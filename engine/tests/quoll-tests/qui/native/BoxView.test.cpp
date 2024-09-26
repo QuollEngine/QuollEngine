@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll/qui/native/BoxView.h"
 #include "quoll-tests/Testing.h"
+#include <imgui.h>
 
 class TestView : public qui::View {
 public:
@@ -20,6 +21,20 @@ public:
 };
 
 class QuiBoxViewTest : public ::testing::Test {
+public:
+  void SetUp() override {
+    ImGui::CreateContext();
+    auto &io = ImGui::GetIO();
+    io.DisplaySize = ImVec2(800, 600);
+    io.Fonts->Build();
+    ImGui::NewFrame();
+  }
+
+  void TearDown() override {
+    ImGui::Render();
+    ImGui::DestroyContext();
+  }
+
 public:
   qui::BoxView view;
   TestView child;
@@ -188,7 +203,7 @@ TEST_F(QuiBoxViewTest, LayoutPassesInputPositionIfDimensionsAreSpecified) {
   EXPECT_EQ(child.input.position, position);
 }
 
-TEST_F(QuiBoxViewTest, LayoutReturnsChildSizeAsItsOwnSizeIfNoSizeIsProvided) {
+TEST_F(QuiBoxViewTest, LayoutReturnsChildSizePlusPaddingIfNoSizeIsProvided) {
   qui::Constraints constraints{0.0f, 0.0f, 100.0f, 100.0f};
   glm::vec2 position{10.0f, 20.0f};
 
@@ -200,12 +215,14 @@ TEST_F(QuiBoxViewTest, LayoutReturnsChildSizeAsItsOwnSizeIfNoSizeIsProvided) {
   view.setChild(&child);
   auto output = view.layout({constraints, position});
 
-  EXPECT_EQ(output.size, glm::vec2(50.0f, 70.0f));
+  EXPECT_EQ(output.size, glm::vec2(95.0f, 100.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(95.0f, 100.0f));
 }
 
-TEST_F(QuiBoxViewTest,
-       LayoutReturnsMinConstraintsIfChildSizeIsSmallerThanMinConstraints) {
-  qui::Constraints constraints{40.0f, 50.0f, 100.0f, 100.0f};
+TEST_F(
+    QuiBoxViewTest,
+    LayoutReturnsMinConstraintsIfChildSizePlusPaddingIsSmallerThanMinConstraints) {
+  qui::Constraints constraints{65.0f, 70.0f, 100.0f, 100.0f};
   glm::vec2 position{10.0f, 20.0f};
 
   child.output.size = {20.0f, 30.0f};
@@ -216,23 +233,25 @@ TEST_F(QuiBoxViewTest,
   view.setChild(&child);
   auto output = view.layout({constraints, position});
 
-  EXPECT_EQ(output.size, glm::vec2(50.0f, 40.0f));
+  EXPECT_EQ(output.size, glm::vec2(70.0f, 65.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(70.0f, 65.0f));
 }
 
-TEST_F(QuiBoxViewTest,
-       LayoutReturnsMaxConstraintsIfChildSizeIsLargerThanMaxConstraints) {
+TEST_F(
+    QuiBoxViewTest,
+    LayoutReturnsMaxConstraintsIfChildSizePlusPaddingIsLargerThanMaxConstraints) {
   qui::Constraints constraints{0.0f, 0.0f, 120.0f, 100.0f};
   glm::vec2 position{10.0f, 20.0f};
 
   child.output.size = {200.0f, 300.0f};
 
-  // Padding does not affect this
   view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 20.0f, 40.0f));
 
   view.setChild(&child);
   auto output = view.layout({constraints, position});
 
   EXPECT_EQ(output.size, glm::vec2(100.0f, 120.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(100.0f, 120.0f));
 }
 
 TEST_F(QuiBoxViewTest,
@@ -242,10 +261,13 @@ TEST_F(QuiBoxViewTest,
   view.setWidth(70.0f);
   view.setHeight(50.0f);
 
+  view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 20.0f, 40.0f));
+
   view.setChild(&child);
   auto output = view.layout({constraints});
 
   EXPECT_EQ(output.size, glm::vec2(70.0f, 50.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(70.0f, 50.0f));
 }
 
 TEST_F(
@@ -260,6 +282,7 @@ TEST_F(
   auto output = view.layout({constraints});
 
   EXPECT_EQ(output.size, glm::vec2(40.0f, 50.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(40.0f, 50.0f));
 }
 
 TEST_F(
@@ -274,9 +297,25 @@ TEST_F(
   auto output = view.layout({constraints});
 
   EXPECT_EQ(output.size, glm::vec2(100.0f, 120.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(100.0f, 120.0f));
 }
 
-TEST_F(QuiBoxViewTest, RenderWorksIfNoChildRender) { view.render(); }
+TEST_F(QuiBoxViewTest, LayoutSetsInputPositionAsViewPositionIfChildIsNotSet) {
+  glm::vec2 position{10.0f, 20.0f};
+  view.layout({{}, position});
+
+  EXPECT_EQ(view.getPosition(), position);
+}
+
+TEST_F(QuiBoxViewTest, LayoutSetsInputPositionAsViewPositionIfChildIsSet) {
+  glm::vec2 position{10.0f, 20.0f};
+  view.setChild(&child);
+  view.layout({{}, position});
+
+  EXPECT_EQ(view.getPosition(), position);
+}
+
+TEST_F(QuiBoxViewTest, RenderWorksIfNoChild) { view.render(); }
 
 TEST_F(QuiBoxViewTest, RenderCallsChildRender) {
   view.setChild(&child);
