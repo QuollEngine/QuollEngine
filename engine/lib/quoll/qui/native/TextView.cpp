@@ -16,9 +16,9 @@ void TextView::render() {
 LayoutOutput TextView::layout(const LayoutInput &input) {
   const auto &constraints = input.constraints;
   auto size =
-      ImGui::CalcTextSize(mText.c_str(), nullptr, true, constraints.maxWidth);
+      ImGui::CalcTextSize(mText.c_str(), nullptr, true, constraints.max.x);
 
-  mTextSize = {constraints.clampWidth(size.x), constraints.clampHeight(size.y)};
+  mTextSize = constraints.clamp({size.x, size.y});
 
   mPosition = input.position;
 
