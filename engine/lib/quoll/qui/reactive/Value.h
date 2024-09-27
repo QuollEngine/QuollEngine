@@ -37,6 +37,14 @@ public:
   requires std::same_as<TData, Element>
   constexpr Value(TComp comp) : mData(Element(comp)) {}
 
+  constexpr Value(std::initializer_list<Element> elements)
+  requires std::same_as<TData, std::vector<Element>>
+      : mData(std::vector<Element>{elements}) {}
+
+  template <std::derived_from<Component> TComp>
+  requires std::same_as<TData, std::vector<Element>>
+  constexpr Value(TComp comp) : mData(std::vector<Element>{comp}) {}
+
   constexpr Value(Signal<TData> signal) : mData(signal.getNode()) {}
 
   template <std::invocable TFunction>

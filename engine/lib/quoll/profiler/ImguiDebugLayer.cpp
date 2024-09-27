@@ -7,16 +7,52 @@
 
 namespace quoll {
 
-static constexpr auto DemoQui = qui::component([]() {
-  static const f32 BorderRadius = 5.0f;
-  static const f32 Padding = 5.0f;
+static constexpr auto ColoredText =
+    qui::component([](qui::Value<quoll::String> text) {
+      static constexpr f32 BoxSize = 40.0f;
+      return qui::Box(qui::Text(text).color(qui::Color::Yellow))
+          .background(qui::Color::Red)
+          .width(BoxSize)
+          .height(BoxSize);
+    });
 
-  return qui::Box(qui::Text("Red text on a yellow background")
-                      .color(qui::Color::Red))
-      .padding(qui::EdgeInsets(Padding))
-      .background(qui::Color::Yellow)
-      .width(100.0f)
-      .borderRadius(BorderRadius);
+static constexpr auto DemoQuiFlexbox = qui::component([]() {
+  static constexpr glm::vec2 BoxSize{200.0f, 300.0f};
+  static constexpr glm::vec2 Spacing{5.0f, 5.0f};
+  return qui::Box(qui::Flex({
+                                ColoredText("1"),
+                                ColoredText("2"),
+                                ColoredText("3"),
+                                ColoredText("4"),
+                                ColoredText("5"),
+                                ColoredText("6"),
+                                ColoredText("7"),
+                                ColoredText("8"),
+                            })
+                      .wrap(qui::Wrap::Wrap)
+                      .spacing(Spacing))
+      .width(BoxSize.x)
+      .height(BoxSize.y);
+});
+
+static constexpr auto DemoQui = qui::component([]() {
+  static constexpr f32 BorderRadius = 5.0f;
+  static constexpr f32 Padding = 5.0f;
+  static constexpr f32 Spacing = 10.0f;
+
+  return qui::Flex({qui::Box(qui::Text("Red text on a yellow background")
+                                 .color(qui::Color::Red))
+                        .padding(qui::EdgeInsets(Padding))
+                        .background(qui::Color::Yellow)
+                        .width(100.0f)
+                        .borderRadius(BorderRadius),
+
+                    qui::Box(qui::Text("Text with resizable sizing"))
+                        .background(qui::Color::White)
+                        .padding(qui::EdgeInsets(Padding)),
+
+                    DemoQuiFlexbox()})
+      .spacing(glm::vec2{Spacing, 0.0f});
 });
 
 ImguiDebugLayer::ImguiDebugLayer(
