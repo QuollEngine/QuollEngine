@@ -4,28 +4,38 @@ namespace qui {
 
 class Constraints {
 public:
-  f32 minHeight = 0.0f;
-  f32 minWidth = 0.0f;
-  f32 maxHeight = 0.0f;
-  f32 maxWidth = 0.0f;
+  static constexpr f32 Infinity = std::numeric_limits<f32>::infinity();
 
 public:
+  glm::vec2 min{0.0f, 0.0f};
+  glm::vec2 max{Infinity, Infinity};
+
+public:
+  constexpr Constraints() = default;
+  constexpr Constraints(f32 minWidth, f32 minHeight, f32 maxWidth,
+                        f32 maxHeight)
+      : min(minWidth, minHeight), max(maxWidth, maxHeight) {}
+
   constexpr f32 clampWidth(f32 width) const {
-    return std::clamp(width, minWidth, maxWidth);
+    return std::clamp(width, min.x, max.x);
   }
 
   constexpr f32 clampHeight(f32 height) const {
-    return std::clamp(height, minHeight, maxHeight);
+    return std::clamp(height, min.y, max.y);
+  }
+
+  constexpr glm::vec2 clamp(const glm::vec2 &size) const {
+    return glm::clamp(size, min, max);
   }
 };
 
 struct LayoutInput {
   Constraints constraints;
-  glm::vec2 position;
+  glm::vec2 position{0.0f, 0.0f};
 };
 
 struct LayoutOutput {
-  glm::vec2 size;
+  glm::vec2 size{0.0f, 0.0f};
 };
 
 class View {

@@ -29,9 +29,9 @@ LayoutOutput BoxView::layout(const LayoutInput &input) {
 
   if (!mChild) {
     mSize.x = mWidth > 0 ? input.constraints.clampWidth(mWidth)
-                         : input.constraints.maxWidth;
+                         : input.constraints.max.x;
     mSize.y = mHeight > 0 ? input.constraints.clampHeight(mHeight)
-                          : input.constraints.maxHeight;
+                          : input.constraints.max.y;
 
     return {mSize};
   }
@@ -41,28 +41,27 @@ LayoutOutput BoxView::layout(const LayoutInput &input) {
 
   if (mWidth > 0.0f) {
     auto width = input.constraints.clampWidth(mWidth);
-    childConstraints.maxWidth =
+    childConstraints.max.x =
         width - mPadding.horizontal.start - mPadding.horizontal.end;
-    childConstraints.minWidth = childConstraints.maxWidth;
+    childConstraints.min.x = childConstraints.max.x;
 
-    constraints.minWidth = width;
-    constraints.maxWidth = width;
+    constraints.min.x = width;
+    constraints.max.x = width;
   } else {
-    childConstraints.maxWidth -=
+    childConstraints.max.x -=
         mPadding.horizontal.start + mPadding.horizontal.end;
   }
 
   if (mHeight > 0.0f) {
     auto height = input.constraints.clampHeight(mHeight);
-    childConstraints.maxHeight =
+    childConstraints.max.y =
         height - mPadding.vertical.start - mPadding.vertical.end;
-    childConstraints.minHeight = childConstraints.maxHeight;
+    childConstraints.min.y = childConstraints.max.y;
 
-    constraints.minHeight = height;
-    constraints.maxHeight = height;
+    constraints.min.y = height;
+    constraints.max.y = height;
   } else {
-    childConstraints.maxHeight -=
-        mPadding.vertical.start + mPadding.vertical.end;
+    childConstraints.max.y -= mPadding.vertical.start + mPadding.vertical.end;
   }
 
   glm::vec2 position = input.position;

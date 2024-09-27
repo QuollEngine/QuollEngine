@@ -12,10 +12,7 @@ Tree Qui::createTree(Element &&element) {
 }
 
 void Qui::render(Tree &tree, glm::vec2 pos, glm::vec2 size) {
-  Constraints constraints{.minHeight = 0.0f,
-                          .minWidth = 0.0f,
-                          .maxHeight = size.y,
-                          .maxWidth = size.x};
+  Constraints constraints(0.0f, 0.0f, size.x, size.y);
   LayoutInput input{constraints, pos};
 
   auto output = tree.root.getComponent()->getView()->layout(input);

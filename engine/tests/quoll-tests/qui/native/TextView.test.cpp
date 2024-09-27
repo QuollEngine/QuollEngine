@@ -23,12 +23,7 @@ TEST_F(QuiTextViewTest, LayoutCalculatesTextSizeBasedOnConstraintMaxWidth) {
   qui::TextView view;
   view.setText("Hello world");
 
-  qui::Constraints constraints{
-      .minHeight = 0,
-      .minWidth = 0,
-      .maxHeight = 100,
-      .maxWidth = 50,
-  };
+  qui::Constraints constraints(0.0f, 0.0f, 50.0f, 100.0f);
 
   auto output = view.layout({.constraints = constraints, .position = {0, 0}});
   EXPECT_EQ(output.size, glm::vec2(35.0f, 26.0f));
@@ -39,13 +34,7 @@ TEST_F(QuiTextViewTest, LayoutConstraintTextSizeBasedOnInputConstraints) {
   view.setText("Hello world");
 
   // Imgui calculated text size is (35.0f, 26.0f)
-  qui::Constraints constraints{
-      .minHeight = 30.0f,
-      .minWidth = 40.0f,
-      .maxHeight = 60.0f,
-      .maxWidth = 50.0f,
-  };
-
+  qui::Constraints constraints(40.0f, 30.0f, 50.0f, 60.0f);
   auto output = view.layout({.constraints = constraints, .position = {0, 0}});
   EXPECT_EQ(output.size, glm::vec2(40.0f, 30.0f));
 }
