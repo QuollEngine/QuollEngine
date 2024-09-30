@@ -3,10 +3,10 @@
 
 namespace qui {
 
-void Custom::build() { mResult.getComponent()->build(); }
+void Custom::build() { mResult.build(); }
 
-View *Custom::getView() { return mResult.getComponent()->getView(); }
+View *Custom::getView() { return mResult.getView(); }
 
-Element &Custom::getResult() { return mResult; }
+const Element &Custom::getResult() const { return mResult; }
 
 } // namespace qui

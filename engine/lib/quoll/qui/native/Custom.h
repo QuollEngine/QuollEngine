@@ -29,7 +29,8 @@ public:
 
   View *getView() override;
 
-  Element &getResult();
+public:
+  const Element &getResult() const;
 
 private:
   Scope mScope;

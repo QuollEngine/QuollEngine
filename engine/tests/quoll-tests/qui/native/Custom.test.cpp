@@ -37,8 +37,9 @@ TEST_F(QuiCustomComponentTest, ComponentWithoutPropsCreatesElementOnCall) {
 
   auto element = Test();
 
-  auto *component = dynamic_cast<qui::Custom *>(element.getComponent());
-  auto *person = dynamic_cast<Person *>(component->getResult().getComponent());
+  auto *component = dynamic_cast<const qui::Custom *>(element.getComponent());
+  auto *person =
+      dynamic_cast<const Person *>(component->getResult().getComponent());
 
   EXPECT_EQ(person->getName(), "John");
   EXPECT_EQ(person->getAge(), 0);
@@ -50,8 +51,9 @@ TEST_F(QuiCustomComponentTest, ComponentWithPropsCreatesElementOnCall) {
 
   auto element = Test("John");
 
-  auto *component = dynamic_cast<qui::Custom *>(element.getComponent());
-  auto *person = dynamic_cast<Person *>(component->getResult().getComponent());
+  auto *component = dynamic_cast<const qui::Custom *>(element.getComponent());
+  auto *person =
+      dynamic_cast<const Person *>(component->getResult().getComponent());
 
   EXPECT_EQ(person->getName(), "John");
   EXPECT_EQ(person->getAge(), 0);
@@ -65,8 +67,9 @@ TEST_F(QuiCustomComponentTest, ComponentWithScopeCreatesElementOnCall) {
 
   auto element = Test();
 
-  auto *component = dynamic_cast<qui::Custom *>(element.getComponent());
-  auto *person = dynamic_cast<Person *>(component->getResult().getComponent());
+  auto *component = dynamic_cast<const qui::Custom *>(element.getComponent());
+  auto *person =
+      dynamic_cast<const Person *>(component->getResult().getComponent());
 
   EXPECT_EQ(person->getName(), "John");
   EXPECT_EQ(person->getAge(), 0);
@@ -82,8 +85,9 @@ TEST_F(QuiCustomComponentTest, ComponentWithScopeAndPropsCreatesElementOnCall) {
 
   auto element = Test("John");
 
-  auto *component = dynamic_cast<qui::Custom *>(element.getComponent());
-  auto *person = dynamic_cast<Person *>(component->getResult().getComponent());
+  auto *component = dynamic_cast<const qui::Custom *>(element.getComponent());
+  auto *person =
+      dynamic_cast<const Person *>(component->getResult().getComponent());
 
   EXPECT_EQ(person->getName(), "John Doe");
   EXPECT_EQ(person->getAge(), 0);
@@ -94,10 +98,11 @@ TEST_F(QuiCustomComponentTest, BuildingComponnetBuildsTheResult) {
 
   auto element = Test();
 
-  element.getComponent()->build();
+  element.build();
 
-  auto *component = dynamic_cast<qui::Custom *>(element.getComponent());
-  auto *person = dynamic_cast<Person *>(component->getResult().getComponent());
+  auto *component = dynamic_cast<const qui::Custom *>(element.getComponent());
+  auto *person =
+      dynamic_cast<const Person *>(component->getResult().getComponent());
 
   EXPECT_EQ(person->getName(), "John");
   EXPECT_EQ(person->getAge(), 20);
@@ -108,8 +113,7 @@ TEST_F(QuiCustomComponentTest, GettingViewReturnsViewOfResult) {
 
   auto element = Test();
 
-  auto *component = element.getComponent();
-  auto *view = dynamic_cast<PersonView *>(component->getView());
+  auto *view = dynamic_cast<PersonView *>(element.getView());
 
   ASSERT_NE(view, nullptr);
   EXPECT_EQ(view->data, 20);

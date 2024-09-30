@@ -35,8 +35,8 @@ void Flex::build() {
     auto &children = mChildren();
     std::vector<View *> viewChildren(children.size());
     for (usize i = 0; i < children.size(); ++i) {
-      children.at(i).getComponent()->build();
-      viewChildren.at(i) = children.at(i).getComponent()->getView();
+      children.at(i).build();
+      viewChildren.at(i) = children.at(i).getView();
     }
 
     mView.setChildren(viewChildren);

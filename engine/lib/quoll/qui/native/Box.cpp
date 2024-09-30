@@ -32,9 +32,9 @@ Box &Box::borderRadius(Value<f32> radius) {
 
 void Box::build() {
   auto observeChild = [this] {
-    if (mChild().getComponent() != nullptr) {
-      mChild().getComponent()->build();
-      mView.setChild(mChild().getComponent()->getView());
+    if (mChild()) {
+      mChild().build();
+      mView.setChild(mChild().getView());
     }
   };
 
