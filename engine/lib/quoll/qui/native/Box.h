@@ -43,12 +43,12 @@ public:
   constexpr View *getView() { return &mView; }
 
 public:
-  inline auto getChild() { return mChild(); }
-  constexpr auto getBackground() { return mBackground(); }
-  constexpr auto getPadding() { return mPadding(); }
-  constexpr auto getWidth() { return mWidth(); }
-  constexpr auto getHeight() { return mHeight(); }
-  constexpr auto getBorderRadius() { return mBorderRadius(); }
+  inline auto getChild() const { return mChild(); }
+  constexpr auto getBackground() const { return mBackground(); }
+  constexpr auto getPadding() const { return mPadding(); }
+  constexpr auto getWidth() const { return mWidth(); }
+  constexpr auto getHeight() const { return mHeight(); }
+  constexpr auto getBorderRadius() const { return mBorderRadius(); }
 
 private:
   Value<Element> mChild;

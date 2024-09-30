@@ -10,7 +10,7 @@ public:
 
 TEST_F(QuiTextTest, CreatesText) {
   qui::Element el = qui::Text("Hello world");
-  auto *text = static_cast<qui::Text *>(el.getComponent());
+  auto *text = static_cast<const qui::Text *>(el.getComponent());
 
   EXPECT_EQ(text->getText(), "Hello world");
   EXPECT_EQ(text->getColor(), qui::Color::Black);
@@ -18,7 +18,7 @@ TEST_F(QuiTextTest, CreatesText) {
 
 TEST_F(QuiTextTest, CreatesTextWithAllProps) {
   qui::Element el = qui::Text("Hello world").color(qui::Color::Red);
-  auto *text = static_cast<qui::Text *>(el.getComponent());
+  auto *text = static_cast<const qui::Text *>(el.getComponent());
 
   EXPECT_EQ(text->getText(), "Hello world");
   EXPECT_EQ(text->getColor(), qui::Color::Red);
@@ -27,9 +27,9 @@ TEST_F(QuiTextTest, CreatesTextWithAllProps) {
 TEST_F(QuiTextTest, BuildingTextUpdatesView) {
   qui::Element el = qui::Text("Hello world").color(qui::Color::Red);
 
-  el.getComponent()->build();
+  el.build();
 
-  auto *view = static_cast<qui::TextView *>(el.getComponent()->getView());
+  auto *view = static_cast<qui::TextView *>(el.getView());
 
   EXPECT_EQ(view->getText(), "Hello world");
   EXPECT_EQ(view->getColor(), qui::Color::Red);
@@ -41,8 +41,8 @@ TEST_F(QuiTextTest, UpdatingTextPropertiesAfterBuildUpdatesTheView) {
   auto color = scope.signal(qui::Color::Red);
 
   qui::Element el = qui::Text(text).color(color);
-  el.getComponent()->build();
-  auto *view = static_cast<qui::TextView *>(el.getComponent()->getView());
+  el.build();
+  auto *view = static_cast<qui::TextView *>(el.getView());
 
   EXPECT_EQ(view->getText(), "Hello world");
   EXPECT_EQ(view->getColor(), qui::Color::Red);

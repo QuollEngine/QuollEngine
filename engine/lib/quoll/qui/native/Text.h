@@ -20,8 +20,8 @@ public:
   constexpr View *getView() override { return &mView; }
 
 public:
-  constexpr auto getText() { return mText(); }
-  constexpr auto getColor() { return mColor(); }
+  constexpr auto getText() const { return mText(); }
+  constexpr auto getColor() const { return mColor(); }
 
 private:
   Value<quoll::String> mText;

@@ -2,38 +2,19 @@
 #include "quoll/qui/native/Box.h"
 #include "quoll/qui/reactive/Scope.h"
 #include "quoll-tests/Testing.h"
-
-class TestComponentView : public qui::View {
-public:
-  u32 value = 0;
-
-  qui::LayoutOutput layout(const qui::LayoutInput &input) override {
-    return qui::LayoutOutput{};
-  }
-};
-
-class TestComponent : public qui::Component {
-public:
-  TestComponent(u32 value) : value(value) {}
-
-  void build() override { mView.value = value; }
-
-  qui::View *getView() override { return &mView; }
-
-  u32 value;
-  TestComponentView mView;
-};
+#include "MockComponent.h"
 
 class QuiBoxTest : public ::testing::Test {
 public:
 };
 
 TEST_F(QuiBoxTest, CreatesBoxWithElements) {
-  qui::Element el = qui::Box(TestComponent(10));
+  qui::Element el = qui::Box(MockComponent(10));
 
-  auto *box = static_cast<qui::Box *>(el.getComponent());
+  auto *box = static_cast<const qui::Box *>(el.getComponent());
 
-  auto *test1 = static_cast<TestComponent *>(box->getChild().getComponent());
+  auto *test1 =
+      static_cast<const MockComponent *>(box->getChild().getComponent());
   EXPECT_EQ(test1->value, 10);
 
   EXPECT_EQ(box->getPadding(), qui::EdgeInsets(0.0f));
@@ -42,7 +23,7 @@ TEST_F(QuiBoxTest, CreatesBoxWithElements) {
   EXPECT_EQ(box->getHeight(), 0.0f);
   EXPECT_EQ(box->getBorderRadius(), 0.0f);
 
-  auto *view = static_cast<qui::BoxView *>(box->getView());
+  auto *view = static_cast<qui::BoxView *>(el.getView());
   EXPECT_EQ(view->getChild(), nullptr);
   EXPECT_EQ(view->getPadding(), qui::EdgeInsets(0.0f));
   EXPECT_EQ(view->getBackground(), qui::Color::Transparent);
@@ -51,16 +32,17 @@ TEST_F(QuiBoxTest, CreatesBoxWithElements) {
 }
 
 TEST_F(QuiBoxTest, CreatesBoxWithAllProps) {
-  qui::Element el = qui::Box(TestComponent(10))
+  qui::Element el = qui::Box(MockComponent(10))
                         .background(qui::Color::Red)
                         .padding(qui::EdgeInsets(3.5f))
                         .borderRadius(5.0f)
                         .width(10.0f)
                         .height(20.0f);
 
-  auto *box = static_cast<qui::Box *>(el.getComponent());
+  auto *box = static_cast<const qui::Box *>(el.getComponent());
 
-  auto *test1 = static_cast<TestComponent *>(box->getChild().getComponent());
+  auto *test1 =
+      static_cast<const MockComponent *>(box->getChild().getComponent());
   EXPECT_EQ(test1->value, 10);
 
   EXPECT_EQ(box->getPadding(), qui::EdgeInsets(3.5f));
@@ -69,7 +51,7 @@ TEST_F(QuiBoxTest, CreatesBoxWithAllProps) {
   EXPECT_EQ(box->getHeight(), 20.0f);
   EXPECT_EQ(box->getBorderRadius(), 5.0f);
 
-  auto *view = static_cast<qui::BoxView *>(box->getView());
+  auto *view = static_cast<qui::BoxView *>(el.getView());
   EXPECT_EQ(view->getChild(), nullptr);
   EXPECT_EQ(view->getPadding(), qui::EdgeInsets(0.0f));
   EXPECT_EQ(view->getBackground(), qui::Color::Transparent);
@@ -78,19 +60,18 @@ TEST_F(QuiBoxTest, CreatesBoxWithAllProps) {
 }
 
 TEST_F(QuiBoxTest, BuildingBoxUpdatesView) {
-  qui::Element el = qui::Box(TestComponent(10))
+  qui::Element el = qui::Box(MockComponent(10))
                         .background(qui::Color::Red)
                         .padding(qui::EdgeInsets(3.5f))
                         .borderRadius(5.0f)
                         .width(10.0f)
                         .height(20.0f);
 
-  auto *box = static_cast<qui::Box *>(el.getComponent());
-  box->build();
+  el.build();
 
-  auto *view = static_cast<qui::BoxView *>(box->getView());
+  auto *view = static_cast<qui::BoxView *>(el.getView());
 
-  auto *childView = static_cast<TestComponentView *>(view->getChild());
+  auto *childView = static_cast<MockView *>(view->getChild());
   EXPECT_EQ(childView->value, 10);
 
   EXPECT_EQ(view->getPadding(), qui::EdgeInsets(3.5f));
@@ -107,7 +88,7 @@ TEST_F(QuiBoxTest, UpdatingBoxPropertiesAfterBuildUpdatesTheView) {
   auto borderRadius = scope.signal(5.0f);
   auto width = scope.signal(10.0f);
   auto height = scope.signal(20.0f);
-  auto child = scope.signal<qui::Element>(TestComponent(10));
+  auto child = scope.signal<qui::Element>(MockComponent(10));
 
   qui::Element el = qui::Box(child)
                         .background(background)
@@ -116,13 +97,13 @@ TEST_F(QuiBoxTest, UpdatingBoxPropertiesAfterBuildUpdatesTheView) {
                         .width(width)
                         .height(height);
 
-  auto *box = static_cast<qui::Box *>(el.getComponent());
-  box->build();
+  auto *box = static_cast<const qui::Box *>(el.getComponent());
+  el.build();
 
-  auto *view = static_cast<qui::BoxView *>(box->getView());
+  auto *view = static_cast<qui::BoxView *>(el.getView());
 
   {
-    auto *childView = static_cast<TestComponentView *>(view->getChild());
+    auto *childView = static_cast<MockView *>(view->getChild());
     EXPECT_EQ(childView->value, 10);
 
     EXPECT_EQ(view->getPadding(), qui::EdgeInsets(3.5f));
@@ -132,8 +113,8 @@ TEST_F(QuiBoxTest, UpdatingBoxPropertiesAfterBuildUpdatesTheView) {
     EXPECT_EQ(view->getBorderRadius(), 5.0f);
   }
 
-  child.set(TestComponent(20));
-  auto *childView = static_cast<TestComponentView *>(view->getChild());
+  child.set(MockComponent(20));
+  auto *childView = static_cast<MockView *>(view->getChild());
   EXPECT_EQ(childView->value, 20);
 
   padding.set(qui::EdgeInsets(5.0f));

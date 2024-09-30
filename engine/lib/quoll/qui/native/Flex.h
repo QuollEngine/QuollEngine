@@ -21,12 +21,12 @@ public:
   View *getView() override { return &mView; }
 
 public:
-  constexpr auto getChildren() { return mChildren(); }
-  constexpr auto getDirection() { return mDirection(); }
-  constexpr auto getWrap() { return mWrap(); }
-  constexpr auto getShrink() { return mShrink(); }
-  constexpr auto getGrow() { return mGrow(); }
-  constexpr auto getSpacing() { return mSpacing(); }
+  constexpr auto getChildren() const { return mChildren(); }
+  constexpr auto getDirection() const { return mDirection(); }
+  constexpr auto getWrap() const { return mWrap(); }
+  constexpr auto getShrink() const { return mShrink(); }
+  constexpr auto getGrow() const { return mGrow(); }
+  constexpr auto getSpacing() const { return mSpacing(); }
 
 private:
   FlexView mView;
