@@ -3,7 +3,7 @@
 
 namespace qui {
 
-void Custom::build() { mResult.build(); }
+void Custom::build(BuildContext &context) { mResult.build(context); }
 
 View *Custom::getView() { return mResult.getView(); }
 

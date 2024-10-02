@@ -2,11 +2,9 @@
 #include "quoll/qui/component/Element.h"
 #include "quoll/qui/native/Text.h"
 #include "quoll/qui/reactive/Scope.h"
-#include "quoll-tests/Testing.h"
+#include "QuiComponentTest.h"
 
-class QuiTextTest : public testing::Test {
-public:
-};
+class QuiTextTest : public QuiComponentTest {};
 
 TEST_F(QuiTextTest, CreatesText) {
   qui::Element el = qui::Text("Hello world");
@@ -27,7 +25,7 @@ TEST_F(QuiTextTest, CreatesTextWithAllProps) {
 TEST_F(QuiTextTest, BuildingTextUpdatesView) {
   qui::Element el = qui::Text("Hello world").color(qui::Color::Red);
 
-  el.build();
+  el.build(buildContext);
 
   auto *view = static_cast<qui::TextView *>(el.getView());
 
@@ -41,7 +39,7 @@ TEST_F(QuiTextTest, UpdatingTextPropertiesAfterBuildUpdatesTheView) {
   auto color = scope.signal(qui::Color::Red);
 
   qui::Element el = qui::Text(text).color(color);
-  el.build();
+  el.build(buildContext);
   auto *view = static_cast<qui::TextView *>(el.getView());
 
   EXPECT_EQ(view->getText(), "Hello world");

@@ -14,6 +14,11 @@ public:
     return {size};
   }
 
+  constexpr bool hitTest(const glm::vec2 &pos) override {
+    return pos.x >= position.x && pos.x <= position.x + size.x &&
+           pos.y >= position.y && pos.y <= position.y + size.y;
+  }
+
 public:
   qui::LayoutInput input;
 

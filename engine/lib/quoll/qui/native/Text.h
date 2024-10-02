@@ -15,7 +15,7 @@ public:
 
   Text &color(Value<Color> color);
 
-  void build() override;
+  void build(BuildContext &context) override;
 
   constexpr View *getView() override { return &mView; }
 

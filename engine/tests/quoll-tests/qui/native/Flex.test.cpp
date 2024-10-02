@@ -1,10 +1,10 @@
 #include "quoll/core/Base.h"
 #include "quoll/qui/native/Flex.h"
 #include "quoll/qui/reactive/Scope.h"
-#include "quoll-tests/Testing.h"
 #include "MockComponent.h"
+#include "QuiComponentTest.h"
 
-class QuiFlexTest : public ::testing::Test {
+class QuiFlexTest : public QuiComponentTest {
 public:
 };
 
@@ -79,7 +79,7 @@ TEST_F(QuiFlexTest, BuildingFlexUpdatesView) {
                         .grow(3.0f)
                         .spacing(glm::vec2{2.0f, 5.0f});
 
-  el.build();
+  el.build(buildContext);
   auto *view = static_cast<qui::FlexView *>(el.getView());
 
   EXPECT_EQ(view->getChildren().size(), 2);
@@ -113,7 +113,7 @@ TEST_F(QuiFlexTest, UpdatingFlexPropertiesAfterBuildUpdatesTheView) {
                         .grow(grow)
                         .spacing(spacing);
 
-  el.build();
+  el.build(buildContext);
 
   auto *view = static_cast<qui::FlexView *>(el.getView());
 

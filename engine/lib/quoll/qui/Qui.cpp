@@ -6,7 +6,9 @@ namespace qui {
 
 Tree Qui::createTree(Element &&element) {
   Tree tree{.root = std::move(element)};
-  tree.root.build();
+
+  BuildContext context{};
+  tree.root.build(context);
 
   return tree;
 }

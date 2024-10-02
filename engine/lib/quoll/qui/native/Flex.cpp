@@ -30,12 +30,12 @@ Flex &Flex::spacing(Value<glm::vec2> spacing) {
   return *this;
 }
 
-void Flex::build() {
-  auto observeChildren = [this] {
+void Flex::build(BuildContext &context) {
+  auto observeChildren = [this, &context] {
     auto &children = mChildren();
     std::vector<View *> viewChildren(children.size());
     for (usize i = 0; i < children.size(); ++i) {
-      children.at(i).build();
+      children.at(i).build(context);
       viewChildren.at(i) = children.at(i).getView();
     }
 

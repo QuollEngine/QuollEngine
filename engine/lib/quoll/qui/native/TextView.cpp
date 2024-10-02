@@ -25,4 +25,9 @@ LayoutOutput TextView::layout(const LayoutInput &input) {
   return LayoutOutput{mTextSize};
 }
 
+bool TextView::hitTest(const glm::vec2 &point) {
+  return point.x >= mPosition.x && point.x <= mPosition.x + mTextSize.x &&
+         point.y >= mPosition.y && point.y <= mPosition.y + mTextSize.y;
+}
+
 } // namespace qui

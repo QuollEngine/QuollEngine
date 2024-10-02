@@ -45,6 +45,8 @@ public:
   virtual constexpr void render() {}
 
   virtual LayoutOutput layout(const LayoutInput &input) = 0;
+
+  virtual constexpr bool hitTest(const glm::vec2 &point) { return false; }
 };
 
 } // namespace qui

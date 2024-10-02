@@ -38,7 +38,7 @@ public:
 
   Box &borderRadius(Value<f32> radius);
 
-  void build() override;
+  void build(BuildContext &context) override;
 
   constexpr View *getView() { return &mView; }
 

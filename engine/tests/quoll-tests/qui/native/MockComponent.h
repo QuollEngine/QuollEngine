@@ -7,7 +7,7 @@ class MockComponent : public qui::Component {
 public:
   MockComponent(u32 value) : value(value) {}
 
-  void build() override {
+  void build(qui::BuildContext &context) override {
     mView.value = value;
     buildCount++;
   }

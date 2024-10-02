@@ -20,6 +20,8 @@ public:
 
   LayoutOutput layout(const LayoutInput &input) override;
 
+  bool hitTest(const glm::vec2 &point) override;
+
 public:
   constexpr auto getDirection() const { return mDirection; }
   constexpr auto getWrap() const { return mWrap; }

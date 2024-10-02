@@ -3,9 +3,9 @@
 
 namespace qui {
 
-void Element::build() {
+void Element::build(BuildContext &context) {
   if (!mBuilt) {
-    mComponent->build();
+    mComponent->build(context);
     mBuilt = true;
   }
 }

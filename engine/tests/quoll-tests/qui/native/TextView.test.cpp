@@ -46,3 +46,40 @@ TEST_F(QuiTextViewTest, LayoutSetsInputPositionAsTextViewPosition) {
   view.layout({.constraints = {}, .position = {40.0f, 50.0f}});
   EXPECT_EQ(view.getPosition(), glm::vec2(40.0f, 50.0f));
 }
+
+TEST_F(QuiTextViewTest, HitTestReturnsTrueIfPointIsWithinViewBounds) {
+  qui::TextView view;
+  view.setText("Hello world");
+
+  qui::Constraints constraints(0.0f, 0.0f, 50.0f, 100.0f);
+  auto output =
+      view.layout({.constraints = constraints, .position = {40.0f, 50.0f}});
+
+  EXPECT_TRUE(view.hitTest({40.0f, 50.0f}));
+  EXPECT_TRUE(view.hitTest({40.0f, 76.0f}));
+  EXPECT_TRUE(view.hitTest({75.0f, 50.0f}));
+  EXPECT_TRUE(view.hitTest({75.0f, 76.0f}));
+  EXPECT_TRUE(view.hitTest({60.0f, 65.0f}));
+}
+
+TEST_F(QuiTextViewTest, HitTestReturnsFalseIfPointIsOutsideOfViewBounds) {
+  qui::TextView view;
+  view.setText("Hello world");
+
+  qui::Constraints constraints(0.0f, 0.0f, 50.0f, 100.0f);
+  auto output =
+      view.layout({.constraints = constraints, .position = {40.0f, 50.0f}});
+
+  EXPECT_FALSE(view.hitTest({40.0f, 49.0f}));
+  EXPECT_FALSE(view.hitTest({40.0f, 77.0f}));
+  EXPECT_FALSE(view.hitTest({75.0f, 49.0f}));
+  EXPECT_FALSE(view.hitTest({75.0f, 77.0f}));
+
+  EXPECT_FALSE(view.hitTest({39.0f, 50.0f}));
+  EXPECT_FALSE(view.hitTest({76.0f, 50.0f}));
+  EXPECT_FALSE(view.hitTest({39.0f, 76.0f}));
+  EXPECT_FALSE(view.hitTest({76.0f, 76.0f}));
+
+  EXPECT_FALSE(view.hitTest({20.0f, 10.0f}));
+  EXPECT_FALSE(view.hitTest({120.0f, 160.0f}));
+}

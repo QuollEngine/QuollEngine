@@ -10,7 +10,7 @@ Text &Text::color(Value<Color> color) {
   return *this;
 }
 
-void Text::build() {
+void Text::build(BuildContext &context) {
   auto observeText = [this] { mView.setText(mText()); };
   auto observeColor = [this] { mView.setColor(mColor()); };
 

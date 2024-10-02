@@ -323,3 +323,36 @@ TEST_F(QuiBoxViewTest, RenderCallsChildRender) {
 
   EXPECT_EQ(child.rendered, 1);
 }
+
+TEST_F(QuiBoxViewTest, HitTestReturnsTrueIfPointIsWithinViewBounds) {
+  view.setWidth(50.0f);
+  view.setHeight(100.0f);
+  view.setChild(&child);
+  auto output = view.layout({.position = {40.0f, 50.0f}});
+
+  EXPECT_TRUE(view.hitTest({40.0f, 50.0f}));
+  EXPECT_TRUE(view.hitTest({40.0f, 150.0f}));
+  EXPECT_TRUE(view.hitTest({90.0f, 50.0f}));
+  EXPECT_TRUE(view.hitTest({90.0f, 150.0f}));
+  EXPECT_TRUE(view.hitTest({80.0f, 120.0f}));
+}
+
+TEST_F(QuiBoxViewTest, HitTestReturnsFalseIfPointIsOutsideOfViewBounds) {
+  view.setWidth(50.0f);
+  view.setHeight(100.0f);
+  view.setChild(&child);
+  auto output = view.layout({.position = {40.0f, 50.0f}});
+
+  EXPECT_FALSE(view.hitTest({40.0f, 49.0f}));
+  EXPECT_FALSE(view.hitTest({40.0f, 151.0f}));
+  EXPECT_FALSE(view.hitTest({90.0f, 49.0f}));
+  EXPECT_FALSE(view.hitTest({09.0f, 151.0f}));
+
+  EXPECT_FALSE(view.hitTest({39.0f, 50.0f}));
+  EXPECT_FALSE(view.hitTest({91.0f, 50.0f}));
+  EXPECT_FALSE(view.hitTest({39.0f, 150.0f}));
+  EXPECT_FALSE(view.hitTest({91.0f, 150.0f}));
+
+  EXPECT_FALSE(view.hitTest({20.0f, 10.0f}));
+  EXPECT_FALSE(view.hitTest({120.0f, 160.0f}));
+}
