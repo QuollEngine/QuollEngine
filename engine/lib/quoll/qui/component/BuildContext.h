@@ -1,7 +1,11 @@
 #pragma once
 
+#include "EventManager.h"
+
 namespace qui {
 
-struct BuildContext {};
+struct BuildContext {
+  EventManager *eventManager = nullptr;
+};
 
 } // namespace qui

@@ -7,18 +7,16 @@
 
 namespace quoll {
 
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 static constexpr auto ColoredText =
     qui::component([](qui::Value<quoll::String> text) {
-      static constexpr f32 BoxSize = 40.0f;
       return qui::Box(qui::Text(text).color(qui::Color::Yellow))
           .background(qui::Color::Red)
-          .width(BoxSize)
-          .height(BoxSize);
+          .width(40.0f)
+          .height(40.0f);
     });
 
 static constexpr auto DemoQuiFlexbox = qui::component([]() {
-  static constexpr glm::vec2 BoxSize{200.0f, 300.0f};
-  static constexpr glm::vec2 Spacing{5.0f, 5.0f};
   return qui::Box(qui::Flex({
                                 ColoredText("1"),
                                 ColoredText("2"),
@@ -30,30 +28,75 @@ static constexpr auto DemoQuiFlexbox = qui::component([]() {
                                 ColoredText("8"),
                             })
                       .wrap(qui::Wrap::Wrap)
-                      .spacing(Spacing))
-      .width(BoxSize.x)
-      .height(BoxSize.y);
+                      .spacing(glm::vec2(5.0f)))
+      .width(200.0f)
+      .height(300.0f);
+});
+
+struct ButtonStyle {
+  qui::Color color;
+  qui::Color backgroundColor;
+};
+
+static constexpr auto ColoredButton = qui::component(
+    [](qui::Scope &scope, qui::Value<quoll::String> text,
+       qui::Value<ButtonStyle> style, qui::Value<ButtonStyle> hoverStyle,
+       qui::Value<ButtonStyle> activeStyle) {
+      auto hovered = scope.signal(false);
+      auto clicked = scope.signal(false);
+
+      auto color =
+          scope.computation([hovered, clicked, hoverStyle, activeStyle, style] {
+            if (hovered()) {
+              return hoverStyle().color;
+            }
+
+            return clicked() ? activeStyle().color : style().color;
+          });
+
+      auto backgroundColor =
+          scope.computation([hovered, clicked, hoverStyle, activeStyle, style] {
+            if (hovered()) {
+              return hoverStyle().backgroundColor;
+            }
+
+            return clicked() ? activeStyle().backgroundColor
+                             : style().backgroundColor;
+          });
+
+      return qui::Pressable(qui::Box(qui::Text(text).color(color))
+                                .padding(qui::EdgeInsets(5.0f))
+                                .background(backgroundColor))
+          .onHoverIn([hovered](const auto &) mutable { hovered.set(true); })
+          .onHoverOut([hovered](const auto &) mutable { hovered.set(false); })
+          .onPress(
+              [clicked](const auto &) mutable { clicked.set(!clicked()); });
+    });
+
+static constexpr auto DemoPressable = qui::component([]() {
+  return ColoredButton(
+      "Hello world",
+      ButtonStyle{.color = qui::Color::White, .backgroundColor = 0x2e86deff},
+      ButtonStyle{.color = qui::Color::White, .backgroundColor = 0x54a0ffff},
+      ButtonStyle{.color = qui::Color::White, .backgroundColor = 0xee5253ff});
 });
 
 static constexpr auto DemoQui = qui::component([]() {
-  static constexpr f32 BorderRadius = 5.0f;
-  static constexpr f32 Padding = 5.0f;
-  static constexpr f32 Spacing = 10.0f;
-
   return qui::Flex({qui::Box(qui::Text("Red text on a yellow background")
                                  .color(qui::Color::Red))
-                        .padding(qui::EdgeInsets(Padding))
+                        .padding(qui::EdgeInsets(5.0f))
                         .background(qui::Color::Yellow)
                         .width(100.0f)
-                        .borderRadius(BorderRadius),
+                        .borderRadius(5.0f),
 
                     qui::Box(qui::Text("Text with resizable sizing"))
                         .background(qui::Color::White)
-                        .padding(qui::EdgeInsets(Padding)),
+                        .padding(qui::EdgeInsets(5.0f)),
 
-                    DemoQuiFlexbox()})
-      .spacing(glm::vec2{Spacing, 0.0f});
+                    DemoQuiFlexbox(), DemoPressable()})
+      .spacing(glm::vec2{10.0f, 0.0f});
 });
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 ImguiDebugLayer::ImguiDebugLayer(
     const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
