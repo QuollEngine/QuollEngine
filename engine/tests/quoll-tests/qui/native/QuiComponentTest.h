@@ -5,5 +5,6 @@
 
 class QuiComponentTest : public ::testing::Test {
 public:
-  qui::BuildContext buildContext{};
+  qui::EventManager eventManager;
+  qui::BuildContext buildContext{&eventManager};
 };
