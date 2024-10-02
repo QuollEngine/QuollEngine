@@ -1,35 +1,27 @@
 #include "quoll/core/Base.h"
 #include "quoll/qui/native/Custom.h"
 #include "quoll/qui/reactive/Value.h"
-#include "quoll-tests/Testing.h"
+#include "MockView.h"
+#include "QuiComponentTest.h"
 
-class QuiCustomComponentTest : public ::testing::Test {};
-
-class PersonView : public qui::View {
-public:
-  int data = 20;
-
-  qui::LayoutOutput layout(const qui::LayoutInput &input) override {
-    return qui::LayoutOutput{};
-  }
-};
+class QuiCustomComponentTest : public QuiComponentTest {};
 
 class Person : public qui::Component {
 public:
-  Person(qui::Value<quoll::String> name) : mName(name) {}
+  Person(qui::Value<quoll::String> name) : mName(name) { mView.value = 20; }
 
-  void build() override { mAge = 20; }
+  void build(qui::BuildContext &context) override { mAge = 20; }
 
   constexpr quoll::String getName() const { return mName(); }
 
   constexpr uint32_t getAge() const { return mAge; }
 
-  qui::View *getView() override { return &mPersonView; }
+  qui::View *getView() override { return &mView; }
 
 private:
   qui::Value<quoll::String> mName;
   uint32_t mAge = 0;
-  PersonView mPersonView;
+  MockView mView;
 };
 
 TEST_F(QuiCustomComponentTest, ComponentWithoutPropsCreatesElementOnCall) {
@@ -98,7 +90,7 @@ TEST_F(QuiCustomComponentTest, BuildingComponnetBuildsTheResult) {
 
   auto element = Test();
 
-  element.build();
+  element.build(buildContext);
 
   auto *component = dynamic_cast<const qui::Custom *>(element.getComponent());
   auto *person =
@@ -113,8 +105,8 @@ TEST_F(QuiCustomComponentTest, GettingViewReturnsViewOfResult) {
 
   auto element = Test();
 
-  auto *view = dynamic_cast<PersonView *>(element.getView());
+  auto *view = dynamic_cast<MockView *>(element.getView());
 
   ASSERT_NE(view, nullptr);
-  EXPECT_EQ(view->data, 20);
+  EXPECT_EQ(view->value, 20);
 }

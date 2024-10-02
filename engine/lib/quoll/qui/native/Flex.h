@@ -16,7 +16,7 @@ public:
   Flex &grow(Value<f32> grow);
   Flex &spacing(Value<glm::vec2> spacing);
 
-  void build() override;
+  void build(BuildContext &context) override;
 
   View *getView() override { return &mView; }
 

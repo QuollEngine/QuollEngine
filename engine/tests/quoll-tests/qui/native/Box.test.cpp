@@ -1,10 +1,10 @@
 #include "quoll/core/Base.h"
 #include "quoll/qui/native/Box.h"
 #include "quoll/qui/reactive/Scope.h"
-#include "quoll-tests/Testing.h"
 #include "MockComponent.h"
+#include "QuiComponentTest.h"
 
-class QuiBoxTest : public ::testing::Test {
+class QuiBoxTest : public QuiComponentTest {
 public:
 };
 
@@ -67,7 +67,7 @@ TEST_F(QuiBoxTest, BuildingBoxUpdatesView) {
                         .width(10.0f)
                         .height(20.0f);
 
-  el.build();
+  el.build(buildContext);
 
   auto *view = static_cast<qui::BoxView *>(el.getView());
 
@@ -98,7 +98,7 @@ TEST_F(QuiBoxTest, UpdatingBoxPropertiesAfterBuildUpdatesTheView) {
                         .height(height);
 
   auto *box = static_cast<const qui::Box *>(el.getComponent());
-  el.build();
+  el.build(buildContext);
 
   auto *view = static_cast<qui::BoxView *>(el.getView());
 

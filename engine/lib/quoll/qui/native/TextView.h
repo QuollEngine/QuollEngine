@@ -12,6 +12,7 @@ public:
 
   void render() override;
   LayoutOutput layout(const LayoutInput &input) override;
+  bool hitTest(const glm::vec2 &point) override;
 
 public:
   constexpr const auto &getText() { return mText; }

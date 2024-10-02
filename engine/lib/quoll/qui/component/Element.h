@@ -16,7 +16,7 @@ public:
   template <std::derived_from<Component> Comp>
   Element(const Comp &component) : mComponent(new Comp(component)){};
 
-  inline View *getView() { return mComponent->getView(); }
+  constexpr View *getView() { return mComponent->getView(); }
 
   inline bool operator==(const Element &other) const {
     return mComponent == other.mComponent;
@@ -26,7 +26,7 @@ public:
 
   inline const Component *getComponent() const { return mComponent.get(); }
 
-  void build();
+  void build(BuildContext &context);
 
 private:
   quoll::SharedPtr<Component> mComponent = nullptr;

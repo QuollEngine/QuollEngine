@@ -25,7 +25,7 @@ public:
     }
   }
 
-  void build() override;
+  void build(BuildContext &context) override;
 
   View *getView() override;
 

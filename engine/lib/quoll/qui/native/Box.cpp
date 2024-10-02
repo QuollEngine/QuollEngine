@@ -30,10 +30,10 @@ Box &Box::borderRadius(Value<f32> radius) {
   return *this;
 }
 
-void Box::build() {
-  auto observeChild = [this] {
+void Box::build(BuildContext &context) {
+  auto observeChild = [this, &context] {
     if (mChild()) {
-      mChild().build();
+      mChild().build(context);
       mView.setChild(mChild().getView());
     }
   };
