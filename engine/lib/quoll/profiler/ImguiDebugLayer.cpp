@@ -80,6 +80,30 @@ static constexpr auto DemoPressable = qui::component([]() {
       ButtonStyle{.color = qui::Color::White, .backgroundColor = 0xee5253ff});
 });
 
+static constexpr auto DemoScrollable = qui::component([]() {
+  return qui::Box(
+             qui::Scrollable(qui::Flex({
+                                           qui::Box(qui::Text("Hello world"))
+                                               .padding(qui::EdgeInsets(5.0f))
+                                               .background(qui::Color::White)
+                                               .width(100.0f)
+                                               .borderRadius(5.0f)
+                                               .width(300.0f)
+                                               .height(100.0f),
+
+                                           qui::Box(qui::Text("Hello world"))
+                                               .padding(qui::EdgeInsets(5.0f))
+                                               .background(qui::Color::Green)
+                                               .width(100.0f)
+                                               .borderRadius(5.0f)
+                                               .width(300.0f)
+                                               .height(100.0f),
+
+                                       })
+                                 .direction(qui::Direction::Column)))
+      .height(110.0f);
+});
+
 static constexpr auto DemoQui = qui::component([]() {
   return qui::Flex({qui::Box(qui::Text("Red text on a yellow background")
                                  .color(qui::Color::Red))
@@ -92,7 +116,7 @@ static constexpr auto DemoQui = qui::component([]() {
                         .background(qui::Color::White)
                         .padding(qui::EdgeInsets(5.0f)),
 
-                    DemoQuiFlexbox(), DemoPressable()})
+                    DemoQuiFlexbox(), DemoPressable(), DemoScrollable()})
       .spacing(glm::vec2{10.0f, 0.0f});
 });
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
@@ -135,7 +159,10 @@ void ImguiDebugLayer::renderQui() {
   if (!mQuiOpen)
     return;
 
-  if (ImGui::Begin("Qui", &mQuiOpen, ImGuiWindowFlags_NoDocking)) {
+  const ImVec2 WindowSize{800.0f, 600.0f};
+  ImGui::SetWindowSize(WindowSize);
+  if (ImGui::Begin("Qui", &mQuiOpen,
+                   ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMove)) {
     auto size = ImGui::GetWindowSize();
     auto pos = ImGui::GetCursorScreenPos();
     qui::Qui::render(mDemoTree, {pos.x, pos.y}, {size.x, size.y});

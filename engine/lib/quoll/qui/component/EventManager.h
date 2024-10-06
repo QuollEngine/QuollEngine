@@ -16,7 +16,8 @@ public:
         mMouseClickHandles(std::move(rhs.mMouseClickHandles)),
         mMouseDownHandles(std::move(rhs.mMouseDownHandles)),
         mMouseUpHandles(std::move(rhs.mMouseUpHandles)),
-        mMouseMoveHandles(std::move(rhs.mMouseMoveHandles)) {}
+        mMouseMoveHandles(std::move(rhs.mMouseMoveHandles)),
+        mMouseWheelHandles(std::move(rhs.mMouseWheelHandles)) {}
 
   constexpr EventHolder &operator=(EventHolder &&rhs) noexcept {
     mManager = rhs.mManager;
@@ -24,6 +25,8 @@ public:
     mMouseDownHandles = std::move(rhs.mMouseDownHandles);
     mMouseUpHandles = std::move(rhs.mMouseUpHandles);
     mMouseMoveHandles = std::move(rhs.mMouseMoveHandles);
+    mMouseWheelHandles = std::move(rhs.mMouseWheelHandles);
+
     return *this;
   }
 
@@ -33,6 +36,7 @@ public:
     mMouseDownHandles = rhs.mMouseDownHandles;
     mMouseUpHandles = rhs.mMouseUpHandles;
     mMouseMoveHandles = rhs.mMouseMoveHandles;
+    mMouseWheelHandles = rhs.mMouseWheelHandles;
   };
 
   constexpr EventHolder &operator=(const EventHolder &) = delete;
@@ -42,6 +46,7 @@ public:
   void registerMouseDownHandler(EventHandler<MouseEvent> &&handler);
   void registerMouseUpHandler(EventHandler<MouseEvent> &&handler);
   void registerMouseMoveHandler(EventHandler<MouseEvent> &&handler);
+  void registerMouseWheelHandler(EventHandler<MouseWheelEvent> &&handler);
 
 private:
   EventManager *mManager{nullptr};
@@ -50,24 +55,44 @@ private:
   std::vector<usize> mMouseDownHandles;
   std::vector<usize> mMouseUpHandles;
   std::vector<usize> mMouseMoveHandles;
+  std::vector<usize> mMouseWheelHandles;
 };
 
 class EventManager {
   friend class EventHolder;
-  using MouseEventSet = quoll::SparseSet<EventHandler<MouseEvent>>;
+
+  template <typename TEvent>
+  using HandlerSet = quoll::SparseSet<EventHandler<TEvent>>;
 
 public:
-  inline MouseEventSet &getMouseClickHandlers() { return mMouseClickHandlers; }
-  inline MouseEventSet &getMouseDownHandlers() { return mMouseDownHandlers; }
-  inline MouseEventSet &getMouseUpHandlers() { return mMouseUpHandlers; }
-  inline MouseEventSet &getMouseMoveHandlers() { return mMouseMoveHandlers; }
+  inline HandlerSet<MouseEvent> &getMouseClickHandlers() {
+    return mMouseClickHandlers;
+  }
+
+  inline HandlerSet<MouseEvent> &getMouseDownHandlers() {
+    return mMouseDownHandlers;
+  }
+
+  inline HandlerSet<MouseEvent> &getMouseUpHandlers() {
+    return mMouseUpHandlers;
+  }
+
+  inline HandlerSet<MouseEvent> &getMouseMoveHandlers() {
+    return mMouseMoveHandlers;
+  }
+
+  inline HandlerSet<MouseWheelEvent> &getMouseWheelHandlers() {
+    return mMouseWheelHandlers;
+  }
+
   inline EventHolder createEventHolder() { return EventHolder(this); }
 
 private:
-  quoll::SparseSet<EventHandler<MouseEvent>> mMouseClickHandlers;
-  quoll::SparseSet<EventHandler<MouseEvent>> mMouseDownHandlers;
-  quoll::SparseSet<EventHandler<MouseEvent>> mMouseUpHandlers;
-  quoll::SparseSet<EventHandler<MouseEvent>> mMouseMoveHandlers;
+  HandlerSet<MouseEvent> mMouseClickHandlers;
+  HandlerSet<MouseEvent> mMouseDownHandlers;
+  HandlerSet<MouseEvent> mMouseUpHandlers;
+  HandlerSet<MouseEvent> mMouseMoveHandlers;
+  HandlerSet<MouseWheelEvent> mMouseWheelHandlers;
 };
 
 } // namespace qui
