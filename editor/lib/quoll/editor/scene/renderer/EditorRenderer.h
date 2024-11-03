@@ -9,8 +9,9 @@
 namespace quoll {
 
 class AssetRegistry;
+class RenderStorage;
 
-}
+} // namespace quoll
 
 namespace quoll::editor {
 

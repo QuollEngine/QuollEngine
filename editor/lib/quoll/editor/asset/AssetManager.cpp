@@ -5,10 +5,11 @@
 #include "AssetManager.h"
 #include "GLTFImporter.h"
 #include "HDRIImporter.h"
+#include "Stb.h"
 #include <cryptopp/files.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/sha.h>
-#include <stb_image.h>
+
 
 namespace quoll::editor {
 

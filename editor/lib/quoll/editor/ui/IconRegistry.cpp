@@ -1,9 +1,45 @@
 #include "quoll/core/Base.h"
-#include "quoll/loaders/ImageTextureLoader.h"
-#include "quoll/rhi/RenderDevice.h"
+#include "quoll/renderer/RenderStorage.h"
+#include "quoll/renderer/TextureUtils.h"
+#include "quoll/editor/asset/Stb.h"
 #include "IconRegistry.h"
 
 namespace quoll::editor {
+
+namespace {
+
+constexpr auto createLoader(RenderStorage &renderStorage) {
+  return [&renderStorage](const Path &path) {
+    quoll::rhi::TextureDescription description;
+    i32 width = 0, height = 0, channels = 0;
+
+    void *data = stbi_load(path.string().c_str(), &width, &height, &channels,
+                           STBI_rgb_alpha);
+    QuollAssert(data, "Failed to load image: " + path.string());
+
+    description.format = rhi::Format::Rgba8Srgb;
+    description.width = width;
+    description.height = height;
+    description.usage = rhi::TextureUsage::Color |
+                        rhi::TextureUsage::TransferDestination |
+                        rhi::TextureUsage::Sampled;
+    description.type = rhi::TextureType::Standard;
+    description.debugName = path.filename().string();
+
+    auto texture = renderStorage.createTexture(description);
+
+    TextureUtils::copyDataToTexture(
+        renderStorage.getDevice(), data, texture,
+        rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
+        {TextureAssetMipLevel{0, static_cast<usize>(width) * height * channels,
+                              static_cast<u32>(width),
+                              static_cast<u32>(height)}});
+
+    return texture;
+  };
+}
+
+} // namespace
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,-warnings-as-errors)
 std::unordered_map<EditorIcon, rhi::TextureHandle> IconRegistry::mIconMap{};
@@ -12,44 +48,41 @@ void IconRegistry::loadIcons(RenderStorage &renderStorage,
                              const std::filesystem::path &iconsPath) {
   QuollAssert(mIconMap.empty(), "Icons are already loaded");
 
-  ImageTextureLoader loader(renderStorage);
+  auto loadIcon = createLoader(renderStorage);
 
   mIconMap.insert_or_assign(EditorIcon::Unknown,
-                            loader.loadFromFile(iconsPath / "unknown.png"));
+                            loadIcon(iconsPath / "unknown.png"));
   mIconMap.insert_or_assign(EditorIcon::Directory,
-                            loader.loadFromFile(iconsPath / "directory.png"));
+                            loadIcon(iconsPath / "directory.png"));
   mIconMap.insert_or_assign(EditorIcon::Material,
-                            loader.loadFromFile(iconsPath / "material.png"));
+                            loadIcon(iconsPath / "material.png"));
   mIconMap.insert_or_assign(EditorIcon::Texture,
-                            loader.loadFromFile(iconsPath / "texture.png"));
-  mIconMap.insert_or_assign(EditorIcon::Font,
-                            loader.loadFromFile(iconsPath / "font.png"));
-  mIconMap.insert_or_assign(EditorIcon::Mesh,
-                            loader.loadFromFile(iconsPath / "mesh.png"));
+                            loadIcon(iconsPath / "texture.png"));
+  mIconMap.insert_or_assign(EditorIcon::Font, loadIcon(iconsPath / "font.png"));
+  mIconMap.insert_or_assign(EditorIcon::Mesh, loadIcon(iconsPath / "mesh.png"));
   mIconMap.insert_or_assign(EditorIcon::Skeleton,
-                            loader.loadFromFile(iconsPath / "skeleton.png"));
+                            loadIcon(iconsPath / "skeleton.png"));
   mIconMap.insert_or_assign(EditorIcon::Audio,
-                            loader.loadFromFile(iconsPath / "audio.png"));
+                            loadIcon(iconsPath / "audio.png"));
   mIconMap.insert_or_assign(EditorIcon::Animation,
-                            loader.loadFromFile(iconsPath / "animation.png"));
+                            loadIcon(iconsPath / "animation.png"));
   mIconMap.insert_or_assign(EditorIcon::Animator,
-                            loader.loadFromFile(iconsPath / "animator.png"));
+                            loadIcon(iconsPath / "animator.png"));
   mIconMap.insert_or_assign(EditorIcon::InputMap,
-                            loader.loadFromFile(iconsPath / "input-map.png"));
+                            loadIcon(iconsPath / "input-map.png"));
   mIconMap.insert_or_assign(EditorIcon::Prefab,
-                            loader.loadFromFile(iconsPath / "prefab.png"));
+                            loadIcon(iconsPath / "prefab.png"));
   mIconMap.insert_or_assign(EditorIcon::LuaScript,
-                            loader.loadFromFile(iconsPath / "script.png"));
+                            loadIcon(iconsPath / "script.png"));
   mIconMap.insert_or_assign(EditorIcon::Environment,
-                            loader.loadFromFile(iconsPath / "environment.png"));
+                            loadIcon(iconsPath / "environment.png"));
   mIconMap.insert_or_assign(EditorIcon::Scene,
-                            loader.loadFromFile(iconsPath / "scene.png"));
-  mIconMap.insert_or_assign(EditorIcon::Sun,
-                            loader.loadFromFile(iconsPath / "sun.png"));
+                            loadIcon(iconsPath / "scene.png"));
+  mIconMap.insert_or_assign(EditorIcon::Sun, loadIcon(iconsPath / "sun.png"));
   mIconMap.insert_or_assign(EditorIcon::Light,
-                            loader.loadFromFile(iconsPath / "light.png"));
+                            loadIcon(iconsPath / "light.png"));
   mIconMap.insert_or_assign(EditorIcon::Camera,
-                            loader.loadFromFile(iconsPath / "camera.png"));
+                            loadIcon(iconsPath / "camera.png"));
 }
 
 } // namespace quoll::editor

@@ -9,6 +9,7 @@
 #include "quoll/loop/MainLoop.h"
 #include "quoll/profiler/ImguiDebugLayer.h"
 #include "quoll/renderer/Presenter.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/Renderer.h"
 #include "quoll/renderer/RendererAssetRegistry.h"
 #include "quoll/renderer/SceneRenderer.h"

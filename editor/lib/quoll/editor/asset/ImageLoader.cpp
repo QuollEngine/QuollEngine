@@ -3,7 +3,7 @@
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/TextureUtils.h"
 #include "ImageLoader.h"
-#include <stb_image.h>
+#include "Stb.h"
 
 namespace quoll::editor {
 
