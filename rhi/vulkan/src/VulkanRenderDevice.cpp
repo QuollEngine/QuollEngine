@@ -35,13 +35,7 @@ VulkanRenderDevice::VulkanRenderDevice(
       mSwapchain(mBackend, mPhysicalDevice, mDevice, mRegistry, mAllocator),
       mAllocator(mBackend, mPhysicalDevice, mDevice),
       mStats(new VulkanResourceMetrics(mRegistry, mDescriptorPool)),
-      mTimestampManager(mDevice) {
-
-  VkDevice device = mDevice.getVulkanHandle();
-  VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
-  VkQueue graphicsQueue = mGraphicsQueue.getVulkanHandle();
-  u32 queueIndex = mGraphicsQueue.getQueueIndex();
-}
+      mTimestampManager(mDevice) {}
 
 RenderCommandList VulkanRenderDevice::requestImmediateCommandList() {
   auto commandList = std::move(mCommandPool.createCommandLists(1).at(0));
@@ -90,7 +84,7 @@ RenderFrame VulkanRenderDevice::beginFrame() {
   mStats.resetCalls();
   mFrameManager.waitForFrame();
 
-  u32 imageIndex =
+  const u32 imageIndex =
       mSwapchain.acquireNextImage(mFrameManager.getImageAvailableSemaphore());
 
   if (imageIndex == std::numeric_limits<u32>::max()) {

@@ -52,7 +52,7 @@ void MainLoop::run() {
 
     mPrepareFn();
 
-    f64 frameTime = std::clamp(
+    const f64 frameTime = std::clamp(
         std::chrono::duration<f64>(currentTime - prevGameTime).count(), 0.0,
         MaxUpdateTime);
 

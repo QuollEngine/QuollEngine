@@ -55,7 +55,7 @@ void Runtime::start() {
     static constexpr f32 FontSize = 18.0f;
     auto &io = ImGui::GetIO();
 
-    Path defaultFontPath = Engine::getFontsPath() / "Roboto-Regular.ttf";
+    const Path defaultFontPath = Engine::getFontsPath() / "Roboto-Regular.ttf";
     io.Fonts->AddFontFromFileTTF(defaultFontPath.string().c_str(), FontSize);
     imguiRenderer.buildFonts();
   }
@@ -125,7 +125,7 @@ void Runtime::start() {
 
     imguiRenderer.beginRendering();
 
-    ImGuiWindowFlags WindowFlags =
+    const ImGuiWindowFlags WindowFlags =
         ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoInputs |
         ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground |
         ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings |

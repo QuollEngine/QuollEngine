@@ -53,7 +53,7 @@ Result<MeshAsset> AssetCache::loadMesh(const Path &path) {
     return Error("Invalid file format");
   }
 
-  std::vector<String> warnings;
+  const std::vector<String> warnings;
 
   MeshAsset mesh{};
 

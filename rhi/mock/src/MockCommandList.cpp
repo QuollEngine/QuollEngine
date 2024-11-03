@@ -3,12 +3,11 @@
 
 namespace quoll::rhi {
 
-template <class T>
-static constexpr std::vector<T> vectorFrom(std::span<T> data) {
+template <class T> constexpr std::vector<T> vectorFrom(std::span<T> data) {
   return std::vector<T>(data.begin(), data.end());
 }
 
-MockCommandList::MockCommandList(MockCommandList &&rhs) {
+MockCommandList::MockCommandList(MockCommandList &&rhs) noexcept {
   mCommands = std::move(rhs.mCommands);
   mDrawCalls = std::move(rhs.mDrawCalls);
   mDispatchCalls = std::move(rhs.mDispatchCalls);

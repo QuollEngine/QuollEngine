@@ -17,7 +17,7 @@ Result<Path> AssetLoader::loadFromPath(const Path &path,
 Result<void> AssetLoader::loadFromFileDialog(const Path &directory) {
   using FileTypeEntry = platform::FileDialog::FileTypeEntry;
 
-  std::vector<FileTypeEntry> entries{
+  const std::vector<FileTypeEntry> entries{
       FileTypeEntry{"Prefab files", AssetManager::PrefabExtensions},
       FileTypeEntry{"Audio files", AssetManager::AudioExtensions},
       FileTypeEntry{"Lua script files", AssetManager::ScriptExtensions},

@@ -316,7 +316,7 @@ void MousePickingGraph::createRenderGraph() {
 
       u32 instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-        u32 numInstances = static_cast<u32>(meshData.transforms.size());
+        const u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
         commandList.bindVertexBuffers(
             MeshRenderUtils::getGeometryBuffers(meshData.drawData),
@@ -346,7 +346,7 @@ void MousePickingGraph::createRenderGraph() {
 
       u32 instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-        u32 numInstances = static_cast<u32>(meshData.transforms.size());
+        const u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
         commandList.bindVertexBuffers(
             MeshRenderUtils::getSkinnedGeometryBuffers(meshData.drawData),

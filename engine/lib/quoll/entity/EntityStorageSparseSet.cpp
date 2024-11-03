@@ -51,13 +51,13 @@ void EntityStorageSparseSet::destroy() {
 
 void EntityStorageSparseSet::deleteAllEntityComponents(Entity entity) {
   for (auto &[index, pool] : mComponentPools) {
-    usize sEntity = static_cast<usize>(entity);
+    const usize sEntity = static_cast<usize>(entity);
 
     if (sEntity < pool.entityIndices.size() &&
         pool.entityIndices[sEntity] < DeadIndex) {
 
-      usize movedEntity = static_cast<usize>(pool.entities.back());
-      usize entityIndexToDelete = pool.entityIndices[sEntity];
+      const usize movedEntity = static_cast<usize>(pool.entities.back());
+      const usize entityIndexToDelete = pool.entityIndices[sEntity];
 
       auto &observers = mRemoveObserverPools.at(index);
       for (auto &observer : observers) {

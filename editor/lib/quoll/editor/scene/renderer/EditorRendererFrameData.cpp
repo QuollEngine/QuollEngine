@@ -92,7 +92,7 @@ void EditorRendererFrameData::addSkeleton(
   mNumBones.push_back(static_cast<u32>(boneTransforms.size()));
 
   auto *currentSkeleton = mSkeletonVector.get() + (mLastSkeleton * MaxNumBones);
-  usize dataSize = std::min(boneTransforms.size(), MaxNumBones);
+  const usize dataSize = std::min(boneTransforms.size(), MaxNumBones);
   memcpy(currentSkeleton, boneTransforms.data(), dataSize * sizeof(glm::mat4));
 
   mLastSkeleton++;
@@ -199,8 +199,8 @@ void EditorRendererFrameData::addSkinnedMeshOutline(
 
   mMeshOutlines.push_back(outline);
 
-  usize currentOffset = mLastOutlineSkeleton * MaxNumJoints;
-  usize newSize = currentOffset + MaxNumJoints;
+  const usize currentOffset = mLastOutlineSkeleton * MaxNumJoints;
+  const usize newSize = currentOffset + MaxNumJoints;
 
   // Resize skeletons if new skeleton does not fit
   if (mOutlineSkeletonCapacity < newSize) {
@@ -213,7 +213,7 @@ void EditorRendererFrameData::addSkinnedMeshOutline(
   }
 
   auto *currentSkeleton = mOutlineSkeletons.get() + currentOffset;
-  usize dataSize = std::min(skeleton.size(), MaxNumJoints);
+  const usize dataSize = std::min(skeleton.size(), MaxNumJoints);
   memcpy(currentSkeleton, skeleton.data(), dataSize * sizeof(glm::mat4));
   mLastOutlineSkeleton++;
 

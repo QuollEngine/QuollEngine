@@ -22,8 +22,8 @@ void FlexView::render() {
 }
 
 LayoutOutput FlexView::layout(const LayoutInput &input) {
-  glm::length_t mainAxis = mDirection == Direction::Row ? 0 : 1;
-  glm::length_t crossAxis = mDirection == Direction::Row ? 1 : 0;
+  const glm::length_t mainAxis = mDirection == Direction::Row ? 0 : 1;
+  const glm::length_t crossAxis = mDirection == Direction::Row ? 1 : 0;
 
   mSize = {0.0f, 0.0f};
 
@@ -113,13 +113,13 @@ LayoutOutput FlexView::layout(const LayoutInput &input) {
     totalGrow = std::max(1.0f, totalGrow);
     totalScaledShrink = std::max(1.0f, totalScaledShrink);
 
-    f32 totalSpacing =
+    const f32 totalSpacing =
         mSpacing[mainAxis] * (static_cast<f32>(line.children.size() - 1));
 
     f32 overflow = 0.0f;
     f32 remaining = 0.0f;
     if (input.constraints.max[mainAxis] < Constraints::Infinity) {
-      f32 mainSizeWithoutSpacing =
+      const f32 mainSizeWithoutSpacing =
           input.constraints.max[mainAxis] - totalSpacing;
       overflow = std::max(0.0f, totalMainSize - mainSizeWithoutSpacing);
       remaining = std::max(0.0f, mainSizeWithoutSpacing - totalMainSize);
@@ -133,13 +133,13 @@ LayoutOutput FlexView::layout(const LayoutInput &input) {
     for (usize i = 0; i < line.children.size(); ++i) {
       auto *child = line.children.at(i);
 
-      f32 childMainSize = line.childSizes.at(i)[mainAxis];
-      f32 childCrossSize = line.childSizes.at(i)[crossAxis];
+      const f32 childMainSize = line.childSizes.at(i)[mainAxis];
+      const f32 childCrossSize = line.childSizes.at(i)[crossAxis];
 
-      f32 growAmount = (growFactors.at(i) * remaining) / totalGrow;
-      f32 shrinkAmount =
+      const f32 growAmount = (growFactors.at(i) * remaining) / totalGrow;
+      const f32 shrinkAmount =
           (childMainSize * shrinkFactors.at(i) * overflow) / totalScaledShrink;
-      f32 mainSize = childMainSize + growAmount - shrinkAmount;
+      const f32 mainSize = childMainSize + growAmount - shrinkAmount;
 
       Constraints constraints = input.constraints;
       constraints.min[mainAxis] = mainSize;

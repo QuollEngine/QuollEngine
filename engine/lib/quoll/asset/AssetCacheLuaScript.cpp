@@ -5,7 +5,9 @@
 
 namespace quoll {
 
-static std::vector<u8> readFileIntoBuffer(std::ifstream &stream) {
+namespace {
+
+std::vector<u8> readFileIntoBuffer(std::ifstream &stream) {
   std::ostringstream ss;
   ss << stream.rdbuf();
   const std::string &s = ss.str();
@@ -14,7 +16,7 @@ static std::vector<u8> readFileIntoBuffer(std::ifstream &stream) {
   return bytes;
 }
 
-static void injectInputVarsInterface(sol::state &state, LuaScriptAsset &data) {
+void injectInputVarsInterface(sol::state &state, LuaScriptAsset &data) {
   auto inputVars = state.create_named_table("inputVars");
   auto *luaState = state.lua_state();
   inputVars["register"] = [&data, luaState](String name, u32 type) {
@@ -44,6 +46,8 @@ static void injectInputVarsInterface(sol::state &state, LuaScriptAsset &data) {
   );
 }
 
+} // namespace
+
 Result<LuaScriptAsset> AssetCache::loadLuaScript(const Path &path) {
   std::ifstream stream(path);
 
@@ -68,7 +72,7 @@ Result<LuaScriptAsset> AssetCache::loadLuaScript(const Path &path) {
   injectInputVarsInterface(state, asset);
 
   auto *luaState = state.lua_state();
-  bool success = interpreter.evaluate(asset.bytes, luaState);
+  const bool success = interpreter.evaluate(asset.bytes, luaState);
 
   if (!success) {
     const auto *message = lua_tostring(luaState, -1);

@@ -21,7 +21,7 @@ Result<void> AssetCache::createAnimationFromData(const AnimationAsset &data,
   file.write(header);
 
   file.write(data.time);
-  u32 numKeyframes = static_cast<u32>(data.keyframes.size());
+  const u32 numKeyframes = static_cast<u32>(data.keyframes.size());
   file.write(numKeyframes);
 
   for (auto &keyframe : data.keyframes) {
@@ -30,7 +30,7 @@ Result<void> AssetCache::createAnimationFromData(const AnimationAsset &data,
     file.write(keyframe.jointTarget);
     file.write(keyframe.joint);
 
-    u32 numValues = static_cast<u32>(keyframe.keyframeTimes.size());
+    const u32 numValues = static_cast<u32>(keyframe.keyframeTimes.size());
     file.write(numValues);
     file.write(keyframe.keyframeTimes);
     file.write(keyframe.keyframeValues);

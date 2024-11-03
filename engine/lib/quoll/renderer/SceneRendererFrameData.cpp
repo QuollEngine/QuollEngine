@@ -232,16 +232,15 @@ void SceneRendererFrameData::addMesh(
     AssetHandle<MeshAsset> handle, const MeshDrawData &meshDrawData,
     quoll::Entity entity, const glm::mat4 &transform,
     const std::vector<rhi::DeviceAddress> &materials) {
-  u32 start = static_cast<u32>(mFlatMaterials.size());
+  const u32 start = static_cast<u32>(mFlatMaterials.size());
   for (const auto &material : materials) {
     mFlatMaterials.push_back(material);
   }
   auto newMaterialSize = static_cast<u32>(mFlatMaterials.size());
-  u32 end = newMaterialSize == start ? 0 : newMaterialSize - 1;
+  const u32 end = newMaterialSize == start ? 0 : newMaterialSize - 1;
 
   if (mMeshGroups.find(handle) == mMeshGroups.end()) {
-    MeshData data{};
-    mMeshGroups.insert_or_assign(handle, data);
+    mMeshGroups.insert_or_assign(handle, MeshData{});
   }
 
   mMeshGroups.at(handle).entities.push_back(entity);
@@ -255,12 +254,12 @@ void SceneRendererFrameData::addSkinnedMesh(
     Entity entity, const glm::mat4 &transform,
     const std::vector<glm::mat4> &skeleton,
     const std::vector<rhi::DeviceAddress> &materials) {
-  u32 start = static_cast<u32>(mFlatMaterials.size());
+  const u32 start = static_cast<u32>(mFlatMaterials.size());
   for (const auto &material : materials) {
     mFlatMaterials.push_back(material);
   }
-  auto newMaterialSize = static_cast<u32>(mFlatMaterials.size());
-  u32 end = newMaterialSize == start ? 0 : newMaterialSize - 1;
+  const u32 newMaterialSize = static_cast<u32>(mFlatMaterials.size());
+  const u32 end = newMaterialSize == start ? 0 : newMaterialSize - 1;
 
   if (mSkinnedMeshGroups.find(handle) == mSkinnedMeshGroups.end()) {
     mSkinnedMeshGroups.insert({handle, SkinnedMeshData{}});
@@ -273,8 +272,8 @@ void SceneRendererFrameData::addSkinnedMesh(
   group.materialRanges.push_back({start, end});
   group.drawData = &meshDrawData;
 
-  usize currentOffset = group.lastSkeleton * MaxNumJoints;
-  usize newSize = currentOffset + MaxNumJoints;
+  const usize currentOffset = group.lastSkeleton * MaxNumJoints;
+  const usize newSize = currentOffset + MaxNumJoints;
 
   // Resize skeletons if new skeleton does not fit
   if (group.skeletonCapacity < newSize) {
@@ -286,7 +285,7 @@ void SceneRendererFrameData::addSkinnedMesh(
   }
 
   auto *currentSkeleton = group.skeletons.get() + currentOffset;
-  usize dataSize = std::min(skeleton.size(), MaxNumJoints);
+  const usize dataSize = std::min(skeleton.size(), MaxNumJoints);
   memcpy(currentSkeleton, skeleton.data(), dataSize * sizeof(glm::mat4));
   group.lastSkeleton++;
 }
@@ -297,7 +296,7 @@ void SceneRendererFrameData::setBrdfLookupTable(rhi::TextureHandle brdfLut) {
 
 void SceneRendererFrameData::addCascadedShadowMaps(
     const DirectionalLight &light, const CascadedShadowMap &shadowMap) {
-  u32 numCascades = static_cast<u32>(shadowMap.numCascades);
+  const u32 numCascades = static_cast<u32>(shadowMap.numCascades);
 
   // Calculate split distances by combining
   // logarithmic and uniform splitting
@@ -307,22 +306,23 @@ void SceneRendererFrameData::addCascadedShadowMaps(
   // distance_i = lambda * log_i + (1 - lambda) * uniform_i
   std::array<f32, CascadedShadowMap::MaxCascades + 1> splitDistances{};
 
-  f32 splitLambda = shadowMap.splitLambda;
+  const f32 splitLambda = shadowMap.splitLambda;
 
-  f32 far = mCameraLens.far;
-  f32 near = mCameraLens.near;
+  const f32 far = mCameraLens.far;
+  const f32 near = mCameraLens.near;
 
-  f32 range = far - near;
-  f32 ratio = far / near;
+  const f32 range = far - near;
+  const f32 ratio = far / near;
 
   const f32 fovY =
       2.0f * atanf(mCameraLens.sensorSize.y / (2.0f * mCameraLens.focalLength));
 
   for (usize i = 0; i < static_cast<usize>(numCascades + 1); ++i) {
-    f32 p = static_cast<f32>(i + 1) / static_cast<f32>(splitDistances.size());
-    f32 log = near * std::pow(ratio, p);
-    f32 uniform = near + range * p;
-    f32 d = splitLambda * log + (1.0f - splitLambda) * uniform;
+    const f32 p =
+        static_cast<f32>(i + 1) / static_cast<f32>(splitDistances.size());
+    const f32 log = near * std::pow(ratio, p);
+    const f32 uniform = near + range * p;
+    const f32 d = splitLambda * log + (1.0f - splitLambda) * uniform;
 
     splitDistances.at(i) = mCameraLens.far * ((d - near) / range);
   }
@@ -337,7 +337,7 @@ void SceneRendererFrameData::addCascadedShadowMaps(
 
   f32 prevSplitDistance = mCameraLens.near;
   for (usize i = 0; i < numCascades; ++i) {
-    f32 splitDistance = splitDistances.at(i);
+    const f32 splitDistance = splitDistances.at(i);
 
     auto splitProjectionMatrix = glm::perspective(
         fovY, mCameraLens.aspectRatio, prevSplitDistance, splitDistance);
@@ -363,23 +363,23 @@ void SceneRendererFrameData::addCascadedShadowMaps(
 
     f32 radius = 0.0f;
     for (const auto &corner : frustumCorners) {
-      f32 distance = glm::length(glm::vec3(corner) - frustumCenter);
+      const f32 distance = glm::length(glm::vec3(corner) - frustumCenter);
       radius = glm::max(radius, distance);
     }
 
     static constexpr f32 Sixteen = 16.0f;
     radius = std::ceil(radius * Sixteen) / Sixteen;
-    glm::vec3 maxBounds = glm::vec3(radius);
-    glm::vec3 minBounds = -maxBounds;
+    const glm::vec3 maxBounds = glm::vec3(radius);
+    const glm::vec3 minBounds = -maxBounds;
 
-    f32 cascadeZ = maxBounds.z - minBounds.z;
-    auto lightViewMatrix =
+    const f32 cascadeZ = maxBounds.z - minBounds.z;
+    const auto lightViewMatrix =
         glm::lookAt(frustumCenter - light.direction * radius, frustumCenter,
                     glm::vec3(0.0f, 1.0f, 0.0f));
-    auto lightProjectionMatrix = glm::ortho(
+    const auto lightProjectionMatrix = glm::ortho(
         minBounds.x, maxBounds.x, minBounds.y, maxBounds.y, 0.0f, cascadeZ);
 
-    auto projectionViewMatrix = lightProjectionMatrix * lightViewMatrix;
+    const auto projectionViewMatrix = lightProjectionMatrix * lightViewMatrix;
 
     mShadowMaps.push_back(
         {projectionViewMatrix,
@@ -392,17 +392,17 @@ void SceneRendererFrameData::addCascadedShadowMaps(
 
 void SceneRendererFrameData::addLight(const DirectionalLight &light,
                                       const CascadedShadowMap &shadowMap) {
-  u32 shadowIndex = static_cast<u32>(mShadowMaps.size());
-  u32 numCascades = static_cast<u32>(shadowMap.numCascades);
+  const u32 shadowIndex = static_cast<u32>(mShadowMaps.size());
+  const u32 numCascades = static_cast<u32>(shadowMap.numCascades);
 
-  bool canCastShadows =
+  const bool canCastShadows =
       (shadowIndex + numCascades) <= static_cast<u32>(MaxShadowMaps);
 
   if (canCastShadows) {
     addCascadedShadowMaps(light, shadowMap);
   }
 
-  DirectionalLightData data{
+  const DirectionalLightData data{
       glm::vec4(light.direction, light.intensity), light.color,
       glm::uvec4(canCastShadows ? 1 : 0, shadowIndex, numCascades, 0)};
   mDirectionalLights.push_back(data);
@@ -410,8 +410,8 @@ void SceneRendererFrameData::addLight(const DirectionalLight &light,
 }
 
 void SceneRendererFrameData::addLight(const DirectionalLight &light) {
-  DirectionalLightData data{glm::vec4(light.direction, light.intensity),
-                            light.color};
+  const DirectionalLightData data{glm::vec4(light.direction, light.intensity),
+                                  light.color};
   mDirectionalLights.push_back(data);
 
   mSceneData.data.x = static_cast<i32>(mDirectionalLights.size());
@@ -427,8 +427,8 @@ void SceneRendererFrameData::addLight(const PointLight &light,
   glm::decompose(transform.worldTransform, scale, orientation, position, skew,
                  perspective);
 
-  PointLightData data{glm::vec4(position, light.intensity),
-                      glm::vec4(light.range), glm::vec4(light.color)};
+  const PointLightData data{glm::vec4(position, light.intensity),
+                            glm::vec4(light.range), glm::vec4(light.color)};
   mPointLights.push_back(data);
   mSceneData.data.y = static_cast<i32>(mPointLights.size());
 }

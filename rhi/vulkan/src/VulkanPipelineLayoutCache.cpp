@@ -5,15 +5,15 @@
 
 namespace quoll::rhi {
 
-static bool bindingsMatch(const VkDescriptorSetLayoutBinding &a,
-                          const VkDescriptorSetLayoutBinding &b) {
+constexpr bool bindingsMatch(const VkDescriptorSetLayoutBinding &a,
+                             const VkDescriptorSetLayoutBinding &b) {
   return (a.binding == b.binding) && (a.descriptorCount == b.descriptorCount) &&
          (a.descriptorType == b.descriptorType) &&
          (a.stageFlags == b.stageFlags);
 }
 
-static bool bindingsMatch(const DescriptorLayoutBindingDescription &a,
-                          const DescriptorLayoutBindingDescription &b) {
+constexpr bool bindingsMatch(const DescriptorLayoutBindingDescription &a,
+                             const DescriptorLayoutBindingDescription &b) {
   return (a.binding == b.binding) && (a.name == b.name);
 }
 

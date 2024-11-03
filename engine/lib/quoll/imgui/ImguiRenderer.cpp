@@ -15,7 +15,7 @@ static constexpr u64 BufferMemoryAlignment = 256;
  * @param size Size to align
  * @return Aligned size
  */
-static inline u64 getAlignedBufferSize(u64 size) {
+constexpr u64 getAlignedBufferSize(u64 size) {
   return ((size - 1) / BufferMemoryAlignment + 1) * BufferMemoryAlignment;
 }
 
@@ -141,8 +141,10 @@ void ImguiRenderer::updateFrameData(u32 frameIndex) {
   if (!data)
     return;
 
-  int fbWidth = (int)(data->DisplaySize.x * data->FramebufferScale.x);
-  int fbHeight = (int)(data->DisplaySize.y * data->FramebufferScale.y);
+  const i32 fbWidth =
+      static_cast<i32>(data->DisplaySize.x * data->FramebufferScale.x);
+  const i32 fbHeight =
+      static_cast<i32>(data->DisplaySize.y * data->FramebufferScale.y);
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
 
@@ -152,9 +154,9 @@ void ImguiRenderer::updateFrameData(u32 frameIndex) {
     return;
   }
 
-  usize vertexSize =
+  const usize vertexSize =
       getAlignedBufferSize(data->TotalVtxCount * sizeof(ImDrawVert));
-  usize indexSize =
+  const usize indexSize =
       getAlignedBufferSize(data->TotalIdxCount * sizeof(ImDrawIdx));
 
   if (frameObj.vertexBufferSize < vertexSize) {
@@ -192,11 +194,13 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
     return;
 
   auto &frameObj = mFrameData.at(frameIndex);
-  int fbWidth = (int)(data->DisplaySize.x * data->FramebufferScale.x);
-  int fbHeight = (int)(data->DisplaySize.y * data->FramebufferScale.y);
+  const i32 fbWidth =
+      static_cast<i32>(data->DisplaySize.x * data->FramebufferScale.x);
+  const i32 fbHeight =
+      static_cast<i32>(data->DisplaySize.y * data->FramebufferScale.y);
 
-  f32 realFbWidth = static_cast<f32>(fbWidth);
-  f32 realFbHeight = static_cast<f32>(fbHeight);
+  const f32 realFbWidth = static_cast<f32>(fbWidth);
+  const f32 realFbHeight = static_cast<f32>(fbHeight);
 
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
@@ -289,10 +293,10 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
 
   commandList.setViewport({0, 0}, {fbWidth, fbHeight}, {0.0f, 1.0f});
 
-  f32 L = data->DisplayPos.x;
-  f32 R = data->DisplayPos.x + data->DisplaySize.x;
-  f32 T = data->DisplayPos.y;
-  f32 B = data->DisplayPos.y + data->DisplaySize.y;
+  const f32 L = data->DisplayPos.x;
+  const f32 R = data->DisplayPos.x + data->DisplaySize.x;
+  const f32 T = data->DisplayPos.y;
+  const f32 B = data->DisplayPos.y + data->DisplaySize.y;
 
   static constexpr usize MatrixSize = 16;
   const f32 SCALE_FACTOR = 2.0f;

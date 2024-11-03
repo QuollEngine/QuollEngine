@@ -152,7 +152,7 @@ void loadAnimations(GLTFImportData &importData) {
       u32 targetJoint = 0;
 
       auto it = importData.skeletons.jointSkinMap.find(channel.target_node);
-      bool skinFound = it != importData.skeletons.jointSkinMap.end();
+      const bool skinFound = it != importData.skeletons.jointSkinMap.end();
       if (targetSkin == -1 && skinFound) {
         targetSkin = static_cast<i32>(it->second);
         targetJoint = importData.skeletons.gltfToNormalizedJointMap.at(

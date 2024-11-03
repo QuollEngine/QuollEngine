@@ -21,7 +21,7 @@ void JointAttachmentSerializer::deserialize(const YAML::Node &node,
   if (node["jointAttachment"] && node["jointAttachment"].IsMap()) {
     auto joint = node["jointAttachment"]["joint"].as<i16>(-1);
     if (joint >= 0 && joint < std::numeric_limits<u8>::max()) {
-      JointAttachment attachment{joint};
+      const JointAttachment attachment{joint};
       entityDatabase.set(entity, attachment);
     }
   }

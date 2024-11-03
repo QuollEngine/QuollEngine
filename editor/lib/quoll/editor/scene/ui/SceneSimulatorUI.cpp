@@ -20,8 +20,10 @@
 
 namespace quoll::editor {
 
-static void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
-                           ActionExecutor &actionExecutor) {
+namespace {
+
+void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
+                    ActionExecutor &actionExecutor) {
   if (auto _ = MenuBar()) {
     if (auto objects = Menu("Objects")) {
       if (objects.item("Create empty object", Shortcut().control().key('N'))) {
@@ -31,8 +33,7 @@ static void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
   }
 }
 
-static void renderToolbar(WorkspaceState &state,
-                          ActionExecutor &actionExecutor) {
+void renderToolbar(WorkspaceState &state, ActionExecutor &actionExecutor) {
   if (auto toolbar = Toolbar()) {
     if (toolbar.item("Move", fa::Arrows,
                      state.activeTransform == TransformOperation::Move)) {
@@ -50,6 +51,8 @@ static void renderToolbar(WorkspaceState &state,
     }
   }
 }
+
+} // namespace
 
 void SceneSimulatorUI::render(WorkspaceState &state, AssetManager &assetManager,
                               ActionExecutor &actionExecutor,

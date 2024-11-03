@@ -20,8 +20,10 @@
 
 namespace quoll::editor {
 
-static void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
-                           ActionExecutor &actionExecutor) {
+namespace {
+
+void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
+                    ActionExecutor &actionExecutor) {
   if (auto _ = MenuBar()) {
     if (auto objects = Menu("Objects")) {
       if (objects.item("Create empty object", Shortcut().control().key('N'))) {
@@ -31,15 +33,13 @@ static void renderMainMenu(WorkspaceState &state, AssetManager &assetManager,
   }
 }
 
-static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
-                          ActionExecutor &actionExecutor,
-                          const AssetRef<SceneAsset> &sceneAsset,
-                          Renderer &renderer, SceneRenderer &sceneRenderer,
-                          EditorRenderer &editorRenderer,
-                          MousePickingGraph &mousePickingGraph,
-                          MainEngineModules &engineModules,
-                          EditorCamera &editorCamera,
-                          WorkspaceManager &workspaceManager) {
+void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
+                   ActionExecutor &actionExecutor,
+                   const AssetRef<SceneAsset> &sceneAsset, Renderer &renderer,
+                   SceneRenderer &sceneRenderer, EditorRenderer &editorRenderer,
+                   MousePickingGraph &mousePickingGraph,
+                   MainEngineModules &engineModules, EditorCamera &editorCamera,
+                   WorkspaceManager &workspaceManager) {
   if (auto toolbar = Toolbar()) {
     if (toolbar.item("Play the scene", fa::Play, false)) {
 
@@ -67,6 +67,8 @@ static void renderToolbar(WorkspaceState &state, AssetManager &assetManager,
     }
   }
 }
+
+} // namespace
 
 void SceneEditorUI::render(WorkspaceState &state, AssetManager &assetManager,
                            ActionExecutor &actionExecutor,

@@ -88,7 +88,7 @@ void CollidableLuaTable::setRestitution(f32 restitution) {
 }
 
 void CollidableLuaTable::setBoxGeometry(f32 hx, f32 hy, f32 hz) {
-  glm::vec3 halfExtents{hx, hy, hz};
+  const glm::vec3 halfExtents{hx, hy, hz};
 
   if (!mScriptGlobals.entityDatabase.has<Collidable>(mEntity)) {
     Collidable collidable{};

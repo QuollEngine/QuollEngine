@@ -54,7 +54,7 @@ RenderDevice *VulkanRenderBackend::createDefaultDevice() {
 
 void VulkanRenderBackend::createInstance(StringView applicationName,
                                          bool enableValidations) {
-  VkResult result = volkInitialize();
+  const VkResult result = volkInitialize();
   QuollAssert(result == VK_SUCCESS, "Cannot initialize Vulkan loader");
 
   std::vector<const char *> extensions;

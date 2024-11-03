@@ -54,7 +54,7 @@ std::vector<char> VulkanShader::readShaderFile(const Path &filepath) {
   QuollAssert(file.is_open(),
               "Failed to open shader file \"" + filepath.string() + "\"");
 
-  std::streamsize fileSize = file.tellg();
+  const std::streamsize fileSize = file.tellg();
   std::vector<char> buffer(fileSize);
 
   file.seekg(0);
@@ -67,7 +67,7 @@ std::vector<char> VulkanShader::readShaderFile(const Path &filepath) {
 
 void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
   SpvReflectShaderModule shaderReflectModule;
-  SpvReflectResult result = spvReflectCreateShaderModule(
+  const SpvReflectResult result = spvReflectCreateShaderModule(
       bytes.size(), bytes.data(), &shaderReflectModule);
 
   QuollAssert(result == SPV_REFLECT_RESULT_SUCCESS,
@@ -122,7 +122,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
 
           auto *reflectBinding = reflectDescriptorSet.bindings[i];
-          String name(reflectBinding->name);
+          const String name(reflectBinding->name);
           if (bindingsMap.find(reflectBinding->binding) != bindingsMap.end() &&
               name.rfind("uGlobal") != 0) {
             continue;

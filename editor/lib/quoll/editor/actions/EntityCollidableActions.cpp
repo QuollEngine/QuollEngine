@@ -4,7 +4,9 @@
 
 namespace quoll::editor {
 
-static PhysicsGeometryParams
+namespace {
+
+PhysicsGeometryParams
 getDefaultGeometryFromType(const PhysicsGeometryType &type) {
   switch (type) {
   case PhysicsGeometryType::Box:
@@ -18,6 +20,8 @@ getDefaultGeometryFromType(const PhysicsGeometryType &type) {
     return PhysicsGeometryPlane();
   }
 }
+
+} // namespace
 
 EntitySetCollidableType::EntitySetCollidableType(Entity entity,
                                                  PhysicsGeometryType type)

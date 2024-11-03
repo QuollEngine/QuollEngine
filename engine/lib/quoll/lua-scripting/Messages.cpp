@@ -5,8 +5,8 @@ namespace quoll::lua {
 
 String Messages::noEntityTable(const String &interfaceName,
                                const String &functionName) {
-  String correctName = interfaceName + ":" + functionName;
-  String invalidName = interfaceName + "." + functionName;
+  const String correctName = interfaceName + ":" + functionName;
+  const String invalidName = interfaceName + "." + functionName;
 
   return "Entity does not exist. Make sure you are using "
          "` " +

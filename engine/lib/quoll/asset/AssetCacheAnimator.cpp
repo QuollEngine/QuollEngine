@@ -7,7 +7,9 @@
 
 namespace quoll {
 
-static String serializeLoopMode(AnimationLoopMode loopMode) {
+namespace {
+
+String serializeLoopMode(AnimationLoopMode loopMode) {
   switch (loopMode) {
   case AnimationLoopMode::Linear:
     return "linear";
@@ -17,13 +19,15 @@ static String serializeLoopMode(AnimationLoopMode loopMode) {
   }
 }
 
-static AnimationLoopMode deserializeLoopMode(String loopMode) {
+AnimationLoopMode deserializeLoopMode(String loopMode) {
   if (loopMode == "linear") {
     return AnimationLoopMode::Linear;
   }
 
   return AnimationLoopMode::None;
 }
+
+} // namespace
 
 Result<void> AssetCache::createAnimatorFromData(const AnimatorAsset &data,
                                                 const Path &assetPath) {

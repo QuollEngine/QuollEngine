@@ -94,17 +94,17 @@ void RigidBodyLuaTable::applyGravity(bool apply) {
 }
 
 void RigidBodyLuaTable::applyForce(f32 x, f32 y, f32 z) {
-  glm::vec3 force{x, y, z};
+  const glm::vec3 force{x, y, z};
   mScriptGlobals.entityDatabase.set<Force>(mEntity, {force});
 }
 
 void RigidBodyLuaTable::applyImpulse(f32 x, f32 y, f32 z) {
-  glm::vec3 impulse{x, y, z};
+  const glm::vec3 impulse{x, y, z};
   mScriptGlobals.entityDatabase.set<Impulse>(mEntity, {impulse});
 }
 
 void RigidBodyLuaTable::applyTorque(f32 x, f32 y, f32 z) {
-  glm::vec3 torque{x, y, z};
+  const glm::vec3 torque{x, y, z};
   mScriptGlobals.entityDatabase.set<Torque>(mEntity, {torque});
 }
 

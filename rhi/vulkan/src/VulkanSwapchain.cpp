@@ -50,7 +50,7 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
       physicalDevice.getPresentModes(backend.getSurface()));
   calculateExtent(surfaceCapabilities, backend.getFramebufferSize());
 
-  bool sameQueueFamily =
+  const bool sameQueueFamily =
       physicalDevice.getQueueFamilyIndices().getGraphicsFamily() ==
       physicalDevice.getQueueFamilyIndices().getPresentFamily();
 
@@ -94,7 +94,7 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
   std::vector<VkImage> images(imageCount, VK_NULL_HANDLE);
   vkGetSwapchainImagesKHR(mDevice, mSwapchain, &imageCount, images.data());
 
-  usize oldSize = mTextures.size();
+  const usize oldSize = mTextures.size();
 
   // Delete old textures
   for (usize i = oldSize + 1; i < images.size(); ++i) {
@@ -173,10 +173,12 @@ void VulkanSwapchain::pickMostSuitablePresentMode(
 void VulkanSwapchain::calculateExtent(
     const VkSurfaceCapabilitiesKHR &capabilities, const glm::uvec2 &size) {
 
-  u32 width = std::max(capabilities.minImageExtent.width,
-                       std::min(capabilities.maxImageExtent.width, size.x));
-  u32 height = std::max(capabilities.minImageExtent.height,
-                        std::min(capabilities.maxImageExtent.height, size.y));
+  const u32 width =
+      std::max(capabilities.minImageExtent.width,
+               std::min(capabilities.maxImageExtent.width, size.x));
+  const u32 height =
+      std::max(capabilities.minImageExtent.height,
+               std::min(capabilities.maxImageExtent.height, size.y));
 
   mExtent = glm::uvec2{width, height};
 }
@@ -204,7 +206,7 @@ VkCompositeAlphaFlagBitsKHR VulkanSwapchain::getSuitableCompositeAlpha(
 u32 VulkanSwapchain::acquireNextImage(VkSemaphore imageAvailableSemaphore) {
   QUOLL_PROFILE_EVENT("VulkanSwapchain::acquireNextImage");
   u32 imageIndex = 0;
-  VkResult result = vkAcquireNextImageKHR(
+  const VkResult result = vkAcquireNextImageKHR(
       mDevice, mSwapchain, std::numeric_limits<u64>::max(),
       imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 

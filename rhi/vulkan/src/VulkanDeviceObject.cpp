@@ -8,13 +8,15 @@ namespace quoll::rhi {
 const String QUOLL_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
     "VK_KHR_portability_subset";
 
+namespace {
+
 /**
  * @brief Assert feature in debug mode or log fatal error in release
  *
  * @param featureFlag Feature flag
  * @param name Feature name
  */
-static void assertFeature(VkBool32 featureFlag, String name) {
+void assertFeature(VkBool32 featureFlag, String name) {
   QuollAssert(featureFlag == VK_TRUE,
               "Feature is not supported in physical device: " + name);
   if (featureFlag != VK_TRUE) {
@@ -24,10 +26,12 @@ static void assertFeature(VkBool32 featureFlag, String name) {
   }
 }
 
+} // namespace
+
 VulkanDeviceObject::VulkanDeviceObject(
     const VulkanPhysicalDevice &physicalDevice)
     : mPhysicalDevice(physicalDevice) {
-  f32 queuePriority = 1.0f;
+  const f32 queuePriority = 1.0f;
   VkDeviceQueueCreateInfo createGraphicsQueueInfo{};
   createGraphicsQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
   createGraphicsQueueInfo.flags = 0;
@@ -161,7 +165,9 @@ VulkanDeviceObject::~VulkanDeviceObject() {
   }
 }
 
-static String getObjectTypeLabel(VkObjectType type) {
+namespace {
+
+String getObjectTypeLabel(VkObjectType type) {
   switch (type) {
   case VK_OBJECT_TYPE_BUFFER:
     return "buffer";
@@ -187,6 +193,8 @@ static String getObjectTypeLabel(VkObjectType type) {
     return "";
   };
 }
+
+} // namespace
 
 void VulkanDeviceObject::setObjectName(const String &name, VkObjectType type,
                                        void *handle) {

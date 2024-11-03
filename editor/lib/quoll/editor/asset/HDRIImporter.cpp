@@ -239,7 +239,7 @@ HDRIImporter::convertEquirectangularToCubemap(f32 *data, u32 width,
     }
   }
 
-  usize totalSize = TextureUtils::getBufferSizeFromLevels(levels);
+  const usize totalSize = TextureUtils::getBufferSizeFromLevels(levels);
 
   // Unfiltered cubemap, prefiltered cubemap,
   // irradiance map and specular map all have the same
@@ -428,9 +428,9 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
                                mDescriptorGenerateCubemap);
 
     auto &level = unfilteredCubemap.levels.at(mipLevel);
-    u32 groupSize = level.width;
-    f32 roughness = static_cast<f32>(mipLevel) /
-                    static_cast<f32>(unfilteredCubemap.levels.size());
+    const u32 groupSize = level.width;
+    const f32 roughness = static_cast<f32>(mipLevel) /
+                          static_cast<f32>(unfilteredCubemap.levels.size());
 
     glm::vec4 data{roughness, mipLevel, static_cast<f32>(level.width), 0.0f};
     commandList.pushConstants(mPipelineGenerateSpecularMap,

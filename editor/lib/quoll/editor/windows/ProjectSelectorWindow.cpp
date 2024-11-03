@@ -23,8 +23,6 @@ ProjectSelectorWindow::ProjectSelectorWindow(Window &window,
     : mWindow(window), mDevice(device) {}
 
 std::optional<Project> ProjectSelectorWindow::start() {
-  EntityDatabase entityDatabase;
-  AssetRegistry assetRegistry;
   MetricsCollector metricsCollector;
   RenderStorage renderStorage(mDevice, metricsCollector);
 

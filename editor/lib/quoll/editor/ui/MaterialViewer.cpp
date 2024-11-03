@@ -5,8 +5,10 @@
 
 namespace quoll::editor {
 
-static void renderTextureIfExists(widgets::Table &table, const String &label,
-                                  const AssetRef<TextureAsset> &texture) {
+namespace {
+
+void renderTextureIfExists(widgets::Table &table, const String &label,
+                           const AssetRef<TextureAsset> &texture) {
   static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
   if (texture) {
@@ -14,6 +16,8 @@ static void renderTextureIfExists(widgets::Table &table, const String &label,
     table.column(texture, TextureSize);
   }
 }
+
+} // namespace
 
 void MaterialViewer::render() {
   bool open = mMaterial;
@@ -28,7 +32,8 @@ void MaterialViewer::render() {
 
   const auto &material = mMaterial.get();
 
-  String title = "Material: " + mMaterial.meta().name + "###MaterialViewer";
+  const String title =
+      "Material: " + mMaterial.meta().name + "###MaterialViewer";
 
   if (auto _ = widgets::FixedWindow(title.c_str(), open)) {
     if (auto table = widgets::Table("TableRigidBodyDetails", 2)) {

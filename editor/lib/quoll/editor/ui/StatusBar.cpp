@@ -31,7 +31,7 @@ void StatusBar::render(EditorCamera &editorCamera) {
              viewport->Pos.y + viewport->Size.y - ImGui::GetFrameHeight()));
   ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, ImGui::GetFrameHeight()));
 
-  ImGuiWindowFlags flags =
+  const ImGuiWindowFlags flags =
       ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse |
       ImGuiWindowFlags_NoSavedSettings |

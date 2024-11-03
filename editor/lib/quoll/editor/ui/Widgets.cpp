@@ -16,14 +16,18 @@ struct XBounds {
   f32 end = 0.0f;
 };
 
-static XBounds calculateSectionBoundsX(f32 padding) {
+namespace {
+
+XBounds calculateSectionBoundsX(f32 padding) {
   auto *window = ImGui::GetCurrentWindow();
-  f32 windowStart = ImGui::GetWindowPos().x;
+  const f32 windowStart = ImGui::GetWindowPos().x;
 
   return {windowStart + window->WindowPadding.x + padding,
           windowStart + ImGui::GetWindowWidth() - window->WindowPadding.x -
               padding};
 }
+
+} // namespace
 
 Section::Section(const char *title) {
   ImGui::GetWindowDrawList()->ChannelsSplit(2);
@@ -32,7 +36,7 @@ Section::Section(const char *title) {
   mPadding = ImGui::GetStyle().WindowPadding;
 
   auto *window = ImGui::GetCurrentWindow();
-  f32 windowWidth = ImGui::GetWindowWidth();
+  const f32 windowWidth = ImGui::GetWindowWidth();
 
   auto boundsX = calculateSectionBoundsX(mPadding.x);
 

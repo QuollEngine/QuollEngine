@@ -13,12 +13,13 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
                                    const VulkanResourceRegistry &registry)
     : mDevice(device) {
 
-  usize numDepthAttachments = description.depthAttachment.has_value() ? 1 : 0;
-  usize numResolveAttachments =
+  const usize numDepthAttachments =
+      description.depthAttachment.has_value() ? 1 : 0;
+  const usize numResolveAttachments =
       description.resolveAttachment.has_value() ? 1 : 0;
 
-  usize numAttachments = description.colorAttachments.size() +
-                         numDepthAttachments + numResolveAttachments;
+  const usize numAttachments = description.colorAttachments.size() +
+                               numDepthAttachments + numResolveAttachments;
 
   std::vector<VkAttachmentDescription> attachments;
   attachments.reserve(numAttachments);

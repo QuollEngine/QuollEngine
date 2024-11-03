@@ -6,6 +6,8 @@
 namespace quoll::editor {
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
+namespace {
+
 /**
  * @brief Convert Srgb color to linear
  *
@@ -18,7 +20,7 @@ namespace quoll::editor {
  * @param value Srgb value
  * @return Linear value
  */
-static constexpr f32 SrgbToLinear(f32 value) {
+constexpr f32 SrgbToLinear(f32 value) {
   if (value <= 0.0031308f) {
     return value / 12.92f;
   }
@@ -26,13 +28,13 @@ static constexpr f32 SrgbToLinear(f32 value) {
   return pow((value + 0.055f) / 1.055f, 2.4f);
 }
 
-static constexpr ImColor rgb(i32 r, i32 g, i32 b) { return ImColor(r, g, b); }
+constexpr ImColor rgb(i32 r, i32 g, i32 b) { return ImColor(r, g, b); }
 
-static constexpr ImColor rgba(i32 r, i32 g, i32 b, i32 a) {
+constexpr ImColor rgba(i32 r, i32 g, i32 b, i32 a) {
   return ImColor(r, g, b, a);
 }
 
-static ImVec4 SrgbToLinear(ImColor color) {
+constexpr ImVec4 SrgbToLinear(ImColor color) {
   return {SrgbToLinear(color.Value.x), SrgbToLinear(color.Value.y),
           SrgbToLinear(color.Value.z), color.Value.w};
 }
@@ -74,7 +76,7 @@ static constexpr ThemeStyles Styles{.itemSpacing = ImVec2(8.0f, 8.0f),
                                     .framePadding = ImVec2(10.0f, 10.0f),
                                     .childRounding = 4.0f};
 
-static void setImguiStyles() {
+void setImguiStyles() {
   auto &style = ImGui::GetStyle();
 
   // Separator
@@ -165,14 +167,14 @@ static void setImguiStyles() {
       Theme::getColor(ThemeColor::Sienna600);
 }
 
-static void addFonts() {
+void addFonts() {
   auto &io = ImGui::GetIO();
 
-  Path defaultFontPath = Engine::getFontsPath() / "Roboto-Regular.ttf";
+  const Path defaultFontPath = Engine::getFontsPath() / "Roboto-Regular.ttf";
   Fonts.at(0) =
       io.Fonts->AddFontFromFileTTF(defaultFontPath.string().c_str(), FontSize);
 
-  Path boldFontPath =
+  const Path boldFontPath =
       std::filesystem::current_path() / "assets" / "fonts" / "Roboto-Bold.ttf";
   Fonts.at(1) =
       io.Fonts->AddFontFromFileTTF(boldFontPath.string().c_str(), FontSize);
@@ -185,12 +187,14 @@ static void addFonts() {
 
     static constexpr std::array<ImWchar, 3> IconRanges{0xe005, 0xf8ff, 0};
 
-    Path iconFontPath = std::filesystem::current_path() / "assets" / "fonts" /
-                        "FontAwesome-Solid.ttf";
+    const Path iconFontPath = std::filesystem::current_path() / "assets" /
+                              "fonts" / "FontAwesome-Solid.ttf";
     io.Fonts->AddFontFromFileTTF(iconFontPath.string().c_str(), FontSize,
                                  &config, IconRanges.data());
   }
 }
+
+} // namespace
 
 void Theme::apply() {
   addFonts();

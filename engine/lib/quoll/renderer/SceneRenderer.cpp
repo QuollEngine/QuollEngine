@@ -837,7 +837,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
     f32 advanceX = 0;
     f32 advanceY = 0;
     for (usize i = 0; i < text.content.length(); ++i) {
-      char c = text.content.at(i);
+      const char c = text.content.at(i);
 
       if (c == '\n') {
         advanceX = 0.0f;
@@ -912,7 +912,7 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-    u32 numInstances = static_cast<u32>(meshData.transforms.size());
+    const u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(meshData.drawData->vertexBuffers,
                                   meshData.drawData->vertexBufferOffsets);
@@ -932,7 +932,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
   u32 instanceStart = 0;
 
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-    u32 numInstances = static_cast<u32>(meshData.transforms.size());
+    const u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(meshData.drawData->vertexBuffers,
                                   meshData.drawData->vertexBufferOffsets);
@@ -972,7 +972,7 @@ void SceneRenderer::renderShadowsMesh(rhi::RenderCommandList &commandList,
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-    u32 numInstances = static_cast<u32>(meshData.transforms.size());
+    const u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(
         MeshRenderUtils::getGeometryBuffers(meshData.drawData),
@@ -992,7 +992,7 @@ void SceneRenderer::renderShadowsSkinnedMesh(
 
   u32 instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-    u32 numInstances = static_cast<u32>(meshData.transforms.size());
+    const u32 numInstances = static_cast<u32>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(
         MeshRenderUtils::getSkinnedGeometryBuffers(meshData.drawData),

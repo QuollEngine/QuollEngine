@@ -45,7 +45,7 @@ void Inspector::render(WorkspaceState &state, AssetManager &assetManager,
 
         for (usize i = 0; i < mTabs.size(); ++i) {
           const auto &tab = mTabs.at(i);
-          bool selected = mSelectedIndex == i;
+          const bool selected = mSelectedIndex == i;
 
           StyleStack tabStyles;
           if (selected) {

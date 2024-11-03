@@ -38,10 +38,10 @@ void AnimationSystem::prepare(SystemView &view) {
       continue;
     }
 
-    Animator animator{.asset = ref.asset,
-                      .currentState = ref.asset->initialState,
-                      .normalizedTime = 0.0f,
-                      .playing = true};
+    const Animator animator{.asset = ref.asset,
+                            .currentState = ref.asset->initialState,
+                            .normalizedTime = 0.0f,
+                            .playing = true};
 
     entityDatabase.set(entity, animator);
     entityDatabase.set(entity, AnimatorCurrentAsset{ref.asset.handle()});
@@ -89,7 +89,7 @@ void AnimationSystem::update(f32 dt, SystemView &view) {
       }
     }
 
-    bool hasSkeleton = entityDatabase.has<Skeleton>(entity);
+    const bool hasSkeleton = entityDatabase.has<Skeleton>(entity);
 
     for (const auto &sequence : animation->keyframes) {
       if (sequence.jointTarget && hasSkeleton) {

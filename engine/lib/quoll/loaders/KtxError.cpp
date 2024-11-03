@@ -26,8 +26,9 @@ static const std::map<ktx_error_code_e, quoll::String> resultMap{
 
 namespace quoll {
 
-static String createErrorMessage(const String &what,
-                                 ktx_error_code_e resultCode) {
+namespace {
+
+String createErrorMessage(const String &what, ktx_error_code_e resultCode) {
   String errorMessage = "[KtxError] " + what;
   if (resultCode == KTX_SUCCESS) {
     return errorMessage;
@@ -41,7 +42,9 @@ static String createErrorMessage(const String &what,
   return errorMessage + ": " + humanReadableResultString + " " + codeString;
 }
 
+} // namespace
+
 KtxError::KtxError(const String &what, ktx_error_code_e resultCode)
-    : std::runtime_error(createErrorMessage(what, resultCode)){};
+    : std::runtime_error(createErrorMessage(what, resultCode)) {};
 
 } // namespace quoll

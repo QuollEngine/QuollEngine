@@ -3,8 +3,7 @@
 
 namespace quoll::rhi {
 
-template <class T>
-static constexpr std::vector<T> vectorFrom(std::span<T> data) {
+template <class T> constexpr std::vector<T> vectorFrom(std::span<T> data) {
   return std::vector<T>(data.begin(), data.end());
 }
 

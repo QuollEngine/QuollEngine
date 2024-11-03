@@ -8,7 +8,7 @@
 
 namespace quoll {
 
-void CameraAspectRatioUpdater::update(SystemView &view) {
+void CameraAspectRatioUpdater::update(SystemView &view) const {
   auto &entityDatabase = view.scene->entityDatabase;
   QUOLL_PROFILE_EVENT("CameraAspectRatioUpdater::update");
 

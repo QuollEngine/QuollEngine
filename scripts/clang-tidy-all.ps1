@@ -97,6 +97,16 @@ function Start-Clang-Tidy {
 
     $HeaderArgs = Build-Header-Args ($VendorIncludes + $Headers)
 
+    if ($IsLinux) {
+        $PlatformPP = "QUOLL_PLATFORM_LINUX";
+    }
+    elseif ($IsMacOS) {
+        $PlatformPP = "QUOLL_PLATFORM_MACOS";
+    }
+    elseif ($IsWindows) {
+        $PlatformPP = "QUOLL_PLATFORM_WINDOWS";
+    }
+
     if ($Threads -gt 1) {
         Get-ChildItem -Recurse -Path $Path -Filter $Filter | ForEach-Object -Parallel {
             if ($IsLinux) {
@@ -104,7 +114,7 @@ function Start-Clang-Tidy {
             }
     
             clang-tidy --p=file --quiet $_.FullName -- --std=c++20 `
-                Create-Header-Paths $using:HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS
+                Create-Header-Paths $using:HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS -D $using:PlatformPP
         } -ThrottleLimit $Threads 
     }
     else {
@@ -114,7 +124,7 @@ function Start-Clang-Tidy {
 
         Get-ChildItem -Recurse -Path $Path -Filter $Filter | ForEach-Object {
             clang-tidy --p=file --quiet $_.FullName -- --std=c++20 `
-                Create-Header-Paths $HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS
+                Create-Header-Paths $HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS -D $PlatformPP
             $global:GlobalExitCode = $global:GlobalExitCode -bor $LASTEXITCODE 
         } 
     }

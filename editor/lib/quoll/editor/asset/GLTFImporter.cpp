@@ -20,8 +20,8 @@ Result<UUIDMap> GLTFImporter::loadFromPath(const Path &sourceAssetPath,
   tinygltf::Model model;
   String error, warning;
 
-  bool ret = loader.LoadBinaryFromFile(&model, &error, &warning,
-                                       sourceAssetPath.string());
+  const bool ret = loader.LoadBinaryFromFile(&model, &error, &warning,
+                                             sourceAssetPath.string());
 
   if (!warning.empty()) {
     return Error(warning);

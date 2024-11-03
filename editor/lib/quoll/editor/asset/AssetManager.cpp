@@ -44,6 +44,8 @@ const std::vector<String> AssetManager::SceneExtensions{"scene"};
 
 using co = std::filesystem::copy_options;
 
+namespace {
+
 /**
  * @brief Get unique path for a given path
  *
@@ -54,14 +56,14 @@ using co = std::filesystem::copy_options;
  * @param path File path
  * @return Unique file path
  */
-static Path getUniquePath(Path path) {
+Path getUniquePath(Path path) {
   auto ext = path.extension();
 
   auto tmpPath = path;
 
   u32 index = 1;
   while (std::filesystem::exists(tmpPath)) {
-    String uniqueSuffix = "-" + std::to_string(index++);
+    const String uniqueSuffix = "-" + std::to_string(index++);
     tmpPath = path;
     tmpPath.replace_extension();
     tmpPath += uniqueSuffix;
@@ -70,6 +72,8 @@ static Path getUniquePath(Path path) {
 
   return tmpPath;
 }
+
+} // namespace
 
 AssetManager::AssetManager(const Path &assetsPath, const Path &assetsCachePath,
                            RenderStorage &renderStorage, bool optimize,
@@ -269,7 +273,7 @@ Result<void> AssetManager::syncAssets() {
 
   std::unordered_map<String, bool> allLoadedUuids{};
 
-  std::vector<Path> paths;
+  const std::vector<Path> paths;
 
   for (const auto &entry :
        std::filesystem::recursive_directory_iterator(mAssetsPath)) {
@@ -356,10 +360,6 @@ Result<UUIDMap> AssetManager::createEngineAsset(const Path &sourceAssetPath,
 
 Result<UUIDMap> AssetManager::createEngineTexture(const Path &sourceAssetPath,
                                                   const UUIDMap &uuids) {
-  i32 width = 0;
-  i32 height = 0;
-  i32 channels = 0;
-
   if (sourceAssetPath.extension() == ".ktx2") {
     auto uuid = getOrCreateUuidFromMap(uuids, "root");
     auto createRes =
@@ -475,7 +475,7 @@ String AssetManager::getFileHash(const Path &path) {
 
   String string;
   CryptoPP::SHA256 sha256;
-  CryptoPP::FileSource source(
+  const CryptoPP::FileSource source(
       stream, true,
       new CryptoPP::HashFilter(
           sha256, new CryptoPP::HexEncoder(new CryptoPP::StringSink(string))));
