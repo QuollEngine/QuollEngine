@@ -65,7 +65,7 @@ void Pressable::build(BuildContext &context) {
 
   if (mOnHoverIn || mOnHoverOut) {
     mEventHolder.registerMouseMoveHandler([this](const MouseEvent &mouseEvent) {
-      bool hitTest = getView()->hitTest(mouseEvent.point);
+      const bool hitTest = getView()->hitTest(mouseEvent.point);
 
       if (!mHovered && hitTest) {
         mHovered = true;

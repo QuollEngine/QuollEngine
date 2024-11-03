@@ -34,34 +34,35 @@ void CameraSerializer::deserialize(const YAML::Node &node,
                                    Entity entity) {
   if (node["camera"] && node["camera"].IsMap()) {
     PerspectiveLens lens{};
-    f32 near = node["camera"]["near"].as<f32>(lens.near);
+    const f32 near = node["camera"]["near"].as<f32>(lens.near);
     if (near >= 0.0f) {
       lens.near = near;
     }
 
-    f32 far = node["camera"]["far"].as<f32>(lens.far);
+    const f32 far = node["camera"]["far"].as<f32>(lens.far);
     if (far >= 0.0f) {
       lens.far = far;
     }
 
-    glm::vec2 sensorSize =
+    const glm::vec2 sensorSize =
         node["camera"]["sensorSize"].as<glm::vec2>(lens.sensorSize);
 
     if (sensorSize.x >= 0.0f && sensorSize.y >= 0.0f) {
       lens.sensorSize = sensorSize;
     }
 
-    f32 focalLength = node["camera"]["focalLength"].as<f32>(lens.focalLength);
+    const f32 focalLength =
+        node["camera"]["focalLength"].as<f32>(lens.focalLength);
     if (focalLength >= 0.0f) {
       lens.focalLength = focalLength;
     }
 
-    f32 aperture = node["camera"]["aperture"].as<f32>(lens.aperture);
+    const f32 aperture = node["camera"]["aperture"].as<f32>(lens.aperture);
     if (aperture >= 0.0f) {
       lens.aperture = aperture;
     }
 
-    f32 shutterSpeed =
+    const f32 shutterSpeed =
         node["camera"]["shutterSpeed"].as<f32>(lens.shutterSpeed);
     if (shutterSpeed >= 0.0f) {
       lens.shutterSpeed = shutterSpeed;
@@ -82,7 +83,8 @@ void CameraSerializer::deserialize(const YAML::Node &node,
     if (autoRatio) {
       entityDatabase.set<AutoAspectRatio>(entity, {});
     } else {
-      f32 aspectRatio = node["camera"]["aspectRatio"].as<f32>(lens.aspectRatio);
+      const f32 aspectRatio =
+          node["camera"]["aspectRatio"].as<f32>(lens.aspectRatio);
       if (aspectRatio >= 0.0f) {
         lens.aspectRatio = aspectRatio;
       }

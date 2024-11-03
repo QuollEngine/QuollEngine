@@ -58,10 +58,10 @@ EditorCamera::EditorCamera(Window &window) : mWindow(window) {
         static constexpr f32 MinOOBThreshold = 2.0f;
         const auto &size = mWindow.getFramebufferSize();
 
-        f32 minX = 0;
-        f32 maxX = static_cast<f32>(size.x);
-        f32 minY = 0;
-        f32 maxY = static_cast<f32>(size.y);
+        const f32 minX = 0;
+        const f32 maxX = static_cast<f32>(size.x);
+        const f32 minY = 0;
+        const f32 maxY = static_cast<f32>(size.y);
 
         bool outOfBounds = false;
 
@@ -150,11 +150,11 @@ void EditorCamera::update(WorkspaceState &state) {
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
-  f32 scaleX = static_cast<f32>(mWindow.getFramebufferSize().x) / mWidth;
-  f32 scaleY = static_cast<f32>(mWindow.getFramebufferSize().y) / mHeight;
+  const f32 scaleX = static_cast<f32>(mWindow.getFramebufferSize().x) / mWidth;
+  const f32 scaleY = static_cast<f32>(mWindow.getFramebufferSize().y) / mHeight;
 
-  f32 rX = pos.x - mX;
-  f32 rY = pos.y - mY;
+  const f32 rX = pos.x - mX;
+  const f32 rY = pos.y - mY;
 
   return glm::vec2(rX * scaleX, rY * scaleY);
 }
@@ -162,14 +162,14 @@ glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
 void EditorCamera::pan(CameraLookAt &lookAt) {
   static constexpr f32 PanSpeed = 0.03f;
 
-  glm::vec2 mousePos = mWindow.getCurrentMousePosition();
-  glm::vec3 right = glm::normalize(
+  const glm::vec2 mousePos = mWindow.getCurrentMousePosition();
+  const glm::vec3 right = glm::normalize(
       glm::cross(glm::vec3(lookAt.eye - lookAt.center), lookAt.up));
 
-  glm::vec2 mousePosDiff =
+  const glm::vec2 mousePosDiff =
       glm::vec4((mousePos - mPrevMousePos) * PanSpeed, 0.0f, 0.0f);
 
-  glm::vec3 change = lookAt.up * mousePosDiff.y + right * mousePosDiff.x;
+  const glm::vec3 change = lookAt.up * mousePosDiff.y + right * mousePosDiff.x;
   lookAt.eye += change;
   lookAt.center += change;
   mPrevMousePos = mousePos;
@@ -178,23 +178,24 @@ void EditorCamera::pan(CameraLookAt &lookAt) {
 void EditorCamera::rotate(CameraLookAt &lookAt) {
   static constexpr f32 TwoPi = 2.0f * glm::pi<f32>();
 
-  glm::vec2 mousePos = mWindow.getCurrentMousePosition();
+  const glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   const auto &size = mWindow.getFramebufferSize();
 
-  glm ::vec2 screenToSphere{// horizontal = 2pi
-                            (TwoPi / static_cast<f32>(size.x)),
-                            // vertical = pi
-                            (glm::pi<f32>() / static_cast<f32>(size.y))};
+  const glm ::vec2 screenToSphere{// horizontal = 2pi
+                                  (TwoPi / static_cast<f32>(size.x)),
+                                  // vertical = pi
+                                  (glm::pi<f32>() / static_cast<f32>(size.y))};
 
   // Convert mouse position difference to angle
   // difference for arcball
-  glm::vec2 angleDiff = (mousePos - mPrevMousePos) * screenToSphere;
-  glm::vec3 direction = glm::vec3(lookAt.eye - lookAt.center);
-  glm::vec3 right = glm::normalize(glm::cross(direction, lookAt.up));
+  const glm::vec2 angleDiff = (mousePos - mPrevMousePos) * screenToSphere;
+  const glm::vec3 direction = glm::vec3(lookAt.eye - lookAt.center);
+  const glm::vec3 right = glm::normalize(glm::cross(direction, lookAt.up));
   lookAt.up = glm::normalize(glm::cross(right, direction));
 
-  glm::mat4 rotationX = glm::rotate(glm::mat4{1.0f}, -angleDiff.x, lookAt.up);
-  glm::mat4 rotationY = glm::rotate(glm::mat4{1.0f}, angleDiff.y, right);
+  const glm::mat4 rotationX =
+      glm::rotate(glm::mat4{1.0f}, -angleDiff.x, lookAt.up);
+  const glm::mat4 rotationY = glm::rotate(glm::mat4{1.0f}, angleDiff.y, right);
 
   lookAt.eye = glm::vec3(rotationY * (rotationX * glm::vec4(direction, 0.0f))) +
                lookAt.center;
@@ -203,17 +204,17 @@ void EditorCamera::rotate(CameraLookAt &lookAt) {
 }
 
 void EditorCamera::zoom(CameraLookAt &lookAt) {
-  glm::vec2 mousePos = mWindow.getCurrentMousePosition();
-  f32 zoomFactor = (mousePos.y - mPrevMousePos.y) * ZoomSpeed;
+  const glm::vec2 mousePos = mWindow.getCurrentMousePosition();
+  const f32 zoomFactor = (mousePos.y - mPrevMousePos.y) * ZoomSpeed;
 
-  glm::vec3 change = glm::vec3(lookAt.eye - lookAt.center) * zoomFactor;
+  const glm::vec3 change = glm::vec3(lookAt.eye - lookAt.center) * zoomFactor;
   lookAt.center += change;
   lookAt.eye += change;
   mPrevMousePos = mousePos;
 }
 
 void EditorCamera::zoomWheel(CameraLookAt &lookAt) {
-  glm::vec3 change =
+  const glm::vec3 change =
       glm::vec3(lookAt.eye - lookAt.center) * mWheelOffset * ZoomSpeed;
   lookAt.center += change;
   lookAt.eye += change;

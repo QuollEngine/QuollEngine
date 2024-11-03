@@ -16,7 +16,7 @@ GameLuaTable::GameLuaTable(Entity entity, ScriptGlobals scriptGlobals)
 sol::object GameLuaTable::getService(String name) {
   auto &script = mScriptGlobals.entityDatabase.get<LuaScript>(mEntity);
 
-  sol::state_view state(script.state);
+  const sol::state_view state(script.state);
   if (name == "EntityQuery") {
     EntityQueryLuaTable::create(state);
     return sol::make_object(state, EntityQueryLuaTable(mScriptGlobals));

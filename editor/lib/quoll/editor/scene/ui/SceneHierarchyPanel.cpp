@@ -25,12 +25,14 @@
 
 namespace quoll::editor {
 
-static String getNameAndIcon(const String &name, const char *icon) {
+namespace {
+
+String getNameAndIcon(const String &name, const char *icon) {
   return String(icon) + "  " + name;
 }
 
-static String getNodeName(const String &name, Entity entity,
-                          EntityDatabase &entityDatabase) {
+String getNodeName(const String &name, Entity entity,
+                   EntityDatabase &entityDatabase) {
   if (entityDatabase.has<EnvironmentSkybox>(entity)) {
     return getNameAndIcon(name, fa::Cloud);
   }
@@ -70,10 +72,12 @@ static String getNodeName(const String &name, Entity entity,
   return name;
 }
 
+} // namespace
+
 void SceneHierarchyPanel::render(WorkspaceState &state,
                                  ActionExecutor &actionExecutor) {
 
-  f32 paddingY = ImGui::GetStyle().WindowPadding.y;
+  const f32 paddingY = ImGui::GetStyle().WindowPadding.y;
   StyleStack stack;
   stack.pushStyle(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
@@ -89,12 +93,12 @@ void SceneHierarchyPanel::renderRoot(WorkspaceState &state,
 
   auto &scene = state.scene;
 
-  int treeNodeFlags =
+  const int treeNodeFlags =
       ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth |
       ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen;
 
   bool open = false;
-  String nodeName = "Scene";
+  const String nodeName = "Scene";
 
   StyleStack stack;
   stack.pushStyle(ImGuiStyleVar_ItemSpacing,
@@ -136,11 +140,12 @@ u32 SceneHierarchyPanel::renderEntity(Entity entity, u32 index, int flags,
   u32 innerIndex = index;
   auto &scene = state.scene;
 
-  String name = scene.entityDatabase.has<Name>(entity)
-                    ? scene.entityDatabase.get<Name>(entity).name
-                    : "Entity #" + std::to_string(static_cast<u32>(entity));
+  const String name =
+      scene.entityDatabase.has<Name>(entity)
+          ? scene.entityDatabase.get<Name>(entity).name
+          : "Entity #" + std::to_string(static_cast<u32>(entity));
 
-  bool isLeaf = !scene.entityDatabase.has<Children>(entity);
+  const bool isLeaf = !scene.entityDatabase.has<Children>(entity);
 
   int treeNodeFlags = flags;
   if (isLeaf) {

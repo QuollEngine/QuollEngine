@@ -24,7 +24,7 @@ bool WorkspaceLayoutRenderer::begin() {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-  ImGuiWindowFlags flags =
+  const ImGuiWindowFlags flags =
       ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse |
       ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground |

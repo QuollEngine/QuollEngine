@@ -139,7 +139,7 @@ void ImguiDebugLayer::renderPerformanceMetrics() {
   if (!mPerformanceMetricsVisible)
     return;
 
-  u32 fps = mFpsCounter.getFPS();
+  const u32 fps = mFpsCounter.getFPS();
 
   if (ImGui::Begin("Performance Metrics", &mPerformanceMetricsVisible,
                    ImGuiWindowFlags_NoDocking)) {
@@ -260,7 +260,9 @@ void ImguiDebugLayer::renderPhysicalDeviceInfo() {
   }
 }
 
-template <typename TAssetData> static void renderAssetMap(AssetCache *cache) {
+namespace {
+
+template <typename TAssetData> void renderAssetMap(AssetCache *cache) {
   auto type = cache->getAssetType<TAssetData>();
 
   if (ImGui::BeginTabItem(getAssetTypeString(type).c_str())) {
@@ -308,6 +310,8 @@ template <typename TAssetData> static void renderAssetMap(AssetCache *cache) {
     ImGui::EndTabItem();
   }
 }
+
+} // namespace
 
 void ImguiDebugLayer::renderAssets() {
   if (!mAssetsVisible || !mAssetCache)

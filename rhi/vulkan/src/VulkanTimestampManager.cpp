@@ -19,7 +19,7 @@ VulkanTimestampManager::VulkanTimestampManager(VulkanDeviceObject &device)
 
   for (usize i = 0; i < mQueryPools.size(); ++i) {
     VkQueryPool queryPool = VK_NULL_HANDLE;
-    String name = "timestamp query pool frame " + std::to_string(i);
+    const String name = "timestamp query pool frame " + std::to_string(i);
     checkForVulkanError(
         vkCreateQueryPool(mDevice, &createInfo, nullptr, &queryPool),
         "Cannot create query pool", name);

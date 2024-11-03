@@ -96,7 +96,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
 
   auto storage = generator.atlasStorage();
 
-  msdfgen::BitmapConstRef<byte, NumChannels> bitmap = storage;
+  const msdfgen::BitmapConstRef<byte, NumChannels> bitmap = storage;
 
   std::vector<std::byte> pixels(static_cast<usize>(bitmap.width) *
                                 bitmap.height * NumChannels);

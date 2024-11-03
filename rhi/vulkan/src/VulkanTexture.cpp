@@ -34,9 +34,9 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
                   : true,
               "Cubemap must have 6 layers");
 
-  u32 imageFlags = description.type == TextureType::Cubemap
-                       ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
-                       : 0;
+  const u32 imageFlags = description.type == TextureType::Cubemap
+                             ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
+                             : 0;
 
   VkImageViewType imageViewType = VK_IMAGE_VIEW_TYPE_MAX_ENUM;
 

@@ -62,7 +62,7 @@ std::vector<MetricsCollector::Metric> MetricsCollector::measure(f32 converter) {
   for (auto spanIndex : mCollectedSpans) {
     const auto &span = mGpuSpans.at(spanIndex);
 
-    f32 value =
+    const f32 value =
         static_cast<f32>(mCollectedTimestamps.at(mQueries.at(span.markEnd)) -
                          mCollectedTimestamps.at(mQueries.at(span.markStart))) *
         converter;

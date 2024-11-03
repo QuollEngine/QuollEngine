@@ -16,7 +16,7 @@ namespace quoll {
 
 static constexpr u32 CubemapSides = 6;
 
-static VkFormat getVulkanFormatFromFormat(rhi::Format format) {
+constexpr VkFormat getVulkanFormatFromFormat(rhi::Format format) {
   switch (format) {
   case rhi::Format::Rgba8Unorm:
     return VK_FORMAT_R8G8B8A8_UNORM;
@@ -45,7 +45,7 @@ static VkFormat getVulkanFormatFromFormat(rhi::Format format) {
   }
 }
 
-static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
+constexpr rhi::Format getFormatFromVulkanFormat(VkFormat format) {
   switch (format) {
   case VK_FORMAT_R8G8B8A8_UNORM:
     return rhi::Format::Rgba8Unorm;
@@ -106,7 +106,7 @@ Result<void> AssetCache::createTextureFromData(const TextureAsset &data,
     const auto &level = data.levels.at(i);
 
     usize faceOffset = 0;
-    usize faceSize = level.size / createInfo.numFaces;
+    const usize faceSize = level.size / createInfo.numFaces;
     for (u32 face = 0; face < createInfo.numFaces; ++face) {
       ktxTexture_SetImageFromMemory(
           baseTexture, static_cast<ktx_uint32_t>(i), 0, face,
@@ -175,7 +175,7 @@ Result<TextureAsset> AssetCache::loadTexture(const Path &path) {
 
   auto *srcData = ktxTexture_GetData(ktxTextureData);
 
-  usize numFaces = ktxTextureData->isCubemap ? CubemapSides : 1;
+  const usize numFaces = ktxTextureData->isCubemap ? CubemapSides : 1;
 
   usize levelOffset = 0;
   u32 mipWidth = texture.width;
@@ -184,10 +184,10 @@ Result<TextureAsset> AssetCache::loadTexture(const Path &path) {
   for (usize level = 0; level < texture.levels.size(); ++level) {
     // ktsTexture_GetImageSize returns size of a
     // single face or layer within a level
-    usize blockSize =
+    const usize blockSize =
         ktxTexture_GetImageSize(ktxTextureData, static_cast<i32>(level));
 
-    usize levelSize = blockSize * numFaces;
+    const usize levelSize = blockSize * numFaces;
 
     texture.levels.at(level).offset = static_cast<u32>(levelOffset);
     texture.levels.at(level).size = static_cast<u32>(levelSize);

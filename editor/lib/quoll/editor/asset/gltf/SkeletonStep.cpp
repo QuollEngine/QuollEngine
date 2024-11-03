@@ -43,8 +43,6 @@ void loadSkeletons(GLTFImportData &importData) {
       continue;
     }
 
-    bool success = true;
-
     std::vector<glm::mat4> inverseBindMatrices(ibMeta.accessor.count);
 
     {
@@ -83,7 +81,7 @@ void loadSkeletons(GLTFImportData &importData) {
         continue;
       }
 
-      u32 nJ = normalizedJointMap.at(j);
+      const u32 nJ = normalizedJointMap.at(j);
 
       const auto &node = model.nodes.at(j);
       for (auto &child : node.children) {
@@ -91,12 +89,12 @@ void loadSkeletons(GLTFImportData &importData) {
           continue;
         }
 
-        u32 nChild = normalizedJointMap.at(child);
+        const u32 nChild = normalizedJointMap.at(child);
         jointParents.at(nChild) = static_cast<int>(nJ);
       }
     }
 
-    u32 numJoints = static_cast<u32>(skin.joints.size());
+    const u32 numJoints = static_cast<u32>(skin.joints.size());
 
     auto assetName =
         skin.name.empty() ? "skeleton" + std::to_string(si) : skin.name;
@@ -109,8 +107,8 @@ void loadSkeletons(GLTFImportData &importData) {
     asset.uuid = getOrCreateGLTFUuid(importData, skeletonName);
 
     for (auto &joint : skin.joints) {
-      u32 nJoint = normalizedJointMap.at(joint);
-      int parent = jointParents.at(nJoint);
+      const u32 nJoint = normalizedJointMap.at(joint);
+      const int parent = jointParents.at(nJoint);
       const auto &node = model.nodes.at(joint);
       const auto &data = loadTransformData(node);
 

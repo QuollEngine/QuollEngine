@@ -4,12 +4,16 @@
 
 namespace quoll {
 
-static void logMessages(LogStream &stream, sol::state_view state,
-                        sol::variadic_args args) {
+namespace {
+
+void logMessages(LogStream &stream, sol::state_view state,
+                 sol::variadic_args args) {
   for (auto arg : args) {
     stream << state["tostring"](arg.get<sol::object>()).get<String>() << "\t";
   }
 }
+
+} // namespace
 
 sol::table UserLoggerLuaTable::create(sol::state_view state) {
   auto logger = state.create_table();

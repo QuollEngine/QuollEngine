@@ -7,7 +7,9 @@
 
 namespace quoll {
 
-static void updateSkeletonAssets(SystemView &view) {
+namespace {
+
+void updateSkeletonAssets(SystemView &view) {
   auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, ref] : entityDatabase.view<SkeletonAssetRef>()) {
     if (entityDatabase.has<SkeletonCurrentAsset>(entity) &&
@@ -37,14 +39,14 @@ static void updateSkeletonAssets(SystemView &view) {
   }
 }
 
-static void updateSkeletons(SystemView &view) {
+void updateSkeletons(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
 
   auto &entityDatabase = view.scene->entityDatabase;
   for (auto [entity, skeleton] : entityDatabase.view<Skeleton>()) {
 
     {
-      glm::mat4 identity{1.0f};
+      const glm::mat4 identity{1.0f};
       skeleton.jointWorldTransforms.at(0) =
           glm::translate(identity, skeleton.jointLocalPositions.at(0)) *
           glm::toMat4(skeleton.jointLocalRotations.at(0)) *
@@ -52,7 +54,7 @@ static void updateSkeletons(SystemView &view) {
     }
 
     for (u32 i = 1; i < skeleton.numJoints; ++i) {
-      glm::mat4 identity{1.0f};
+      const glm::mat4 identity{1.0f};
       auto localTransform =
           glm::translate(identity, skeleton.jointLocalPositions.at(i)) *
           glm::toMat4(skeleton.jointLocalRotations.at(i)) *
@@ -71,7 +73,7 @@ static void updateSkeletons(SystemView &view) {
   }
 }
 
-static void updateDebugBones(SystemView &view) {
+void updateDebugBones(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::updateDebug");
 
   auto &entityDatabase = view.scene->entityDatabase;
@@ -86,6 +88,8 @@ static void updateDebugBones(SystemView &view) {
     }
   }
 }
+
+} // namespace
 
 void SkeletonUpdater::update(SystemView &view) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::update");

@@ -67,7 +67,7 @@ void generateTangents(const std::vector<glm::vec3> &vertices,
 void optimizeMeshes(BaseGeometryAsset &g) {
   static constexpr f32 OverdrawThreshold = 1.05f;
 
-  usize vertexSize = g.positions.size();
+  const usize vertexSize = g.positions.size();
 
   meshopt_optimizeVertexCache(g.indices.data(), g.indices.data(),
                               g.indices.size(), vertexSize);
@@ -114,7 +114,7 @@ Result<void> loadStandardMeshAttributes(const String &primitiveName,
 
   auto &&positionMeta =
       getBufferMetaForAccessor(model, primitive.attributes.at("POSITION"));
-  usize vertexSize = positionMeta.accessor.count;
+  const usize vertexSize = positionMeta.accessor.count;
 
   // According to spec, position attribute can only be vec3<f32>
   if (positionMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&

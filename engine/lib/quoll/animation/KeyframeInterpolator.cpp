@@ -56,7 +56,7 @@ const T getLinearValue(const KeyframeSequenceAsset &sequence, f32 time) {
   const auto &currentTime = sequence.keyframeTimes.at(found);
   const auto &nextTime = sequence.keyframeTimes.at(found + 1);
 
-  f32 k = (time - currentTime) / (nextTime - currentTime);
+  const f32 k = (time - currentTime) / (nextTime - currentTime);
 
   return interpolateLinear(currentVal, nextVal, k);
 }

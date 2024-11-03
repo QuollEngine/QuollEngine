@@ -8,7 +8,9 @@
 
 namespace quoll {
 
-static sol_maybe<EntityLuaTable> getParent(EntityLuaTable &entityTable) {
+namespace {
+
+sol_maybe<EntityLuaTable> getParent(EntityLuaTable &entityTable) {
   auto entity = entityTable.getEntity();
   auto &scriptGlobals = entityTable.getScriptGlobals();
   if (scriptGlobals.entityDatabase.has<Parent>(entity)) {
@@ -20,8 +22,8 @@ static sol_maybe<EntityLuaTable> getParent(EntityLuaTable &entityTable) {
   return sol::nil;
 }
 
-static void setParent(EntityLuaTable &entityTable,
-                      sol_maybe<EntityLuaTable> parentTable) {
+void setParent(EntityLuaTable &entityTable,
+               sol_maybe<EntityLuaTable> parentTable) {
   auto &scriptGlobals = entityTable.getScriptGlobals();
   auto &db = entityTable.getScriptGlobals().entityDatabase;
   auto entity = entityTable.getEntity();
@@ -38,6 +40,8 @@ static void setParent(EntityLuaTable &entityTable,
     }
   }
 }
+
+} // namespace
 
 void ParentLuaTable::create(sol::usertype<EntityLuaTable> entityUsertype,
                             sol::state_view state) {

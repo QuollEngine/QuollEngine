@@ -5,7 +5,7 @@ namespace quoll {
 
 void BindlessDrawParameters::build(rhi::RenderDevice *device) {
   usize maxSize = 0;
-  for (auto &range : mRanges) {
+  for (const auto &range : mRanges) {
     maxSize = std::max(range.size, maxSize);
   }
 
@@ -67,7 +67,7 @@ void BindlessDrawParameters::destroy(rhi::RenderDevice *device) {
 }
 
 usize BindlessDrawParameters::padSizeToMinimumUniformAlignment(
-    usize originalSize) {
+    usize originalSize) const {
   if (mMinBufferAlignment > 0) {
     return (originalSize + mMinBufferAlignment - 1) &
            ~(mMinBufferAlignment - 1);

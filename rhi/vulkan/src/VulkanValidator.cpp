@@ -68,7 +68,9 @@ void VulkanValidator::destroyDebugUtilsMessengerEXT(
   }
 }
 
-static String getValidationMessage(
+namespace {
+
+String getValidationMessage(
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData) {
 
   String str(pCallbackData->pMessage);
@@ -90,6 +92,8 @@ static String getValidationMessage(
 
   return ss.str();
 }
+
+} // namespace
 
 VKAPI_ATTR VkBool32 VKAPI_CALL VulkanValidator::debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

@@ -10,7 +10,7 @@ class MockCommandList : public NativeRenderCommandListInterface {
 public:
   MockCommandList() = default;
 
-  MockCommandList(MockCommandList &&rhs);
+  MockCommandList(MockCommandList &&rhs) noexcept;
 
   void beginRenderPass(rhi::RenderPassHandle renderPass,
                        FramebufferHandle framebuffer,

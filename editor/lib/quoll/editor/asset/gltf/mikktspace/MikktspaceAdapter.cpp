@@ -86,7 +86,7 @@ void MikktspaceAdapter::setTSpaceBasic(const SMikkTSpaceContext *context,
 usize MikktspaceAdapter::getVertexIndex(const SMikkTSpaceContext *context,
                                         int faceIndex, int vertexIndex) {
   auto &meshData = getMeshData(context);
-  usize index = static_cast<usize>(faceIndex * 3 + vertexIndex);
+  const usize index = static_cast<usize>(faceIndex * 3 + vertexIndex);
 
   return meshData.indices.at(index);
 }

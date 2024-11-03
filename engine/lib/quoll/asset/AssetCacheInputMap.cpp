@@ -4,7 +4,9 @@
 
 namespace quoll {
 
-static Result<void> checkBoolean(YAML::Node node) {
+namespace {
+
+Result<void> checkBoolean(YAML::Node node) {
   if (node.IsNull()) {
     return Ok();
   }
@@ -22,7 +24,7 @@ static Result<void> checkBoolean(YAML::Node node) {
   return Ok();
 }
 
-static Result<void> checkAxis1d(YAML::Node node) {
+Result<void> checkAxis1d(YAML::Node node) {
   if (node.IsNull()) {
     return Ok();
   }
@@ -55,7 +57,7 @@ static Result<void> checkAxis1d(YAML::Node node) {
   return Error("Invalid binding item value");
 }
 
-static Result<void> checkAxis2d(YAML::Node node) {
+Result<void> checkAxis2d(YAML::Node node) {
   if (node.IsNull()) {
     return Ok();
   }
@@ -95,6 +97,8 @@ static Result<void> checkAxis2d(YAML::Node node) {
 
   return Error("Invalid binding item value");
 }
+
+} // namespace
 
 Result<InputMapAsset> AssetCache::loadInputMap(const Path &path) {
   std::ifstream stream(path);

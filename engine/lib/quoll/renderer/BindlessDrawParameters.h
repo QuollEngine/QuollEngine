@@ -34,7 +34,7 @@ public:
   void destroy(rhi::RenderDevice *device);
 
 private:
-  usize padSizeToMinimumUniformAlignment(usize originalSize);
+  usize padSizeToMinimumUniformAlignment(usize originalSize) const;
 
 private:
   std::vector<Range> mRanges;

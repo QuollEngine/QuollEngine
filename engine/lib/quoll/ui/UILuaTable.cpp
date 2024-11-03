@@ -13,7 +13,7 @@ sol::table UILuaTable::create(sol::state_view state, AssetCache &assetCache) {
   uiImage["texture"] = sol::property(
       [](UIImage &image) { return image.texture.handle().getRawId(); },
       [&](UIImage &image, AssetHandleType value) {
-        AssetHandle<TextureAsset> handle(value);
+        const AssetHandle<TextureAsset> handle(value);
         if (assetCache.getRegistry().has(handle)) {
           image.texture = AssetRef<TextureAsset>(
               assetCache.getRegistry().getMap<TextureAsset>(), handle);
@@ -29,7 +29,8 @@ sol::table UILuaTable::create(sol::state_view state, AssetCache &assetCache) {
   auto ui = state.create_table();
 
   ui["image"] = [&](sol::table props) {
-    AssetHandle<TextureAsset> handle(props.get<AssetHandleType>("texture"));
+    const AssetHandle<TextureAsset> handle(
+        props.get<AssetHandleType>("texture"));
 
     AssetRef<TextureAsset> texture;
 

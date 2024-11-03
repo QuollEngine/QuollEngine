@@ -187,8 +187,8 @@ bool Window::isKeyPressed(int key) const {
 void Window::focus() { glfwFocusWindow(mWindowInstance); }
 
 InputStateValue Window::getKeyboardState(int key) {
-  int val = glfwGetKey(mWindowInstance, input::getGlfwKeyboardKey(key));
-  return val == GLFW_PRESS;
+  return glfwGetKey(mWindowInstance, input::getGlfwKeyboardKey(key)) ==
+         GLFW_PRESS;
 }
 
 InputStateValue Window::getMouseState(int key) {
@@ -230,11 +230,12 @@ void Window::addGamepad(int jid, Window *window) {
 
   const char *name = glfwGetJoystickName(jid);
 
-  InputDevice device = {.type = InputDeviceType::Gamepad,
-                        .name = name,
-                        .index = static_cast<u32>(jid),
-                        .stateFn = std::bind(&Window::getGamepadState, window,
-                                             jid, std::placeholders::_1)};
+  const InputDevice device = {.type = InputDeviceType::Gamepad,
+                              .name = name,
+                              .index = static_cast<u32>(jid),
+                              .stateFn =
+                                  std::bind(&Window::getGamepadState, window,
+                                            jid, std::placeholders::_1)};
 
   window->mDeviceManager.addDevice(device);
 }

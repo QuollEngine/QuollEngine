@@ -23,7 +23,9 @@ struct ImguiInputTextCallbackUserData {
   String &value;
 };
 
-static int InputTextCallback(ImGuiInputTextCallbackData *data) {
+namespace {
+
+int InputTextCallback(ImGuiInputTextCallbackData *data) {
   auto *userData =
       static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
   if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
@@ -36,8 +38,8 @@ static int InputTextCallback(ImGuiInputTextCallbackData *data) {
   return 0;
 }
 
-static bool ImguiInputText(const String &label, String &value,
-                           ImGuiInputTextFlags flags = 0) {
+bool ImguiInputText(const String &label, String &value,
+                    ImGuiInputTextFlags flags = 0) {
   QuollAssert((flags & ImGuiInputTextFlags_CallbackResize) == 0,
               "Do not back callback resize flag");
 
@@ -50,7 +52,7 @@ static bool ImguiInputText(const String &label, String &value,
                           flags, InputTextCallback, &userData);
 }
 
-static EditorIcon getIconFromAssetType(AssetType type) {
+EditorIcon getIconFromAssetType(AssetType type) {
   switch (type) {
   case AssetType::Texture:
     return EditorIcon::Texture;
@@ -83,6 +85,8 @@ static EditorIcon getIconFromAssetType(AssetType type) {
     return EditorIcon::Unknown;
   }
 }
+
+} // namespace
 
 void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
                           ActionExecutor &actionExecutor) {
@@ -121,10 +125,6 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
     ImGui::Text("%s", relativePath.string().c_str());
 
-    bool itemContextMenu = false;
-
-    std::optional<Entry> rightClickedEntry;
-
     if (ImGui::BeginTable("CurrentDir", itemsPerRow,
                           ImGuiTableFlags_NoPadInnerX)) {
       usize i = 0;
@@ -140,7 +140,7 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
 
         ImGui::TableNextColumn();
 
-        String id = "###" + std::to_string(i);
+        const String id = "###" + std::to_string(i);
         if (ImGui::Selectable(id.c_str(), mSelected == i,
                               ImGuiSelectableFlags_AllowDoubleClick,
                               ImVec2(ItemWidth, ItemHeight))) {
@@ -185,16 +185,16 @@ void AssetBrowser::render(WorkspaceState &state, AssetManager &assetManager,
           }
         }
 
-        bool dndAllowed = entry.assetType == AssetType::Prefab ||
-                          entry.assetType == AssetType::Mesh ||
-                          entry.assetType == AssetType::Material ||
-                          entry.assetType == AssetType::Skeleton ||
-                          entry.assetType == AssetType::Texture ||
-                          entry.assetType == AssetType::Audio ||
-                          entry.assetType == AssetType::LuaScript ||
-                          entry.assetType == AssetType::Environment ||
-                          entry.assetType == AssetType::Animator ||
-                          entry.assetType == AssetType::InputMap;
+        const bool dndAllowed = entry.assetType == AssetType::Prefab ||
+                                entry.assetType == AssetType::Mesh ||
+                                entry.assetType == AssetType::Material ||
+                                entry.assetType == AssetType::Skeleton ||
+                                entry.assetType == AssetType::Texture ||
+                                entry.assetType == AssetType::Audio ||
+                                entry.assetType == AssetType::LuaScript ||
+                                entry.assetType == AssetType::Environment ||
+                                entry.assetType == AssetType::Animator ||
+                                entry.assetType == AssetType::InputMap;
 
         if (dndAllowed) {
           if (ImGui::BeginDragDropSource()) {
@@ -367,14 +367,14 @@ void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
 void AssetBrowser::renderEntry(const Entry &entry) {
 
   {
-    f32 initialCursorPos = ImGui::GetCursorPosX();
+    const f32 initialCursorPos = ImGui::GetCursorPosX();
     ImGui::SetCursorPosX(initialCursorPos + ImagePadding);
     imgui::image(entry.preview, IconSize);
     ImGui::SetCursorPosX(initialCursorPos);
   }
 
   {
-    f32 initialCursorPos = ImGui::GetCursorPosX();
+    const f32 initialCursorPos = ImGui::GetCursorPosX();
     const f32 centerPos =
         initialCursorPos + (ItemWidth * 1.0f - entry.textWidth) * 0.5f;
     ImGui::SetCursorPosX(centerPos);
@@ -454,8 +454,6 @@ void AssetBrowser::setDefaultProps(Entry &entry, AssetManager &assetManager) {
   entry.truncatedName = entry.name;
 
   if (ImGui::CalcTextSize(entry.truncatedName.c_str()).x > TextWidth) {
-    bool changed = false;
-
     while (calculateTextWidth(entry.truncatedName) > TextWidth) {
       entry.truncatedName.pop_back();
     }

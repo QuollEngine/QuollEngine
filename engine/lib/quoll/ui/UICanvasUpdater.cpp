@@ -11,8 +11,8 @@ namespace quoll {
 static constexpr f32 ImageSize = 50.0f;
 
 void renderView(UIComponent component, YGNodeRef node) {
-  f32 left = YGNodeLayoutGetLeft(node);
-  f32 top = YGNodeLayoutGetTop(node);
+  const f32 left = YGNodeLayoutGetLeft(node);
+  const f32 top = YGNodeLayoutGetTop(node);
 
   ImGui::SetCursorPos({left, top});
 
@@ -28,8 +28,8 @@ void renderView(UIComponent component, YGNodeRef node) {
         ImVec4(view->style.backgroundColor.x, view->style.backgroundColor.y,
                view->style.backgroundColor.z, view->style.backgroundColor.w));
 
-    f32 width = YGNodeLayoutGetWidth(node);
-    f32 height = YGNodeLayoutGetHeight(node);
+    const f32 width = YGNodeLayoutGetWidth(node);
+    const f32 height = YGNodeLayoutGetHeight(node);
 
     ImGui::BeginChild(view->id.c_str(), ImVec2(width, height), false, 0);
     for (usize i = 0; i < view->children.size(); ++i) {
@@ -121,7 +121,7 @@ void UICanvasUpdater::render(SystemView &view) {
     ImGui::SetNextWindowPos(ImVec2(mPosition.x, mPosition.y));
     ImGui::SetNextWindowSize(ImVec2(mSize.x, mSize.y));
 
-    ImGuiWindowFlags WindowFlags =
+    const ImGuiWindowFlags WindowFlags =
         ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration |
         ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground |
         ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings |
@@ -140,12 +140,12 @@ void UICanvasUpdater::render(SystemView &view) {
 void UICanvasUpdater::setViewport(f32 x, f32 y, f32 width, f32 height) {
   static const f32 Epsilon = 0.01f;
 
-  bool xEqual = glm::epsilonEqual(x, mPosition.x, Epsilon);
-  bool yEqual = glm::epsilonEqual(y, mPosition.y, Epsilon);
-  bool widthEqual = glm::epsilonEqual(width, mSize.x, Epsilon);
-  bool heightEqual = glm::epsilonEqual(height, mSize.y, Epsilon);
+  const bool xEqual = glm::epsilonEqual(x, mPosition.x, Epsilon);
+  const bool yEqual = glm::epsilonEqual(y, mPosition.y, Epsilon);
+  const bool widthEqual = glm::epsilonEqual(width, mSize.x, Epsilon);
+  const bool heightEqual = glm::epsilonEqual(height, mSize.y, Epsilon);
 
-  bool changed = !(xEqual && yEqual && widthEqual && heightEqual);
+  const bool changed = !(xEqual && yEqual && widthEqual && heightEqual);
   if (changed) {
     mViewportChanged = true;
   }

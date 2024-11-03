@@ -53,13 +53,15 @@ RenderGraph::RGTexture RenderGraph::import(rhi::TextureHandle handle) {
   return RGTexture(mRegistry, textureIndex);
 }
 
-static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
-                            usize index, std::vector<bool> &visited,
-                            const std::vector<std::set<usize>> &adjacencyList,
-                            std::vector<RenderGraphPass> &output) {
+namespace {
+
+void topologicalSort(const std::vector<RenderGraphPass> &inputs, usize index,
+                     std::vector<bool> &visited,
+                     const std::vector<std::set<usize>> &adjacencyList,
+                     std::vector<RenderGraphPass> &output) {
   visited.at(index) = true;
 
-  for (usize x : adjacencyList.at(index)) {
+  for (const usize x : adjacencyList.at(index)) {
     if (!visited.at(x)) {
       topologicalSort(inputs, x, visited, adjacencyList, output);
     }
@@ -67,6 +69,8 @@ static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
 
   output.push_back(inputs.at(index));
 }
+
+} // namespace
 
 void RenderGraph::buildResources(RenderStorage &storage) {
   // Create all real handles for render graph if they do not exist
@@ -420,7 +424,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
     layerCount = desc.layerCount;
   }
 
-  bool renderPassExists = isHandleValid(pass.mRenderPass);
+  const bool renderPassExists = isHandleValid(pass.mRenderPass);
 
   if (!rhi::isHandleValid(pass.mRenderPass)) {
     pass.mRenderPass = storage.getNewRenderPassHandle();

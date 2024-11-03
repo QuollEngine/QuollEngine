@@ -16,7 +16,7 @@ VulkanPhysicalDevice::getPhysicalDevices(VkInstance instance,
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 
-    VulkanQueueFamily queueFamilyIndices(physicalDevice, surface);
+    const VulkanQueueFamily queueFamilyIndices(physicalDevice, surface);
 
     devices.push_back(VulkanPhysicalDevice(physicalDevice, deviceProperties,
                                            queueFamilyIndices));

@@ -27,14 +27,14 @@ bool Toolbar::item(String label, String icon, bool active) {
   StyleStack stack;
   if (active) {
     const auto &imguiCol = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
-    glm::vec4 buttonColor{imguiCol.x, imguiCol.y, imguiCol.z, imguiCol.w};
+    const glm::vec4 buttonColor{imguiCol.x, imguiCol.y, imguiCol.z, imguiCol.w};
 
     stack.pushColor(ImGuiCol_Button, buttonColor);
     stack.pushColor(ImGuiCol_ButtonActive, buttonColor);
     stack.pushColor(ImGuiCol_ButtonHovered, buttonColor);
   }
 
-  bool clicked = widgets::Button(icon.c_str());
+  const bool clicked = widgets::Button(icon.c_str());
 
   ImGui::SameLine();
   return clicked;

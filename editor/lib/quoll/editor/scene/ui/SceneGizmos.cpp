@@ -11,7 +11,9 @@
 
 namespace quoll::editor {
 
-static LocalTransform
+namespace {
+
+LocalTransform
 calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
                                  const glm::mat4 &worldTransform) {
   auto &scene = state.scene;
@@ -30,7 +32,7 @@ calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
     return LocalTransform{localPosition, localRotation, localScale};
   }
 
-  Entity parent = entityDatabase.get<Parent>(entity).parent;
+  const Entity parent = entityDatabase.get<Parent>(entity).parent;
 
   QuollAssert(entityDatabase.exists(parent) &&
                   entityDatabase.has<WorldTransform>(parent),
@@ -64,7 +66,7 @@ calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
   return LocalTransform{localPosition, localRotation, localScale};
 }
 
-static ImGuizmo::OPERATION
+ImGuizmo::OPERATION
 getImguizmoOperation(TransformOperation transformOperation) {
   switch (transformOperation) {
   case TransformOperation::Scale:
@@ -76,6 +78,8 @@ getImguizmoOperation(TransformOperation transformOperation) {
     return ImGuizmo::TRANSLATE;
   }
 }
+
+} // namespace
 
 bool SceneGizmos::render(WorkspaceState &state,
                          ActionExecutor &actionExecutor) {

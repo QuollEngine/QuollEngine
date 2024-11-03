@@ -150,7 +150,7 @@ sol_maybe<f32> PerspectiveLensLuaTable::getShutterSpeed() {
 }
 
 void PerspectiveLensLuaTable::setShutterSpeed(f32 shutterSpeed) {
-  f32 value = 1.0f / shutterSpeed;
+  const f32 value = 1.0f / shutterSpeed;
 
   if (!mScriptGlobals.entityDatabase.has<PerspectiveLens>(mEntity)) {
     PerspectiveLens lens{};

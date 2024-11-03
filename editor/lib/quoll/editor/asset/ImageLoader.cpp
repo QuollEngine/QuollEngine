@@ -71,7 +71,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, u32 width, u32 height,
     levels.at(0).size = static_cast<usize>(width) * height * 4;
     levels.at(0).width = width;
     levels.at(0).height = height;
-    usize textureSize = TextureUtils::getBufferSizeFromLevels(levels);
+    const usize textureSize = TextureUtils::getBufferSizeFromLevels(levels);
     assetData.resize(textureSize);
     memcpy(assetData.data(), data, textureSize);
   }
@@ -110,7 +110,8 @@ std::vector<u8> ImageLoader::generateMipMapsFromTextureData(
   description.format = format;
 
   auto texture = mRenderStorage.createTexture(description);
-  usize size = static_cast<usize>(description.width) * description.height * 4;
+  const usize size =
+      static_cast<usize>(description.width) * description.height * 4;
 
   TextureUtils::copyDataToTexture(
       mRenderStorage.getDevice(), data, texture,

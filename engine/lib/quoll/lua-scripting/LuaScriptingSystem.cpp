@@ -22,7 +22,6 @@ void LuaScriptingSystem::start(SystemView &view, PhysicsSystem &physicsSystem,
                               mAssetCache, mScriptLoop};
 
   lua::ScriptDecorator scriptDecorator;
-  std::vector<Entity> deleteList;
   std::vector<lua::DeferredLoader *> loaders;
 
   for (auto [entity, ref] : entityDatabase.view<LuaScriptAssetRef>()) {

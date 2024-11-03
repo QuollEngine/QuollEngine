@@ -47,7 +47,7 @@ void loadPrefabs(GLTFImportData &importData) {
       }
     }
 
-    bool hasValidMesh =
+    const bool hasValidMesh =
         node.mesh >= 0 &&
         importData.meshes.map.find(node.mesh) != importData.meshes.map.end();
     bool hasValidLight = false;
@@ -87,7 +87,7 @@ void loadPrefabs(GLTFImportData &importData) {
       prefab.data.meshes.push_back({localEntityId, asset});
 
       if (node.skin >= 0) {
-        SkinnedMeshRenderer renderer{materials};
+        const SkinnedMeshRenderer renderer{materials};
         prefab.data.skinnedMeshRenderers.push_back({localEntityId, renderer});
 
         prefab.data.skeletons.push_back(
@@ -99,7 +99,7 @@ void loadPrefabs(GLTFImportData &importData) {
           prefab.data.animators.push_back({localEntityId, it->second});
         }
       } else {
-        MeshRenderer renderer{materials};
+        const MeshRenderer renderer{materials};
         prefab.data.meshRenderers.push_back({localEntityId, renderer});
 
         prefab.data.meshes.push_back(
@@ -114,7 +114,7 @@ void loadPrefabs(GLTFImportData &importData) {
 
     if (hasValidLight) {
       const auto &light = itExtLight->second;
-      usize lightIndex =
+      const usize lightIndex =
           static_cast<usize>(light.Get("light").GetNumberAsInt());
 
       if (importData.directionalLights.map.find(lightIndex) !=

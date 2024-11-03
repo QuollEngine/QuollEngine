@@ -49,7 +49,7 @@ void TransformSerializer::deserialize(const YAML::Node &node,
       auto parentId = node["transform"]["parent"].as<u64>(0);
 
       auto it = entityIdCache.find(parentId);
-      Entity parentEntity =
+      const Entity parentEntity =
           it != entityIdCache.end() ? it->second : Entity::Null;
 
       if (parentEntity != Entity::Null) {

@@ -36,8 +36,8 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device,
     binding2.descriptorType = rhi::DescriptorType::StorageImage;
     binding2.shaderStage = rhi::ShaderStage::All;
 
-    rhi::DescriptorLayoutDescription description{{binding0, binding1, binding2},
-                                                 "Global textures"};
+    const rhi::DescriptorLayoutDescription description{
+        {binding0, binding1, binding2}, "Global textures"};
     auto layout = mDevice->createDescriptorLayout(description);
 
     mGlobalTexturesDescriptor = mDevice->createDescriptor(layout);

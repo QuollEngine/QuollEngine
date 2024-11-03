@@ -61,7 +61,9 @@ struct ImguiInputTextCallbackUserData {
   String &value;
 };
 
-static int InputTextCallback(ImGuiInputTextCallbackData *data) {
+namespace {
+
+int InputTextCallback(ImGuiInputTextCallbackData *data) {
   auto *userData =
       static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
   if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
@@ -74,9 +76,9 @@ static int InputTextCallback(ImGuiInputTextCallbackData *data) {
   return 0;
 }
 
-static bool ImguiMultilineInputText(const String &label, String &value,
-                                    const ImVec2 &size,
-                                    ImGuiInputTextFlags flags = 0) {
+bool ImguiMultilineInputText(const String &label, String &value,
+                             const ImVec2 &size,
+                             ImGuiInputTextFlags flags = 0) {
   QuollAssert((flags & ImGuiInputTextFlags_CallbackResize) == 0,
               "Do not back callback resize flag");
 
@@ -90,17 +92,17 @@ static bool ImguiMultilineInputText(const String &label, String &value,
                                    InputTextCallback, &userData);
 }
 
-static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
-                                const EnvironmentSkybox &skybox,
-                                ActionExecutor &actionExecutor,
-                                AssetCache &assetCache) {
+void dndEnvironmentAsset(widgets::Section &section, Entity entity,
+                         const EnvironmentSkybox &skybox,
+                         ActionExecutor &actionExecutor,
+                         AssetCache &assetCache) {
   static constexpr f32 DropBorderWidth = 3.5f;
   auto &g = *ImGui::GetCurrentContext();
 
-  ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
-                 g.LastItemData.Rect.Min.y + DropBorderWidth);
-  ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
-                 g.LastItemData.Rect.Max.y - DropBorderWidth);
+  const ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                       g.LastItemData.Rect.Min.y + DropBorderWidth);
+  const ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                       g.LastItemData.Rect.Max.y - DropBorderWidth);
   if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
                                        g.LastItemData.ID)) {
     if (auto *payload = ImGui::AcceptDragDropPayload(
@@ -120,31 +122,30 @@ static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
 }
 
 template <typename AssetType, typename ComponentType>
-static void dndComponentAsset(const widgets::Section &section, Scene &scene,
-                              AssetCache &assetCache,
-                              ActionExecutor &actionExecutor,
-                              Entity selectedEntity) {
+void dndComponentAsset(const widgets::Section &section, Scene &scene,
+                       AssetCache &assetCache, ActionExecutor &actionExecutor,
+                       Entity selectedEntity) {
   auto type = AssetCache::getAssetType<AssetType>();
 
   auto &component = scene.entityDatabase.get<ComponentType>(selectedEntity);
 
-  f32 width = section.getClipRect().GetWidth();
+  const f32 width = section.getClipRect().GetWidth();
   const f32 height = width * 0.2f;
 
   if (component.asset) {
     widgets::Button(component.asset.meta().name.c_str(), ImVec2(width, height));
   } else {
-    String label = "Drag " + getAssetTypeString(type) + " here";
+    const String label = "Drag " + getAssetTypeString(type) + " here";
     widgets::Button(label.c_str(), ImVec2(width, height));
   }
 
   static constexpr f32 DropBorderWidth = 3.5f;
   auto &g = *ImGui::GetCurrentContext();
 
-  ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
-                 g.LastItemData.Rect.Min.y + DropBorderWidth);
-  ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
-                 g.LastItemData.Rect.Max.y - DropBorderWidth);
+  const ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                       g.LastItemData.Rect.Min.y + DropBorderWidth);
+  const ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                       g.LastItemData.Rect.Max.y - DropBorderWidth);
   if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
                                        g.LastItemData.ID)) {
     if (auto *payload =
@@ -162,7 +163,7 @@ static void dndComponentAsset(const widgets::Section &section, Scene &scene,
   }
 }
 
-static String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
+String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
   if (type == EnvironmentSkyboxType::Color) {
     return "Color";
   }
@@ -173,6 +174,8 @@ static String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
 
   return "None";
 }
+
+} // namespace
 
 void EntityPanel::renderContent(WorkspaceState &state,
                                 AssetManager &assetManager,
@@ -548,7 +551,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     static constexpr f32 MinCustomAspectRatio = 0.01f;
     static constexpr f32 MaxCustomAspectRatio = 1000.0f;
 
-    bool hasViewportAspectRatio =
+    const bool hasViewportAspectRatio =
         scene.entityDatabase.has<AutoAspectRatio>(mSelectedEntity);
 
     if (ImGui::BeginCombo("###AspectRatioType",
@@ -683,7 +686,7 @@ void EntityPanel::renderSprite(Scene &scene, AssetCache &assetCache,
   static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    f32 width = section.getClipRect().GetWidth();
+    const f32 width = section.getClipRect().GetWidth();
 
     auto &component = scene.entityDatabase.get<Sprite>(mSelectedEntity);
 
@@ -703,10 +706,10 @@ void EntityPanel::renderSprite(Scene &scene, AssetCache &assetCache,
     static constexpr f32 DropBorderWidth = 3.5f;
     auto &g = *ImGui::GetCurrentContext();
 
-    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
-                   g.LastItemData.Rect.Min.y + DropBorderWidth);
-    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
-                   g.LastItemData.Rect.Max.y - DropBorderWidth);
+    const ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                         g.LastItemData.Rect.Min.y + DropBorderWidth);
+    const ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                         g.LastItemData.Rect.Max.y - DropBorderWidth);
     if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
                                          g.LastItemData.ID)) {
       if (auto *payload = ImGui::AcceptDragDropPayload(
@@ -1061,7 +1064,9 @@ void EntityPanel::renderAnimator(WorkspaceState &state, Scene &scene,
   }
 }
 
-static String getGeometryName(const PhysicsGeometryType &type) {
+namespace {
+
+String getGeometryName(const PhysicsGeometryType &type) {
   switch (type) {
   case PhysicsGeometryType::Box:
     return "Box";
@@ -1076,6 +1081,8 @@ static String getGeometryName(const PhysicsGeometryType &type) {
   }
 }
 
+} // namespace
+
 void EntityPanel::renderCollidable(Scene &scene,
                                    ActionExecutor &actionExecutor) {
   if (!scene.entityDatabase.has<Collidable>(mSelectedEntity)) {
@@ -1085,7 +1092,7 @@ void EntityPanel::renderCollidable(Scene &scene,
   static const String SectionName = String(fa::Circle) + "  Collidable";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    std::array<PhysicsGeometryType, sizeof(PhysicsGeometryType)> types{
+    const std::array<PhysicsGeometryType, sizeof(PhysicsGeometryType)> types{
         PhysicsGeometryType::Box,
         PhysicsGeometryType::Sphere,
         PhysicsGeometryType::Capsule,
@@ -1108,7 +1115,7 @@ void EntityPanel::renderCollidable(Scene &scene,
       ImGui::EndCombo();
     }
 
-    bool sendAction = false;
+    const bool sendAction = false;
 
     auto center = collidable.geometryDesc.center;
     if (widgets::Input("Center", center, false)) {
@@ -1517,7 +1524,7 @@ void EntityPanel::renderLuaScript(Scene &scene, AssetCache &assetCache,
               if (!value) {
                 widgets::Button("Drag prefab here", ImVec2(width, halfWidth));
               } else {
-                String buttonLabel =
+                const String buttonLabel =
                     "Replace current prefab: " + value.meta().name;
                 widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
               }
@@ -1546,7 +1553,7 @@ void EntityPanel::renderLuaScript(Scene &scene, AssetCache &assetCache,
               if (!value) {
                 widgets::Button("Drag texture here", ImVec2(width, halfWidth));
               } else {
-                String buttonLabel =
+                const String buttonLabel =
                     "Replace current texture: " + value.meta().name;
                 widgets::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
               }
@@ -1664,7 +1671,7 @@ void EntityPanel::renderSkybox(Scene &scene, AssetManager &assetManager,
   static const String SectionName = String(fa::Cloud) + "  Skybox";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-    f32 width = section.getClipRect().GetWidth();
+    const f32 width = section.getClipRect().GetWidth();
     const f32 height = width * 0.5f;
 
     auto &skybox = scene.entityDatabase.get<EnvironmentSkybox>(mSelectedEntity);

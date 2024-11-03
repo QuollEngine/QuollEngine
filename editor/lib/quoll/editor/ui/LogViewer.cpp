@@ -28,8 +28,6 @@ void LogViewer::renderLogContainer(const String &name,
     logSize = 0;
   }
 
-  StyleStack stack;
-
   ImGui::BeginChild(name.c_str(),
                     ImVec2(width, ImGui::GetContentRegionAvail().y), false,
                     flags);

@@ -117,7 +117,7 @@ RendererAssetRegistry::get(const AssetRef<MeshAsset> &asset) {
   {                                                                            \
     usize vbSize = 0;                                                          \
     for (auto &g : mesh.geometries) {                                          \
-      usize vertexSize = g.FieldName.size();                                   \
+      const usize vertexSize = g.FieldName.size();                             \
       vbSize += vertexSize * sizeof(Type);                                     \
     }                                                                          \
                                                                                \

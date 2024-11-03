@@ -35,7 +35,7 @@ void Material::updateProperty(StringView name, const Property &value) {
     return;
   }
 
-  usize index = (*it).second;
+  const usize index = (*it).second;
 
   if (mProperties.at(index).getType() != value.getType()) {
     Engine::getLogger().warning()

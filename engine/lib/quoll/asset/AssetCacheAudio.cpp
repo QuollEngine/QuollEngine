@@ -4,13 +4,17 @@
 
 namespace quoll {
 
-static AudioAssetFormat getAudioFormatFromExtension(StringView extension) {
+namespace {
+
+AudioAssetFormat getAudioFormatFromExtension(StringView extension) {
   if (extension == "wav") {
     return AudioAssetFormat::Wav;
   }
 
   return AudioAssetFormat::Unknown;
 }
+
+} // namespace
 
 Result<AudioAsset> AssetCache::loadAudio(const Path &path) {
   auto ext = path.extension().string();
@@ -24,7 +28,7 @@ Result<AudioAsset> AssetCache::loadAudio(const Path &path) {
     return Error("Cannot load audio file: " + path.string());
   }
 
-  std::ifstream::pos_type pos = stream.tellg();
+  const std::ifstream::pos_type pos = stream.tellg();
 
   if (pos <= 0) {
     return Error("Could not open file: File is empty");

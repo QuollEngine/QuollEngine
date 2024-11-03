@@ -134,8 +134,8 @@ void VulkanCommandBuffer::setViewport(const glm::vec2 &offset,
                                       const glm::vec2 &size,
                                       const glm::vec2 &depthRange) {
   // Using negative height to flip the viewport
-  VkViewport viewport{offset.x, size.y - offset.y, size.x,
-                      -size.y,  depthRange.x,      depthRange.y};
+  const VkViewport viewport{offset.x, size.y - offset.y, size.x,
+                            -size.y,  depthRange.x,      depthRange.y};
 
   vkCmdSetViewport(mCommandBuffer, 0, 1, &viewport);
   mStats.addCommandCall();
@@ -143,7 +143,8 @@ void VulkanCommandBuffer::setViewport(const glm::vec2 &offset,
 
 void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
                                      const glm::uvec2 &size) {
-  VkRect2D scissor{VkOffset2D{offset.x, offset.y}, VkExtent2D{size.x, size.y}};
+  const VkRect2D scissor{VkOffset2D{offset.x, offset.y},
+                         VkExtent2D{size.x, size.y}};
 
   vkCmdSetScissor(mCommandBuffer, 0, 1, &scissor);
   mStats.addCommandCall();

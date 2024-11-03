@@ -31,10 +31,11 @@ void SceneUpdater::updateTransforms(SystemView &view) {
     if (entityDatabase.has<Parent>(entity))
       continue;
 
-    glm::mat4 identity{1.0f};
-    glm::mat4 localTransform = glm::translate(identity, local.localPosition) *
-                               glm::toMat4(local.localRotation) *
-                               glm::scale(identity, local.localScale);
+    const glm::mat4 identity{1.0f};
+    const glm::mat4 localTransform =
+        glm::translate(identity, local.localPosition) *
+        glm::toMat4(local.localRotation) *
+        glm::scale(identity, local.localScale);
 
     world.worldTransform = localTransform;
   }
@@ -43,10 +44,11 @@ void SceneUpdater::updateTransforms(SystemView &view) {
        entityDatabase.view<LocalTransform, WorldTransform, Parent>()) {
     auto &parentTransform = entityDatabase.get<WorldTransform>(parent.parent);
 
-    glm::mat4 identity{1.0f};
-    glm::mat4 localTransform = glm::translate(identity, local.localPosition) *
-                               glm::toMat4(local.localRotation) *
-                               glm::scale(identity, local.localScale);
+    const glm::mat4 identity{1.0f};
+    const glm::mat4 localTransform =
+        glm::translate(identity, local.localPosition) *
+        glm::toMat4(local.localRotation) *
+        glm::scale(identity, local.localScale);
 
     i16 jointId = -1;
     if (entityDatabase.has<JointAttachment>(entity) &&

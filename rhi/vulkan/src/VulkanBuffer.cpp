@@ -75,7 +75,7 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
     allocationFlags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
   }
 
-  VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  const VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
   VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
   if (BitwiseEnumContains(description.usage, rhi::BufferUsage::Vertex)) {
     bufferUsage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;

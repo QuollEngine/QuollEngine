@@ -13,7 +13,9 @@
 
 namespace quoll::editor {
 
-static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
+namespace {
+
+LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
   static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};
   const auto &invViewMatrix = glm::inverse(viewMatrix);
   const auto &orientation = invViewMatrix * glm::translate(DistanceFromEye);
@@ -24,12 +26,14 @@ static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
   return transform;
 }
 
-static bool isPrefabValid(const PrefabAsset &prefab) {
+bool isPrefabValid(const PrefabAsset &prefab) {
   return !prefab.animators.empty() || !prefab.meshes.empty() ||
          !prefab.skeletons.empty() || !prefab.transforms.empty() ||
          !prefab.directionalLights.empty() || !prefab.pointLights.empty() ||
          !prefab.meshRenderers.empty() || !prefab.skinnedMeshRenderers.empty();
 }
+
+} // namespace
 
 ActionExecutorResult SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
                                                        AssetCache &assetCache) {

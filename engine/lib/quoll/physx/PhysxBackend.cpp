@@ -27,8 +27,10 @@ using namespace physx;
 
 namespace quoll {
 
-static PxTransform getShapeLocalTransform(const glm::vec3 &center,
-                                          PhysicsGeometryType type) {
+namespace {
+
+PxTransform getShapeLocalTransform(const glm::vec3 &center,
+                                   PhysicsGeometryType type) {
   if (type == PhysicsGeometryType::Capsule) {
     return PxTransform(PhysxMapping::getPhysxVec3(center),
                        PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
@@ -37,9 +39,9 @@ static PxTransform getShapeLocalTransform(const glm::vec3 &center,
   return PxTransform(PhysxMapping::getPhysxVec3(center));
 }
 
-static void updateShapeWithGeometryData(const PhysicsGeometryDesc &geometryDesc,
-                                        PxShape *shape,
-                                        const glm::mat4 &worldTransform) {
+void updateShapeWithGeometryData(const PhysicsGeometryDesc &geometryDesc,
+                                 PxShape *shape,
+                                 const glm::mat4 &worldTransform) {
   glm::vec3 scale;
   glm::quat rotation;
   glm::vec3 translation;
@@ -52,29 +54,30 @@ static void updateShapeWithGeometryData(const PhysicsGeometryDesc &geometryDesc,
 
   if (geometryDesc.type == PhysicsGeometryType::Sphere) {
     const auto &[radius] = std::get<PhysicsGeometrySphere>(geometryDesc.params);
-    PxSphereGeometry geometry(std::max(scale.x, std::max(scale.y, scale.z)) *
-                              radius);
+    const PxSphereGeometry geometry(
+        std::max(scale.x, std::max(scale.y, scale.z)) * radius);
     shape->setGeometry(geometry);
   } else if (geometryDesc.type == PhysicsGeometryType::Box) {
     const auto &[halfExtents] =
         std::get<PhysicsGeometryBox>(geometryDesc.params);
-    PxBoxGeometry geometry(scale.x * halfExtents.x, scale.y * halfExtents.y,
-                           scale.z * halfExtents.z);
+    const PxBoxGeometry geometry(scale.x * halfExtents.x,
+                                 scale.y * halfExtents.y,
+                                 scale.z * halfExtents.z);
     shape->setGeometry(geometry);
   } else if (geometryDesc.type == PhysicsGeometryType::Capsule) {
     const auto &[radius, halfHeight] =
         std::get<PhysicsGeometryCapsule>(geometryDesc.params);
-    PxCapsuleGeometry geometry(scale.x * radius, scale.y * halfHeight);
+    const PxCapsuleGeometry geometry(scale.x * radius, scale.y * halfHeight);
     shape->setGeometry(geometry);
 
-    PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+    const PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
     shape->setLocalPose(relativePose);
   } else if (geometryDesc.type == PhysicsGeometryType::Plane) {
     shape->setGeometry(PxPlaneGeometry());
   }
 }
 
-static PxFilterFlags physxFilterAllCollisionShader(
+PxFilterFlags physxFilterAllCollisionShader(
     PxFilterObjectAttributes attributes0, PxFilterData filterData0,
     PxFilterObjectAttributes attributes1, PxFilterData filterData1,
     PxPairFlags &pairFlags, const void *constantBlock,
@@ -91,6 +94,8 @@ static PxFilterFlags physxFilterAllCollisionShader(
 
   return PxFilterFlag::eDEFAULT;
 }
+
+} // namespace
 
 PhysxBackend::PhysxBackend() : mSimulationEventCallback(mSignals) {
   static constexpr u32 PvdPort = 5425;
@@ -196,11 +201,11 @@ bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
 
   PxSweepBuffer buffer;
 
-  PxQueryFilterData filterData(PxQueryFlag::eDYNAMIC | PxQueryFlag::eSTATIC |
-                               PxQueryFlag::ePREFILTER);
+  const PxQueryFilterData filterData(
+      PxQueryFlag::eDYNAMIC | PxQueryFlag::eSTATIC | PxQueryFlag::ePREFILTER);
   PhysxQueryFilterCallback filterCallback(physx.shape);
 
-  bool result =
+  const bool result =
       mScene->sweep(physx.shape->getGeometry().any(),
                     PhysxMapping::getPhysxTransform(transform.worldTransform) *
                         physx.shape->getLocalPose(),
@@ -445,13 +450,13 @@ void PhysxBackend::synchronizeTransforms(SystemView &view) {
       auto *actor = static_cast<PxRigidActor *>(actors[i]);
       const auto &globalTransform = actor->getGlobalPose();
 
-      Entity entity =
+      const Entity entity =
           static_cast<Entity>(reinterpret_cast<uptr>(actor->userData));
 
-      glm::vec3 position(globalTransform.p.x, globalTransform.p.y,
-                         globalTransform.p.z);
-      glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
-                         globalTransform.q.y, globalTransform.q.z);
+      const glm::vec3 position(globalTransform.p.x, globalTransform.p.y,
+                               globalTransform.p.z);
+      const glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
+                               globalTransform.q.y, globalTransform.q.z);
 
       if (entityDatabase.has<WorldTransform>(entity)) {
         auto &world = entityDatabase.get<WorldTransform>(entity);
@@ -481,13 +486,13 @@ void PhysxBackend::synchronizeTransforms(SystemView &view) {
       auto *actor = static_cast<PxRigidActor *>(actors[i]);
       const auto &globalTransform = actor->getGlobalPose();
 
-      Entity entity =
+      const Entity entity =
           static_cast<Entity>(reinterpret_cast<uptr>(actor->userData));
 
-      glm::vec3 position(globalTransform.p.x, globalTransform.p.y,
-                         globalTransform.p.z);
-      glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
-                         globalTransform.q.y, globalTransform.q.z);
+      const glm::vec3 position(globalTransform.p.x, globalTransform.p.y,
+                               globalTransform.p.z);
+      const glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
+                               globalTransform.q.y, globalTransform.q.z);
 
       if (entityDatabase.has<LocalTransform>(entity)) {
         auto &transform = entityDatabase.get<LocalTransform>(entity);
@@ -543,24 +548,26 @@ PxShape *PhysxBackend::createShape(Entity entity,
   PxShape *shape = nullptr;
   if (geometryDesc.type == PhysicsGeometryType::Sphere) {
     const auto &[radius] = std::get<PhysicsGeometrySphere>(geometryDesc.params);
-    PxSphereGeometry geometry(std::max(scale.x, std::max(scale.y, scale.z)) *
-                              radius);
+    const PxSphereGeometry geometry(
+        std::max(scale.x, std::max(scale.y, scale.z)) * radius);
     shape = mPhysics->createShape(geometry, material, true);
   } else if (geometryDesc.type == PhysicsGeometryType::Box) {
     const auto &[halfExtents] =
         std::get<PhysicsGeometryBox>(geometryDesc.params);
-    PxBoxGeometry geometry(scale.x * halfExtents.x, scale.y * halfExtents.y,
-                           scale.z * halfExtents.z);
+    const PxBoxGeometry geometry(scale.x * halfExtents.x,
+                                 scale.y * halfExtents.y,
+                                 scale.z * halfExtents.z);
     shape = mPhysics->createShape(geometry, material, true);
   } else if (geometryDesc.type == PhysicsGeometryType::Capsule) {
     const auto &[radius, halfHeight] =
         std::get<PhysicsGeometryCapsule>(geometryDesc.params);
-    PxCapsuleGeometry geometry(std::max(scale.x, scale.y) * radius,
-                               scale.y * halfHeight);
+    const PxCapsuleGeometry geometry(std::max(scale.x, scale.y) * radius,
+                                     scale.y * halfHeight);
     shape = mPhysics->createShape(geometry, material, true);
 
-    PxTransform relativePose(PhysxMapping::getPhysxVec3(geometryDesc.center),
-                             PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+    const PxTransform relativePose(
+        PhysxMapping::getPhysxVec3(geometryDesc.center),
+        PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
     shape->setLocalPose(relativePose);
   } else if (geometryDesc.type == PhysicsGeometryType::Plane) {
     shape = mPhysics->createShape(PxPlaneGeometry(), material, true);

@@ -128,7 +128,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetRef<PrefabAsset> prefab,
     auto entity = getOrCreateEntity(pSkeleton.entity);
     const auto &asset = pSkeleton.value.get();
 
-    usize numJoints = asset.jointLocalPositions.size();
+    const usize numJoints = asset.jointLocalPositions.size();
 
     mEntityDatabase.set(entity, SkeletonAssetRef{pSkeleton.value});
   }
@@ -136,7 +136,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(AssetRef<PrefabAsset> prefab,
   for (auto &item : asset.animators) {
     auto entity = getOrCreateEntity(item.entity);
 
-    AnimatorAssetRef animator{item.value};
+    const AnimatorAssetRef animator{item.value};
     mEntityDatabase.set(entity, animator);
   }
 

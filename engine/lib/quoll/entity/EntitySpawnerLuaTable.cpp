@@ -8,7 +8,7 @@
 
 namespace quoll {
 
-static bool isPrefabEmpty(const PrefabAsset &prefab) {
+constexpr bool isPrefabEmpty(const PrefabAsset &prefab) {
   return prefab.animators.empty() && prefab.meshes.empty() &&
          prefab.skeletons.empty() && prefab.directionalLights.empty() &&
          prefab.pointLights.empty() && prefab.meshRenderers.empty() &&
@@ -27,14 +27,14 @@ EntityLuaTable EntitySpawnerLuaTable::spawnEmpty() {
 
 sol_maybe<EntityLuaTable>
 EntitySpawnerLuaTable::spawnPrefab(AssetHandleType handle) {
-  AssetHandle<PrefabAsset> prefabHandle(handle);
+  const AssetHandle<PrefabAsset> prefabHandle(handle);
   if (!mScriptGlobals.assetCache.getRegistry().has(prefabHandle)) {
     Engine::getUserLogger().error() << lua::Messages::assetNotFound(
         "EntitySpawner", "spawnPrefab", getAssetTypeString(AssetType::Prefab));
     return sol::nil;
   }
 
-  AssetRef<PrefabAsset> prefab(
+  const AssetRef<PrefabAsset> prefab(
       mScriptGlobals.assetCache.getRegistry().getMap<PrefabAsset>(),
       prefabHandle);
 
@@ -55,7 +55,7 @@ EntitySpawnerLuaTable::spawnPrefab(AssetHandleType handle) {
 
 sol_maybe<EntityLuaTable>
 EntitySpawnerLuaTable::spawnSprite(AssetHandleType handle) {
-  AssetHandle<TextureAsset> textureHandle(handle);
+  const AssetHandle<TextureAsset> textureHandle(handle);
   if (!mScriptGlobals.assetCache.getRegistry().has(textureHandle)) {
     Engine::getUserLogger().error() << lua::Messages::assetNotFound(
         "EntitySpawner", "spawnSprite", getAssetTypeString(AssetType::Texture));
@@ -63,7 +63,7 @@ EntitySpawnerLuaTable::spawnSprite(AssetHandleType handle) {
     return sol::nil;
   }
 
-  AssetRef<TextureAsset> texture(
+  const AssetRef<TextureAsset> texture(
       mScriptGlobals.assetCache.getRegistry().getMap<TextureAsset>(),
       textureHandle);
 

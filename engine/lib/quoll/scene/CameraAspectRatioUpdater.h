@@ -10,7 +10,7 @@ struct SystemView;
  */
 class CameraAspectRatioUpdater {
 public:
-  void update(SystemView &view);
+  void update(SystemView &view) const;
 
   void setViewportSize(glm::uvec2 size);
 

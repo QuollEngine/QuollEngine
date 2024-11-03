@@ -272,7 +272,7 @@ void EditorRenderer::attach(RenderGraph &graph,
                       glm::vec4(0.0));
 
     static constexpr u32 MaskAll = 0xFF;
-    rhi::PipelineDepthStencil outlineWritePipelineStencil{
+    const rhi::PipelineDepthStencil outlineWritePipelineStencil{
         .depthTest = true,
         .depthWrite = true,
         .stencilTest = true,
@@ -291,7 +291,7 @@ void EditorRenderer::attach(RenderGraph &graph,
                  .writeMask = MaskAll,
                  .reference = 1}};
 
-    rhi::PipelineDepthStencil outlinePipelineStencil{
+    const rhi::PipelineDepthStencil outlinePipelineStencil{
         .depthTest = false,
         .depthWrite = true,
         .stencilTest = true,
@@ -547,7 +547,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       f32 advanceX = 0;
       f32 advanceY = 0;
       for (usize i = 0; i < text.content.length(); ++i) {
-        char c = text.content.at(i);
+        const char c = text.content.at(i);
 
         if (c == '\n') {
           advanceX = 0.0f;
@@ -786,12 +786,12 @@ void EditorRenderer::createCollidableShapes() {
       const f32 SegmentDelta = 2.0f * Pi / static_cast<f32>(numSegments);
       f32 segmentAngle = SegmentDelta;
 
-      V start{cX(0.0f), cY(0.0f), cZ(0.0f)};
+      const V start{cX(0.0f), cY(0.0f), cZ(0.0f)};
 
       vertices.push_back(start);
 
       for (u32 i = 0; i < numSegments; ++i) {
-        V vertex{cX(segmentAngle), cY(segmentAngle), cZ(segmentAngle)};
+        const V vertex{cX(segmentAngle), cY(segmentAngle), cZ(segmentAngle)};
 
         vertices.push_back(vertex);
         vertices.push_back(vertex);
@@ -824,12 +824,12 @@ void EditorRenderer::createCollidableShapes() {
           const f32 SegmentDelta = circleAngle / static_cast<f32>(numSegments);
           f32 segmentAngle = SegmentDelta;
 
-          V start{cX(0.0f), cY(0.0f), cZ(0.0f)};
+          const V start{cX(0.0f), cY(0.0f), cZ(0.0f)};
 
           vertices.push_back(start);
 
           for (u32 i = 0; i < numSegments; ++i) {
-            V v{cX(segmentAngle), cY(segmentAngle), cZ(segmentAngle)};
+            const V v{cX(segmentAngle), cY(segmentAngle), cZ(segmentAngle)};
 
             vertices.push_back(v);
             vertices.push_back(v);
