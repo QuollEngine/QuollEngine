@@ -7,7 +7,10 @@
 #include "quoll/logger/StreamTransport.h"
 #include "quoll/loop/MainEngineModules.h"
 #include "quoll/loop/MainLoop.h"
+#include "quoll/profiler/FPSCounter.h"
 #include "quoll/profiler/ImguiDebugLayer.h"
+#include "quoll/profiler/MetricsCollector.h"
+#include "quoll/profiler/PerformanceDebugPanel.h"
 #include "quoll/renderer/Presenter.h"
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/Renderer.h"
@@ -96,10 +99,6 @@ void EditorWindow::start(const Project &rawProject) {
 
   MainLoop mainLoop(mWindow, fpsCounter);
 
-  ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
-                             mDevice->getDeviceStats(), fpsCounter,
-                             metricsCollector, &assetManager.getCache());
-
   IconRegistry::loadIcons(renderStorage,
                           std::filesystem::current_path() / "assets" / "icons");
 
@@ -133,6 +132,14 @@ void EditorWindow::start(const Project &rawProject) {
 
   MainEngineModules engineModules(mDeviceManager, mWindow,
                                   assetManager.getCache());
+
+  debug::PerformanceDebugPanel performanceDebugPanel(mDevice, metricsCollector,
+                                                     fpsCounter);
+
+  ImguiDebugLayer debugLayer(
+      {renderer.getDebugPanel(), &performanceDebugPanel,
+       assetManager.getCache().getDebugPanel(),
+       engineModules.getPhysicsSystem().getDebugPanel()});
 
   // Workspace manager
   WorkspaceManager workspaceManager;

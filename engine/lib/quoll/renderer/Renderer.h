@@ -3,6 +3,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/rhi/RenderDevice.h"
 #include "RenderGraph.h"
+#include "RendererDebugPanel.h"
 #include "RendererOptions.h"
 
 namespace quoll {
@@ -43,9 +44,11 @@ public:
 
   void execute(rhi::RenderCommandList &commandList, u32 frameIndex);
 
-  inline rhi::TextureHandle getFinalTexture() const { return mFinalTexture; }
+  constexpr rhi::TextureHandle getFinalTexture() const { return mFinalTexture; }
 
-  inline rhi::TextureHandle getSceneTexture() const { return mSceneTexture; }
+  constexpr rhi::TextureHandle getSceneTexture() const { return mSceneTexture; }
+
+  constexpr debug::DebugPanel *getDebugPanel() { return &mDebugPanel; }
 
 private:
   RenderStorage &mRenderStorage;
@@ -58,6 +61,8 @@ private:
 
   rhi::TextureHandle mFinalTexture{0};
   rhi::TextureHandle mSceneTexture{0};
+
+  debug::RendererDebugPanel mDebugPanel;
 };
 
 } // namespace quoll

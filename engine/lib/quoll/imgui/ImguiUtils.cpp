@@ -89,4 +89,38 @@ bool imageButton(quoll::rhi::TextureHandle handle, const ImVec2 &size,
                             frame_padding, bg_col, tint_col);
 }
 
+namespace {
+
+struct ImguiInputTextCallbackUserData {
+  String &value;
+};
+
+int InputTextCallback(ImGuiInputTextCallbackData *data) {
+  auto *userData =
+      static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
+  if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+    auto &str = userData->value;
+    QuollAssert(data->Buf == str.c_str(),
+                "Buffer and string value must point to the same address");
+    str.resize(data->BufTextLen);
+    data->Buf = str.data();
+  }
+  return 0;
+}
+
+} // namespace
+
+bool inputText(const String &label, String &value, ImGuiInputTextFlags flags) {
+  QuollAssert((flags & ImGuiInputTextFlags_CallbackResize) == 0,
+              "Do not add callback resize flag");
+
+  flags |= ImGuiInputTextFlags_CallbackResize;
+
+  ImguiInputTextCallbackUserData userData{
+      value,
+  };
+  return ImGui::InputText(label.c_str(), value.data(), value.capacity() + 1,
+                          flags, InputTextCallback, &userData);
+}
+
 } // namespace quoll::imgui

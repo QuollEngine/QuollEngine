@@ -98,28 +98,18 @@ PxFilterFlags physxFilterAllCollisionShader(
 } // namespace
 
 PhysxBackend::PhysxBackend() : mSimulationEventCallback(mSignals) {
-  static constexpr u32 PvdPort = 5425;
-  static constexpr u32 PvdTimeoutInMs = 2000;
   static constexpr glm::vec3 Gravity(0.0f, -9.8f, 0.0f);
+  static u32 NumThreads = 1;
 
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, mDefaultAllocator,
                                    mDefaultErrorCallback);
-
-  mPvd = PxCreatePvd(*mFoundation);
-  PxPvdTransport *transport =
-      PxDefaultPvdSocketTransportCreate("127.0.0.1", PvdPort, PvdTimeoutInMs);
-  mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
-
-  Engine::getLogger().info()
-      << "PhysX initialized. Visual debugger connected connected to "
-         "127.0.0.1:"
-      << PvdPort;
+  mDebugPanel.create(mFoundation);
 
   mPhysics =
       PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(),
-                      RECORD_MEMORY_ALLOCATIONS, mPvd);
+                      RECORD_MEMORY_ALLOCATIONS, mDebugPanel.getPvd());
 
-  mDispatcher = PxDefaultCpuDispatcherCreate(1);
+  mDispatcher = PxDefaultCpuDispatcherCreate(NumThreads);
 
   PxSceneDesc sceneDesc(mPhysics->getTolerancesScale());
   sceneDesc.cpuDispatcher = mDispatcher;
@@ -137,13 +127,19 @@ PhysxBackend::PhysxBackend() : mSimulationEventCallback(mSignals) {
     pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
     pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
   }
+
+  Engine::getLogger().info()
+      << "Physx engine v" << PX_PHYSICS_VERSION_MAJOR << "."
+      << PX_PHYSICS_VERSION_MINOR << "." << PX_PHYSICS_VERSION_BUGFIX
+      << " initialized with " << NumThreads << " CPU thread"
+      << (NumThreads > 1 ? "s" : "");
 }
 
 PhysxBackend::~PhysxBackend() {
   mScene->release();
   mDispatcher->release();
   mPhysics->release();
-  mPvd->release();
+  mDebugPanel.release();
   mFoundation->release();
 }
 

@@ -3,6 +3,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/physics/PhysicsBackend.h"
 #include "quoll/physics/PhysicsObjects.h"
+#include "PhysxDebugPanel.h"
 #include "PhysxInstance.h"
 #include "PhysxSimulationEventCallback.h"
 #include <PxConfig.h>
@@ -28,7 +29,9 @@ public:
              const glm::vec3 &direction, f32 maxDistance,
              CollisionHit &hit) override;
 
-  inline PhysicsSignals &getSignals() override { return mSignals; }
+  constexpr PhysicsSignals &getSignals() override { return mSignals; }
+
+  constexpr debug::DebugPanel *getDebugPanel() { return &mDebugPanel; }
 
 private:
   void synchronizeComponents(SystemView &view);
@@ -48,8 +51,8 @@ private:
   physx::PxDefaultErrorCallback mDefaultErrorCallback;
   PhysxSimulationEventCallback mSimulationEventCallback;
 
-  physx::PxPvd *mPvd = nullptr;
   physx::PxFoundation *mFoundation = nullptr;
+  debug::PhysxDebugPanel mDebugPanel;
   physx::PxPhysics *mPhysics = nullptr;
   physx::PxDefaultCpuDispatcher *mDispatcher = nullptr;
 

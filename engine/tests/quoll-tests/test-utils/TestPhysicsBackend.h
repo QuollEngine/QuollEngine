@@ -18,7 +18,11 @@ public:
 
   void setSweepHitData(quoll::CollisionHit hit);
 
-  inline quoll::PhysicsSignals &getSignals() override { return mSignals; }
+  constexpr quoll::PhysicsSignals &getSignals() override { return mSignals; }
+
+  constexpr quoll::debug::DebugPanel *getDebugPanel() override {
+    return nullptr;
+  }
 
 private:
   bool mSweepValue = true;

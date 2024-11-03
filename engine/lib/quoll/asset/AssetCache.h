@@ -5,6 +5,7 @@
 #include "AssetMeta.h"
 #include "AssetRef.h"
 #include "AssetRegistry.h"
+#include "AssetsDebugPanel.h"
 
 namespace quoll {
 
@@ -163,6 +164,8 @@ public:
 
   Result<void> waitForIdle(const Uuid &uuid);
 
+  constexpr debug::DebugPanel *getDebugPanel() { return &mDebugPanel; }
+
 private:
   template <typename TAssetData>
   void loadAsync(AssetHandle<TAssetData> handle) {
@@ -285,6 +288,8 @@ private:
   std::mutex mFuturesMutex;
   std::condition_variable mLoadComplete;
   std::atomic<u32> mLoadCount{0};
+
+  debug::AssetsDebugPanel mDebugPanel;
 };
 
 } // namespace quoll
