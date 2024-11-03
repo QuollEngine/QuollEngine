@@ -1,6 +1,5 @@
 #include "quoll/core/Base.h"
 #include "quoll/core/Version.h"
-#include "quoll/loaders/KtxError.h"
 #include "AssetCache.h"
 #include "InputBinaryStream.h"
 #include "OutputBinaryStream.h"
@@ -13,6 +12,47 @@
 #include <ktxvulkan.h>
 
 namespace quoll {
+
+namespace {
+
+// Reference:
+// https://www.khronos.org/ktx/documentation/libktx/ktx_8h.html#a8de6927e772cc95a9f49593c3dd72069
+static const std::map<ktx_error_code_e, String> KtxErrorCodeMap{
+    // Success codes
+    {KTX_SUCCESS, "Operation successfully completed"},
+    {KTX_FILE_DATA_ERROR, "The data in the file is inconsistent with the spec"},
+    {KTX_FILE_ISPIPE, "The file is a pipe or named pipe"},
+    {KTX_FILE_OPEN_FAILED, "File could not be opened"},
+    {KTX_FILE_OVERFLOW, "Operation exceeds maximum file size"},
+    {KTX_FILE_READ_ERROR, "Failed to read from file"},
+    {KTX_FILE_SEEK_ERROR, "Failed to seek from file"},
+    {KTX_FILE_UNEXPECTED_EOF, "File is not complete"},
+    {KTX_FILE_WRITE_ERROR, "Failed to write to file"},
+    {KTX_INVALID_OPERATION, "Invalid operation"},
+    {KTX_INVALID_VALUE, "Invalid parameter value"},
+    {KTX_NOT_FOUND, "Requested key not found"},
+    {KTX_OUT_OF_MEMORY, "Not enough memory to complete the operation"},
+    {KTX_TRANSCODE_FAILED, "Transcoding block compressed texture failed"},
+    {KTX_UNKNOWN_FILE_FORMAT, "File is not in KTX format"},
+    {KTX_UNSUPPORTED_TEXTURE_TYPE, "Texture type not supported"},
+    {KTX_UNSUPPORTED_FEATURE, "Feature not supported"},
+};
+
+Error createKtxError(const String &message, ktx_error_code_e resultCode) {
+  const String errorMessage = "[KtxError] " + message;
+  if (resultCode == KTX_SUCCESS) {
+    return errorMessage;
+  }
+
+  const auto &codeString = "(code: " + std::to_string(resultCode) + ")";
+  const auto &it = KtxErrorCodeMap.find(resultCode);
+  const auto &humanReadableResultString =
+      it != KtxErrorCodeMap.end() ? (*it).second : "Unknown Error";
+
+  return errorMessage + ": " + humanReadableResultString + " " + codeString;
+}
+
+} // namespace
 
 static constexpr u32 CubemapSides = 6;
 
@@ -95,7 +135,7 @@ Result<void> AssetCache::createTextureFromData(const TextureAsset &data,
                                   &texture);
 
     if (res != KTX_SUCCESS) {
-      return Error(KtxError("Cannot create KTX texture", res).what());
+      return createKtxError("Cannot create KTX texture", res);
     }
   }
 
@@ -120,7 +160,7 @@ Result<void> AssetCache::createTextureFromData(const TextureAsset &data,
         ktxTexture_WriteToNamedFile(baseTexture, assetPath.string().c_str());
 
     if (res != KTX_SUCCESS) {
-      return Error(KtxError("Cannot write KTX texture to a file", res).what());
+      return createKtxError("Cannot write KTX texture to a file", res);
     }
   }
 
@@ -149,7 +189,7 @@ Result<TextureAsset> AssetCache::loadTexture(const Path &path) {
       &ktxTextureData);
 
   if (result != KTX_SUCCESS) {
-    return Error(KtxError("Cannot load KTX texture", result).what());
+    return createKtxError("Cannot load KTX texture", result);
   }
 
   if (ktxTextureData->numDimensions != 2) {

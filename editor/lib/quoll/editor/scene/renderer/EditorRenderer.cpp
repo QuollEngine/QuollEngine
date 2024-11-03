@@ -4,6 +4,7 @@
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/renderer/Mesh.h"
 #include "quoll/renderer/MeshVertexLayout.h"
+#include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/RendererAssetRegistry.h"
 #include "quoll/scene/Sprite.h"
 #include "quoll/skeleton/Skeleton.h"
