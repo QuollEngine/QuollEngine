@@ -37,4 +37,7 @@ bool imageButton(quoll::rhi::TextureHandle handle, const ImVec2 &size,
                  const ImVec4 &bg_col = ImVec4(0, 0, 0, 0),
                  const ImVec4 &tint_col = ImVec4(1, 1, 1, 1));
 
+bool inputText(const String &label, String &value,
+               ImGuiInputTextFlags flags = 0);
+
 } // namespace quoll::imgui

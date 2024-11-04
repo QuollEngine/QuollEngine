@@ -5,6 +5,8 @@
 #include "quoll/loop/MainLoop.h"
 #include "quoll/profiler/FPSCounter.h"
 #include "quoll/profiler/ImguiDebugLayer.h"
+#include "quoll/profiler/MetricsCollector.h"
+#include "quoll/profiler/PerformanceDebugPanel.h"
 #include "quoll/renderer/Presenter.h"
 #include "quoll/renderer/RenderStorage.h"
 #include "quoll/renderer/Renderer.h"
@@ -63,9 +65,10 @@ std::optional<Project> ProjectSelectorWindow::start() {
 
   mainLoop.setUpdateFn([&project, this](f32 dt) {});
 
-  ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
-                             mDevice->getDeviceStats(), fpsCounter,
-                             metricsCollector, nullptr);
+  debug::PerformanceDebugPanel performanceDebugPanel(mDevice, metricsCollector,
+                                                     fpsCounter);
+  ImguiDebugLayer debugLayer(
+      {renderer.getDebugPanel(), &performanceDebugPanel});
 
   mainLoop.setRenderFn([&]() mutable {
     if (presenter.requiresFramebufferUpdate()) {

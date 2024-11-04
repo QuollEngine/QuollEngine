@@ -36,13 +36,15 @@ public:
 
   SystemView createSystemView(Scene &scene);
 
-  inline CameraAspectRatioUpdater &getCameraAspectRatioUpdater() {
+  constexpr CameraAspectRatioUpdater &getCameraAspectRatioUpdater() {
     return mCameraAspectRatioUpdater;
   }
 
-  inline UICanvasUpdater &getUICanvasUpdater() { return mUICanvasUpdater; }
+  constexpr UICanvasUpdater &getUICanvasUpdater() { return mUICanvasUpdater; }
 
-  inline Window &getWindow() { return mWindow; }
+  constexpr Window &getWindow() { return mWindow; }
+
+  constexpr PhysicsSystem &getPhysicsSystem() { return mPhysicsSystem; }
 
 private:
   Window &mWindow;

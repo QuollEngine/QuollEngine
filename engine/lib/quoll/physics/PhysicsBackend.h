@@ -6,6 +6,12 @@
 
 namespace quoll {
 
+namespace debug {
+
+class DebugPanel;
+
+}
+
 class PhysicsSignals;
 struct SystemView;
 
@@ -26,6 +32,8 @@ public:
                      CollisionHit &hit) = 0;
 
   virtual PhysicsSignals &getSignals() = 0;
+
+  virtual debug::DebugPanel *getDebugPanel() = 0;
 };
 
 } // namespace quoll

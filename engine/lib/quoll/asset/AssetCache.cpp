@@ -8,7 +8,7 @@
 namespace quoll {
 
 AssetCache::AssetCache(const Path &assetsPath, bool createDefaultObjects)
-    : mAssetsPath(assetsPath) {
+    : mAssetsPath(assetsPath), mDebugPanel(this) {
   if (createDefaultObjects) {
     mRegistry.createDefaultObjects();
   }

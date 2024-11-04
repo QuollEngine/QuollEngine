@@ -3,13 +3,15 @@
 #include "quoll/renderer/RenderGraph.h"
 #include "quoll/renderer/SceneRenderer.h"
 #include "quoll/window/Window.h"
+#include "RenderStorage.h"
 #include "Renderer.h"
 #include "StandardPushConstants.h"
 
 namespace quoll {
 
 Renderer::Renderer(RenderStorage &storage, const RendererOptions &options)
-    : mRenderStorage(storage), mGraph("Main"), mOptions(options) {}
+    : mRenderStorage(storage), mGraph("Main"), mOptions(options),
+      mDebugPanel(storage.getDevice()) {}
 
 void Renderer::setGraphBuilder(GraphBuilderFn &&builderFn) {
   mBuilderFn = std::move(builderFn);
