@@ -1,24 +1,8 @@
 #include "quoll/core/Base.h"
 #include "quoll/qui/native/BoxView.h"
 #include "quoll-tests/Testing.h"
+#include "MockView.h"
 #include <imgui.h>
-
-class TestView : public qui::View {
-public:
-  u32 value = 0;
-  qui::LayoutInput input;
-
-  qui::LayoutOutput output;
-
-  u32 rendered = 0;
-
-  void render() override { rendered++; }
-
-  qui::LayoutOutput layout(const qui::LayoutInput &input) override {
-    this->input = input;
-    return output;
-  }
-};
 
 class QuiBoxViewTest : public ::testing::Test {
 public:
@@ -37,7 +21,7 @@ public:
 
 public:
   qui::BoxView view;
-  TestView child;
+  MockView child;
 };
 
 TEST_F(QuiBoxViewTest, LayoutReturnsMaxConstraintAsSizeIfNoChildIsSet) {
@@ -207,7 +191,7 @@ TEST_F(QuiBoxViewTest, LayoutReturnsChildSizePlusPaddingIfNoSizeIsProvided) {
   qui::Constraints constraints(0.0f, 0.0f, 100.0f, 100.0f);
   glm::vec2 position{10.0f, 20.0f};
 
-  child.output.size = {50.0f, 70.0f};
+  child.desiredSize = {50.0f, 70.0f};
 
   // Padding does not affect this
   view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 20.0f, 40.0f));
@@ -222,19 +206,19 @@ TEST_F(QuiBoxViewTest, LayoutReturnsChildSizePlusPaddingIfNoSizeIsProvided) {
 TEST_F(
     QuiBoxViewTest,
     LayoutReturnsMinConstraintsIfChildSizePlusPaddingIsSmallerThanMinConstraints) {
-  qui::Constraints constraints(70.0f, 65.0f, 100.0f, 100.0f);
+  qui::Constraints constraints(50.0f, 65.0f, 100.0f, 100.0f);
   glm::vec2 position{10.0f, 20.0f};
 
-  child.output.size = {20.0f, 30.0f};
+  child.desiredSize = {20.0f, 30.0f};
 
   // Padding does not affect this
-  view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 20.0f, 40.0f));
+  view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 15.0f, 25.0f));
 
   view.setChild(&child);
   auto output = view.layout({constraints, position});
 
-  EXPECT_EQ(output.size, glm::vec2(70.0f, 65.0f));
-  EXPECT_EQ(view.getSize(), glm::vec2(70.0f, 65.0f));
+  EXPECT_EQ(output.size, glm::vec2(80.0f, 90.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(80.0f, 90.0f));
 }
 
 TEST_F(
@@ -243,7 +227,7 @@ TEST_F(
   qui::Constraints constraints(0.0f, 0.0f, 100.0f, 120.0f);
   glm::vec2 position{10.0f, 20.0f};
 
-  child.output.size = {200.0f, 300.0f};
+  child.desiredSize = {200.0f, 300.0f};
 
   view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 20.0f, 40.0f));
 
@@ -324,35 +308,52 @@ TEST_F(QuiBoxViewTest, RenderCallsChildRender) {
   EXPECT_EQ(child.rendered, 1);
 }
 
-TEST_F(QuiBoxViewTest, HitTestReturnsTrueIfPointIsWithinViewBounds) {
+TEST_F(QuiBoxViewTest, HitTestReturnsChildIfPointIsWithinChildBounds) {
   view.setWidth(50.0f);
   view.setHeight(100.0f);
   view.setChild(&child);
+  view.setPadding(qui::EdgeInsets(5.0f));
+  child.desiredSize = {20.0f, 30.0f};
   auto output = view.layout({.position = {40.0f, 50.0f}});
 
-  EXPECT_TRUE(view.hitTest({40.0f, 50.0f}));
-  EXPECT_TRUE(view.hitTest({40.0f, 150.0f}));
-  EXPECT_TRUE(view.hitTest({90.0f, 50.0f}));
-  EXPECT_TRUE(view.hitTest({90.0f, 150.0f}));
-  EXPECT_TRUE(view.hitTest({80.0f, 120.0f}));
+  EXPECT_EQ(view.hitTest({45.0f, 55.0f}), &child);
+  EXPECT_EQ(view.hitTest({45.0f, 145.0f}), &child);
+  EXPECT_EQ(view.hitTest({85.0f, 55.0f}), &child);
+  EXPECT_EQ(view.hitTest({85.0f, 145.0f}), &child);
+  EXPECT_EQ(view.hitTest({80.0f, 120.0f}), &child);
 }
 
-TEST_F(QuiBoxViewTest, HitTestReturnsFalseIfPointIsOutsideOfViewBounds) {
+TEST_F(QuiBoxViewTest,
+       HitTestReturnsViewIfPointIsWithinViewBoundsButNotChildBounds) {
+  view.setWidth(50.0f);
+  view.setHeight(100.0f);
+  view.setChild(&child);
+  view.setPadding(qui::EdgeInsets(5.0f));
+  child.desiredSize = {20.0f, 30.0f};
+  auto output = view.layout({.position = {40.0f, 50.0f}});
+
+  EXPECT_EQ(view.hitTest({40.0f, 50.0f}), &view);
+  EXPECT_EQ(view.hitTest({40.0f, 150.0f}), &view);
+  EXPECT_EQ(view.hitTest({90.0f, 50.0f}), &view);
+  EXPECT_EQ(view.hitTest({90.0f, 150.0f}), &view);
+}
+
+TEST_F(QuiBoxViewTest, HitTestReturnsNullIfPointIsOutsideOfViewBounds) {
   view.setWidth(50.0f);
   view.setHeight(100.0f);
   view.setChild(&child);
   auto output = view.layout({.position = {40.0f, 50.0f}});
 
-  EXPECT_FALSE(view.hitTest({40.0f, 49.0f}));
-  EXPECT_FALSE(view.hitTest({40.0f, 151.0f}));
-  EXPECT_FALSE(view.hitTest({90.0f, 49.0f}));
-  EXPECT_FALSE(view.hitTest({09.0f, 151.0f}));
+  EXPECT_EQ(view.hitTest({40.0f, 49.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({40.0f, 151.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({90.0f, 49.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({09.0f, 151.0f}), nullptr);
 
-  EXPECT_FALSE(view.hitTest({39.0f, 50.0f}));
-  EXPECT_FALSE(view.hitTest({91.0f, 50.0f}));
-  EXPECT_FALSE(view.hitTest({39.0f, 150.0f}));
-  EXPECT_FALSE(view.hitTest({91.0f, 150.0f}));
+  EXPECT_EQ(view.hitTest({39.0f, 50.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({91.0f, 50.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({39.0f, 150.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({91.0f, 150.0f}), nullptr);
 
-  EXPECT_FALSE(view.hitTest({20.0f, 10.0f}));
-  EXPECT_FALSE(view.hitTest({120.0f, 160.0f}));
+  EXPECT_EQ(view.hitTest({20.0f, 10.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({120.0f, 160.0f}), nullptr);
 }

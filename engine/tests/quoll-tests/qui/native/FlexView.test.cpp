@@ -34,7 +34,7 @@ TEST_F(QuiFlexViewTest, RendersChildren) {
   EXPECT_EQ(child3.rendered, 1);
 }
 
-TEST_F(QuiFlexViewTest, HitTestReturnsTrueIfPointIssWithinViewBounds) {
+TEST_F(QuiFlexViewTest, HitTestReturnsChildIfPointIsWithinChildBounds) {
   child1.desiredSize.x = 100.0f;
   child1.desiredSize.y = 30.0f;
   child2.desiredSize.x = 50.0f;
@@ -58,14 +58,15 @@ TEST_F(QuiFlexViewTest, HitTestReturnsTrueIfPointIssWithinViewBounds) {
   EXPECT_EQ(output.size.y, 40.0f);
 
   // Bounds = [200, 150, 650, 190]
-  EXPECT_TRUE(view.hitTest({200.0f, 150.0f}));
-  EXPECT_TRUE(view.hitTest({200.0f, 190.0f}));
-  EXPECT_TRUE(view.hitTest({650.0f, 190.0f}));
-  EXPECT_TRUE(view.hitTest({650.0f, 150.0f}));
-  EXPECT_TRUE(view.hitTest({250.0f, 170.0f}));
+  EXPECT_EQ(view.hitTest({200.0f, 150.0f}), &child1);
+  EXPECT_EQ(view.hitTest({300.0f, 180.0f}), &child1);
+  EXPECT_EQ(view.hitTest({301.0f, 150.0f}), &child2);
+  EXPECT_EQ(view.hitTest({350.0f, 170.0f}), &child2);
+  EXPECT_EQ(view.hitTest({351.0f, 150.0f}), &child3);
+  EXPECT_EQ(view.hitTest({650.0f, 190.0f}), &child3);
 }
 
-TEST_F(QuiFlexViewTest, HitTestReturnsFalseIfPointIsOutsideOfViewBounds) {
+TEST_F(QuiFlexViewTest, HitTestReturnsNullIfPointIsOutsideOfViewBounds) {
   child1.desiredSize.x = 100.0f;
   child1.desiredSize.y = 30.0f;
   child2.desiredSize.x = 50.0f;
@@ -86,16 +87,16 @@ TEST_F(QuiFlexViewTest, HitTestReturnsFalseIfPointIsOutsideOfViewBounds) {
   auto output = view.layout({constraints, position});
 
   // Bounds = [200, 150, 650, 190]
-  EXPECT_FALSE(view.hitTest({200.0f, 149.0f}));
-  EXPECT_FALSE(view.hitTest({200.0f, 191.0f}));
-  EXPECT_FALSE(view.hitTest({650.0f, 149.0f}));
-  EXPECT_FALSE(view.hitTest({650.0f, 191.0f}));
+  EXPECT_EQ(view.hitTest({200.0f, 149.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({200.0f, 191.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({650.0f, 149.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({650.0f, 191.0f}), nullptr);
 
-  EXPECT_FALSE(view.hitTest({199.0f, 150.0f}));
-  EXPECT_FALSE(view.hitTest({651.0f, 150.0f}));
-  EXPECT_FALSE(view.hitTest({199.0f, 190.0f}));
-  EXPECT_FALSE(view.hitTest({651.0f, 190.0f}));
+  EXPECT_EQ(view.hitTest({199.0f, 150.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({651.0f, 150.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({199.0f, 190.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({651.0f, 190.0f}), nullptr);
 
-  EXPECT_FALSE(view.hitTest({400.0f, 130.0f}));
-  EXPECT_FALSE(view.hitTest({700.0f, 240.0f}));
+  EXPECT_EQ(view.hitTest({400.0f, 130.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({700.0f, 240.0f}), nullptr);
 }

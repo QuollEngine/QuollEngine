@@ -11,7 +11,7 @@ public:
 
   LayoutOutput layout(const LayoutInput &input) override;
 
-  bool hitTest(const glm::vec2 &point) override;
+  View *hitTest(const glm::vec2 &point) override;
 
   constexpr void setThickness(f32 thickness) { mThickness = thickness; }
   constexpr void setBorderRadius(f32 borderRadius) {

@@ -46,7 +46,7 @@ public:
 
   virtual LayoutOutput layout(const LayoutInput &input) = 0;
 
-  virtual constexpr bool hitTest(const glm::vec2 &point) { return false; }
+  virtual constexpr View *hitTest(const glm::vec2 &point) { return nullptr; }
 };
 
 } // namespace qui

@@ -33,6 +33,13 @@ LayoutOutput ScrollableView::layout(const LayoutInput &input) {
   return output;
 }
 
-bool ScrollableView::hitTest(const glm::vec2 &point) { return false; }
+View *ScrollableView::hitTest(const glm::vec2 &point) {
+  auto *view = mScrollbar.hitTest(point);
+  if (view) {
+    return view;
+  }
+
+  return mScrollableContent.hitTest(point);
+}
 
 } // namespace qui

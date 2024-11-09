@@ -12,7 +12,7 @@ public:
 
   LayoutOutput layout(const LayoutInput &input) override;
 
-  bool hitTest(const glm::vec2 &point) override;
+  View *hitTest(const glm::vec2 &point) override;
 
   constexpr ScrollableContentView &getScrollableContent() {
     return mScrollableContent;
@@ -28,7 +28,6 @@ public:
 
 private:
   ScrollableContentView mScrollableContent;
-
   ScrollbarView mScrollbar;
 
   bool mScrollbarVisible = false;
