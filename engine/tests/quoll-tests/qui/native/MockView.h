@@ -14,9 +14,14 @@ public:
     return {size};
   }
 
-  constexpr bool hitTest(const glm::vec2 &pos) override {
-    return pos.x >= position.x && pos.x <= position.x + size.x &&
-           pos.y >= position.y && pos.y <= position.y + size.y;
+  constexpr View *hitTest(const glm::vec2 &pos) override {
+    const auto end = position + size;
+    if (pos.x >= position.x && pos.x <= end.x && pos.y >= position.y &&
+        pos.y <= end.y) {
+      return this;
+    }
+
+    return nullptr;
   }
 
 public:

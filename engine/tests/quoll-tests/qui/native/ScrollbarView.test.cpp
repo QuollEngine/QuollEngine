@@ -39,28 +39,28 @@ TEST_F(QuiScrollbarViewTest,
   EXPECT_EQ(view.getSize(), glm::vec2(5.0f, 100.0f));
 }
 
-TEST_F(QuiScrollbarViewTest, HitTestReturnsTrueIfPointIsInside) {
+TEST_F(QuiScrollbarViewTest, HitTestReturnsViewIfPointIsInside) {
   view.setThickness(5.0f);
   view.layout({qui::Constraints(0.0f, 100.0f, 0.0f, 100.0f), {50.0f, 60.0f}});
 
-  EXPECT_TRUE(view.hitTest({45.0f, 160.0f}));
-  EXPECT_TRUE(view.hitTest({45.0f, 60.0f}));
-  EXPECT_TRUE(view.hitTest({50.0f, 60.0f}));
-  EXPECT_TRUE(view.hitTest({50.0f, 160.0f}));
-  EXPECT_TRUE(view.hitTest({47.0f, 120.0f}));
+  EXPECT_EQ(view.hitTest({45.0f, 160.0f}), &view);
+  EXPECT_EQ(view.hitTest({45.0f, 60.0f}), &view);
+  EXPECT_EQ(view.hitTest({50.0f, 60.0f}), &view);
+  EXPECT_EQ(view.hitTest({50.0f, 160.0f}), &view);
+  EXPECT_EQ(view.hitTest({47.0f, 120.0f}), &view);
 }
 
-TEST_F(QuiScrollbarViewTest, HitTestReturnsFalseIfPointIsOutside) {
+TEST_F(QuiScrollbarViewTest, HitTestReturnsNullIfPointIsOutside) {
   view.setThickness(5.0f);
   view.layout({qui::Constraints(0.0f, 100.0f, 0.0f, 100.0f), {50.0f, 60.0f}});
 
-  EXPECT_FALSE(view.hitTest({44.0f, 160.0f}));
-  EXPECT_FALSE(view.hitTest({44.0f, 60.0f}));
-  EXPECT_FALSE(view.hitTest({45.0f, 161.0f}));
-  EXPECT_FALSE(view.hitTest({45.0f, 59.0f}));
+  EXPECT_EQ(view.hitTest({44.0f, 160.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({44.0f, 60.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({45.0f, 161.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({45.0f, 59.0f}), nullptr);
 
-  EXPECT_FALSE(view.hitTest({51.0f, 160.0f}));
-  EXPECT_FALSE(view.hitTest({51.0f, 60.0f}));
-  EXPECT_FALSE(view.hitTest({50.0f, 161.0f}));
-  EXPECT_FALSE(view.hitTest({50.0f, 59.0f}));
+  EXPECT_EQ(view.hitTest({51.0f, 160.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({51.0f, 60.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({50.0f, 161.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({50.0f, 59.0f}), nullptr);
 }

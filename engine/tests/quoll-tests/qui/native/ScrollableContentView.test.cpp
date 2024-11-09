@@ -132,31 +132,44 @@ TEST_F(QuiScrollableContentViewTest, LayoutSetsChildPositionToScrollOffset) {
   EXPECT_EQ(child.position, glm::vec2(150.0, 200.0f));
 }
 
-TEST_F(QuiScrollableContentViewTest, HitTestReturnsTrueIfPointIsInsideBounds) {
+TEST_F(QuiScrollableContentViewTest,
+       HitTestReturnsChildIfPointIsWithinViewBoundsAndChildBoundsWithOffset) {
   qui::Constraints constraints(50.0f, 100.0f, 500.0f, 600.0f);
   child.desiredSize = {600.0f, 900.0f};
   view.layout({constraints, glm::vec2{200.0f, 300.0f}});
 
-  EXPECT_TRUE(view.hitTest({200.0f, 300.0f}));
-  EXPECT_TRUE(view.hitTest({200.0f, 900.0f}));
-  EXPECT_TRUE(view.hitTest({700.0f, 300.0f}));
-  EXPECT_TRUE(view.hitTest({700.0f, 900.0f}));
-  EXPECT_TRUE(view.hitTest({500.0f, 400.0f}));
+  EXPECT_EQ(view.hitTest({200.0f, 300.0f}), &child);
+  EXPECT_EQ(view.hitTest({200.0f, 900.0f}), &child);
+  EXPECT_EQ(view.hitTest({700.0f, 300.0f}), &child);
+  EXPECT_EQ(view.hitTest({700.0f, 900.0f}), &child);
+  EXPECT_EQ(view.hitTest({500.0f, 400.0f}), &child);
 }
 
 TEST_F(QuiScrollableContentViewTest,
-       HitTestReturnsFalseIfPointIsOutsideOfBounds) {
+       HitTestReturnsViewIfPointIsWithinBoundsButNotWithinChildBounds) {
+  qui::Constraints constraints(100.0f, 200.0f, 100.0f, 200.0f);
+  child.desiredSize = {50.0f, 500.0f};
+
+  view.layout({constraints, glm::vec2{200.0f, 300.0f}});
+  view.scroll({0.0f, -1000.0f});
+  view.layout({constraints, glm::vec2{200.0f, 300.0f}});
+
+  EXPECT_EQ(view.hitTest({300.0f, 400.0f}), &view);
+}
+
+TEST_F(QuiScrollableContentViewTest,
+       HitTestReturnsNullIfPointIsOutsideOfBounds) {
   qui::Constraints constraints(50.0f, 100.0f, 500.0f, 600.0f);
   child.desiredSize = {600.0f, 900.0f};
   view.layout({constraints, glm::vec2{200.0f, 300.0f}});
 
-  EXPECT_FALSE(view.hitTest({199.0f, 300.0f}));
-  EXPECT_FALSE(view.hitTest({199.0f, 900.0f}));
-  EXPECT_FALSE(view.hitTest({200.0f, 299.0f}));
-  EXPECT_FALSE(view.hitTest({200.0f, 901.0f}));
+  EXPECT_EQ(view.hitTest({199.0f, 300.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({199.0f, 900.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({200.0f, 299.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({200.0f, 901.0f}), nullptr);
 
-  EXPECT_FALSE(view.hitTest({701.0f, 300.0f}));
-  EXPECT_FALSE(view.hitTest({701.0f, 900.0f}));
-  EXPECT_FALSE(view.hitTest({700.0f, 299.0f}));
-  EXPECT_FALSE(view.hitTest({700.0f, 901.0f}));
+  EXPECT_EQ(view.hitTest({701.0f, 300.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({701.0f, 900.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({700.0f, 299.0f}), nullptr);
+  EXPECT_EQ(view.hitTest({700.0f, 901.0f}), nullptr);
 }
