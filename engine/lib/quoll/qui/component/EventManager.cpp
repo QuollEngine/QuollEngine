@@ -42,4 +42,10 @@ void EventHolder::registerMouseMoveHandler(EventHandler<MouseEvent> &&handler) {
   mMouseMoveHandles.push_back(handle);
 }
 
+void EventHolder::registerMouseWheelHandler(
+    EventHandler<MouseWheelEvent> &&handler) {
+  auto handle = mManager->mMouseWheelHandlers.insert(std::move(handler));
+  mMouseWheelHandles.push_back(handle);
+}
+
 } // namespace qui

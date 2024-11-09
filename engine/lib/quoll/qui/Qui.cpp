@@ -37,6 +37,18 @@ void handleEvents(EventManager *events) {
       handler(ev);
     }
   }
+
+  {
+    const auto deltaX = ImGui::GetIO().MouseWheelH;
+    const auto deltaY = ImGui::GetIO().MouseWheel;
+
+    if (deltaY != 0.0f || deltaX != 0.0f) {
+      const MouseWheelEvent ev{.delta = {deltaX, deltaY}};
+      for (const auto &handler : events->getMouseWheelHandlers()) {
+        handler(ev);
+      }
+    }
+  }
 }
 
 } // namespace
