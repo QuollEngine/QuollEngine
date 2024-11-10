@@ -316,11 +316,45 @@ TEST_F(QuiBoxViewTest, HitTestReturnsChildIfPointIsWithinChildBounds) {
   child.desiredSize = {20.0f, 30.0f};
   auto output = view.layout({.position = {40.0f, 50.0f}});
 
-  EXPECT_EQ(view.hitTest({45.0f, 55.0f}), &child);
-  EXPECT_EQ(view.hitTest({45.0f, 145.0f}), &child);
-  EXPECT_EQ(view.hitTest({85.0f, 55.0f}), &child);
-  EXPECT_EQ(view.hitTest({85.0f, 145.0f}), &child);
-  EXPECT_EQ(view.hitTest({80.0f, 120.0f}), &child);
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({45.0f, 55.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({45.0f, 145.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({85.0f, 55.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({85.0f, 145.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({80.0f, 120.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
 }
 
 TEST_F(QuiBoxViewTest,
@@ -332,10 +366,33 @@ TEST_F(QuiBoxViewTest,
   child.desiredSize = {20.0f, 30.0f};
   auto output = view.layout({.position = {40.0f, 50.0f}});
 
-  EXPECT_EQ(view.hitTest({40.0f, 50.0f}), &view);
-  EXPECT_EQ(view.hitTest({40.0f, 150.0f}), &view);
-  EXPECT_EQ(view.hitTest({90.0f, 50.0f}), &view);
-  EXPECT_EQ(view.hitTest({90.0f, 150.0f}), &view);
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({40.0f, 50.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({40.0f, 150.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({90.0f, 50.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({90.0f, 150.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
 }
 
 TEST_F(QuiBoxViewTest, HitTestReturnsNullIfPointIsOutsideOfViewBounds) {
@@ -344,16 +401,19 @@ TEST_F(QuiBoxViewTest, HitTestReturnsNullIfPointIsOutsideOfViewBounds) {
   view.setChild(&child);
   auto output = view.layout({.position = {40.0f, 50.0f}});
 
-  EXPECT_EQ(view.hitTest({40.0f, 49.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({40.0f, 151.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({90.0f, 49.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({09.0f, 151.0f}), nullptr);
+  qui::HitTestResult hitResult;
+  EXPECT_FALSE(view.hitTest({40.0f, 49.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({40.0f, 151.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({90.0f, 49.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({09.0f, 151.0f}, hitResult));
 
-  EXPECT_EQ(view.hitTest({39.0f, 50.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({91.0f, 50.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({39.0f, 150.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({91.0f, 150.0f}), nullptr);
+  EXPECT_FALSE(view.hitTest({39.0f, 50.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({91.0f, 50.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({39.0f, 150.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({91.0f, 150.0f}, hitResult));
 
-  EXPECT_EQ(view.hitTest({20.0f, 10.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({120.0f, 160.0f}), nullptr);
+  EXPECT_FALSE(view.hitTest({20.0f, 10.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({120.0f, 160.0f}, hitResult));
+
+  EXPECT_TRUE(hitResult.path.empty());
 }

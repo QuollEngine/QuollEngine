@@ -138,11 +138,45 @@ TEST_F(QuiScrollableContentViewTest,
   child.desiredSize = {600.0f, 900.0f};
   view.layout({constraints, glm::vec2{200.0f, 300.0f}});
 
-  EXPECT_EQ(view.hitTest({200.0f, 300.0f}), &child);
-  EXPECT_EQ(view.hitTest({200.0f, 900.0f}), &child);
-  EXPECT_EQ(view.hitTest({700.0f, 300.0f}), &child);
-  EXPECT_EQ(view.hitTest({700.0f, 900.0f}), &child);
-  EXPECT_EQ(view.hitTest({500.0f, 400.0f}), &child);
+  {
+    qui::HitTestResult hitResult{};
+    EXPECT_TRUE(view.hitTest({200.0f, 300.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
+
+  {
+    qui::HitTestResult hitResult{};
+    EXPECT_TRUE(view.hitTest({200.0f, 900.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
+
+  {
+    qui::HitTestResult hitResult{};
+    EXPECT_TRUE(view.hitTest({700.0f, 300.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
+
+  {
+    qui::HitTestResult hitResult{};
+    EXPECT_TRUE(view.hitTest({700.0f, 900.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
+
+  {
+    qui::HitTestResult hitResult{};
+    EXPECT_TRUE(view.hitTest({500.0f, 400.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child);
+  }
 }
 
 TEST_F(QuiScrollableContentViewTest,
@@ -154,22 +188,29 @@ TEST_F(QuiScrollableContentViewTest,
   view.scroll({0.0f, -1000.0f});
   view.layout({constraints, glm::vec2{200.0f, 300.0f}});
 
-  EXPECT_EQ(view.hitTest({300.0f, 400.0f}), &view);
+  qui::HitTestResult hitResult{};
+  EXPECT_TRUE(view.hitTest({300.0f, 400.0f}, hitResult));
+  EXPECT_EQ(hitResult.path.size(), 1);
+  EXPECT_EQ(hitResult.path.at(0), &view);
 }
 
 TEST_F(QuiScrollableContentViewTest,
-       HitTestReturnsNullIfPointIsOutsideOfBounds) {
+       HitTestReturnsFalseIfPointIsOutsideOfBounds) {
   qui::Constraints constraints(50.0f, 100.0f, 500.0f, 600.0f);
   child.desiredSize = {600.0f, 900.0f};
   view.layout({constraints, glm::vec2{200.0f, 300.0f}});
 
-  EXPECT_EQ(view.hitTest({199.0f, 300.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({199.0f, 900.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({200.0f, 299.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({200.0f, 901.0f}), nullptr);
+  qui::HitTestResult hitResult;
 
-  EXPECT_EQ(view.hitTest({701.0f, 300.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({701.0f, 900.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({700.0f, 299.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({700.0f, 901.0f}), nullptr);
+  EXPECT_FALSE(view.hitTest({199.0f, 300.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({199.0f, 900.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({200.0f, 299.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({200.0f, 901.0f}, hitResult));
+
+  EXPECT_FALSE(view.hitTest({701.0f, 300.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({701.0f, 900.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({700.0f, 299.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({700.0f, 901.0f}, hitResult));
+
+  EXPECT_TRUE(hitResult.path.empty());
 }

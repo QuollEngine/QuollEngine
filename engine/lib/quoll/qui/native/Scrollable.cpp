@@ -32,7 +32,8 @@ void Scrollable::build(BuildContext &context) {
 
     if (mScrollbarState == ScrollbarState::Active) {
       if (mHovered) {
-        if (scrollBar.hitTest(e.point)) {
+        HitTestResult hitResult{};
+        if (scrollBar.hitTest(e.point, hitResult)) {
           setScrollbarState(ScrollbarState::Hovered);
         } else {
           setScrollbarState(ScrollbarState::Visible);
@@ -47,7 +48,10 @@ void Scrollable::build(BuildContext &context) {
     auto &content = mView.getScrollableContent();
     auto &scrollBar = mView.getScrollbar();
 
-    mHovered = content.hitTest(e.point);
+    {
+      HitTestResult hitResult{};
+      mHovered = content.hitTest(e.point, hitResult);
+    }
 
     if (mScrollbarState == ScrollbarState::Active) {
       if (e.point.y >= content.getPosition().y &&
@@ -58,7 +62,8 @@ void Scrollable::build(BuildContext &context) {
 
       mPreviousMousePos = e.point;
     } else if (mHovered) {
-      if (scrollBar.hitTest(e.point)) {
+      HitTestResult hitResult;
+      if (scrollBar.hitTest(e.point, hitResult)) {
         setScrollbarState(ScrollbarState::Hovered);
       } else {
         setScrollbarState(ScrollbarState::Visible);

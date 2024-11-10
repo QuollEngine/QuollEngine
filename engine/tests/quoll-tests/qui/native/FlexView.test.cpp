@@ -58,12 +58,53 @@ TEST_F(QuiFlexViewTest, HitTestReturnsChildIfPointIsWithinChildBounds) {
   EXPECT_EQ(output.size.y, 40.0f);
 
   // Bounds = [200, 150, 650, 190]
-  EXPECT_EQ(view.hitTest({200.0f, 150.0f}), &child1);
-  EXPECT_EQ(view.hitTest({300.0f, 180.0f}), &child1);
-  EXPECT_EQ(view.hitTest({301.0f, 150.0f}), &child2);
-  EXPECT_EQ(view.hitTest({350.0f, 170.0f}), &child2);
-  EXPECT_EQ(view.hitTest({351.0f, 150.0f}), &child3);
-  EXPECT_EQ(view.hitTest({650.0f, 190.0f}), &child3);
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({200.0f, 150.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child1);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({300.0f, 180.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child1);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({301.0f, 150.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child2);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({350.0f, 170.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child2);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({351.0f, 150.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child3);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({650.0f, 190.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 2);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child3);
+  }
 }
 
 TEST_F(QuiFlexViewTest, HitTestReturnsNullIfPointIsOutsideOfViewBounds) {
@@ -86,17 +127,20 @@ TEST_F(QuiFlexViewTest, HitTestReturnsNullIfPointIsOutsideOfViewBounds) {
 
   auto output = view.layout({constraints, position});
 
+  qui::HitTestResult hitResult;
   // Bounds = [200, 150, 650, 190]
-  EXPECT_EQ(view.hitTest({200.0f, 149.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({200.0f, 191.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({650.0f, 149.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({650.0f, 191.0f}), nullptr);
+  EXPECT_FALSE(view.hitTest({200.0f, 149.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({200.0f, 191.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({650.0f, 149.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({650.0f, 191.0f}, hitResult));
 
-  EXPECT_EQ(view.hitTest({199.0f, 150.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({651.0f, 150.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({199.0f, 190.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({651.0f, 190.0f}), nullptr);
+  EXPECT_FALSE(view.hitTest({199.0f, 150.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({651.0f, 150.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({199.0f, 190.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({651.0f, 190.0f}, hitResult));
 
-  EXPECT_EQ(view.hitTest({400.0f, 130.0f}), nullptr);
-  EXPECT_EQ(view.hitTest({700.0f, 240.0f}), nullptr);
+  EXPECT_FALSE(view.hitTest({400.0f, 130.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({700.0f, 240.0f}, hitResult));
+
+  EXPECT_TRUE(hitResult.path.empty());
 }
