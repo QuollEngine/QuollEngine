@@ -15,34 +15,35 @@ public:
 };
 
 TEST_F(QuiScrollableTest, MouseWheelDoesNothingIfComponentIsNotHovered) {
-  qui::Element element = qui::Scrollable(child);
-  element.build(buildContext);
-  element.getView()->layout(
-      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
-  auto *view = dynamic_cast<qui::ScrollableView *>(element.getView());
+  auto tree = qui::Qui::createTree(qui::Scrollable(child));
+  MockEventController events(tree);
+
+  tree.root.getView()->layout(
+      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {100.0f, 100.0f}});
+  auto *view = dynamic_cast<qui::ScrollableView *>(tree.root.getView());
 
   EXPECT_EQ(view->getScrollableContent().getScrollOffset(),
             glm::vec2(0.0f, 0.0f));
 
-  dispatchMouseWheelEvent({glm::vec2{-20.0f, -30.0f}});
+  events.mouseWheel({glm::vec2{-20.0f, -30.0f}});
 
   EXPECT_EQ(view->getScrollableContent().getScrollOffset(),
             glm::vec2(0.0f, 0.0f));
 }
 
 TEST_F(QuiScrollableTest, MouseWheelDoesNothingIfScrollbarIsDragging) {
-  qui::Element element = qui::Scrollable(child);
-  element.build(buildContext);
-  element.getView()->layout(
+  auto tree = qui::Qui::createTree(qui::Scrollable(child));
+  MockEventController events(tree);
+
+  tree.root.getView()->layout(
       {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
-  auto *view = dynamic_cast<qui::ScrollableView *>(element.getView());
+  auto *view = dynamic_cast<qui::ScrollableView *>(tree.root.getView());
 
   EXPECT_EQ(view->getScrollableContent().getScrollOffset(),
             glm::vec2(0.0f, 0.0f));
 
-  dispatchMouseMoveEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseDownEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseWheelEvent({glm::vec2{-20.0f, -30.0f}});
+  events.mouseDown({glm::vec2{195.0f, 20.0f}});
+  events.mouseWheel({glm::vec2{-20.0f, -30.0f}});
 
   EXPECT_EQ(view->getScrollableContent().getScrollOffset(),
             glm::vec2(0.0f, 0.0f));
@@ -51,106 +52,111 @@ TEST_F(QuiScrollableTest, MouseWheelDoesNothingIfScrollbarIsDragging) {
 TEST_F(
     QuiScrollableTest,
     MouseWheelUpdatesScrollOffsetIfComponentIsHoveredAndScrollbarIsNotDragging) {
-  qui::Element element = qui::Scrollable(child);
-  element.build(buildContext);
-  element.getView()->layout(
+  auto tree = qui::Qui::createTree(qui::Scrollable(child));
+  MockEventController events(tree);
+
+  tree.root.getView()->layout(
       {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
-  auto *view = dynamic_cast<qui::ScrollableView *>(element.getView());
+  auto *view = dynamic_cast<qui::ScrollableView *>(tree.root.getView());
 
   EXPECT_EQ(view->getScrollableContent().getScrollOffset(),
             glm::vec2(0.0f, 0.0f));
 
-  dispatchMouseMoveEvent({glm::vec2{150.0f, 150.0f}});
-  dispatchMouseWheelEvent({glm::vec2{-20.0f, -30.0f}});
+  events.mouseMove({glm::vec2{150.0f, 150.0f}});
+  events.mouseWheel({glm::vec2{-20.0f, -30.0f}});
 
   EXPECT_EQ(view->getScrollableContent().getScrollOffset(),
             glm::vec2(-100.0f, -150.0f));
 }
 
 TEST_F(QuiScrollableTest, ScrollbarIsNotVisibleWhenComponentIsNotHovered) {
-  qui::Element element = qui::Scrollable(child);
-  element.build(buildContext);
-  element.getView()->layout(
+  auto tree = qui::Qui::createTree(qui::Scrollable(child));
+  MockEventController events(tree);
+
+  tree.root.getView()->layout(
       {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
-  auto *view = dynamic_cast<qui::ScrollableView *>(element.getView());
+  auto *view = dynamic_cast<qui::ScrollableView *>(tree.root.getView());
 
   EXPECT_FALSE(view->isScrollbarVisible());
 
-  dispatchMouseMoveEvent({glm::vec2{1000.0, 0.0f}});
+  events.mouseMove({glm::vec2{1000.0, 0.0f}});
   EXPECT_FALSE(view->isScrollbarVisible());
 }
 
 TEST_F(QuiScrollableTest, ThinScrollbarIsVisibleWhenComponentIsHovered) {
-  qui::Element element = qui::Scrollable(child);
-  element.build(buildContext);
-  element.getView()->layout(
-      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
-  auto *view = dynamic_cast<qui::ScrollableView *>(element.getView());
+  auto tree = qui::Qui::createTree(qui::Scrollable(child));
+  MockEventController events(tree);
 
-  dispatchMouseMoveEvent({glm::vec2{150.0f, 150.0f}});
+  tree.root.getView()->layout(
+      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
+  auto *view = dynamic_cast<qui::ScrollableView *>(tree.root.getView());
+
+  events.mouseMove({glm::vec2{150.0f, 150.0f}});
   EXPECT_TRUE(view->isScrollbarVisible());
   EXPECT_EQ(view->getScrollbar().getThickness(), 6.0f);
 }
 
 TEST_F(QuiScrollableTest, ThickScrollbarIsVisibleWhenScrollbarIsHovered) {
-  qui::Element element = qui::Scrollable(child);
-  element.build(buildContext);
-  element.getView()->layout(
-      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
-  auto *view = dynamic_cast<qui::ScrollableView *>(element.getView());
+  auto tree = qui::Qui::createTree(qui::Scrollable(child));
+  MockEventController events(tree);
 
-  dispatchMouseMoveEvent({glm::vec2{195.0f, 20.0f}});
+  tree.root.getView()->layout(
+      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
+  auto *view = dynamic_cast<qui::ScrollableView *>(tree.root.getView());
+
+  events.mouseMove({glm::vec2{195.0f, 20.0f}});
   EXPECT_TRUE(view->isScrollbarVisible());
   EXPECT_EQ(view->getScrollbar().getThickness(), 12.0f);
 }
 
 TEST_F(QuiScrollableTest, ScrollbarStaysActiveIfDraggingStarted) {
-  qui::Element element = qui::Scrollable(child);
-  element.build(buildContext);
-  element.getView()->layout(
-      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
-  auto *view = dynamic_cast<qui::ScrollableView *>(element.getView());
+  auto tree = qui::Qui::createTree(qui::Scrollable(child));
+  MockEventController events(tree);
 
-  dispatchMouseMoveEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseDownEvent({glm::vec2{195.0f, 20.0f}});
+  tree.root.getView()->layout(
+      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
+  auto *view = dynamic_cast<qui::ScrollableView *>(tree.root.getView());
+
+  events.mouseDown({195.0f, 20.0f});
 
   EXPECT_TRUE(view->isScrollbarVisible());
   EXPECT_EQ(view->getScrollbar().getThickness(), 12.0f);
 
-  dispatchMouseMoveEvent({glm::vec2{1000.0f, 1000.0f}});
+  events.mouseMove({glm::vec2{1000.0f, 1000.0f}});
   EXPECT_TRUE(view->isScrollbarVisible());
   EXPECT_EQ(view->getScrollbar().getThickness(), 12.0f);
 }
 
 TEST_F(QuiScrollableTest,
        EndingScrollbarDragSetsScrollbarStateBasedOnMousePosition) {
-  qui::Element element = qui::Scrollable(child);
-  element.build(buildContext);
-  element.getView()->layout(
-      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
-  auto *view = dynamic_cast<qui::ScrollableView *>(element.getView());
+  auto tree = qui::Qui::createTree(qui::Scrollable(child));
+  MockEventController events(tree);
 
-  dispatchMouseMoveEvent({glm::vec2{195.0f, 20.0f}});
+  tree.root.getView()->layout(
+      {qui::Constraints(200.0f, 300.0f, 200.0f, 300.0f), {0.0f, 0.0f}});
+  auto *view = dynamic_cast<qui::ScrollableView *>(tree.root.getView());
+
+  events.mouseMove({glm::vec2{195.0f, 20.0f}});
 
   // Hovered state
-  dispatchMouseMoveEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseDownEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseUpEvent({glm::vec2{195.0f, 20.0f}});
+  events.mouseMove({glm::vec2{195.0f, 20.0f}});
+  events.mouseDown({glm::vec2{195.0f, 20.0f}});
+  events.mouseUp({glm::vec2{195.0f, 20.0f}});
   EXPECT_TRUE(view->isScrollbarVisible());
   EXPECT_EQ(view->getScrollbar().getThickness(), 12.0f);
 
   // Visible state
-  dispatchMouseMoveEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseDownEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseMoveEvent({glm::vec2{150.0f, 150.0f}});
-  dispatchMouseUpEvent({glm::vec2{150.0f, 150.0f}});
+  events.mouseMove({glm::vec2{195.0f, 20.0f}});
+  events.mouseDown({glm::vec2{195.0f, 20.0f}});
+  events.mouseMove({glm::vec2{150.0f, 150.0f}});
+  events.mouseUp({glm::vec2{150.0f, 150.0f}});
   EXPECT_TRUE(view->isScrollbarVisible());
   EXPECT_EQ(view->getScrollbar().getThickness(), 6.0f);
 
   // Hidden state
-  dispatchMouseMoveEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseDownEvent({glm::vec2{195.0f, 20.0f}});
-  dispatchMouseMoveEvent({glm::vec2{1000.0, 1000.0f}});
-  dispatchMouseUpEvent({glm::vec2{1000.0f, 1000.0f}});
+  events.mouseMove({glm::vec2{195.0f, 20.0f}});
+  events.mouseDown({glm::vec2{195.0f, 20.0f}});
+  events.mouseMove({glm::vec2{1000.0, 1000.0f}});
+  events.mouseUp({glm::vec2{1000.0f, 1000.0f}});
   EXPECT_FALSE(view->isScrollbarVisible());
 }

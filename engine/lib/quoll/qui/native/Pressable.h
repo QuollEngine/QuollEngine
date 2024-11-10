@@ -43,8 +43,6 @@ private:
   PressHandler mOnHoverOut;
 
   bool mHovered = false;
-
-  EventHolder mEventHolder;
 };
 
 } // namespace qui
