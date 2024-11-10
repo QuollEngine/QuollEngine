@@ -23,13 +23,14 @@ LayoutOutput ScrollbarView::layout(const LayoutInput &input) {
   return {mSize};
 }
 
-View *ScrollbarView::hitTest(const glm::vec2 &point) {
+bool ScrollbarView::hitTest(const glm::vec2 &point, HitTestResult &hitResult) {
   if (point.x >= mPosition.x && point.x <= mPosition.x + mSize.x &&
       point.y >= mPosition.y && point.y <= mPosition.y + mSize.y) {
-    return this;
+    hitResult.path.push_back(this);
+    return true;
   }
 
-  return nullptr;
+  return false;
 }
 
 } // namespace qui

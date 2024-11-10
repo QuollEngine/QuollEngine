@@ -41,7 +41,9 @@ void Pressable::build(BuildContext &context) {
   if (mOnPress) {
     mEventHolder.registerMouseClickHandler(
         [this](const MouseEvent &mouseEvent) {
-          if (getView()->hitTest(mouseEvent.point)) {
+          HitTestResult hitResult{};
+
+          if (getView()->hitTest(mouseEvent.point, hitResult)) {
             mOnPress({.point = mouseEvent.point});
           }
         });
@@ -49,7 +51,9 @@ void Pressable::build(BuildContext &context) {
 
   if (mOnPressDown) {
     mEventHolder.registerMouseDownHandler([this](const MouseEvent &mouseEvent) {
-      if (getView()->hitTest(mouseEvent.point)) {
+      HitTestResult hitResult{};
+
+      if (getView()->hitTest(mouseEvent.point, hitResult)) {
         mOnPressDown({.point = mouseEvent.point});
       }
     });
@@ -57,7 +61,8 @@ void Pressable::build(BuildContext &context) {
 
   if (mOnPressUp) {
     mEventHolder.registerMouseUpHandler([this](const MouseEvent &mouseEvent) {
-      if (getView()->hitTest(mouseEvent.point)) {
+      HitTestResult hitResult{};
+      if (getView()->hitTest(mouseEvent.point, hitResult)) {
         mOnPressUp({.point = mouseEvent.point});
       }
     });
@@ -65,7 +70,9 @@ void Pressable::build(BuildContext &context) {
 
   if (mOnHoverIn || mOnHoverOut) {
     mEventHolder.registerMouseMoveHandler([this](const MouseEvent &mouseEvent) {
-      const bool hitTest = getView()->hitTest(mouseEvent.point);
+      HitTestResult hitResult{};
+
+      const bool hitTest = getView()->hitTest(mouseEvent.point, hitResult);
 
       if (!mHovered && hitTest) {
         mHovered = true;

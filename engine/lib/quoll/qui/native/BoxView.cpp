@@ -78,17 +78,15 @@ LayoutOutput BoxView::layout(const LayoutInput &input) {
   return {mSize};
 }
 
-View *BoxView::hitTest(const glm::vec2 &point) {
+bool BoxView::hitTest(const glm::vec2 &point, HitTestResult &hitResult) {
   if (point.x >= mPosition.x && point.x <= mPosition.x + mSize.x &&
       point.y >= mPosition.y && point.y <= mPosition.y + mSize.y) {
-    auto *child = mChild->hitTest(point);
-    if (child) {
-      return child;
-    }
-    return this;
+    hitResult.path.push_back(this);
+    mChild->hitTest(point, hitResult);
+    return true;
   }
 
-  return nullptr;
+  return false;
 }
 
 } // namespace qui

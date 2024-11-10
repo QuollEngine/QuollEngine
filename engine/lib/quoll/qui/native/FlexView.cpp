@@ -165,19 +165,17 @@ LayoutOutput FlexView::layout(const LayoutInput &input) {
   return {mSize};
 }
 
-View *FlexView::hitTest(const glm::vec2 &point) {
+bool FlexView::hitTest(const glm::vec2 &point, HitTestResult &hitResult) {
   if (point.x >= mPosition.x && point.x <= mPosition.x + mSize.x &&
       point.y >= mPosition.y && point.y <= mPosition.y + mSize.y) {
+    hitResult.path.emplace_back(this);
     for (auto *child : mChildren) {
-      auto *hit = child->hitTest(point);
-      if (hit) {
-        return hit;
-      }
+      child->hitTest(point, hitResult);
     }
-    return this;
+    return true;
   }
 
-  return nullptr;
+  return false;
 }
 
 } // namespace qui

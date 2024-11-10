@@ -2,6 +2,8 @@
 
 namespace qui {
 
+class View;
+
 class Constraints {
 public:
   static constexpr f32 Infinity = std::numeric_limits<f32>::infinity();
@@ -38,6 +40,10 @@ struct LayoutOutput {
   glm::vec2 size{0.0f, 0.0f};
 };
 
+struct HitTestResult {
+  std::vector<View *> path;
+};
+
 class View {
 public:
   virtual ~View() = default;
@@ -46,7 +52,10 @@ public:
 
   virtual LayoutOutput layout(const LayoutInput &input) = 0;
 
-  virtual constexpr View *hitTest(const glm::vec2 &point) { return nullptr; }
+  virtual constexpr bool hitTest(const glm::vec2 &point,
+                                 HitTestResult &hitResult) {
+    return false;
+  }
 };
 
 } // namespace qui

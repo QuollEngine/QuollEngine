@@ -55,11 +55,40 @@ TEST_F(QuiTextViewTest, HitTestReturnsTrueIfPointIsWithinViewBounds) {
   auto output =
       view.layout({.constraints = constraints, .position = {40.0f, 50.0f}});
 
-  EXPECT_TRUE(view.hitTest({40.0f, 50.0f}));
-  EXPECT_TRUE(view.hitTest({40.0f, 76.0f}));
-  EXPECT_TRUE(view.hitTest({75.0f, 50.0f}));
-  EXPECT_TRUE(view.hitTest({75.0f, 76.0f}));
-  EXPECT_TRUE(view.hitTest({60.0f, 65.0f}));
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({40.0f, 50.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({40.0f, 76.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({75.0f, 50.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({75.0f, 76.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({60.0f, 65.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 1);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+  }
 }
 
 TEST_F(QuiTextViewTest, HitTestReturnsFalseIfPointIsOutsideOfViewBounds) {
@@ -70,16 +99,19 @@ TEST_F(QuiTextViewTest, HitTestReturnsFalseIfPointIsOutsideOfViewBounds) {
   auto output =
       view.layout({.constraints = constraints, .position = {40.0f, 50.0f}});
 
-  EXPECT_FALSE(view.hitTest({40.0f, 49.0f}));
-  EXPECT_FALSE(view.hitTest({40.0f, 77.0f}));
-  EXPECT_FALSE(view.hitTest({75.0f, 49.0f}));
-  EXPECT_FALSE(view.hitTest({75.0f, 77.0f}));
+  qui::HitTestResult hitResult;
+  EXPECT_FALSE(view.hitTest({40.0f, 49.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({40.0f, 77.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({75.0f, 49.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({75.0f, 77.0f}, hitResult));
 
-  EXPECT_FALSE(view.hitTest({39.0f, 50.0f}));
-  EXPECT_FALSE(view.hitTest({76.0f, 50.0f}));
-  EXPECT_FALSE(view.hitTest({39.0f, 76.0f}));
-  EXPECT_FALSE(view.hitTest({76.0f, 76.0f}));
+  EXPECT_FALSE(view.hitTest({39.0f, 50.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({76.0f, 50.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({39.0f, 76.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({76.0f, 76.0f}, hitResult));
 
-  EXPECT_FALSE(view.hitTest({20.0f, 10.0f}));
-  EXPECT_FALSE(view.hitTest({120.0f, 160.0f}));
+  EXPECT_FALSE(view.hitTest({20.0f, 10.0f}, hitResult));
+  EXPECT_FALSE(view.hitTest({120.0f, 160.0f}, hitResult));
+
+  EXPECT_TRUE(hitResult.path.empty());
 }
