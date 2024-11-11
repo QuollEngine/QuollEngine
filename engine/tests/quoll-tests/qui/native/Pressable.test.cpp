@@ -10,9 +10,10 @@ public:
 };
 
 TEST_F(QuiPressableTest, CreatesPressableElementWithChild) {
-  qui::Element element = qui::Pressable(MockComponent(20));
+  auto tree = qui::Qui::createTree(qui::Pressable(MockComponent(20)));
 
-  auto *component = static_cast<const qui::Pressable *>(element.getComponent());
+  auto *component =
+      static_cast<const qui::Pressable *>(tree.root.getComponent());
 
   EXPECT_FALSE(component->getOnPress());
   EXPECT_FALSE(component->getOnPressDown());
@@ -24,11 +25,10 @@ TEST_F(QuiPressableTest, CreatesPressableElementWithChild) {
       dynamic_cast<const MockComponent *>(component->getChild().getComponent());
   EXPECT_EQ(child->value, 20);
 
-  auto *view = dynamic_cast<MockView *>(element.getView());
+  auto *view = dynamic_cast<MockView *>(tree.root.getView());
   ASSERT_NE(view, nullptr);
-
-  EXPECT_EQ(view->value, 0);
-  EXPECT_EQ(child->mView.value, 0);
+  EXPECT_EQ(view->value, 20);
+  EXPECT_EQ(child->mView.value, 20);
 }
 
 TEST_F(QuiPressableTest, CreatesPressableElementWithAllProps) {
@@ -41,14 +41,16 @@ TEST_F(QuiPressableTest, CreatesPressableElementWithAllProps) {
   EXPECT_CALL(handleHoverIn, Call(::testing::_)).Times(1);
   EXPECT_CALL(handleHoverOut, Call(::testing::_)).Times(1);
 
-  qui::Element element = qui::Pressable(MockComponent(20))
-                             .onPress(handlePress.AsStdFunction())
-                             .onPressDown(handlePressDown.AsStdFunction())
-                             .onPressUp(handlePressUp.AsStdFunction())
-                             .onHoverIn(handleHoverIn.AsStdFunction())
-                             .onHoverOut(handleHoverOut.AsStdFunction());
+  auto tree =
+      qui::Qui::createTree(qui::Pressable(MockComponent(20))
+                               .onPress(handlePress.AsStdFunction())
+                               .onPressDown(handlePressDown.AsStdFunction())
+                               .onPressUp(handlePressUp.AsStdFunction())
+                               .onHoverIn(handleHoverIn.AsStdFunction())
+                               .onHoverOut(handleHoverOut.AsStdFunction()));
 
-  auto *component = static_cast<const qui::Pressable *>(element.getComponent());
+  auto *component =
+      static_cast<const qui::Pressable *>(tree.root.getComponent());
 
   EXPECT_TRUE(component->getOnPress());
   EXPECT_TRUE(component->getOnPressDown());
@@ -60,11 +62,10 @@ TEST_F(QuiPressableTest, CreatesPressableElementWithAllProps) {
       static_cast<const MockComponent *>(component->getChild().getComponent());
   EXPECT_EQ(child->value, 20);
 
-  auto *view = dynamic_cast<MockView *>(element.getView());
+  auto *view = dynamic_cast<MockView *>(tree.root.getView());
   ASSERT_NE(view, nullptr);
-
-  EXPECT_EQ(view->value, 0);
-  EXPECT_EQ(child->mView.value, 0);
+  EXPECT_EQ(view->value, 20);
+  EXPECT_EQ(child->mView.value, 20);
 
   qui::PressEvent ev{};
   component->getOnPress()(ev);
@@ -74,22 +75,6 @@ TEST_F(QuiPressableTest, CreatesPressableElementWithAllProps) {
   component->getOnHoverOut()(ev);
 }
 
-TEST_F(QuiPressableTest, BuildCallsChildBuild) {
-  qui::Element element = qui::Pressable(MockComponent(20));
-
-  element.build(buildContext);
-
-  auto *component = static_cast<const qui::Pressable *>(element.getComponent());
-  auto *child =
-      static_cast<const MockComponent *>(component->getChild().getComponent());
-  EXPECT_EQ(child->value, 20);
-
-  auto *view = dynamic_cast<MockView *>(element.getView());
-  ASSERT_NE(view, nullptr);
-  EXPECT_EQ(view->value, 20);
-  EXPECT_EQ(child->mView.value, 20);
-}
-
 TEST_F(QuiPressableTest, UpdatingChildRebuildsChild) {
   PressHandler handlePress, handlePressDown, handlePressUp, handleHoverIn,
       handleHoverOut;
@@ -97,18 +82,16 @@ TEST_F(QuiPressableTest, UpdatingChildRebuildsChild) {
   qui::Scope scope;
   auto childEl = scope.signal<qui::Element>(MockComponent(20));
 
-  qui::Element element = qui::Pressable(childEl);
-
-  element.build(buildContext);
+  auto tree = qui::Qui::createTree(qui::Pressable(childEl));
 
   {
     auto *component =
-        static_cast<const qui::Pressable *>(element.getComponent());
+        static_cast<const qui::Pressable *>(tree.root.getComponent());
     auto *child = static_cast<const MockComponent *>(
         component->getChild().getComponent());
     EXPECT_EQ(child->value, 20);
 
-    auto *view = dynamic_cast<MockView *>(element.getView());
+    auto *view = dynamic_cast<MockView *>(tree.root.getView());
     ASSERT_NE(view, nullptr);
     EXPECT_EQ(view->value, 20);
     EXPECT_EQ(child->mView.value, 20);
@@ -117,12 +100,12 @@ TEST_F(QuiPressableTest, UpdatingChildRebuildsChild) {
   childEl.set(MockComponent(40));
   {
     auto *component =
-        static_cast<const qui::Pressable *>(element.getComponent());
+        static_cast<const qui::Pressable *>(tree.root.getComponent());
     auto *child = static_cast<const MockComponent *>(
         component->getChild().getComponent());
     EXPECT_EQ(child->value, 40);
 
-    auto *view = dynamic_cast<MockView *>(element.getView());
+    auto *view = dynamic_cast<MockView *>(tree.root.getView());
     ASSERT_NE(view, nullptr);
     EXPECT_EQ(view->value, 40);
     EXPECT_EQ(child->mView.value, 40);
@@ -143,16 +126,13 @@ TEST_F(QuiPressableEventsTest,
   MockComponent component(20);
   component.mView.desiredSize = {100, 100};
 
-  qui::Element element =
-      qui::Pressable(component).onPress(pressHandler.AsStdFunction());
+  auto tree = qui::Qui::createTree(
+      qui::Pressable(component).onPress(pressHandler.AsStdFunction()));
+  MockEventController events(tree);
 
-  element.build(buildContext);
-  element.getView()->layout({});
-
-  ASSERT_EQ(buildContext.eventManager->getMouseClickHandlers().size(), 1);
-  auto mouseHandler = buildContext.eventManager->getMouseClickHandlers().at(0);
-  mouseHandler(qui::MouseEvent{glm::vec2{50, 60}});
-  mouseHandler(qui::MouseEvent{glm::vec2{150, 120}});
+  tree.root.getView()->layout({});
+  events.click({50, 60});
+  events.click({150, 120});
 }
 
 TEST_F(QuiPressableEventsTest,
@@ -165,16 +145,14 @@ TEST_F(QuiPressableEventsTest,
   MockComponent component(20);
   component.mView.desiredSize = {100, 100};
 
-  qui::Element element =
-      qui::Pressable(component).onPressDown(pressHandler.AsStdFunction());
+  auto tree = qui::Qui::createTree(
+      qui::Pressable(component).onPressDown(pressHandler.AsStdFunction()));
+  MockEventController events(tree);
 
-  element.build(buildContext);
-  element.getView()->layout({});
+  tree.root.getView()->layout({});
 
-  ASSERT_EQ(buildContext.eventManager->getMouseDownHandlers().size(), 1);
-  auto mouseHandler = buildContext.eventManager->getMouseDownHandlers().at(0);
-  mouseHandler(qui::MouseEvent{glm::vec2{50, 60}});
-  mouseHandler(qui::MouseEvent{glm::vec2{150, 120}});
+  events.mouseDown({50, 60});
+  events.mouseDown({150, 120});
 }
 
 TEST_F(QuiPressableEventsTest,
@@ -187,17 +165,14 @@ TEST_F(QuiPressableEventsTest,
   MockComponent component(20);
   component.mView.desiredSize = {100, 100};
 
-  qui::Element element =
-      qui::Pressable(component).onPressDown(pressHandler.AsStdFunction());
+  auto tree = qui::Qui::createTree(
+      qui::Pressable(component).onPressUp(pressHandler.AsStdFunction()));
+  MockEventController events(tree);
 
-  element.build(buildContext);
-  element.getView()->layout({});
+  tree.root.getView()->layout({});
 
-  ASSERT_EQ(buildContext.eventManager->getMouseDownHandlers().size(), 1);
-
-  auto mouseHandler = buildContext.eventManager->getMouseDownHandlers().at(0);
-  mouseHandler(qui::MouseEvent{glm::vec2{50, 60}});
-  mouseHandler(qui::MouseEvent{glm::vec2{150, 120}});
+  events.mouseDown({50, 60});
+  events.mouseUp({50, 60});
 }
 
 TEST_F(
@@ -211,18 +186,15 @@ TEST_F(
   MockComponent component(20);
   component.mView.desiredSize = {100, 100};
 
-  qui::Element element =
-      qui::Pressable(component).onHoverIn(pressHandler.AsStdFunction());
+  auto tree = qui::Qui::createTree(
+      qui::Pressable(component).onHoverIn(pressHandler.AsStdFunction()));
+  MockEventController events(tree);
 
-  element.build(buildContext);
-  element.getView()->layout({});
+  tree.root.getView()->layout({});
 
-  ASSERT_EQ(buildContext.eventManager->getMouseMoveHandlers().size(), 1);
-
-  auto mouseHandler = buildContext.eventManager->getMouseMoveHandlers().at(0);
-  mouseHandler(qui::MouseEvent{glm::vec2{50, 60}});
-  mouseHandler(qui::MouseEvent{glm::vec2{60, 70}});
-  mouseHandler(qui::MouseEvent{glm::vec2{150, 120}});
+  events.mouseMove({50, 60});
+  events.mouseMove({60, 70});
+  events.mouseMove({150, 120});
 }
 
 TEST_F(
@@ -236,19 +208,16 @@ TEST_F(
   MockComponent component(20);
   component.mView.desiredSize = {100, 100};
 
-  qui::Element element =
-      qui::Pressable(component).onHoverOut(pressHandler.AsStdFunction());
+  auto tree = qui::Qui::createTree(
+      qui::Pressable(component).onHoverOut(pressHandler.AsStdFunction()));
+  MockEventController events(tree);
 
-  element.build(buildContext);
-  element.getView()->layout({});
+  tree.root.getView()->layout({});
 
-  ASSERT_EQ(buildContext.eventManager->getMouseMoveHandlers().size(), 1);
-
-  auto mouseHandler = buildContext.eventManager->getMouseMoveHandlers().at(0);
-  mouseHandler(qui::MouseEvent{glm::vec2{50, 60}});
-  mouseHandler(qui::MouseEvent{glm::vec2{60, 70}});
-  mouseHandler(qui::MouseEvent{glm::vec2{150, 120}});
-  mouseHandler(qui::MouseEvent{glm::vec2{250, 320}});
+  events.mouseMove({50, 60});
+  events.mouseMove({60, 70});
+  events.mouseMove({150, 120});
+  events.mouseMove({250, 320});
 }
 
 TEST_F(
@@ -264,49 +233,16 @@ TEST_F(
   MockComponent component(20);
   component.mView.desiredSize = {100, 100};
 
-  qui::Element element = qui::Pressable(component)
-                             .onHoverIn(hoverInHandler.AsStdFunction())
-                             .onHoverOut(hoverOutHandler.AsStdFunction());
+  auto tree =
+      qui::Qui::createTree(qui::Pressable(component)
+                               .onHoverIn(hoverInHandler.AsStdFunction())
+                               .onHoverOut(hoverOutHandler.AsStdFunction()));
+  MockEventController events(tree);
 
-  element.build(buildContext);
-  element.getView()->layout({});
+  tree.root.getView()->layout({});
 
-  ASSERT_EQ(buildContext.eventManager->getMouseMoveHandlers().size(), 1);
-
-  auto mouseHandler = buildContext.eventManager->getMouseMoveHandlers().at(0);
-  mouseHandler(qui::MouseEvent{glm::vec2{50, 60}});
-  mouseHandler(qui::MouseEvent{glm::vec2{60, 70}});
-  mouseHandler(qui::MouseEvent{glm::vec2{150, 120}});
-  mouseHandler(qui::MouseEvent{glm::vec2{250, 320}});
-}
-
-TEST_F(QuiPressableEventsTest,
-       EventsAreClearedIsComponentIsDestroyedAfterBuild) {
-
-  {
-    PressHandler handlePress, handlePressDown, handlePressUp, handleHoverIn,
-        handleHoverOut;
-
-    MockComponent component(20);
-    component.mView.desiredSize = {100, 100};
-
-    qui::Element element = qui::Pressable(component)
-                               .onPress(handlePress.AsStdFunction())
-                               .onPressDown(handlePressDown.AsStdFunction())
-                               .onPressUp(handlePressUp.AsStdFunction())
-                               .onHoverIn(handleHoverIn.AsStdFunction())
-                               .onHoverOut(handleHoverOut.AsStdFunction());
-
-    element.build(buildContext);
-
-    EXPECT_EQ(buildContext.eventManager->getMouseClickHandlers().size(), 1);
-    EXPECT_EQ(buildContext.eventManager->getMouseDownHandlers().size(), 1);
-    EXPECT_EQ(buildContext.eventManager->getMouseUpHandlers().size(), 1);
-    EXPECT_EQ(buildContext.eventManager->getMouseMoveHandlers().size(), 1);
-  }
-
-  EXPECT_EQ(buildContext.eventManager->getMouseClickHandlers().size(), 0);
-  EXPECT_EQ(buildContext.eventManager->getMouseDownHandlers().size(), 0);
-  EXPECT_EQ(buildContext.eventManager->getMouseUpHandlers().size(), 0);
-  EXPECT_EQ(buildContext.eventManager->getMouseMoveHandlers().size(), 0);
+  events.mouseMove({50, 60});
+  events.mouseMove({60, 70});
+  events.mouseMove({150, 120});
+  events.mouseMove({250, 320});
 }

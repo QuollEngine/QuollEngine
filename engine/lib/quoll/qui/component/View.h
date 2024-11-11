@@ -1,8 +1,9 @@
 #pragma once
 
-namespace qui {
+#include "EventDispatcher.h"
+#include "HitTestResult.h"
 
-class View;
+namespace qui {
 
 class Constraints {
 public:
@@ -40,10 +41,6 @@ struct LayoutOutput {
   glm::vec2 size{0.0f, 0.0f};
 };
 
-struct HitTestResult {
-  std::vector<View *> path;
-};
-
 class View {
 public:
   virtual ~View() = default;
@@ -56,6 +53,11 @@ public:
                                  HitTestResult &hitResult) {
     return false;
   }
+
+  constexpr EventDispatcher &getEventDispatcher() { return mEventDispatcher; }
+
+private:
+  EventDispatcher mEventDispatcher;
 };
 
 } // namespace qui

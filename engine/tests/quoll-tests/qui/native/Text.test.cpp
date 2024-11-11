@@ -7,7 +7,8 @@
 class QuiTextTest : public QuiComponentTest {};
 
 TEST_F(QuiTextTest, CreatesText) {
-  qui::Element el = qui::Text("Hello world");
+  auto tree = qui::Qui::createTree(qui::Text("Hello world"));
+  auto &el = tree.root;
   auto *text = static_cast<const qui::Text *>(el.getComponent());
 
   EXPECT_EQ(text->getText(), "Hello world");
@@ -15,7 +16,9 @@ TEST_F(QuiTextTest, CreatesText) {
 }
 
 TEST_F(QuiTextTest, CreatesTextWithAllProps) {
-  qui::Element el = qui::Text("Hello world").color(qui::Color::Red);
+  auto tree =
+      qui::Qui::createTree(qui::Text("Hello world").color(qui::Color::Red));
+  auto &el = tree.root;
   auto *text = static_cast<const qui::Text *>(el.getComponent());
 
   EXPECT_EQ(text->getText(), "Hello world");
@@ -23,9 +26,9 @@ TEST_F(QuiTextTest, CreatesTextWithAllProps) {
 }
 
 TEST_F(QuiTextTest, BuildingTextUpdatesView) {
-  qui::Element el = qui::Text("Hello world").color(qui::Color::Red);
-
-  el.build(buildContext);
+  auto tree =
+      qui::Qui::createTree(qui::Text("Hello world").color(qui::Color::Red));
+  auto &el = tree.root;
 
   auto *view = static_cast<qui::TextView *>(el.getView());
 
@@ -38,8 +41,9 @@ TEST_F(QuiTextTest, UpdatingTextPropertiesAfterBuildUpdatesTheView) {
   auto text = scope.signal("Hello world");
   auto color = scope.signal(qui::Color::Red);
 
-  qui::Element el = qui::Text(text).color(color);
-  el.build(buildContext);
+  auto tree = qui::Qui::createTree(qui::Text(text).color(color));
+  auto &el = tree.root;
+
   auto *view = static_cast<qui::TextView *>(el.getView());
 
   EXPECT_EQ(view->getText(), "Hello world");

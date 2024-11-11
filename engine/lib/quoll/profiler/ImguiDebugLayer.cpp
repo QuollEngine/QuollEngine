@@ -91,9 +91,9 @@ static constexpr auto DemoScrollable = qui::component([]() {
                                                .width(300.0f)
                                                .height(100.0f),
 
-                                           qui::Box(qui::Text("Hello world"))
+                                           qui::Box(DemoPressable())
                                                .padding(qui::EdgeInsets(5.0f))
-                                               .background(qui::Color::Green)
+                                               .background(qui::Color::Red)
                                                .width(100.0f)
                                                .borderRadius(5.0f)
                                                .width(300.0f)

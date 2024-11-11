@@ -84,10 +84,28 @@ TEST_F(QuiFlexViewTest, HitTestReturnsChildIfPointIsWithinChildBounds) {
 
   {
     qui::HitTestResult hitResult;
-    EXPECT_TRUE(view.hitTest({350.0f, 170.0f}, hitResult));
+    EXPECT_TRUE(view.hitTest({300.0f, 150.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 3);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child1);
+    EXPECT_EQ(hitResult.path.at(2), &child2);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({349.0f, 170.0f}, hitResult));
     EXPECT_EQ(hitResult.path.size(), 2);
     EXPECT_EQ(hitResult.path.at(0), &view);
     EXPECT_EQ(hitResult.path.at(1), &child2);
+  }
+
+  {
+    qui::HitTestResult hitResult;
+    EXPECT_TRUE(view.hitTest({350.0f, 170.0f}, hitResult));
+    EXPECT_EQ(hitResult.path.size(), 3);
+    EXPECT_EQ(hitResult.path.at(0), &view);
+    EXPECT_EQ(hitResult.path.at(1), &child2);
+    EXPECT_EQ(hitResult.path.at(2), &child3);
   }
 
   {

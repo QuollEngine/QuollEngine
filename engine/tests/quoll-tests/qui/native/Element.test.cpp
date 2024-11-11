@@ -17,25 +17,27 @@ TEST_F(QuiElementTest, CreatesElementFromComponent) {
 }
 
 TEST_F(QuiElementTest, BuildingElementBuildsComponent) {
-  qui::Element element = MockComponent(20);
-  auto *component = dynamic_cast<const MockComponent *>(element.getComponent());
-
-  element.build(buildContext);
+  auto tree = qui::Qui::createTree(MockComponent(20));
+  auto *component =
+      dynamic_cast<const MockComponent *>(tree.root.getComponent());
 
   EXPECT_EQ(component->value, 20);
-  EXPECT_EQ(dynamic_cast<MockView *>(element.getView())->value, 20);
+  EXPECT_EQ(dynamic_cast<MockView *>(tree.root.getView())->value, 20);
   EXPECT_EQ(component->buildCount, 1);
 }
 
 TEST_F(QuiElementTest, RebuildingElementDoesNotBuildComponentAgain) {
-  qui::Element element = MockComponent(20);
-  auto *component = dynamic_cast<const MockComponent *>(element.getComponent());
+  auto tree = qui::Qui::createTree(MockComponent(20));
+  auto *component =
+      dynamic_cast<const MockComponent *>(tree.root.getComponent());
 
-  element.build(buildContext);
-  element.build(buildContext);
-  element.build(buildContext);
+  qui::BuildContext buildContext{tree.events.get()};
+
+  tree.root.build(buildContext);
+  tree.root.build(buildContext);
+  tree.root.build(buildContext);
 
   EXPECT_EQ(component->value, 20);
-  EXPECT_EQ(dynamic_cast<MockView *>(element.getView())->value, 20);
+  EXPECT_EQ(dynamic_cast<MockView *>(tree.root.getView())->value, 20);
   EXPECT_EQ(component->buildCount, 1);
 }

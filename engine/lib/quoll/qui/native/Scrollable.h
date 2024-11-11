@@ -7,7 +7,7 @@
 namespace qui {
 
 class Scrollable : public Component {
-  enum class ScrollbarState { Hidden = 0, Visible, Hovered, Active };
+  enum class ScrollbarState { Hidden = 0, Visible, Hovered };
 
 public:
   Scrollable(Value<Element> child);
@@ -18,6 +18,7 @@ public:
 
 private:
   void setScrollbarState(ScrollbarState state);
+  void setScrollbarActive(bool isActive);
 
 private:
   ScrollableView mView;
@@ -25,6 +26,7 @@ private:
 
   Value<Element> mChild;
   bool mHovered = false;
+  bool mScrollbarActive = false;
 
   glm::vec2 mPreviousMousePos{0.0f, 0.0f};
 

@@ -31,62 +31,39 @@ Pressable &Pressable::onHoverOut(PressHandler &&handler) {
 }
 
 void Pressable::build(BuildContext &context) {
-  mEventHolder = context.eventManager->createEventHolder();
+  auto observeChild = [this, &context]() {
+    mChild().build(context);
 
-  auto observeChild = [this, &context]() { mChild().build(context); };
+    auto &dispatcher = mChild().getView()->getEventDispatcher();
+
+    if (mOnPress) {
+      dispatcher.registerMouseClickHandler(
+          [this](const auto &e) { mOnPress({.point = e.point}); });
+    }
+
+    if (mOnPressDown) {
+      dispatcher.registerMouseDownHandler(
+          [this](const auto &e) { mOnPressDown({.point = e.point}); });
+    }
+
+    if (mOnPressUp) {
+      dispatcher.registerMouseUpHandler(
+          [this](const auto &e) { mOnPressUp({.point = e.point}); });
+    }
+
+    if (mOnHoverIn) {
+      dispatcher.registerMouseEnterHandler(
+          [this](const auto &e) { mOnHoverIn({.point = e.point}); });
+    }
+
+    if (mOnHoverOut) {
+      dispatcher.registerMouseExitHandler(
+          [this](const auto &e) { mOnHoverOut({.point = e.point}); });
+    }
+  };
 
   mChild.observe(observeChild);
   observeChild();
-
-  if (mOnPress) {
-    mEventHolder.registerMouseClickHandler(
-        [this](const MouseEvent &mouseEvent) {
-          HitTestResult hitResult{};
-
-          if (getView()->hitTest(mouseEvent.point, hitResult)) {
-            mOnPress({.point = mouseEvent.point});
-          }
-        });
-  }
-
-  if (mOnPressDown) {
-    mEventHolder.registerMouseDownHandler([this](const MouseEvent &mouseEvent) {
-      HitTestResult hitResult{};
-
-      if (getView()->hitTest(mouseEvent.point, hitResult)) {
-        mOnPressDown({.point = mouseEvent.point});
-      }
-    });
-  }
-
-  if (mOnPressUp) {
-    mEventHolder.registerMouseUpHandler([this](const MouseEvent &mouseEvent) {
-      HitTestResult hitResult{};
-      if (getView()->hitTest(mouseEvent.point, hitResult)) {
-        mOnPressUp({.point = mouseEvent.point});
-      }
-    });
-  }
-
-  if (mOnHoverIn || mOnHoverOut) {
-    mEventHolder.registerMouseMoveHandler([this](const MouseEvent &mouseEvent) {
-      HitTestResult hitResult{};
-
-      const bool hitTest = getView()->hitTest(mouseEvent.point, hitResult);
-
-      if (!mHovered && hitTest) {
-        mHovered = true;
-        if (mOnHoverIn) {
-          mOnHoverIn({.point = mouseEvent.point});
-        }
-      } else if (mHovered && !hitTest) {
-        mHovered = false;
-        if (mOnHoverOut) {
-          mOnHoverOut({.point = mouseEvent.point});
-        }
-      }
-    });
-  }
 }
 
 } // namespace qui
