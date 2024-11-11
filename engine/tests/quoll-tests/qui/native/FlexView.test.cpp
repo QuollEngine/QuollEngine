@@ -52,10 +52,10 @@ TEST_F(QuiFlexViewTest, HitTestReturnsChildIfPointIsWithinChildBounds) {
   position.x = 200.0f;
   position.y = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size.x, 450.0f);
-  EXPECT_EQ(output.size.y, 40.0f);
+  EXPECT_EQ(view.getSize().x, 450.0f);
+  EXPECT_EQ(view.getSize().y, 40.0f);
 
   // Bounds = [200, 150, 650, 190]
   {
@@ -143,7 +143,7 @@ TEST_F(QuiFlexViewTest, HitTestReturnsNullIfPointIsOutsideOfViewBounds) {
   position.x = 200.0f;
   position.y = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
   qui::HitTestResult hitResult;
   // Bounds = [200, 150, 650, 190]

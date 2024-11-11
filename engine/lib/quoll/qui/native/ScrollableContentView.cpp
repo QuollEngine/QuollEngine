@@ -18,11 +18,11 @@ void ScrollableContentView::render() {
   ImGui::PopClipRect();
 }
 
-LayoutOutput ScrollableContentView::layout(const LayoutInput &input) {
+void ScrollableContentView::layout(const LayoutInput &input) {
   mPosition = input.position;
 
-  auto childOutput = mChild->layout({Constraints(), mPosition + mScrollOffset});
-  mContentSize = childOutput.size;
+  mChild->layout({Constraints(), mPosition + mScrollOffset});
+  mContentSize = mChild->getSize();
 
   if (input.constraints.max.x < Constraints::Infinity &&
       input.constraints.max.y < Constraints::Infinity) {
@@ -30,14 +30,11 @@ LayoutOutput ScrollableContentView::layout(const LayoutInput &input) {
   } else {
     mSize = input.constraints.clamp(mContentSize);
   }
-
-  return {mSize};
 }
 
 bool ScrollableContentView::hitTest(const glm::vec2 &point,
                                     HitTestResult &hitResult) {
-  if (point.x >= mPosition.x && point.x <= mPosition.x + mSize.x &&
-      point.y >= mPosition.y && point.y <= mPosition.y + mSize.y) {
+  if (isPointInBounds(point)) {
     hitResult.path.push_back(this);
     mChild->hitTest(point, hitResult);
     return true;

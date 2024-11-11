@@ -10,7 +10,7 @@ class ScrollableView : public View {
 public:
   void render() override;
 
-  LayoutOutput layout(const LayoutInput &input) override;
+  void layout(const LayoutInput &input) override;
 
   bool hitTest(const glm::vec2 &point, HitTestResult &hitResult) override;
 

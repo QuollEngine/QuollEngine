@@ -27,7 +27,7 @@ TEST_P(LayoutTest, SetsViewPositionToInputPosition) {
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({.position = position});
+  view.layout({.position = position});
 
   EXPECT_EQ(view.getPosition(), position);
 }
@@ -50,10 +50,10 @@ TEST_P(LayoutTest, SetsTotalSizeOfChildrenAsViewSizeIfSizeIsWithinConstraints) {
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 450.0f);
-  EXPECT_EQ(output.size[crossAxis], 40.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 450.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 40.0f);
 }
 
 TEST_P(LayoutTest, ConstraintsViewSizeToInputConstraints) {
@@ -74,10 +74,10 @@ TEST_P(LayoutTest, ConstraintsViewSizeToInputConstraints) {
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 350.0f);
-  EXPECT_EQ(output.size[crossAxis], 150.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 350.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 150.0f);
 }
 
 TEST_P(LayoutTest, SetsViewSizeToChildSizeIfConstraintsAreInfinite) {
@@ -92,10 +92,10 @@ TEST_P(LayoutTest, SetsViewSizeToChildSizeIfConstraintsAreInfinite) {
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({qui::Constraints(), position});
+  view.layout({qui::Constraints(), position});
 
-  EXPECT_EQ(output.size[mainAxis], 450.0f);
-  EXPECT_EQ(output.size[crossAxis], 40.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 450.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 40.0f);
 }
 
 TEST_P(
@@ -113,10 +113,10 @@ TEST_P(
   constraints.max[mainAxis] = 200.0f;
   constraints.max[crossAxis] = 200.0f;
 
-  auto output = view.layout({constraints});
+  view.layout({constraints});
 
-  EXPECT_EQ(output.size[mainAxis], 140.0f);
-  EXPECT_EQ(output.size[crossAxis], 80.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 140.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 80.0f);
 }
 
 TEST_P(
@@ -134,10 +134,10 @@ TEST_P(
   constraints.max[mainAxis] = 200.0f;
   constraints.max[crossAxis] = 50.0f;
 
-  auto output = view.layout({constraints});
+  view.layout({constraints});
 
-  EXPECT_EQ(output.size[mainAxis], 140.0f);
-  EXPECT_EQ(output.size[crossAxis], 50.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 140.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 50.0f);
 }
 
 TEST_P(LayoutTest, RetainsChildSizesIfTotalSizeOfChildrenIsWithinConstraints) {
@@ -156,25 +156,25 @@ TEST_P(LayoutTest, RetainsChildSizesIfTotalSizeOfChildrenIsWithinConstraints) {
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 300.0f);
-  EXPECT_EQ(output.size[crossAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 300.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 200.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_EQ(child1.size[mainAxis], 100.0f);
-  EXPECT_EQ(child1.size[crossAxis], 100.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getSize()[mainAxis], 100.0f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 100.0f);
 
-  EXPECT_EQ(child2.position[mainAxis], 300.0f);
-  EXPECT_EQ(child2.position[crossAxis], 150.0f);
-  EXPECT_EQ(child2.size[mainAxis], 50.0f);
-  EXPECT_EQ(child2.size[crossAxis], 350.0f);
+  EXPECT_EQ(child2.getPosition()[mainAxis], 300.0f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child2.getSize()[mainAxis], 50.0f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 350.0f);
 
-  EXPECT_EQ(child3.position[mainAxis], 350.0f);
-  EXPECT_EQ(child3.position[crossAxis], 150.0f);
-  EXPECT_EQ(child3.size[mainAxis], 150.0f);
-  EXPECT_EQ(child3.size[crossAxis], 50.0f);
+  EXPECT_EQ(child3.getPosition()[mainAxis], 350.0f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child3.getSize()[mainAxis], 150.0f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 50.0f);
 }
 
 TEST_P(LayoutTest,
@@ -205,25 +205,25 @@ TEST_P(LayoutTest,
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[crossAxis], 200.0f);
-  EXPECT_EQ(output.size[mainAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 200.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_EQ(child1.size[mainAxis], 100.0f);
-  EXPECT_EQ(child1.size[crossAxis], 100.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getSize()[mainAxis], 100.0f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 100.0f);
 
-  EXPECT_EQ(child2.position[mainAxis], 300.0f);
-  EXPECT_EQ(child2.position[crossAxis], 150.0f);
-  EXPECT_EQ(child2.size[mainAxis], 50.0f);
-  EXPECT_EQ(child2.size[crossAxis], 350.0f);
+  EXPECT_EQ(child2.getPosition()[mainAxis], 300.0f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child2.getSize()[mainAxis], 50.0f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 350.0f);
 
-  EXPECT_EQ(child3.position[mainAxis], 350.0f);
-  EXPECT_EQ(child3.position[crossAxis], 150.0f);
-  EXPECT_EQ(child3.size[mainAxis], 150.0f);
-  EXPECT_EQ(child3.size[crossAxis], 50.0f);
+  EXPECT_EQ(child3.getPosition()[mainAxis], 350.0f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child3.getSize()[mainAxis], 150.0f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 50.0f);
 }
 
 TEST_P(
@@ -244,25 +244,25 @@ TEST_P(
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[crossAxis], 150.0f);
-  EXPECT_EQ(output.size[mainAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 150.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 200.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child1.size[mainAxis], 66.667f, 0.001f);
-  EXPECT_EQ(child1.size[crossAxis], 100.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child1.getSize()[mainAxis], 66.667f, 0.001f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 100.0f);
 
-  EXPECT_NEAR(child2.position[mainAxis], 266.667f, 0.001f);
-  EXPECT_EQ(child2.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child2.size[mainAxis], 33.333f, 0.001f);
-  EXPECT_EQ(child2.size[crossAxis], 350.0f);
+  EXPECT_NEAR(child2.getPosition()[mainAxis], 266.667f, 0.001f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child2.getSize()[mainAxis], 33.333f, 0.001f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 350.0f);
 
-  EXPECT_NEAR(child3.position[mainAxis], 300.0f, 0.001f);
-  EXPECT_EQ(child3.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child3.size[mainAxis], 100.0f, 0.001f);
-  EXPECT_EQ(child3.size[crossAxis], 50.0f);
+  EXPECT_NEAR(child3.getPosition()[mainAxis], 300.0f, 0.001f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child3.getSize()[mainAxis], 100.0f, 0.001f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 50.0f);
 }
 
 TEST_P(LayoutTest,
@@ -291,10 +291,10 @@ TEST_P(LayoutTest,
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[crossAxis], 150.0f);
-  EXPECT_EQ(output.size[mainAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 150.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 200.0f);
 
   EXPECT_EQ(f1.getPosition()[mainAxis], 200.0f);
   EXPECT_EQ(f1.getPosition()[crossAxis], 150.0f);
@@ -328,25 +328,25 @@ TEST_P(LayoutTest, ShrinksChildrenIfHeightOfAChildIsLargerThanMaxSize) {
   position[mainAxis] = 100.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[crossAxis], 150.0f);
-  EXPECT_EQ(output.size[mainAxis], 100.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 150.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 100.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 100.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child1.size[mainAxis], 33.333f, 0.001f);
-  EXPECT_EQ(child1.size[crossAxis], 100.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 100.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child1.getSize()[mainAxis], 33.333f, 0.001f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 100.0f);
 
-  EXPECT_NEAR(child2.position[mainAxis], 133.333f, 0.001f);
-  EXPECT_EQ(child2.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child2.size[mainAxis], 16.667f, 0.001f);
-  EXPECT_EQ(child2.size[crossAxis], 350.0f);
+  EXPECT_NEAR(child2.getPosition()[mainAxis], 133.333f, 0.001f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child2.getSize()[mainAxis], 16.667f, 0.001f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 350.0f);
 
-  EXPECT_NEAR(child3.position[mainAxis], 150.0f, 0.001f);
-  EXPECT_EQ(child3.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child3.size[mainAxis], 50.0f, 0.001f);
-  EXPECT_EQ(child3.size[crossAxis], 50.0f);
+  EXPECT_NEAR(child3.getPosition()[mainAxis], 150.0f, 0.001f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child3.getSize()[mainAxis], 50.0f, 0.001f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 50.0f);
 }
 
 TEST_P(
@@ -371,25 +371,25 @@ TEST_P(
   spacing[mainAxis] = 5.0f;
   spacing[crossAxis] = 0.0f;
   view.setSpacing(spacing);
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[crossAxis], 150.0f);
-  EXPECT_EQ(output.size[mainAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 150.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 200.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child1.size[mainAxis], 63.333f, 0.001f);
-  EXPECT_EQ(child1.size[crossAxis], 100.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child1.getSize()[mainAxis], 63.333f, 0.001f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 100.0f);
 
-  EXPECT_NEAR(child2.position[mainAxis], 268.333f, 0.001f);
-  EXPECT_EQ(child2.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child2.size[mainAxis], 31.667f, 0.001f);
-  EXPECT_EQ(child2.size[crossAxis], 350.0f);
+  EXPECT_NEAR(child2.getPosition()[mainAxis], 268.333f, 0.001f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child2.getSize()[mainAxis], 31.667f, 0.001f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 350.0f);
 
-  EXPECT_EQ(child3.position[crossAxis], 150.0f);
-  EXPECT_NEAR(child3.position[mainAxis], 305.0f, 0.001f);
-  EXPECT_EQ(child3.size[crossAxis], 50.0f);
-  EXPECT_NEAR(child3.size[mainAxis], 95.0f, 0.001f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 150.0f);
+  EXPECT_NEAR(child3.getPosition()[mainAxis], 305.0f, 0.001f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 50.0f);
+  EXPECT_NEAR(child3.getSize()[mainAxis], 95.0f, 0.001f);
 }
 
 TEST_P(LayoutTest,
@@ -419,10 +419,10 @@ TEST_P(LayoutTest,
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[crossAxis], 150.0f);
-  EXPECT_EQ(output.size[mainAxis], 500.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 150.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 500.0f);
 
   EXPECT_EQ(f1.getPosition()[mainAxis], 200.0f);
   EXPECT_EQ(f1.getPosition()[crossAxis], 150.0f);
@@ -472,10 +472,10 @@ TEST_P(
   spacing[mainAxis] = 5.0f;
   spacing[crossAxis] = 0.0f;
   view.setSpacing(spacing);
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[crossAxis], 150.0f);
-  EXPECT_EQ(output.size[mainAxis], 500.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 150.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 500.0f);
 
   EXPECT_EQ(f1.getPosition()[mainAxis], 200.0f);
   EXPECT_EQ(f1.getPosition()[crossAxis], 150.0f);
@@ -513,25 +513,25 @@ TEST_P(
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 300.0f);
-  EXPECT_EQ(output.size[crossAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 300.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 200.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_EQ(child1.size[mainAxis], 100.0f);
-  EXPECT_EQ(child1.size[crossAxis], 100.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getSize()[mainAxis], 100.0f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 100.0f);
 
-  EXPECT_EQ(child2.position[mainAxis], 300.0f);
-  EXPECT_EQ(child2.position[crossAxis], 150.0f);
-  EXPECT_EQ(child2.size[mainAxis], 50.0f);
-  EXPECT_EQ(child2.size[crossAxis], 350.0f);
+  EXPECT_EQ(child2.getPosition()[mainAxis], 300.0f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child2.getSize()[mainAxis], 50.0f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 350.0f);
 
-  EXPECT_EQ(child3.position[mainAxis], 350.0f);
-  EXPECT_EQ(child3.position[crossAxis], 150.0f);
-  EXPECT_EQ(child3.size[mainAxis], 150.0f);
-  EXPECT_EQ(child3.size[crossAxis], 50.0f);
+  EXPECT_EQ(child3.getPosition()[mainAxis], 350.0f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child3.getSize()[mainAxis], 150.0f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 50.0f);
 }
 
 TEST_P(
@@ -554,25 +554,25 @@ TEST_P(
   position[crossAxis] = 150.0f;
   position[mainAxis] = 200.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 140.0f);
-  EXPECT_EQ(output.size[crossAxis], 100.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 140.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 100.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_EQ(child1.size[mainAxis], 100.0f);
-  EXPECT_EQ(child1.size[crossAxis], 50.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getSize()[mainAxis], 100.0f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 50.0f);
 
-  EXPECT_EQ(child2.position[mainAxis], 200.0f);
-  EXPECT_EQ(child2.position[crossAxis], 200.0f);
-  EXPECT_EQ(child2.size[mainAxis], 140.0f);
-  EXPECT_EQ(child2.size[crossAxis], 20.0f);
+  EXPECT_EQ(child2.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 200.0f);
+  EXPECT_EQ(child2.getSize()[mainAxis], 140.0f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 20.0f);
 
-  EXPECT_EQ(child3.position[mainAxis], 200.0f);
-  EXPECT_EQ(child3.position[crossAxis], 220.0f);
-  EXPECT_EQ(child3.size[mainAxis], 120.0f);
-  EXPECT_EQ(child3.size[crossAxis], 30.0f);
+  EXPECT_EQ(child3.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 220.0f);
+  EXPECT_EQ(child3.getSize()[mainAxis], 120.0f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 30.0f);
 }
 
 TEST_P(
@@ -606,25 +606,25 @@ TEST_P(
   position[crossAxis] = 150.0f;
   position[mainAxis] = 200.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 200.0f);
-  EXPECT_EQ(output.size[crossAxis], 100.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 100.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_EQ(child1.size[mainAxis], 250.0f);
-  EXPECT_EQ(child1.size[crossAxis], 50.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getSize()[mainAxis], 250.0f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 50.0f);
 
-  EXPECT_EQ(child2.position[mainAxis], 200.0f);
-  EXPECT_EQ(child2.position[crossAxis], 200.0f);
-  EXPECT_EQ(child2.size[mainAxis], 300.0f);
-  EXPECT_EQ(child2.size[crossAxis], 20.0f);
+  EXPECT_EQ(child2.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 200.0f);
+  EXPECT_EQ(child2.getSize()[mainAxis], 300.0f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 20.0f);
 
-  EXPECT_EQ(child3.position[mainAxis], 200.0f);
-  EXPECT_EQ(child3.position[crossAxis], 220.0f);
-  EXPECT_EQ(child3.size[mainAxis], 350.0f);
-  EXPECT_EQ(child3.size[crossAxis], 30.0f);
+  EXPECT_EQ(child3.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 220.0f);
+  EXPECT_EQ(child3.getSize()[mainAxis], 350.0f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 30.0f);
 }
 
 TEST_P(
@@ -647,25 +647,25 @@ TEST_P(
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 200.0f);
-  EXPECT_EQ(output.size[crossAxis], 100.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 100.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_EQ(child1.size[mainAxis], 100.0f);
-  EXPECT_EQ(child1.size[crossAxis], 50.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getSize()[mainAxis], 100.0f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 50.0f);
 
-  EXPECT_EQ(child2.position[mainAxis], 200.0f);
-  EXPECT_EQ(child2.position[crossAxis], 200.0f);
-  EXPECT_EQ(child2.size[mainAxis], 200.0f);
-  EXPECT_EQ(child2.size[crossAxis], 20.0f);
+  EXPECT_EQ(child2.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 200.0f);
+  EXPECT_EQ(child2.getSize()[mainAxis], 200.0f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 20.0f);
 
-  EXPECT_EQ(child3.position[mainAxis], 200.0f);
-  EXPECT_EQ(child3.position[crossAxis], 220.0f);
-  EXPECT_EQ(child3.size[mainAxis], 200.0f);
-  EXPECT_EQ(child3.size[crossAxis], 30.0f);
+  EXPECT_EQ(child3.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 220.0f);
+  EXPECT_EQ(child3.getSize()[mainAxis], 200.0f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 30.0f);
 }
 
 TEST_P(
@@ -699,13 +699,13 @@ TEST_P(
   position[mainAxis] = 200.0f;
   position[crossAxis] = 150.0f;
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 200.0f);
-  EXPECT_EQ(output.size[crossAxis], 80.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 200.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 80.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
   EXPECT_EQ(f1.getSize()[mainAxis], 120.0f);
   EXPECT_EQ(f1.getSize()[crossAxis], 50.0f);
 
@@ -744,25 +744,25 @@ TEST_P(
   spacing[crossAxis] = 10.0f;
   view.setSpacing(spacing);
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 140.0f);
-  EXPECT_EQ(output.size[crossAxis], 120.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 140.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 120.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_EQ(child1.size[mainAxis], 100.0f);
-  EXPECT_EQ(child1.size[crossAxis], 50.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getSize()[mainAxis], 100.0f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 50.0f);
 
-  EXPECT_EQ(child2.position[mainAxis], 200.0f);
-  EXPECT_EQ(child2.position[crossAxis], 210.0f);
-  EXPECT_EQ(child2.size[mainAxis], 140.0f);
-  EXPECT_EQ(child2.size[crossAxis], 20.0f);
+  EXPECT_EQ(child2.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 210.0f);
+  EXPECT_EQ(child2.getSize()[mainAxis], 140.0f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 20.0f);
 
-  EXPECT_EQ(child3.position[mainAxis], 200.0f);
-  EXPECT_EQ(child3.position[crossAxis], 240.0f);
-  EXPECT_EQ(child3.size[mainAxis], 120.0f);
-  EXPECT_EQ(child3.size[crossAxis], 30.0f);
+  EXPECT_EQ(child3.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 240.0f);
+  EXPECT_EQ(child3.getSize()[mainAxis], 120.0f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 30.0f);
 }
 
 TEST_P(
@@ -790,25 +790,25 @@ TEST_P(
   spacing[crossAxis] = 10.0f;
   view.setSpacing(spacing);
 
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size[mainAxis], 145.0f);
-  EXPECT_EQ(output.size[crossAxis], 90.0f);
+  EXPECT_EQ(view.getSize()[mainAxis], 145.0f);
+  EXPECT_EQ(view.getSize()[crossAxis], 90.0f);
 
-  EXPECT_EQ(child1.position[mainAxis], 200.0f);
-  EXPECT_EQ(child1.position[crossAxis], 150.0f);
-  EXPECT_EQ(child1.size[mainAxis], 80.0f);
-  EXPECT_EQ(child1.size[crossAxis], 50.0f);
+  EXPECT_EQ(child1.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child1.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child1.getSize()[mainAxis], 80.0f);
+  EXPECT_EQ(child1.getSize()[crossAxis], 50.0f);
 
-  EXPECT_EQ(child2.position[mainAxis], 285.0f);
-  EXPECT_EQ(child2.position[crossAxis], 150.0f);
-  EXPECT_EQ(child2.size[mainAxis], 60.0f);
-  EXPECT_EQ(child2.size[crossAxis], 20.0f);
+  EXPECT_EQ(child2.getPosition()[mainAxis], 285.0f);
+  EXPECT_EQ(child2.getPosition()[crossAxis], 150.0f);
+  EXPECT_EQ(child2.getSize()[mainAxis], 60.0f);
+  EXPECT_EQ(child2.getSize()[crossAxis], 20.0f);
 
-  EXPECT_EQ(child3.position[mainAxis], 200.0f);
-  EXPECT_EQ(child3.position[crossAxis], 210.0f);
-  EXPECT_EQ(child3.size[mainAxis], 120.0f);
-  EXPECT_EQ(child3.size[crossAxis], 30.0f);
+  EXPECT_EQ(child3.getPosition()[mainAxis], 200.0f);
+  EXPECT_EQ(child3.getPosition()[crossAxis], 210.0f);
+  EXPECT_EQ(child3.getSize()[mainAxis], 120.0f);
+  EXPECT_EQ(child3.getSize()[crossAxis], 30.0f);
 }
 
 INSTANTIATE_TEST_SUITE_P(

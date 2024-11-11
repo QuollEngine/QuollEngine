@@ -37,13 +37,12 @@ TEST_F(QuiScrollableContentViewTest,
 
   child.desiredSize = {600.0f, 900.0f};
 
-  auto output = view.layout({constraints, glm::vec2{200.0f, 300.0f}});
+  view.layout({constraints, glm::vec2{200.0f, 300.0f}});
 
-  EXPECT_EQ(output.size.x, 500.0f);
-  EXPECT_EQ(output.size.y, 600.0f);
-  EXPECT_EQ(view.getSize(), output.size);
+  EXPECT_EQ(view.getSize().x, 500.0f);
+  EXPECT_EQ(view.getSize().y, 600.0f);
   EXPECT_EQ(view.getPosition(), glm::vec2(200.0f, 300.0f));
-  EXPECT_EQ(child.position, glm::vec2(200.0f, 300.0f));
+  EXPECT_EQ(child.getPosition(), glm::vec2(200.0f, 300.0f));
 }
 
 TEST_F(QuiScrollableContentViewTest,
@@ -53,11 +52,10 @@ TEST_F(QuiScrollableContentViewTest,
 
   child.desiredSize = {600.0f, 900.0f};
 
-  auto output = view.layout({constraints, glm::vec2(200.0f, 300.0f)});
+  view.layout({constraints, glm::vec2(200.0f, 300.0f)});
 
-  EXPECT_EQ(output.size.x, 600.0f);
-  EXPECT_EQ(output.size.y, 900.0f);
-  EXPECT_EQ(view.getSize(), output.size);
+  EXPECT_EQ(view.getSize().x, 600.0f);
+  EXPECT_EQ(view.getSize().y, 900.0f);
 }
 
 TEST_F(QuiScrollableContentViewTest,
@@ -67,11 +65,10 @@ TEST_F(QuiScrollableContentViewTest,
 
   child.desiredSize = {100.0f, 200.0f};
 
-  auto output = view.layout({constraints, glm::vec2(200.0f, 300.0f)});
+  view.layout({constraints, glm::vec2(200.0f, 300.0f)});
 
-  EXPECT_EQ(output.size.x, 300.0f);
-  EXPECT_EQ(output.size.y, 400.0f);
-  EXPECT_EQ(view.getSize(), output.size);
+  EXPECT_EQ(view.getSize().x, 300.0f);
+  EXPECT_EQ(view.getSize().y, 400.0f);
 }
 
 TEST_F(QuiScrollableContentViewTest, LayoutSetsChildConstraintsToInfinity) {
@@ -81,7 +78,7 @@ TEST_F(QuiScrollableContentViewTest, LayoutSetsChildConstraintsToInfinity) {
 
   view.layout({constraints});
 
-  EXPECT_EQ(child.size, child.desiredSize);
+  EXPECT_EQ(child.getSize(), child.desiredSize);
   EXPECT_EQ(child.input.constraints.min.x, 0.0f);
   EXPECT_EQ(child.input.constraints.min.y, 0.0f);
   EXPECT_EQ(child.input.constraints.max.x, qui::Constraints::Infinity);
@@ -129,7 +126,7 @@ TEST_F(QuiScrollableContentViewTest, LayoutSetsChildPositionToScrollOffset) {
   view.scroll({-50.0f, -100.0f});
   view.layout({constraints, glm::vec2(200.0f, 300.0f)});
 
-  EXPECT_EQ(child.position, glm::vec2(150.0, 200.0f));
+  EXPECT_EQ(child.getPosition(), glm::vec2(150.0, 200.0f));
 }
 
 TEST_F(QuiScrollableContentViewTest,

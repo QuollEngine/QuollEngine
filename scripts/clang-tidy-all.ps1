@@ -21,7 +21,7 @@
 #>
 
 param(
-    [string[]] [ValidateSet('rhi-core', 'rhi-vulkan', 'rhi-mock', 'engine', 'editor', 'runtime')]
+    [string[]] [ValidateSet('rhi-core', 'rhi-vulkan', 'rhi-mock', 'engine', 'editor', 'runtime', 'qui')]
     $Projects = @('rhi-core', 'rhi-vulkan', 'rhi-mock', 'engine', 'editor', 'runtime'),
     [string] $Filter = '*.cpp',
     [uint] $Threads,
@@ -34,6 +34,7 @@ $LintRHIMock = $false
 $LintEngine = $false
 $LintEditor = $false
 $LintRuntime = $false
+$LintQui = $false
 
 foreach ($project in $Projects) {
     if ($project -eq 'rhi-core') {
@@ -58,6 +59,10 @@ foreach ($project in $Projects) {
     
     if ($project -eq 'runtime') {
         $LintRuntime = $true
+    }
+
+    if ($project -eq 'qui') {
+        $LintQui = $true;        
     }
 }
 
@@ -152,6 +157,12 @@ if ($LintEngine) {
     Write-Output "Checking Engine files"
 
     Start-Clang-Tidy -Path "engine/lib" -Headers "./engine/lib", "./rhi/core/include", "./platform/base/include"
+}
+
+if ($LintQui) {
+    Write-Output "Checking Qui files"
+
+    Start-Clang-Tidy -Path "engine/lib/quoll/qui" -Headers "./engine/lib", "./rhi/core/include", "./platform/base/include"
 }
 
 if ($LintEditor) {

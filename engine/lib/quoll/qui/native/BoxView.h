@@ -16,7 +16,7 @@ public:
   constexpr void setBorderRadius(f32 radius) { mBorderRadius = radius; }
 
   void render() override;
-  LayoutOutput layout(const LayoutInput &input) override;
+  void layout(const LayoutInput &input) override;
   bool hitTest(const glm::vec2 &point, HitTestResult &hitResult) override;
 
 public:
@@ -26,8 +26,6 @@ public:
   constexpr f32 getWidth() { return mWidth; }
   constexpr f32 getHeight() { return mHeight; }
   constexpr f32 getBorderRadius() { return mBorderRadius; }
-  constexpr glm::vec2 getPosition() { return mPosition; }
-  constexpr glm::vec2 getSize() { return mSize; }
 
 private:
   View *mChild = nullptr;
@@ -36,9 +34,6 @@ private:
   f32 mWidth{0};
   f32 mHeight{0};
   f32 mBorderRadius{0};
-
-  glm::vec2 mPosition;
-  glm::vec2 mSize;
 };
 
 } // namespace qui

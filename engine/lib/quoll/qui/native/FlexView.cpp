@@ -21,7 +21,7 @@ void FlexView::render() {
   ImGui::PopClipRect();
 }
 
-LayoutOutput FlexView::layout(const LayoutInput &input) {
+void FlexView::layout(const LayoutInput &input) {
   const glm::length_t mainAxis = mDirection == Direction::Row ? 0 : 1;
   const glm::length_t crossAxis = mDirection == Direction::Row ? 1 : 0;
 
@@ -38,9 +38,9 @@ LayoutOutput FlexView::layout(const LayoutInput &input) {
     for (auto *child : mChildren) {
       auto constraints = input.constraints;
       constraints.max[mainAxis] = Constraints::Infinity;
-      auto output = child->layout({constraints, input.position});
+      child->layout({constraints, input.position});
 
-      line.childSizes.emplace_back(output.size);
+      line.childSizes.emplace_back(child->getSize());
     }
 
     lines.emplace_back(line);
@@ -50,24 +50,24 @@ LayoutOutput FlexView::layout(const LayoutInput &input) {
     FlexLine currentLine{.crossPos = input.position[crossAxis]};
 
     for (auto *child : mChildren) {
-      auto output = child->layout({Constraints(), input.position});
-
-      totalLineSize += output.size[mainAxis] + mSpacing[mainAxis];
+      child->layout({Constraints(), input.position});
+      const auto &childSize = child->getSize();
+      totalLineSize += childSize[mainAxis] + mSpacing[mainAxis];
 
       if (totalLineSize > input.constraints.max[mainAxis]) {
-        totalLineSize = output.size[mainAxis] + mSpacing[mainAxis];
+        totalLineSize = childSize[mainAxis] + mSpacing[mainAxis];
         lines.emplace_back(currentLine);
-        currentLine.childSizes.emplace_back(output.size);
+        currentLine.childSizes.emplace_back(childSize);
 
         currentLine = FlexLine{.children = {child},
-                               .childSizes = {output.size},
-                               .crossSize = output.size[crossAxis]};
+                               .childSizes = {childSize},
+                               .crossSize = childSize[crossAxis]};
       } else {
         currentLine.crossSize =
-            std::max(output.size[crossAxis], currentLine.crossSize);
+            std::max(childSize[crossAxis], currentLine.crossSize);
 
         currentLine.children.emplace_back(child);
-        currentLine.childSizes.emplace_back(output.size);
+        currentLine.childSizes.emplace_back(childSize);
       }
     }
 
@@ -161,13 +161,10 @@ LayoutOutput FlexView::layout(const LayoutInput &input) {
 
   mSize = input.constraints.clamp(mSize);
   mPosition = input.position;
-
-  return {mSize};
 }
 
 bool FlexView::hitTest(const glm::vec2 &point, HitTestResult &hitResult) {
-  if (point.x >= mPosition.x && point.x <= mPosition.x + mSize.x &&
-      point.y >= mPosition.y && point.y <= mPosition.y + mSize.y) {
+  if (isPointInBounds(point)) {
     hitResult.path.emplace_back(this);
     for (auto *child : mChildren) {
       child->hitTest(point, hitResult);
