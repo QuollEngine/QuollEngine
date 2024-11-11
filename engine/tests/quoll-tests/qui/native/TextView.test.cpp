@@ -25,8 +25,8 @@ TEST_F(QuiTextViewTest, LayoutCalculatesTextSizeBasedOnConstraintMaxWidth) {
 
   qui::Constraints constraints(0.0f, 0.0f, 50.0f, 100.0f);
 
-  auto output = view.layout({.constraints = constraints, .position = {0, 0}});
-  EXPECT_EQ(output.size, glm::vec2(35.0f, 26.0f));
+  view.layout({.constraints = constraints, .position = {0, 0}});
+  EXPECT_EQ(view.getSize(), glm::vec2(35.0f, 26.0f));
 }
 
 TEST_F(QuiTextViewTest, LayoutConstraintTextSizeBasedOnInputConstraints) {
@@ -35,8 +35,8 @@ TEST_F(QuiTextViewTest, LayoutConstraintTextSizeBasedOnInputConstraints) {
 
   // Imgui calculated text size is (35.0f, 26.0f)
   qui::Constraints constraints(40.0f, 30.0f, 50.0f, 60.0f);
-  auto output = view.layout({.constraints = constraints, .position = {0, 0}});
-  EXPECT_EQ(output.size, glm::vec2(40.0f, 30.0f));
+  view.layout({.constraints = constraints, .position = {0, 0}});
+  EXPECT_EQ(view.getSize(), glm::vec2(40.0f, 30.0f));
 }
 
 TEST_F(QuiTextViewTest, LayoutSetsInputPositionAsTextViewPosition) {
@@ -52,8 +52,8 @@ TEST_F(QuiTextViewTest, HitTestReturnsTrueIfPointIsWithinViewBounds) {
   view.setText("Hello world");
 
   qui::Constraints constraints(0.0f, 0.0f, 50.0f, 100.0f);
-  auto output =
-      view.layout({.constraints = constraints, .position = {40.0f, 50.0f}});
+
+  view.layout({.constraints = constraints, .position = {40.0f, 50.0f}});
 
   {
     qui::HitTestResult hitResult;
@@ -96,8 +96,8 @@ TEST_F(QuiTextViewTest, HitTestReturnsFalseIfPointIsOutsideOfViewBounds) {
   view.setText("Hello world");
 
   qui::Constraints constraints(0.0f, 0.0f, 50.0f, 100.0f);
-  auto output =
-      view.layout({.constraints = constraints, .position = {40.0f, 50.0f}});
+
+  view.layout({.constraints = constraints, .position = {40.0f, 50.0f}});
 
   qui::HitTestResult hitResult;
   EXPECT_FALSE(view.hitTest({40.0f, 49.0f}, hitResult));

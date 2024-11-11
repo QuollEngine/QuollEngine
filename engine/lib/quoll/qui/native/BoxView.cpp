@@ -24,7 +24,7 @@ void BoxView::render() {
   }
 }
 
-LayoutOutput BoxView::layout(const LayoutInput &input) {
+void BoxView::layout(const LayoutInput &input) {
   mPosition = input.position;
 
   if (!mChild) {
@@ -32,8 +32,7 @@ LayoutOutput BoxView::layout(const LayoutInput &input) {
                          : input.constraints.max.x;
     mSize.y = mHeight > 0 ? input.constraints.clampHeight(mHeight)
                           : input.constraints.max.y;
-
-    return {mSize};
+    return;
   }
 
   Constraints childConstraints = input.constraints;
@@ -68,19 +67,18 @@ LayoutOutput BoxView::layout(const LayoutInput &input) {
   position.x += mPadding.horizontal.start;
   position.y += mPadding.vertical.start;
 
-  auto output = mChild->layout({childConstraints, position});
+  mChild->layout({childConstraints, position});
 
-  mSize.x = constraints.clampWidth(output.size.x + mPadding.horizontal.start +
+  const auto &childSize = mChild->getSize();
+
+  mSize.x = constraints.clampWidth(childSize.x + mPadding.horizontal.start +
                                    mPadding.horizontal.end);
-  mSize.y = constraints.clampHeight(output.size.y + mPadding.vertical.start +
+  mSize.y = constraints.clampHeight(childSize.y + mPadding.vertical.start +
                                     mPadding.vertical.end);
-
-  return {mSize};
 }
 
 bool BoxView::hitTest(const glm::vec2 &point, HitTestResult &hitResult) {
-  if (point.x >= mPosition.x && point.x <= mPosition.x + mSize.x &&
-      point.y >= mPosition.y && point.y <= mPosition.y + mSize.y) {
+  if (isPointInBounds(point)) {
     hitResult.path.push_back(this);
     mChild->hitTest(point, hitResult);
     return true;

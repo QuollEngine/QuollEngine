@@ -47,7 +47,7 @@ public:
 
   virtual constexpr void render() {}
 
-  virtual LayoutOutput layout(const LayoutInput &input) = 0;
+  virtual void layout(const LayoutInput &input) = 0;
 
   virtual constexpr bool hitTest(const glm::vec2 &point,
                                  HitTestResult &hitResult) {
@@ -56,8 +56,21 @@ public:
 
   constexpr EventDispatcher &getEventDispatcher() { return mEventDispatcher; }
 
+  constexpr const glm::vec2 &getPosition() const { return mPosition; }
+  constexpr const glm::vec2 &getSize() const { return mSize; }
+
+protected:
+  constexpr bool isPointInBounds(const glm::vec2 &point) const {
+    return point.x >= mPosition.x && point.x <= mPosition.x + mSize.x &&
+           point.y >= mPosition.y && point.y <= mPosition.y + mSize.y;
+  }
+
 private:
   EventDispatcher mEventDispatcher;
+
+protected:
+  glm::vec2 mPosition{0.0f};
+  glm::vec2 mSize{0.0f};
 };
 
 } // namespace qui

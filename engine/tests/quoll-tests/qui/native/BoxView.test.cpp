@@ -27,8 +27,8 @@ public:
 TEST_F(QuiBoxViewTest, LayoutReturnsMaxConstraintAsSizeIfNoChildIsSet) {
   qui::Constraints constraints(0.0f, 0.0f, 100.0f, 100.0f);
 
-  auto output = view.layout({constraints});
-  EXPECT_EQ(output.size, glm::vec2(100.0f, 100.0f));
+  view.layout({constraints});
+  EXPECT_EQ(view.getSize(), glm::vec2(100.0f, 100.0f));
 }
 
 TEST_F(QuiBoxViewTest, LayoutReturnsSizeIfSpecifiedSizeIsWithinConstraints) {
@@ -36,8 +36,8 @@ TEST_F(QuiBoxViewTest, LayoutReturnsSizeIfSpecifiedSizeIsWithinConstraints) {
 
   view.setWidth(50.0f);
   view.setHeight(70.0f);
-  auto output = view.layout({constraints});
-  EXPECT_EQ(output.size, glm::vec2(50.0f, 70.0f));
+  view.layout({constraints});
+  EXPECT_EQ(view.getSize(), glm::vec2(50.0f, 70.0f));
 }
 
 TEST_F(
@@ -47,8 +47,8 @@ TEST_F(
 
   view.setWidth(20.0f);
   view.setHeight(30.0f);
-  auto output = view.layout({constraints});
-  EXPECT_EQ(output.size, glm::vec2(50.0f, 40.0f));
+  view.layout({constraints});
+  EXPECT_EQ(view.getSize(), glm::vec2(50.0f, 40.0f));
 }
 
 TEST_F(
@@ -58,8 +58,8 @@ TEST_F(
 
   view.setWidth(200.0f);
   view.setHeight(300.0f);
-  auto output = view.layout({constraints});
-  EXPECT_EQ(output.size, glm::vec2(100.0f, 120.0f));
+  view.layout({constraints});
+  EXPECT_EQ(view.getSize(), glm::vec2(100.0f, 120.0f));
 }
 
 TEST_F(QuiBoxViewTest,
@@ -197,9 +197,9 @@ TEST_F(QuiBoxViewTest, LayoutReturnsChildSizePlusPaddingIfNoSizeIsProvided) {
   view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 20.0f, 40.0f));
 
   view.setChild(&child);
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size, glm::vec2(95.0f, 100.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(95.0f, 100.0f));
   EXPECT_EQ(view.getSize(), glm::vec2(95.0f, 100.0f));
 }
 
@@ -215,9 +215,9 @@ TEST_F(
   view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 15.0f, 25.0f));
 
   view.setChild(&child);
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size, glm::vec2(80.0f, 90.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(80.0f, 90.0f));
   EXPECT_EQ(view.getSize(), glm::vec2(80.0f, 90.0f));
 }
 
@@ -232,9 +232,9 @@ TEST_F(
   view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 20.0f, 40.0f));
 
   view.setChild(&child);
-  auto output = view.layout({constraints, position});
+  view.layout({constraints, position});
 
-  EXPECT_EQ(output.size, glm::vec2(100.0f, 120.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(100.0f, 120.0f));
   EXPECT_EQ(view.getSize(), glm::vec2(100.0f, 120.0f));
 }
 
@@ -248,9 +248,9 @@ TEST_F(QuiBoxViewTest,
   view.setPadding(qui::EdgeInsets(10.0f, 5.0f, 20.0f, 40.0f));
 
   view.setChild(&child);
-  auto output = view.layout({constraints});
+  view.layout({constraints});
 
-  EXPECT_EQ(output.size, glm::vec2(70.0f, 50.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(70.0f, 50.0f));
   EXPECT_EQ(view.getSize(), glm::vec2(70.0f, 50.0f));
 }
 
@@ -263,9 +263,9 @@ TEST_F(
   view.setHeight(30.0f);
 
   view.setChild(&child);
-  auto output = view.layout({constraints});
+  view.layout({constraints});
 
-  EXPECT_EQ(output.size, glm::vec2(40.0f, 50.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(40.0f, 50.0f));
   EXPECT_EQ(view.getSize(), glm::vec2(40.0f, 50.0f));
 }
 
@@ -278,9 +278,9 @@ TEST_F(
   view.setHeight(300.0f);
 
   view.setChild(&child);
-  auto output = view.layout({constraints});
+  view.layout({constraints});
 
-  EXPECT_EQ(output.size, glm::vec2(100.0f, 120.0f));
+  EXPECT_EQ(view.getSize(), glm::vec2(100.0f, 120.0f));
   EXPECT_EQ(view.getSize(), glm::vec2(100.0f, 120.0f));
 }
 
@@ -314,7 +314,7 @@ TEST_F(QuiBoxViewTest, HitTestReturnsChildIfPointIsWithinChildBounds) {
   view.setChild(&child);
   view.setPadding(qui::EdgeInsets(5.0f));
   child.desiredSize = {20.0f, 30.0f};
-  auto output = view.layout({.position = {40.0f, 50.0f}});
+  view.layout({.position = {40.0f, 50.0f}});
 
   {
     qui::HitTestResult hitResult;
@@ -364,7 +364,7 @@ TEST_F(QuiBoxViewTest,
   view.setChild(&child);
   view.setPadding(qui::EdgeInsets(5.0f));
   child.desiredSize = {20.0f, 30.0f};
-  auto output = view.layout({.position = {40.0f, 50.0f}});
+  view.layout({.position = {40.0f, 50.0f}});
 
   {
     qui::HitTestResult hitResult;
@@ -399,7 +399,7 @@ TEST_F(QuiBoxViewTest, HitTestReturnsNullIfPointIsOutsideOfViewBounds) {
   view.setWidth(50.0f);
   view.setHeight(100.0f);
   view.setChild(&child);
-  auto output = view.layout({.position = {40.0f, 50.0f}});
+  view.layout({.position = {40.0f, 50.0f}});
 
   qui::HitTestResult hitResult;
   EXPECT_FALSE(view.hitTest({40.0f, 49.0f}, hitResult));

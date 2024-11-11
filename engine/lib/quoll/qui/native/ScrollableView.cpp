@@ -11,8 +11,11 @@ void ScrollableView::render() {
   }
 }
 
-LayoutOutput ScrollableView::layout(const LayoutInput &input) {
-  const auto output = mScrollableContent.layout(input);
+void ScrollableView::layout(const LayoutInput &input) {
+  mScrollableContent.layout(input);
+
+  mSize = mScrollableContent.getSize();
+  mPosition = mScrollableContent.getPosition();
 
   const auto containerSize = mScrollableContent.getSize().y;
   const auto contentSize = mScrollableContent.getContentSize().y;
@@ -29,8 +32,6 @@ LayoutOutput ScrollableView::layout(const LayoutInput &input) {
   mScrollbar.layout(
       {Constraints(0.0f, scrollbarSize, Constraints::Infinity, scrollbarSize),
        position});
-
-  return output;
 }
 
 bool ScrollableView::hitTest(const glm::vec2 &point, HitTestResult &hitResult) {

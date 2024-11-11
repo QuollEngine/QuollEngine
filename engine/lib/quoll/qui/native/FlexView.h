@@ -18,7 +18,7 @@ public:
 
   void render() override;
 
-  LayoutOutput layout(const LayoutInput &input) override;
+  void layout(const LayoutInput &input) override;
 
   bool hitTest(const glm::vec2 &point, HitTestResult &hitResult) override;
 
@@ -30,9 +30,6 @@ public:
   constexpr auto getShrink() const { return mShrink; }
   constexpr auto getGrow() const { return mGrow; }
 
-  constexpr auto getSize() const { return mSize; }
-  constexpr auto getPosition() const { return mPosition; }
-
 private:
   Direction mDirection{Direction::Row};
   Wrap mWrap{Wrap::NoWrap};
@@ -40,9 +37,6 @@ private:
   f32 mGrow = 0.0f;
   glm::vec2 mSpacing{0.0f, 0.0f};
   std::vector<View *> mChildren;
-
-  glm::vec2 mSize{0.0f, 0.0f};
-  glm::vec2 mPosition{0.0f, 0.0f};
 };
 
 } // namespace qui

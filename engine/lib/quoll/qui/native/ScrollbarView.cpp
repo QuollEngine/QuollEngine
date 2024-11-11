@@ -13,19 +13,16 @@ void ScrollbarView::render() {
       mBorderRadius);
 }
 
-LayoutOutput ScrollbarView::layout(const LayoutInput &input) {
+void ScrollbarView::layout(const LayoutInput &input) {
   mPosition = input.position;
   mSize = input.constraints.clamp({0.0f, 0.0f});
 
   mPosition.x -= mThickness;
   mSize.x = mThickness;
-
-  return {mSize};
 }
 
 bool ScrollbarView::hitTest(const glm::vec2 &point, HitTestResult &hitResult) {
-  if (point.x >= mPosition.x && point.x <= mPosition.x + mSize.x &&
-      point.y >= mPosition.y && point.y <= mPosition.y + mSize.y) {
+  if (isPointInBounds(point)) {
     hitResult.path.push_back(this);
     return true;
   }
