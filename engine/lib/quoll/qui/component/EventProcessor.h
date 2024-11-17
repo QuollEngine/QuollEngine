@@ -9,7 +9,7 @@ template <EventProcessorBackend Backend> class EventProcessor {
 public:
   constexpr void processEvents(Tree &tree) {
     auto *root = tree.root.getView();
-    auto *globalEvents = tree.events.get();
+    auto *globalEvents = tree.globalEvents.get();
     auto &eventContext = tree.eventContext;
 
     auto pos = mBackend.getMousePosition();
@@ -21,12 +21,12 @@ public:
       if (root->hitTest(pos, eventContext.hitTestResult) &&
           eventContext.activeHitTestResult.path.empty()) {
         for (auto *v : eventContext.hitTestResult.path) {
-          v->getEventDispatcher().dispatchMouseDownEvent(ev);
+          v->getEvents().dispatchMouseDownEvent(ev);
         }
         eventContext.activeHitTestResult = eventContext.hitTestResult;
       }
 
-      for (auto &handler : globalEvents->getMouseDownHandlers()) {
+      for (const auto &handler : globalEvents->getMouseDownHandlers()) {
         handler(ev);
       }
     }
@@ -35,13 +35,13 @@ public:
       const MouseEvent ev{pos};
       if (!eventContext.activeHitTestResult.path.empty()) {
         for (auto *v : eventContext.activeHitTestResult.path) {
-          v->getEventDispatcher().dispatchMouseUpEvent(ev);
+          v->getEvents().dispatchMouseUpEvent(ev);
         }
 
         eventContext.activeHitTestResult.path.clear();
       }
 
-      for (auto &handler : globalEvents->getMouseUpHandlers()) {
+      for (const auto &handler : globalEvents->getMouseUpHandlers()) {
         handler(ev);
       }
     }
@@ -52,11 +52,11 @@ public:
       const MouseEvent ev{pos};
       if (root->hitTest(pos, eventContext.hitTestResult)) {
         for (auto *v : eventContext.hitTestResult.path) {
-          v->getEventDispatcher().dispatchMouseClickEvent(ev);
+          v->getEvents().dispatchMouseClickEvent(ev);
         }
       }
 
-      for (auto &handler : globalEvents->getMouseClickHandlers()) {
+      for (const auto &handler : globalEvents->getMouseClickHandlers()) {
         handler(ev);
       }
     }
@@ -78,25 +78,25 @@ public:
         }
 
         for (usize i = mismatchIndex; i < previous.size(); ++i) {
-          previous.at(i)->getEventDispatcher().dispatchMouseExitEvent(ev);
+          previous.at(i)->getEvents().dispatchMouseExitEvent(ev);
         }
 
         for (usize i = mismatchIndex; i < current.size(); ++i) {
-          current.at(i)->getEventDispatcher().dispatchMouseEnterEvent(ev);
+          current.at(i)->getEvents().dispatchMouseEnterEvent(ev);
         }
 
         for (usize i = 0; i < mismatchIndex; ++i) {
-          current.at(i)->getEventDispatcher().dispatchMouseMoveEvent(ev);
+          current.at(i)->getEvents().dispatchMouseMoveEvent(ev);
         }
       } else {
         for (auto *view : eventContext.hoveredHitTestResult.path) {
-          view->getEventDispatcher().dispatchMouseExitEvent(ev);
+          view->getEvents().dispatchMouseExitEvent(ev);
         }
       }
 
       eventContext.hoveredHitTestResult = eventContext.hitTestResult;
 
-      for (auto &handler : globalEvents->getMouseMoveHandlers()) {
+      for (const auto &handler : globalEvents->getMouseMoveHandlers()) {
         handler(ev);
       }
     }
@@ -107,11 +107,11 @@ public:
       const MouseWheelEvent ev{.delta = mBackend.getMouseWheelDelta()};
       if (root->hitTest(pos, eventContext.hitTestResult)) {
         for (auto *v : eventContext.hitTestResult.path) {
-          v->getEventDispatcher().dispatchMouseWheelEvent(ev);
+          v->getEvents().dispatchMouseWheelEvent(ev);
         }
       }
 
-      for (auto &handler : globalEvents->getMouseWheelHandlers()) {
+      for (const auto &handler : globalEvents->getMouseWheelHandlers()) {
         handler(ev);
       }
     }

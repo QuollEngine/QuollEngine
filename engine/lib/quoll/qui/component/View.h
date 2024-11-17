@@ -54,7 +54,7 @@ public:
     return false;
   }
 
-  constexpr EventDispatcher &getEventDispatcher() { return mEventDispatcher; }
+  constexpr EventDispatcher &getEvents() { return mEvents; }
 
   constexpr const glm::vec2 &getPosition() const { return mPosition; }
   constexpr const glm::vec2 &getSize() const { return mSize; }
@@ -66,7 +66,7 @@ protected:
   }
 
 private:
-  EventDispatcher mEventDispatcher;
+  EventDispatcher mEvents;
 
 protected:
   glm::vec2 mPosition{0.0f};

@@ -17,9 +17,7 @@ void Scrollable::build(BuildContext &context) {
   mChild.observe(observeChildren);
   observeChildren();
 
-  mEventHolder = context.eventManager->createEventHolder();
-
-  mView.getScrollbar().getEventDispatcher().registerMouseDownHandler(
+  mView.getScrollbar().getEvents().registerMouseDownHandler(
       [this](const auto &e) {
         if (!mScrollbarActive) {
           setScrollbarActive(true);
@@ -27,41 +25,42 @@ void Scrollable::build(BuildContext &context) {
         }
       });
 
-  mView.getScrollbar().getEventDispatcher().registerMouseUpHandler(
+  mView.getScrollbar().getEvents().registerMouseUpHandler(
       [this](const MouseEvent &e) { setScrollbarActive(false); });
 
-  mEventHolder.registerMouseMoveHandler([this](const MouseEvent &e) {
-    if (!mScrollbarActive) {
-      return;
-    }
+  mMouseMoveHandle = context.globalEvents->registerMouseMoveHandler(
+      [this](const MouseEvent &e) {
+        if (!mScrollbarActive) {
+          return;
+        }
 
-    auto &content = mView.getScrollableContent();
-    if (e.point.y >= content.getPosition().y &&
-        e.point.y <= content.getPosition().y + content.getSize().y) {
-      const f32 deltaY = e.point.y - mPreviousMousePos.y;
-      content.scroll({0.0f, -deltaY});
-    }
+        auto &content = mView.getScrollableContent();
+        if (e.point.y >= content.getPosition().y &&
+            e.point.y <= content.getPosition().y + content.getSize().y) {
+          const f32 deltaY = e.point.y - mPreviousMousePos.y;
+          content.scroll({0.0f, -deltaY});
+        }
 
-    mPreviousMousePos = e.point;
-  });
+        mPreviousMousePos = e.point;
+      });
 
-  mView.getScrollbar().getEventDispatcher().registerMouseEnterHandler(
+  mView.getScrollbar().getEvents().registerMouseEnterHandler(
       [this](const auto &) { setScrollbarState(ScrollbarState::Hovered); });
 
-  mView.getScrollbar().getEventDispatcher().registerMouseExitHandler(
+  mView.getScrollbar().getEvents().registerMouseExitHandler(
       [this](const auto &) { setScrollbarState(ScrollbarState::Hidden); });
 
-  mView.getScrollableContent().getEventDispatcher().registerMouseEnterHandler(
+  mView.getScrollableContent().getEvents().registerMouseEnterHandler(
       [this](const auto &) {
         if (mScrollbarState == ScrollbarState::Hidden) {
           setScrollbarState(ScrollbarState::Visible);
         }
       });
 
-  mView.getScrollableContent().getEventDispatcher().registerMouseExitHandler(
+  mView.getScrollableContent().getEvents().registerMouseExitHandler(
       [this](const auto &) { setScrollbarState(ScrollbarState::Hidden); });
 
-  mView.getScrollableContent().getEventDispatcher().registerMouseWheelHandler(
+  mView.getScrollableContent().getEvents().registerMouseWheelHandler(
       [this](const MouseWheelEvent &event) {
         if (!mScrollbarActive) {
           mView.getScrollableContent().scroll(event.delta * ScrollSpeed);

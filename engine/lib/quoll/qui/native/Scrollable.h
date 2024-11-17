@@ -22,7 +22,6 @@ private:
 
 private:
   ScrollableView mView;
-  EventHolder mEventHolder;
 
   Value<Element> mChild;
   bool mHovered = false;
@@ -31,6 +30,8 @@ private:
   glm::vec2 mPreviousMousePos{0.0f, 0.0f};
 
   ScrollbarState mScrollbarState = ScrollbarState::Hidden;
+
+  EventHandle<MouseEvent> mMouseMoveHandle;
 };
 
 } // namespace qui

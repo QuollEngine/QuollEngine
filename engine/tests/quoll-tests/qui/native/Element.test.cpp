@@ -31,7 +31,7 @@ TEST_F(QuiElementTest, RebuildingElementDoesNotBuildComponentAgain) {
   auto *component =
       dynamic_cast<const MockComponent *>(tree.root.getComponent());
 
-  qui::BuildContext buildContext{tree.events.get()};
+  qui::BuildContext buildContext{tree.globalEvents.get()};
 
   tree.root.build(buildContext);
   tree.root.build(buildContext);

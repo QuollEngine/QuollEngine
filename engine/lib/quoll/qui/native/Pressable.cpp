@@ -34,7 +34,7 @@ void Pressable::build(BuildContext &context) {
   auto observeChild = [this, &context]() {
     mChild().build(context);
 
-    auto &dispatcher = mChild().getView()->getEventDispatcher();
+    auto &dispatcher = mChild().getView()->getEvents();
 
     if (mOnPress) {
       dispatcher.registerMouseClickHandler(

@@ -40,7 +40,7 @@ public:
 
   void build(BuildContext &context) override;
 
-  constexpr View *getView() { return &mView; }
+  constexpr View *getView() override { return &mView; }
 
 public:
   inline auto getChild() const { return mChild(); }
