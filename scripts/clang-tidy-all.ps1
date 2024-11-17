@@ -92,12 +92,14 @@ function Build-Header-Args {
     }
 }
 
-$global:GlobalExitCode = 0
+$global:FinalExitCode = 0
+$global:RunspacePool = [runspacefactory]::CreateRunspacePool(1, $Threads - 1)
 
 function Start-Clang-Tidy {
     param (
         $Path,
-        $Headers
+        $Headers,
+        $Operation
     )
 
     $HeaderArgs = Build-Header-Args ($VendorIncludes + $Headers)
@@ -112,71 +114,136 @@ function Start-Clang-Tidy {
         $PlatformPP = "QUOLL_PLATFORM_WINDOWS";
     }
 
-    if ($Threads -gt 1) {
-        Get-ChildItem -Recurse -Path $Path -Filter $Filter | ForEach-Object -Parallel {
-            if ($IsLinux) {
-                Set-Alias -Name clang-tidy -Value clang-tidy-$using:LLVMVersion
-            }
-    
-            clang-tidy --p=file --quiet $_.FullName -- --std=c++20 `
-                Create-Header-Paths $using:HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS -D $using:PlatformPP
-        } -ThrottleLimit $Threads 
-    }
-    else {
-        if ($IsLinux) {
-            Set-Alias -Name clang-tidy -Value clang-tidy-$LLVMVersion
-        }
+    $Files = Get-ChildItem -Recurse -Path $Path -Filter $Filter
+    $Processed = [ref] 0
 
-        Get-ChildItem -Recurse -Path $Path -Filter $Filter | ForEach-Object {
-            clang-tidy --p=file --quiet $_.FullName -- --std=c++20 `
-                Create-Header-Paths $HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS -D $PlatformPP
-            $global:GlobalExitCode = $global:GlobalExitCode -bor $LASTEXITCODE 
-        } 
+    $Jobs = $Files | ForEach-Object {
+        $Pwsh = [powershell]::Create().AddScript({
+                param(
+                    $File,
+                    $PlatformDefines,
+                    $HeaderArgs,
+                    $LLVMVersion,
+                    $Processed
+                )
+
+                if ($IsLinux) {
+                    Set-Alias -Name clang-tidy -Value clang-tidy-$LLVMVersion
+                }
+
+                $Output = clang-tidy --p=file --quiet $File.FullName -- --std=c++20 `
+                    Create-Header-Paths $HeaderArgs -D CRYPTOPP_CXX17_UNCAUGHT_EXCEPTIONS -D $PlatformDefines 2>$null
+                $Code = $LASTEXITCODE
+
+                if ($Output) {
+                    $CurrentDir = (Get-Location).Path;
+                    $Output = $Output.Replace("$CurrentDir/", "")
+                } 
+
+                $null = [System.Threading.Interlocked]::Increment($Processed) 
+
+                @{
+                    Code  = $Code
+                    Error = $Output
+                }
+            }).AddArgument($_).AddArgument($PlatformPP).AddArgument($HeaderArgs).AddArgument($LLVMVersion).AddArgument($Processed)
+
+        $Pwsh.RunspacePool = $global:RunspacePool
+
+        return @{
+            Pwsh   = $Pwsh
+            Handle = $Pwsh.BeginInvoke()
+        }
+    }
+
+    while ($Processed.Value -lt $Files.Count) {
+        $Completed = ($Processed.Value / $Files.Count) * 100
+        Write-Progress -CurrentOperation $Operation -PercentComplete $Completed -Activity "Linting $Operation..." -Status "$($Processed.Value) of $($Files.Count)"
+        Start-Sleep -Milliseconds 1000
+    }
+
+    do {} until ($Jobs.Handle.IsCompleted)
+        
+    Write-Progress -CurrentOperation $Operation -Activity "Linting $Operation..." -Completed
+
+    $Results = $Jobs | ForEach-Object {
+        $Res = $_.Pwsh.EndInvoke($_.Handle)
+        $_.Pwsh.Dispose()
+        $Res[0]
+    }
+
+    $Errors = New-Object System.Collections.ArrayList
+    $ExitCode = 0
+    foreach ($Res in $Results) {
+        $ExitCode = $ExitCode -bor $Res.Code
+        if ($Res.Code -gt 0) {
+            $Errors.Add($Res.Error)
+        }
+    }
+
+    $global:FinalExitCode = $global:FinalExitCode -bor $ExitCode
+
+    return @{
+        Code   = $ExitCode
+        Errors = $Errors
     }
 }
 
-if ($LintRHICore) {
-    Write-Output "Checking RHICore files"
+function Start-Lint-Project {
+    param (
+        $Project,
+        $Path,
+        $Headers
+    )
 
-    Start-Clang-Tidy -Path "rhi/core" -Headers "./engine/lib", "./rhi/core/include", "./rhi/core/include/quoll/rhi", "./platform/base/include"
+    $Result = Start-Clang-Tidy -Path $Path -Headers $Headers -Operation $Project
+    Write-Progress -CurrentOperation $Operation -Completed -Activity "Linting $Project..."
+
+    if ($Result.Code -gt 0) {
+        Write-Host "Linting $Project... " -NoNewLine
+        Write-Host "Error" -ForegroundColor Red
+        foreach ($Error in $Result.Errors) {
+            Write-Host $Error
+        }
+    }
+    else {
+        Write-Host "Linting $Project files... " -NoNewLine
+        Write-Host "Done" -ForegroundColor Green
+    }
+}
+
+$global:RunspacePool.Open()
+if ($LintRHICore) {
+    Start-Lint-Project -Project "RHICore" -Path "rhi/core" -Headers "./engine/lib", "./rhi/core/include", "./rhi/core/include/quoll/rhi", "./platform/base/include"
 }
 
 if ($LintRHIVulkan) {
-    Write-Output "Checking RHIVulkan files"
-
-    Start-Clang-Tidy -Path "rhi/vulkan" -Headers "./engine/lib", "./rhi/core/include", "./rhi/vulkan/include", "./rhi/vulkan/include/quoll/rhi-vulkan", "./platform/base/include"
+    Start-Lint-Project -Project "RHIVulkan" -Path "rhi/vulkan" -Headers "./engine/lib", "./rhi/core/include", "./rhi/vulkan/include", "./rhi/vulkan/include/quoll/rhi-vulkan", "./platform/base/include"
 }
 
 if ($LintRHIMock) {
-    Write-Output "Checking RHIMock files"
-
-    Start-Clang-Tidy -Path "rhi/mock" -Headers "./engine/lib", "./rhi/core/include", "./rhi/mock/include", "./rhi/mock/include/quoll/rhi-mock", "./platform/base/include"
+    Start-Lint-Project -Project "RHIMock" -Path "rhi/mock" -Headers "./engine/lib", "./rhi/core/include", "./rhi/mock/include", "./rhi/mock/include/quoll/rhi-mock", "./platform/base/include"
 }
 
 if ($LintEngine) {
-    Write-Output "Checking Engine files"
-
-    Start-Clang-Tidy -Path "engine/lib" -Headers "./engine/lib", "./rhi/core/include", "./platform/base/include"
+    Start-Lint-Project -Project "Engine" -Path "engine/lib" -Headers "./engine/lib", "./rhi/core/include", "./platform/base/include"
 }
 
 if ($LintQui) {
-    Write-Output "Checking Qui files"
-
-    Start-Clang-Tidy -Path "engine/lib/quoll/qui" -Headers "./engine/lib", "./rhi/core/include", "./platform/base/include"
+    Start-Lint-Project -Project "Qui" -Path "engine/lib/quoll/qui" -Headers "./engine/lib", "./rhi/core/include", "./platform/base/include"
 }
 
 if ($LintEditor) {
-    Write-Output "Checking Editor files"
-
-    Start-Clang-Tidy -Path "editor/lib" -Headers "./editor/lib", "./engine/lib", "./rhi/core/include", "./rhi/vulkan/include", "./platform/base/include"
+    Start-Lint-Project -Project "Editor" -Path "editor/lib" -Headers "./editor/lib", "./engine/lib", "./rhi/core/include", "./rhi/vulkan/include", "./platform/base/include"
 }
 
 if ($LintRuntime) {
-    Write-Output "Checking Runtime files"
-
-    Start-Clang-Tidy -Path "runtime/src" -Headers "./runtime/src", "./engine/lib", "./rhi/core/include", "./rhi/vulkan/include", "./platform/base/include"
+    Start-Lint-Project -Project "Runtime" -Path "runtime/src" -Headers "./runtime/src", "./engine/lib", "./rhi/core/include", "./rhi/vulkan/include", "./platform/base/include"
 }
 
-if ($global:GlobalExitCode -gt 0) {
-    exit $global:GlobalExitCode
-}
+$global:RunspacePool.Close()
+$global:RunspacePool.Dispose()
+
+if ($global:FinalExitCode -gt 0) {
+    exit $global:FinalExitCode
+} 

@@ -79,7 +79,7 @@ jobs:
 
       - name: Static Analysis
         run: |
-          ./scripts/clang-tidy-all.ps1 -Threads 1
+          ./scripts/clang-tidy-all.ps1
 
   build-and-test:
     name: Build and test
