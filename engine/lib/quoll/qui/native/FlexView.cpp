@@ -12,13 +12,14 @@ struct FlexLine {
 };
 
 void FlexView::render() {
-  ImGui::PushClipRect({mPosition.x, mPosition.y},
-                      {mPosition.x + mSize.x, mPosition.y + mSize.y}, true);
+  auto *drawList = ImGui::GetWindowDrawList();
+  drawList->PushClipRect({mPosition.x, mPosition.y},
+                         {mPosition.x + mSize.x, mPosition.y + mSize.y}, true);
   for (auto *child : mChildren) {
     child->render();
   }
 
-  ImGui::PopClipRect();
+  drawList->PopClipRect();
 }
 
 void FlexView::layout(const LayoutInput &input) {

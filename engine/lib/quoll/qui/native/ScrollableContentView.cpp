@@ -12,10 +12,12 @@ void ScrollableContentView::scroll(const glm::vec2 &offset) {
 }
 
 void ScrollableContentView::render() {
-  ImGui::PushClipRect({mPosition.x, mPosition.y},
-                      {mPosition.x + mSize.x, mPosition.y + mSize.y}, true);
+  auto *drawList = ImGui::GetWindowDrawList();
+
+  drawList->PushClipRect({mPosition.x, mPosition.y},
+                         {mPosition.x + mSize.x, mPosition.y + mSize.y}, true);
   mChild->render();
-  ImGui::PopClipRect();
+  drawList->PopClipRect();
 }
 
 void ScrollableContentView::layout(const LayoutInput &input) {

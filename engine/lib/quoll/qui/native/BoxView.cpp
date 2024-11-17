@@ -5,8 +5,8 @@
 namespace qui {
 
 void BoxView::render() {
+  auto *drawList = ImGui::GetWindowDrawList();
   if (mBackground != Color::Transparent) {
-    auto *drawList = ImGui::GetWindowDrawList();
 
     drawList->AddRectFilled(
         ImVec2(mPosition.x, mPosition.y),
@@ -17,10 +17,11 @@ void BoxView::render() {
   }
 
   if (mChild) {
-    ImGui::PushClipRect({mPosition.x, mPosition.y},
-                        {mPosition.x + mSize.x, mPosition.y + mSize.y}, true);
+    drawList->PushClipRect({mPosition.x, mPosition.y},
+                           {mPosition.x + mSize.x, mPosition.y + mSize.y},
+                           true);
     mChild->render();
-    ImGui::PopClipRect();
+    drawList->PopClipRect();
   }
 }
 
