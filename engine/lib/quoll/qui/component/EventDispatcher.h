@@ -6,38 +6,72 @@
 namespace qui {
 
 class EventDispatcher {
+  template <typename TEvent>
+  static constexpr void
+  callHandlers(quoll::SparseSet<EventHandler<TEvent>> &handlers,
+               const TEvent &event) {
+    for (const auto &handler : handlers) {
+      handler(event);
+    }
+  }
+
 public:
-  inline void registerMouseDownHandler(EventHandler<MouseEvent> &&handler) {
+  constexpr void registerMouseDownHandler(EventHandler<MouseEvent> &&handler) {
     mMouseDownHandlers.insert(handler);
   }
-  inline void registerMouseUpHandler(EventHandler<MouseEvent> &&handler) {
+
+  constexpr void registerMouseUpHandler(EventHandler<MouseEvent> &&handler) {
     mMouseUpHandlers.insert(handler);
   }
-  inline void registerMouseClickHandler(EventHandler<MouseEvent> &&handler) {
+
+  constexpr void registerMouseClickHandler(EventHandler<MouseEvent> &&handler) {
     mMouseClickHandlers.insert(handler);
   }
-  inline void registerMouseEnterHandler(EventHandler<MouseEvent> &&handler) {
+
+  constexpr void registerMouseEnterHandler(EventHandler<MouseEvent> &&handler) {
     mMouseEnterHandlers.insert(handler);
   }
-  inline void registerMouseExitHandler(EventHandler<MouseEvent> &&handler) {
+
+  constexpr void registerMouseExitHandler(EventHandler<MouseEvent> &&handler) {
     mMouseExitHandlers.insert(handler);
   }
 
-  inline void registerMouseMoveHandler(EventHandler<MouseEvent> &&handler) {
+  constexpr void registerMouseMoveHandler(EventHandler<MouseEvent> &&handler) {
     mMouseMoveHandlers.insert(handler);
   }
-  inline void
+
+  constexpr void
   registerMouseWheelHandler(EventHandler<MouseWheelEvent> &&handler) {
     mMouseWheelHandlers.insert(handler);
   }
 
-  void dispatchMouseDownEvent(const MouseEvent &event);
-  void dispatchMouseUpEvent(const MouseEvent &event);
-  void dispatchMouseClickEvent(const MouseEvent &event);
-  void dispatchMouseEnterEvent(const MouseEvent &event);
-  void dispatchMouseExitEvent(const MouseEvent &event);
-  void dispatchMouseMoveEvent(const MouseEvent &event);
-  void dispatchMouseWheelEvent(const MouseWheelEvent &event);
+  constexpr void dispatchMouseDownEvent(const MouseEvent &event) {
+    callHandlers(mMouseDownHandlers, event);
+  }
+
+  constexpr void dispatchMouseUpEvent(const MouseEvent &event) {
+    callHandlers(mMouseUpHandlers, event);
+  }
+
+  constexpr void dispatchMouseClickEvent(const MouseEvent &event) {
+    callHandlers(mMouseClickHandlers, event);
+  }
+
+  constexpr void dispatchMouseEnterEvent(const MouseEvent &event) {
+    callHandlers(mMouseEnterHandlers, event);
+  }
+
+  constexpr void dispatchMouseExitEvent(const MouseEvent &event) {
+    callHandlers(mMouseExitHandlers, event);
+  }
+
+  constexpr void dispatchMouseMoveEvent(const MouseEvent &event) {
+    callHandlers(mMouseMoveHandlers, event);
+  }
+
+  constexpr void dispatchMouseWheelEvent(const MouseWheelEvent &event) {
+    callHandlers(mMouseWheelHandlers, event);
+  }
 
 private:
   quoll::SparseSet<EventHandler<MouseEvent>> mMouseDownHandlers;

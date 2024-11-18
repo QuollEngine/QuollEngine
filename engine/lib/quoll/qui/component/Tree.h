@@ -2,14 +2,15 @@
 
 #include "Element.h"
 #include "EventContext.h"
-#include "EventManager.h"
+#include "GlobalEventDispatcher.h"
 
 namespace qui {
 
 struct Tree {
   EventContext eventContext;
 
-  std::unique_ptr<EventManager> events{new EventManager};
+  std::unique_ptr<GlobalEventDispatcher> globalEvents{
+      new GlobalEventDispatcher};
   Element root;
 };
 

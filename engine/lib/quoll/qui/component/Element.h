@@ -10,11 +10,11 @@ public:
   Element() = default;
 
   template <std::derived_from<Component> Comp>
-  Element(Comp &&component)
+  constexpr Element(Comp &&component)
       : mComponent(new Comp(std::forward<Comp>(component))){};
 
   template <std::derived_from<Component> Comp>
-  Element(const Comp &component) : mComponent(new Comp(component)){};
+  constexpr Element(const Comp &component) : mComponent(new Comp(component)){};
 
   constexpr View *getView() { return mComponent->getView(); }
 

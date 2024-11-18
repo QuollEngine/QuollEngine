@@ -30,11 +30,12 @@ template <class TData> class SparseSet {
 public:
   static constexpr usize Empty = std::numeric_limits<usize>::max();
   using Iterator = typename std::vector<TData>::iterator;
+  using ConstIterator = typename std::vector<TData>::const_iterator;
 
 public:
-  SparseSet() { mSparseData.resize(SparseDataSize, Empty); }
+  constexpr SparseSet() { mSparseData.resize(SparseDataSize, Empty); }
 
-  usize insert(const TData &item) {
+  constexpr usize insert(const TData &item) {
     auto newKey = size();
     if (!mEmptyData.empty()) {
       newKey = mEmptyData.back();
@@ -48,7 +49,7 @@ public:
     return newKey;
   }
 
-  void erase(usize key) {
+  constexpr void erase(usize key) {
     QuollAssert(key < mSparseData.size(),
                 "Key is out of bounds: " + std::to_string(key));
 
@@ -72,7 +73,7 @@ public:
     mEmptyData.push_back(key);
   }
 
-  inline TData &at(usize key) {
+  constexpr TData &at(usize key) {
     QuollAssert(key < mSparseData.size(), "Index out of bounds");
     usize denseIndex = mSparseData.at(key);
 
@@ -81,7 +82,7 @@ public:
     return mRealData.at(denseIndex);
   }
 
-  inline const TData &at(usize key) const {
+  constexpr const TData &at(usize key) const {
     QuollAssert(key < mSparseData.size(), "Index out of bounds");
     usize denseIndex = mSparseData.at(key);
 
@@ -90,17 +91,19 @@ public:
     return mRealData.at(denseIndex);
   }
 
-  bool contains(usize key) {
+  constexpr const bool contains(usize key) const {
     return key < mSparseData.size() && mSparseData.at(key) != Empty;
   }
 
-  inline bool empty() const { return mDenseData.empty(); }
+  constexpr bool empty() const { return mDenseData.empty(); }
 
-  inline usize size() const { return mDenseData.size(); }
+  constexpr usize size() const { return mDenseData.size(); }
 
-  inline Iterator begin() { return mRealData.begin(); }
+  constexpr ConstIterator begin() { return mRealData.begin(); }
+  constexpr ConstIterator begin() const { return mRealData.begin(); }
 
-  inline Iterator end() { return mRealData.end(); }
+  constexpr ConstIterator end() { return mRealData.end(); }
+  constexpr ConstIterator end() const { return mRealData.end(); }
 
 private:
   std::vector<usize> mDenseData;
